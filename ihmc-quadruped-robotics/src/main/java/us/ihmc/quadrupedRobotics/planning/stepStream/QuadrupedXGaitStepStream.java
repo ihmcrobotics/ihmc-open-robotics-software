@@ -1,27 +1,18 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.robotics.robotSide.EndDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class QuadrupedXGaitStepStream
@@ -44,9 +35,7 @@ public class QuadrupedXGaitStepStream
    private final YoDouble bodyYaw;
    private final YoFrameYawPitchRoll bodyOrientation;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
-   private final EndDependentList<YoQuadrupedTimedStep> xGaitCurrentSteps;
-   private final ArrayList<YoQuadrupedTimedStep> xGaitPreviewSteps;
-   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
+   private final QuadrupedPlanarFootstepPlan footstepPlan;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
                                    YoVariableRegistry parentRegistry)
@@ -68,18 +57,7 @@ public class QuadrupedXGaitStepStream
       this.bodyYaw = new YoDouble("bodyYaw", registry);
       this.bodyOrientation = new YoFrameYawPitchRoll("bodyOrientation", worldFrame, registry);
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
-      this.xGaitCurrentSteps = new EndDependentList<>();
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         xGaitCurrentSteps.set(robotEnd, new YoQuadrupedTimedStep("currentStep" + robotEnd.getCamelCaseNameForMiddleOfExpression(), registry));
-      }
-      this.xGaitPreviewSteps = new ArrayList<>(NUMBER_OF_PREVIEW_STEPS);
-      for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)
-      {
-         xGaitPreviewSteps.add(new YoQuadrupedTimedStep("previewStep" + i, registry));
-      }
-
-      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, NUMBER_OF_PREVIEW_STEPS + 2, YoQuadrupedTimedStep::new);
+      this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
 
       if (parentRegistry != null)
       {
@@ -112,12 +90,8 @@ public class QuadrupedXGaitStepStream
       double initialYaw = bodyYaw.getDoubleValue();
       double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.getValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, desiredPlanarVelocity, initialQuadrant, supportCentroid, initialTime, initialYaw, xGaitSettings);
-      for (int i = 0; i < 2; i++)
-      {
-         RobotEnd robotEnd = xGaitPreviewSteps.get(i).getRobotQuadrant().getEnd();
-         xGaitCurrentSteps.get(robotEnd).set(xGaitPreviewSteps.get(i));
-      }
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, desiredPlanarVelocity, initialQuadrant, supportCentroid, initialTime, initialYaw, xGaitSettings);
+      footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }
 
@@ -138,14 +112,7 @@ public class QuadrupedXGaitStepStream
       }
 
       // update xgait current steps
-      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-      {
-         QuadrupedTimedStep xGaitPreviewStep = xGaitPreviewSteps.get(i);
-         if (xGaitPreviewStep.getTimeInterval().getStartTime() <= currentTime)
-         {
-            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotQuadrant().getEnd()).set(xGaitPreviewStep);
-         }
-      }
+      footstepPlan.updateCurrentSteps(timestamp.getDoubleValue());
 
       // update xgait preview steps
       supportCentroid.setToZero(supportFrame);
@@ -153,26 +120,7 @@ public class QuadrupedXGaitStepStream
 
       updateXGaitSettings();
       double currentYaw = bodyYaw.getDoubleValue();
-      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, desiredPlanarVelocity, currentTime, currentYaw, supportCentroid.getZ(), xGaitSettings);
-
-      // update step sequence
-      stepSequence.clear();
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         if (xGaitCurrentSteps.get(robotEnd).getTimeInterval().getEndTime() >= currentTime)
-         {
-            stepSequence.add();
-            stepSequence.get(stepSequence.size() - 1).set(xGaitCurrentSteps.get(robotEnd));
-         }
-      }
-      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-      {
-         if (xGaitPreviewSteps.get(i).getTimeInterval().getEndTime() >= currentTime)
-         {
-            stepSequence.add();
-            stepSequence.get(stepSequence.size() - 1).set(xGaitPreviewSteps.get(i));
-         }
-      }
+      xGaitStepPlanner.computeOnlinePlan(footstepPlan, desiredPlanarVelocity, currentTime, currentYaw, supportCentroid.getZ(), xGaitSettings);
    }
 
    public void setDesiredPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -186,13 +134,8 @@ public class QuadrupedXGaitStepStream
       bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
    }
 
-   public FrameQuaternionReadOnly getBodyOrientation()
-   {
-      return bodyOrientation.getFrameOrientation();
-   }
-
    public List<? extends QuadrupedTimedStep> getSteps()
    {
-      return stepSequence;
+      return footstepPlan.getCompleteStepSequence(timestamp.getDoubleValue());
    }
 }
