@@ -9,7 +9,7 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ihmc-build:0.13.0"
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.5.13-alpha"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.7.0-alpha"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.6.9-alpha"
       classpath "org.ajoberstar:grgit:2.1.0"
       classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
@@ -40,16 +40,16 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
    compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.9-alpha'
-   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.13-alpha'
+   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.7.0-alpha'
 }
 
 testDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.13-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.7.0-alpha'
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.13-alpha"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.7.0-alpha"
 }
 
 task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
