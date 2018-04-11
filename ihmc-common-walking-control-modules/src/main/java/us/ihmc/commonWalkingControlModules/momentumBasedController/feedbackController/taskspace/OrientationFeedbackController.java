@@ -16,6 +16,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControl
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
@@ -96,6 +97,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
    private final VirtualTorqueCommand virtualModelControlOutput = new VirtualTorqueCommand();
+   private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
 
    private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
@@ -106,6 +108,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame angularGainsFrame;
 
+   private final RigidBody rootBody;
    private final RigidBody endEffector;
    private final MovingReferenceFrame endEffectorFrame;
 
@@ -115,6 +118,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
                                         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      this.rootBody = toolbox.getRootBody();
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -323,8 +327,24 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (!isEnabled())
          return;
 
-      virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+      computeFeedbackTorque();
 
+      if (endEffector == rootBody)
+      {
+         desiredAngularTorque.changeFrame(worldFrame);
+
+         virtualModelControlRootOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlRootOutput.setAngularMomentumRate(desiredAngularTorque);
+      }
+      else
+      {
+         virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlOutput.setAngularTorque(endEffectorFrame, desiredAngularTorque);
+      }
+   }
+
+   private void computeFeedbackTorque()
+   {
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -339,9 +359,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       desiredAngularTorque.changeFrame(endEffectorFrame);
       yoDesiredAngularTorque.setMatchingFrame(desiredAngularTorque);
-
-      virtualModelControlOutput.setAngularTorque(endEffectorFrame, desiredAngularTorque);
    }
+
+
 
    @Override
    public void computeAchievedAcceleration()

@@ -201,8 +201,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoDesiredWrench = feedbackControllerToolbox.getWrench(endEffector, DESIRED, isEnabled);
             yoFeedForwardWrench = feedbackControllerToolbox.getWrench(endEffector, FEEDFORWARD, isEnabled);
             yoFeedbackWrench = feedbackControllerToolbox.getWrench(endEffector, FEEDBACK, isEnabled);
-            rateLimitedFeedbackWrench = feedbackControllerToolbox.getRateLimitedWrench(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate,
-                                                                                       isEnabled);
+            rateLimitedFeedbackWrench = feedbackControllerToolbox
+                  .getRateLimitedWrench(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate, isEnabled);
          }
          else
          {
@@ -233,8 +233,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoFeedbackVelocity = feedbackControllerToolbox.getVelocity(endEffector, FEEDBACK, isEnabled);
          yoFeedForwardVelocity = feedbackControllerToolbox.getVelocity(endEffector, FEEDFORWARD, isEnabled);
-         rateLimitedFeedbackVelocity = feedbackControllerToolbox.getRateLimitedVelocity(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate,
-                                                                                        isEnabled);
+         rateLimitedFeedbackVelocity = feedbackControllerToolbox
+               .getRateLimitedVelocity(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate, isEnabled);
       }
       else
       {
@@ -242,8 +242,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoFeedForwardVelocity = null;
          rateLimitedFeedbackVelocity = null;
       }
-
-
 
       parentRegistry.addChild(registry);
    }
@@ -388,85 +386,63 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
+      computeFeedbackWrench();
+
       if (endEffector == rootBody)
-         computeMomentumForBase();
+      {
+         desiredLinearForce.changeFrame(worldFrame);
+         desiredAngularTorque.changeFrame(worldFrame);
+
+         virtualModelControlRootOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlRootOutput.setMomentumRate(desiredAngularTorque, desiredLinearForce);
+      }
       else
-         computeWrenchForEndEffector();
+      {
+         virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlOutput.setWrench(controlFrame, desiredAngularTorque, desiredLinearForce);
+      }
+   }
+
+   private void computeFeedbackWrench()
+   {
+      yoFeedForwardWrench.getIncludingFrame(feedForwardLinearAction, feedForwardAngularAction);
+      feedForwardLinearAction.changeFrame(controlFrame);
+      feedForwardAngularAction.changeFrame(controlFrame);
+      computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
+      computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
+      computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
+
+      desiredLinearForce.setIncludingFrame(linearProportionalFeedback);
+      desiredLinearForce.add(linearDerivativeFeedback);
+      desiredLinearForce.add(linearIntegralFeedback);
+      desiredLinearForce.clipToMaxLength(positionGains.getMaximumFeedback());
+
+      desiredAngularTorque.setIncludingFrame(angularProportionalFeedback);
+      desiredAngularTorque.add(angularDerivativeFeedback);
+      desiredAngularTorque.add(angularIntegralFeedback);
+      desiredAngularTorque.clipToMaxLength(orientationGains.getMaximumFeedback());
+
+      yoFeedbackWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
+      rateLimitedFeedbackWrench.update();
+      rateLimitedFeedbackWrench.getIncludingFrame(desiredLinearForce, desiredAngularTorque);
+
+      desiredLinearForce.changeFrame(controlFrame);
+      desiredLinearForce.add(feedForwardLinearAction);
+
+      desiredAngularTorque.changeFrame(controlFrame);
+      desiredAngularTorque.add(feedForwardAngularAction);
+
+      yoDesiredWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
    }
 
    private void computeWrenchForEndEffector()
    {
-      virtualModelControlOutput.setProperties(inverseDynamicsOutput);
 
-      yoFeedForwardWrench.getIncludingFrame(feedForwardLinearAction, feedForwardAngularAction);
-      feedForwardLinearAction.changeFrame(controlFrame);
-      feedForwardAngularAction.changeFrame(controlFrame);
-      computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
-      computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
-      computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
-
-      desiredLinearForce.setIncludingFrame(linearProportionalFeedback);
-      desiredLinearForce.add(linearDerivativeFeedback);
-      desiredLinearForce.add(linearIntegralFeedback);
-      desiredLinearForce.clipToMaxLength(positionGains.getMaximumFeedback());
-
-      desiredAngularTorque.setIncludingFrame(angularProportionalFeedback);
-      desiredAngularTorque.add(angularDerivativeFeedback);
-      desiredAngularTorque.add(angularIntegralFeedback);
-      desiredAngularTorque.clipToMaxLength(orientationGains.getMaximumFeedback());
-
-      yoFeedbackWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
-      rateLimitedFeedbackWrench.update();
-      rateLimitedFeedbackWrench.getIncludingFrame(desiredLinearForce, desiredAngularTorque);
-
-      desiredLinearForce.changeFrame(controlFrame);
-      desiredLinearForce.add(feedForwardLinearAction);
-
-      desiredAngularTorque.changeFrame(controlFrame);
-      desiredAngularTorque.add(feedForwardAngularAction);
-
-      yoDesiredWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
-
-      virtualModelControlOutput.setWrench(controlFrame, desiredAngularTorque, desiredLinearForce);
    }
 
    private void computeMomentumForBase()
    {
-      virtualModelControlRootOutput.setProperties(inverseDynamicsOutput);
 
-      yoFeedForwardWrench.getIncludingFrame(feedForwardLinearAction, feedForwardAngularAction);
-      feedForwardLinearAction.changeFrame(controlFrame);
-      feedForwardAngularAction.changeFrame(controlFrame);
-      computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
-      computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
-      computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
-
-      desiredLinearForce.setIncludingFrame(linearProportionalFeedback);
-      desiredLinearForce.add(linearDerivativeFeedback);
-      desiredLinearForce.add(linearIntegralFeedback);
-      desiredLinearForce.clipToMaxLength(positionGains.getMaximumFeedback());
-
-      desiredAngularTorque.setIncludingFrame(angularProportionalFeedback);
-      desiredAngularTorque.add(angularDerivativeFeedback);
-      desiredAngularTorque.add(angularIntegralFeedback);
-      desiredAngularTorque.clipToMaxLength(orientationGains.getMaximumFeedback());
-
-      yoFeedbackWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
-      rateLimitedFeedbackWrench.update();
-      rateLimitedFeedbackWrench.getIncludingFrame(desiredLinearForce, desiredAngularTorque);
-
-      desiredLinearForce.changeFrame(controlFrame);
-      desiredLinearForce.add(feedForwardLinearAction);
-
-      desiredAngularTorque.changeFrame(controlFrame);
-      desiredAngularTorque.add(feedForwardAngularAction);
-
-      yoDesiredWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
-
-      desiredLinearForce.changeFrame(worldFrame);
-      desiredAngularTorque.changeFrame(worldFrame);
-
-      virtualModelControlRootOutput.setMomentumRate(desiredAngularTorque, desiredLinearForce);
    }
 
    @Override
