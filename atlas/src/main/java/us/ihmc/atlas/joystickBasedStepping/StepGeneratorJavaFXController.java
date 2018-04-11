@@ -1,14 +1,7 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonAState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonSelectState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonStartState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.*;
+import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +10,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
@@ -45,7 +41,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,6 +71,7 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<Double> swingHeight;
    private final AtomicReference<Double> swingDuration;
    private final AtomicReference<Double> transferDuration;
+   private final AtomicReference<Double> trajectoryDuration;
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
                                         PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
@@ -90,6 +89,7 @@ public class StepGeneratorJavaFXController
       swingHeight = messager.createInput(WalkingSwingHeight, 0.12);
       swingDuration = messager.createInput(WalkingSwingDuration, walkingControllerParameters.getDefaultSwingTime());
       transferDuration = messager.createInput(WalkingTransferDuration, walkingControllerParameters.getDefaultTransferTime());
+      trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 0.5);
 
       animationTimer = new AnimationTimer()
       {
@@ -122,6 +122,9 @@ public class StepGeneratorJavaFXController
       footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
+
+//      messager.registerTopicListener(ButtonXState, state -> processPunch(RobotSide.LEFT, state));
+//      messager.registerTopicListener(ButtonYState, state -> processPunch(RobotSide.RIGHT, state));
 
       messager.registerTopicListener(ButtonAState, state -> toggleWalking(state == ButtonState.PRESSED));
       messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
@@ -220,6 +223,60 @@ public class StepGeneratorJavaFXController
       MeshView meshView = new MeshView(mesh);
       meshView.setMaterial(new PhongMaterial(footColor));
       return meshView;
+   }
+
+   private void processPunch(RobotSide robotSide, ButtonState state)
+   {
+      if (state == ButtonState.PRESSED)
+         sendArmStraightConfiguration(robotSide);
+      else
+         sendArmHomeConfiguration(robotSide);
+   }
+
+   private void sendArmHomeConfiguration(RobotSide robotSide)
+   {
+      double[] jointAngles = new double[7];
+      int index = 0;
+      jointAngles[index++] = robotSide.negateIfRightSide(0.785398); // ArmJointName.SHOULDER_YAW        
+      jointAngles[index++] = robotSide.negateIfRightSide(-0.52379); // ArmJointName.SHOULDER_ROLL       
+      jointAngles[index++] = 2.33708; // ArmJointName.ELBOW_PITCH         
+      jointAngles[index++] = robotSide.negateIfRightSide(2.35619); // ArmJointName.ELBOW_ROLL          
+      jointAngles[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
+      jointAngles[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
+      jointAngles[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration.get(), jointAngles);
+      packetCommunicator.send(message);
+   }
+
+   private void sendArmStraightConfiguration(RobotSide robotSide)
+   {
+      double[] jointAngles0 = new double[7];
+      int index = 0;
+      jointAngles0[index++] = robotSide.negateIfRightSide(-0.2); // ArmJointName.SHOULDER_YAW        
+      jointAngles0[index++] = robotSide.negateIfRightSide(-0.17); // ArmJointName.SHOULDER_ROLL       
+      jointAngles0[index++] = 1.4; // ArmJointName.ELBOW_PITCH         
+      jointAngles0[index++] = robotSide.negateIfRightSide(1.8); // ArmJointName.ELBOW_ROLL          
+      jointAngles0[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
+      jointAngles0[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
+      jointAngles0[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
+
+      double[] jointAngles1 = new double[7];
+      index = 0;
+      jointAngles1[index++] = robotSide.negateIfRightSide(-1.2); // ArmJointName.SHOULDER_YAW        
+      jointAngles1[index++] = robotSide.negateIfRightSide(-0.0); // ArmJointName.SHOULDER_ROLL       
+      jointAngles1[index++] = 1.8; // ArmJointName.ELBOW_PITCH         
+      jointAngles1[index++] = robotSide.negateIfRightSide(0.6); // ArmJointName.ELBOW_ROLL          
+      jointAngles1[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
+      jointAngles1[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
+      jointAngles1[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration.get() / 2.0, jointAngles0);
+      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = message.getJointspaceTrajectory().getJointTrajectoryMessages();
+      for (int i = 0; i < jointTrajectoryMessages.size(); i++)
+      {
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = createTrajectoryPoint1DMessage(trajectoryDuration.get(), jointAngles1[i], 0.0);
+         jointTrajectoryMessages.get(i).getTrajectoryPoints().add().set(trajectoryPoint1DMessage);
+      }
+      packetCommunicator.send(message);
    }
 
    public void start()
