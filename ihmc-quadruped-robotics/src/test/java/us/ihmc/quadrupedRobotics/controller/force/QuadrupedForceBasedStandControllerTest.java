@@ -237,7 +237,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      double initialComZ = variables.getComPositionEstimateZ().getDoubleValue();
+      double initialComZ = variables.getCurrentHeightInWorld().getDoubleValue();
       testMovingCoM(initialComZ + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
       testMovingCoM(initialComZ, orientationShift, - orientationShift, orientationShift, translationDelta, orientationDelta);
       testMovingCoM(initialComZ - translationShift, - orientationShift, - orientationShift, - orientationShift, translationDelta, orientationDelta);
@@ -253,7 +253,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      assertTrue(Math.abs(variables.getComPositionEstimateZ().getDoubleValue() - variables.getComPositionSetpointZ().getDoubleValue()) < translationDelta);
+      assertTrue(Math.abs(variables.getCurrentHeightInWorld().getDoubleValue() - variables.getHeightInWorldSetpoint().getDoubleValue()) < translationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimateYaw().getDoubleValue() - bodyOrientationYaw) < orientationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimatePitch().getDoubleValue() - bodyOrientationPitch) < orientationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimateRoll().getDoubleValue() - bodyOrientationRoll) < orientationDelta);
