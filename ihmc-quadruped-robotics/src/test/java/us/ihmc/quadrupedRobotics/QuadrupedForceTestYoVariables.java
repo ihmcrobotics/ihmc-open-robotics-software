@@ -38,14 +38,14 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    // CoM
    private final YoDouble comPositionEstimateX;
    private final YoDouble comPositionEstimateY;
-   private final YoDouble comPositionEstimateZ;
+   private final YoDouble currentHeightInWorld;
    private final YoDouble comPositionEstimateYaw;
    private final YoDouble comPositionEstimatePitch;
    private final YoDouble comPositionEstimateRoll;
 
    private final YoDouble comPositionSetpointX;
    private final YoDouble comPositionSetpointY;
-   private final YoDouble comPositionSetpointZ;
+   private final YoDouble desiredHeightInWorld;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -69,7 +69,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       
       comPositionEstimateX = (YoDouble) scs.getVariable("comPositionEstimateX");
       comPositionEstimateY = (YoDouble) scs.getVariable("comPositionEstimateY");
-      comPositionEstimateZ = (YoDouble) scs.getVariable("comPositionEstimateZ");
+      currentHeightInWorld = (YoDouble) scs.getVariable("currentHeightInWorld");
       
       timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
       timedStepDuration = (YoDouble) scs.getVariable("timedStepDuration");
@@ -84,7 +84,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 
       comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
       comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
-      comPositionSetpointZ = (YoDouble) scs.getVariable("comPositionSetpointZ");
+      desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
    }
 
    public YoEnum<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -127,9 +127,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return comPositionEstimateY;
    }
 
-   public YoDouble getComPositionEstimateZ()
+   public YoDouble getCurrentHeightInWorld()
    {
-      return comPositionEstimateZ;
+      return currentHeightInWorld;
    }
    
    public YoEnum<RobotQuadrant> getTimedStepQuadrant()
@@ -187,8 +187,8 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return comPositionSetpointY;
    }
 
-   public YoDouble getComPositionSetpointZ()
+   public YoDouble getHeightInWorldSetpoint()
    {
-      return comPositionSetpointZ;
+      return desiredHeightInWorld;
    }
 }

@@ -155,7 +155,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
       poseTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), desiredCoMHeight, 0.01));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), desiredCoMHeight, 0.01));
       conductor.simulate();
    }
 
@@ -168,14 +168,14 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), originalHeight + heightDelta, 0.01));
          conductor.simulate();
 
          try
          {
             variables.getLimitJointTorques().set(true);
             conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-            conductor.addSustainGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+            conductor.addSustainGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), originalHeight + heightDelta, 0.01));
             conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
             conductor.simulate();
          }
@@ -196,14 +196,14 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), originalHeight + heightDelta, 0.01));
          conductor.simulate();
 
          try
          {
             variables.getLimitJointTorques().set(true);
             conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-            conductor.addSustainGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+            conductor.addSustainGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), originalHeight + heightDelta, 0.01));
             conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
             conductor.simulate();
          }
