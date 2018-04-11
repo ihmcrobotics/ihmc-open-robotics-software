@@ -392,11 +392,9 @@ public class DRCNetworkProcessor
 
    private void setupJoystickBasedContinuousSteppingModule(DRCNetworkModuleParameters parameters) throws IOException
    {
-//      if (parameters.isEnableJoystickBasedStepping())
+      if (parameters.isEnableJoystickBasedStepping())
       {
-         KryoObjectServer server = new KryoObjectServer(NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING.getPort(), NET_CLASS_LIST);
-         server.throwExceptionForUnregisteredPackets(false);
-         PacketCommunicator reaCommunicator = PacketCommunicator.createCustomPacketCommunicator(server, NET_CLASS_LIST);
+         PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.JOYSTICK_BASED_STEPPING, reaCommunicator);
          reaCommunicator.connect();
       }

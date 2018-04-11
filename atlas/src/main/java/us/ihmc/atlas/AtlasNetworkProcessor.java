@@ -70,6 +70,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableKinematicsToolbox(true);
         networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
         networkModuleParams.setFilterControllerInputMessages(true);
+        networkModuleParams.setEnableJoystickBasedStepping(true);
 
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 
