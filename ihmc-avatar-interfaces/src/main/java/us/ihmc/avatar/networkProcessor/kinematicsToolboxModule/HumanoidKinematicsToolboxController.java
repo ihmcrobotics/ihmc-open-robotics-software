@@ -26,8 +26,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,6 +34,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -58,13 +58,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * they can be held in place during the optimization process such that the solution will be
     * statically reachable.
     */
-   private final SideDependentList<YoFramePoseUsingQuaternions> initialFootPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
    /**
     * Updated during the initialization phase, this is where the robot's center of mass position is
     * stored so it can be held in place during the optimization process such that the solution will
     * be statically reachable.
     */
-   private final YoFramePoint initialCenterOfMassPosition = new YoFramePoint("initialCenterOfMass", worldFrame, registry);
+   private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
    /**
     * Indicates whether the support foot/feet should be held in place for this run. It is
@@ -122,7 +122,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
+         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
       populateJointLimitReductionFactors();

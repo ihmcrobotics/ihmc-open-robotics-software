@@ -42,7 +42,7 @@ public class REAPlanarRegionPublicNetworkProvider
          for (PacketDestination packetDestination : listenersForContinuousUpdate)
          {
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-            planarRegionsListMessage.setDestination(packetDestination);
+            planarRegionsListMessage.setDestination(packetDestination.ordinal());
             publicPacketCommunicator.send(planarRegionsListMessage);
          }
       }
@@ -50,7 +50,7 @@ public class REAPlanarRegionPublicNetworkProvider
       for (PacketDestination packetDestination : listenersForSingleUpdate)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-         planarRegionsListMessage.setDestination(packetDestination);
+         planarRegionsListMessage.setDestination(packetDestination.ordinal());
          publicPacketCommunicator.send(planarRegionsListMessage);
       }
 

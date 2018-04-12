@@ -25,9 +25,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -36,6 +33,9 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using the leg kinematics.
@@ -56,11 +56,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final Map<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
    private final Map<RigidBody, ReferenceFrame> copFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
 
-   private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
+   private final YoFramePoint3D rootJointPosition = new YoFramePoint3D("estimatedRootJointPositionWithKinematics", worldFrame, registry);
 
-   private final Map<RigidBody, YoFrameVector> footVelocitiesInWorld = new LinkedHashMap<RigidBody, YoFrameVector>();
+   private final Map<RigidBody, YoFrameVector3D> footVelocitiesInWorld = new LinkedHashMap<RigidBody, YoFrameVector3D>();
    private final Map<RigidBody, Twist> footTwistsInWorld = new LinkedHashMap<RigidBody, Twist>();
-   private final YoFrameVector rootJointLinearVelocityNewTwist = new YoFrameVector("estimatedRootJointVelocityNewTwist", worldFrame, registry);
+   private final YoFrameVector3D rootJointLinearVelocityNewTwist = new YoFrameVector3D("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final YoDouble alphaRootJointLinearVelocityNewTwist = new YoDouble("alphaRootJointLinearVelocityNewTwist", registry);
 
    /** Debug variable */
@@ -72,16 +72,16 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final YoDouble alphaFootToRootJointPosition = new YoDouble("alphaFootToRootJointPosition", registry);
    private final Map<RigidBody, AlphaFilteredYoFrameVector> footToRootJointPositions = new LinkedHashMap<RigidBody, AlphaFilteredYoFrameVector>();
-   private final Map<RigidBody, YoFramePoint> footPositionsInWorld = new LinkedHashMap<RigidBody, YoFramePoint>();
+   private final Map<RigidBody, YoFramePoint3D> footPositionsInWorld = new LinkedHashMap<RigidBody, YoFramePoint3D>();
    /** Debug variable */
-   private final Map<RigidBody, YoFramePoint> rootJointPositionsPerFoot = new LinkedHashMap<>();
+   private final Map<RigidBody, YoFramePoint3D> rootJointPositionsPerFoot = new LinkedHashMap<>();
    private final YoBoolean correctTrustedFeetPositions = new YoBoolean("correctTrustedFeetPositions", registry);
 
-   private final Map<RigidBody, YoFramePoint> copPositionsInWorld = new LinkedHashMap<RigidBody, YoFramePoint>();
+   private final Map<RigidBody, YoFramePoint3D> copPositionsInWorld = new LinkedHashMap<RigidBody, YoFramePoint3D>();
 
    private final YoDouble alphaCoPFilter = new YoDouble("alphaCoPFilter", registry);
    private final Map<RigidBody, AlphaFilteredYoFramePoint2d> copsFilteredInFootFrame = new LinkedHashMap<RigidBody, AlphaFilteredYoFramePoint2d>();
-   private final Map<RigidBody, YoFramePoint2d> copsRawInFootFrame = new LinkedHashMap<RigidBody, YoFramePoint2d>();
+   private final Map<RigidBody, YoFramePoint2D> copsRawInFootFrame = new LinkedHashMap<RigidBody, YoFramePoint2D>();
 
    private final Map<RigidBody, FrameConvexPolygon2D> footPolygons = new LinkedHashMap<RigidBody, FrameConvexPolygon2D>();
    private final Map<RigidBody, FrameLineSegment2D> footCenterCoPLineSegments = new LinkedHashMap<RigidBody, FrameLineSegment2D>();
@@ -100,6 +100,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
+
+   private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
          Map<RigidBody, FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
@@ -129,10 +131,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
          AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFootToRootJointPosition, worldFrame);
          footToRootJointPositions.put(foot, footToRootJointPosition);
 
-         YoFramePoint rootJointPosition = new YoFramePoint(namePrefix + "BasedRootJointPosition", worldFrame, registry);
+         YoFramePoint3D rootJointPosition = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
          rootJointPositionsPerFoot.put(foot, rootJointPosition);
 
-         YoFramePoint footPositionInWorld = new YoFramePoint(namePrefix + "FootPositionInWorld", worldFrame, registry);
+         YoFramePoint3D footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
          footPositionsInWorld.put(foot, footPositionInWorld);
 
          FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(feetContactablePlaneBodies.get(foot).getContactPoints2d()));
@@ -141,17 +143,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameLineSegment2D tempLineSegment = new FrameLineSegment2D(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
          footCenterCoPLineSegments.put(foot, tempLineSegment);
 
-         YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
+         YoFramePoint2D copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
          copsRawInFootFrame.put(foot, copRawInFootFrame);
 
          final AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCoPFilter, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0); // So the next point will be filtered
          copsFilteredInFootFrame.put(foot, copFilteredInFootFrame);
 
-         YoFramePoint copPositionInWorld = new YoFramePoint(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
+         YoFramePoint3D copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          copPositionsInWorld.put(foot, copPositionInWorld);
 
-         YoFrameVector footVelocityInWorld = new YoFrameVector(namePrefix + "VelocityInWorld", worldFrame, registry);
+         YoFrameVector3D footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
          footVelocitiesInWorld.put(foot, footVelocityInWorld);
 
          footTwistsInWorld.put(foot, new Twist());
@@ -257,7 +259,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
 
-      YoFramePoint rootJointPositionPerFoot = rootJointPositionsPerFoot.get(trustedFoot);
+      YoFramePoint3D rootJointPositionPerFoot = rootJointPositionsPerFoot.get(trustedFoot);
       rootJointPositionPerFoot.set(footPositionsInWorld.get(trustedFoot));
       rootJointPositionPerFoot.add(footToRootJointPositions.get(trustedFoot));
 
@@ -273,7 +275,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    private void updateUntrustedFootPosition(RigidBody swingingFoot, FramePoint3D pelvisPosition)
    {
-      YoFramePoint footPositionInWorld = footPositionsInWorld.get(swingingFoot);
+      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(swingingFoot);
       footPositionInWorld.set(pelvisPosition);
       footPositionInWorld.sub(footToRootJointPositions.get(swingingFoot));
 
@@ -285,7 +287,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private void updateTrustedFootPosition(RigidBody trustedFoot)
    {
-      YoFramePoint footPositionInWorld = footPositionsInWorld.get(trustedFoot);
+      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(trustedFoot);
       AlphaFilteredYoFrameVector footToRootJointPosition = footToRootJointPositions.get(trustedFoot);
 
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
@@ -334,10 +336,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
                {
                   FrameLineSegment2D footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
                   footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
-                  // TODO Garbage
-                  FramePoint2DBasics[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
+                  int intersections = footPolygon.intersectionWith(footCenterCoPLineSegment, intersectionPoints[0], intersectionPoints[1]);
 
-                  if (intersectionPoints == null || intersectionPoints.length == 0)
+                  if (intersections == 0)
                   {
                      System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
                      tempCoP2d.setToZero(footFrame);
@@ -345,11 +346,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
                   else
                   {
                      tempCoP2d.set(intersectionPoints[0]);
-                     
-                     if (intersectionPoints.length == 2)
+
+                     if (intersections == 2)
                         System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
                   }
-                  
+
 
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
@@ -388,7 +389,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       tempCoPOffset.changeFrame(worldFrame);
 
-      YoFramePoint footPositionInWorld = footPositionsInWorld.get(plantedFoot);
+      YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(plantedFoot);
       footPositionInWorld.set(copPositionsInWorld.get(plantedFoot));
       footPositionInWorld.sub(tempCoPOffset);
    }
@@ -433,7 +434,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       {
          RigidBody foot = feetRigidBodies.get(i);
          Twist footTwistInWorld = footTwistsInWorld.get(foot);
-         YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(foot);
+         YoFrameVector3D footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
          foot.getBodyFixedFrame().getTwistOfFrame(footTwistInWorld);
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));

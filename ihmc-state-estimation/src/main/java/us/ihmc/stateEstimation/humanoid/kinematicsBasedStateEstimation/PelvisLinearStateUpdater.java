@@ -20,8 +20,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -40,6 +38,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -62,23 +62,23 @@ public class PelvisLinearStateUpdater
 
    private final List<RigidBody> feet = new ArrayList<RigidBody>();
 
-   private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
-   private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoRootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
+   private final YoFrameVector3D yoRootJointVelocity = new YoFrameVector3D("estimatedRootJointVelocity", worldFrame, registry);
 
    private final YoDouble yoInitialComHeight = new YoDouble("initialComHeight", registry);
-   private final YoFramePoint yoInitialCenterOfMassPosition = new YoFramePoint("initialCenterOfMassPosition", worldFrame, registry);
-   private final YoFramePoint yoInitialFootPosition = new YoFramePoint("initialFootPosition", worldFrame, registry);
+   private final YoFramePoint3D yoInitialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMassPosition", worldFrame, registry);
+   private final YoFramePoint3D yoInitialFootPosition = new YoFramePoint3D("initialFootPosition", worldFrame, registry);
 
-   private final YoFramePoint yoCenterOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
-   private final YoFrameVector yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector("estimatedCenterOfMassVelocityPelvisAndKin", worldFrame, registry);
-   private final YoFrameVector yoCenterOfMassVelocityIntegrateGRF = new YoFrameVector("estimatedCenterOfMassVelocityGRF", worldFrame, registry);
-   private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMassPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector3D("estimatedCenterOfMassVelocityPelvisAndKin", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocityIntegrateGRF = new YoFrameVector3D("estimatedCenterOfMassVelocityGRF", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
 
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
    
-   private final YoFrameVector totalGroundReactionForce = new YoFrameVector("totalGroundForce", worldFrame, registry);
+   private final YoFrameVector3D totalGroundReactionForce = new YoFrameVector3D("totalGroundForce", worldFrame, registry);
    private final YoDouble robotMass = new YoDouble("robotMass", registry);
-   private final YoFrameVector comAcceleration = new YoFrameVector("comAcceleration", worldFrame, registry);
+   private final YoFrameVector3D comAcceleration = new YoFrameVector3D("comAcceleration", worldFrame, registry);
 
    private final YoDouble alphaIMUAgainstKinematicsForVelocity = new YoDouble("alphaIMUAgainstKinematicsForVelocity", registry);
    private final YoDouble alphaGRFAgainstIMUAndKinematicsForVelocity = new YoDouble("alphaGRFAgainstIMUAndKinematicsForVelocity", registry);

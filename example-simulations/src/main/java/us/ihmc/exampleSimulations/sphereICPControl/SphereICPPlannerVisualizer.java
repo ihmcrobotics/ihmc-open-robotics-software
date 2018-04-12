@@ -49,12 +49,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -66,6 +60,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SphereICPPlannerVisualizer
 {
@@ -102,7 +102,7 @@ public class SphereICPPlannerVisualizer
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    private ReferenceFrame midFeetZUpFrame;
 
-   private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
 
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
    private BipedSupportPolygons bipedSupportPolygons;
@@ -114,9 +114,9 @@ public class SphereICPPlannerVisualizer
    private final double dt = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
-   private final YoFramePoint eCMP = new YoFramePoint("eCMP", worldFrame, registry);
-   private final YoFramePoint desiredICP = new YoFramePoint("desiredICP", worldFrame, registry);
-   private final YoFrameVector desiredICPVelocity = new YoFrameVector("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D eCMP = new YoFramePoint3D("eCMP", worldFrame, registry);
+   private final YoFramePoint3D desiredICP = new YoFramePoint3D("desiredICP", worldFrame, registry);
+   private final YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
 
    private final Random random = new Random(21616L);
    private final double steppingError = 0.0 * 0.05;
@@ -135,15 +135,15 @@ public class SphereICPPlannerVisualizer
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
 
-   private final YoFramePose yoNextFootstepPose = new YoFramePose("nextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextFootstepPose = new YoFramePose("nextNextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextNextFootstepPose = new YoFramePose("nextNextNextFootstepPose", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoNextFootstepPolygon = new YoFrameConvexPolygon2d("nextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
 
-   private final YoFramePoint2d centerOfMass = new YoFramePoint2d("centerOfMass", worldFrame, registry);
-   private final YoFrameVector2d centerOfMassVelocity = new YoFrameVector2d("centerOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint2D centerOfMass = new YoFramePoint2D("centerOfMass", worldFrame, registry);
+   private final YoFrameVector2D centerOfMassVelocity = new YoFrameVector2D("centerOfMassVelocity", worldFrame, registry);
 
    private final double omega0 = 3.4;
 
@@ -155,6 +155,8 @@ public class SphereICPPlannerVisualizer
    private FootstepTestHelper footstepTestHelper;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    public SphereICPPlannerVisualizer()
    {
@@ -464,7 +466,7 @@ public class SphereICPPlannerVisualizer
       FrameVector2D randomLineVector = EuclidFrameRandomTools.nextFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2D randomLine = new FrameLine2D(randomLineOrigin, randomLineVector);
 
-      ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
+      convexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
       randomSupportPolygon.update();
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
@@ -509,7 +511,7 @@ public class SphereICPPlannerVisualizer
       yoNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
-      yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
+      yoNextFootstepPose.setMatchingFrame(nextFootstepPose);
 
       if (nextNextFootstep == null)
       {
@@ -530,7 +532,7 @@ public class SphereICPPlannerVisualizer
       yoNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
-      yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
+      yoNextNextFootstepPose.setMatchingFrame(nextNextFootstepPose);
 
       if (nextNextNextFootstep == null)
       {
@@ -549,7 +551,7 @@ public class SphereICPPlannerVisualizer
       yoNextNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
-      yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
+      yoNextNextNextFootstepPose.setMatchingFrame(nextNextNextFootstepPose);
    }
 
    private void callUpdatables()
@@ -641,7 +643,7 @@ public class SphereICPPlannerVisualizer
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         currentFootPoses.put(robotSide, new YoFramePose(sidePrefix + "FootPose", worldFrame, registry));
+         currentFootPoses.put(robotSide, new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootPose", worldFrame, registry));
 
          Graphics3DObject footGraphics = new Graphics3DObject();
          AppearanceDefinition footColor = robotSide == RobotSide.LEFT ? YoAppearance.Color(defaultLeftColor) : YoAppearance.Color(defaultRightColor);

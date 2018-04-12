@@ -47,8 +47,6 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
-      
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
@@ -70,7 +68,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             double yaw = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
-            poseTeleopManager.setDesiredBodyOrientation(yaw, pitch, roll);
+            poseTeleopManager.setDesiredBodyOrientation(yaw, pitch, roll, 0.0);
             poseTeleopManager.setDesiredCoMHeight(0.03 * Math.sin(variables.getYoTime().getDoubleValue()) + 0.55);
             double planarVelocityInputX = 0.2 * Math.sin(variables.getYoTime().getDoubleValue() + Math.PI) + 0.3;
             double planarVelocityInputY = 0.2 * Math.cos(variables.getYoTime().getDoubleValue() + Math.PI);

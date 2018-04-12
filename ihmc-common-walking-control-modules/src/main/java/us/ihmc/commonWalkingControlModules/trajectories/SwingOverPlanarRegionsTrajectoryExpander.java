@@ -24,13 +24,13 @@ import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
@@ -48,7 +48,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
    private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
-   private final YoFramePoint trajectoryPosition;
+   private final YoFramePoint3D trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
@@ -118,7 +118,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
-      trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
+      trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);

@@ -27,7 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
@@ -308,7 +308,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       private final SimulationConstructionSet scs;
       
       private final BagOfBalls bagOfBalls;
-      private final YoFramePoint queryPoint;
+      private final YoFramePoint3D queryPoint;
       
 //      private SimplifiedGroundOnlyQuadTree heightMap;
       private QuadTreeHeightMapInterface heightMap;
@@ -329,7 +329,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          this.visualize = visualize;
          
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         queryPoint = new YoFramePoint("queryPoint", worldFrame, registry);
+         queryPoint = new YoFramePoint3D("queryPoint", worldFrame, registry);
          this.rangeOfPointsToTest = rangeOfPointsToTest;
 
          if (visualize)

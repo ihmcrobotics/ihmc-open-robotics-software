@@ -232,13 +232,6 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    /** @inheritDoc */
    @Override
-   public int getRhoSize()
-   {
-      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
-   }
-
-   /** @inheritDoc */
-   @Override
    public List<GroupParameter<Double>> getJointspaceWeights()
    {
       return jointspaceWeights;

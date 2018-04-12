@@ -1,0 +1,47 @@
+#ifndef __controller_msgs__msg__QuadrupedRequestedControllerStateMessage__idl__
+#define __controller_msgs__msg__QuadrupedRequestedControllerStateMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet REQUEST_DO_NOTHING =
+      0;
+
+      const octet REQUEST_STAND_PREP =
+      1;
+
+      const octet REQUEST_FREEZE =
+      2;
+
+      const octet REQUEST_STEPPING =
+      3;
+
+      const octet REQUEST_FALL =
+      4;
+
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message is used to switch the control scheme between different control mode.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedRequestedControllerStateMessage_")
+      struct QuadrupedRequestedControllerStateMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the which state the controller should transition into.
+         */
+        @defaultValue(value=255)
+        octet quadruped_controller_name;
+      };
+    };
+  };
+};
+
+#endif

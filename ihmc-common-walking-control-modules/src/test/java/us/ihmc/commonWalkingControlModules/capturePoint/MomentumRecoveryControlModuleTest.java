@@ -35,7 +35,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -43,6 +42,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class MomentumRecoveryControlModuleTest
@@ -472,7 +472,7 @@ public class MomentumRecoveryControlModuleTest
 
          String prefix = robotSide.getLowerCaseName();
          String Prefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(prefix + "FootPolygon", worldFrame, 10, registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(prefix + "FootPolygon", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon(Prefix + " Foot Polygon", yoFootPolygon, Color.BLACK, false, 1));
          yoFootPolygon.set(footPolygonInWorld);
       }

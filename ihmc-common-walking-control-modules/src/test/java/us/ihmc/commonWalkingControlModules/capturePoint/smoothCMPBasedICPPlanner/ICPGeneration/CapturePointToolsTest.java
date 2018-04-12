@@ -21,10 +21,10 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CapturePointToolsTest
@@ -41,13 +41,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       for (int i = 0; i < nFootsteps; i++)
       {
@@ -86,13 +86,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       for (int i = 0; i < nFootsteps; i++)
       {
@@ -133,13 +133,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -174,13 +174,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -223,13 +223,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -272,13 +272,13 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> arrayToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         arrayToPack.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -327,9 +327,9 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
-      ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
-      YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
+      ArrayList<YoFramePoint3D> constantCentersOfPressures = new ArrayList<YoFramePoint3D>();
+      ArrayList<YoFramePoint3D> capturePointsToPack = new ArrayList<YoFramePoint3D>();
+      YoFramePoint3D icpToCheck = new YoFramePoint3D("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
@@ -337,12 +337,12 @@ public class CapturePointToolsTest
       int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         constantCentersOfPressures.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         constantCentersOfPressures.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       int lastFootstepIndex = numberFootstepsToConsider - 1;
       for (int i = 0; i < lastFootstepIndex; i++)
       {
-         capturePointsToPack.add(new YoFramePoint("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         capturePointsToPack.add(new YoFramePoint3D("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -393,21 +393,21 @@ public class CapturePointToolsTest
    {
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
-      ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
-      ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
+      ArrayList<YoFramePoint3D> constantCentersOfPressures = new ArrayList<YoFramePoint3D>();
+      ArrayList<YoFramePoint3D> capturePointsToPack = new ArrayList<YoFramePoint3D>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
-      YoFramePoint desiredICP = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D desiredICP = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
 
       int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         constantCentersOfPressures.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         constantCentersOfPressures.add(new YoFramePoint3D("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       for (int i = 0; i < numberFootstepsToConsider - 1; i++)
       {
-         capturePointsToPack.add(new YoFramePoint("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+         capturePointsToPack.add(new YoFramePoint3D("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (int j = 0; j < nTests; j++)
@@ -456,12 +456,12 @@ public class CapturePointToolsTest
    @Test(timeout = 30000)
    public void testComputeDesiredCapturePointVelocity()
    {
-      YoFramePoint initialCapturePointPosition = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint computedCapturePoint1 = new YoFramePoint("1", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint computedCapturePoint2 = new YoFramePoint("2", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint initialCenterOfPressure = new YoFramePoint("3", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector differentiatedCapturePointPosition = new YoFrameVector("4", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector computedCapturePointVelocity = new YoFrameVector("5", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D initialCapturePointPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D computedCapturePoint1 = new YoFramePoint3D("1", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D computedCapturePoint2 = new YoFramePoint3D("2", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D initialCenterOfPressure = new YoFramePoint3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D differentiatedCapturePointPosition = new YoFrameVector3D("4", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D computedCapturePointVelocity = new YoFrameVector3D("5", ReferenceFrame.getWorldFrame(), registry);
 
       for (int i = 0; i < nTests; i++)
       {
@@ -491,10 +491,10 @@ public class CapturePointToolsTest
    @Test(timeout = 30000)
    public void testComputeDesiredCapturePointAcceleration()
    {
-      YoFramePoint initialCapturePointPosition = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint initialCenterOfPressure = new YoFramePoint("3", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector computedCapturePointVelocity = new YoFrameVector("5", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector desiredCapturePointAcceleration = new YoFrameVector("6", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D initialCapturePointPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D initialCenterOfPressure = new YoFramePoint3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D computedCapturePointVelocity = new YoFrameVector3D("5", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D desiredCapturePointAcceleration = new YoFrameVector3D("6", ReferenceFrame.getWorldFrame(), registry);
 
       for (int i = 0; i < nTests; i++)
       {
@@ -523,9 +523,9 @@ public class CapturePointToolsTest
    @Test(timeout = 30000)
    public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
    {
-      YoFramePoint constantCenterOfPressure = new YoFramePoint("COP", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint finalDesiredICP = new YoFramePoint("finalICP", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint initialICP = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D constantCenterOfPressure = new YoFramePoint3D("COP", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D finalDesiredICP = new YoFramePoint3D("finalICP", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D initialICP = new YoFramePoint3D("initialICP", ReferenceFrame.getWorldFrame(), registry);
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
 

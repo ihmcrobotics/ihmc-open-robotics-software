@@ -15,13 +15,13 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 /**
  * This control module can activate the use of upper body momentum during walking to allow the robot to recover from
@@ -86,10 +86,10 @@ public class MomentumRecoveryControlModule
    private final FrameConvexPolygon2D tempPolygon1 = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D tempPolygon2 = new FrameConvexPolygon2D();
 
-   private final YoFrameConvexPolygon2d yoSafeArea;
-   private final YoFrameConvexPolygon2d yoSafeCMPArea;
-   private final YoFrameConvexPolygon2d yoProjectionArea;
-   private final YoFramePoint2d yoCapturePoint;
+   private final YoFrameConvexPolygon2D yoSafeArea;
+   private final YoFrameConvexPolygon2D yoSafeCMPArea;
+   private final YoFrameConvexPolygon2D yoProjectionArea;
+   private final YoFramePoint2D yoCapturePoint;
 
 
    public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2D> defaultFootPolygons, double maxAllowedDistanceCMPSupport,
@@ -117,17 +117,17 @@ public class MomentumRecoveryControlModule
          String label = getClass().getSimpleName();
          ArtifactList artifacts = new ArtifactList(label);
 
-         yoSafeArea = new YoFrameConvexPolygon2d("SafeArea", worldFrame, 10, registry);
+         yoSafeArea = new YoFrameConvexPolygon2D("SafeArea", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon("Safe Area", yoSafeArea, Color.GREEN, false));
 
-         yoSafeCMPArea = new YoFrameConvexPolygon2d("SafeCMPArea", worldFrame, 10, registry);
+         yoSafeCMPArea = new YoFrameConvexPolygon2D("SafeCMPArea", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon("Safe CMP Area", yoSafeCMPArea, Color.CYAN, false));
 
-         yoCapturePoint = new YoFramePoint2d("CapturePointForMomentum", worldFrame, registry);
+         yoCapturePoint = new YoFramePoint2D("CapturePointForMomentum", worldFrame, registry);
          artifacts.add(new YoArtifactPosition("Capture Point For Momentum", yoCapturePoint.getYoX(), yoCapturePoint.getYoY(), GraphicType.BALL, Color.BLUE,
                                               0.01));
 
-         yoProjectionArea = new YoFrameConvexPolygon2d("ProjectionArea", worldFrame, 10, registry);
+         yoProjectionArea = new YoFrameConvexPolygon2D("ProjectionArea", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon("Projection Area", yoProjectionArea, Color.BLUE, false));
 
          artifacts.setVisible(showVizByDefault);

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ManualHandControlPacket" defined in
- * "ManualHandControlPacket_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ManualHandControlPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ManualHandControlPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ManualHandControlPacket" defined in "ManualHandControlPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ManualHandControlPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ManualHandControlPacket_.idl instead.
+*
+*/
 public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ManualHandControlPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ManualHandControlPacket_";
@@ -18,8 +16,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ManualHandControlPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.ManualHandControlPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ManualHandControlPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ManualHandControlPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -58,6 +54,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -72,17 +69,25 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,18 +113,19 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    public static void read(controller_msgs.msg.dds.ManualHandControlPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotSide(cdr.read_type_9());
-
+      	
       data.setIndex(cdr.read_type_6());
-
+      	
       data.setMiddle(cdr.read_type_6());
-
+      	
       data.setThumb(cdr.read_type_6());
-
+      	
       data.setSpread(cdr.read_type_6());
-
+      	
       data.setControlType(cdr.read_type_2());
+      	
 
    }
 
@@ -157,7 +163,6 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       return new controller_msgs.msg.dds.ManualHandControlPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -169,7 +174,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ManualHandControlPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -179,7 +184,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ManualHandControlPacket src, controller_msgs.msg.dds.ManualHandControlPacket dest)
    {
       staticCopy(src, dest);

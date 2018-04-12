@@ -6,7 +6,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -14,6 +13,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class ToeSlippingDetector
 {
@@ -25,7 +25,7 @@ public class ToeSlippingDetector
    private final AlphaFilteredYoVariable toeForceFiltered;
    private final AlphaFilteredYoFrameVector toeLinearVelocityFiltered;
 
-   private final YoFramePoint initialToePosition;
+   private final YoFramePoint3D initialToePosition;
    private final YoDouble toeSlippageDistance;
 
    private final YoDouble forceMagnitudeThreshold;
@@ -51,7 +51,7 @@ public class ToeSlippingDetector
       toeLinearVelocityFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha,
                                                                                               worldFrame);
 
-      initialToePosition = new YoFramePoint(namePrefix + "ToeInitial", worldFrame, registry);
+      initialToePosition = new YoFramePoint3D(namePrefix + "ToeInitial", worldFrame, registry);
       toeSlippageDistance = new YoDouble(namePrefix + "ToeSlippageDistance", registry);
 
       forceMagnitudeThreshold = new YoDouble(namePrefix + "ForceMagnitudeThreshold", registry);

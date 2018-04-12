@@ -443,6 +443,7 @@ public class RobotDescriptionFromSDFLoader
             {
             case "camera":
             case "multicamera":
+            case "depth":
                addCameraMounts(sensor, scsJoint, child);
                break;
             case "imu":

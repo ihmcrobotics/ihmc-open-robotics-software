@@ -12,9 +12,9 @@ import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
@@ -23,7 +23,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final YoDouble timestamp;
-   private final YoFrameOrientation bodyOrientation;
+   private final YoFrameYawPitchRoll bodyOrientation;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames,
@@ -33,7 +33,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       this.preplannedStepProvider = preplannedStepProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
-      this.bodyOrientation = new YoFrameOrientation("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
+      this.bodyOrientation = new YoFrameYawPitchRoll("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
       this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
 
       parentRegistry.addChild(registry);
@@ -49,7 +49,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    {
       double currentTime = timestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = preplannedStepProvider.isStepPlanExpressedInAbsoluteTime();
-      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
+      List<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
 
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)

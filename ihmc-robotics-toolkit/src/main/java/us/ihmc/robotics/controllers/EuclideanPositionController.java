@@ -10,17 +10,17 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class EuclideanPositionController implements PositionController
 {
    private final YoVariableRegistry registry;
 
-   private final YoFrameVector positionError;
-   private final YoFrameVector positionErrorCumulated;
-   private final YoFrameVector velocityError;
+   private final YoFrameVector3D positionError;
+   private final YoFrameVector3D positionErrorCumulated;
+   private final YoFrameVector3D velocityError;
 
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
@@ -34,7 +34,7 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
    private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
-   private final YoFrameVector feedbackLinearAction;
+   private final YoFrameVector3D feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
 
    private final double dt;
@@ -58,15 +58,15 @@ public class EuclideanPositionController implements PositionController
 
       this.gains = gains;
 
-      positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
-      positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
-      velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
+      positionError = new YoFrameVector3D(prefix + "PositionError", bodyFrame, registry);
+      positionErrorCumulated = new YoFrameVector3D(prefix + "PositionErrorCumulated", bodyFrame, registry);
+      velocityError = new YoFrameVector3D(prefix + "LinearVelocityError", bodyFrame, registry);
 
       proportionalTerm = new FrameVector3D(bodyFrame);
       derivativeTerm = new FrameVector3D(bodyFrame);
       integralTerm = new FrameVector3D(bodyFrame);
 
-      feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
+      feedbackLinearAction = new YoFrameVector3D(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
                                                                      dt, feedbackLinearAction);
 

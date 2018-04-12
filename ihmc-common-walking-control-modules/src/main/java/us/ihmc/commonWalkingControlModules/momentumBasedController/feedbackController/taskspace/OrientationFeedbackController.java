@@ -26,8 +26,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -37,6 +35,8 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -52,27 +52,27 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final YoFrameQuaternion yoErrorOrientationCumulated;
 
-   private final YoFrameVector yoDesiredRotationVector;
-   private final YoFrameVector yoCurrentRotationVector;
-   private final YoFrameVector yoErrorRotationVector;
+   private final YoFrameVector3D yoDesiredRotationVector;
+   private final YoFrameVector3D yoCurrentRotationVector;
+   private final YoFrameVector3D yoErrorRotationVector;
 
-   private final YoFrameVector yoErrorRotationVectorIntegrated;
+   private final YoFrameVector3D yoErrorRotationVectorIntegrated;
 
-   private final YoFrameVector yoDesiredAngularVelocity;
-   private final YoFrameVector yoCurrentAngularVelocity;
-   private final YoFrameVector yoErrorAngularVelocity;
-   private final YoFrameVector yoFeedForwardAngularVelocity;
-   private final YoFrameVector yoFeedbackAngularVelocity;
+   private final YoFrameVector3D yoDesiredAngularVelocity;
+   private final YoFrameVector3D yoCurrentAngularVelocity;
+   private final YoFrameVector3D yoErrorAngularVelocity;
+   private final YoFrameVector3D yoFeedForwardAngularVelocity;
+   private final YoFrameVector3D yoFeedbackAngularVelocity;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularVelocity;
 
-   private final YoFrameVector yoDesiredAngularAcceleration;
-   private final YoFrameVector yoFeedForwardAngularAcceleration;
-   private final YoFrameVector yoFeedbackAngularAcceleration;
+   private final YoFrameVector3D yoDesiredAngularAcceleration;
+   private final YoFrameVector3D yoFeedForwardAngularAcceleration;
+   private final YoFrameVector3D yoFeedbackAngularAcceleration;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAcceleration;
-   private final YoFrameVector yoAchievedAngularAcceleration;
+   private final YoFrameVector3D yoAchievedAngularAcceleration;
 
-   private final YoFrameVector yoDesiredAngularTorque;
-   private final YoFrameVector yoFeedbackAngularTorque;
+   private final YoFrameVector3D yoDesiredAngularTorque;
+   private final YoFrameVector3D yoFeedbackAngularTorque;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularTorque;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();

@@ -14,10 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -25,6 +22,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AbstractICPPlanner implements ICPPlannerInterface
@@ -44,17 +44,17 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
-   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCMPPosition", worldFrame, registry);
+   protected final YoFramePoint3D desiredCMPPosition = new YoFramePoint3D(namePrefix + "DesiredCMPPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
-   protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCMPVelocity", worldFrame, registry);
+   protected final YoFrameVector3D desiredCMPVelocity = new YoFrameVector3D(namePrefix + "DesiredCMPVelocity", worldFrame, registry);
    /** Desired position for the Instantaneous Capture Point (ICP) */
-   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredICPPosition", worldFrame, registry);
+   protected final YoFramePoint3D desiredICPPosition = new YoFramePoint3D(namePrefix + "DesiredICPPosition", worldFrame, registry);
    /** Desired velocity for the Instantaneous Capture Point (ICP) */
-   protected final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredICPVelocity", worldFrame, registry);
+   protected final YoFrameVector3D desiredICPVelocity = new YoFrameVector3D(namePrefix + "DesiredICPVelocity", worldFrame, registry);
    /** Desired acceleration for the Instantaneous Capture Point (ICP) */
-   protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredICPAcceleration", worldFrame, registry);
+   protected final YoFrameVector3D desiredICPAcceleration = new YoFrameVector3D(namePrefix + "DesiredICPAcceleration", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM)*/
-   protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   protected final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -118,14 +118,14 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
 
    protected final YoFramePointInMultipleFrames singleSupportInitialICP;
-   protected final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
+   protected final YoFrameVector3D singleSupportInitialICPVelocity = new YoFrameVector3D(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
 
    protected final YoFramePointInMultipleFrames singleSupportFinalICP;
-   protected final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
+   protected final YoFrameVector3D singleSupportFinalICPVelocity = new YoFrameVector3D(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
    protected final YoBoolean requestedHoldPosition = new YoBoolean(namePrefix + "RequestedHoldPosition", registry);
    protected final YoBoolean isHoldingPosition = new YoBoolean(namePrefix + "IsHoldingPosition", registry);
-   protected final YoFramePoint icpPositionToHold = new YoFramePoint(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
+   protected final YoFramePoint3D icpPositionToHold = new YoFramePoint3D(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
 
    protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
    protected final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
@@ -304,7 +304,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public abstract void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack);
+   public abstract void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack);
 
    /** {@inheritDoc} */
    @Override
@@ -383,7 +383,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointPosition(YoFramePoint desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(YoFramePoint3D desiredCapturePointPositionToPack)
    {
       desiredCapturePointPositionToPack.set(desiredICPPosition);
    }
@@ -397,7 +397,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
@@ -419,7 +419,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.set(desiredICPVelocity);
    }
@@ -445,7 +445,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(desiredCMPPosition);
    }
    
-   public void getDesiredCentroidalMomentumPivotPosition(YoFramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(YoFramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPositionToPack.set(desiredCMPPosition);
    }
@@ -464,7 +464,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
 
-   public void getDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(YoFrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocityToPack.set(desiredCMPVelocity);
    }

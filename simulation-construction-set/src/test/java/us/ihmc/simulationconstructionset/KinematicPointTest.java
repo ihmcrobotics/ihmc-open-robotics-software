@@ -10,8 +10,8 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 
 
@@ -158,7 +158,7 @@ public class KinematicPointTest
 	@Test(timeout=300000)
 	public void testGetYoPosition()
 	{
-		YoFramePoint yoPosition = kinematicPoint.getYoPosition();
+		YoFramePoint3D yoPosition = kinematicPoint.getYoPosition();
 		String frameName = yoPosition.getReferenceFrame().getName();
 
 		assertEquals("( 0.000,  0.000,  0.000 )-" + frameName, yoPosition.toString());
@@ -170,7 +170,7 @@ public class KinematicPointTest
 	@Test(timeout=300000)
 	public void testGetYoVelocity()
 	{
-		YoFrameVector yoVelocity = kinematicPoint.getYoVelocity();
+		YoFrameVector3D yoVelocity = kinematicPoint.getYoVelocity();
 		String frameName = yoVelocity.getReferenceFrame().getName();
 		
       assertEquals("( 0.000,  0.000,  0.000 )-" + frameName, yoVelocity.toString());

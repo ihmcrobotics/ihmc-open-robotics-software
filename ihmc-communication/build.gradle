@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.11"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -36,8 +36,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.6.6-alpha"
-   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.5.9-alpha"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.6.9-alpha"
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.5.13-alpha"
    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 }
 

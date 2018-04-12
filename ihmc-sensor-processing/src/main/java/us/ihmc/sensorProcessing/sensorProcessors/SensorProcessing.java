@@ -35,8 +35,6 @@ import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -61,6 +59,8 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
@@ -174,18 +174,18 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final LinkedHashMap<OneDoFJoint, YoDouble> inputJointTaus = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> inputOrientations = new LinkedHashMap<>();
-   private final LinkedHashMap<IMUDefinition, YoFrameVector> inputAngularVelocities = new LinkedHashMap<>();
-   private final LinkedHashMap<IMUDefinition, YoFrameVector> inputLinearAccelerations = new LinkedHashMap<>();
+   private final LinkedHashMap<IMUDefinition, YoFrameVector3D> inputAngularVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<IMUDefinition, YoFrameVector3D> inputLinearAccelerations = new LinkedHashMap<>();
 
-   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> inputForces = new LinkedHashMap<>();
-   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> inputTorques = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> inputForces = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> inputTorques = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> intermediateOrientations = new LinkedHashMap<>();
-   private final LinkedHashMap<IMUDefinition, YoFrameVector> intermediateAngularVelocities = new LinkedHashMap<>();
-   private final LinkedHashMap<IMUDefinition, YoFrameVector> intermediateLinearAccelerations = new LinkedHashMap<>();
+   private final LinkedHashMap<IMUDefinition, YoFrameVector3D> intermediateAngularVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<IMUDefinition, YoFrameVector3D> intermediateLinearAccelerations = new LinkedHashMap<>();
 
-   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateForces = new LinkedHashMap<>();
-   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateTorques = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> intermediateForces = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> intermediateTorques = new LinkedHashMap<>();
 
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointVelocities = new LinkedHashMap<>();
@@ -303,14 +303,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(RAW);
          suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, -1);
-         YoFrameVector rawAngularVelocity = new YoFrameVector(prefix, suffix, sensorFrame, registry);
+         YoFrameVector3D rawAngularVelocity = new YoFrameVector3D(prefix, suffix, sensorFrame, registry);
          inputAngularVelocities.put(imuDefinition, rawAngularVelocity);
          intermediateAngularVelocities.put(imuDefinition, rawAngularVelocity);
          processedAngularVelocities.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
 
          prefix = IMU_LINEAR_ACCELERATION.getProcessorNamePrefix(RAW);
          suffix = IMU_LINEAR_ACCELERATION.getProcessorNameSuffix(imuName, -1);
-         YoFrameVector rawLinearAcceleration = new YoFrameVector(prefix, suffix, sensorFrame, registry);
+         YoFrameVector3D rawLinearAcceleration = new YoFrameVector3D(prefix, suffix, sensorFrame, registry);
          inputLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
@@ -328,14 +328,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          prefix = FORCE_SENSOR.getProcessorNamePrefix(RAW);
          suffix = FORCE_SENSOR.getProcessorNameSuffix(sensorName, -1);
-         YoFrameVector rawForce = new YoFrameVector(prefix, suffix, sensorFrame, registry);
+         YoFrameVector3D rawForce = new YoFrameVector3D(prefix, suffix, sensorFrame, registry);
          inputForces.put(forceSensorDefinition, rawForce);
          intermediateForces.put(forceSensorDefinition, rawForce);
          processedForces.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
 
          prefix = TORQUE_SENSOR.getProcessorNamePrefix(RAW);
          suffix = TORQUE_SENSOR.getProcessorNameSuffix(sensorName, -1);
-         YoFrameVector rawTorque = new YoFrameVector(prefix, suffix, sensorFrame, registry);
+         YoFrameVector3D rawTorque = new YoFrameVector3D(prefix, suffix, sensorFrame, registry);
          inputTorques.put(forceSensorDefinition, rawTorque);
          intermediateTorques.put(forceSensorDefinition, rawTorque);
          processedTorques.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
@@ -479,7 +479,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
-      LinkedHashMap<IMUDefinition, YoFrameVector> intermediateIMUVectorTypeSignals = getIntermediateIMUVectorTypeSignals(sensorType);
+      LinkedHashMap<IMUDefinition, YoFrameVector3D> intermediateIMUVectorTypeSignals = getIntermediateIMUVectorTypeSignals(sensorType);
       LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedIMUVectorTypeSignals = getProcessedIMUVectorTypeSignals(sensorType);
 
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
@@ -490,7 +490,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (sensorsToIgnore.contains(imuName))
             continue;
 
-         YoFrameVector intermediateSignal = intermediateIMUVectorTypeSignals.get(imuDefinition);
+         YoFrameVector3D intermediateSignal = intermediateIMUVectorTypeSignals.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedIMUVectorTypeSignals.get(imuDefinition);
          String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
          int newProcessorID = processors.size();
@@ -510,7 +510,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
-      LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateForceSensorSignals = getIntermediateForceSensorSignals(sensorType);
+      LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> intermediateForceSensorSignals = getIntermediateForceSensorSignals(sensorType);
       LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedForceSensorSignals = getProcessedForceSensorSignals(sensorType);
 
       for (int i = 0; i < forceSensorDefinitions.size(); i++)
@@ -521,7 +521,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (sensorsToIgnore.contains(sensorName))
             continue;
 
-         YoFrameVector intermediateSignal = intermediateForceSensorSignals.get(forceSensorDefinition);
+         YoFrameVector3D intermediateSignal = intermediateForceSensorSignals.get(forceSensorDefinition);
          List<ProcessingYoVariable> processors = processedForceSensorSignals.get(forceSensorDefinition);
          String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
          int newProcessorID = processors.size();
@@ -1246,7 +1246,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (sensorToIgnoreList.contains(imuName))
             continue;
 
-         YoFrameVector intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
+         YoFrameVector3D intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedAngularVelocities.get(imuDefinition);
          String prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(BACKLASH);
          int newProcessorID = processors.size();
@@ -1300,8 +1300,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          IMUDefinition imuToCheck = imuSensorDefinitions.get(i);
          YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
-         YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
-         YoFrameVector linearAcceleration = intermediateLinearAccelerations.get(imuToCheck);
+         YoFrameVector3D angularVelocity = intermediateAngularVelocities.get(imuToCheck);
+         YoFrameVector3D linearAcceleration = intermediateLinearAccelerations.get(imuToCheck);
          IMUSensorValidityChecker validityChecker = new IMUSensorValidityChecker(imuToCheck, orientation, angularVelocity, linearAcceleration, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
@@ -1319,8 +1319,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       for (int i = 0; i < forceSensorDefinitions.size(); i++)
       {
          ForceSensorDefinition wrenchSensorToCheck = forceSensorDefinitions.get(i);
-         YoFrameVector forceMeasurement = intermediateForces.get(wrenchSensorToCheck);
-         YoFrameVector torqueMeasurement = intermediateTorques.get(wrenchSensorToCheck);
+         YoFrameVector3D forceMeasurement = intermediateForces.get(wrenchSensorToCheck);
+         YoFrameVector3D torqueMeasurement = intermediateTorques.get(wrenchSensorToCheck);
          WrenchSensorValidityChecker validityChecker = new WrenchSensorValidityChecker(wrenchSensorToCheck, forceMeasurement, torqueMeasurement, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
@@ -1364,7 +1364,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
          ReferenceFrame referenceFrame = imuToCheck.getRigidBody().getBodyFixedFrame();
          YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
-         YoFrameVector angularVelocity = intermediateAngularVelocities.get(imuToCheck);
+         YoFrameVector3D angularVelocity = intermediateAngularVelocities.get(imuToCheck);
          OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, referenceFrame, updateDT, registry);
          consistencyCheckerMap.put(imuToCheck.getName(), consistencyChecker);
          diagnosticModules.add(consistencyChecker);
@@ -1567,7 +1567,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   private LinkedHashMap<ForceSensorDefinition, YoFrameVector> getIntermediateForceSensorSignals(SensorType sensorType)
+   private LinkedHashMap<ForceSensorDefinition, YoFrameVector3D> getIntermediateForceSensorSignals(SensorType sensorType)
    {
       switch (sensorType)
       {
@@ -1593,7 +1593,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   private LinkedHashMap<IMUDefinition, YoFrameVector> getIntermediateIMUVectorTypeSignals(SensorType sensorType)
+   private LinkedHashMap<IMUDefinition, YoFrameVector3D> getIntermediateIMUVectorTypeSignals(SensorType sensorType)
    {
       switch (sensorType)
       {

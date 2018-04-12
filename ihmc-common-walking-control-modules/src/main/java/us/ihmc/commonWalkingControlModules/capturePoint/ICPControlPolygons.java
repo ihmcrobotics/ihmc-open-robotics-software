@@ -10,10 +10,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class ICPControlPolygons
 {
@@ -39,8 +39,8 @@ public class ICPControlPolygons
    private final FrameConvexPolygon2D controlPolygonInMidFeetZUp = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D controlPolygonInWorld = new FrameConvexPolygon2D();
 
-   private final YoFrameConvexPolygon2d controlPolygonViz;
-   private final SideDependentList<YoFrameConvexPolygon2d> controlFootPolygonsViz = new SideDependentList<>();
+   private final YoFrameConvexPolygon2D controlPolygonViz;
+   private final SideDependentList<YoFrameConvexPolygon2D> controlFootPolygonsViz = new SideDependentList<>();
 
    private final ICPControlPlane icpControlPlane;
 
@@ -49,7 +49,7 @@ public class ICPControlPolygons
       this.icpControlPlane = icpControlPlane;
       this.midFeetZUp = midFeetZUpFrame;
 
-      controlPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
+      controlPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
@@ -62,7 +62,7 @@ public class ICPControlPolygons
          footControlPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2d controlFootPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "controlFootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
          controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
          YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon", controlFootPolygonViz, feetColors.get(robotSide), false);
          artifactList.add(footPolygonArtifact);
@@ -153,7 +153,7 @@ public class ICPControlPolygons
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameConvexPolygon2d footPolygonViz = controlFootPolygonsViz.get(robotSide);
+         YoFrameConvexPolygon2D footPolygonViz = controlFootPolygonsViz.get(robotSide);
          FrameConvexPolygon2D footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
          if (footPolygon.isEmpty())
             footPolygonViz.clear();

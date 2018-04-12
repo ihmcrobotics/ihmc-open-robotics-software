@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -15,7 +15,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 {
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
-   private final YoFramePoint2d yoResolvedCoP;
+   private final YoFramePoint2D yoResolvedCoP;
    private final YoBoolean touchdownDetected;
    private final YoBoolean trustTouchdownDetectors;
    private boolean touchdownDetectorsUpdated = false;
@@ -26,7 +26,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
       this.foot = foot;
       this.totalRobotWeight = totalRobotWeight;
-      yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
    }

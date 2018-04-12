@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "SnapFootstepPacket" defined in "SnapFootstepPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from SnapFootstepPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * SnapFootstepPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "SnapFootstepPacket" defined in "SnapFootstepPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from SnapFootstepPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SnapFootstepPacket_.idl instead.
+*
+*/
 public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SnapFootstepPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SnapFootstepPacket_";
@@ -26,8 +24,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.SnapFootstepPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.SnapFootstepPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -45,16 +42,13 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+          current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -70,17 +64,20 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getFootstepData().size(); ++i0)
+      for(int i0 = 0; i0 < data.getFootstepData().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepData().get(i0), current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepData().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getFootstepOrder().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getFlag().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -89,30 +86,27 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getFootstepData().size() <= 100)
-         cdr.write_type_e(data.getFootstepData());
-      else
-         throw new RuntimeException("footstep_data field exceeds the maximum length");
+      if(data.getFootstepData().size() <= 100)
+      cdr.write_type_e(data.getFootstepData());else
+          throw new RuntimeException("footstep_data field exceeds the maximum length");
 
-      if (data.getFootstepOrder().size() <= 100)
-         cdr.write_type_e(data.getFootstepOrder());
-      else
-         throw new RuntimeException("footstep_order field exceeds the maximum length");
+      if(data.getFootstepOrder().size() <= 100)
+      cdr.write_type_e(data.getFootstepOrder());else
+          throw new RuntimeException("footstep_order field exceeds the maximum length");
 
-      if (data.getFlag().size() <= 100)
-         cdr.write_type_e(data.getFlag());
-      else
-         throw new RuntimeException("flag field exceeds the maximum length");
+      if(data.getFlag().size() <= 100)
+      cdr.write_type_e(data.getFlag());else
+          throw new RuntimeException("flag field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.SnapFootstepPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getFootstepData());
-      cdr.read_type_e(data.getFootstepOrder());
-      cdr.read_type_e(data.getFlag());
+      	
+      cdr.read_type_e(data.getFootstepData());	
+      cdr.read_type_e(data.getFootstepOrder());	
+      cdr.read_type_e(data.getFlag());	
 
    }
 
@@ -144,7 +138,6 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return new controller_msgs.msg.dds.SnapFootstepPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -156,7 +149,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.SnapFootstepPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -166,7 +159,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.SnapFootstepPacket src, controller_msgs.msg.dds.SnapFootstepPacket dest)
    {
       staticCopy(src, dest);

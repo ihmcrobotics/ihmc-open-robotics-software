@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -35,7 +35,7 @@ public class VirtualHoist implements RobotController
    private final YoDouble hoistStiffness = new YoDouble("hoistStiffness", registry);
    private final YoDouble hoistDamping = new YoDouble("hoistDamping", registry);
 
-   private final YoFramePoint teepeeLocation = new YoFramePoint("teepeeLocation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D teepeeLocation = new YoFramePoint3D("teepeeLocation", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble q_x, q_y, q_z;
 

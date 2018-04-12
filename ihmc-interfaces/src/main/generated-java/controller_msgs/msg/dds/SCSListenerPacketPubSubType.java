@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "SCSListenerPacket" defined in "SCSListenerPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from SCSListenerPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit SCSListenerPacket_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "SCSListenerPacket" defined in "SCSListenerPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from SCSListenerPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SCSListenerPacket_.idl instead.
+*
+*/
 public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SCSListenerPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SCSListenerPacket_";
@@ -46,6 +44,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -60,7 +59,10 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -76,8 +78,9 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    public static void read(controller_msgs.msg.dds.SCSListenerPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setIsStopped(cdr.read_type_7());
+      	
 
    }
 
@@ -105,7 +108,6 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return new controller_msgs.msg.dds.SCSListenerPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -117,7 +119,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.SCSListenerPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -127,7 +129,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.SCSListenerPacket src, controller_msgs.msg.dds.SCSListenerPacket dest)
    {
       staticCopy(src, dest);

@@ -43,13 +43,13 @@ import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
@@ -78,7 +78,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
    private final boolean visualizing;
    private static final int bodyPathPointsForVisualization = 100;
-   private final List<YoFramePoint> bodyPathPoints = new ArrayList<>();
+   private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
    public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
                                           YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -111,7 +111,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
-         YoFramePoint point = new YoFramePoint("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D point = new YoFramePoint3D("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
          point.setToNaN();
          bodyPathPoints.add(point);
          YoGraphicPosition pointVisualization = new YoGraphicPosition("BodyPathPoint" + i, point, 0.02, YoAppearance.Yellow());

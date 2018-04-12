@@ -40,7 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +57,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
@@ -66,7 +66,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
+   private SideDependentList<YoFrameConvexPolygon2D> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
    private ContactPointController contactPointController;
@@ -406,9 +406,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      supportPolygons = new SideDependentList<YoFrameConvexPolygon2d>();
-      supportPolygons.set(RobotSide.LEFT, new YoFrameConvexPolygon2d("FootPolygonLeft", "", worldFrame, 4, registry));
-      supportPolygons.set(RobotSide.RIGHT, new YoFrameConvexPolygon2d("FootPolygonRight", "", worldFrame, 4, registry));
+      supportPolygons = new SideDependentList<YoFrameConvexPolygon2D>();
+      supportPolygons.set(RobotSide.LEFT, new YoFrameConvexPolygon2D("FootPolygonLeft", "", worldFrame, 4, registry));
+      supportPolygons.set(RobotSide.RIGHT, new YoFrameConvexPolygon2D("FootPolygonRight", "", worldFrame, 4, registry));
 
       footContactsInAnkleFrame = new SideDependentList<ArrayList<Point2D>>();
       footContactsInAnkleFrame.set(RobotSide.LEFT, null);

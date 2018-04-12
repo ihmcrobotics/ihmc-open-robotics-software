@@ -181,7 +181,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the high weight to use for the regularization of the rate of change of contact forces.
     */
-   double getRhoRateHighWeight();
+   default double getRhoRateHighWeight()
+   {
+      return getRhoRateDefaultWeight();
+   }
 
    /**
     * Gets the weight specifying how much deviation of the desired center of pressure (CoP) off of
@@ -227,7 +230,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the high regularization weight to use for center of pressure variations.
     */
-   Vector2D getCoPRateHighWeight();
+   default Vector2D getCoPRateHighWeight()
+   {
+      return getCoPRateDefaultWeight();
+   }
 
    /**
     * Gets the number of basis vectors to use per contact point.
@@ -296,7 +302,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the size of the vector rho.
     */
-   int getRhoSize();
+   default int getRhoSize()
+   {
+      return getNumberOfContactableBodies() * getNumberOfContactPointsPerContactableBody() * getNumberOfBasisVectorsPerContactPoint();
+   }
 
    /**
     * Returns whether or not the optimization should consider the rho variable when its associated

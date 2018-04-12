@@ -25,13 +25,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
 {
@@ -42,24 +42,24 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
-   private final YoFramePoint yoDesiredPosition;
-   private final YoFramePoint yoCurrentPosition;
-   private final YoFrameVector yoErrorPosition;
+   private final YoFramePoint3D yoDesiredPosition;
+   private final YoFramePoint3D yoCurrentPosition;
+   private final YoFrameVector3D yoErrorPosition;
 
-   private final YoFrameVector yoErrorPositionIntegrated;
+   private final YoFrameVector3D yoErrorPositionIntegrated;
 
-   private final YoFrameVector yoDesiredLinearVelocity;
-   private final YoFrameVector yoCurrentLinearVelocity;
-   private final YoFrameVector yoErrorLinearVelocity;
-   private final YoFrameVector yoFeedForwardLinearVelocity;
-   private final YoFrameVector yoFeedbackLinearVelocity;
+   private final YoFrameVector3D yoDesiredLinearVelocity;
+   private final YoFrameVector3D yoCurrentLinearVelocity;
+   private final YoFrameVector3D yoErrorLinearVelocity;
+   private final YoFrameVector3D yoFeedForwardLinearVelocity;
+   private final YoFrameVector3D yoFeedbackLinearVelocity;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearVelocity;
 
-   private final YoFrameVector yoDesiredLinearAcceleration;
-   private final YoFrameVector yoFeedForwardLinearAcceleration;
-   private final YoFrameVector yoFeedbackLinearAcceleration;
+   private final YoFrameVector3D yoDesiredLinearAcceleration;
+   private final YoFrameVector3D yoFeedForwardLinearAcceleration;
+   private final YoFrameVector3D yoFeedbackLinearAcceleration;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
-   private final YoFrameVector yoAchievedLinearAcceleration;
+   private final YoFrameVector3D yoAchievedLinearAcceleration;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FramePoint3D currentPosition = new FramePoint3D();

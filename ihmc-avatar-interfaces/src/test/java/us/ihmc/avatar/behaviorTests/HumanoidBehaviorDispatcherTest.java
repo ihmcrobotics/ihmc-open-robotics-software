@@ -58,7 +58,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -74,6 +73,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
@@ -339,7 +339,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       YoEnum<RobotSide> supportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class);
       supportLeg.set(RobotSide.LEFT);
 
-      YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
+      YoFrameConvexPolygon2D yoSupportPolygon = new YoFrameConvexPolygon2D("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
 
       WholeBodyControllerParameters wholeBodyControllerParameters = this.getRobotModel();
 

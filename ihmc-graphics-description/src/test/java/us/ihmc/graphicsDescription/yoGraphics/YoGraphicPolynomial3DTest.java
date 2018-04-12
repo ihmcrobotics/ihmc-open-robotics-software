@@ -12,8 +12,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 
@@ -31,7 +31,7 @@ public class YoGraphicPolynomial3DTest
          YoVariableRegistry registry = new YoVariableRegistry("writerRegistry");
          int numberOfPolynomials = random.nextInt(20) + 3;
 
-         YoFramePoseUsingQuaternions poseToPolynomialFrame = new YoFramePoseUsingQuaternions(name + "Pose", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePose3D poseToPolynomialFrame = new YoFramePose3D(name + "Pose", ReferenceFrame.getWorldFrame(), registry);
 
          List<YoPolynomial3D> yoPolynomial3Ds = new ArrayList<>();
          List<YoDouble> waypointTimes = new ArrayList<>();

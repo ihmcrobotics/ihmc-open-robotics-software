@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "MessageCollection" defined in "MessageCollection_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from MessageCollection_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit MessageCollection_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "MessageCollection" defined in "MessageCollection_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from MessageCollection_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit MessageCollection_.idl instead.
+*
+*/
 public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MessageCollection>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MessageCollection_";
@@ -44,8 +42,8 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -61,8 +59,11 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getSequences().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -71,18 +72,17 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getSequences().size() <= 100)
-         cdr.write_type_e(data.getSequences());
-      else
-         throw new RuntimeException("sequences field exceeds the maximum length");
+      if(data.getSequences().size() <= 100)
+      cdr.write_type_e(data.getSequences());else
+          throw new RuntimeException("sequences field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getSequences());
+      	
+      cdr.read_type_e(data.getSequences());	
 
    }
 
@@ -110,7 +110,6 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return new controller_msgs.msg.dds.MessageCollection();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -122,7 +121,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -132,7 +131,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.MessageCollection src, controller_msgs.msg.dds.MessageCollection dest)
    {
       staticCopy(src, dest);

@@ -54,7 +54,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingChestTrajectoryMessage.setDestination(PacketDestination.UI);
+         outgoingChestTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
          sendPacket(outgoingChestTrajectoryMessage);
          sendPacketToController(outgoingChestTrajectoryMessage);
          hasPacketBeenSent.set(true);

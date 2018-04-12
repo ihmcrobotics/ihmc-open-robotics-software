@@ -12,13 +12,13 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 /**
  * This class allows constructs RemoteYoGraphic objects from parsed
@@ -77,16 +77,16 @@ public class YoGraphicFactory
          ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
          int i = 0;
          YoInteger yoNumVertices = (YoInteger) vars[i++];
-         ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
+         ArrayList<YoFramePoint2D> yoFramePoints = new ArrayList<YoFramePoint2D>();
          while (i < vars.length - 6)
          {
-            yoFramePoints.add(new YoFramePoint2d((YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame));
+            yoFramePoints.add(new YoFramePoint2D((YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame));
          }
 
-         YoFrameConvexPolygon2d convexPolygon2d = new YoFrameConvexPolygon2d(yoFramePoints, yoNumVertices, referenceFrame);
+         YoFrameConvexPolygon2D convexPolygon2d = new YoFrameConvexPolygon2D(yoFramePoints, yoNumVertices, referenceFrame);
 
-         YoFramePoint framePoint = new YoFramePoint((YoDouble) vars[i++], (YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame);
-         YoFrameOrientation frameOrientation = new YoFrameOrientation((YoDouble) vars[i++], (YoDouble) vars[i++], (YoDouble) vars[i++],
+         YoFramePoint3D framePoint = new YoFramePoint3D((YoDouble) vars[i++], (YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame);
+         YoFrameYawPitchRoll frameOrientation = new YoFrameYawPitchRoll((YoDouble) vars[i++], (YoDouble) vars[i++], (YoDouble) vars[i++],
                referenceFrame);
 
          return new YoGraphicPolygon(name, convexPolygon2d, framePoint, frameOrientation, consts[0], appearance);
@@ -102,7 +102,7 @@ public class YoGraphicFactory
 
       case LINE_SEGMENT_2D_ARTIFACT:
 
-         YoFrameLineSegment2d segment = new YoFrameLineSegment2d((YoDouble) vars[0], (YoDouble) vars[1], (YoDouble) vars[2], (YoDouble) vars[3],
+         YoFrameLineSegment2D segment = new YoFrameLineSegment2D((YoDouble) vars[0], (YoDouble) vars[1], (YoDouble) vars[2], (YoDouble) vars[3],
                ReferenceFrame.getWorldFrame());
 
          return new YoArtifactLineSegment2d(name, segment, appearance.getColor().get());
@@ -112,13 +112,13 @@ public class YoGraphicFactory
          ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
          int i = 0;
          YoInteger yoNumVertices = (YoInteger) vars[i++];
-         ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
+         ArrayList<YoFramePoint2D> yoFramePoints = new ArrayList<YoFramePoint2D>();
          while (i < vars.length)
          {
-            yoFramePoints.add(new YoFramePoint2d((YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame));
+            yoFramePoints.add(new YoFramePoint2D((YoDouble) vars[i++], (YoDouble) vars[i++], referenceFrame));
          }
 
-         YoFrameConvexPolygon2d convexPolygon2d = new YoFrameConvexPolygon2d(yoFramePoints, yoNumVertices, referenceFrame);
+         YoFrameConvexPolygon2D convexPolygon2d = new YoFrameConvexPolygon2D(yoFramePoints, yoNumVertices, referenceFrame);
 
          return new YoArtifactPolygon(name, convexPolygon2d, appearance.getColor().get(), consts[0] > 0);
       }

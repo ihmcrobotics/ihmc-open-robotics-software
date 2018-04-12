@@ -5,12 +5,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 
-public class RateLimitedYoFrameVector2d extends YoFrameVector2d
+public class RateLimitedYoFrameVector2d extends YoFrameVector2D
 {
    private final RateLimitedYoVariable x, y;
 
@@ -46,7 +46,7 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
 
 
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           double maxRate, double dt, YoFrameVector2d unfilteredVector)
+           double maxRate, double dt, YoFrameVector2D unfilteredVector)
    {
       RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
       RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);
@@ -58,7 +58,7 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
 
 
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble maxRate, double dt, YoFrameVector2d unfilteredVector)
+           YoDouble maxRate, double dt, YoFrameVector2D unfilteredVector)
    {
       RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
       RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);

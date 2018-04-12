@@ -4,6 +4,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -15,6 +18,12 @@ import java.io.IOException;
 public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalkingOverRampsTest
 {
    @Override
+   public double getDesiredWalkingVelocity()
+   {
+      return 0.75;
+   }
+
+   @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
       return new GenericQuadrupedTestFactory();
@@ -24,7 +33,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    @Test(timeout = 1200000)
    public void testWalkingDownSlope() throws IOException
    {
-      super.testWalkingDownSlope(new GenericQuadrupedDefaultInitialPosition());
+      super.testWalkingDownSlope(new InitialWalkDownSlopePosition());
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 431.3)
@@ -38,7 +47,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    @Test(timeout = 980000)
    public void testWalkingUpSlope() throws IOException
    {
-      super.testWalkingUpSlope(new GenericQuadrupedDefaultInitialPosition());
+      super.testWalkingUpSlope(new InitialWalkUpSlopePosition());
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 405.9)
@@ -46,5 +55,35 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       super.testWalkingOverAggressiveRamps(0.575);
+   }
+
+   private class InitialWalkDownSlopePosition extends GenericQuadrupedDefaultInitialPosition
+   {
+      @Override
+      public Point3D getInitialBodyPosition()
+      {
+         return new Point3D(0.0, 0.0, 0.05);
+      }
+
+      @Override
+      public QuaternionReadOnly getInitialBodyOrientation()
+      {
+         return new Quaternion(0.0, 0.2, 0.0);
+      }
+   }
+
+   private class InitialWalkUpSlopePosition extends GenericQuadrupedDefaultInitialPosition
+   {
+      @Override
+      public Point3D getInitialBodyPosition()
+      {
+         return new Point3D(0.0, 0.0, 0.1);
+      }
+
+      @Override
+      public QuaternionReadOnly getInitialBodyOrientation()
+      {
+         return new Quaternion(0.0, -0.1, 0.0);
+      }
    }
 }

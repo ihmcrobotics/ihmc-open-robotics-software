@@ -30,9 +30,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -1890,7 +1890,7 @@ public class PolygonWigglingTest
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2D polygon, Color color)
    {
-      YoFrameConvexPolygon2d yoPlanePolygon = new YoFrameConvexPolygon2d(name + "Polygon", worldFrame, 10, registry);
+      YoFrameConvexPolygon2D yoPlanePolygon = new YoFrameConvexPolygon2D(name + "Polygon", worldFrame, 10, registry);
       artifacts.add(new YoArtifactPolygon(name, yoPlanePolygon , color, false));
       yoPlanePolygon.set(polygon);
    }

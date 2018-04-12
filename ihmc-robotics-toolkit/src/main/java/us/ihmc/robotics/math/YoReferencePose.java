@@ -5,13 +5,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 
 public class YoReferencePose extends ReferenceFrame
 {
-   private final YoFramePose yoFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoFramePose;
 
    //Below are used for interpolation only
    private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
@@ -26,7 +26,7 @@ public class YoReferencePose extends ReferenceFrame
    public YoReferencePose(String frameName, ReferenceFrame parentFrame, YoVariableRegistry registry)
    {
       super(frameName, parentFrame);
-      yoFramePose = new YoFramePose(frameName + "_", this, registry);
+      yoFramePose = new YoFramePoseUsingYawPitchRoll(frameName + "_", this, registry);
    }
 
    @Override
@@ -34,7 +34,7 @@ public class YoReferencePose extends ReferenceFrame
    {
       yoFramePose.getOrientation().getQuaternion(rotation);
       transformToParent.setRotation(rotation);
-      YoFramePoint yoFramePoint = yoFramePose.getPosition();
+      YoFramePoint3D yoFramePoint = yoFramePose.getPosition();
       transformToParent.setTranslation(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
    }
 

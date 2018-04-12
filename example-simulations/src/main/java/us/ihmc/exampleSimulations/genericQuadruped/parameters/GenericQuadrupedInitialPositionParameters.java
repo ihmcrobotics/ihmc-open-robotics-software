@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 
-public abstract class GenericQuadrupedInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
+public abstract class GenericQuadrupedInitialPositionParameters implements QuadrupedInitialPositionParameters
 {
    private static final boolean INVERT_REAR_LEGS = true;
 

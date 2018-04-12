@@ -39,8 +39,6 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,6 +52,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -70,7 +70,7 @@ public class LIPMDDPCalculatorVisualizer
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
-   private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private final SimulationConstructionSet scs;
@@ -78,12 +78,12 @@ public class LIPMDDPCalculatorVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
 
-   private final YoFramePose yoNextFootstepPose = new YoFramePose("nextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextFootstepPose = new YoFramePose("nextNextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextNextFootstepPose = new YoFramePose("nextNextNextFootstepPose", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoNextFootstepPolygon = new YoFrameConvexPolygon2d("nextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -132,7 +132,7 @@ public class LIPMDDPCalculatorVisualizer
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         currentFootPoses.put(robotSide, new YoFramePose(sidePrefix + "FootPose", worldFrame, registry));
+         currentFootPoses.put(robotSide, new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootPose", worldFrame, registry));
 
          Graphics3DObject footGraphics = new Graphics3DObject();
          AppearanceDefinition footColor = robotSide == RobotSide.LEFT ? YoAppearance.Color(defaultLeftColor) : YoAppearance.Color(defaultRightColor);
@@ -348,7 +348,7 @@ public class LIPMDDPCalculatorVisualizer
    private final FrameConvexPolygon2D tempFootstepPolygonForShrinking = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
-   private void updateFootstepViz(Footstep footstep, YoFrameConvexPolygon2d convexPolygon2d, YoFramePose framePose, double polygonShrinkAmount)
+   private void updateFootstepViz(Footstep footstep, YoFrameConvexPolygon2D convexPolygon2d, YoFramePoseUsingYawPitchRoll framePose, double polygonShrinkAmount)
    {
       footstep.setPredictedContactPoints(contactableFeet.get(footstep.getRobotSide()).getContactPoints2d());
       tempFootstepPolygonForShrinking.setIncludingFrame(footstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));
@@ -358,7 +358,7 @@ public class LIPMDDPCalculatorVisualizer
       convexPolygon2d.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(footstep.getSoleReferenceFrame());
-      framePose.setAndMatchFrame(nextNextNextFootstepPose);
+      framePose.setMatchingFrame(nextNextNextFootstepPose);
 
    }
 

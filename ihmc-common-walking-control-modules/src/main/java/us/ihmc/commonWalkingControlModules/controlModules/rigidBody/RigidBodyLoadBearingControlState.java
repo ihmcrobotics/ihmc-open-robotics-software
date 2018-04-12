@@ -24,8 +24,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -34,6 +32,8 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
@@ -61,8 +61,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final FrameVector3D previousContactNormal = new FrameVector3D();
    private double previousCoefficientOfFriction;
 
-   private final YoFramePoint contactPoint;
-   private final YoFramePoint contactPointInWorld;
+   private final YoFramePoint3D contactPoint;
+   private final YoFramePoint3D contactPointInWorld;
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
@@ -70,7 +70,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    private final ContactablePlaneBody contactableBody;
    private final YoDouble coefficientOfFriction;
-   private final YoFrameVector contactNormal;
+   private final YoFrameVector3D contactNormal;
    private final ReferenceFrame contactFrame;
 
    private final RigidBodyTransform bodyToJointTransform = new RigidBodyTransform();
@@ -107,9 +107,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       String bodyName = bodyToControl.getName();
       coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
-      contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
-      contactPoint = new YoFramePoint(bodyName + "ContactPoint", contactFrame, parentRegistry);
-      contactPointInWorld = new YoFramePoint(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);
+      contactNormal = new YoFrameVector3D(bodyName + "ContactNormal", worldFrame, parentRegistry);
+      contactPoint = new YoFramePoint3D(bodyName + "ContactPoint", contactFrame, parentRegistry);
+      contactPointInWorld = new YoFramePoint3D(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);
       desiredContactFrame = new PoseReferenceFrame(bodyName + "DesiredContactFrame", worldFrame);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);

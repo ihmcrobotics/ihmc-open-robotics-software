@@ -13,15 +13,16 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 {
@@ -40,7 +41,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final YoDouble timestamp, previousTimestamp;
 
    private final YoDouble bodyYaw;
-   private final YoFrameOrientation bodyOrientation;
+   private final YoFrameYawPitchRoll bodyOrientation;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final EndDependentList<YoQuadrupedTimedStep> xGaitCurrentSteps;
    private final ArrayList<YoQuadrupedTimedStep> xGaitPreviewSteps;
@@ -66,7 +67,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       this.previousTimestamp = new YoDouble("previousTimestamp", registry);
 
       this.bodyYaw = new YoDouble("bodyYaw", registry);
-      this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
+      this.bodyOrientation = new YoFrameYawPitchRoll("bodyOrientation", worldFrame, registry);
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
       this.xGaitCurrentSteps = new EndDependentList<>();
       for (RobotEnd robotEnd : RobotEnd.values)
@@ -201,7 +202,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    }
 
    @Override
-   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
+   public List<? extends QuadrupedTimedStep> getSteps()
    {
       return stepSequence;
    }
