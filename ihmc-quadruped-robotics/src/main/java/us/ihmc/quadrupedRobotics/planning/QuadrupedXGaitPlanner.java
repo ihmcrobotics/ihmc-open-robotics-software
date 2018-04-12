@@ -109,7 +109,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
-         Vector3D planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+         Vector3D planarVelocity, double currentTime, double currentYaw, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -126,7 +126,7 @@ public class QuadrupedXGaitPlanner
          xGaitRectangle.get(robotQuadrant).setY(robotQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth() / 2.0));
          xGaitRectangle.get(robotQuadrant).setZ(0);
       }
-      xGaitRectanglePoseAtSoS.setPosition(0, 0, 0);
+      xGaitRectanglePoseAtSoS.setPosition(0, 0, currentHeight);
       xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(currentYaw, 0, 0);
 
       // compute step quadrants and time intervals
@@ -194,7 +194,8 @@ public class QuadrupedXGaitPlanner
          {
             plannedSteps.get(i).getGoalPosition(goalPosition);
             goalPosition.changeFrame(worldFrame);
-            goalPosition.add(goalPositionAdjustment);
+            goalPosition.addX(goalPositionAdjustment.getX());
+            goalPosition.addY(goalPositionAdjustment.getY());
             plannedSteps.get(i).setGoalPosition(goalPosition);
          }
       }

@@ -152,10 +152,13 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       }
 
       // update xgait preview steps
+      supportCentroid.setToZero(supportFrame);
+      supportCentroid.changeFrame(worldFrame);
+
       updateXGaitSettings();
       double currentYaw = bodyYaw.getDoubleValue();
       Vector3D inputVelocity = planarVelocityProvider.get();
-      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, currentYaw, xGaitSettings);
+      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, currentYaw, supportCentroid.getZ(), xGaitSettings);
 
       // update step sequence
       stepSequence.clear();
