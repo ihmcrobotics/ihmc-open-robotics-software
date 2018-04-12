@@ -190,11 +190,10 @@ public class GuiParameter extends GuiElement
 
    public void reset()
    {
-      if (resetState == null || status != GuiParameterStatus.MODIFIED)
+      if (resetState != null && status == GuiParameterStatus.MODIFIED)
       {
-         throw new RuntimeException("Can not reset if the parameter was not modified.");
+         set(resetState);
       }
-      set(resetState);
    }
 
    public void saveStateForReset()
