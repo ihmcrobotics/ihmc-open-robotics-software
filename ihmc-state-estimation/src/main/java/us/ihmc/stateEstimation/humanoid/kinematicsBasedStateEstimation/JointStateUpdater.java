@@ -83,9 +83,9 @@ public class JointStateUpdater
          double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
          IMUBasedJointStateEstimator iMUBasedJointStateEstimator = new IMUBasedJointStateEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
          iMUBasedJointStateEstimator.compute();
-         double alphaIMUsForSpineJointVelocityEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation();
-         double alphaIMUsForSpineJointPositionEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointPositionEstimation();
-         iMUBasedJointStateEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
+         double velocityBreakFrequency = stateEstimatorParameters.getBreakFrequencyForSpineJointVelocityEstimation();
+         double positionBreakFrequency = stateEstimatorParameters.getBreakFrequencyForSpineJointPositionEstimation();
+         iMUBasedJointStateEstimator.setFusingBreakFrequency(velocityBreakFrequency, positionBreakFrequency);
          return iMUBasedJointStateEstimator;
       }
       else
