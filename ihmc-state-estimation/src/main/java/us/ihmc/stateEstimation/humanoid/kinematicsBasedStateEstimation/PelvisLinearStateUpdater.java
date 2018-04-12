@@ -193,8 +193,7 @@ public class PelvisLinearStateUpdater
             centerOfPressureDataHolderFromController, estimatorDT, stateEstimatorParameters, yoGraphicsListRegistry, registry);
       
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, cancelGravityFromAccelerationMeasurement, estimatorDT,
-            gravitationalAcceleration, yoGraphicsListRegistry, registry);
-      imuBasedLinearStateCalculator.enableEstimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
+            gravitationalAcceleration, stateEstimatorParameters, yoGraphicsListRegistry, registry);
 
       alphaIMUAgainstKinematicsForVelocity
             .set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisLinearVelocityFusingFrequency(), estimatorDT));
