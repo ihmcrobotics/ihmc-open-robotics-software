@@ -66,6 +66,11 @@ public class PelvisControlManager implements JumpControlManagerInterface
 
    public void maintainDesiredOrientationOnly()
    {
+      maintainDesiredOrientationOnly(angularWeights);
+   }
+   
+   public void maintainDesiredOrientationOnly(Vector3DReadOnly angularWeights)
+   {
       spatialFeedbackControlCommand.set(desiredPelvisPosition);
       spatialFeedbackControlCommand.set(desiredPelvisOrientation);
       spatialFeedbackControlCommand.setPositionGains(linearGains);

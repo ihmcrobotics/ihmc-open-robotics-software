@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlMa
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,6 +31,7 @@ public class TakeOffState extends AbstractJumpState
    private double zGroundReactionThreshold = 10;
    private double heightThreshold = 0.35;
    private double velocityThreshold = 0.1;
+   private final Vector3D angularWeights = new Vector3D(10.0, 10.0, 10.0);
 
    public TakeOffState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                        CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisControlManager,
@@ -58,7 +60,7 @@ public class TakeOffState extends AbstractJumpState
    {
       double timeInCurrentState = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
-      pelvisControlManager.maintainDesiredOrientationOnly();
+      pelvisControlManager.maintainDesiredOrientationOnly(angularWeights);
       feetManager.compute();
       headManager.compute();
       chestManager.compute();

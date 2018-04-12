@@ -200,19 +200,19 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
 
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      plannedAngularMomentum.setToZero(controlFrame);
+      plannedAngularMomentum.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
       estimatedAngularMomentum.changeFrame(controlFrame);
-      angularMomentumError.sub(desiredAngularMomentumRateOfChange, estimatedAngularMomentum);
+      angularMomentumError.sub(plannedAngularMomentum, estimatedAngularMomentum);
       desiredAngularMomentumRateOfChange.setIncludingFrame(angularMomentumError);
-      desiredAngularMomentumRateOfChange.scale(1.0);
+      desiredAngularMomentumRateOfChange.scale(10.0);
       if (desiredAngularMomentumRateOfChange.containsNaN())
          desiredAngularMomentumRateOfChange.setToZero();
       clamp(desiredAngularMomentumRateOfChange, 5.0);
-      double alpha = 0.9;
-      desiredAngularMomentumRateOfChange.scale(alpha);
-      rateLimitedAngularMomentumRateOfChange.scale(1.0 - alpha);
-      rateLimitedAngularMomentumRateOfChange.add(desiredAngularMomentumRateOfChange);
-      desiredAngularMomentumRateOfChange.set(rateLimitedAngularMomentumRateOfChange);
+//      double alpha = 0.9;
+//      desiredAngularMomentumRateOfChange.scale(alpha);
+//      rateLimitedAngularMomentumRateOfChange.scale(1.0 - alpha);
+//      rateLimitedAngularMomentumRateOfChange.add(desiredAngularMomentumRateOfChange);
+//      desiredAngularMomentumRateOfChange.set(rateLimitedAngularMomentumRateOfChange);
    }
 
    private void clamp(FrameVector3D vector, double maxLength)
