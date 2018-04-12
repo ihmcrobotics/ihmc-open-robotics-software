@@ -190,14 +190,7 @@ public class PelvisLinearStateUpdater
       });
 
       kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, feetContactablePlaneBodies, footSwitches,
-            centerOfPressureDataHolderFromController, estimatorDT, yoGraphicsListRegistry, registry);
-      kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz(), estimatorDT));
-      kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityAlphaNewTwist(stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
-      kinematicsBasedLinearStateCalculator.setTrustCoPAsNonSlippingContactPoint(stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
-      kinematicsBasedLinearStateCalculator.useControllerDesiredCoP(stateEstimatorParameters.useControllerDesiredCenterOfPressure());
-      kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
-      kinematicsBasedLinearStateCalculator.setCorrectTrustedFeetPositions(stateEstimatorParameters.correctTrustedFeetPositions());
-
+            centerOfPressureDataHolderFromController, estimatorDT, stateEstimatorParameters, yoGraphicsListRegistry, registry);
       
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, cancelGravityFromAccelerationMeasurement, estimatorDT,
             gravitationalAcceleration, yoGraphicsListRegistry, registry);
