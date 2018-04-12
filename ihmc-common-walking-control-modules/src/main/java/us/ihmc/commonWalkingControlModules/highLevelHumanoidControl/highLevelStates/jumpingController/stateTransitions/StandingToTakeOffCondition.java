@@ -8,7 +8,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandingToTakeOffCondition implements StateTransitionCondition, StateTransitionAction
 {
-   private boolean standingForTheFirstTime = true;
    private final StandingState standingState;
    
    public StandingToTakeOffCondition(StandingState standingState)
@@ -19,12 +18,12 @@ public class StandingToTakeOffCondition implements StateTransitionCondition, Sta
    @Override
    public boolean checkCondition()
    {
-      return standingForTheFirstTime && standingState.isDone();
+      return standingState.isDone();
    }
 
    @Override
    public void doTransitionAction()
    {
-      standingForTheFirstTime = false;
+      
    }
 }

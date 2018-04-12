@@ -31,6 +31,7 @@ public class StandingState extends AbstractJumpState
    private boolean isDone = false;
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
+   private boolean standingForFirstTime = true;
 
    public StandingState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisControlManager,
@@ -50,7 +51,8 @@ public class StandingState extends AbstractJumpState
    @Override
    public boolean isDone()
    {
-      isDone = getTimeInCurrentState() > 0.5;
+      isDone = standingForFirstTime && (getTimeInCurrentState() > 0.5);
+      standingForFirstTime &= (!isDone);
       return isDone;
    }
 
