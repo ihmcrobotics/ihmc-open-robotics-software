@@ -828,7 +828,6 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
