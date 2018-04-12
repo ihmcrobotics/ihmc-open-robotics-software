@@ -157,7 +157,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoCoRVelocityFiltered = FilteredVelocityYoFrameVector2d.createFilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity", "", generalDescription,
             yoCoRVelocityAlphaFilter, dt, registry, yoCoRPositionFiltered);
 
-      yoLineOfRotation = new YoFrameLineSegment2D(namePrefix + "LoRPosition", generalDescription, worldFrame, registry);
+      yoLineOfRotation = new YoFrameLineSegment2D(namePrefix + "LoRPosition", /*generalDescription,*/ worldFrame, registry);
       yoAngleOfLoR = new YoDouble(namePrefix + "AngleOfLoR", generalDescription, registry);
       yoLoRAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LoRAngularVelocityAlphaFilter", generalDescription, registry);
       yoLoRAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered", generalDescription,
