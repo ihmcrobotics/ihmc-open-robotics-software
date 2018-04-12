@@ -12,7 +12,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
+   private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -22,7 +22,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.setToOrientationTrajectory(taskspaceTrajectoryCommand);
    }
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand(Random random)
@@ -47,14 +47,14 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public void set(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -75,7 +75,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       return jointspaceTrajectoryCommand;
    }
 
-   public SO3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
+   public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }
