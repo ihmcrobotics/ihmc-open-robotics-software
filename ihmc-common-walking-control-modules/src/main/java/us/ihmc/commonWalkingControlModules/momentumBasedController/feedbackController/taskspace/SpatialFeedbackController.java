@@ -124,7 +124,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       this.endEffector = endEffector;
 
-      rootBody = toolbox.getRootJoint().getSuccessor();
+      if (toolbox.getRootJoint() != null)
+         rootBody = toolbox.getRootJoint().getSuccessor();
+      else
+         rootBody = null;
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 

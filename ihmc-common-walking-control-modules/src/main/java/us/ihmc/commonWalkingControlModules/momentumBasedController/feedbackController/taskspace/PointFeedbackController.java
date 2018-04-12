@@ -100,7 +100,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      this.rootBody = toolbox.getRootJoint().getSuccessor();
+      if (toolbox.getRootJoint() != null)
+         this.rootBody = toolbox.getRootJoint().getSuccessor();
+      else
+         rootBody = null;
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 

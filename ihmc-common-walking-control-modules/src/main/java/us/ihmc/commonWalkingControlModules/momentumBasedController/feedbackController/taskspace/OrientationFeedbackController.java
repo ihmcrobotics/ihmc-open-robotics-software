@@ -109,7 +109,11 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
                                         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      this.rootBody = toolbox.getRootJoint().getSuccessor();
+
+      if (toolbox.getRootJoint() != null)
+         rootBody = toolbox.getRootJoint().getSuccessor();
+      else
+         rootBody = null;
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -195,8 +199,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          yoFeedbackAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, ANGULAR_VELOCITY, isEnabled);
          yoFeedForwardAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled);
-         rateLimitedFeedbackAngularVelocity = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_VELOCITY, dt, maximumRate,
-                                                                                                 isEnabled);
+         rateLimitedFeedbackAngularVelocity = feedbackControllerToolbox
+               .getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_VELOCITY, dt, maximumRate, isEnabled);
       }
       else
       {
@@ -351,8 +355,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.changeFrame(endEffectorFrame);
       yoDesiredAngularTorque.setMatchingFrame(desiredAngularTorque);
    }
-
-
 
    @Override
    public void computeAchievedAcceleration()
