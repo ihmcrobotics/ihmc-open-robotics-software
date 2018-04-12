@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.stateEstimator;
+package us.ihmc.quadrupedRobotics.estimator;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
