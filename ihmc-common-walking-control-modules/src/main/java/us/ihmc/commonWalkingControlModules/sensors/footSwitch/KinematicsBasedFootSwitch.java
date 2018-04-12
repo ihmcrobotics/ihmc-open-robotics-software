@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -24,7 +24,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
 
-   private final YoFramePoint2d yoResolvedCoP;
+   private final YoFramePoint2D yoResolvedCoP;
 
    public KinematicsBasedFootSwitch(String footName, SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet, double switchZThreshold,
                                     double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
@@ -41,7 +41,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
 
-      yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -74,7 +74,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
 
-      yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }

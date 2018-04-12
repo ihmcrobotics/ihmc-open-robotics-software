@@ -26,9 +26,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -36,6 +33,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
@@ -77,32 +77,32 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
    private final YoDouble minimumTimeRemaining = new YoDouble(yoNamePrefix + "MinimumTimeRemaining", registry);
 
-   private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
-   private final YoFramePoint2d feedbackCoP = new YoFramePoint2d(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
-   private final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-   private final YoFramePoint2d yoPerfectCoP = new YoFramePoint2d(yoNamePrefix + "PerfectCoP", worldFrame, registry);
-   private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
-   private final YoFramePoint2d predictedEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
+   private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
+   private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   private final YoFramePoint2D predictedEndOfStateICP = new YoFramePoint2D(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
-   private final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
-   private final YoFrameVector2d feedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
-   private final YoFramePoseUsingQuaternions upcomingFootstepLocation = new YoFramePoseUsingQuaternions(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
-   private final YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
-   private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-   private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePose3D upcomingFootstepLocation = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoint2D footstepLocationSubmitted = new YoFramePoint2D(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
+   private final YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
-   private final YoFrameVector2d footstepWeights = new YoFrameVector2d(yoNamePrefix + "FootstepWeights", worldFrame, registry);
+   private final YoFrameVector2D footstepWeights = new YoFrameVector2D(yoNamePrefix + "FootstepWeights", worldFrame, registry);
 
    private final YoDouble copFeedbackForwardWeight = new YoDouble(yoNamePrefix + "CoPFeedbackForwardWeight", registry);
    private final YoDouble copFeedbackLateralWeight = new YoDouble(yoNamePrefix + "CoPFeedbackLateralWeight", registry);
    private final YoDouble cmpFeedbackWeight = new YoDouble(yoNamePrefix + "CMPFeedbackWeight", registry);
-   private final YoFrameVector2d scaledCoPFeedbackWeight = new YoFrameVector2d(yoNamePrefix + "ScaledCoPFeedbackWeight", worldFrame, registry);
+   private final YoFrameVector2D scaledCoPFeedbackWeight = new YoFrameVector2D(yoNamePrefix + "ScaledCoPFeedbackWeight", worldFrame, registry);
    private final YoDouble scaledCMPFeedbackWeight = new YoDouble(yoNamePrefix + "ScaledCMPFeedbackWeight", registry);
 
    private final YoDouble maxAllowedDistanceCMPSupport = new YoDouble(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry);
@@ -137,7 +137,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegrator", registry);
    private final GlitchFilteredYoBoolean isICPStuck;
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
-   private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
+   private final YoFrameVector2D feedbackCMPIntegral = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;

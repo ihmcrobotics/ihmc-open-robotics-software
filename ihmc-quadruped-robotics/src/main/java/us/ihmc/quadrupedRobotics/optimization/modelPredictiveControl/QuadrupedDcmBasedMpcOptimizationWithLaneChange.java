@@ -18,13 +18,13 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements QuadrupedMpcOptimizationWithLaneChange
 {
@@ -58,8 +58,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private int numberOfIntervals = 0;
    private int numberOfPreviewSteps = 0;
 
-   private YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
-   private YoFrameVector yoStepAdjustmentVector = new YoFrameVector("stepAdjustmentVector", ReferenceFrame.getWorldFrame(), registry);
+   private YoFramePoint3D yoCmpPositionSetpoint = new YoFramePoint3D("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   private YoFrameVector3D yoStepAdjustmentVector = new YoFrameVector3D("stepAdjustmentVector", ReferenceFrame.getWorldFrame(), registry);
 
    public QuadrupedDcmBasedMpcOptimizationWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)

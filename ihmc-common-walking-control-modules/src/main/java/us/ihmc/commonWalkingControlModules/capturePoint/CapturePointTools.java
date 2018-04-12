@@ -9,10 +9,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -36,13 +36,13 @@ public class CapturePointTools
     * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else
     *           it will at the last footstep.
     */
-   public static void computeConstantCMPs(List<YoFramePoint> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList, int firstFootstepIndex,
+   public static void computeConstantCMPs(List<YoFramePoint3D> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList, int firstFootstepIndex,
                                           int lastFootstepIndex, boolean startStanding, boolean endStanding)
    {
       if (startStanding)
       {
          // Start with the first constant CMP located between the feet.
-         YoFramePoint firstConstantCMPPlanned = constantCMPsToPack.get(firstFootstepIndex);
+         YoFramePoint3D firstConstantCMPPlanned = constantCMPsToPack.get(firstFootstepIndex);
          FramePoint3DReadOnly firstFootstepToConsider = footstepList.get(firstFootstepIndex);
          FramePoint3DReadOnly secondFootstepToConsider = footstepList.get(firstFootstepIndex + 1);
          putConstantCMPBetweenFeet(firstConstantCMPPlanned, firstFootstepToConsider, secondFootstepToConsider);
@@ -52,7 +52,7 @@ public class CapturePointTools
       if (endStanding)
       {
          // End with the last constant CMP located between the feet.
-         YoFramePoint lastConstantCMPPlanned = constantCMPsToPack.get(lastFootstepIndex);
+         YoFramePoint3D lastConstantCMPPlanned = constantCMPsToPack.get(lastFootstepIndex);
          FramePoint3DReadOnly lastFootstepToConsider = footstepList.get(lastFootstepIndex);
          FramePoint3DReadOnly beforeLastFootstepToConsider = footstepList.get(lastFootstepIndex - 1);
          putConstantCMPBetweenFeet(lastConstantCMPPlanned, beforeLastFootstepToConsider, lastFootstepToConsider);
@@ -72,12 +72,12 @@ public class CapturePointTools
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when
     *           laying out the CMP's
     */
-   public static void computeConstantCMPsOnFeet(List<YoFramePoint> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList,
+   public static void computeConstantCMPsOnFeet(List<YoFramePoint3D> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList,
                                                 int firstFootstepIndex, int lastFootstepIndex)
    {
       for (int i = firstFootstepIndex; i <= lastFootstepIndex; i++)
       {
-         YoFramePoint constantCMP = constantCMPsToPack.get(i);
+         YoFramePoint3D constantCMP = constantCMPsToPack.get(i);
          // Put the constant CMP at the footstep location
          constantCMP.setMatchingFrame(footstepList.get(i));
       }
@@ -90,7 +90,7 @@ public class CapturePointTools
     * @param firstFootstep FramePoint holding the position of the first footstep
     * @param secondFootstep FramePoint holding the position of the second footstep
     */
-   public static void putConstantCMPBetweenFeet(YoFramePoint constantCMPToPack, FramePoint3DReadOnly firstFootstep, FramePoint3DReadOnly secondFootstep)
+   public static void putConstantCMPBetweenFeet(YoFramePoint3D constantCMPToPack, FramePoint3DReadOnly firstFootstep, FramePoint3DReadOnly secondFootstep)
    {
       constantCMPToPack.setMatchingFrame(firstFootstep);
       constantCMPToPack.add(secondFootstep);
@@ -768,7 +768,7 @@ public class CapturePointTools
     * @param desiredCapturePointAccelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, FrameVector3DReadOnly desiredCapturePointVelocity,
-                                                             YoFrameVector desiredCapturePointAccelerationToPack)
+                                                             YoFrameVector3D desiredCapturePointAccelerationToPack)
    {
       desiredCapturePointAccelerationToPack.setMatchingFrame(desiredCapturePointVelocity);
       desiredCapturePointAccelerationToPack.scale(omega0);

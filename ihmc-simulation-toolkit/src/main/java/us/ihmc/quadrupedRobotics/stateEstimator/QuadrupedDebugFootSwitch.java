@@ -7,8 +7,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
@@ -25,7 +25,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
 
    private final FrameVector3D measuredForce = new FrameVector3D();
    private final FrameVector3D measuredForceWorld = new FrameVector3D();
-   private final YoFrameVector yoMeasuredForceWorld;
+   private final YoFrameVector3D yoMeasuredForceWorld;
    private final YoBoolean hasFootHitGround;
 
    private final double totalRobotWeight;
@@ -39,7 +39,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
       forceThreshold = new YoDouble(contactablePlaneBody.getName() + "ForceThreshold", registry);
       forceThreshold.set(0.04 * totalRobotWeight);
       
-      yoMeasuredForceWorld = new YoFrameVector(contactablePlaneBody.getName() + "MeasuredForceWorld", worldFrame, registry);
+      yoMeasuredForceWorld = new YoFrameVector3D(contactablePlaneBody.getName() + "MeasuredForceWorld", worldFrame, registry);
       hasFootHitGround = new YoBoolean(contactablePlaneBody.getName() + "HasFootHitGround", registry);
    }
 

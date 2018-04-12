@@ -4,18 +4,18 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public abstract class AbstractDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   protected final SideDependentList<YoFramePoint> footstepPositions = new SideDependentList<>();
+   protected final SideDependentList<YoFramePoint3D> footstepPositions = new SideDependentList<>();
    protected final SideDependentList<YoFrameQuaternion> footstepOrientations = new SideDependentList<>();
 
    protected final FramePoint3D framePosition = new FramePoint3D();
@@ -27,7 +27,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression() + "Footstep";
 
-         YoFramePoint footstepPosition = new YoFramePoint(namePrefix + "Position", worldFrame, registry);
+         YoFramePoint3D footstepPosition = new YoFramePoint3D(namePrefix + "Position", worldFrame, registry);
          footstepPositions.put(robotSide, footstepPosition);
 
          YoFrameQuaternion footstepOrientation = new YoFrameQuaternion(namePrefix + "Orientation", "", worldFrame, registry);

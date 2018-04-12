@@ -25,10 +25,10 @@ import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -48,8 +48,8 @@ public class LogDataProcessorHelper
    private final LogDataRawSensorMap rawSensorMap;
    private final SideDependentList<ContactableFoot> contactableFeet;
 
-   private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
-   private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint2D> cops = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint2D> desiredCoPs = new SideDependentList<>();
    private final SideDependentList<YoEnum<?>> footStates = new SideDependentList<>();
 
    private final double controllerDT;
@@ -100,7 +100,7 @@ public class LogDataProcessorHelper
          YoDouble copy = (YoDouble) scs.getVariable(copNameSpace, copName + "Y");
          if (copx != null && copy != null)
          {
-            YoFramePoint2d cop = new YoFramePoint2d(copx, copy, soleFrame);
+            YoFramePoint2D cop = new YoFramePoint2D(copx, copy, soleFrame);
             cops.put(robotSide, cop);
          }
 
@@ -108,7 +108,7 @@ public class LogDataProcessorHelper
          String desiredCoPName = side + "SoleCoP2d";
          YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
          YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
-         YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrame);
+         YoFramePoint2D desiredCoP = new YoFramePoint2D(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPs.put(robotSide, desiredCoP);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -281,12 +281,12 @@ public class LogDataProcessorHelper
       return controllerToolbox;
    }
 
-   public YoFramePoint findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)
+   public YoFramePoint3D findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)
    {
       return findYoFramePoint(pointPrefix, "", pointFrame);
    }
 
-   public YoFramePoint findYoFramePoint(String pointPrefix, String pointSuffix, ReferenceFrame pointFrame)
+   public YoFramePoint3D findYoFramePoint(String pointPrefix, String pointSuffix, ReferenceFrame pointFrame)
    {
       YoDouble x = (YoDouble) scs.getVariable(createXName(pointPrefix, pointSuffix));
       YoDouble y = (YoDouble) scs.getVariable(createYName(pointPrefix, pointSuffix));
@@ -294,15 +294,15 @@ public class LogDataProcessorHelper
       if (x == null || y == null || z == null)
          return null;
       else
-         return new YoFramePoint(x, y, z, pointFrame);
+         return new YoFramePoint3D(x, y, z, pointFrame);
    }
 
-   public YoFrameVector findYoFrameVector(String vectorPrefix, ReferenceFrame vectorFrame)
+   public YoFrameVector3D findYoFrameVector(String vectorPrefix, ReferenceFrame vectorFrame)
    {
       return findYoFrameVector(vectorPrefix, "", vectorFrame);
    }
 
-   public YoFrameVector findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
+   public YoFrameVector3D findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
    {
       YoDouble x = (YoDouble) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
       YoDouble y = (YoDouble) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
@@ -310,7 +310,7 @@ public class LogDataProcessorHelper
       if (x == null || y == null || z == null)
          return null;
       else
-         return new YoFrameVector(x, y, z, vectorFrame);
+         return new YoFrameVector3D(x, y, z, vectorFrame);
    }
 
    public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, ReferenceFrame quaternionFrame)

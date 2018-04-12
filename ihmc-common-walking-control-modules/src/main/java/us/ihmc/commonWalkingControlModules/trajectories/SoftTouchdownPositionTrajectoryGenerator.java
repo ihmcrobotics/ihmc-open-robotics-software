@@ -4,8 +4,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -13,15 +11,17 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    private final String namePostFix = getClass().getSimpleName();
 
-   private final YoFramePoint desiredPosition;
-   private final YoFrameVector desiredVelocity;
-   private final YoFrameVector desiredAcceleration;
+   private final YoFramePoint3D desiredPosition;
+   private final YoFrameVector3D desiredVelocity;
+   private final YoFrameVector3D desiredAcceleration;
    
    private final ReferenceFrame referenceFrame;
 
@@ -51,9 +51,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
-      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
-      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+      desiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", referenceFrame, registry);
       
       p0 = new FramePoint3D();
       pd0 = new FrameVector3D();
@@ -83,9 +83,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
       
-      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
-      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+      desiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", referenceFrame, registry);
       
       p0 = new FramePoint3D();
       pd0 = new FrameVector3D();

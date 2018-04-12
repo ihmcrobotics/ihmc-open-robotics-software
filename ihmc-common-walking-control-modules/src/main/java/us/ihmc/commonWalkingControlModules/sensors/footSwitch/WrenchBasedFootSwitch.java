@@ -18,9 +18,9 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
@@ -57,7 +57,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final GlitchFilteredYoBoolean heelHitGroundFilter;
    private final GlitchFilteredYoBoolean toeHitGroundFilter;
 
-   private final YoFramePoint2d yoResolvedCoP;
+   private final YoFramePoint2D yoResolvedCoP;
    private final FramePoint2D resolvedCoP;
    private final FramePoint3D resolvedCoP3d = new FramePoint3D();
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
@@ -67,12 +67,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final double footMaxX;
    private final FrameVector3D footForce = new FrameVector3D();
    private final FrameVector3D footTorque = new FrameVector3D();
-   private final YoFrameVector yoFootForce;
-   private final YoFrameVector yoFootTorque;
-   private final YoFrameVector yoFootForceInFoot;
-   private final YoFrameVector yoFootTorqueInFoot;
-   private final YoFrameVector yoFootForceInWorld;
-   private final YoFrameVector yoFootTorqueInWorld;
+   private final YoFrameVector3D yoFootForce;
+   private final YoFrameVector3D yoFootTorque;
+   private final YoFrameVector3D yoFootForceInFoot;
+   private final YoFrameVector3D yoFootTorqueInFoot;
+   private final YoFrameVector3D yoFootForceInWorld;
+   private final YoFrameVector3D yoFootTorqueInWorld;
 
    private final double robotTotalWeight;
 
@@ -95,12 +95,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.secondContactThresholdForce = new YoDouble(namePrefix + "SecondContactThresholdForce", registry);
       this.secondContactThresholdForce.set(Double.POSITIVE_INFINITY);
 
-      yoFootForce = new YoFrameVector(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
-      yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
-      yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
-      yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
-      yoFootForceInWorld = new YoFrameVector(namePrefix + "ForceWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-      yoFootTorqueInWorld = new YoFrameVector(namePrefix + "TorqueWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+      yoFootForce = new YoFrameVector3D(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
+      yoFootTorque = new YoFrameVector3D(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
+      yoFootForceInFoot = new YoFrameVector3D(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
+      yoFootTorqueInFoot = new YoFrameVector3D(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
+      yoFootForceInWorld = new YoFrameVector3D(namePrefix + "ForceWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+      yoFootTorqueInWorld = new YoFrameVector3D(namePrefix + "TorqueWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
       if (showForceSensorFrames && yoGraphicsListRegistry != null)
       {
@@ -152,7 +152,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       this.contactablePlaneBody = contactablePlaneBody;
 
-      yoResolvedCoP = new YoFramePoint2d(namePrefix + "ResolvedCoP", "", contactablePlaneBody.getSoleFrame(), registry);
+      yoResolvedCoP = new YoFramePoint2D(namePrefix + "ResolvedCoP", "", contactablePlaneBody.getSoleFrame(), registry);
       resolvedCoP = new FramePoint2D(contactablePlaneBody.getSoleFrame());
 
       this.forceSensorData = forceSensorData;

@@ -25,14 +25,14 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportPolygon implements Serializable
 {
@@ -445,7 +445,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return footsteps.containsQuadrant(robotQuadrant);
    }
 
-   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
+   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2D yoFrameConvexPolygon2d)
    {      
       updateTempFrameConvexPolygon();
       yoFrameConvexPolygon2d.set(tempFrameConvexPolygon2d);
@@ -529,13 +529,13 @@ public class QuadrupedSupportPolygon implements Serializable
       return closestQuadrant;
    }
    
-   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2D pointToSnap)
    {
       FramePoint2D snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
       pointToSnap.set(snapped.getX(), snapped.getY());
    }
    
-   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint3D pointToSnap)
    {
       FramePoint2D snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
       pointToSnap.set(snapped.getX(), snapped.getY(), 0.0);
@@ -560,7 +560,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
    
-   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
+   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint3D pointToSnap, YoFramePoint3D innerPoint)
    {
       if (size() > 0 && !isInside(pointToSnap))
       {

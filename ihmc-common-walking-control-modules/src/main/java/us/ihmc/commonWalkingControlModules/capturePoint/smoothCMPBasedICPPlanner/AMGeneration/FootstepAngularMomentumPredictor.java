@@ -16,8 +16,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
@@ -25,6 +23,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -92,15 +92,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final FrameVector3D tempFrameVector = new FrameVector3D();
 
    // DEBUGGING
-   private final YoFramePoint comPosDebug;
-   private final YoFramePoint comVelDebug;
-   private final YoFramePoint comAccDebug;
-   private final YoFramePoint swingFootPosDebug;
-   private final YoFramePoint swingFootVelDebug;
-   private final YoFramePoint swingFootAccDebug;
-   private final YoFramePoint supportFootPosDebug;
-   private final YoFramePoint supportFootVelDebug;
-   private final YoFramePoint supportFootAccDebug;
+   private final YoFramePoint3D comPosDebug;
+   private final YoFramePoint3D comVelDebug;
+   private final YoFramePoint3D comAccDebug;
+   private final YoFramePoint3D swingFootPosDebug;
+   private final YoFramePoint3D swingFootVelDebug;
+   private final YoFramePoint3D swingFootAccDebug;
+   private final YoFramePoint3D supportFootPosDebug;
+   private final YoFramePoint3D supportFootVelDebug;
+   private final YoFramePoint3D supportFootAccDebug;
    private final List<TrajectoryDebug> transferCoMTrajectories;
    private final List<TrajectoryDebug> swingCoMTrajectories;
    private final List<TrajectoryDebug> transferSwingFootTrajectories;
@@ -234,15 +234,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       this.estimatedAngularMomentumTrajectory = new FrameTrajectory3D(2 * maxNumberOfTrajectoryCoefficients, worldFrame);
       if (DEBUG)
       {
-         this.comPosDebug = new YoFramePoint("CoMPosViz", "", worldFrame, registry);
-         this.comVelDebug = new YoFramePoint("CoMVelViz", "", worldFrame, registry);
-         this.comAccDebug = new YoFramePoint("CoMAccViz", "", worldFrame, registry);
-         this.swingFootPosDebug = new YoFramePoint("SwFPosViz", worldFrame, registry);
-         this.swingFootVelDebug = new YoFramePoint("SwFVelViz", worldFrame, registry);
-         this.swingFootAccDebug = new YoFramePoint("SwFAccViz", worldFrame, registry);
-         this.supportFootPosDebug = new YoFramePoint("SpFPosViz", worldFrame, registry);
-         this.supportFootVelDebug = new YoFramePoint("SpFVelViz", worldFrame, registry);
-         this.supportFootAccDebug = new YoFramePoint("SpFAccViz", worldFrame, registry);
+         this.comPosDebug = new YoFramePoint3D("CoMPosViz", "", worldFrame, registry);
+         this.comVelDebug = new YoFramePoint3D("CoMVelViz", "", worldFrame, registry);
+         this.comAccDebug = new YoFramePoint3D("CoMAccViz", "", worldFrame, registry);
+         this.swingFootPosDebug = new YoFramePoint3D("SwFPosViz", worldFrame, registry);
+         this.swingFootVelDebug = new YoFramePoint3D("SwFVelViz", worldFrame, registry);
+         this.swingFootAccDebug = new YoFramePoint3D("SwFAccViz", worldFrame, registry);
+         this.supportFootPosDebug = new YoFramePoint3D("SpFPosViz", worldFrame, registry);
+         this.supportFootVelDebug = new YoFramePoint3D("SpFVelViz", worldFrame, registry);
+         this.supportFootAccDebug = new YoFramePoint3D("SpFAccViz", worldFrame, registry);
       }
       else
       {

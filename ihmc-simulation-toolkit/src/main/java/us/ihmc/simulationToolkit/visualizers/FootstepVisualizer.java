@@ -26,8 +26,8 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappin
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -53,7 +53,7 @@ public class FootstepVisualizer
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private YoFramePoint textPoint;
+   private YoFramePoint3D textPoint;
    private boolean firstFocus = true;
    private double focusXmax;
    private double focusYmax;
@@ -195,9 +195,9 @@ public class FootstepVisualizer
 
       YoGraphicsList yoGraphicsList = new YoGraphicsList("TextDescription");
 
-      textPoint = new YoFramePoint("Desc", worldFrame, registry);
+      textPoint = new YoFramePoint3D("Desc", worldFrame, registry);
       textPoint.set(focusX, focusY, -.003);
-      YoFrameOrientation orientation = new YoFrameOrientation("Desc", worldFrame, registry);
+      YoFrameYawPitchRoll orientation = new YoFrameYawPitchRoll("Desc", worldFrame, registry);
       double scale = 0.5;
       YoGraphicText desc = new YoGraphicText("FootstepDescription", string, textPoint, orientation, scale, Color.WHITE, Color.BLACK);
       yoGraphicsList.add(desc);

@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class CaptureRegionVisualizer
 {
@@ -18,7 +18,7 @@ public class CaptureRegionVisualizer
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final YoFrameConvexPolygon2d yoCaptureRegionPolygon;
+   private final YoFrameConvexPolygon2D yoCaptureRegionPolygon;
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D();
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
 
@@ -33,7 +33,7 @@ public class CaptureRegionVisualizer
    {
       this.captureRegionCalculator = captureRegionCalculator;
 
-      yoCaptureRegionPolygon = new YoFrameConvexPolygon2d(caption, suffix, worldFrame, 30, registry);
+      yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(caption, suffix, worldFrame, 30, registry);
 
       YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
       yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);

@@ -6,20 +6,20 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalculator
 {
-   private final YoFrameVector2d forwardCostVector;
-   private final YoFrameVector2d backwardCostVector;
-   private final YoFrameVector2d inwardCostVector;
-   private final YoFrameVector2d outwardCostVector;
-   private final YoFrameVector upwardCostVector;
-   private final YoFrameVector downwardVector;
+   private final YoFrameVector2D forwardCostVector;
+   private final YoFrameVector2D backwardCostVector;
+   private final YoFrameVector2D inwardCostVector;
+   private final YoFrameVector2D outwardCostVector;
+   private final YoFrameVector3D upwardCostVector;
+   private final YoFrameVector3D downwardVector;
 
    private final YoDouble forwardCostScalar;
    private final YoDouble backwardCostScalar;
@@ -33,20 +33,20 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private final YoDouble footstepBaseCost;
 
-   private final YoFrameVector idealToCandidateVector;
-   private final YoFrameOrientation idealToCandidateOrientation;
+   private final YoFrameVector3D idealToCandidateVector;
+   private final YoFrameYawPitchRoll idealToCandidateOrientation;
 
    private final FrameVector3D tempFrameVectorForDot;
 
    public BipedalStepAdjustmentCostCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       String prefix = "StepAdjustment";
-      forwardCostVector = new YoFrameVector2d(prefix + "ForwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      backwardCostVector = new YoFrameVector2d(prefix + "BackwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      inwardCostVector = new YoFrameVector2d(prefix + "InwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      outwardCostVector = new YoFrameVector2d(prefix + "OutwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      upwardCostVector = new YoFrameVector(prefix + "UpwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      downwardVector = new YoFrameVector(prefix + "DownwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      forwardCostVector = new YoFrameVector2D(prefix + "ForwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      backwardCostVector = new YoFrameVector2D(prefix + "BackwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      inwardCostVector = new YoFrameVector2D(prefix + "InwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      outwardCostVector = new YoFrameVector2D(prefix + "OutwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      upwardCostVector = new YoFrameVector3D(prefix + "UpwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      downwardVector = new YoFrameVector3D(prefix + "DownwardCostVector", ReferenceFrame.getWorldFrame(), parentRegistry);
 
       forwardCostScalar = new YoDouble(prefix + "ForwardCostScalar", parentRegistry);
       backwardCostScalar = new YoDouble(prefix + "BackwardCostScalar", parentRegistry);
@@ -60,8 +60,8 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
       footstepBaseCost = new YoDouble(prefix + "FootstepBaseCost", parentRegistry);
 
-      idealToCandidateVector = new YoFrameVector(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
-      idealToCandidateOrientation = new YoFrameOrientation(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);
+      idealToCandidateVector = new YoFrameVector3D(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
+      idealToCandidateOrientation = new YoFrameYawPitchRoll(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);
 
       tempFrameVectorForDot = new FrameVector3D();
 
@@ -120,7 +120,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       return cost;
    }
 
-   private double penalizeCandidateFootstep(YoFrameVector penalizationVector, double penalizationWeight)
+   private double penalizeCandidateFootstep(YoFrameVector3D penalizationVector, double penalizationWeight)
    {
       // TODO sqrt??
       double dotProduct = idealToCandidateVector.dot(penalizationVector);
@@ -128,7 +128,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       return penalizationWeight * dotProduct;
    }
 
-   private double penalizeCandidateFootstep(YoFrameVector2d penalizationVector, double penalizationWeight)
+   private double penalizeCandidateFootstep(YoFrameVector2D penalizationVector, double penalizationWeight)
    {
       // TODO sqrt??
       double dotProduct = dot3dVectorWith2dVector(idealToCandidateVector, penalizationVector);
@@ -136,18 +136,18 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       return penalizationWeight * dotProduct;
    }
 
-   private double dot3dVectorWith2dVector(YoFrameVector vector3d, YoFrameVector2d vector2d)
+   private double dot3dVectorWith2dVector(YoFrameVector3D vector3d, YoFrameVector2D vector2d)
    {
       tempFrameVectorForDot.setIncludingFrame(vector2d, 0.0);
       return vector3d.dot(tempFrameVectorForDot);
    }
 
-   private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose3D fromPose, FramePose3D toPose)
+   private void setOrientationFromPoseToPose(YoFrameYawPitchRoll frameOrientationToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       frameOrientationToPack.getFrameOrientation().difference(toPose.getOrientation(), fromPose.getOrientation());
    }
 
-   private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose3D fromPose, FramePose3D toPose)
+   private void setVectorFromPoseToPose(YoFrameVector3D frameVectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       frameVectorToPack.set(toPose.getPosition());
       FrameVector3D frameTuple = new FrameVector3D(frameVectorToPack);
@@ -155,7 +155,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       frameVectorToPack.set(frameTuple);
    }
 
-   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose3D fromPose, FramePose3D toPose)
+   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2D vectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       if (fromPose.getPosition().epsilonEquals(toPose.getPosition(), 1e-7))
       {

@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 
@@ -20,9 +20,9 @@ public class DivergentComponentOfMotionEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoDcmPositionEstimate = new YoFramePoint3D("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoIcpPositionEstimate = new YoFramePoint3D("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centerOfMass = new YoFramePoint3D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 

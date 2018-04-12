@@ -17,14 +17,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class CapturePointUpdatable implements Updatable
 {
@@ -32,10 +32,10 @@ public class CapturePointUpdatable implements Updatable
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredCapturePoint", worldFrame, registry);
-   private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("capturePoint", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
-   private final SideDependentList<YoFrameConvexPolygon2d> yoFootSupportPolygons = new SideDependentList<>();
+   private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredCapturePoint", worldFrame, registry);
+   private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoSupportPolygon = new YoFrameConvexPolygon2D("supportPolygon", "", worldFrame, 30, registry);
+   private final SideDependentList<YoFrameConvexPolygon2D> yoFootSupportPolygons = new SideDependentList<>();
    private final YoEnum<RobotSide> yoSupportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class, true);
    private final YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
@@ -67,7 +67,7 @@ public class CapturePointUpdatable implements Updatable
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String name = sidePrefix + "FootSupportPolygon";
-         YoFrameConvexPolygon2d yoFootSupportPolygon = new YoFrameConvexPolygon2d(name, "", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D yoFootSupportPolygon = new YoFrameConvexPolygon2D(name, "", worldFrame, 4, registry);
          yoFootSupportPolygons.put(robotSide, yoFootSupportPolygon);
 
          Color color = FootstepListVisualizer.defaultFeetColors.get(robotSide);
@@ -155,22 +155,22 @@ public class CapturePointUpdatable implements Updatable
       return tippingDetected;
    }
 
-   public YoFramePoint2d getYoDesiredCapturePoint()
+   public YoFramePoint2D getYoDesiredCapturePoint()
    {
       return yoDesiredCapturePoint;
    }
 
-   public YoFramePoint2d getYoCapturePoint()
+   public YoFramePoint2D getYoCapturePoint()
    {
       return yoCapturePoint;
    }
 
-   public YoFrameConvexPolygon2d getYoSupportPolygon()
+   public YoFrameConvexPolygon2D getYoSupportPolygon()
    {
       return yoSupportPolygon;
    }
 
-   public YoFrameConvexPolygon2d getYoFootPolygon(RobotSide robotSide)
+   public YoFrameConvexPolygon2D getYoFootPolygon(RobotSide robotSide)
    {
       return yoFootSupportPolygons.get(robotSide);
    }

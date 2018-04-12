@@ -7,9 +7,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 
@@ -25,8 +25,8 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    private final YoFrameQuaternion finalOrientation;
 
    private final YoFrameQuaternion currentOrientation;
-   private final YoFrameVector currentAngularVelocity;
-   private final YoFrameVector currentAngularAcceleration;
+   private final YoFrameVector3D currentAngularVelocity;
+   private final YoFrameVector3D currentAngularAcceleration;
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
@@ -70,8 +70,8 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
          initialOrientation = new YoFrameQuaternion(initialOrientationName, referenceFrame, registry);
          finalOrientation = new YoFrameQuaternion(finalOrientationName, referenceFrame, registry);
          currentOrientation = new YoFrameQuaternion(currentOrientationName, referenceFrame, registry);
-         currentAngularVelocity = new YoFrameVector(currentAngularVelocityName, referenceFrame, registry);
-         currentAngularAcceleration = new YoFrameVector(currentAngularAccelerationName, referenceFrame, registry);
+         currentAngularVelocity = new YoFrameVector3D(currentAngularVelocityName, referenceFrame, registry);
+         currentAngularAcceleration = new YoFrameVector3D(currentAngularAccelerationName, referenceFrame, registry);
       }
 
       parentRegistry.addChild(registry);

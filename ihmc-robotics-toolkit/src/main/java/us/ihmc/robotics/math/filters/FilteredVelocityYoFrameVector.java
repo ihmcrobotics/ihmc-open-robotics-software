@@ -3,11 +3,11 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * <p>FilteredVelocityYoFrameVector </p>
@@ -19,12 +19,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * @author IHMC Biped Team
  * @version 1.0
  */
-public class FilteredVelocityYoFrameVector extends YoFrameVector
+public class FilteredVelocityYoFrameVector extends YoFrameVector3D
 {
    private final FilteredVelocityYoVariable xDot, yDot, zDot;
 
    public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-         YoVariableRegistry registry, YoFrameVector yoFrameVectorToDifferentiate)
+         YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
    {
       FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha,
             yoFrameVectorToDifferentiate.getYoX(), dt, registry);
@@ -40,7 +40,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
    }
 
    public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-         YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate)
+         YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
       FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha,
             yoFramePointToDifferentiate.getYoX(), dt, registry);
@@ -78,7 +78,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
    }
 
    private FilteredVelocityYoFrameVector(FilteredVelocityYoVariable xDot, FilteredVelocityYoVariable yDot, FilteredVelocityYoVariable zDot,
-         YoDouble alpha, double dt, YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate)
+         YoDouble alpha, double dt, YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
       super(xDot, yDot, zDot, yoFramePointToDifferentiate.getReferenceFrame());
 

@@ -38,7 +38,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -65,6 +64,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRobotTestInterface
@@ -599,7 +599,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private boolean testTranslationAndRotationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
-      YoFramePose target = new YoFramePose("target_", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll target = new YoFramePoseUsingYawPitchRoll("target_", ReferenceFrame.getWorldFrame(), registry);
       RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
       boolean success = true;
 
@@ -671,7 +671,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private boolean testTranslationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
-      YoFramePose target = new YoFramePose("target_", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll target = new YoFramePoseUsingYawPitchRoll("target_", ReferenceFrame.getWorldFrame(), registry);
       RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
       boolean success = true;
 

@@ -13,11 +13,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class SmartCMPProjector extends CMPProjector
 {
@@ -32,9 +32,9 @@ public class SmartCMPProjector extends CMPProjector
    private final FramePoint2D finalCapturePoint = new FramePoint2D();
 
    // visualization
-   private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("DesiredCMP", worldFrame, registry);
-   private final YoFramePoint2d yoProjectedCMP = new YoFramePoint2d("ProjectedCMP", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoProjectionArea = new YoFrameConvexPolygon2d("CMPProjectionArea", worldFrame, 10, registry);
+   private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("DesiredCMP", worldFrame, registry);
+   private final YoFramePoint2D yoProjectedCMP = new YoFramePoint2D("ProjectedCMP", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoProjectionArea = new YoFrameConvexPolygon2D("CMPProjectionArea", worldFrame, 10, registry);
 
    // debugging and state of the projector
    private final YoBoolean cmpWasProjected = new YoBoolean("CmpWasProjected", registry);

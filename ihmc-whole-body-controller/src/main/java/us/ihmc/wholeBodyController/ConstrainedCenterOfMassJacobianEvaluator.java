@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)
@@ -48,8 +48,8 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final YoDouble comJacobianSigmaMin = new YoDouble("comJacobianSigmaMin", registry);
    private final YoDouble constrainedComJacobianConditionNumber = new YoDouble("constrComJacCondition", registry);
    private final YoDouble constrainedComJacobianSigmaMin = new YoDouble("constrComJacobianSigmaMin", registry);
-   private final YoFrameVector comVelocity = new YoFrameVector("comJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector constrainedComVelocity = new YoFrameVector("constrComJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comVelocity = new YoFrameVector3D("comJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D constrainedComVelocity = new YoFrameVector3D("constrComJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble cmmConditionNumber = new YoDouble("CMMCondition", registry);
    private final YoDouble cmmSigmaMin = new YoDouble("CMMSigmaMin", registry);
@@ -64,11 +64,11 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final Collection<InverseDynamicsJoint> actuatedJoints;
    private final ColumnSpaceProjector projector;
 
-   private final YoFrameVector centroidalLinearMomentum;
-   private final YoFrameVector centroidalAngularMomentum;
+   private final YoFrameVector3D centroidalLinearMomentum;
+   private final YoFrameVector3D centroidalAngularMomentum;
 
-   private final YoFrameVector centroidalLinearMomentumPlus;
-   private final YoFrameVector centroidalAngularMomentumPlus;
+   private final YoFrameVector3D centroidalLinearMomentumPlus;
+   private final YoFrameVector3D centroidalAngularMomentumPlus;
    private final DenseMatrix64F momentumSelectionMatrix;
 
    public ConstrainedCenterOfMassJacobianEvaluator(FullHumanoidRobotModel fullRobotModel)
@@ -131,11 +131,11 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 //      LinearSolver<DenseMatrix64F> columnSpaceProjectorSolver = LinearSolverFactory.pseudoInverse(true);
       projector = new ColumnSpaceProjector(columnSpaceProjectorSolver, momentumSelectionMatrix.getNumRows(), nActuatedDoFs);
 
-      centroidalLinearMomentum = new YoFrameVector("centroidalLinearMomentum", centerOfMassFrame, registry);
-      centroidalAngularMomentum = new YoFrameVector("centroidalAngularMomentum", centerOfMassFrame, registry);
+      centroidalLinearMomentum = new YoFrameVector3D("centroidalLinearMomentum", centerOfMassFrame, registry);
+      centroidalAngularMomentum = new YoFrameVector3D("centroidalAngularMomentum", centerOfMassFrame, registry);
 
-      centroidalLinearMomentumPlus = new YoFrameVector("centroidalLinearMomentumPlus", centerOfMassFrame, registry);
-      centroidalAngularMomentumPlus = new YoFrameVector("centroidalAngularMomentumPlus", centerOfMassFrame, registry);
+      centroidalLinearMomentumPlus = new YoFrameVector3D("centroidalLinearMomentumPlus", centerOfMassFrame, registry);
+      centroidalAngularMomentumPlus = new YoFrameVector3D("centroidalAngularMomentumPlus", centerOfMassFrame, registry);
 
       centroidalLinearMomentum.setZ(10.0);
    }

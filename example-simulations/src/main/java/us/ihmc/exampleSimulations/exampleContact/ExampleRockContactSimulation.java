@@ -17,8 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -30,13 +28,15 @@ import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ExampleRockContactSimulation
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("ExampleRockContactSimulation");
-   private final YoFramePoint groundCheckPoint = new YoFramePoint("groundCheckPoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint groundClosestPoint = new YoFramePoint("groundClosestPoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector groundClosestNormal = new YoFrameVector("groundClosestNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D groundCheckPoint = new YoFramePoint3D("groundCheckPoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D groundClosestPoint = new YoFramePoint3D("groundClosestPoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D groundClosestNormal = new YoFrameVector3D("groundClosestNormal", ReferenceFrame.getWorldFrame(), registry);
    
    double kXY = 1000.0;
    double bXY = 100.0;
