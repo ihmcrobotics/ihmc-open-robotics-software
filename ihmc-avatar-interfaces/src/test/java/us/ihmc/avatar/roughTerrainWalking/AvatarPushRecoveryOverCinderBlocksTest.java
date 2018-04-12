@@ -61,6 +61,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
       PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
 
+
+
       FootstepDataListMessage footsteps = createFlatBlocksFootstepDataListMessage(swingTime, transferTime);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.send(planarRegionsListMessage);
@@ -169,6 +171,9 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       swingTime = walkingControllerParameters.getDefaultSwingTime();
       transferTime = walkingControllerParameters.getDefaultTransferTime();
+
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       return planarRegionsListMessage;
    }
