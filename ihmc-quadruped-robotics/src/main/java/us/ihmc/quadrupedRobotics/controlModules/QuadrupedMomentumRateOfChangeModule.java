@@ -73,7 +73,7 @@ public class QuadrupedMomentumRateOfChangeModule
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
-   {
+   {N
       this.desiredCoMHeightAcceleration = desiredCoMHeightAcceleration;
    }
 
