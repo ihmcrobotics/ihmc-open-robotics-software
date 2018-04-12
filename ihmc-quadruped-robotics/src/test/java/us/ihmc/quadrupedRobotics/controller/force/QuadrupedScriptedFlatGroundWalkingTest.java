@@ -13,6 +13,9 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -61,17 +64,17 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       PacketCommunicator packetCommunicator = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
-      AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
+      AtomicReference<QuadrupedControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
-                                        packet -> controllerState.set(QuadrupedForceControllerEnum.fromByte(packet.getEndControllerName())));
+                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndControllerName())));
 
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
                                         packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
       packetCommunicator.connect();
 
       QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
       packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

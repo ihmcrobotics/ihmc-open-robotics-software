@@ -22,8 +22,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -83,7 +83,7 @@ public class QuadrupedBalanceManager
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final ReferenceFrame supportFrame;
 
-   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
@@ -101,7 +101,7 @@ public class QuadrupedBalanceManager
                                                                                                                          YoAppearance.RGBColor(1, 0.5, 0.0),
                                                                                                                          YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
-   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
+   public QuadrupedBalanceManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                   YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;

@@ -2,9 +2,7 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
