@@ -1,6 +1,19 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.*;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonLeftBumperState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonRightBumperState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonSelectState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonStartState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonXState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonYState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import java.util.ArrayList;
@@ -8,10 +21,13 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -36,6 +52,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -43,11 +60,13 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 
 public class StepGeneratorJavaFXController
 {
@@ -72,24 +91,39 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<Double> swingDuration;
    private final AtomicReference<Double> transferDuration;
    private final AtomicReference<Double> trajectoryDuration;
+   private final AtomicBoolean isWalking = new AtomicBoolean(false);
+   private final JavaFXRobotVisualizer javaFXRobotVisualizer;
+   private final double inPlaceStepWidth;
+
+   private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
+   private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
+   private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
+   private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
+   private final BooleanProvider isInSingleSupport = () -> isLeftFootInSupport.get() ^ isRightFootInSupport.get();
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
                                         PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
    {
       this.packetCommunicator = packetCommunicator;
+      this.javaFXRobotVisualizer = javaFXRobotVisualizer;
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
       continuousStepGenerator.setDesiredHeadingProvider(() -> headingVelocityProperty.get());
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
-      continuousStepGenerator.setSupportFootBasedFootstepAdjustment();
+      inPlaceStepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
+      double min = 0.20;
+      double max = 0.50;
+      continuousStepGenerator.setStepWidths(inPlaceStepWidth, min, max);
+      continuousStepGenerator.setMaxStepLength(0.50);
+      continuousStepGenerator.setSupportFootBasedFootstepAdjustment(false);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
       packetCommunicator.attachListener(FootstepStatusMessage.class, continuousStepGenerator::consumeFootstepStatus);
 
-      swingHeight = messager.createInput(WalkingSwingHeight, 0.12);
+      swingHeight = messager.createInput(WalkingSwingHeight, 0.05);
       swingDuration = messager.createInput(WalkingSwingDuration, walkingControllerParameters.getDefaultSwingTime());
       transferDuration = messager.createInput(WalkingTransferDuration, walkingControllerParameters.getDefaultTransferTime());
-      trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 0.5);
+      trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
 
       animationTimer = new AnimationTimer()
       {
@@ -123,10 +157,43 @@ public class StepGeneratorJavaFXController
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
 
-//      messager.registerTopicListener(ButtonXState, state -> processPunch(RobotSide.LEFT, state));
-//      messager.registerTopicListener(ButtonYState, state -> processPunch(RobotSide.RIGHT, state));
+      messager.registerTopicListener(ButtonXState, state -> {
+         if (state == ButtonState.PRESSED)
+         {
+            if (isInDoubleSupport.getValue())
+               flamingoHomeStance(RobotSide.LEFT);
+            else if (!isLeftFootInSupport.get())
+               putFootDown(RobotSide.LEFT);
+         }
+      });
+      messager.registerTopicListener(ButtonBState, state -> {
+         if (state == ButtonState.PRESSED)
+         {
+            if (isInDoubleSupport.getValue())
+               flamingoHomeStance(RobotSide.RIGHT);
+            else if (!isRightFootInSupport.get())
+               putFootDown(RobotSide.RIGHT);
+         }
+      });
 
-      messager.registerTopicListener(ButtonAState, state -> toggleWalking(state == ButtonState.PRESSED));
+      messager.registerTopicListener(ButtonYState, state -> {
+         if (isInDoubleSupport.getValue())
+            return;
+
+         RobotSide kickSide = isRightFootInSupport.get() ? RobotSide.LEFT : RobotSide.RIGHT;
+
+         if (state == ButtonState.PRESSED)
+            kick(kickSide);
+         else if (state == ButtonState.RELEASED)
+            flamingoHomeStance(kickSide);
+      });
+
+      messager.registerTopicListener(ButtonLeftBumperState, state -> {
+         if (state == ButtonState.PRESSED)
+            sendArmHomeConfiguration(RobotSide.values);
+      });
+      messager.registerTopicListener(ButtonRightBumperState, state -> startWalking(state == ButtonState.PRESSED));
+      messager.registerTopicListener(ButtonRightBumperState, state -> stopWalking(state == ButtonState.RELEASED));
       messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateHeadingVelocity);
@@ -134,37 +201,38 @@ public class StepGeneratorJavaFXController
       packetCommunicator.attachListener(WalkingControllerFailureStatusMessage.class, packet -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.FREEZE));
       messager.registerTopicListener(ButtonStartState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.STAND_PREP));
+      packetCommunicator.attachListener(CapturabilityBasedStatus.class, status -> {
+         isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
+         isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
+      });
    }
 
    private void updateForwardVelocity(double alpha)
    {
-      double minMaxVelocity = 0.15;
+      double minMaxVelocity = 0.30;
       forwardVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void updateLateralVelocity(double alpha)
    {
-      double minMaxVelocity = 0.15;
+      double minMaxVelocity = 0.30;
       lateralVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void updateHeadingVelocity(double alpha)
    {
-      double minMaxVelocity = Math.PI / 6.0;
+      double minMaxVelocity = Math.PI / 4.0;
+      if (forwardVelocityProperty.get() < -1.0e-10)
+         alpha = -alpha;
       headingVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
-   private void toggleWalking(boolean confirm)
+   private void startWalking(boolean confirm)
    {
       if (confirm)
       {
-         continuousStepGenerator.toggleWalking();
-         if (!continuousStepGenerator.isWalking())
-         {
-            PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-            pauseWalkingMessage.setPause(true);
-            packetCommunicator.send(pauseWalkingMessage);
-         }
+         isWalking.set(true);
+         continuousStepGenerator.startWalking();
       }
    }
 
@@ -172,15 +240,23 @@ public class StepGeneratorJavaFXController
    {
       if (confirm)
       {
+         isWalking.set(false);
+         footstepsToSendReference.set(null);
          continuousStepGenerator.stopWalking();
-         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-         pauseWalkingMessage.setPause(true);
-         packetCommunicator.send(pauseWalkingMessage);
+         sendPauseMessage();
       }
+   }
+
+   private void sendPauseMessage()
+   {
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+      pauseWalkingMessage.setPause(true);
+      packetCommunicator.send(pauseWalkingMessage);
    }
 
    public void sendLowLevelControlModeRequest(AtlasLowLevelControlMode mode)
    {
+      stopWalking(true);
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
       message.setRequestedAtlasLowLevelControlMode(mode.toByte());
       packetCommunicator.send(message);
@@ -196,16 +272,19 @@ public class StepGeneratorJavaFXController
          footstepNode.add(createFootstep(footstepDataMessage));
       }
       footstepsToVisualizeReference.set(footstepNode);
+//      footstepDataListMessage.setAreFootstepsAdjustable(true);
       footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
    }
 
    private void sendFootsteps()
    {
       FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
-      if (footstepsToSend != null)
+      if (footstepsToSend != null && isWalking.get())
       {
          packetCommunicator.send(footstepsToSend);
       }
+      if (!isWalking.get())
+         sendPauseMessage();
    }
 
    private Node createFootstep(FootstepDataMessage footstepDataMessage)
@@ -233,19 +312,22 @@ public class StepGeneratorJavaFXController
          sendArmHomeConfiguration(robotSide);
    }
 
-   private void sendArmHomeConfiguration(RobotSide robotSide)
+   private void sendArmHomeConfiguration(RobotSide... robotSides)
    {
-      double[] jointAngles = new double[7];
-      int index = 0;
-      jointAngles[index++] = robotSide.negateIfRightSide(0.785398); // ArmJointName.SHOULDER_YAW        
-      jointAngles[index++] = robotSide.negateIfRightSide(-0.52379); // ArmJointName.SHOULDER_ROLL       
-      jointAngles[index++] = 2.33708; // ArmJointName.ELBOW_PITCH         
-      jointAngles[index++] = robotSide.negateIfRightSide(2.35619); // ArmJointName.ELBOW_ROLL          
-      jointAngles[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
-      jointAngles[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
-      jointAngles[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
-      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration.get(), jointAngles);
-      packetCommunicator.send(message);
+      for (RobotSide robotSide : robotSides)
+      {
+         double[] jointAngles = new double[7];
+         int index = 0;
+         jointAngles[index++] = robotSide.negateIfRightSide(0.785398); // ArmJointName.SHOULDER_YAW        
+         jointAngles[index++] = robotSide.negateIfRightSide(-0.52379); // ArmJointName.SHOULDER_ROLL       
+         jointAngles[index++] = 2.33708; // ArmJointName.ELBOW_PITCH         
+         jointAngles[index++] = robotSide.negateIfRightSide(2.35619); // ArmJointName.ELBOW_ROLL          
+         jointAngles[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
+         jointAngles[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
+         jointAngles[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
+         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 3.0, jointAngles);
+         packetCommunicator.send(message);
+      }
    }
 
    private void sendArmStraightConfiguration(RobotSide robotSide)
@@ -276,6 +358,45 @@ public class StepGeneratorJavaFXController
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = createTrajectoryPoint1DMessage(trajectoryDuration.get(), jointAngles1[i], 0.0);
          jointTrajectoryMessages.get(i).getTrajectoryPoints().add().set(trajectoryPoint1DMessage);
       }
+      packetCommunicator.send(message);
+   }
+
+   private void flamingoHomeStance(RobotSide robotSide)
+   {
+      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
+      footPose.appendTranslation(0.0, robotSide.negateIfRightSide(inPlaceStepWidth), 0.15);
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration.get(), footPose);
+      packetCommunicator.send(message);
+   }
+
+   private void putFootDown(RobotSide robotSide)
+   {
+      if (isFootInSupport.get(robotSide).get())
+         return;
+
+      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
+      footPose.appendTranslation(0.0, robotSide.negateIfRightSide(inPlaceStepWidth), 0.0);
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration.get(), footPose);
+      packetCommunicator.send(message);
+
+      packetCommunicator.send(HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD));
+   }
+
+   private void kick(RobotSide robotSide)
+   {
+      if (isFootInSupport.get(robotSide).get())
+         return;
+
+      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
+      footPose.appendTranslation(0.60, robotSide.negateIfRightSide(inPlaceStepWidth), 0.35);
+      footPose.appendPitchRotation(-0.8);
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.33 * trajectoryDuration.get(), footPose);
       packetCommunicator.send(message);
    }
 
