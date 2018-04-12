@@ -23,12 +23,12 @@ public class QuadrupedTestBehaviors
    {
       variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.DO_NOTHING));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.025));
       conductor.simulate();
 
       variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.STAND_READY));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
       conductor.simulate();
    }
 
