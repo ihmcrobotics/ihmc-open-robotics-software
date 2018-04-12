@@ -20,6 +20,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -122,6 +123,7 @@ public class JoystickBasedSteppingMainUI
       javaFXRobotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
       cameraTracking.stop();
+      packetCommunicator.send(HumanoidMessageTools.createBDIBehaviorCommandPacket(true));
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
       pauseWalkingMessage.setPause(true);
       packetCommunicator.send(pauseWalkingMessage);
