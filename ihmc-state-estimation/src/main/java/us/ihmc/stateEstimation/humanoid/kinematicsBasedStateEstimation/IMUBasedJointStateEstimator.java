@@ -3,6 +3,10 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -11,9 +15,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Creates an alpha filter defined by:
@@ -25,8 +26,8 @@ import java.util.Map;
 public class IMUBasedJointStateEstimator
 {
    private final IMUBasedJointVelocityEstimator velocityEstimator;
-   private final YoDouble alphaVelocity;
-   private final YoDouble alphaPosition;
+   private final YoDouble velocityBreakFrequency;
+   private final YoDouble positionBreakFrequency;
    private final GeometricJacobian jacobian;
    private final SensorOutputMapReadOnly sensorMap;
    private final YoDouble slopTime;
@@ -46,10 +47,10 @@ public class IMUBasedJointStateEstimator
       this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, pelvisIMU, chestIMU, registry);
 
       String namePrefix = "imuBasedJointVelocityEstimator";
-      alphaVelocity = new YoDouble(namePrefix + "AlphaFuseVelocity", registry);
-      alphaVelocity.set(0.0);
-      alphaPosition = new YoDouble(namePrefix + "AlphaFusePosition", registry);
-      alphaPosition.set(0.0);
+      velocityBreakFrequency = new YoDouble(namePrefix + "AlphaFuseVelocity", registry);
+      velocityBreakFrequency.set(0.0);
+      positionBreakFrequency = new YoDouble(namePrefix + "AlphaFusePosition", registry);
+      positionBreakFrequency.set(0.0);
 
       this.estimatorDT = estimatorDT;
       this.slopTime = new YoDouble(namePrefix + "SlopTime", registry);
@@ -64,15 +65,18 @@ public class IMUBasedJointStateEstimator
       }
    }
 
-   public void setAlphaFuse(double alphaVelocity, double alphaPosition)
+   public void setFusingBreakFrequency(double velocityBreakFrequency, double positionBreakFrequency)
    {
-      this.alphaVelocity.set(alphaVelocity);
-      this.alphaPosition.set(alphaPosition);
+      this.velocityBreakFrequency.set(velocityBreakFrequency);
+      this.positionBreakFrequency.set(positionBreakFrequency);
    }
 
    public void compute()
    {
       velocityEstimator.compute();
+
+      double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getDoubleValue(), estimatorDT);
+      double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getDoubleValue(), estimatorDT);
 
       for (int i = 0; i < joints.length; i++)
       {
@@ -80,13 +84,13 @@ public class IMUBasedJointStateEstimator
 
          double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);
-         double qd_fused = (1.0 - alphaVelocity.getDoubleValue()) * qd_sensorMap + alphaVelocity.getDoubleValue() * qd_IMU;
+         double qd_fused = (1.0 - alphaVelocity) * qd_sensorMap + alphaVelocity * qd_IMU;
 
          jointVelocities.get(joint).update(qd_fused);
 
          double q_sensorMap = sensorMap.getJointPositionProcessedOutput(joint);
          double q_IMU = jointPositions.get(joint).getDoubleValue() + estimatorDT * qd_IMU; // is qd_IMU or qd_fused better here?
-         double q_fused = (1.0 - alphaPosition.getDoubleValue()) * q_sensorMap + alphaPosition.getDoubleValue() * q_IMU;
+         double q_fused = (1.0 - alphaPosition) * q_sensorMap + alphaPosition * q_IMU;
 
          jointPositionsFromIMUOnly.get(joint).set(q_IMU);
          jointPositions.get(joint).set(q_fused);
