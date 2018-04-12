@@ -12,6 +12,7 @@ import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
+import us.ihmc.atlas.parameters.AtlasJumpControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasPlanarRegionFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -33,6 +34,7 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -109,6 +111,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasSensorInformation sensorInformation;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
+   private final AtlasJumpControllerParameters jumpControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
@@ -172,6 +175,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
+      jumpControllerParameters = new AtlasJumpControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
 
@@ -209,6 +213,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+   
+   @Override
+   public JumpControllerParameters getJumpControlParameters()
+   {
+      return jumpControllerParameters;
    }
 
    @Override

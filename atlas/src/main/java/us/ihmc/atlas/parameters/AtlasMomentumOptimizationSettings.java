@@ -10,11 +10,26 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
+   private final Vector3D linearMomentumWeight = new Vector3D(2.0, 2.0, 2.0);
+   private final Vector3D angularMomentumWeight = new Vector3D(2.0, 2.0, 2.0);
+
+   private final Vector3D footAngularWeight = new Vector3D(0.25, 0.25, 0.5);
+   private final Vector3D footLinearWeight = new Vector3D(15.0, 15.0, 25.0);
+
+   private final Vector3D pelvisAngularWeight = new Vector3D(10.0, 10.0, 10.0);
+   private final Vector3D pelvisLinearWeight = new Vector3D(10.0, 10.0, 50.0);
+   
+   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
+   private final Vector3D handAngularWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D handLinearWeight = new Vector3D(5.0,5.0,5.0);
+
    // defaults for unscaled model:
    private static final double defaultRhoWeight = 0.00001;
    private static final double defaultRhoMin = 4.0;
@@ -65,18 +80,18 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       jointspaceWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));
       userModeWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));
 
-      taskspaceAngularWeightGroups.add(new GroupParameter<>("Chest", jointMap.getChestName()));
-      taskspaceAngularWeightGroups.add(new GroupParameter<>("Head", jointMap.getHeadName()));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Chest", chestAngularWeight, jointMap.getChestName()));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Head", headAngularWeight, jointMap.getHeadName()));
 
-      taskspaceAngularWeightGroups.add(new GroupParameter<>("Pelvis", jointMap.getPelvisName()));
-      taskspaceLinearWeightGroups.add(new GroupParameter<>("Pelvis", jointMap.getPelvisName()));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, jointMap.getPelvisName()));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, jointMap.getPelvisName()));
 
       List<String> handNames = jointMap.getHandNames();
       List<String> footNames = jointMap.getFootNames();
-      taskspaceAngularWeightGroups.add(new GroupParameter<>("Hand", handNames));
-      taskspaceLinearWeightGroups.add(new GroupParameter<>("Hand", handNames));
-      taskspaceAngularWeightGroups.add(new GroupParameter<>("Foot", footNames));
-      taskspaceLinearWeightGroups.add(new GroupParameter<>("Foot", footNames));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Hand", handAngularWeight, handNames));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
 
       this.nContactableBodies = numberOfContactableBodies;
    }
@@ -218,5 +233,17 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public boolean getDeactivateRhoWhenNotInContact()
    {
       return disableRhosWhenNotInContact;
+   }
+   
+   @Override
+   public Vector3DReadOnly getLinearMomentumWeight()
+   {
+      return linearMomentumWeight;
+   }
+   
+   @Override
+   public Vector3DReadOnly getAngularMomentumWeight()
+   {
+      return angularMomentumWeight;
    }
 }
