@@ -47,8 +47,6 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
-      
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

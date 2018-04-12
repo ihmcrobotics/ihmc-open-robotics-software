@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.communication.commands;
 
 import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 
 public class QuadrupedRequestedSteppingStateCommand implements Command<QuadrupedRequestedSteppingStateCommand, QuadrupedRequestedSteppingStateMessage>
 {

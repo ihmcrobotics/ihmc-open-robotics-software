@@ -44,6 +44,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
 }
 
 testDependencies {

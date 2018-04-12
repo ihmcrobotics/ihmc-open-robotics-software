@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.controllers.PIDController;
@@ -62,7 +62,7 @@ public class QuadrupedCenterOfMassHeightManager
 
    private final double controlDT;
 
-   public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
+   public QuadrupedCenterOfMassHeightManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                              YoVariableRegistry parentRegistry)
    {
       this.physicalProperties = physicalProperties;

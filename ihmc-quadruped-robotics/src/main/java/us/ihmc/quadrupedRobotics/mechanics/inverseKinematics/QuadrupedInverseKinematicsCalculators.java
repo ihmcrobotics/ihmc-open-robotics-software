@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -31,9 +32,9 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
    protected final JointDesiredOutputList jointDesiredOutputList;
 
-   public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
-         FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public QuadrupedInverseKinematicsCalculators(FullQuadrupedRobotModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
+                                                FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+                                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.jointDesiredOutputList = jointDesiredOutputList;
 
@@ -111,7 +112,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
       private final QuadrupedReferenceFrames referenceFrames;
 
-      public QuadrantHolder(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
+      public QuadrantHolder(RobotQuadrant robotQuadrant, FullQuadrupedRobotModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
             QuadrupedReferenceFrames referenceFrames, FullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.referenceFrames = referenceFrames;

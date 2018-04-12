@@ -68,11 +68,11 @@ public class PDController extends AbstractPDController
       return positionDeadband.getValue();
    }
 
-   public void setGains(PDGainsReadOnly pdGainsReadOnly)
+   public void setGains(PDGainsReadOnly gains)
    {
-      setProportionalGain(pdGainsReadOnly.getKp());
-      setDerivativeGain(pdGainsReadOnly.getKd());
-      setPositionDeadband(pdGainsReadOnly.getPositionDeadband());
+      setProportionalGain(gains.getKp());
+      setDerivativeGain(gains.getKd());
+      setPositionDeadband(gains.getPositionDeadband());
    }
 
    public void setProportionalGain(double proportionalGain)

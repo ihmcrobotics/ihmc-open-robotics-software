@@ -1,8 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInitialPositionParameters
 {

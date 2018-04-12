@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -46,7 +46,7 @@ public class QuadrupedMomentumRateOfChangeModule
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FrameVector3D dcmVelocitySetpoint = new FrameVector3D();
 
-   public QuadrupedMomentumRateOfChangeModule(QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();
       mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -20,7 +20,7 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    // YoVariables
-   protected final QuadrupedForceControllerToolbox controllerToolbox;
+   protected final QuadrupedControllerToolbox controllerToolbox;
    protected final RobotQuadrant robotQuadrant;
 
    private final YoDouble timestamp;
@@ -40,7 +40,7 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
 
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
-   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
+   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;

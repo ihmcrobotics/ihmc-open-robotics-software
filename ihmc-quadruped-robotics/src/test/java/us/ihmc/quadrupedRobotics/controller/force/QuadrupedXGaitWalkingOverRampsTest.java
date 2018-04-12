@@ -10,7 +10,7 @@ import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
@@ -73,7 +73,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       poseTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
@@ -96,17 +95,17 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor.concludeTesting();
    }
    
-   public void testWalkingDownSlope(QuadrupedSimulationInitialPositionParameters initialPosition) throws IOException
+   public void testWalkingDownSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       walkSlope(0.2, initialPosition);
    }
 
-   public void testWalkingUpSlope(QuadrupedSimulationInitialPositionParameters initialPosition) throws IOException
+   public void testWalkingUpSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       walkSlope(-0.1, initialPosition);
    }
 
-   private void walkSlope(double slope, QuadrupedSimulationInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
+   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       
@@ -124,7 +123,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor.simulate();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

@@ -2,11 +2,11 @@ package us.ihmc.quadrupedRobotics.communication.commands;
 
 import controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 
 public class QuadrupedRequestedControllerStateCommand implements Command<QuadrupedRequestedControllerStateCommand, QuadrupedRequestedControllerStateMessage>
 {
-   private QuadrupedForceControllerRequestedEvent requestedControllerState;
+   private QuadrupedControllerRequestedEvent requestedControllerState;
 
    @Override
    public void clear()
@@ -23,15 +23,15 @@ public class QuadrupedRequestedControllerStateCommand implements Command<Quadrup
    @Override
    public void set(QuadrupedRequestedControllerStateMessage message)
    {
-      requestedControllerState = QuadrupedForceControllerRequestedEvent.fromByte(message.getQuadrupedControllerName());
+      requestedControllerState = QuadrupedControllerRequestedEvent.fromByte(message.getQuadrupedControllerName());
    }
 
-   public void setRequestedControllerState(QuadrupedForceControllerRequestedEvent requestedControllerState)
+   public void setRequestedControllerState(QuadrupedControllerRequestedEvent requestedControllerState)
    {
       this.requestedControllerState = requestedControllerState;
    }
 
-   public QuadrupedForceControllerRequestedEvent getRequestedControllerState()
+   public QuadrupedControllerRequestedEvent getRequestedControllerState()
    {
       return requestedControllerState;
    }
