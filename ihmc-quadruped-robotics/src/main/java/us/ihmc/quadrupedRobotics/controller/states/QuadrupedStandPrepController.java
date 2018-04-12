@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -15,6 +16,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
@@ -32,16 +34,18 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 25.0);
+   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 20.0);
    private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 5.0);
 
+   private final YoBoolean yoUseForceFeedbackControl;
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters, YoVariableRegistry parentRegistry)
+   public QuadrupedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters,
+                                       QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
    {
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
@@ -54,6 +58,9 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectories.add(new MinimumJerkTrajectory());
       }
 
+      yoUseForceFeedbackControl = new YoBoolean("useForceControlStandPrep", registry);
+      yoUseForceFeedbackControl.set(controlMode == QuadrupedControlMode.FORCE);
+
       parentRegistry.addChild(registry);
    }
 
@@ -63,15 +70,17 @@ public class QuadrupedStandPrepController implements QuadrupedController
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
-         jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+         if (yoUseForceFeedbackControl.getBooleanValue())
+            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+         else
+            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
-         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0,
-               trajectoryTimeParameter.getValue());
+         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
       }
 
       // This is a new trajectory. We start at time 0.

@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
-   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.32);
+   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.5);
 
    @Override
    public Point3D getInitialBodyPosition()
@@ -21,12 +21,12 @@ public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInit
    @Override
    double getHipPitchAngle()
    {
-      return 1.2;
+      return 0.8;
    }
 
    @Override
    double getKneePitchAngle()
    {
-      return -2.1;
+      return -1.4;
    }
 }

@@ -71,6 +71,16 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private QuadrupedStepTeleopManager stepTeleopManager;
    private QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
 
+   public GenericQuadrupedTestFactory()
+   {
+      this(false);
+   }
+
+   public GenericQuadrupedTestFactory(boolean keepSCSUp)
+   {
+      simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+   }
+
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
