@@ -10,9 +10,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -36,7 +38,7 @@ public class QuadrupedMomentumRateOfChangeModule
 
    private double desiredCoMHeightAcceleration;
 
-   private final YoFrameVector3D linearMomentumRateWeight = new YoFrameVector3D("linearMomentumRateWeight", worldFrame, registry);
+   private final ParameterVector3D linearMomentumRateWeight = new ParameterVector3D("linearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
 
@@ -60,8 +62,6 @@ public class QuadrupedMomentumRateOfChangeModule
 
       dcmPositionController = new DivergentComponentOfMotionController(comFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
 
-      linearMomentumRateWeight.set(5.0, 5.0, 2.5);
-      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
       momentumRateCommand.setSelectionMatrixForLinearControl();
 
       parentRegistry.addChild(registry);
