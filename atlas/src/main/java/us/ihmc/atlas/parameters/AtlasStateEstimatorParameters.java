@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -373,19 +374,20 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    {
       return true;
    }
-   
+
    @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   public double getBreakFrequencyForSpineJointVelocityEstimation()
    {
       // 04/24/2017 get rid of pelvis shaking
-      return 0.85;
+      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.001);
    }
 
    @Override
-   public double getAlphaIMUsForSpineJointPositionEstimation()
+   public double getBreakFrequencyForSpineJointPositionEstimation()
    {
       // 04/24/2017 get rid of pelvis shaking
-      return runningOnRealRobot ? 0.995 : 0.0;
+      double alpha = runningOnRealRobot ? 0.995 : 0.0;
+      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(alpha, 0.001);
    }
 
    @Override

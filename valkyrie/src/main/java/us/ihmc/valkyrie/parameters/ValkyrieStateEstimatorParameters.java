@@ -33,6 +33,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -508,9 +509,9 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   public double getBreakFrequencyForSpineJointVelocityEstimation()
    {
-      return 0.95; // 35 Hz
+      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.002);
    }
 
    /**
