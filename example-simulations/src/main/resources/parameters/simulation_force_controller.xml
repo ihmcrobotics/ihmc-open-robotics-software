@@ -155,6 +155,9 @@
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="500.0"/>
             </registry>
             <registry name="QuadrupedSteppingState">
+                <registry name="QuadrupedStepMessageHandler">
+                    <parameter name="haltTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                </registry>
                 <registry name="YoQuadrupedXGaitSettings">
                     <parameter name="stanceLengthLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                     <parameter name="stanceLengthUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.4"/>
@@ -180,34 +183,6 @@
                 <registry name="QuadrupedXGaitStepStream">
                     <parameter name="initialStepDelay" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                     <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
-                </registry>
-                <registry name="QuadrupedStandController">
-                    <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
-                    <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-                    <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="500.0"/>
-                    <parameter name="contactPressureLowerLimitParameter" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                    <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                    <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                </registry>
-                <registry name="QuadrupedStepController">
-                    <registry name="QuadrupedStepMessageHandler">
-                        <parameter name="haltTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                    </registry>
-                    <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-                    <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="500.0"/>
-                    <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                    <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                    <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 </registry>
                 <registry name="QuadrupedForceBasedSoleWaypointController">
                     <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
