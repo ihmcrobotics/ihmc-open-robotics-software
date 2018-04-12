@@ -29,28 +29,28 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       return new GenericQuadrupedTestFactory();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 238.9)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1200000)
    public void testWalkingDownSlope() throws IOException
    {
       super.testWalkingDownSlope(new InitialWalkDownSlopePosition());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 431.3)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2200000)
    public void testWalkingOverShallowRamps() throws IOException
    {
       super.testWalkingOverShallowRamps(0.575);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 195.3)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 980000)
    public void testWalkingUpSlope() throws IOException
    {
       super.testWalkingUpSlope(new InitialWalkUpSlopePosition());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 405.9)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
