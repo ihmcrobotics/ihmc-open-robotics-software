@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.stateEstimator;
+package us.ihmc.quadrupedRobotics.estimator;
 
 import java.util.List;
 

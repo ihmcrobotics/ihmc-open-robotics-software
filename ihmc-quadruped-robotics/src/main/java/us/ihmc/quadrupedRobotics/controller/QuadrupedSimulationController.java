@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.quadrupedRobotics.controller;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.OutputWriter;
