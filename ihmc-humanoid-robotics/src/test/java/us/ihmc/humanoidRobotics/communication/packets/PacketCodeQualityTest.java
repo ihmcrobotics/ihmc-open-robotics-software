@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -205,6 +206,9 @@ public class PacketCodeQualityTest
                   if (method.getParameterTypes()[0] == Object.class)
                      continue;
                }
+
+               if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && Supplier.class.isAssignableFrom(method.getReturnType()))
+                     continue;
 
                if (methodName.equals("set"))
                {
