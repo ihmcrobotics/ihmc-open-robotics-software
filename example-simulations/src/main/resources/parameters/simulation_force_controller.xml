@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <parameters>
     <registry name="QuadrupedSimulationController">
-        <registry name="QuadrupedForceControllerManager">
+        <registry name="QuadrupedControllerManager">
             <registry name="QuadrupedFootControlModule">
                 <parameter name="touchdownPressureLimit" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                 <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="-10.0" max="10.0" value="1"/>
@@ -136,7 +136,7 @@
                 <parameter name="stateChangeSmootherSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.04"/>
                 <parameter name="stateChangeSmootherSlopBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
             </registry>
-            <registry name="QuadrupedForceBasedStandPrepController">
+            <registry name="QuadrupedStandPrepController">
                 <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
@@ -149,7 +149,7 @@
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="500.0"/>
                 <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="false"/>
             </registry>
-            <registry name="QuadrupedForceBasedFreezeController">
+            <registry name="QuadrupedFreezeController">
                 <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
                 <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="500.0"/>
@@ -217,7 +217,7 @@
                     <parameter name="useInitialSoleForces" type="BooleanParameter" min="0.0" max="1.0" value="false"/>
                 </registry>
             </registry>
-            <registry name="QuadrupedForceBasedFallController">
+            <registry name="QuadrupedFallController">
                 <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
                 <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
