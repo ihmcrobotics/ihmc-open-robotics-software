@@ -1,25 +1,12 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonAState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonLeftBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonLeftStickState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonRightBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonRightStickState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonSelectState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonStartState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonXBoxState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonXState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonYState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftTriggerAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightTriggerAxis;
-
 import net.java.games.input.Event;
 import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
@@ -28,6 +15,57 @@ import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class XBoxOneJavaFXController
 {
+   public static Topic<ButtonState> ButtonAState, ButtonBState, ButtonXState, ButtonYState;
+   public static Topic<ButtonState> ButtonLeftBumperState, ButtonRightBumperState;
+   public static Topic<ButtonState> ButtonSelectState, ButtonStartState;
+   public static Topic<ButtonState> ButtonXBoxState;
+   public static Topic<ButtonState> ButtonLeftStickState, ButtonRightStickState;
+
+   public static Topic<Double> LeftStickXAxis, LeftStickYAxis;
+   public static Topic<Double> RightStickXAxis, RightStickYAxis;
+   public static Topic<Double> LeftTriggerAxis, RightTriggerAxis;
+
+   public static void addTopicsToAPI(MessagerAPIFactory apiFactory, Category rootCategory)
+   {
+      CategoryTheme XBoxOneController = apiFactory.createCategoryTheme("XBoxOneController");
+      CategoryTheme Button = apiFactory.createCategoryTheme("Button");
+      CategoryTheme A = apiFactory.createCategoryTheme("A");
+      CategoryTheme B = apiFactory.createCategoryTheme("B");
+      CategoryTheme X = apiFactory.createCategoryTheme("X");
+      CategoryTheme Y = apiFactory.createCategoryTheme("Y");
+      CategoryTheme LeftBumper = apiFactory.createCategoryTheme("LeftBumper");
+      CategoryTheme RightBumper = apiFactory.createCategoryTheme("RightBumper");
+      CategoryTheme Select = apiFactory.createCategoryTheme("Select");
+      CategoryTheme Start = apiFactory.createCategoryTheme("Start");
+      CategoryTheme XBox = apiFactory.createCategoryTheme("XBox");
+      CategoryTheme LeftTrigger = apiFactory.createCategoryTheme("LeftTrigger");
+      CategoryTheme RightTrigger = apiFactory.createCategoryTheme("RightTrigger");
+      CategoryTheme LeftStick = apiFactory.createCategoryTheme("LeftStick");
+      CategoryTheme RightStick = apiFactory.createCategoryTheme("RightStick");
+
+      TypedTopicTheme<ButtonState> State = apiFactory.createTypedTopicTheme("State");
+      TypedTopicTheme<Double> Axis = apiFactory.createTypedTopicTheme("Axis");
+
+      ButtonAState = rootCategory.child(XBoxOneController).child(Button).child(A).topic(State);
+      ButtonBState = rootCategory.child(XBoxOneController).child(Button).child(B).topic(State);
+      ButtonXState = rootCategory.child(XBoxOneController).child(Button).child(X).topic(State);
+      ButtonYState = rootCategory.child(XBoxOneController).child(Button).child(Y).topic(State);
+      ButtonLeftBumperState = rootCategory.child(XBoxOneController).child(Button).child(LeftBumper).topic(State);
+      ButtonRightBumperState = rootCategory.child(XBoxOneController).child(Button).child(RightBumper).topic(State);
+      ButtonSelectState = rootCategory.child(XBoxOneController).child(Button).child(Select).topic(State);
+      ButtonStartState = rootCategory.child(XBoxOneController).child(Button).child(Start).topic(State);
+      ButtonXBoxState = rootCategory.child(XBoxOneController).child(Button).child(XBox).topic(State);
+      ButtonLeftStickState = rootCategory.child(XBoxOneController).child(Button).child(LeftStick).topic(State);
+      ButtonRightStickState = rootCategory.child(XBoxOneController).child(Button).child(RightStick).topic(State);
+
+      LeftStickXAxis = rootCategory.child(XBoxOneController).child(LeftStick).child(X).topic(Axis);
+      LeftStickYAxis = rootCategory.child(XBoxOneController).child(LeftStick).child(Y).topic(Axis);
+      RightStickXAxis = rootCategory.child(XBoxOneController).child(RightStick).child(X).topic(Axis);
+      RightStickYAxis = rootCategory.child(XBoxOneController).child(RightStick).child(Y).topic(Axis);
+      LeftTriggerAxis = rootCategory.child(XBoxOneController).child(LeftTrigger).topic(Axis);
+      RightTriggerAxis = rootCategory.child(XBoxOneController).child(RightTrigger).topic(Axis);
+   }
+
    private final Messager messager;
    private final Joystick joystick;
 

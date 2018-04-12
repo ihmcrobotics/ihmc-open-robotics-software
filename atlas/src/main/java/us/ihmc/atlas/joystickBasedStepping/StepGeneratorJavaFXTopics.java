@@ -18,50 +18,37 @@ public class StepGeneratorJavaFXTopics
    private static final CategoryTheme Transfer = apiFactory.createCategoryTheme("Transfer");
    private static final CategoryTheme Trajectory = apiFactory.createCategoryTheme("Trajectory");
 
-   private static final CategoryTheme XBoxOneController = apiFactory.createCategoryTheme("XBoxOneController");
-   private static final CategoryTheme Button = apiFactory.createCategoryTheme("Button");
-   private static final CategoryTheme A = apiFactory.createCategoryTheme("A");
-   private static final CategoryTheme B = apiFactory.createCategoryTheme("B");
-   private static final CategoryTheme X = apiFactory.createCategoryTheme("X");
-   private static final CategoryTheme Y = apiFactory.createCategoryTheme("Y");
-   private static final CategoryTheme LeftBumper = apiFactory.createCategoryTheme("LeftBumper");
-   private static final CategoryTheme RightBumper = apiFactory.createCategoryTheme("RightBumper");
-   private static final CategoryTheme Select = apiFactory.createCategoryTheme("Select");
-   private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
-   private static final CategoryTheme XBox = apiFactory.createCategoryTheme("XBox");
-   private static final CategoryTheme LeftTrigger = apiFactory.createCategoryTheme("LeftTrigger");
-   private static final CategoryTheme RightTrigger = apiFactory.createCategoryTheme("RightTrigger");
-   private static final CategoryTheme LeftStick = apiFactory.createCategoryTheme("LeftStick");
-   private static final CategoryTheme RightStick = apiFactory.createCategoryTheme("RightStick");
-
    private static final TypedTopicTheme<Double> Height = apiFactory.createTypedTopicTheme("Height");
    private static final TypedTopicTheme<Double> Duration = apiFactory.createTypedTopicTheme("Duration");
-   private static final TypedTopicTheme<ButtonState> State = apiFactory.createTypedTopicTheme("State");
-   private static final TypedTopicTheme<Double> Axis = apiFactory.createTypedTopicTheme("Axis");
-
-   public static final Topic<ButtonState> ButtonAState = Root.child(XBoxOneController).child(Button).child(A).topic(State);
-   public static final Topic<ButtonState> ButtonBState = Root.child(XBoxOneController).child(Button).child(B).topic(State);
-   public static final Topic<ButtonState> ButtonXState = Root.child(XBoxOneController).child(Button).child(X).topic(State);
-   public static final Topic<ButtonState> ButtonYState = Root.child(XBoxOneController).child(Button).child(Y).topic(State);
-   public static final Topic<ButtonState> ButtonLeftBumperState = Root.child(XBoxOneController).child(Button).child(LeftBumper).topic(State);
-   public static final Topic<ButtonState> ButtonRightBumperState = Root.child(XBoxOneController).child(Button).child(RightBumper).topic(State);
-   public static final Topic<ButtonState> ButtonSelectState = Root.child(XBoxOneController).child(Button).child(Select).topic(State);
-   public static final Topic<ButtonState> ButtonStartState = Root.child(XBoxOneController).child(Button).child(Start).topic(State);
-   public static final Topic<ButtonState> ButtonXBoxState = Root.child(XBoxOneController).child(Button).child(XBox).topic(State);
-   public static final Topic<ButtonState> ButtonLeftStickState = Root.child(XBoxOneController).child(Button).child(LeftStick).topic(State);
-   public static final Topic<ButtonState> ButtonRightStickState = Root.child(XBoxOneController).child(Button).child(RightStick).topic(State);
-
-   public static final Topic<Double> LeftStickXAxis = Root.child(XBoxOneController).child(LeftStick).child(X).topic(Axis);
-   public static final Topic<Double> LeftStickYAxis = Root.child(XBoxOneController).child(LeftStick).child(Y).topic(Axis);
-   public static final Topic<Double> RightStickXAxis = Root.child(XBoxOneController).child(RightStick).child(X).topic(Axis);
-   public static final Topic<Double> RightStickYAxis = Root.child(XBoxOneController).child(RightStick).child(Y).topic(Axis);
-   public static final Topic<Double> LeftTriggerAxis = Root.child(XBoxOneController).child(LeftTrigger).topic(Axis);
-   public static final Topic<Double> RightTriggerAxis = Root.child(XBoxOneController).child(RightTrigger).topic(Axis);
 
    public static final Topic<Double> WalkingSwingHeight = Root.child(WalkingController).child(Swing).topic(Height);
    public static final Topic<Double> WalkingSwingDuration = Root.child(WalkingController).child(Swing).topic(Duration);
    public static final Topic<Double> WalkingTransferDuration = Root.child(WalkingController).child(Transfer).topic(Duration);
    public static final Topic<Double> WalkingTrajectoryDuration = Root.child(WalkingController).child(Trajectory).topic(Duration);
+
+   static
+   {
+      XBoxOneJavaFXController.addTopicsToAPI(apiFactory, Root);
+   }
+
+   public static final Topic<ButtonState> ButtonAState = XBoxOneJavaFXController.ButtonAState;
+   public static final Topic<ButtonState> ButtonBState = XBoxOneJavaFXController.ButtonBState;
+   public static final Topic<ButtonState> ButtonXState = XBoxOneJavaFXController.ButtonXState;
+   public static final Topic<ButtonState> ButtonYState = XBoxOneJavaFXController.ButtonYState;
+   public static final Topic<ButtonState> ButtonLeftBumperState = XBoxOneJavaFXController.ButtonLeftBumperState;
+   public static final Topic<ButtonState> ButtonRightBumperState = XBoxOneJavaFXController.ButtonRightBumperState;
+   public static final Topic<ButtonState> ButtonSelectState = XBoxOneJavaFXController.ButtonSelectState;
+   public static final Topic<ButtonState> ButtonStartState = XBoxOneJavaFXController.ButtonStartState;
+   public static final Topic<ButtonState> ButtonXBoxState = XBoxOneJavaFXController.ButtonXBoxState;
+   public static final Topic<ButtonState> ButtonLeftStickState = XBoxOneJavaFXController.ButtonLeftStickState;
+   public static final Topic<ButtonState> ButtonRightStickState = XBoxOneJavaFXController.ButtonRightStickState;
+
+   public static final Topic<Double> LeftStickXAxis = XBoxOneJavaFXController.LeftStickXAxis;
+   public static final Topic<Double> LeftStickYAxis = XBoxOneJavaFXController.LeftStickYAxis;
+   public static final Topic<Double> RightStickXAxis = XBoxOneJavaFXController.RightStickXAxis;
+   public static final Topic<Double> RightStickYAxis = XBoxOneJavaFXController.RightStickYAxis;
+   public static final Topic<Double> LeftTriggerAxis = XBoxOneJavaFXController.LeftTriggerAxis;
+   public static final Topic<Double> RightTriggerAxis = XBoxOneJavaFXController.RightTriggerAxis;
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
