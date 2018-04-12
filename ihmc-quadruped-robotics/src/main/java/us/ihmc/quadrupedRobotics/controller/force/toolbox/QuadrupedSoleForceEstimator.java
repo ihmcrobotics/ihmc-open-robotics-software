@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.*;
@@ -26,8 +26,8 @@ public class QuadrupedSoleForceEstimator
    private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
    private final QuadrantDependentList<FrameVector3D> soleContactForce;
    private final QuadrantDependentList<FramePoint3D> solePosition;
-   private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
-   private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleVirtualForce;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleContactForce;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
@@ -66,8 +66,8 @@ public class QuadrupedSoleForceEstimator
       yoSoleContactForce = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleVirtualForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleVirtualForceEstimate", worldFrame, registry));
-         yoSoleContactForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleContactForceEstimate", worldFrame, registry));
+         yoSoleVirtualForce.set(robotQuadrant, new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "SoleVirtualForceEstimate", worldFrame, registry));
+         yoSoleContactForce.set(robotQuadrant, new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "SoleContactForceEstimate", worldFrame, registry));
       }
 
       // initialize jacobian variables

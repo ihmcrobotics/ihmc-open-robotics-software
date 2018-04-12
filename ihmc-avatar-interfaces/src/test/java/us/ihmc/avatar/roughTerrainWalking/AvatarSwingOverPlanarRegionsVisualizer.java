@@ -21,13 +21,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class AvatarSwingOverPlanarRegionsVisualizer
 {
@@ -38,7 +38,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final YoVariableRegistry registry;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final YoFramePose solePose;
+   private final YoFramePoseUsingYawPitchRoll solePose;
    private final YoGraphicEllipsoid collisionSphere;
    private final YoGraphicPolygon stanceFootGraphic;
    private final YoGraphicPolygon swingStartGraphic;
@@ -63,7 +63,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
       swingOverPlanarRegionsTrajectoryExpander.attachVisualizer(this::update);
 
-      solePose = new YoFramePose("SolePose", WORLD, registry);
+      solePose = new YoFramePoseUsingYawPitchRoll("SolePose", WORLD, registry);
       AppearanceDefinition bubble = YoAppearance.LightBlue();
       bubble.setTransparency(0.5);
       collisionSphere = new YoGraphicEllipsoid("CollisionSphere", solePose.getPosition(), solePose.getOrientation(), bubble, new Vector3D());
@@ -100,7 +100,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
          }
          intersectionMap.put(swingOverPlanarRegionsTrajectoryCollisionType,
                              new YoGraphicPosition("IntersectionGraphic" + swingOverPlanarRegionsTrajectoryCollisionType.name(),
-                                                   new YoFramePoint("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
+                                                   new YoFramePoint3D("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
                                                                     registry),
                                                    size, appearance));
 

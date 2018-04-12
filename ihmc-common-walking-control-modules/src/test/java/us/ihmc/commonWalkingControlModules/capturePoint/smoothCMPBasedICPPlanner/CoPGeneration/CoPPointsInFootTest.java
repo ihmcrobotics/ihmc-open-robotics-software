@@ -25,8 +25,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * Test functionality of CoPPointsInFoot
@@ -97,8 +97,8 @@ public class CoPPointsInFootTest
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
-      YoFramePoint testLocation1 = new YoFramePoint("TestLocation1", footSpoof.getSoleFrame(), null);
-      YoFramePoint testLocation2 = new YoFramePoint("TestLocation2", footSpoof.getSoleFrame(), null);
+      YoFramePoint3D testLocation1 = new YoFramePoint3D("TestLocation1", footSpoof.getSoleFrame(), null);
+      YoFramePoint3D testLocation2 = new YoFramePoint3D("TestLocation2", footSpoof.getSoleFrame(), null);
       testLocation1.set(Math.random(), Math.random(), Math.random());
       testLocation2.set(Math.random(), Math.random(), Math.random());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.87, testLocation1);

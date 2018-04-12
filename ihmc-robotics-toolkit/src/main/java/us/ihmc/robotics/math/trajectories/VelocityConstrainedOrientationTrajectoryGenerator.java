@@ -13,11 +13,11 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 
 /**
@@ -55,14 +55,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameQuaternion initialOrientationDrifted;
-   private final YoFrameVector initialAngularVelocity;
+   private final YoFrameVector3D initialAngularVelocity;
    private final YoFrameQuaternion finalOrientation;
    private final YoFrameQuaternion finalOrientationDrifted;
-   private final YoFrameVector finalAngularVelocity;
+   private final YoFrameVector3D finalAngularVelocity;
 
    private final YoFrameQuaternion currentOrientation;
-   private final YoFrameVector currentAngularVelocity;
-   private final YoFrameVector currentAngularAcceleration;
+   private final YoFrameVector3D currentAngularVelocity;
+   private final YoFrameVector3D currentAngularAcceleration;
 
    private final YoPolynomial saturationPolynomial;
    private final YoDouble maxAngularVelocityMagnitudeAtLimits;
@@ -138,14 +138,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       {
          initialOrientation = new YoFrameQuaternion(namePrefix + initialOrientationName, trajectoryFrame, registry);
          initialOrientationDrifted = new YoFrameQuaternion(namePrefix + initialOrientationDriftedName, trajectoryFrame, registry);
-         initialAngularVelocity = new YoFrameVector(namePrefix + initialAngularVelocityName, trajectoryFrame, registry);
+         initialAngularVelocity = new YoFrameVector3D(namePrefix + initialAngularVelocityName, trajectoryFrame, registry);
          finalOrientation = new YoFrameQuaternion(namePrefix + finalOrientationName, trajectoryFrame, registry);
          finalOrientationDrifted = new YoFrameQuaternion(namePrefix + finalOrientationDriftedName, trajectoryFrame, registry);
-         finalAngularVelocity = new YoFrameVector(namePrefix + finalAngularVelocityName, trajectoryFrame, registry);
+         finalAngularVelocity = new YoFrameVector3D(namePrefix + finalAngularVelocityName, trajectoryFrame, registry);
 
          currentOrientation = new YoFrameQuaternion(namePrefix + currentOrientationName, trajectoryFrame, registry);
-         currentAngularVelocity = new YoFrameVector(namePrefix + currentAngularVelocityName, trajectoryFrame, registry);
-         currentAngularAcceleration = new YoFrameVector(namePrefix + currentAngularAccelerationName, trajectoryFrame, registry);
+         currentAngularVelocity = new YoFrameVector3D(namePrefix + currentAngularVelocityName, trajectoryFrame, registry);
+         currentAngularAcceleration = new YoFrameVector3D(namePrefix + currentAngularAccelerationName, trajectoryFrame, registry);
       }
 
       saturationPolynomial = new YoPolynomial(namePrefix + "SaturationPolynomial", 6, registry);
@@ -209,7 +209,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setInitialConditions(YoFrameQuaternion initialOrientation, YoFrameVector initialAngularVelocity)
+   public void setInitialConditions(YoFrameQuaternion initialOrientation, YoFrameVector3D initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
@@ -221,7 +221,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       setFinalAngularVelocity(finalAngularVelocity);
    }
 
-   public void setFinalConditions(YoFrameQuaternion finalOrientation, YoFrameVector finalAngularVelocity)
+   public void setFinalConditions(YoFrameQuaternion finalOrientation, YoFrameVector3D finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -352,14 +352,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    private final Vector3D tempAngularVelocityForDrift = new Vector3D();
 
-   private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quaternion driftToPack)
+   private void computeDrift(double time, double alphaDecay, YoFrameVector3D angularVelocity, Quaternion driftToPack)
    {
       tempAngularVelocityForDrift.set(angularVelocity);
       tempAngularVelocity.scale(alphaDecay);
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
-   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, YoDouble angularVelocityMagnitude, Quaternion driftToPack)
+   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector3D angularVelocity, YoDouble angularVelocityMagnitude, Quaternion driftToPack)
    {
       tempAngularVelocityForDrift.set(angularVelocity);
 

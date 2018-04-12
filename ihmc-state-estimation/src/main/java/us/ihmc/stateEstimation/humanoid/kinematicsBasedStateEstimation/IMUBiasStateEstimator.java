@@ -17,8 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -30,6 +28,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class IMUBiasStateEstimator implements IMUBiasProvider
 {
@@ -42,11 +42,11 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoDouble> orientationBiasMagnitudes = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> angularVelocityBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> linearAccelerationBiases = new ArrayList<>();
-   private final List<YoFrameVector> angularVelocityBiasesInWorld = new ArrayList<>();
-   private final List<YoFrameVector> linearAccelerationBiasesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> angularVelocityBiasesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> linearAccelerationBiasesInWorld = new ArrayList<>();
 
-   private final List<YoFrameVector> angularVelocitiesInWorld = new ArrayList<>();
-   private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> angularVelocitiesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> linearAccelerationsInWorld = new ArrayList<>();
    private final List<YoDouble> linearAccelerationMagnitudes = new ArrayList<>();
 
    private final BooleanProvider isAccelerationIncludingGravity;
@@ -123,9 +123,9 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, alphaProvider, registry);
          orientationBiases.add(orientationBias);
 
-         angularVelocitiesInWorld.add(new YoFrameVector("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
+         angularVelocitiesInWorld.add(new YoFrameVector3D("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
          
-         linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
+         linearAccelerationsInWorld.add(new YoFrameVector3D("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
          linearAccelerationMagnitudes.add(new YoDouble("unprocessed" + sensorName + "LinearAccelerationMagnitude", registry));
 
          orientationBiasMagnitudes.add(new YoDouble("estimated" + sensorName + "OrientationBiasMagnitude", registry));
@@ -135,8 +135,8 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          isBiasEstimated.add(new YoBoolean("is" + sensorName + "BiasEstimated", registry));
          isIMUOrientationBiasEstimated.add(new YoBoolean("is" + sensorName + "OrientationBiasEstimated", registry));
 
-         angularVelocityBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
-         linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
+         angularVelocityBiasesInWorld.add(new YoFrameVector3D("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
+         linearAccelerationBiasesInWorld.add(new YoFrameVector3D("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
       }
 
       parentRegistry.addChild(registry);

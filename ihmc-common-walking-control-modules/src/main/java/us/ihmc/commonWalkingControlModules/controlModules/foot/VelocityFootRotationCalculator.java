@@ -21,12 +21,12 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -67,7 +67,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    /** Linear velocity of the center of rotation that is transversal (perpendicular) to the line of rotation. */
    private final YoDouble yoCoRTransversalVelocity;
    /** Estimated line of rotation of the foot. It is actually here a line segment that remains contained in the foot. */
-   private final YoFrameLineSegment2d yoLineOfRotation;
+   private final YoFrameLineSegment2D yoLineOfRotation;
    /** Absolute angle of the line of rotation. */
    private final YoDouble yoAngleOfLoR;
    /** Alpha filter used to filter the yaw rate of the line of rotation. */
@@ -157,7 +157,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoCoRVelocityFiltered = FilteredVelocityYoFrameVector2d.createFilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity", "", generalDescription,
             yoCoRVelocityAlphaFilter, dt, registry, yoCoRPositionFiltered);
 
-      yoLineOfRotation = new YoFrameLineSegment2d(namePrefix + "LoRPosition", "", generalDescription, worldFrame, registry);
+      yoLineOfRotation = new YoFrameLineSegment2D(namePrefix + "LoRPosition", generalDescription, worldFrame, registry);
       yoAngleOfLoR = new YoDouble(namePrefix + "AngleOfLoR", generalDescription, registry);
       yoLoRAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LoRAngularVelocityAlphaFilter", generalDescription, registry);
       yoLoRAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered", generalDescription,

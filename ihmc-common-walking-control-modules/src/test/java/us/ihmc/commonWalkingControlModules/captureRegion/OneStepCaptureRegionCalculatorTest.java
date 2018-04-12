@@ -32,8 +32,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
@@ -43,6 +41,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class OneStepCaptureRegionCalculatorTest
@@ -421,7 +421,7 @@ public class OneStepCaptureRegionCalculatorTest
       double kinematicStepRange = 0.6;
       final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
       final SideDependentList<FrameConvexPolygon2D> footPolygons = new SideDependentList<>();
-      final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<>();
+      final SideDependentList<YoFrameConvexPolygon2D> yoFootPolygons = new SideDependentList<>();
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       final SideDependentList<YoArtifactPolygon> footArtifacts = new SideDependentList<>();
@@ -446,7 +446,7 @@ public class OneStepCaptureRegionCalculatorTest
          footConvexPolygon2d.update();
          footPolygons.put(robotSide, footConvexPolygon2d);
 
-         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", "", worldFrame, 4,
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", "", worldFrame, 4,
                registry);
          footConvexPolygon2d.changeFrame(worldFrame);
          yoFootPolygon.set(footConvexPolygon2d);
@@ -464,12 +464,12 @@ public class OneStepCaptureRegionCalculatorTest
       final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth,
             kinematicStepRange, ankleZUpFrames, registry, null);
 
-      final YoFrameConvexPolygon2d yoCaptureRegion = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, 50, registry);
+      final YoFrameConvexPolygon2D yoCaptureRegion = new YoFrameConvexPolygon2D("captureRegion", "", worldFrame, 50, registry);
       YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
       yoGraphicsListRegistry.registerArtifact("Capture", captureRegionArtifact);
       final YoEnum<RobotSide> yoSupportSide = new YoEnum<>("supportSide", registry, RobotSide.class);
       final YoDouble swingTimeRemaining = new YoDouble("swingTimeRemaining", registry);
-      final YoFramePoint2d yoICP = new YoFramePoint2d("ICP", worldFrame, registry);
+      final YoFramePoint2D yoICP = new YoFramePoint2D("ICP", worldFrame, registry);
       yoGraphicsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
       final double omega0 = 3.4;
 

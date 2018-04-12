@@ -22,9 +22,9 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -70,7 +70,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
-   private final YoFramePose distortedPlanePose;
+   private final YoFramePoseUsingYawPitchRoll distortedPlanePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final YoBoolean showViz;
@@ -141,7 +141,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
          final YoGraphicVector finalDirectionViz = new YoGraphicVector(namePrefix + "FinalDirection",
                finalPosition.buildUpdatedYoFramePointForVisualizationOnly(), finalDirection.buildUpdatedYoFrameVectorForVisualizationOnly(), 0.2,
                YoAppearance.Red());
-         distortedPlanePose = new YoFramePose(namePrefix + "DistortedPlane", ReferenceFrame.getWorldFrame(), registry);
+         distortedPlanePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "DistortedPlane", ReferenceFrame.getWorldFrame(), registry);
          final YoGraphicCoordinateSystem distortedPlaneViz = new YoGraphicCoordinateSystem(namePrefix + "DistortedPlan", distortedPlanePose, 0.1);
          YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "FinalApproachTraj");
          yoGraphicsList.add(currentPositionViz);
@@ -289,7 +289,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       xyPolynomial.compute(MathTools.clamp(time, t1, t2));
 
       currentDistortionPose.interpolate(initialDistortionPose, finalDistortionPose, xyPolynomial.getPosition());
-      distortedPlanePose.setAndMatchFrame(currentDistortionPose);
+      distortedPlanePose.setMatchingFrame(currentDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 

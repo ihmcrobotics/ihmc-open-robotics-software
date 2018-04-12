@@ -5,20 +5,20 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class OrientationAngularVelocityConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
    private final FiniteDifferenceAngularVelocityYoFrameVector localVelocityFromFD;
-   private final YoFrameVector angularVelocityToCheck;
+   private final YoFrameVector3D angularVelocityToCheck;
 
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
@@ -28,13 +28,13 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    private final ReferenceFrame referenceFrameUsedForComparison;
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
-   public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck, double updateDT,
+   public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector3D angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, orientation, angularVelocityToCheck, angularVelocityToCheck.getReferenceFrame(), updateDT, parentRegistry);
    }
 
-   public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck,
+   public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector3D angularVelocityToCheck,
          ReferenceFrame referenceFrameUsedForComparison, double updateDT, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "OrientationVelocityCheck");

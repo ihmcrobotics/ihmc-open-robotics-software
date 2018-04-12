@@ -15,8 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryCo
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
@@ -24,6 +22,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -74,9 +74,9 @@ public class PositionOptimizedTrajectoryGenerator
    private final YoInteger activeSegment;
    private final ArrayList<YoDouble> waypointTimes = new ArrayList<>();
 
-   private final YoFramePoint desiredPosition;
-   private final YoFrameVector desiredVelocity;
-   private final YoFrameVector desiredAcceleration;
+   private final YoFramePoint3D desiredPosition;
+   private final YoFrameVector3D desiredVelocity;
+   private final YoFrameVector3D desiredAcceleration;
 
    private final YoGraphicPolynomial3D trajectoryViz;
 
@@ -141,9 +141,9 @@ public class PositionOptimizedTrajectoryGenerator
       optimizeInOneTick.set(maxIterations >= 0);
       hasConverged.set(optimizeInOneTick.getBooleanValue());
 
-      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", trajectoryFrame, registry);
-      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", trajectoryFrame, registry);
-      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", trajectoryFrame, registry);
+      desiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", trajectoryFrame, registry);
+      desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", trajectoryFrame, registry);
+      desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", trajectoryFrame, registry);
 
       for (int i = 0; i < dimensions; i++)
       {

@@ -16,11 +16,11 @@ import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class QuadrupedBodyOrientationManager
 {
@@ -35,9 +35,9 @@ public class QuadrupedBodyOrientationManager
 
    private final ReferenceFrame bodyFrame;
    private final AxisAngleOrientationController bodyOrientationController;
-   private final YoFrameOrientation yoBodyOrientationSetpoint;
-   private final YoFrameVector yoBodyAngularVelocitySetpoint;
-   private final YoFrameVector yoComTorqueFeedforwardSetpoint;
+   private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
+   private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
+   private final YoFrameVector3D yoComTorqueFeedforwardSetpoint;
 
    private final FrameQuaternion desiredBodyOrientation;
    private final FrameQuaternion desiredBodyOrientationOffset;
@@ -51,7 +51,7 @@ public class QuadrupedBodyOrientationManager
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
-   private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
+   private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
 
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
@@ -70,9 +70,9 @@ public class QuadrupedBodyOrientationManager
 
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controllerToolbox.getRuntimeEnvironment().getControlDT(), registry);
-      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", worldFrame, registry);
-      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", worldFrame, registry);
-      yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", worldFrame, registry);
+      yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
+      yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
+      yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
@@ -145,7 +145,7 @@ public class QuadrupedBodyOrientationManager
       doControl();
 
       // update log variables
-      yoBodyOrientationSetpoint.setAndMatchFrame(desiredBodyOrientation);
+      yoBodyOrientationSetpoint.setMatchingFrame(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.setMatchingFrame(desiredBodyAngularVelocity);
       yoComTorqueFeedforwardSetpoint.setMatchingFrame(desiredBodyFeedForwardTorque);
 

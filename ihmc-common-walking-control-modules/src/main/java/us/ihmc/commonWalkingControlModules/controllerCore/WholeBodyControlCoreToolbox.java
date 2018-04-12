@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -59,13 +59,13 @@ public class WholeBodyControlCoreToolbox
    private PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private WrenchVisualizer wrenchVisualizer;
 
-   private YoFrameVector yoDesiredMomentumRateLinear;
-   private YoFrameVector yoAchievedMomentumRateLinear;
-   private YoFrameVector yoDesiredMomentumRateAngular;
-   private YoFrameVector yoAchievedMomentumRateAngular;
+   private YoFrameVector3D yoDesiredMomentumRateLinear;
+   private YoFrameVector3D yoAchievedMomentumRateLinear;
+   private YoFrameVector3D yoDesiredMomentumRateAngular;
+   private YoFrameVector3D yoAchievedMomentumRateAngular;
 
-   private YoFrameVector yoResidualRootJointForce;
-   private YoFrameVector yoResidualRootJointTorque;
+   private YoFrameVector3D yoResidualRootJointForce;
+   private YoFrameVector3D yoResidualRootJointTorque;
 
    private MotionQPInputCalculator motionQPInputCalculator;
    private WholeBodyControllerBoundCalculator qpBoundCalculator;
@@ -369,45 +369,45 @@ public class WholeBodyControlCoreToolbox
       return wrenchVisualizer;
    }
 
-   public YoFrameVector getYoDesiredMomentumRateLinear()
+   public YoFrameVector3D getYoDesiredMomentumRateLinear()
    {
       if (yoDesiredMomentumRateLinear == null)
-         yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", worldFrame, registry);
+         yoDesiredMomentumRateLinear = new YoFrameVector3D("desiredMomentumRateLinear", worldFrame, registry);
       return yoDesiredMomentumRateLinear;
    }
 
-   public YoFrameVector getYoAchievedMomentumRateLinear()
+   public YoFrameVector3D getYoAchievedMomentumRateLinear()
    {
       if (yoAchievedMomentumRateLinear == null)
-         yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", worldFrame, registry);
+         yoAchievedMomentumRateLinear = new YoFrameVector3D("achievedMomentumRateLinear", worldFrame, registry);
       return yoAchievedMomentumRateLinear;
    }
 
-   public YoFrameVector getYoDesiredMomentumRateAngular()
+   public YoFrameVector3D getYoDesiredMomentumRateAngular()
    {
       if (yoDesiredMomentumRateAngular == null)
-         yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", worldFrame, registry);
+         yoDesiredMomentumRateAngular = new YoFrameVector3D("desiredMomentumRateAngular", worldFrame, registry);
       return yoDesiredMomentumRateAngular;
    }
 
-   public YoFrameVector getYoAchievedMomentumRateAngular()
+   public YoFrameVector3D getYoAchievedMomentumRateAngular()
    {
       if (yoAchievedMomentumRateAngular == null)
-         yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", worldFrame, registry);
+         yoAchievedMomentumRateAngular = new YoFrameVector3D("achievedMomentumRateAngular", worldFrame, registry);
       return yoAchievedMomentumRateAngular;
    }
 
-   public YoFrameVector getYoResidualRootJointForce()
+   public YoFrameVector3D getYoResidualRootJointForce()
    {
       if (yoResidualRootJointForce == null)
-         yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
+         yoResidualRootJointForce = new YoFrameVector3D("residualRootJointForce", worldFrame, registry);
       return yoResidualRootJointForce;
    }
 
-   public YoFrameVector getYoResidualRootJointTorque()
+   public YoFrameVector3D getYoResidualRootJointTorque()
    {
       if (yoResidualRootJointTorque == null)
-         yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
+         yoResidualRootJointTorque = new YoFrameVector3D("residualRootJointTorque", worldFrame, registry);
       return yoResidualRootJointTorque;
    }
 

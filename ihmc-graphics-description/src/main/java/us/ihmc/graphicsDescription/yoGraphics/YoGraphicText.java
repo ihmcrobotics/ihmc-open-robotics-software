@@ -9,15 +9,15 @@ import java.awt.image.BufferedImage;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGraphicText extends YoGraphicAbstractShape
 {
    private final Graphics3DObject graphics3dObject;
    private final Font font = new Font("Lucida Sans", Font.BOLD, 26);
 
-   public YoGraphicText(String name, String text, YoFramePoint framePoint, YoFrameOrientation frameOrientation, double scale, Color backgroundColor,
+   public YoGraphicText(String name, String text, YoFramePoint3D framePoint, YoFrameYawPitchRoll frameOrientation, double scale, Color backgroundColor,
          Color textAppearance)
    {
       super(name, framePoint, frameOrientation, scale);

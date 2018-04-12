@@ -10,9 +10,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMultipleFramesHolder
+public class YoFramePointInMultipleFrames extends YoFramePoint3D implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
@@ -103,8 +104,8 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
    }
 
-   private YoFramePoint yoFramePointInWorld;
-   public YoFramePoint buildUpdatedYoFramePointForVisualizationOnly()
+   private YoFramePoint3D yoFramePointInWorld;
+   public YoFramePoint3D buildUpdatedYoFramePointForVisualizationOnly()
    {
       if (yoFramePointInWorld == null)
       {
@@ -112,12 +113,12 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
          if (!isReferenceFrameRegistered(worldFrame))
             registerReferenceFrame(worldFrame);
 
-         yoFramePointInWorld = new YoFramePoint(namePrefix, worldFrame.getName(), worldFrame, registry);
+         yoFramePointInWorld = new YoFramePoint3D(namePrefix, worldFrame.getName(), worldFrame, registry);
 
          attachVariableChangedListener(new VariableChangedListener()
          {
             private final FramePoint3D localFramePoint = new FramePoint3D();
-            private final YoFramePoint point = yoFramePointInWorld;
+            private final YoFramePoint3D point = yoFramePointInWorld;
 
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)

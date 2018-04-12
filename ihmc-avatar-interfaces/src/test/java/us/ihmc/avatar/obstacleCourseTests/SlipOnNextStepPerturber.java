@@ -8,8 +8,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -27,8 +27,8 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final YoEnum<SlipState> slipState;
    private final YoBoolean slipNextStep;
    private final YoDouble slipAfterTimeDelta, touchdownTimeForSlip;
-   private final YoFrameVector amountToSlipNextStep;
-   private final YoFrameOrientation rotationToSlipNextStep;
+   private final YoFrameVector3D amountToSlipNextStep;
+   private final YoFrameYawPitchRoll rotationToSlipNextStep;
 
    public SlipOnNextStepPerturber(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
@@ -40,8 +40,8 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       this.slipAfterTimeDelta = new YoDouble(sideString + "SlipAfterTimeDelta", registry);
       this.slipNextStep = new YoBoolean(sideString + "SlipNextStep", registry);
 
-      amountToSlipNextStep = new YoFrameVector(sideString + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      rotationToSlipNextStep = new YoFrameOrientation(sideString + "RotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      amountToSlipNextStep = new YoFrameVector3D(sideString + "AmountToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      rotationToSlipNextStep = new YoFrameYawPitchRoll(sideString + "RotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       slipState = new YoEnum<SlipState>(sideString + "SlipState", registry, SlipState.class);
       slipState.set(SlipState.NOT_SLIPPING);
 

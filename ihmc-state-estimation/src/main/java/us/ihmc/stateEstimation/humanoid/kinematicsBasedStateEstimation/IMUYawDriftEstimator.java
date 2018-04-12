@@ -13,12 +13,12 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -43,10 +43,10 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final YoDouble delayBeforeTrustingFoot = new YoDouble("delayBeforeTrustingFootIMUDrift", registry);
 
-   private final YoFramePoint referenceAverageFootPosition = new YoFramePoint("referenceAverageFootPositionIMUDrift", worldFrame, registry);
-   private final Map<RigidBody, YoFramePoint> referenceFootPositions = new LinkedHashMap<>();
-   private final YoFramePoint currentAverageFootPosition = new YoFramePoint("currentAverageFootPositionIMUDrift", worldFrame, registry);
-   private final Map<RigidBody, YoFramePoint> currentFootPositions = new LinkedHashMap<>();
+   private final YoFramePoint3D referenceAverageFootPosition = new YoFramePoint3D("referenceAverageFootPositionIMUDrift", worldFrame, registry);
+   private final Map<RigidBody, YoFramePoint3D> referenceFootPositions = new LinkedHashMap<>();
+   private final YoFramePoint3D currentAverageFootPosition = new YoFramePoint3D("currentAverageFootPositionIMUDrift", worldFrame, registry);
+   private final Map<RigidBody, YoFramePoint3D> currentFootPositions = new LinkedHashMap<>();
 
    private final YoDouble footLinearVelocityThreshold = new YoDouble("footLinearVelocityThreshold", registry);
    private final Map<RigidBody, YoDouble> currentFootLinearVelocities = new LinkedHashMap<>();
@@ -101,7 +101,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          RigidBody foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
-         YoFramePoint referenceFootPosition = new YoFramePoint(footNameCamelCase + "IMUDriftReference", worldFrame, registry);
+         YoFramePoint3D referenceFootPosition = new YoFramePoint3D(footNameCamelCase + "IMUDriftReference", worldFrame, registry);
          referenceFootPositions.put(foot, referenceFootPosition);
 
       }
@@ -110,7 +110,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       {
          RigidBody foot = allFeet.get(i);
          String footNameCamelCase = FormattingTools.underscoredToCamelCase(foot.getName(), false);
-         YoFramePoint currentFootPosition = new YoFramePoint(footNameCamelCase + "IMUDriftCurrentPosition", worldFrame, registry);
+         YoFramePoint3D currentFootPosition = new YoFramePoint3D(footNameCamelCase + "IMUDriftCurrentPosition", worldFrame, registry);
          currentFootPositions.put(foot, currentFootPosition);
 
       }

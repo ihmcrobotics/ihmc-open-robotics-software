@@ -5,8 +5,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
@@ -16,8 +16,8 @@ public class TrebuchetController implements RobotController
 
    private final YoBoolean isBallAttachedToRope = new YoBoolean("isBallAttachedToRope", registry);
 
-   private final YoFrameVector poleToBallPosition = new YoFrameVector("poleToBallPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector poleToBallVelocity = new YoFrameVector("poleToBallVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D poleToBallPosition = new YoFrameVector3D("poleToBallPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D poleToBallVelocity = new YoFrameVector3D("poleToBallVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble poleTipToBallCenterDistance = new YoDouble("poleTipToBallCenterDistance", registry);
    private final YoDouble poleTipToBallCenterVelocity = new YoDouble("poleTipToBallCenterVelocity", registry);
@@ -48,11 +48,11 @@ public class TrebuchetController implements RobotController
 
       // Calculate rope length and force:
 
-      YoFramePoint poleTipPosition = poleTipExternalForcePoint.getYoPosition();
-      YoFramePoint ballCenterPosition = ballCenterExternalForcePoint.getYoPosition();
+      YoFramePoint3D poleTipPosition = poleTipExternalForcePoint.getYoPosition();
+      YoFramePoint3D ballCenterPosition = ballCenterExternalForcePoint.getYoPosition();
 
-      YoFrameVector poleTipVelocity = poleTipExternalForcePoint.getYoVelocity();
-      YoFrameVector ballCenterVelocity = ballCenterExternalForcePoint.getYoVelocity();
+      YoFrameVector3D poleTipVelocity = poleTipExternalForcePoint.getYoVelocity();
+      YoFrameVector3D ballCenterVelocity = ballCenterExternalForcePoint.getYoVelocity();
 
       poleToBallPosition.sub(ballCenterPosition, poleTipPosition);
       poleToBallVelocity.sub(ballCenterVelocity, poleTipVelocity);

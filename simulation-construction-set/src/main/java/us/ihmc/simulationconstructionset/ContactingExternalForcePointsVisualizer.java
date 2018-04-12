@@ -11,21 +11,21 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ContactingExternalForcePointsVisualizer
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final List<YoFramePoint> contactPointsWorld = new ArrayList<YoFramePoint>();
+   private final List<YoFramePoint3D> contactPointsWorld = new ArrayList<YoFramePoint3D>();
    private final List<YoGraphicPosition> contactPointsViz = new ArrayList<YoGraphicPosition>();
    
-   private final List<YoFrameVector> contactNormals = new ArrayList<YoFrameVector>();
+   private final List<YoFrameVector3D> contactNormals = new ArrayList<YoFrameVector3D>();
    private final List<YoGraphicVector> contactNormalsViz = new ArrayList<YoGraphicVector>();
    
-   private final List<YoFrameVector> forceVectors = new ArrayList<YoFrameVector>();
+   private final List<YoFrameVector3D> forceVectors = new ArrayList<YoFrameVector3D>();
    private final List<YoGraphicVector> forceVectorsViz = new ArrayList<YoGraphicVector>();
 
    private double normalVectorScale = 0.03;
@@ -38,13 +38,13 @@ public class ContactingExternalForcePointsVisualizer
    {
       for (int i = 0; i < maxNumberOfYoGraphicPositions; i++)
       {
-         YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, worldFrame, this.registry);
+         YoFramePoint3D contactPointWorld = new YoFramePoint3D("contactPoint" + i, worldFrame, this.registry);
          contactPointsWorld.add(contactPointWorld);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          contactPointsViz.add(yoGraphicPosition);
          yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicPosition);
 
-         YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
+         YoFrameVector3D normalVector = new YoFrameVector3D("contactNormal" + i, worldFrame, registry);
          contactNormals.add(normalVector);
          YoGraphicVector contactNormalViz = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Gold());
          contactNormalViz.setDrawArrowhead(false);
@@ -52,7 +52,7 @@ public class ContactingExternalForcePointsVisualizer
          contactNormalsViz.add(contactNormalViz);
          yoGraphicsListRegistry.registerYoGraphic("contactPoints", contactNormalViz);
 
-         YoFrameVector forceVector = new YoFrameVector("forceVector" + i, worldFrame, registry);
+         YoFrameVector3D forceVector = new YoFrameVector3D("forceVector" + i, worldFrame, registry);
          forceVectors.add(forceVector);
          YoGraphicVector forceVectorViz = new YoGraphicVector("forceVectorViz" + i, contactPointWorld, forceVector, YoAppearance.Crimson());
          forceVectorViz.setDrawArrowhead(false);

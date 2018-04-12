@@ -5,8 +5,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -17,6 +15,8 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedPathPreviewVisualizer implements RobotController
 {
@@ -31,9 +31,9 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
    private final MockQuadrupedReferenceFrames referenceFrames = new MockQuadrupedReferenceFrames();
    private final YoEnum<RobotQuadrant> swingLeg = new YoEnum<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
    private final QuadrupedPathPreview pathPreview;
-   private final YoFrameVector desiredVelocity = new YoFrameVector("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredYawRate = new YoDouble("desiredYawRate", registry);
-   private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
+   private final QuadrantDependentList<YoFramePoint3D> yoFootPositions = new QuadrantDependentList< YoFramePoint3D>();
    
    
    public QuadrupedPathPreviewVisualizer()
@@ -58,7 +58,7 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footPosition = new YoFramePoint3D(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
          yoFootPositions.set(robotQuadrant, footPosition);
       }
       

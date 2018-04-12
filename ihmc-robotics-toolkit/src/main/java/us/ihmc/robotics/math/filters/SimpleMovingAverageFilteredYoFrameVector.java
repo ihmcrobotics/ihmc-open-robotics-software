@@ -8,9 +8,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector implements ProcessingYoVariable
+public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final SimpleMovingAverageFilteredYoVariable x, y, z;
 
@@ -39,7 +39,7 @@ public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector impl
    }
 
    public static SimpleMovingAverageFilteredYoFrameVector createSimpleMovingAverageFilteredYoFrameVector(String namePrefix, String nameSuffix, int windowSize,
-         YoFrameVector unfilteredVector, YoVariableRegistry registry)
+         YoFrameVector3D unfilteredVector, YoVariableRegistry registry)
    {
       String xName = createXName(namePrefix, nameSuffix);
       String yName = createYName(namePrefix, nameSuffix);

@@ -12,8 +12,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,7 +36,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
    private final YoEnum<RobotSide> userHandPoseSide = new YoEnum<RobotSide>("userHandPoseSide", registry, RobotSide.class);
    private final YoEnum<BaseForControl> userHandPoseBaseForControl = new YoEnum<BaseForControl>("userHandPoseBaseForControl", registry, BaseForControl.class);
 
-   private final YoFramePose userDesiredHandPose;
+   private final YoFramePoseUsingYawPitchRoll userDesiredHandPose;
 
    private final ReferenceFrame chestFrame;
 
@@ -44,7 +44,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
    public UserDesiredHandPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      userDesiredHandPose = new YoFramePose("userDesiredHandPose", ReferenceFrame.getWorldFrame(), registry);
+      userDesiredHandPose = new YoFramePoseUsingYawPitchRoll("userDesiredHandPose", ReferenceFrame.getWorldFrame(), registry);
 
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 

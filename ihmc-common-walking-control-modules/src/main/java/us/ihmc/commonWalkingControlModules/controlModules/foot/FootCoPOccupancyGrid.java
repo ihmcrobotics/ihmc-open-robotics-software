@@ -18,13 +18,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -46,9 +46,9 @@ public class FootCoPOccupancyGrid
    private final YoInteger currentYIndex;
    private final YoBoolean areCurrentCoPIndicesValid;
 
-   private final YoFramePoint[][] cellViz;
+   private final YoFramePoint3D[][] cellViz;
 
-   private final YoFrameVector2d cellSize;
+   private final YoFrameVector2D cellSize;
    private final YoDouble cellArea;
 
    private final ReferenceFrame soleFrame;
@@ -108,20 +108,20 @@ public class FootCoPOccupancyGrid
       currentYIndex = new YoInteger(namePrefix + "CurrentYIndex", registry);
       areCurrentCoPIndicesValid = new YoBoolean(namePrefix + "IsCurrentCoPIndicesValid", registry);
 
-      cellSize = new YoFrameVector2d(namePrefix + "CellSize", soleFrame, registry);
+      cellSize = new YoFrameVector2D(namePrefix + "CellSize", soleFrame, registry);
       cellArea = new YoDouble(namePrefix + "CellArea", registry);
 
       setupChangedGridParameterListeners();
 
       if (VISUALIZE)
       {
-         cellViz = new YoFramePoint[nLengthSubdivisions][nWidthSubdivisions];
+         cellViz = new YoFramePoint3D[nLengthSubdivisions][nWidthSubdivisions];
          for (int i = 0; i < cellViz.length; i++)
          {
             for (int j = 0; j < cellViz[0].length; j++)
             {
                String namePrefix2 = "CellViz_X" + String.valueOf(i) + "Y" + String.valueOf(j);
-               YoFramePoint pointForViz = new YoFramePoint(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoint3D pointForViz = new YoFramePoint3D(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
                pointForViz.setToNaN();
                cellViz[i][j] = pointForViz;
                YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.004, YoAppearance.Orange());
