@@ -212,7 +212,6 @@ public class WholeBodyVirtualModelControlSolver
       while (virtualModelControlCommandList.getNumberOfCommands() > 0)
       {
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
-         MomentumRateCommand rootMomentum = null;
          switch (command.getCommandType())
          {
          case MOMENTUM:
@@ -226,13 +225,13 @@ public class WholeBodyVirtualModelControlSolver
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
             break;
          case VIRTUAL_WRENCH:
-            rootMomentum = handleVirtualWrenchCommand((VirtualWrenchCommand) command);
+            handleVirtualWrenchCommand((VirtualWrenchCommand) command);
             break;
          case VIRTUAL_FORCE:
-            rootMomentum = handleVirtualForceCommand((VirtualForceCommand) command);
+            handleVirtualForceCommand((VirtualForceCommand) command);
             break;
          case VIRTUAL_TORQUE:
-            rootMomentum = handleVirtualTorqueCommand((VirtualTorqueCommand) command);
+            handleVirtualTorqueCommand((VirtualTorqueCommand) command);
             break;
          case JOINTSPACE:
             virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
@@ -246,12 +245,6 @@ public class WholeBodyVirtualModelControlSolver
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Virtual Model Control solver mode.");
          }
-
-         if (rootMomentum != null)
-         {
-            optimizationControlModule.submitMomentumRateCommand(rootMomentum);
-            recordMomentumRate(rootMomentum);
-         }
       }
    }
 
@@ -262,7 +255,7 @@ public class WholeBodyVirtualModelControlSolver
       MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
    }
 
-   private MomentumRateCommand handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)
+   private void handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)
    {
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
@@ -277,14 +270,16 @@ public class WholeBodyVirtualModelControlSolver
          rootBodyDefaultMomentumCommand.setWeights(defaultAngularMomentumWeight, defaultLinearMomentumWeight);
          rootBodyDefaultMomentumCommand.setMomentumRate(tempTorque, tempForce);
 
-         return rootBodyDefaultMomentumCommand;
+         optimizationControlModule.submitMomentumRateCommand(rootBodyDefaultMomentumCommand);
+         recordMomentumRate(rootBodyDefaultMomentumCommand);
+
+         return;
       }
 
       virtualModelController.addVirtualEffortCommand(commandToSubmit);
-      return null;
    }
 
-   private MomentumRateCommand handleVirtualForceCommand(VirtualForceCommand commandToSubmit)
+   private void handleVirtualForceCommand(VirtualForceCommand commandToSubmit)
    {
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
@@ -296,14 +291,16 @@ public class WholeBodyVirtualModelControlSolver
          rootBodyDefaultMomentumCommand.setLinearWeights(defaultLinearMomentumWeight);
          rootBodyDefaultMomentumCommand.setLinearMomentumRate(tempForce);
 
-         return rootBodyDefaultMomentumCommand;
+         optimizationControlModule.submitMomentumRateCommand(rootBodyDefaultMomentumCommand);
+         recordMomentumRate(rootBodyDefaultMomentumCommand);
+
+         return;
       }
 
       virtualModelController.addVirtualEffortCommand(commandToSubmit);
-      return null;
    }
 
-   private MomentumRateCommand handleVirtualTorqueCommand(VirtualTorqueCommand commandToSubmit)
+   private void handleVirtualTorqueCommand(VirtualTorqueCommand commandToSubmit)
    {
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
@@ -315,11 +312,13 @@ public class WholeBodyVirtualModelControlSolver
          rootBodyDefaultMomentumCommand.setAngularWeights(defaultLinearMomentumWeight);
          rootBodyDefaultMomentumCommand.setAngularMomentumRate(tempTorque);
 
-         return rootBodyDefaultMomentumCommand;
+         optimizationControlModule.submitMomentumRateCommand(rootBodyDefaultMomentumCommand);
+         recordMomentumRate(rootBodyDefaultMomentumCommand);
+
+         return;
       }
 
       virtualModelController.addVirtualEffortCommand(commandToSubmit);
-      return null;
    }
 
    private void handleExternalWrenchCommand(ExternalWrenchCommand command)
