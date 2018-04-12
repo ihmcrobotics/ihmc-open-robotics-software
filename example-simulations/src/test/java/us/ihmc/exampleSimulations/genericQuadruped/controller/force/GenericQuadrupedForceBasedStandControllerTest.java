@@ -25,7 +25,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
       return testFactory;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 77.7)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 390000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
@@ -38,7 +38,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 109.7)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 550000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
@@ -46,7 +46,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 67.8)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
@@ -54,7 +54,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 64.1)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
@@ -62,7 +62,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 67.4)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
@@ -70,7 +70,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 67.4)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
