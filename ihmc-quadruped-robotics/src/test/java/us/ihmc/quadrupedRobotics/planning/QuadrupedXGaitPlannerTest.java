@@ -98,6 +98,7 @@ public class QuadrupedXGaitPlannerTest
       Vector3D planarVelocity = new Vector3D(1.0, 0.0, 0.0);
       double currentTime = 0.125;
       double currentYaw = 0.0;
+      double currentHeight = 0.0;
 
       EndDependentList<QuadrupedTimedStep> priorSteps = new EndDependentList<>();
       priorSteps.set(RobotEnd.HIND, new QuadrupedTimedStep());
@@ -117,7 +118,7 @@ public class QuadrupedXGaitPlannerTest
       {
          plannedSteps.add(new QuadrupedTimedStep());
       }
-      xGaitPlanner.computeOnlinePlan(plannedSteps, priorSteps, planarVelocity, currentTime, currentYaw, xGaitSettings);
+      xGaitPlanner.computeOnlinePlan(plannedSteps, priorSteps, planarVelocity, currentTime, currentYaw, currentHeight, xGaitSettings);
 
       ArrayList<QuadrupedTimedStep> nominalSteps = new ArrayList<>();
       for (int i = 0; i < 2; i++)
