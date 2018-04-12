@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,8 @@ public class PiecewiseReverseDcmTrajectory
    private final double gravity;
    private double comHeight;
    private final double[] timesAtStartOfSteps;
-   private final List<YoFramePoint> dcmCornerPoints = new ArrayList<>();
-   private final List<YoFramePoint> vrpCornerPoints = new ArrayList<>();
+   private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
+   private final List<YoFramePoint3D> vrpCornerPoints = new ArrayList<>();
 
    private final FramePoint3D dcmPosition;
    private final FrameVector3D dcmVelocity;
@@ -49,8 +49,8 @@ public class PiecewiseReverseDcmTrajectory
       timesAtStartOfSteps = new double[maxSteps + 1];
       for (int i = 0; i < maxSteps + 1; i++)
       {
-         dcmCornerPoints.add(new YoFramePoint("dcmCornerPoint" + i, worldFrame, registry));
-         vrpCornerPoints.add(new YoFramePoint("vrpCornerPoint" + i, worldFrame, registry));
+         dcmCornerPoints.add(new YoFramePoint3D("dcmCornerPoint" + i, worldFrame, registry));
+         vrpCornerPoints.add(new YoFramePoint3D("vrpCornerPoint" + i, worldFrame, registry));
       }
       dcmPosition = new FramePoint3D(worldFrame);
       dcmVelocity = new FrameVector3D(worldFrame);
@@ -75,8 +75,8 @@ public class PiecewiseReverseDcmTrajectory
    {
       for (int i = 0; i < dcmCornerPoints.size(); i++)
       {
-         YoFramePoint dcmCornerPoint = dcmCornerPoints.get(i);
-         YoFramePoint vrpCornerPoint = vrpCornerPoints.get(i);
+         YoFramePoint3D dcmCornerPoint = dcmCornerPoints.get(i);
+         YoFramePoint3D vrpCornerPoint = vrpCornerPoints.get(i);
          YoGraphicPosition dcmCornerPointViz = new YoGraphicPosition("DCMCornerPoint" + i, dcmCornerPoint, pointSize, YoAppearance.Blue(),
                                                                      YoGraphicPosition.GraphicType.BALL);
          YoGraphicPosition vrpCornerPointViz = new YoGraphicPosition("VRPCornerPoint" + i, vrpCornerPoint, pointSize, YoAppearance.Blue(),

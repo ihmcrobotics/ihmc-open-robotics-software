@@ -12,9 +12,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
@@ -134,7 +134,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
          ReferenceFrame imuFrame = imuDefinition.getIMUFrame();
 
          YoFrameQuaternion q = logDataProcessorHelper.findYoFrameQuaternion(q_prefix, imuName + q_suffix, ReferenceFrame.getWorldFrame());
-         YoFrameVector qd = logDataProcessorHelper.findYoFrameVector(qd_prefix, imuName + qd_suffix, imuFrame);
+         YoFrameVector3D qd = logDataProcessorHelper.findYoFrameVector(qd_prefix, imuName + qd_suffix, imuFrame);
 
          if (q == null)
          {
@@ -182,8 +182,8 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
 
    public void addCenterOfMassConsistencyChecker()
    {
-      YoFramePoint com = logDataProcessorHelper.findYoFramePoint("estimatedCenterOfMassPosition", ReferenceFrame.getWorldFrame());
-      YoFrameVector comVelocity = logDataProcessorHelper.findYoFrameVector("estimatedCenterOfMassVelocity", ReferenceFrame.getWorldFrame());
+      YoFramePoint3D com = logDataProcessorHelper.findYoFramePoint("estimatedCenterOfMassPosition", ReferenceFrame.getWorldFrame());
+      YoFrameVector3D comVelocity = logDataProcessorHelper.findYoFrameVector("estimatedCenterOfMassVelocity", ReferenceFrame.getWorldFrame());
 
       if (com == null)
       {

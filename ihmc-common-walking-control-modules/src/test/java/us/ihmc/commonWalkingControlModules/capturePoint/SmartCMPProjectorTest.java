@@ -43,9 +43,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPProjectorTest
@@ -640,32 +640,32 @@ public class SmartCMPProjectorTest
       // show overhead results if required
       if ((!success && showPlotterOnFail) || (!correctInfo && showPlotterOnFail) || (!directionPreserved && showPlotterOnDirectionChange) || showPlotter)
       {
-         YoFramePoint2d yoCapturePoint = new YoFramePoint2d("CapturePoint", worldFrame, registry);
+         YoFramePoint2D yoCapturePoint = new YoFramePoint2D("CapturePoint", worldFrame, registry);
          YoArtifactPosition capturePointViz = new YoArtifactPosition("Capture Point", yoCapturePoint, GraphicType.BALL_WITH_ROTATED_CROSS, Blue().getAwtColor(),
                0.01);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), capturePointViz);
          yoCapturePoint.set(capturePoint);
 
-         YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("DesiredCMP", worldFrame, registry);
+         YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("DesiredCMP", worldFrame, registry);
          YoArtifactPosition desiredCMPViz = new YoArtifactPosition("Desired CMP Position", yoDesiredCMP, GraphicType.SOLID_BALL, DarkRed().getAwtColor(),
                0.008);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), desiredCMPViz);
          yoDesiredCMP.set(desiredCMP);
 
-         YoFramePoint2d yoProjectedCMP = new YoFramePoint2d("ProjectedCMP", worldFrame, registry);
+         YoFramePoint2D yoProjectedCMP = new YoFramePoint2D("ProjectedCMP", worldFrame, registry);
          YoArtifactPosition projectedCMPViz = new YoArtifactPosition("Projected CMP Position", yoProjectedCMP, GraphicType.BALL_WITH_ROTATED_CROSS,
                DarkRed().getAwtColor(), 0.01);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), projectedCMPViz);
          yoProjectedCMP.set(projectedCMP);
 
-         YoFrameConvexPolygon2d yoProjectionArea = new YoFrameConvexPolygon2d("CMPProjectionArea", worldFrame, 10, registry);
+         YoFrameConvexPolygon2D yoProjectionArea = new YoFrameConvexPolygon2D("CMPProjectionArea", worldFrame, 10, registry);
          YoArtifactPolygon projectionAreaViz = new YoArtifactPolygon("CMP Projection Area", yoProjectionArea, Blue().getAwtColor(), false);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), projectionAreaViz);
          yoProjectionArea.set(projectionArea);
 
          if (expectedProjection != null)
          {
-            YoFramePoint2d yoExpectedCMP = new YoFramePoint2d("ExpectedProjection", worldFrame, registry);
+            YoFramePoint2D yoExpectedCMP = new YoFramePoint2D("ExpectedProjection", worldFrame, registry);
             YoArtifactPosition expectedCMPViz = new YoArtifactPosition("Expected Projection", yoExpectedCMP, GraphicType.BALL, LawnGreen().getAwtColor(),
                   0.01);
             graphicsListRegistry.registerArtifact(getClass().getSimpleName(), expectedCMPViz);
@@ -674,7 +674,7 @@ public class SmartCMPProjectorTest
 
          if (expectedArea != null)
          {
-            YoFrameConvexPolygon2d yoExpectedArea = new YoFrameConvexPolygon2d("ExpectedArea", worldFrame, 10, registry);
+            YoFrameConvexPolygon2D yoExpectedArea = new YoFrameConvexPolygon2D("ExpectedArea", worldFrame, 10, registry);
             YoArtifactPolygon expectedAreaViz = new YoArtifactPolygon("Expected CMP Area", yoExpectedArea, LawnGreen().getAwtColor(), false, 4);
             graphicsListRegistry.registerArtifact(getClass().getSimpleName(), expectedAreaViz);
             yoExpectedArea.set(expectedArea);
@@ -682,7 +682,7 @@ public class SmartCMPProjectorTest
 
          if (finalCapturePoint != null)
          {
-            YoFramePoint2d yoFinalCapturePoint = new YoFramePoint2d("FinalCapturePoint", worldFrame, registry);
+            YoFramePoint2D yoFinalCapturePoint = new YoFramePoint2D("FinalCapturePoint", worldFrame, registry);
             YoArtifactPosition finalCapturePointViz = new YoArtifactPosition("Final Capture Point", yoFinalCapturePoint, GraphicType.BALL_WITH_ROTATED_CROSS,
                   Beige().getAwtColor(), 0.01);
             graphicsListRegistry.registerArtifact(getClass().getSimpleName(), finalCapturePointViz);

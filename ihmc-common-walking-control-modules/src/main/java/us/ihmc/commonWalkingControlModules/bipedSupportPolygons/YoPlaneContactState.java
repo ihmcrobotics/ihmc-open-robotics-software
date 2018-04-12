@@ -14,11 +14,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
@@ -34,7 +34,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final HashMap<YoContactPoint, YoDouble> rhoWeights = new HashMap<>();
    private final HashMap<YoContactPoint, YoDouble> maxContactPointNormalForces = new HashMap<>();
    private final FrameConvexPolygon2D contactPointsPolygon = new FrameConvexPolygon2D();
-   private final YoFramePoint2d contactPointCentroid;
+   private final YoFramePoint2D contactPointCentroid;
 
    private final YoBoolean hasContactStateChanged;
 
@@ -78,7 +78,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       totalNumberOfContactPoints = contactPoints.size();
 
-      contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, registry);
+      contactPointCentroid = new YoFramePoint2D(namePrefix + "ContactPointCentroid", planeFrame, registry);
       contactPointCentroid.setToNaN();
 
       hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);

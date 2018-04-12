@@ -25,7 +25,7 @@ public class SCSPlaybackListener implements PlaybackListener
       if (networkServer != null)
       {
          SCSListenerPacket packet = new SCSListenerPacket();
-         packet.setDestination(PacketDestination.UI);
+         packet.setDestination(PacketDestination.UI.ordinal());
          networkServer.queueDataToSend(packet);
       }
    }

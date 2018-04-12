@@ -21,12 +21,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class GroundProfileTest
@@ -54,8 +54,8 @@ public abstract class GroundProfileTest
       
       SimulationConstructionSet scs = null;
       BagOfBalls bagOfBalls = null;
-      YoFramePoint surfaceNormalPointForViz = null;
-      YoFrameVector surfaceNormalViz = null;
+      YoFramePoint3D surfaceNormalPointForViz = null;
+      YoFrameVector3D surfaceNormalViz = null;
       if (VISUALIZE)
       {
          Robot robot = new Robot("Test");
@@ -66,8 +66,8 @@ public abstract class GroundProfileTest
          
          YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
          bagOfBalls = new BagOfBalls(robot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
-         surfaceNormalPointForViz = new YoFramePoint("surfaceNormalPointForViz", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
-         surfaceNormalViz = new YoFrameVector("surfaceNormalVector", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
+         surfaceNormalPointForViz = new YoFramePoint3D("surfaceNormalPointForViz", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
+         surfaceNormalViz = new YoFrameVector3D("surfaceNormalVector", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
          YoGraphicVector surfaceNormalGraphicVector = new YoGraphicVector("surfaceNormalViz", surfaceNormalPointForViz, surfaceNormalViz, YoAppearance.AliceBlue());
           
          yoGraphicsListRegistry.registerYoGraphic("Viz", surfaceNormalGraphicVector);

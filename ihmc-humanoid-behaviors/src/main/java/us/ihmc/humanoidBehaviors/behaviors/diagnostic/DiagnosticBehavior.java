@@ -69,9 +69,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -92,6 +89,9 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -147,14 +147,14 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
    private final YoDouble icpTimeDelay;
 
-   private final YoFrameConvexPolygon2d yoSupportPolygon;
+   private final YoFrameConvexPolygon2D yoSupportPolygon;
 
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
-   private final YoFrameVector2d pelvisShiftScaleFactor;
+   private final YoFrameVector2D pelvisShiftScaleFactor;
 
    private final SideDependentList<OneDoFJoint[]> upperArmJoints = new SideDependentList<OneDoFJoint[]>();
    private final SideDependentList<OneDoFJoint[]> lowerArmJoints = new SideDependentList<OneDoFJoint[]>();
@@ -234,8 +234,8 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForUpperArms = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForLowerArms = new SideDependentList<>();
 
-   private final SideDependentList<YoFrameOrientation> currentUpperArmOrientations = new SideDependentList<YoFrameOrientation>();
-   private final SideDependentList<YoFrameOrientation> currentHandOrientations = new SideDependentList<YoFrameOrientation>();
+   private final SideDependentList<YoFrameYawPitchRoll> currentUpperArmOrientations = new SideDependentList<YoFrameYawPitchRoll>();
+   private final SideDependentList<YoFrameYawPitchRoll> currentHandOrientations = new SideDependentList<YoFrameYawPitchRoll>();
 
    private final SideDependentList<RigidBodyTransform> armZeroJointAngleConfigurationOffsets = new SideDependentList<>();
 
@@ -244,7 +244,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
          YoDouble yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
-         WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
+         WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
 
@@ -391,7 +391,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       doPelvisAndChestYaw = new YoBoolean("diagnosticDoPelvisAndChestYaw", registry);
       doPelvisAndChestYaw.set(true);
 
-      pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
+      pelvisShiftScaleFactor = new YoFrameVector2D("DiagnosticPelvisShiftScaleFactor", null, registry);
       pelvisShiftScaleFactor.set(0.4, 0.7);
 
       pelvisOrientationScaleFactor.set(0.1);
@@ -403,10 +403,10 @@ public class DiagnosticBehavior extends AbstractBehavior
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameOrientation currentUpperArmOrientation = new YoFrameOrientation(sidePrefix + "CurrentUpperArm", chestFrame, registry);
+         YoFrameYawPitchRoll currentUpperArmOrientation = new YoFrameYawPitchRoll(sidePrefix + "CurrentUpperArm", chestFrame, registry);
          currentUpperArmOrientations.put(robotSide, currentUpperArmOrientation);
 
-         YoFrameOrientation currentHandOrientation = new YoFrameOrientation(sidePrefix + "CurrentHand", lowerArmsFrames.get(robotSide), registry);
+         YoFrameYawPitchRoll currentHandOrientation = new YoFrameYawPitchRoll(sidePrefix + "CurrentHand", lowerArmsFrames.get(robotSide), registry);
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
@@ -2369,10 +2369,10 @@ public class DiagnosticBehavior extends AbstractBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          tempFrameOrientation.setToZero(upperArmsFrames.get(robotSide));
-         currentUpperArmOrientations.get(robotSide).setAndMatchFrame(tempFrameOrientation);
+         currentUpperArmOrientations.get(robotSide).setMatchingFrame(tempFrameOrientation);
 
          tempFrameOrientation.setToZero(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
-         currentHandOrientations.get(robotSide).setAndMatchFrame(tempFrameOrientation);
+         currentHandOrientations.get(robotSide).setMatchingFrame(tempFrameOrientation);
       }
 
       handleRequestedSymmetricArmPose();

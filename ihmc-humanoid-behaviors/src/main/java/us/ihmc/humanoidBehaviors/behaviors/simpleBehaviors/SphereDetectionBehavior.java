@@ -129,7 +129,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
 
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
-      pointCloudWorldPacket.setDestination(PacketDestination.UI);
+      pointCloudWorldPacket.setDestination(PacketDestination.UI.ordinal());
       pointCloudWorldPacket.setTimestamp(System.nanoTime());
       Point3D[] points3d = new Point3D[points.length];
       for (int i = 0; i < points.length; i++)

@@ -52,12 +52,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   
@@ -68,8 +68,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public static final boolean USE_LEFT_ARM = false;
 
    //YoVariables for Display
-   private final YoFramePoint ypLeftEE, ypRightEE;
-   private final YoFramePose yposeLeftEE, yposeRightEE, yposeBoard, yposeLeftCamera;
+   private final YoFramePoint3D ypLeftEE, ypRightEE;
+   private final YoFramePoseUsingYawPitchRoll yposeLeftEE, yposeRightEE, yposeBoard, yposeLeftCamera;
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
 
@@ -89,12 +89,12 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public AtlasHeadLoopKinematicCalibrator(DRCRobotModel robotModel)
    {
       super(robotModel);
-      ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
-      ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
-      yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
-      yposeRightEE = new YoFramePose("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
-      yposeBoard = new YoFramePose("board", "", ReferenceFrame.getWorldFrame(), registry);
-      yposeLeftCamera = new YoFramePose("leftCamera", "", ReferenceFrame.getWorldFrame(), registry);
+      ypLeftEE = new YoFramePoint3D("leftEE", ReferenceFrame.getWorldFrame(), registry);
+      ypRightEE = new YoFramePoint3D("rightEE", ReferenceFrame.getWorldFrame(), registry);
+      yposeLeftEE = new YoFramePoseUsingYawPitchRoll("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
+      yposeRightEE = new YoFramePoseUsingYawPitchRoll("rightPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
+      yposeBoard = new YoFramePoseUsingYawPitchRoll("board", "", ReferenceFrame.getWorldFrame(), registry);
+      yposeLeftCamera = new YoFramePoseUsingYawPitchRoll("leftCamera", "", ReferenceFrame.getWorldFrame(), registry);
 
       cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       metaData = new ArrayList<>();

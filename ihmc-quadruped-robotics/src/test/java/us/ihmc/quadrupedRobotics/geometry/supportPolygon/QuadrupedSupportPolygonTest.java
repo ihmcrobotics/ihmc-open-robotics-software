@@ -32,14 +32,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 @VmOptions("-XX:-TieredCompilation")
@@ -1150,7 +1150,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrantDependentList<ReferenceFrame> frames = new QuadrantDependentList<>();
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      QuadrantDependentList<YoFramePoint> quadrantDependentList = new QuadrantDependentList<YoFramePoint>();
+      QuadrantDependentList<YoFramePoint3D> quadrantDependentList = new QuadrantDependentList<YoFramePoint3D>();
       
       for (RobotQuadrant robotQuadrant2 : RobotQuadrant.values)
       {
@@ -1159,7 +1159,7 @@ public class QuadrupedSupportPolygonTest
          
          frames.set(robotQuadrant2, testFrame);
          
-         quadrantDependentList.set(robotQuadrant2, new YoFramePoint("yo" + robotQuadrant2, ReferenceFrame.getWorldFrame(), registry));
+         quadrantDependentList.set(robotQuadrant2, new YoFramePoint3D("yo" + robotQuadrant2, ReferenceFrame.getWorldFrame(), registry));
       }
       
       TranslationReferenceFrame testFrame = new TranslationReferenceFrame("testFrame", ReferenceFrame.getWorldFrame());
@@ -1195,7 +1195,7 @@ public class QuadrupedSupportPolygonTest
    public void testPackYoFrameConvexPolygon2d()
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
-      YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("boo", "yaw", ReferenceFrame.getWorldFrame(), 4, new YoVariableRegistry("bah"));
+      YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D("boo", "yaw", ReferenceFrame.getWorldFrame(), 4, new YoVariableRegistry("bah"));
       poly.packYoFrameConvexPolygon2d(yoFrameConvexPolygon2d);
       
       for (int i = 0; i < 4; i++)

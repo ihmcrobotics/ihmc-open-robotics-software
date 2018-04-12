@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "LocalizationPacket" defined in "LocalizationPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LocalizationPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * LocalizationPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "LocalizationPacket" defined in "LocalizationPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LocalizationPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LocalizationPacket_.idl instead.
+*
+*/
 public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LocalizationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LocalizationPacket_";
@@ -26,8 +24,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LocalizationPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LocalizationPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,6 +46,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -63,9 +61,13 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,10 +85,11 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(controller_msgs.msg.dds.LocalizationPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setReset(cdr.read_type_7());
-
+      	
       data.setToggle(cdr.read_type_7());
+      	
 
    }
 
@@ -116,7 +119,6 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return new controller_msgs.msg.dds.LocalizationPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -128,7 +130,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.LocalizationPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -138,7 +140,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.LocalizationPacket src, controller_msgs.msg.dds.LocalizationPacket dest)
    {
       staticCopy(src, dest);

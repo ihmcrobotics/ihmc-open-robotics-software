@@ -2,44 +2,18 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.AdjustFootstepMessage;
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -125,7 +99,8 @@ public abstract class PacketValidityChecker
 
          if (swingTrajectory.size() > Footstep.maxNumberOfSwingWaypoints)
          {
-            String errorMessage = messageClassName + " has " + swingTrajectory.size() + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
+            String errorMessage =
+                  messageClassName + " has " + swingTrajectory.size() + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
             return errorMessage;
          }
 
@@ -219,6 +194,169 @@ public abstract class PacketValidityChecker
                return errorMessage;
             }
          }
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedStepMessage(QuadrupedStepMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotQuadrant.fromByte(message.getRobotQuadrant()));
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s robotQuadrant field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getGoalPosition());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s goalPosition field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      //TODO Check if thats supposed to be checked
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getGroundClearance());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s groundClearance field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateTimeIntervalMessage(TimeIntervalMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getStartTime());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s startTime field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getEndTime());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s endTime field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedTimedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedTimedStepMessage(QuadrupedTimedStepMessage message)
+   {
+      String stepErrorMessage = validateQuadrupedStepMessage(message.getQuadrupedStepMessage());
+      if (stepErrorMessage != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + " step field which " + stepErrorMessage;
+         return errorMessage;
+      }
+
+      String timeErrorMessage = validateTimeIntervalMessage(message.getTimeInterval());
+      if (timeErrorMessage != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + " time interval field which " + timeErrorMessage;
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link FootstepDataListMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedTimedStepListMessage(QuadrupedTimedStepListMessage message)
+   {
+      if (message.getQuadrupedStepList() != null)
+      {
+         for (int arrayListIndex = 0; arrayListIndex < message.getQuadrupedStepList().size(); arrayListIndex++)
+         {
+            QuadrupedTimedStepMessage stepMessage = message.getQuadrupedStepList().get(arrayListIndex);
+            String footstepDataListErrorMessage = validateQuadrupedTimedStepMessage(stepMessage);
+
+            if (footstepDataListErrorMessage != null)
+            {
+               String messageClassName = message.getClass().getSimpleName();
+               String errorMessage = messageClassName + " field contains a FootstepData in which " + footstepDataListErrorMessage;
+               return errorMessage;
+            }
+         }
+      }
+
+      return null;
+   }
+
+   public static String validateSoleTrajectoryMessage(SoleTrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
+
+      EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
+
+      if (message.getPositionTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = "Received " + messageClassName + " with no waypoint.";
+         return errorMessage;
+      }
+
+      for (int i = 0; i < message.getPositionTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
+      {
+         EuclideanTrajectoryPointMessage waypoint = message.getPositionTrajectory().getTaskspaceTrajectoryPoints().get(i);
+         errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
+         if (errorMessage != null)
+         {
+            String messageClassName = message.getClass().getSimpleName();
+            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
+            return errorMessage;
+         }
+         previousTrajectoryPoint = waypoint;
+      }
+
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateEnum(RobotQuadrant.fromByte(message.getRobotQuadrant()));
+      if (errorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = messageClassName + "'s robotQuadrant field " + errorType.getMessage();
+         return errorMessage;
       }
 
       return null;
@@ -424,7 +562,7 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getJointTrajectoryMessages().get(jointIndex);
-         if(oneJointTrajectoryMessage != null)
+         if (oneJointTrajectoryMessage != null)
          {
             errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
          }
@@ -445,12 +583,12 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
@@ -501,12 +639,12 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
@@ -551,6 +689,18 @@ public abstract class PacketValidityChecker
          errorMessage = validateSE3TrajectoryMessage(message.getSe3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
+   public static String validateQuadrupedBodyOrientationMessage(QuadrupedBodyOrientationMessage message)
+   {
+      String errorMessage = validatePacket(message);
+
+      if (errorMessage == null)
+         errorMessage = validateSO3TrajectoryMessage(message.getSo3Trajectory());
+      if (errorMessage != null)
+         return QuadrupedBodyOrientationMessage.class.getSimpleName() + " " + errorMessage;
 
       return null;
    }
@@ -626,6 +776,37 @@ public abstract class PacketValidityChecker
    }
 
    public static String validatePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
+
+      EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
+
+      if (message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = "Received " + messageClassName + " with no waypoint.";
+         return errorMessage;
+      }
+
+      for (int i = 0; i < message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
+      {
+         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().get(i);
+         errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
+         if (errorMessage != null)
+         {
+            String messageClassName = message.getClass().getSimpleName();
+            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
+            return errorMessage;
+         }
+         previousTrajectoryPoint = waypoint;
+      }
+
+      return null;
+   }
+
+   public static String validateQuadrupedBodyHeightMessage(QuadrupedBodyHeightMessage message)
    {
       String errorMessage = validatePacket(message);
       if (errorMessage != null)
@@ -802,7 +983,7 @@ public abstract class PacketValidityChecker
    }
 
    private static String validateEuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage se3TrajectoryPoint,
-         EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
+                                                                 EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
    {
       String errorMessage = validatePacket(se3TrajectoryPoint);
       if (errorMessage != null)
@@ -828,6 +1009,7 @@ public abstract class PacketValidityChecker
 
       return null;
    }
+
 
    private static String validateSO3TrajectoryPointMessage(SO3TrajectoryPointMessage so3TrajectoryPoint, SO3TrajectoryPointMessage previousSO3TrajectoryPoint,
                                                            boolean checkId)
@@ -935,11 +1117,11 @@ public abstract class PacketValidityChecker
    {
       if (message == null)
          return "is null.";
-      if(message.getDesiredJointAccelerations() == null)
+      if (message.getDesiredJointAccelerations() == null)
       {
          return "desired acceleration buffer null";
       }
-      if(message.getDesiredJointAccelerations().size()  == 0)
+      if (message.getDesiredJointAccelerations().size() == 0)
       {
          return "desired acceleration buffer empty";
       }

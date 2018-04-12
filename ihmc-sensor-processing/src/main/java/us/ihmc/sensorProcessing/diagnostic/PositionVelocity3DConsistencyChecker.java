@@ -6,11 +6,11 @@ import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 {
@@ -25,7 +25,7 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 
    private final YoDouble dummyAlpha;
 
-   public PositionVelocity3DConsistencyChecker(String namePrefix, YoFramePoint position, YoFrameVector angularVelocityToCheck, double updateDT,
+   public PositionVelocity3DConsistencyChecker(String namePrefix, YoFramePoint3D position, YoFrameVector3D angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "PositionVelocity3DCheck");

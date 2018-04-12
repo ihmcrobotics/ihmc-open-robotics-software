@@ -8,17 +8,17 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public abstract class YoGraphicAbstractShape extends YoGraphic
 {
-   protected final YoFramePoint yoFramePoint;
-   protected final YoFrameOrientation yoFrameOrientation;
+   protected final YoFramePoint3D yoFramePoint;
+   protected final YoFrameYawPitchRoll yoFrameOrientation;
    protected final double scale;
    private final Vector3D translationVector = new Vector3D();
 
-   protected YoGraphicAbstractShape(String name, YoFramePoint framePoint, YoFrameOrientation frameOrientation, double scale)
+   protected YoGraphicAbstractShape(String name, YoFramePoint3D framePoint, YoFrameYawPitchRoll frameOrientation, double scale)
    {
       super(name);
       framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());

@@ -1287,7 +1287,7 @@ public class HumanoidMessageTools
    {
       VideoPacket message = new VideoPacket();
       if (packetDestination != null)
-         message.setDestination(packetDestination);
+         message.setDestination(packetDestination.ordinal());
       message.setVideoSource(videoSource.toByte());
       message.setTimestamp(timeStamp);
       message.getData().add(data);
@@ -1918,7 +1918,7 @@ public class HumanoidMessageTools
    public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
    {
       HeightQuadTreeToolboxRequestMessage clearMessage = new HeightQuadTreeToolboxRequestMessage();
-      clearMessage.setDestination(destination);
+      clearMessage.setDestination(destination.ordinal());
       clearMessage.setRequestClearQuadTree(true);
       clearMessage.setRequestQuadTreeUpdate(false);
       return clearMessage;
@@ -1927,7 +1927,7 @@ public class HumanoidMessageTools
    public static HeightQuadTreeToolboxRequestMessage requestQuadTreeUpdate(PacketDestination destination)
    {
       HeightQuadTreeToolboxRequestMessage requestMessage = new HeightQuadTreeToolboxRequestMessage();
-      requestMessage.setDestination(destination);
+      requestMessage.setDestination(destination.ordinal());
       requestMessage.setRequestClearQuadTree(false);
       requestMessage.setRequestQuadTreeUpdate(true);
       return requestMessage;

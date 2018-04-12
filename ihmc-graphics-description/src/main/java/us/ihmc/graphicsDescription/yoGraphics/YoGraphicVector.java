@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
@@ -30,29 +30,29 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    private boolean drawArrowhead;
    private final AppearanceDefinition appearance;
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance)
+   public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, AppearanceDefinition appearance)
    {
       this(name, startPoint, frameVector, 1.0, appearance);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale)
+   public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, double scale)
    {
       this(name, startPoint, frameVector, scale, YoAppearance.Black(), true);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance)
+   public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, double scale, AppearanceDefinition appearance)
    {
       this(name, startPoint, frameVector, scale, appearance, true);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector directionVector, double scale, AppearanceDefinition appearance,
+   public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D directionVector, double scale, AppearanceDefinition appearance,
                           boolean drawArrowhead, double lineRadiusWhenOneMeterLong)
    {
       this(name, startPoint, directionVector, scale, appearance, drawArrowhead);
       this.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale,
            appearance, drawArrowhead);
@@ -212,7 +212,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this.z.set(z.getDoubleValue());
    }
 
-   public void set(YoFramePoint base, YoFrameVector vector)
+   public void set(YoFramePoint3D base, YoFrameVector3D vector)
    {
       this.baseX.set(base.getX());
       this.baseY.set(base.getY());
@@ -244,7 +244,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       x.addVariableChangedListener(v -> endPointX.set(baseX.getDoubleValue() + x.getDoubleValue()));
       y.addVariableChangedListener(v -> endPointY.set(baseY.getDoubleValue() + y.getDoubleValue()));
 
-      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, endPointX, endPointY, ReferenceFrame.getWorldFrame()), color3f.get());
+      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2D(baseX, baseY, endPointX, endPointY, ReferenceFrame.getWorldFrame()), color3f.get());
    }
 
    @Override

@@ -7,10 +7,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -32,8 +32,8 @@ public class LogDataRawSensorMap
    private final LinkedHashMap<String, YoDouble> rawJointTauMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<String, YoFrameQuaternion> rawIMUOrientationMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, YoFrameVector> rawIMUAngularVelocityMap = new LinkedHashMap<>();
-   private final LinkedHashMap<String, YoFrameVector> rawIMULinearAccelerationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoFrameVector3D> rawIMUAngularVelocityMap = new LinkedHashMap<>();
+   private final LinkedHashMap<String, YoFrameVector3D> rawIMULinearAccelerationMap = new LinkedHashMap<>();
 
    public LogDataRawSensorMap(FullRobotModel fullRobotModel, YoVariableHolder yoVariableHolder)
    {
@@ -73,7 +73,7 @@ public class LogDataRawSensorMap
          YoDouble qd_wz = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
          if (qd_wx != null && qd_wy != null && qd_wz != null)
          {
-            YoFrameVector rawAngularVelocity = new YoFrameVector(qd_wx, qd_wy, qd_wz, null);
+            YoFrameVector3D rawAngularVelocity = new YoFrameVector3D(qd_wx, qd_wy, qd_wz, null);
             rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
          }
          
@@ -82,7 +82,7 @@ public class LogDataRawSensorMap
          YoDouble qdd_z = (YoDouble) yoVariableHolder.getVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
          if (qdd_x != null && qdd_y != null && qdd_z != null)
          {
-            YoFrameVector rawLinearAcceleration = new YoFrameVector(qdd_x, qdd_y, qdd_z, null);
+            YoFrameVector3D rawLinearAcceleration = new YoFrameVector3D(qdd_x, qdd_y, qdd_z, null);
             rawIMULinearAccelerationMap.put(imuName, rawLinearAcceleration);
          }
       }

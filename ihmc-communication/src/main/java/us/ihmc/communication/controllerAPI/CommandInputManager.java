@@ -42,7 +42,7 @@ public class CommandInputManager
 
    /**
     * List of all the buffers that allows the user to easily flush all new commands using
-    * {@link #flushAllCommands()}. These buffers CANNOT be visible or accessed from outside this
+    * {@link #clearAllCommands()}. These buffers CANNOT be visible or accessed from outside this
     * class.
     */
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
@@ -350,21 +350,41 @@ public class CommandInputManager
 
    /**
     * Throw away any new available commands.
+    * @deprecated Use {@link #clearAllCommands()} instead
     */
    public void flushAllCommands()
    {
+      clearAllCommands();
+   }
+
+   /**
+    * Throw away any new available commands.
+    */
+   public void clearAllCommands()
+   {
       for (int i = 0; i < allBuffers.size(); i++)
-         allBuffers.get(i).flush();
+         clearBuffer(allBuffers.get(i));
    }
 
    /**
     * Throw away any new available commands of a certain type.
     * 
     * @param commandClassToFlush Used to know what type of command is to be thrown away.
+    * @deprecated Use {@link #clearCommands(Class<C>)} instead
     */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
-      commandClassToBufferMap.get(commandClassToFlush).flush();
+      clearCommands(commandClassToFlush);
+   }
+
+   /**
+    * Throw away any new available commands of a certain type.
+    * 
+    * @param commandClassToClear Used to know what type of command is to be thrown away.
+    */
+   public <C extends Command<C, ?>> void clearCommands(Class<C> commandClassToClear)
+   {
+      clearBuffer(commandClassToBufferMap.get(commandClassToClear));
    }
 
    /**
@@ -394,6 +414,24 @@ public class CommandInputManager
       ConcurrentRingBuffer<C> buffer = (ConcurrentRingBuffer<C>) commandClassToBufferMap.get(commandClassToPoll);
       pollNewCommands(buffer, commands);
       return commands;
+   }
+
+   /**
+    * Reads all the available elements from the buffer and then flushes it.
+    * 
+    * @param bufferToClear the buffer to be cleared from the reader perspective. Modified.
+    */
+   private static void clearBuffer(ConcurrentRingBuffer<?> bufferToClear)
+   {
+      if (bufferToClear.poll())
+      {
+         for (int i = 0; i < bufferToClear.getCapacity(); i++)
+         {
+            if (bufferToClear.read() == null)
+               break;
+         }
+         bufferToClear.flush();
+      }
    }
 
    /**

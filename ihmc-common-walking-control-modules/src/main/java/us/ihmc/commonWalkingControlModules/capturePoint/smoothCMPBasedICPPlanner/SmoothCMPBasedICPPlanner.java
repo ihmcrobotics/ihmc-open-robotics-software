@@ -28,15 +28,15 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
@@ -50,18 +50,18 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private boolean adjustICPForEachDoubleSupport = true;
 
    /** Desired velocity for the Center of Mass (CoM) */
-   private final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
+   private final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
    /** Desired acceleration for the Center of Mass (CoM) */
-   private final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
+   private final YoFrameVector3D desiredCoMAcceleration = new YoFrameVector3D(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
    /** Desired position for the Center of Pressure (CoP) */
-   private final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCoPPosition", worldFrame, registry);
+   private final YoFramePoint3D desiredCoPPosition = new YoFramePoint3D(namePrefix + "DesiredCoPPosition", worldFrame, registry);
    /** Desired velocity for the Center of Pressure (CoP) */
-   private final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
+   private final YoFrameVector3D desiredCoPVelocity = new YoFrameVector3D(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
 
    /** Desired Centroidal Angular Momentum (CAM) */
-   private final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
+   private final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
    /** Desired Centroidal Torque (CT) */
-   private final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
+   private final YoFrameVector3D desiredCentroidalTorque = new YoFrameVector3D(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
 
    private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
@@ -81,7 +81,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final YoFramePoint yoSingleSupportFinalCoM;
+   private final YoFramePoint3D yoSingleSupportFinalCoM;
    private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
 
    private final int maxNumberOfICPCornerPointsVisualized = 20;
@@ -102,7 +102,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
-      yoSingleSupportFinalCoM = new YoFramePoint(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
+      yoSingleSupportFinalCoM = new YoFramePoint3D(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       this.gravityZ = gravityZ;
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
@@ -180,14 +180,14 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       for (int i = 0; i < maxNumberOfICPCornerPointsVisualized - 1; i++)
       {
-         YoFramePoint icpEntryCornerPointInWorld = icpPhaseEntryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint3D icpEntryCornerPointInWorld = icpPhaseEntryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpEntryCornerPointsViz = new YoGraphicPosition("ICPEntryCornerPoints" + i, icpEntryCornerPointInWorld, ICP_CORNER_POINT_SIZE,
                                                                            YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpEntryCornerPointsViz);
          artifactList.add(icpEntryCornerPointsViz.createArtifact());
 
-         YoFramePoint icpExitCornerPointInWorld = icpPhaseExitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint3D icpExitCornerPointInWorld = icpPhaseExitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpExitCornerPointsViz = new YoGraphicPosition("ICPExitCornerPoints" + i, icpExitCornerPointInWorld, ICP_CORNER_POINT_SIZE,
                                                                           YoAppearance.Blue(), GraphicType.BALL);
 
@@ -534,7 +534,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack)
    {
       getFinalDesiredCapturePointPosition(tempFinalICP);
       finalDesiredCapturePointPositionToPack.set(tempFinalICP);
@@ -610,12 +610,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getNumberOfFootstepsRegistered();
    }
 
-   public void getPredictedCenterOfMassPosition(YoFramePoint estimatedCenterOfMassPositionToPack, double time)
+   public void getPredictedCenterOfMassPosition(YoFramePoint3D estimatedCenterOfMassPositionToPack, double time)
    {
       angularMomentumGenerator.getPredictedCenterOfMassPosition(estimatedCenterOfMassPositionToPack, time);
    }
 
-   public void getPredictedSwingFootPosition(YoFramePoint predictedSwingFootPositionToPack, double time)
+   public void getPredictedSwingFootPosition(YoFramePoint3D predictedSwingFootPositionToPack, double time)
    {
       angularMomentumGenerator.getPredictedFootPosition(predictedSwingFootPositionToPack, time);
    }
@@ -650,7 +650,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
    }
 
-   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
+   public void getDesiredCenterOfMassVelocity(YoFrameVector3D desiredCenterOfMassVelocityToPack)
    {
       desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
    }
@@ -660,7 +660,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCenterOfMassVelocityToPack.setIncludingFrame(desiredCoMVelocity);
    }
 
-   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector3D desiredCenterOfMassAccelerationToPack)
    {
       desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
    }
@@ -684,7 +684,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
    }
 
-   public void getDesiredCenterOfPressurePosition(YoFramePoint desiredCenterOfPressurePositionToPack)
+   public void getDesiredCenterOfPressurePosition(YoFramePoint3D desiredCenterOfPressurePositionToPack)
    {
       desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
    }
@@ -708,7 +708,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCentroidalAngularMomentumToPack.setIncludingFrame(desiredCentroidalAngularMomentum);
    }
 
-   public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
+   public void getDesiredCentroidalTorque(YoFrameVector3D desiredCentroidalTorqueToPack)
    {
       desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
    }

@@ -26,9 +26,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,6 +38,9 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
 {
@@ -186,23 +186,23 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return ((YoEnum<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePoseUsingYawPitchRoll findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
    {
       return findYoFramePose(nameSpace, namePrefix, "", scs);
    }
 
-   private static YoFramePose findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePoseUsingYawPitchRoll findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
       YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
       YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
       YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
-      YoFramePoint position = new YoFramePoint(x, y, z, ReferenceFrame.getWorldFrame());
+      YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
       YoDouble yaw = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
       YoDouble pitch = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
       YoDouble roll = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
-      YoFrameOrientation orientation = new YoFrameOrientation(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
-      return new YoFramePose(position, orientation);
+      YoFrameYawPitchRoll orientation = new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
+      return new YoFramePoseUsingYawPitchRoll(position, orientation);
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition

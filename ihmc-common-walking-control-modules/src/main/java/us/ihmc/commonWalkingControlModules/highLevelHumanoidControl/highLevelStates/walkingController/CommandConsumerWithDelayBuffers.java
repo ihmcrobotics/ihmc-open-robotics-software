@@ -224,10 +224,20 @@ public class CommandConsumerWithDelayBuffers
    /**
     * clears commands from all buffers
     * @param commandClassToFlush the command class
+    * @deprecated Use {@link #clearCommands(Class<C>)} instead
     */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
+      clearCommands(commandClassToFlush);
+   }
+
+   /**
+    * clears commands from all buffers
+    * @param commandClassToFlush the command class
+    */
+   public <C extends Command<C, ?>> void clearCommands(Class<C> commandClassToFlush)
+   {
       clearDelayQueue(commandClassToFlush);
-      commandInputManager.flushCommands(commandClassToFlush);
+      commandInputManager.clearCommands(commandClassToFlush);
    }
 }

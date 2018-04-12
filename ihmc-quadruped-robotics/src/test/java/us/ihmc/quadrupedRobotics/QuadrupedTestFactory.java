@@ -6,7 +6,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 
@@ -28,7 +28,7 @@ public interface QuadrupedTestFactory
 
    public void setUsePushRobotController(boolean usePushRobotController);
 
-   public void setInitialPosition(QuadrupedSimulationInitialPositionParameters initialPosition);
+   public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition);
 
    public void setUseNetworking(boolean useNetworking);
 }

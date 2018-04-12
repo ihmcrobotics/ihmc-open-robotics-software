@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
@@ -25,6 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInterface
 {
@@ -130,8 +130,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       Vector3D comAngMom = new Vector3D();
       Vector3D comLinMom = new Vector3D();
       Point3D comPoint = new Point3D();
-      YoFrameVector comAngularMomentum;
-      YoFrameVector comEstimatedAngularMomentum;
+      YoFrameVector3D comAngularMomentum;
+      YoFrameVector3D comEstimatedAngularMomentum;
       FloatingJoint rootJoint;
       Quaternion rootOrientation = new Quaternion();
       RigidBodyTransform rootJointTransform = new RigidBodyTransform();
@@ -162,8 +162,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
          floatingRootJointModel = drcSimulationTestHelper.getRobot();
          rootJoint = floatingRootJointModel.getRootJoint();
-         comAngularMomentum = new YoFrameVector("CoMAngularMomentum", worldFrame, scsRegistry);
-         comEstimatedAngularMomentum = new YoFrameVector("CoMEstimatedAngularMomentum", worldFrame, scsRegistry);
+         comAngularMomentum = new YoFrameVector3D("CoMAngularMomentum", worldFrame, scsRegistry);
+         comEstimatedAngularMomentum = new YoFrameVector3D("CoMEstimatedAngularMomentum", worldFrame, scsRegistry);
          scs = drcSimulationTestHelper.getSimulationConstructionSet();
          swTraj = new YoPolynomial3D("SwingFootTraj", 4, scsRegistry);
          comTraj = new YoPolynomial3D("CoMTraj", 4, scsRegistry);

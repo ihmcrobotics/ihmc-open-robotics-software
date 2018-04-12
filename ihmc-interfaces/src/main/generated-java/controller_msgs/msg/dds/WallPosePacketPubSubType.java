@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "WallPosePacket" defined in "WallPosePacket_.idl". Use this class
- * to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from WallPosePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit WallPosePacket_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "WallPosePacket" defined in "WallPosePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from WallPosePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit WallPosePacket_.idl instead.
+*
+*/
 public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WallPosePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WallPosePacket_";
@@ -50,6 +48,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -64,11 +63,14 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getCenterOrientation(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,11 +88,11 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    public static void read(controller_msgs.msg.dds.WallPosePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setCuttingRadius(cdr.read_type_6());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getCenterOrientation(), cdr);
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getCenterOrientation(), cdr);	
 
    }
 
@@ -126,7 +128,6 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    {
       return new controller_msgs.msg.dds.WallPosePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -138,7 +139,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.WallPosePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -148,7 +149,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<co
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.WallPosePacket src, controller_msgs.msg.dds.WallPosePacket dest)
    {
       staticCopy(src, dest);

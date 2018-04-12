@@ -13,12 +13,12 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class ClippedSpeedOffsetErrorInterpolator
@@ -141,9 +141,9 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoDouble translationErrorZ;
    
    //for feedBack in scs
-   private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
-   private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
-   private final YoFramePose yoInterpolatedOffset_InWorldFrame;
+   private final YoFramePoseUsingYawPitchRoll yoStartOffsetErrorPose_InWorldFrame;
+   private final YoFramePoseUsingYawPitchRoll yoGoalOffsetErrorPose_InWorldFrame;
+   private final YoFramePoseUsingYawPitchRoll yoInterpolatedOffset_InWorldFrame;
 
    private final FramePose3D startOffsetErrorPose_Translation = new FramePose3D(worldFrame);
    private final FramePose3D startOffsetErrorPose_Rotation = new FramePose3D(worldFrame);
@@ -155,11 +155,11 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final FrameQuaternion goalOffsetFrameOrientation_Rotation = new FrameQuaternion(worldFrame);
    private final FrameQuaternion interpolatedOffsetFrameOrientation_Rotation = new FrameQuaternion(worldFrame);
 
-   private final YoFramePoint yoGoalOffsetFramePoint_Translation;
-   private final YoFramePoint yoInterpolatedOffsetFramePoint_Translation;
+   private final YoFramePoint3D yoGoalOffsetFramePoint_Translation;
+   private final YoFramePoint3D yoInterpolatedOffsetFramePoint_Translation;
 
-   private final YoFrameOrientation yoGoalOffsetFrameOrientation_Rotation;
-   private final YoFrameOrientation yoInterpolatedOffsetFrameOrientation_Rotation;
+   private final YoFrameYawPitchRoll yoGoalOffsetFrameOrientation_Rotation;
+   private final YoFrameYawPitchRoll yoInterpolatedOffsetFrameOrientation_Rotation;
 
    public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, YoDouble alphaFilterBreakFrequency,
          double estimator_dt, boolean correctRotation)
@@ -228,15 +228,15 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalYawWithDeadZone = new DeadzoneYoVariable("goalYawWithDeadZone", goalYawRaw, yawDeadzoneSize, registry);
       
       // for feedback in SCS
-      yoStartOffsetErrorPose_InWorldFrame = new YoFramePose("yoStartOffsetErrorPose_InWorldFrame", worldFrame, registry);
-      yoGoalOffsetErrorPose_InWorldFrame = new YoFramePose("yoGoalOffsetErrorPose_InWorldFrame", worldFrame, registry);
-      yoInterpolatedOffset_InWorldFrame = new YoFramePose("yoInterpolatedOffset_InWorldFrame", worldFrame, registry);
+      yoStartOffsetErrorPose_InWorldFrame = new YoFramePoseUsingYawPitchRoll("yoStartOffsetErrorPose_InWorldFrame", worldFrame, registry);
+      yoGoalOffsetErrorPose_InWorldFrame = new YoFramePoseUsingYawPitchRoll("yoGoalOffsetErrorPose_InWorldFrame", worldFrame, registry);
+      yoInterpolatedOffset_InWorldFrame = new YoFramePoseUsingYawPitchRoll("yoInterpolatedOffset_InWorldFrame", worldFrame, registry);
 
-      yoGoalOffsetFramePoint_Translation = new YoFramePoint("yoGoalOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
-      yoInterpolatedOffsetFramePoint_Translation = new YoFramePoint("yoInterpolatedOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
+      yoGoalOffsetFramePoint_Translation = new YoFramePoint3D("yoGoalOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
+      yoInterpolatedOffsetFramePoint_Translation = new YoFramePoint3D("yoInterpolatedOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
 
-      yoGoalOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
-     yoInterpolatedOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoInterpolatedOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
+      yoGoalOffsetFrameOrientation_Rotation = new YoFrameYawPitchRoll("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
+     yoInterpolatedOffsetFrameOrientation_Rotation = new YoFrameYawPitchRoll("yoInterpolatedOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
      
       this.alphaFilter_BreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
@@ -532,12 +532,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
       goalOffsetFrameOrientation_Rotation.set(updatedGoalOffset_Rotation);
       goalOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
-      yoGoalOffsetFrameOrientation_Rotation.setAndMatchFrame(goalOffsetFrameOrientation_Rotation);
+      yoGoalOffsetFrameOrientation_Rotation.setMatchingFrame(goalOffsetFrameOrientation_Rotation);
 
       interpolatedOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
       interpolatedOffsetFrameOrientation_Rotation.set(interpolatedRotation);
       interpolatedOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
-      yoInterpolatedOffsetFrameOrientation_Rotation.setAndMatchFrame(interpolatedOffsetFrameOrientation_Rotation);
+      yoInterpolatedOffsetFrameOrientation_Rotation.setMatchingFrame(interpolatedOffsetFrameOrientation_Rotation);
    }
 
    public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize, double yawDeadzoneSize)

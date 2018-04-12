@@ -1,20 +1,34 @@
 package us.ihmc.robotDataLogger;
 
 /**
- * Topic data type of the struct "LoggerConfiguration" defined in "LoggerConfiguration.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LoggerConfiguration.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit LoggerConfiguration.idl instead.
- */
+* 
+* Topic data type of the struct "LoggerConfiguration" defined in "LoggerConfiguration.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LoggerConfiguration.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LoggerConfiguration.idl instead.
+*
+*/
 public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.LoggerConfiguration>
 {
    public static final java.lang.String name = "us::ihmc::robotDataLogger::LoggerConfiguration";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public LoggerConfigurationPubSubType()
+   @Override
+   public void serialize(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.LoggerConfiguration data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,8 +41,8 @@ public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -46,26 +60,41 @@ public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
+
       return current_alignment - initial_alignment;
    }
 
    public static void write(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.idl.CDR cdr)
    {
-
-      if (data.getCamerasToCapture().length() <= 255)
-         cdr.write_type_d(data.getCamerasToCapture());
-      else
-         throw new RuntimeException("camerasToCapture field exceeds the maximum length");
+      if(data.getCamerasToCapture().length() <= 255)
+      cdr.write_type_d(data.getCamerasToCapture());else
+          throw new RuntimeException("camerasToCapture field exceeds the maximum length");
 
       cdr.write_type_7(data.getPublicBroadcast());
+
    }
 
    public static void read(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.idl.CDR cdr)
    {
-
-      cdr.read_type_d(data.getCamerasToCapture());
-
+      cdr.read_type_d(data.getCamerasToCapture());	
       data.setPublicBroadcast(cdr.read_type_7());
+      	
+
+   }
+
+   @Override
+   public final void serialize(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_d("camerasToCapture", data.getCamerasToCapture());
+      ser.write_type_7("publicBroadcast", data.getPublicBroadcast());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.LoggerConfiguration data)
+   {
+      ser.read_type_d("camerasToCapture", data.getCamerasToCapture());
+      data.setPublicBroadcast(ser.read_type_7("publicBroadcast"));
    }
 
    public static void staticCopy(us.ihmc.robotDataLogger.LoggerConfiguration src, us.ihmc.robotDataLogger.LoggerConfiguration dest)
@@ -74,44 +103,10 @@ public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void serialize(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.LoggerConfiguration data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_d("camerasToCapture", data.getCamerasToCapture());
-
-      ser.write_type_7("publicBroadcast", data.getPublicBroadcast());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.LoggerConfiguration data)
-   {
-      ser.read_type_d("camerasToCapture", data.getCamerasToCapture());
-
-      data.setPublicBroadcast(ser.read_type_7("publicBroadcast"));
-   }
-
-   @Override
    public us.ihmc.robotDataLogger.LoggerConfiguration createData()
    {
       return new us.ihmc.robotDataLogger.LoggerConfiguration();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -123,7 +118,7 @@ public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(us.ihmc.robotDataLogger.LoggerConfiguration data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -133,7 +128,7 @@ public class LoggerConfigurationPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(us.ihmc.robotDataLogger.LoggerConfiguration src, us.ihmc.robotDataLogger.LoggerConfiguration dest)
    {
       staticCopy(src, dest);

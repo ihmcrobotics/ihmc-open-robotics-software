@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ObjectWeightPacket" defined in "ObjectWeightPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ObjectWeightPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ObjectWeightPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ObjectWeightPacket" defined in "ObjectWeightPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ObjectWeightPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ObjectWeightPacket_.idl instead.
+*
+*/
 public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ObjectWeightPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ObjectWeightPacket_";
@@ -26,8 +24,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ObjectWeightPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ObjectWeightPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,6 +46,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -63,9 +61,13 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,10 +85,11 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(controller_msgs.msg.dds.ObjectWeightPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotSide(cdr.read_type_9());
-
+      	
       data.setWeight(cdr.read_type_6());
+      	
 
    }
 
@@ -116,7 +119,6 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return new controller_msgs.msg.dds.ObjectWeightPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -128,7 +130,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ObjectWeightPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -138,7 +140,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ObjectWeightPacket src, controller_msgs.msg.dds.ObjectWeightPacket dest)
    {
       staticCopy(src, dest);

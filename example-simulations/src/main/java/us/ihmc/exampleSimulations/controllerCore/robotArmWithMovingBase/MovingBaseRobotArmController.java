@@ -28,8 +28,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -44,6 +42,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class MovingBaseRobotArmController implements RobotController
 {
@@ -74,9 +74,9 @@ public class MovingBaseRobotArmController implements RobotController
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
    private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
-   private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
+   private final YoFramePoint3D handTargetPosition = new YoFramePoint3D("handTarget", worldFrame, registry);
 
-   private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
+   private final YoFrameYawPitchRoll handTargetOrientation = new YoFrameYawPitchRoll("handTarget", worldFrame, registry);
    private final YoBoolean goToTarget = new YoBoolean("goToTarget", registry);
    private final YoDouble trajectoryDuration = new YoDouble("handTrajectoryDuration", registry);
    private final YoDouble trajectoryStartTime = new YoDouble("handTrajectoryStartTime", registry);
@@ -179,7 +179,7 @@ public class MovingBaseRobotArmController implements RobotController
       initialHandOrientation.changeFrame(worldFrame);
 
       handTargetPosition.setMatchingFrame(initialHandPosition);
-      handTargetOrientation.setAndMatchFrame(initialHandOrientation);
+      handTargetOrientation.setMatchingFrame(initialHandOrientation);
 
       FramePoint3D initialBasePosition = new FramePoint3D(robotArm.getBase().getBodyFixedFrame());
       initialBasePosition.changeFrame(worldFrame);
@@ -344,12 +344,12 @@ public class MovingBaseRobotArmController implements RobotController
       return name;
    }
 
-   public YoFramePoint getHandTargetPosition()
+   public YoFramePoint3D getHandTargetPosition()
    {
       return handTargetPosition;
    }
 
-   public YoFrameOrientation getHandTargetOrientation()
+   public YoFrameYawPitchRoll getHandTargetOrientation()
    {
       return handTargetOrientation;
    }

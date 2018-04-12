@@ -11,10 +11,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoMIntegrationToolsTest
@@ -32,20 +32,20 @@ public class CoMIntegrationToolsTest
       omega0.set(3.0);
 
       double duration = 2.0;
-      YoFramePoint initialICP = new YoFramePoint("initialICP", worldFrame, registry);
-      YoFrameVector initialICPVelocity = new YoFrameVector("initialICPVelocity", worldFrame, registry);
-      YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
-      YoFrameVector finalICPVelocity = new YoFrameVector("finalICPVelocity", worldFrame, registry);
-      YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
+      YoFramePoint3D initialICP = new YoFramePoint3D("initialICP", worldFrame, registry);
+      YoFrameVector3D initialICPVelocity = new YoFrameVector3D("initialICPVelocity", worldFrame, registry);
+      YoFramePoint3D finalICP = new YoFramePoint3D("finalICP", worldFrame, registry);
+      YoFrameVector3D finalICPVelocity = new YoFrameVector3D("finalICPVelocity", worldFrame, registry);
+      YoFramePoint3D initialCoM = new YoFramePoint3D("initialCoM", worldFrame, registry);
 
-      YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
-      YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", worldFrame, registry);
-      YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", worldFrame, registry);
-      YoFramePoint integratedCoMPosition = new YoFramePoint("integratedCoMPosition", worldFrame, registry);
+      YoFramePoint3D desiredCapturePoint = new YoFramePoint3D("desiredCapturePoint", worldFrame, registry);
+      YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      YoFramePoint3D integratedCoMPosition = new YoFramePoint3D("integratedCoMPosition", worldFrame, registry);
 
-      YoFramePoint cmp = new YoFramePoint("cmp", worldFrame, registry);
+      YoFramePoint3D cmp = new YoFramePoint3D("cmp", worldFrame, registry);
       cmp.set(0.1, 0.03, 0.0);
-      YoFramePoint cornerPoint = new YoFramePoint("cornerPoint", worldFrame, registry);
+      YoFramePoint3D cornerPoint = new YoFramePoint3D("cornerPoint", worldFrame, registry);
       cornerPoint.set(0.08, 0.06, 0.0);
 
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), duration / 2.0, cornerPoint, cmp, finalICP);
@@ -111,24 +111,24 @@ public class CoMIntegrationToolsTest
       double swingInitialDuration = timeSpentOnEntryCMP - transferFinalDuration;
       double swingFinalDuration = timeSpentOnExitCMP - transferInitialDuration;
 
-      YoFramePoint initialICP = new YoFramePoint("initialICP", worldFrame, registry);
-      YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
-      YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
+      YoFramePoint3D initialICP = new YoFramePoint3D("initialICP", worldFrame, registry);
+      YoFramePoint3D finalICP = new YoFramePoint3D("finalICP", worldFrame, registry);
+      YoFramePoint3D initialCoM = new YoFramePoint3D("initialCoM", worldFrame, registry);
       finalICP.set(-0.07, 0.4, 0.0);
 
-      YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
-      YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", worldFrame, registry);
-      YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", worldFrame, registry);
-      YoFramePoint integratedCoMPosition = new YoFramePoint("integratedCoMPosition", worldFrame, registry);
+      YoFramePoint3D desiredCapturePoint = new YoFramePoint3D("desiredCapturePoint", worldFrame, registry);
+      YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      YoFramePoint3D integratedCoMPosition = new YoFramePoint3D("integratedCoMPosition", worldFrame, registry);
 
-      YoFramePoint entryCMP = new YoFramePoint("entryCMP", worldFrame, registry);
-      YoFramePoint exitCMP = new YoFramePoint("exitCMP", worldFrame, registry);
+      YoFramePoint3D entryCMP = new YoFramePoint3D("entryCMP", worldFrame, registry);
+      YoFramePoint3D exitCMP = new YoFramePoint3D("exitCMP", worldFrame, registry);
       entryCMP.set(0.1, 0.0, 0.0);
       exitCMP.set(0.08, 0.08, 0.0);
 
 
-      YoFramePoint entryCornerPoint = new YoFramePoint("entryCornerPoint", worldFrame, registry);
-      YoFramePoint exitCornerPoint = new YoFramePoint("exitCornerPoint", worldFrame, registry);
+      YoFramePoint3D entryCornerPoint = new YoFramePoint3D("entryCornerPoint", worldFrame, registry);
+      YoFramePoint3D exitCornerPoint = new YoFramePoint3D("exitCornerPoint", worldFrame, registry);
 
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), -swingFinalDuration, finalICP, exitCMP, exitCornerPoint);
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), -timeSpentOnEntryCMP, exitCornerPoint, entryCMP, entryCornerPoint);
@@ -196,24 +196,24 @@ public class CoMIntegrationToolsTest
       double swingInitialDuration = timeSpentOnEntryCMP - transferFinalDuration;
       double swingFinalDuration = timeSpentOnExitCMP - transferInitialDuration;
 
-      YoFramePoint initialICP = new YoFramePoint("initialICP", worldFrame, registry);
-      YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
-      YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
+      YoFramePoint3D initialICP = new YoFramePoint3D("initialICP", worldFrame, registry);
+      YoFramePoint3D finalICP = new YoFramePoint3D("finalICP", worldFrame, registry);
+      YoFramePoint3D initialCoM = new YoFramePoint3D("initialCoM", worldFrame, registry);
       finalICP.set(-0.07, 0.4, 0.0);
 
-      YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
-      YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", worldFrame, registry);
-      YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", worldFrame, registry);
-      YoFramePoint integratedCoMPosition = new YoFramePoint("integratedCoMPosition", worldFrame, registry);
+      YoFramePoint3D desiredCapturePoint = new YoFramePoint3D("desiredCapturePoint", worldFrame, registry);
+      YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      YoFramePoint3D integratedCoMPosition = new YoFramePoint3D("integratedCoMPosition", worldFrame, registry);
 
-      YoFramePoint entryCMP = new YoFramePoint("entryCMP", worldFrame, registry);
-      YoFramePoint exitCMP = new YoFramePoint("exitCMP", worldFrame, registry);
+      YoFramePoint3D entryCMP = new YoFramePoint3D("entryCMP", worldFrame, registry);
+      YoFramePoint3D exitCMP = new YoFramePoint3D("exitCMP", worldFrame, registry);
       entryCMP.set(0.1, 0.0, 0.0);
       exitCMP.set(0.08, 0.08, 0.0);
 
 
-      YoFramePoint entryCornerPoint = new YoFramePoint("entryCornerPoint", worldFrame, registry);
-      YoFramePoint exitCornerPoint = new YoFramePoint("exitCornerPoint", worldFrame, registry);
+      YoFramePoint3D entryCornerPoint = new YoFramePoint3D("entryCornerPoint", worldFrame, registry);
+      YoFramePoint3D exitCornerPoint = new YoFramePoint3D("exitCornerPoint", worldFrame, registry);
 
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), -swingFinalDuration, finalICP, exitCMP, exitCornerPoint);
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), -timeSpentOnEntryCMP, exitCornerPoint, entryCMP, entryCornerPoint);

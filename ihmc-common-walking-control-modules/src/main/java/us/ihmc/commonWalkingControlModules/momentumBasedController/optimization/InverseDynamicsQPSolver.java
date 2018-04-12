@@ -6,13 +6,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseDynamicsQPSolver
@@ -23,8 +22,8 @@ public class InverseDynamicsQPSolver
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
-   private final YoFrameVector wrenchEquilibriumForceError;
-   private final YoFrameVector wrenchEquilibriumTorqueError;
+   private final YoFrameVector3D wrenchEquilibriumForceError;
+   private final YoFrameVector3D wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
@@ -139,8 +138,8 @@ public class InverseDynamicsQPSolver
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
-         wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
-         wrenchEquilibriumTorqueError = new YoFrameVector("wrenchEquilibriumTorqueError", null, registry);
+         wrenchEquilibriumForceError = new YoFrameVector3D("wrenchEquilibriumForceError", null, registry);
+         wrenchEquilibriumTorqueError = new YoFrameVector3D("wrenchEquilibriumTorqueError", null, registry);
       }
       else
       {
@@ -483,7 +482,7 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
-   public void solve() throws NoConvergenceException
+   public boolean solve()
    {
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
@@ -519,7 +518,7 @@ public class InverseDynamicsQPSolver
 
       if (MatrixTools.containsNaN(solverOutput))
       {
-         throw new NoConvergenceException(numberOfIterations.getIntegerValue());
+         return false;
       }
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
@@ -547,6 +546,8 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb_previous.set(solverInput_lb);
       solverInput_ub_previous.set(solverInput_ub);
+
+      return true;
    }
 
    private void printForJerry()

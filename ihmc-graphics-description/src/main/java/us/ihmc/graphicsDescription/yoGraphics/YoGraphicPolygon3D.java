@@ -15,8 +15,8 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -29,7 +29,7 @@ public class YoGraphicPolygon3D extends YoGraphic implements RemoteYoGraphic, Gr
    private static final MeshDataHolder EMPTY_MESH = MeshDataGenerator.Tetrahedron(0.0);
 
    private final YoInteger numberOfPoints;
-   private final YoFramePoint[] ccwOrderedYoFramePoints;
+   private final YoFramePoint3D[] ccwOrderedYoFramePoints;
    private final List<Point3D> ccwOrderedPoints;
 
    private final double height;
@@ -42,12 +42,12 @@ public class YoGraphicPolygon3D extends YoGraphic implements RemoteYoGraphic, Gr
    {
       super(name);
 
-      ccwOrderedYoFramePoints = new YoFramePoint[maxNumberOfPolygonVertices];
+      ccwOrderedYoFramePoints = new YoFramePoint3D[maxNumberOfPolygonVertices];
       ccwOrderedPoints = new ArrayList<>(maxNumberOfPolygonVertices);
 
       for (int i = 0; i < maxNumberOfPolygonVertices; i++)
       {
-         ccwOrderedYoFramePoints[i] = new YoFramePoint(name + "Point" + i, ReferenceFrame.getWorldFrame(), registry);
+         ccwOrderedYoFramePoints[i] = new YoFramePoint3D(name + "Point" + i, ReferenceFrame.getWorldFrame(), registry);
          ccwOrderedYoFramePoints[i].setToNaN();
          ccwOrderedPoints.add(new Point3D());
       }

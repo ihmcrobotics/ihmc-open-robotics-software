@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "WholeBodyTrajectoryMessage" defined in
- * "WholeBodyTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from WholeBodyTrajectoryMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * WholeBodyTrajectoryMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "WholeBodyTrajectoryMessage" defined in "WholeBodyTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from WholeBodyTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit WholeBodyTrajectoryMessage_.idl instead.
+*
+*/
 public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WholeBodyTrajectoryMessage_";
@@ -18,8 +16,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.WholeBodyTrajectoryMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.WholeBodyTrajectoryMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -64,6 +60,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -78,10 +75,10 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.getCdrSerializedSize(data.getLeftHandTrajectoryMessage(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.getCdrSerializedSize(data.getRightHandTrajectoryMessage(),
-                                                                                                        current_alignment);
+      current_alignment += controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.getCdrSerializedSize(data.getRightHandTrajectoryMessage(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.getCdrSerializedSize(data.getLeftArmTrajectoryMessage(), current_alignment);
 
@@ -93,10 +90,10 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.getCdrSerializedSize(data.getLeftFootTrajectoryMessage(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.getCdrSerializedSize(data.getRightFootTrajectoryMessage(),
-                                                                                                        current_alignment);
+      current_alignment += controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.getCdrSerializedSize(data.getRightFootTrajectoryMessage(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.getCdrSerializedSize(data.getHeadTrajectoryMessage(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -119,16 +116,16 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getLeftHandTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getRightHandTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.read(data.getLeftArmTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.read(data.getRightArmTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType.read(data.getChestTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.PelvisTrajectoryMessagePubSubType.read(data.getPelvisTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.read(data.getLeftFootTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.read(data.getRightFootTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.read(data.getHeadTrajectoryMessage(), cdr);
+      	
+      controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getLeftHandTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getRightHandTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.read(data.getLeftArmTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.read(data.getRightArmTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType.read(data.getChestTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.PelvisTrajectoryMessagePubSubType.read(data.getPelvisTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.read(data.getLeftFootTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.read(data.getRightFootTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.read(data.getHeadTrajectoryMessage(), cdr);	
 
    }
 
@@ -190,7 +187,6 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       return new controller_msgs.msg.dds.WholeBodyTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -202,7 +198,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -212,7 +208,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.WholeBodyTrajectoryMessage src, controller_msgs.msg.dds.WholeBodyTrajectoryMessage dest)
    {
       staticCopy(src, dest);

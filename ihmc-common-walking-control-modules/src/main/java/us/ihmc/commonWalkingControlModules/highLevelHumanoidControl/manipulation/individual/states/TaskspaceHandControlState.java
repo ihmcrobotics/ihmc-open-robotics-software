@@ -20,11 +20,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -52,7 +52,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    // viz stuff:
-   private final YoFramePose yoDesiredPose;
+   private final YoFramePoseUsingYawPitchRoll yoDesiredPose;
 
    // temp stuff:
    private final FramePose3D desiredPose = new FramePose3D();
@@ -74,8 +74,8 @@ public class TaskspaceHandControlState extends HandControlState
    private final ReferenceFrame chestFrame;
 
    private final YoPIDSE3Gains gains;
-   private final YoFrameVector yoAngularWeight;
-   private final YoFrameVector yoLinearWeight;
+   private final YoFrameVector3D yoAngularWeight;
+   private final YoFrameVector3D yoLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
@@ -98,8 +98,8 @@ public class TaskspaceHandControlState extends HandControlState
       endEffectorFrame = endEffector.getBodyFixedFrame();
       chestFrame = chest.getBodyFixedFrame();
 
-      yoAngularWeight = new YoFrameVector(namePrefix + "AngularTaskspaceWeight", null, registry);
-      yoLinearWeight = new YoFrameVector(namePrefix + "LinearTaskspaceWeight", null, registry);
+      yoAngularWeight = new YoFrameVector3D(namePrefix + "AngularTaskspaceWeight", null, registry);
+      yoLinearWeight = new YoFrameVector3D(namePrefix + "LinearTaskspaceWeight", null, registry);
       yoAngularWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
       yoLinearWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
       angularWeight.set(yoAngularWeight);
@@ -109,7 +109,7 @@ public class TaskspaceHandControlState extends HandControlState
       spatialFeedbackControlCommand.setPrimaryBase(chest);
 
       controlFrame = new PoseReferenceFrame("trackingFrame", endEffectorFrame);
-      yoDesiredPose = new YoFramePose(namePrefix + "DesiredPose", worldFrame, registry);
+      yoDesiredPose = new YoFramePoseUsingYawPitchRoll(namePrefix + "DesiredPose", worldFrame, registry);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, true, worldFrame, registry);
@@ -234,7 +234,7 @@ public class TaskspaceHandControlState extends HandControlState
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-      yoDesiredPose.setAndMatchFrame(desiredPose);
+      yoDesiredPose.setMatchingFrame(desiredPose);
 
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);

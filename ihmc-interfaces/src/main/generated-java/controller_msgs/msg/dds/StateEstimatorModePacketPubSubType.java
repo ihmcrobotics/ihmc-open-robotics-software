@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "StateEstimatorModePacket" defined in
- * "StateEstimatorModePacket_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from StateEstimatorModePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * StateEstimatorModePacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "StateEstimatorModePacket" defined in "StateEstimatorModePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from StateEstimatorModePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit StateEstimatorModePacket_.idl instead.
+*
+*/
 public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StateEstimatorModePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StateEstimatorModePacket_";
@@ -18,8 +16,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StateEstimatorModePacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StateEstimatorModePacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -48,6 +44,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -62,7 +59,10 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,8 +78,9 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    public static void read(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRequestedStateEstimatorMode(cdr.read_type_9());
+      	
 
    }
 
@@ -107,7 +108,6 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       return new controller_msgs.msg.dds.StateEstimatorModePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -119,7 +119,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -129,7 +129,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.StateEstimatorModePacket src, controller_msgs.msg.dds.StateEstimatorModePacket dest)
    {
       staticCopy(src, dest);
