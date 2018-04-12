@@ -123,7 +123,7 @@ public class ContinuousStepGenerator implements Updatable
             footstepSideDependentVisualizers.put(robotSide, new ArrayList<>());
       }
 
-      setSupportFootBasedFootstepAdjustment();
+      setSupportFootBasedFootstepAdjustment(true);
    }
 
    private final FramePose2D footstepPose2D = new FramePose2D();
@@ -356,7 +356,7 @@ public class ContinuousStepGenerator implements Updatable
       this.footstepAdjustment = footstepAdjustment;
    }
 
-   public void setSupportFootBasedFootstepAdjustment()
+   public void setSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
    {
       setFootstepAdjustment(new FootstepAdjustment()
       {
@@ -370,9 +370,16 @@ public class ContinuousStepGenerator implements Updatable
             currentSupportFootPose.setIncludingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
             currentSupportFootPose.changeFrame(worldFrame);
             adjustedPose.setZ(currentSupportFootPose.getZ());
-            currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
-            yawPitchRoll[0] = footstepPose.getYaw();
-            adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
+            if (adjustPitchAndRoll)
+            {
+               currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
+               yawPitchRoll[0] = footstepPose.getYaw();
+               adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
+            }
+            else
+            {
+               adjustedPose.setOrientation(footstepPose.getOrientation());
+            }
             return adjustedPose;
          }
       });
