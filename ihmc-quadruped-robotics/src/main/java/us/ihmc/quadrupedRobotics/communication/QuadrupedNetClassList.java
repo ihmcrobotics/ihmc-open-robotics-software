@@ -14,6 +14,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -98,6 +99,8 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(SpatialVectorMessage[].class);
 
       // Footstep data
+      registerPacketField(QuadrupedXGaitSettingsPacket.class);
+      registerPacketField(QuadrupedXGaitSettings.class);
       registerPacketField(QuadrupedTimedStepListMessage.class);
       registerPacketClass(QuadrupedTimedStepListMessage.class);
       registerPacketField(QuadrupedStepMessage.class);
