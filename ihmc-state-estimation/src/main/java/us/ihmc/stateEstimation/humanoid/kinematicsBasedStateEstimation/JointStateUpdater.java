@@ -43,7 +43,15 @@ public class JointStateUpdater
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      enableIMUBasedJointVelocityEstimator = new BooleanParameter("enableIMUBasedJointVelocityEstimator", registry, stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation());
+      if (stateEstimatorParameters == null)
+      {
+         enableIMUBasedJointVelocityEstimator = new BooleanParameter("enableIMUBasedJointVelocityEstimator", registry);
+      }
+      else
+      {
+         boolean initialValue = stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation();
+         enableIMUBasedJointVelocityEstimator = new BooleanParameter("enableIMUBasedJointVelocityEstimator", registry, initialValue);
+      }
       iMUBasedJointStateEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
