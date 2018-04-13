@@ -74,30 +74,6 @@ public class ThreeDoFSwingFootTrajectory
       trajectoryViz.showGraphic();
    }
 
-   public void showVisualization()
-   {
-      if (trajectoryViz == null)
-         return;
-      trajectoryViz.showGraphic();
-   }
-
-   public void hideVisualization()
-   {
-      if (trajectoryViz == null)
-         return;
-      trajectoryViz.hideGraphic();
-   }
-
-   public double getStartTime()
-   {
-      return timeInterval.getStartTime();
-   }
-
-   public double getEndTime()
-   {
-      return timeInterval.getEndTime();
-   }
-
    public void getPosition(FramePoint3D position)
    {
       position.setIncludingFrame(this.position);
@@ -121,11 +97,6 @@ public class ThreeDoFSwingFootTrajectory
    public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, TimeInterval timeInterval)
    {
       initializeTrajectory(initialPosition, finalPosition, groundClearance, timeInterval.getStartTime(), timeInterval.getEndTime());
-   }
-
-   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, double duration)
-   {
-      initializeTrajectory(initialPosition, finalPosition, groundClearance, 0, duration);
    }
 
    public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, double startTime, double endTime)
