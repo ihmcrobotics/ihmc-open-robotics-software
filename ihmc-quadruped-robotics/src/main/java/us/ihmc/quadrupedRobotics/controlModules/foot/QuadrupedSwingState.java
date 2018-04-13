@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -26,7 +27,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean createSwingTrajectoryGraphics = false;
 
    private final ThreeDoFSwingFootTrajectory swingTrajectory;
    private final FramePoint3D goalPosition = new FramePoint3D();
@@ -50,12 +50,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final QuadrupedControllerToolbox controllerToolbox;
    private final RobotQuadrant robotQuadrant;
 
-   // graphics
-   private static final int pointsPerSecondOfSwingTime = 70;
-   private static final AppearanceDefinition visualizationAppearance = YoAppearance.Blue();
-   private final FramePoint3D swingPositionForVisualization = new FramePoint3D();
-   private final BagOfBalls stepSequenceVisualization;
-
    private boolean triggerSupport;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
@@ -72,7 +66,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
-      this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
+      this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry, graphicsListRegistry);
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
@@ -83,16 +77,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
 
-      // graphics
-      if (createSwingTrajectoryGraphics)
-      {
-         String prefix = robotQuadrant.getPascalCaseName() + "SwingTrajectory";
-         stepSequenceVisualization = new BagOfBalls(pointsPerSecondOfSwingTime, 0.005, prefix, visualizationAppearance, registry, graphicsListRegistry);
-      }
-      else
-      {
-         stepSequenceVisualization = null;
-      }
    }
 
    @Override
@@ -113,26 +97,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       swingTrajectory.initializeTrajectory(initialPosition, goalPosition, groundClearance, timeInterval);
 
-      if (createSwingTrajectoryGraphics)
-         updateGraphics(timeInterval.getStartTime(), timeInterval.getEndTime());
-
       touchdownTrigger.set(false);
       triggerSupport = false;
-   }
-
-   private void updateGraphics(double startTime, double endTime)
-   {
-      stepSequenceVisualization.reset();
-      double swingDuration = endTime - startTime;
-      int numberOfPoints = MathTools.clamp((int) (pointsPerSecondOfSwingTime * swingDuration), 2, pointsPerSecondOfSwingTime);
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         double t = startTime + (i + 1) * swingDuration / numberOfPoints;
-         swingTrajectory.computeTrajectory(t);
-         swingTrajectory.getPosition(swingPositionForVisualization);
-         stepSequenceVisualization.setBall(swingPositionForVisualization);
-      }
    }
 
    @Override
@@ -182,9 +148,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
          feedbackControlCommand.setGains(parameters.getSolePositionGains());
       }
 
-      if (createSwingTrajectoryGraphics)
-         updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
-
       // Trigger support phase.
       if (currentTime >= touchDownTime)
       {
@@ -207,8 +170,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       stepCommandIsValid.set(false);
 
-      if (createSwingTrajectoryGraphics)
-         stepSequenceVisualization.hideAll();
       triggerSupport = false;
    }
 
