@@ -17,18 +17,21 @@ import java.util.List;
 
 public class ThreeDoFSwingFootTrajectory
 {
-   final private YoPolynomial xTrajectory;
-   final private YoPolynomial yTrajectory;
-   final private YoPolynomial zTrajectory;
-   final private YoPolynomial xTrajectoryAdjustment;
-   final private YoPolynomial yTrajectoryAdjustment;
-   final private YoPolynomial zTrajectoryAdjustment;
+   private final YoPolynomial3D swingTrajectory;
+   private final YoPolynomial3D swingTrajectoryAdjustment;
    private final YoDouble duration;
+
    final private FramePoint3D initialPosition;
+
+   private static final FrameVector3D zeroVector = new FrameVector3D();
+
    final private FramePoint3D finalPosition;
+   final private FramePoint3D finalPositionAdjustment = new FramePoint3D();
+
    final private FramePoint3D position;
    final private FrameVector3D velocity;
    final private FrameVector3D acceleration;
+
    private final TimeInterval timeInterval;
    private ReferenceFrame referenceFrame;
    private TimeInterval timeIntervalAdjustment;
@@ -38,12 +41,9 @@ public class ThreeDoFSwingFootTrajectory
 
    public ThreeDoFSwingFootTrajectory(String prefix, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      xTrajectory = new YoPolynomial(prefix + "SwingTrajectoryX", 4, registry);
-      yTrajectory = new YoPolynomial(prefix + "SwingTrajectoryY", 4, registry);
-      zTrajectory = new YoPolynomial(prefix + "SwingTrajectoryZ", 3, registry);
-      xTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentX", 6, registry);
-      yTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentY", 6, registry);
-      zTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentZ", 6, registry);
+      swingTrajectory = new YoPolynomial3D(prefix + "SwingTrajectory", 4, registry);
+      swingTrajectoryAdjustment = new YoPolynomial3D(prefix + "SwingTrajectoryAdjustment", 6, registry);
+
       duration = new YoDouble(prefix + "Duration", registry);
       finalPosition = new FramePoint3D();
       initialPosition = new FramePoint3D();
@@ -57,9 +57,7 @@ public class ThreeDoFSwingFootTrajectory
 
       if (graphicsListRegistry != null)
       {
-         YoPolynomial3D yoPolynomial = new YoPolynomial3D(xTrajectory, yTrajectory, zTrajectory);
-
-         trajectoryViz = new YoGraphicPolynomial3D(prefix + "Trajectory", yoPolynomial, duration, 0.01, 50, 8, registry);
+         trajectoryViz = new YoGraphicPolynomial3D(prefix + "Trajectory", swingTrajectory, duration, 0.01, 50, 8, registry);
          graphicsListRegistry.registerYoGraphic(prefix + "Trajectory", trajectoryViz);
 
          trajectoryViz.setColorType(YoGraphicPolynomial3D.TrajectoryColorType.ACCELERATION_BASED);
@@ -140,15 +138,16 @@ public class ThreeDoFSwingFootTrajectory
       timeInterval.setInterval(startTime, endTime);
       duration.set(timeInterval.getDuration());
       double midwayPositionZ = groundClearance + Math.max(initialPosition.getZ(), finalPosition.getZ());
-      xTrajectory.setCubic(0, timeInterval.getDuration(), initialPosition.getX(), 0, finalPosition.getX(), 0);
-      yTrajectory.setCubic(0, timeInterval.getDuration(), initialPosition.getY(), 0, finalPosition.getY(), 0);
-      zTrajectory.setQuadraticUsingIntermediatePoint(0, 0.5 * timeInterval.getDuration(), timeInterval.getDuration(), initialPosition.getZ(), midwayPositionZ,
+
+      swingTrajectory.getYoPolynomialX().setCubic(0, timeInterval.getDuration(), initialPosition.getX(), 0, finalPosition.getX(), 0);
+      swingTrajectory.getYoPolynomialY().setCubic(0, timeInterval.getDuration(), initialPosition.getY(), 0, finalPosition.getY(), 0);
+      swingTrajectory.getYoPolynomialZ().setQuadraticUsingIntermediatePoint(0, 0.5 * timeInterval.getDuration(), timeInterval.getDuration(), initialPosition.getZ(), midwayPositionZ,
             finalPosition.getZ());
 
       timeIntervalAdjustment.setInterval(startTime, endTime);
-      xTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
-      yTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
-      zTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
+      swingTrajectoryAdjustment.getYoPolynomialX().setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
+      swingTrajectoryAdjustment.getYoPolynomialY().setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
+      swingTrajectoryAdjustment.getYoPolynomialZ().setQuintic(0, timeIntervalAdjustment.getDuration(), 0, 0, 0, 0, 0, 0);
 
       position.changeFrame(referenceFrame);
       velocity.changeFrame(referenceFrame);
@@ -167,21 +166,15 @@ public class ThreeDoFSwingFootTrajectory
       }
       currentTime = MathTools.clamp(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
 
-      xTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
-      yTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
-      zTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
+      swingTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
 
       timeIntervalAdjustment.setStartTime(currentTime);
       timeIntervalAdjustment.setEndTime(timeInterval.getEndTime());
-      double finalPositionOffsetX = finalPosition.getX() - this.finalPosition.getX();
-      double finalPositionOffsetY = finalPosition.getY() - this.finalPosition.getY();
-      double finalPositionOffsetZ = finalPosition.getZ() - this.finalPosition.getZ();
-      xTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), xTrajectoryAdjustment.getPosition(), xTrajectoryAdjustment.getVelocity(),
-            xTrajectoryAdjustment.getAcceleration(), finalPositionOffsetX, 0, 0);
-      yTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), yTrajectoryAdjustment.getPosition(), yTrajectoryAdjustment.getVelocity(),
-            yTrajectoryAdjustment.getAcceleration(), finalPositionOffsetY, 0, 0);
-      zTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), zTrajectoryAdjustment.getPosition(), zTrajectoryAdjustment.getVelocity(),
-            zTrajectoryAdjustment.getAcceleration(), finalPositionOffsetZ, 0, 0);
+
+      finalPositionAdjustment.sub(finalPosition, this.finalPosition);
+
+      swingTrajectoryAdjustment.setQuintic(0, timeIntervalAdjustment.getDuration(), swingTrajectoryAdjustment.getPosition(), swingTrajectoryAdjustment.getVelocity(),
+                                           swingTrajectoryAdjustment.getAcceleration(), finalPositionAdjustment, zeroVector, zeroVector);
    }
 
    public void computeTrajectory(double currentTime)
@@ -192,21 +185,16 @@ public class ThreeDoFSwingFootTrajectory
       }
       currentTime = MathTools.clamp(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
 
-      xTrajectory.compute(currentTime - timeInterval.getStartTime());
-      yTrajectory.compute(currentTime - timeInterval.getStartTime());
-      zTrajectory.compute(currentTime - timeInterval.getStartTime());
-      xTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
-      yTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
-      zTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
+      swingTrajectory.compute(currentTime - timeInterval.getStartTime());
+      swingTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
 
-      position.setX(xTrajectory.getPosition() + xTrajectoryAdjustment.getPosition());
-      position.setY(yTrajectory.getPosition() + yTrajectoryAdjustment.getPosition());
-      position.setZ(zTrajectory.getPosition() + zTrajectoryAdjustment.getPosition());
-      velocity.setX(xTrajectory.getVelocity() + xTrajectoryAdjustment.getVelocity());
-      velocity.setY(yTrajectory.getVelocity() + yTrajectoryAdjustment.getVelocity());
-      velocity.setZ(zTrajectory.getVelocity() + zTrajectoryAdjustment.getVelocity());
-      acceleration.setX(xTrajectory.getAcceleration() + xTrajectoryAdjustment.getAcceleration());
-      acceleration.setY(yTrajectory.getAcceleration() + yTrajectoryAdjustment.getAcceleration());
-      acceleration.setZ(zTrajectory.getAcceleration() + zTrajectoryAdjustment.getAcceleration());
+      position.set(swingTrajectory.getPosition());
+      position.add(swingTrajectoryAdjustment.getPosition());
+
+      velocity.set(swingTrajectory.getVelocity());
+      velocity.add(swingTrajectoryAdjustment.getVelocity());
+
+      acceleration.set(swingTrajectory.getAcceleration());
+      acceleration.add(swingTrajectoryAdjustment.getAcceleration());
    }
 }
