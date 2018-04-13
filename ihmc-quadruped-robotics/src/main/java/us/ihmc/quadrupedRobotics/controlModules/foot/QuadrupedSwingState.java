@@ -15,11 +15,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
+import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectoryGenerator;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,12 +33,18 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final ThreeDoFSwingFootTrajectory swingTrajectory;
+
+//   private final ThreeDoFSwingFootTrajectoryGenerator trajectoryGenerator;
+//   private final BlendedPositionTrajectoryGenerator newSwingTrajectory;
+
    private final FramePoint3D goalPosition = new FramePoint3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final GlitchFilteredYoBoolean touchdownTrigger;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
+
+   private final FrameVector3D zeroVector = new FrameVector3D();
 
    private final QuadrupedFootControlModuleParameters parameters;
 
@@ -67,6 +77,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry, graphicsListRegistry);
+//
+//      trajectoryGenerator = new ThreeDoFSwingFootTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), registry, graphicsListRegistry);
+//      newSwingTrajectory = new BlendedPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), trajectoryGenerator, ReferenceFrame.getWorldFrame(), registry);
+
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
@@ -96,6 +110,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
       goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
       swingTrajectory.initializeTrajectory(initialPosition, goalPosition, groundClearance, timeInterval);
+//      trajectoryGenerator.setInitialConditions(initialPosition, zeroVector);
+//      trajectoryGenerator.setFinalConditions(goalPosition, zeroVector);
+//      trajectoryGenerator.setGroundClearance(groundClearance);
+//      trajectoryGenerator.setStepDuration(timeInterval.getDuration());
+//      trajectoryGenerator.initialize();
 
       touchdownTrigger.set(false);
       triggerSupport = false;
@@ -115,11 +134,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
       // Compute swing trajectory.
       if (touchDownTime - currentTime > parameters.getMinimumStepAdjustmentTimeParameter())
       {
+//         newSwingTrajectory.blendFinalConstraint(goalPosition, touchDownTime, touchDownTime - currentTime);
          swingTrajectory.adjustTrajectory(goalPosition, currentTime);
       }
       swingTrajectory.computeTrajectory(currentTime);
       swingTrajectory.getPosition(desiredPosition);
       swingTrajectory.getVelocity(desiredVelocity);
+//      newSwingTrajectory.compute((timeInState));
+//      newSwingTrajectory.getPosition(desiredPosition);
+//      newSwingTrajectory.getVelocity(desiredVelocity);
 
       // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
       FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
