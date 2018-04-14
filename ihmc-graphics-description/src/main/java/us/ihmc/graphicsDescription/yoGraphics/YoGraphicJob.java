@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  * @author Sylvain
  *
  */
-enum YoGraphicJob
+public enum YoGraphicJob
 {
    /** The YoGraphic is the one processing user data and updating the YoVariables. */
    WRITER,
