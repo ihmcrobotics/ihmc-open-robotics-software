@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
 
 public interface REAMessager
 {
@@ -43,5 +43,5 @@ public interface REAMessager
 
    void registerConnectionStateListener(ConnectionStateListener listener);
 
-   API getMessagerAPI();
+   MessagerAPI getMessagerAPI();
 }

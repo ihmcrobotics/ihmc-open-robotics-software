@@ -1,11 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.APIElementId;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TopicID;
 
 public final class REAMessage<T> extends Packet<REAMessage<T>>
 {
-   public APIElementId topicId;
+   public TopicID topicId;
    public Object messageContent;
 
    public REAMessage()
@@ -20,7 +20,7 @@ public final class REAMessage<T> extends Packet<REAMessage<T>>
       setPacketInformation(other);
    }
 
-   public APIElementId getTopicId()
+   public TopicID getTopicId()
    {
       return topicId;
    }

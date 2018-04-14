@@ -34,7 +34,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.APIElementId;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TopicID;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
@@ -73,7 +73,7 @@ public class REACommunicationKryoNetClassLists
       privateNetClassList.registerPacketField(Point2D32[].class);
       privateNetClassList.registerPacketField(LineSegment3DMessage.class);
       privateNetClassList.registerPacketField(LineSegment3DMessage[].class);
-      privateNetClassList.registerPacketField(APIElementId.class);
+      privateNetClassList.registerPacketField(TopicID.class);
       privateNetClassList.registerPacketField(LidarScanMessage.class);
       privateNetClassList.registerPacketField(BoxMessage.class);
       privateNetClassList.registerPacketField(BoundingBoxParametersMessage.class);

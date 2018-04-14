@@ -5,13 +5,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.*;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlannerUserInterfaceAPI
 {
-   private static final APIFactory apiFactory = new APIFactory();
+   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
@@ -40,7 +40,7 @@ public class FootstepPlannerUserInterfaceAPI
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
-   private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
+   private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
 
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
@@ -71,5 +71,5 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);
    public static final Topic<Pose3D> FootstepPoseTopic = Root.child(NodeChecking).topic(FootstepPose);
 
-   public static final API API = apiFactory.getAPIAndCloseFactory();
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

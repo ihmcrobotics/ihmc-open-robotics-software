@@ -9,19 +9,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
 
 public class REAMessagerSharedVariables implements REAMessager
 {
-   private final API messagerAPI;
+   private final MessagerAPI messagerAPI;
 
    private final AtomicBoolean isConnected = new AtomicBoolean(false);
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> boundVariables = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<ConnectionStateListener> connectionStateListeners = new ArrayList<>();
 
-   public REAMessagerSharedVariables(API messagerAPI)
+   public REAMessagerSharedVariables(MessagerAPI messagerAPI)
    {
       this.messagerAPI = messagerAPI;
    }
@@ -115,7 +115,7 @@ public class REAMessagerSharedVariables implements REAMessager
    }
 
    @Override
-   public API getMessagerAPI()
+   public MessagerAPI getMessagerAPI()
    {
       return messagerAPI;
    }
