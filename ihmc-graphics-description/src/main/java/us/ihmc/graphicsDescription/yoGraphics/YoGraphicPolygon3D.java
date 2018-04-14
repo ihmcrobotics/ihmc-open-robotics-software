@@ -83,12 +83,6 @@ public class YoGraphicPolygon3D extends YoGraphic implements RemoteYoGraphic, Gr
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYGON_3D;
-   }
-
-   @Override
    public YoVariable<?>[] getVariables()
    {
       YoVariable<?>[] yoVariableList = new YoVariable<?>[3 * ccwOrderedYoFramePoints.length + 1];

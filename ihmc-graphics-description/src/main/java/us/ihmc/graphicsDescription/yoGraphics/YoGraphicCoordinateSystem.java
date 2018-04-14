@@ -220,11 +220,6 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       throw new RuntimeException("Implement Me!");
    }
 
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.COORDINATE_SYSTEM_DGO;
-   }
-
    @Override
    public YoDouble[] getVariables()
    {

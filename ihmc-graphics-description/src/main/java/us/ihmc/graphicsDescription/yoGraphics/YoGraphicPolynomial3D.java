@@ -607,7 +607,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * Update the trajectory mesh only if it appears to be out-of-date.
     * <p>
     * When a remote YoGraphic is created, this method becomes ineffective for the writer, i.e. where
-    * it is originally created. Only the reader, i.e. created from {@link YoGraphicFactory},
+    * it is originally created. Only the reader, i.e. created from {@link RemoteYoGraphicFactory},
     * performs actual computation.
     * </p>
     */
@@ -753,12 +753,6 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    private TrajectoryColorType getCurrentColorType()
    {
       return TrajectoryColorType.values[currentColorType.getOrdinal()];
-   }
-
-   @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYNOMIAL_3D_DGO;
    }
 
    /**

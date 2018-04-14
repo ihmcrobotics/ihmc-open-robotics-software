@@ -75,12 +75,6 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.CIRCLE_ARTIFACT;
-   }
-
-   @Override
    public YoArtifact duplicate(YoVariableRegistry newRegistry)
    {
       return new YoArtifactOval(getName(), center.duplicate(newRegistry), radii.duplicate(newRegistry), color);

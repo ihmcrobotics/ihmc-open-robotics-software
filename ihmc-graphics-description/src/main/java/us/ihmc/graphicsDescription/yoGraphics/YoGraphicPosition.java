@@ -334,11 +334,6 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       return false;
    }
 
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POSITION_DGO;
-   }
-
    @Override
    public YoVariable<?>[] getVariables()
    {

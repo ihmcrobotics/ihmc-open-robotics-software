@@ -159,12 +159,6 @@ public class YoArtifactPosition extends YoArtifact
       }
    }
    
-   @Override
-   public RemoteGraphicType getRemoteGraphicType() 
-   {
-      return RemoteGraphicType.POSITION_ARTIFACT;
-   }
-   
    public YoDouble getYoX()
    {
       return point.getYoX();

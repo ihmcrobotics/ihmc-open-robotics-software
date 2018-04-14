@@ -742,12 +742,6 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentRegionPose.setToNaN();
    }
 
-   @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.PLANAR_REGIONS_LIST_DGO;
-   }
-
    /**
     * @return The YoVariables needed to create a remote version of this YoGraphic.
     */

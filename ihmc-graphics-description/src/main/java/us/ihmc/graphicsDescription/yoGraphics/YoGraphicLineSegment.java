@@ -87,12 +87,6 @@ public class YoGraphicLineSegment extends YoGraphicVector
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.LINE_SEGMENT_DGO;
-   }
-
-   @Override
    public YoDouble[] getVariables()
    {
       return new YoDouble[] {start.getYoX(), start.getYoY(), start.getYoZ(), end.getYoX(), end.getYoY(), end.getYoZ()};
