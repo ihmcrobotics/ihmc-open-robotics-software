@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;

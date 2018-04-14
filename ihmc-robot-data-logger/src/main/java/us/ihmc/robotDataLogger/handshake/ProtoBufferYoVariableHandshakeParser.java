@@ -13,6 +13,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
@@ -28,7 +29,6 @@ import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProto
 import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoEnum;

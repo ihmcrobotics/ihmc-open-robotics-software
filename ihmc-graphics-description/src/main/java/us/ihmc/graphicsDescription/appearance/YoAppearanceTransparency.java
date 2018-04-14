@@ -2,7 +2,7 @@ package us.ihmc.graphicsDescription.appearance;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 
 public abstract class YoAppearanceTransparency implements AppearanceDefinition
 {
