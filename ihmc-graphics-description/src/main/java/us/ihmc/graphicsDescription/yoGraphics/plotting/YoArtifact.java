@@ -8,6 +8,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
@@ -82,4 +83,7 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
          }
       }
    }
+
+   @Override
+   public abstract YoArtifact duplicate(YoVariableRegistry newRegistry);
 }

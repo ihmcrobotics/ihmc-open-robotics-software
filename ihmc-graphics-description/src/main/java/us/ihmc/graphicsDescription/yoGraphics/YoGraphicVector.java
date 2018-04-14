@@ -17,6 +17,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -53,7 +54,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
                           boolean drawArrowhead, double lineRadiusWhenOneMeterLong)
    {
       this(name, startPoint, directionVector, scale, appearance, drawArrowhead);
-      this.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
+      setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
    }
 
    public YoGraphicVector(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, double scale, AppearanceDefinition appearance,
@@ -62,7 +63,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale,
            appearance, drawArrowhead);
 
-      if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
+      if (!startPoint.getReferenceFrame().isWorldFrame() || !frameVector.getReferenceFrame().isWorldFrame())
       {
          System.err.println("Warning: Should be in a World Frame to create a YoGraphicVector. startPoint = " + startPoint + ", frameVector = " + frameVector);
       }
@@ -259,7 +260,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       {
          linkGraphics.addCylinder(0.9, lineRadiusWhenOneMeterLong, appearance);
          linkGraphics.translate(0.0, 0.0, 0.9);
-         linkGraphics.addCone(0.1, (0.05 / 0.02) * lineRadiusWhenOneMeterLong, appearance);
+         linkGraphics.addCone(0.1, 0.05 / 0.02 * lineRadiusWhenOneMeterLong, appearance);
       }
       else
       {
@@ -273,5 +274,12 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    public AppearanceDefinition getAppearance()
    {
       return appearance;
+   }
+
+   @Override
+   public YoGraphicVector duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicVector(getName(), base.duplicate(newRegistry), vector.duplicate(newRegistry), scaleFactor, appearance, drawArrowhead,
+                                 lineRadiusWhenOneMeterLong);
    }
 }

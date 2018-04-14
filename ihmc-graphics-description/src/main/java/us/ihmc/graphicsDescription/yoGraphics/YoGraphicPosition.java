@@ -37,7 +37,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
    private final GraphicType type;
    private final AppearanceDefinition appearance;
 
-   private final ArrayList<Graphics3DInstruction> linkGraphicInstructions = new ArrayList<Graphics3DInstruction>();
+   private final ArrayList<Graphics3DInstruction> linkGraphicInstructions = new ArrayList<>();
 
    public YoGraphicPosition(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition appearance)
    {
@@ -93,9 +93,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
       framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      this.x = framePoint.getYoX();
-      this.y = framePoint.getYoY();
-      this.z = framePoint.getYoZ();
+      x = framePoint.getYoX();
+      y = framePoint.getYoY();
+      z = framePoint.getYoZ();
 
       this.scale = scale;
 
@@ -124,9 +124,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
       framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      this.x = framePoint.getYoX();
-      this.y = framePoint.getYoY();
-      this.z = null;
+      x = framePoint.getYoX();
+      y = framePoint.getYoY();
+      z = null;
 
       this.scale = scale;
 
@@ -166,10 +166,10 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public void getPosition(Tuple3DBasics positionToPack)
    {
-      positionToPack.setX(this.getX());
-      positionToPack.setY(this.getY());
-      if (this.z != null)
-         positionToPack.setZ(this.getZ());
+      positionToPack.setX(getX());
+      positionToPack.setY(getY());
+      if (z != null)
+         positionToPack.setZ(getZ());
       else
          positionToPack.setZ(0.0);
    }
@@ -209,9 +209,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public Color getColor()
    {
-      if (this.appearance instanceof YoAppearanceRGBColor)
+      if (appearance instanceof YoAppearanceRGBColor)
       {
-         YoAppearanceRGBColor yoAppearanceRGBColor = (YoAppearanceRGBColor) this.appearance;
+         YoAppearanceRGBColor yoAppearanceRGBColor = (YoAppearanceRGBColor) appearance;
          Color color = new Color(yoAppearanceRGBColor.getRed(), yoAppearanceRGBColor.getGreen(), yoAppearanceRGBColor.getBlue());
          return color;
       }
@@ -221,6 +221,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       }
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -286,11 +287,12 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    private Vector3D translationVector = new Vector3D();
 
+   @Override
    protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
 
-      if (Double.isNaN(x.getDoubleValue()) || Double.isNaN(y.getDoubleValue()) || ((z != null) && (Double.isNaN(z.getDoubleValue()))))
+      if (Double.isNaN(x.getDoubleValue()) || Double.isNaN(y.getDoubleValue()) || z != null && Double.isNaN(z.getDoubleValue()))
       {
          translationVector.set(-1000.0, -1000.0, -1000.0);
          transform3D.setTranslation(translationVector);
@@ -313,9 +315,10 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       }
    }
 
+   @Override
    public YoArtifactPosition createArtifact()
    {
-      return new YoArtifactPosition(getName(), x, y, type, this.getColor(), scale);
+      return new YoArtifactPosition(getName(), x, y, type, getColor(), scale);
    }
 
    @Override
@@ -325,7 +328,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          return true;
       if (y.isNaN())
          return true;
-      if ((z != null) && (z.isNaN()))
+      if (z != null && z.isNaN())
          return true;
 
       return false;
@@ -336,6 +339,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       return RemoteGraphicType.POSITION_DGO;
    }
 
+   @Override
    public YoVariable<?>[] getVariables()
    {
       if (z != null)
@@ -348,11 +352,13 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       }
    }
 
+   @Override
    public double[] getConstants()
    {
       return new double[] {scale, type.ordinal()};
    }
 
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return appearance;
@@ -366,5 +372,14 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
    public YoVariable<?> getYoY()
    {
       return y;
+   }
+
+   @Override
+   public YoGraphicPosition duplicate(YoVariableRegistry newRegistry)
+   {
+      YoDouble x = (YoDouble) newRegistry.getVariable(this.x.getFullNameWithNameSpace());
+      YoDouble y = (YoDouble) newRegistry.getVariable(this.y.getFullNameWithNameSpace());
+      YoDouble z = (YoDouble) newRegistry.getVariable(this.z.getFullNameWithNameSpace());
+      return new YoGraphicPosition(getName(), x, y, z, scale, appearance, type);
    }
 }

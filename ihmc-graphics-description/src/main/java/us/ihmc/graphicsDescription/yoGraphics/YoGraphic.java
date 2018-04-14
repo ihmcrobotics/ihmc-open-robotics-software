@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class YoGraphic
 {
@@ -105,6 +106,8 @@ public abstract class YoGraphic
    public void update()
    {
    }
+
+   public abstract YoGraphic duplicate(YoVariableRegistry newRegistry);
 
    @Override
    public String toString()

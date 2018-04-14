@@ -1,6 +1,6 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonList;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -21,10 +21,17 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * {@link YoGraphic} that can display 3D trajectories using {@link YoPolynomial}s or
@@ -865,6 +872,12 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    protected boolean containsNaN()
    { // Only used to determine if the graphics from this object is valid, and whether to display or hide.
       return getCurrentGraphicType() == TrajectoryGraphicType.HIDE;
+   }
+
+   @Override
+   public YoGraphicPolynomial3D duplicate(YoVariableRegistry newRegistry)
+   {
+      return createAsRemoteYoGraphic(getName(), getVariables(), getConstants());
    }
 
    /**

@@ -38,7 +38,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance,
            drawArrowhead);
 
-      if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
+      if (!startPoint.getReferenceFrame().isWorldFrame() || !endPoint.getReferenceFrame().isWorldFrame())
       {
          System.err.println("Warning: Should be in a World Frame to create a YoGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
       }
@@ -67,12 +67,13 @@ public class YoGraphicLineSegment extends YoGraphicVector
    {
       super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead);
 
-      this.vector = yoFrameVector;
+      vector = yoFrameVector;
 
-      this.start = new YoFramePoint3D(startX, startY, startZ, ReferenceFrame.getWorldFrame());
-      this.end = new YoFramePoint3D(endX, endY, endZ, ReferenceFrame.getWorldFrame());
+      start = new YoFramePoint3D(startX, startY, startZ, ReferenceFrame.getWorldFrame());
+      end = new YoFramePoint3D(endX, endY, endZ, ReferenceFrame.getWorldFrame());
    }
 
+   @Override
    protected void computeRotationTranslation(AffineTransform transform3D)
    {
       if (vector == null)
@@ -112,9 +113,9 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
    public void setStartAndEnd(Point3DReadOnly startPoint, Point3DReadOnly endPoint)
    {
-      this.start.set(startPoint);
-      this.end.set(endPoint);
-      this.vector.sub(endPoint, startPoint);
+      start.set(startPoint);
+      end.set(endPoint);
+      vector.sub(endPoint, startPoint);
    }
 
    public void setToNaN()
@@ -124,4 +125,10 @@ public class YoGraphicLineSegment extends YoGraphicVector
       vector.setToNaN();
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public YoGraphicLineSegment duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicLineSegment(getName(), start, end, scaleFactor, getAppearance(), getDrawArrowhead());
+   }
 }

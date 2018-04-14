@@ -62,6 +62,26 @@ public class YoGraphicPolygon3D extends YoGraphic implements RemoteYoGraphic, Gr
       graphics3dObject.addInstruction(instruction);
    }
 
+   public YoGraphicPolygon3D(String name, YoInteger numberOfPoints, YoFramePoint3D[] ccwOrderedYoFramePoints, double height, AppearanceDefinition appearance)
+   {
+      super(name);
+
+      this.numberOfPoints = numberOfPoints;
+      this.ccwOrderedYoFramePoints = ccwOrderedYoFramePoints;
+
+      ccwOrderedPoints = new ArrayList<>(ccwOrderedYoFramePoints.length);
+      for (int i = 0; i < ccwOrderedYoFramePoints.length; i++)
+         ccwOrderedPoints.add(new Point3D());
+
+      this.height = height;
+      this.appearance = appearance;
+
+      graphics3dObject = new Graphics3DObject();
+      graphics3dObject.setChangeable(true);
+      instruction = new Graphics3DAddMeshDataInstruction(EMPTY_MESH, appearance);
+      graphics3dObject.addInstruction(instruction);
+   }
+
    @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
@@ -178,6 +198,12 @@ public class YoGraphicPolygon3D extends YoGraphic implements RemoteYoGraphic, Gr
             return true;
       }
       return false;
+   }
+
+   @Override
+   public YoGraphicPolygon3D duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicPolygon3D(getName(), numberOfPoints, ccwOrderedYoFramePoints, height, appearance);
    }
 
    @Override

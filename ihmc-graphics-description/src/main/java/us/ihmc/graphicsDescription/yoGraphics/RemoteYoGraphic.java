@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  * @author Alex Lesman
  *
  */
-public interface RemoteYoGraphic extends DuplicatableYoGraphic
+public interface RemoteYoGraphic
 {
    /*
     * WARNING: Changing the order here will break old logs. Only add new elements to the end of the list
@@ -49,20 +49,6 @@ public interface RemoteYoGraphic extends DuplicatableYoGraphic
    public double[] getConstants();
 
    public AppearanceDefinition getAppearance();
-   
-   default YoGraphic duplicateOntoRegistry(YoVariableRegistry targetRegistry)
-   {
-      YoVariable<?> originalVars[] = getVariables();
 
-      YoVariable<?> targetVars[] = new YoVariable[originalVars.length];
-
-      for (int i = 0; i < targetVars.length; i++)
-      {
-         targetVars[i] = getVariableInTargetRegistry(originalVars[i], targetRegistry);
-      }
-
-      return (YoGraphic) YoGraphicFactory.yoGraphicFromMessage(getRemoteGraphicType(), getName(), targetVars,
-                                            getConstants(), getAppearance());
-      
-   }
+   public RemoteYoGraphic duplicate(YoVariableRegistry newRegistry);
 }

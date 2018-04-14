@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
-public class YoGraphicShape extends YoGraphicAbstractShape implements DuplicatableYoGraphic
+public class YoGraphicShape extends YoGraphicAbstractShape
 {
    private final Graphics3DObject linkGraphics;
 
@@ -25,10 +25,10 @@ public class YoGraphicShape extends YoGraphicAbstractShape implements Duplicatab
    }
 
    public YoGraphicShape(String name, Graphics3DObject linkGraphics, String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale,
-         AppearanceDefinition appearance)
+                         AppearanceDefinition appearance)
    {
-      this(name, linkGraphics, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameYawPitchRoll(namePrefix,
-            nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
+      this(name, linkGraphics, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry),
+           new YoFrameYawPitchRoll(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
    }
 
    @Override
@@ -38,12 +38,8 @@ public class YoGraphicShape extends YoGraphicAbstractShape implements Duplicatab
    }
 
    @Override
-   public YoGraphic duplicateOntoRegistry(YoVariableRegistry targetRegistry)
+   public YoGraphic duplicate(YoVariableRegistry newRegistry)
    {
-      YoFramePoint3D newFramePoint = createYoFramePointInTargetRegistry(yoFramePoint, targetRegistry);
-      YoFrameYawPitchRoll newFrameOrientation = createYoFrameOrientationInTargetRegistry(yoFrameOrientation, targetRegistry);
-      
-      
-      return new YoGraphicShape(getName(), getLinkGraphics(), newFramePoint,  newFrameOrientation, scale);
+      return new YoGraphicShape(getName(), getLinkGraphics(), yoFramePoint.duplicate(newRegistry), yoFrameOrientation.duplicate(newRegistry), scale);
    }
 }

@@ -189,4 +189,10 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
 
       this.update();
    }
+
+   @Override
+   public YoGraphicTriangle duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicTriangle(getName(), pointOne.duplicate(newRegistry), pointTwo.duplicate(newRegistry), pointThree.duplicate(newRegistry), appearance);
+   }
 }

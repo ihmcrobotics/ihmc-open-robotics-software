@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -15,14 +16,17 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoArtifactPolygon extends YoArtifact
 {
    private final YoFrameConvexPolygon2D convexPolygon;
-   
+
    private final ConvexPolygon2D tempConvexPolygon = new ConvexPolygon2D();
 
    private final boolean fill;
    private final BasicStroke stroke;
-   
+
    private final Point2D legendStringPosition = new Point2D();
-   
+
+   private final int lineWidth;
+   private final boolean dashedLine;
+
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill)
    {
       this(name, yoConvexPolygon2d, color, fill, 2, false);
@@ -40,15 +44,17 @@ public class YoArtifactPolygon extends YoArtifact
 
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill, int lineWidth, boolean dashedLine)
    {
-      super(name,  new double[] {fill ? 1.0 : 0.0}, color);
-      this.convexPolygon = yoConvexPolygon2d;
+      super(name, new double[] {fill ? 1.0 : 0.0}, color);
+      convexPolygon = yoConvexPolygon2d;
       this.fill = fill;
+      this.lineWidth = lineWidth;
+      this.dashedLine = dashedLine;
       if (!dashedLine)
-         this.stroke = new BasicStroke(lineWidth);
+         stroke = new BasicStroke(lineWidth);
       else
       {
-         float[] dashArray = new float[]{10.0f};
-         this.stroke = new BasicStroke(lineWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dashArray, 0.0F);
+         float[] dashArray = new float[] {10.0f};
+         stroke = new BasicStroke(lineWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dashArray, 0.0F);
       }
    }
 
@@ -111,5 +117,11 @@ public class YoArtifactPolygon extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.POLYGON_ARTIFACT;
+   }
+
+   @Override
+   public YoArtifact duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoArtifactPolygon(getName(), convexPolygon.duplicate(newRegistry), color, fill, lineWidth, dashedLine);
    }
 }
