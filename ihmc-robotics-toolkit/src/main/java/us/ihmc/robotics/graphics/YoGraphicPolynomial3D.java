@@ -22,7 +22,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicJob;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -611,7 +610,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * Update the trajectory mesh only if it appears to be out-of-date.
     * <p>
     * When a remote YoGraphic is created, this method becomes ineffective for the writer, i.e. where
-    * it is originally created. Only the reader, i.e. created from {@link RemoteYoGraphicFactory},
+    * it is originally created. Only the reader, i.e. created from {@link RoboticsRemoteYoGraphicFactory},
     * performs actual computation.
     * </p>
     */

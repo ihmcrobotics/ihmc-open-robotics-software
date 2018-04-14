@@ -7,6 +7,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -74,6 +75,7 @@ public class RemoteYoGraphicFactory
    {
       if (!registrationIDs.containsKey(clazz))
          throw new RuntimeException("The class: " + clazz.getSimpleName() + " is not registered.");
+      PrintTools.info("YoGraphic " + clazz.getSimpleName() + " ID " + registrationIDs.get(clazz));
       return registrationIDs.get(clazz);
    }
 
@@ -82,7 +84,7 @@ public class RemoteYoGraphicFactory
       YoGraphicFromMessageBuilder<?> builder = registrationBuilders.get(registrationID);
 
       if (builder == null)
-         throw new RuntimeException("Unhandled registrion ID: " + registrationID);
+         throw new RuntimeException("Unhandled registrion ID: " + registrationID + ", yoGraphic name: " + name);
 
       return builder.yoGraphicFromMessage(name, vars, consts, appearance);
    }
