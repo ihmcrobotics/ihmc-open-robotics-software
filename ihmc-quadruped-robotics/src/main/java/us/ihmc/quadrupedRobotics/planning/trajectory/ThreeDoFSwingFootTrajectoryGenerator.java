@@ -37,8 +37,18 @@ public class ThreeDoFSwingFootTrajectoryGenerator implements PositionTrajectoryG
 
    private final YoGraphicPolynomial3D trajectoryViz;
 
+   private final String prefix;
+   private final boolean debug;
+
    public ThreeDoFSwingFootTrajectoryGenerator(String prefix, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this(prefix, registry, graphicsListRegistry, false);
+   }
+
+   public ThreeDoFSwingFootTrajectoryGenerator(String prefix, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry, boolean debug)
+   {
+      this.debug = debug;
+      this.prefix = prefix;
       swingTrajectory = new YoPolynomial3D(prefix + "SwingTrajectory", 4, registry);
       duration = new YoDouble(prefix + "SwingDuration", registry);
       timeInState = new YoDouble(prefix + "TimeInSwingState", registry);
@@ -117,9 +127,11 @@ public class ThreeDoFSwingFootTrajectoryGenerator implements PositionTrajectoryG
    public void setInitialConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity)
    {
       referenceFrame = initialPosition.getReferenceFrame();
+
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
       this.initialVelocity.changeFrame(referenceFrame);
+
    }
 
    public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
@@ -128,6 +140,7 @@ public class ThreeDoFSwingFootTrajectoryGenerator implements PositionTrajectoryG
       this.finalVelocity.setIncludingFrame(finalVelocity);
       this.finalPosition.changeFrame(referenceFrame);
       this.finalVelocity.changeFrame(referenceFrame);
+
    }
 
    public void initialize()
@@ -135,10 +148,22 @@ public class ThreeDoFSwingFootTrajectoryGenerator implements PositionTrajectoryG
       timeInState.set(0.0);
       isDone.set(false);
 
+      if (debug)
+      {
+         if (initialPosition.containsNaN())
+            throw new RuntimeException("Initial position for " + prefix + " is invalid.");
+         if (initialVelocity.containsNaN())
+            throw new RuntimeException("Initial velocity for " + prefix + " is invalid.");
+         if (finalPosition.containsNaN())
+            throw new RuntimeException("Final position for " + prefix + " is invalid.");
+         if (finalVelocity.containsNaN())
+            throw new RuntimeException("Final velocity for " + prefix + " is invalid.");
+      }
+
       double midwayPositionZ = groundClearance.getDoubleValue() + Math.max(initialPosition.getZ(), finalPosition.getZ());
 
-      swingTrajectory.getYoPolynomialX().setCubic(0, 1.0, initialPosition.getX(), 0, finalPosition.getX(), 0);
-      swingTrajectory.getYoPolynomialY().setCubic(0, 1.0, initialPosition.getY(), 0, finalPosition.getY(), 0);
+      swingTrajectory.getYoPolynomialX().setCubic(0, 1.0, initialPosition.getX(), initialVelocity.getX(), finalPosition.getX(), finalVelocity.getX());
+      swingTrajectory.getYoPolynomialY().setCubic(0, 1.0, initialPosition.getY(), initialVelocity.getY(), finalPosition.getY(), finalVelocity.getY());
       swingTrajectory.getYoPolynomialZ().setQuadraticUsingIntermediatePoint(0, 0.5, 1.0, initialPosition.getZ(), midwayPositionZ, finalPosition.getZ());
 
       initialized = true;
@@ -152,6 +177,10 @@ public class ThreeDoFSwingFootTrajectoryGenerator implements PositionTrajectoryG
       if (!initialized)
       {
          throw new RuntimeException("parameters must be initialized before computing trajectory");
+      }
+      if (debug && !Double.isFinite(timeInState))
+      {
+         throw new RuntimeException("Time in state for " + prefix + " is invalid.");
       }
 
       double trajectoryTime = duration.getDoubleValue();
