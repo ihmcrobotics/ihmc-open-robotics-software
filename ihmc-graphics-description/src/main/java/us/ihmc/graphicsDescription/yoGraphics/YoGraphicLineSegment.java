@@ -12,12 +12,14 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoGraphicLineSegment extends YoGraphicVector
 {
-   private final YoDouble startX, startY, startZ, endX, endY, endZ;
-   private final YoDouble vectorX, vectorY, vectorZ;
+   private final YoFramePoint3D start, end;
+   private final YoFrameVector3D vector;
 
-   public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance, YoVariableRegistry registry)
+   public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance,
+                               YoVariableRegistry registry)
    {
-      this(namePrefix, new YoFramePoint3D(namePrefix, nameSuffix + "Start", referenceFrame, registry), new YoFramePoint3D(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
+      this(namePrefix, new YoFramePoint3D(namePrefix, nameSuffix + "Start", referenceFrame, registry),
+           new YoFramePoint3D(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
    }
 
    public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, AppearanceDefinition appearance)
@@ -30,9 +32,11 @@ public class YoGraphicLineSegment extends YoGraphicVector
       this(name, startPoint, endPoint, scale, appearance, false);
    }
 
-   public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, double scale, AppearanceDefinition appearance,
+                               boolean drawArrowhead)
    {
-      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance, drawArrowhead);
+      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance,
+           drawArrowhead);
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
       {
@@ -41,13 +45,13 @@ public class YoGraphicLineSegment extends YoGraphicVector
    }
 
    public YoGraphicLineSegment(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y, YoDouble z, double scaleFactor,
-         AppearanceDefinition appearance)
+                               AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
    public YoGraphicLineSegment(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble endX, YoDouble endY, YoDouble endZ, double scaleFactor,
-         AppearanceDefinition appearance, boolean drawArrowhead)
+                               AppearanceDefinition appearance, boolean drawArrowhead)
    {
       this(name, baseX, baseY, baseZ, endX, endY, endZ, createDirectionVector(name, baseX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead);
    }
@@ -58,36 +62,25 @@ public class YoGraphicLineSegment extends YoGraphicVector
       return directionVector;
    }
 
-   private YoGraphicLineSegment(String name, YoDouble startX, YoDouble startY, YoDouble startZ, YoDouble endX, YoDouble endY, YoDouble endZ, YoFrameVector3D yoFrameVector,
-         double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
+   private YoGraphicLineSegment(String name, YoDouble startX, YoDouble startY, YoDouble startZ, YoDouble endX, YoDouble endY, YoDouble endZ,
+                                YoFrameVector3D yoFrameVector, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead);
 
-      this.vectorX = yoFrameVector.getYoX();
-      this.vectorY = yoFrameVector.getYoY();
-      this.vectorZ = yoFrameVector.getYoZ();
+      this.vector = yoFrameVector;
 
-      this.startX = startX;
-      this.startY = startY;
-      this.startZ = startZ;
-
-      this.endX = endX;
-      this.endY = endY;
-      this.endZ = endZ;
-
-      //    computeRotationTranslation();
+      this.start = new YoFramePoint3D(startX, startY, startZ, ReferenceFrame.getWorldFrame());
+      this.end = new YoFramePoint3D(endX, endY, endZ, ReferenceFrame.getWorldFrame());
    }
 
    protected void computeRotationTranslation(AffineTransform transform3D)
    {
-      if (vectorX == null)
+      if (vector == null)
       {
          return;
       }
 
-      vectorX.set(endX.getDoubleValue() - startX.getDoubleValue());
-      vectorY.set(endY.getDoubleValue() - startY.getDoubleValue());
-      vectorZ.set(endZ.getDoubleValue() - startZ.getDoubleValue());
+      vector.sub(end, start);
 
       super.computeRotationTranslation(transform3D);
    }
@@ -101,13 +94,13 @@ public class YoGraphicLineSegment extends YoGraphicVector
    @Override
    public YoDouble[] getVariables()
    {
-      return new YoDouble[] { startX, startY, startZ, endX, endY, endZ };
+      return new YoDouble[] {start.getYoX(), start.getYoY(), start.getYoZ(), end.getYoX(), end.getYoY(), end.getYoZ()};
    }
 
    @Override
    public double[] getConstants()
    {
-      return new double[] { scaleFactor };
+      return new double[] {scaleFactor};
    }
 
    public void setStartAndEnd(FramePoint3DReadOnly startPoint, FramePoint3DReadOnly endPoint)
@@ -119,32 +112,16 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
    public void setStartAndEnd(Point3DReadOnly startPoint, Point3DReadOnly endPoint)
    {
-      this.startX.set(startPoint.getX());
-      this.startY.set(startPoint.getY());
-      this.startZ.set(startPoint.getZ());
-
-      this.endX.set(endPoint.getX());
-      this.endY.set(endPoint.getY());
-      this.endZ.set(endPoint.getZ());
-
-      this.vectorX.set(endPoint.getX() - startPoint.getX());
-      this.vectorY.set(endPoint.getY() - startPoint.getY());
-      this.vectorZ.set(endPoint.getZ() - startPoint.getZ());
+      this.start.set(startPoint);
+      this.end.set(endPoint);
+      this.vector.sub(endPoint, startPoint);
    }
 
    public void setToNaN()
    {
-      startX.setToNaN();
-      startY.setToNaN();
-      startZ.setToNaN();
-
-      endX.setToNaN();
-      endY.setToNaN();
-      endZ.setToNaN();
-
-      vectorX.setToNaN();
-      vectorY.setToNaN();
-      vectorZ.setToNaN();
+      start.setToNaN();
+      end.setToNaN();
+      vector.setToNaN();
    }
 
 }
