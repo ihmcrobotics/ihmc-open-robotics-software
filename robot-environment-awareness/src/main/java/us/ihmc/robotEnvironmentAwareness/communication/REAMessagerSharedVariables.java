@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
 public class REAMessagerSharedVariables implements REAMessager
 {

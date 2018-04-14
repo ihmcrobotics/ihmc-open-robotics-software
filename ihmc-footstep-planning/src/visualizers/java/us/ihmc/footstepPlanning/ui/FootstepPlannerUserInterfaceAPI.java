@@ -5,8 +5,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.*;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlannerUserInterfaceAPI

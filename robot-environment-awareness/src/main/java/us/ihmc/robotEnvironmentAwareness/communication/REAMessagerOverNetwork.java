@@ -11,8 +11,8 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
 public class REAMessagerOverNetwork implements REAMessager
 {
