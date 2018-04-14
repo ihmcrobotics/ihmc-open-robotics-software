@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.input.SelectedListener;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DNode
@@ -105,7 +104,20 @@ public class Graphics3DNode
 
    public void rotate(double angle, Axis axis)
    {
-      TransformTools.appendRotation(transform, angle, axis);
+      switch (axis)
+      {
+      case X:
+         transform.appendRollRotation(angle);
+         break;
+      case Y:
+         transform.appendPitchRotation(angle);
+         break;
+      case Z:
+         transform.appendYawRotation(angle);
+         break;
+      default:
+         throw new RuntimeException("Unhandled value of Axis: " + axis);
+      }
    }
 
    public Vector3D getTranslation()
