@@ -84,7 +84,6 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
                                     double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      parentRegistry.addChild(registry);
 
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
@@ -119,7 +118,6 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
          extendBySegment(namePrefix, registry);
 
       segments.set(1);
-      parentRegistry.addChild(registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -138,6 +136,9 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
          waypointViz = null;
       }
 
+      hideVisualization();
+
+      parentRegistry.addChild(registry);
    }
 
    private void extendBySegment(String namePrefix, YoVariableRegistry registry)
@@ -221,9 +222,12 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
       waypointTimes.get(0).set(waypointProportion.getValue());
       waypointTimes.get(1).set(1.0);
 
+      midpointPosition.interpolate(initialPosition, finalPosition, waypointProportion.getValue());
+
       computeMidpointXY();
 
       double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
+
       switch (trajectoryType)
       {
       case OBSTACLE_CLEARANCE:
@@ -235,7 +239,7 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
       case DEFAULT:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            midpointPosition.add(0.0, 0.0, swingHeight.getDoubleValue());
+            midpointPosition.addZ(swingHeight.getDoubleValue());
          }
          break;
       case CUSTOM:
@@ -319,11 +323,16 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private void visualize()
    {
-      if (waypointViz == null)
-         return;
+      if (waypointViz != null)
+      {
+         for (int i = 0; i < numberWaypoints; i++)
+            waypointViz.setBall(midpointPosition, i);
+      }
 
-      for (int i = 0; i < numberWaypoints; i++)
-         waypointViz.setBall(midpointPosition, i);
+      if (trajectoryViz != null)
+      {
+         trajectoryViz.showGraphic();
+      }
    }
 
    @Override
@@ -413,16 +422,16 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    public void showVisualization()
    {
-      if (trajectoryViz == null)
-         return;
-      trajectoryViz.showGraphic();
+      if (trajectoryViz != null)
+         trajectoryViz.showGraphic();
    }
 
    public void hideVisualization()
    {
-      if (trajectoryViz == null)
-         return;
-      trajectoryViz.hideGraphic();
+      if (trajectoryViz != null)
+         trajectoryViz.hideGraphic();
+      if (waypointViz != null)
+         waypointViz.hideAll();
    }
 
    public int getNumberOfWaypoints()
