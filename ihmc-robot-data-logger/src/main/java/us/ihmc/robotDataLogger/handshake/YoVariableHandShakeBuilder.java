@@ -316,7 +316,7 @@ public class YoVariableHandShakeBuilder
    private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, GraphicObjectMessage objectMessage)
    {
 
-      objectMessage.setType(yoGraphicFactory.getRegistrationID(obj.getClass()));
+      objectMessage.setRegistrationID(yoGraphicFactory.getRegistrationID(obj.getClass()));
       objectMessage.setName(obj.getName());
 
       try

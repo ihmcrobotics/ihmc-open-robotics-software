@@ -8,7 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implements Settable<GraphicObjectMessage>, EpsilonComparable<GraphicObjectMessage>
 {
-   public int type_;
+   public int registrationID_;
    public java.lang.StringBuilder name_;
    public us.ihmc.idl.IDLSequence.Integer  yoVariableIndex_;
    public us.ihmc.idl.IDLSequence.Double  constants_;
@@ -34,7 +34,7 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
 
    public void set(GraphicObjectMessage other)
    {
-      type_ = other.type_;
+      registrationID_ = other.registrationID_;
 
       name_.setLength(0);
       name_.append(other.name_);
@@ -47,13 +47,13 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
 
    }
 
-   public void setType(int type)
+   public void setRegistrationID(int registrationID)
    {
-      type_ = type;
+      registrationID_ = registrationID;
    }
-   public int getType()
+   public int getRegistrationID()
    {
-      return type_;
+      return registrationID_;
    }
 
    public void setName(java.lang.String name)
@@ -122,7 +122,7 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.registrationID_, other.registrationID_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
@@ -146,7 +146,7 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
 
       GraphicObjectMessage otherMyClass = (GraphicObjectMessage) other;
 
-      if(this.type_ != otherMyClass.type_) return false;
+      if(this.registrationID_ != otherMyClass.registrationID_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
@@ -165,8 +165,8 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("GraphicObjectMessage {");
-      builder.append("type=");
-      builder.append(this.type_);      builder.append(", ");
+      builder.append("registrationID=");
+      builder.append(this.registrationID_);      builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
       builder.append("yoVariableIndex=");
