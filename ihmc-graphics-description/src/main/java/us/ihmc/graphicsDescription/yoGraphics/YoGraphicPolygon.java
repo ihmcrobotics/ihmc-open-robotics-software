@@ -4,7 +4,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -71,7 +70,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       super(name, framePoint, orientation, scale);
 
       if (yoFrameConvexPolygon2d.getNumberOfVertices() <= 0)
-         yoFrameConvexPolygon2d.set(Vertex2DSupplier.asVertex2DSupplier(new Point2D[] {new Point2D()}));
+         yoFrameConvexPolygon2d.set(Vertex2DSupplier.emptyVertex2DSupplier());
 
       this.yoFrameConvexPolygon2d = yoFrameConvexPolygon2d;
       this.appearance = appearance;
