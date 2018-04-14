@@ -51,7 +51,6 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstr
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
@@ -1241,9 +1240,16 @@ public class Graphics3DObject
 
    public void createInertiaEllipsoid(Matrix3D momentOfInertia, Vector3D comOffset, double mass, AppearanceDefinition appearance)
    {
-      Vector3D principalMomentsOfInertia = new Vector3D(momentOfInertia.getM00(), momentOfInertia.getM11(), momentOfInertia.getM22());
-      Vector3D ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
+      double Ixx = momentOfInertia.getM00();
+      double Iyy = momentOfInertia.getM11();
+      double Izz = momentOfInertia.getM22();
 
+//    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
+      Vector3D ellipsoidRadii = new Vector3D();
+      ellipsoidRadii.setX(Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass));
+      ellipsoidRadii.setY(Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass));
+      ellipsoidRadii.setZ(Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass));
+   
       this.translate(comOffset);
       this.addEllipsoid(ellipsoidRadii.getX(), ellipsoidRadii.getY(), ellipsoidRadii.getZ(), appearance);
       this.identity();
