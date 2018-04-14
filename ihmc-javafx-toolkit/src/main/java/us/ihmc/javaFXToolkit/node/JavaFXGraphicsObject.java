@@ -3,9 +3,6 @@ package us.ihmc.javaFXToolkit.node;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -13,19 +10,15 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
-import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
@@ -52,7 +45,7 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstr
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.javaFXToolkit.graphics.JAssImpJavaFXTools;
-import us.ihmc.tools.FloatArrayCollector;
+import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 
 public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 {
@@ -185,25 +178,7 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 
    private static TriangleMesh interpretMeshData(MeshDataHolder meshData)
    {
-      Point3D32[] vertices = meshData.getVertices();
-      TexCoord2f[] textureCoords = meshData.getTexturePoints();
-      int[] triangleIndices = meshData.getTriangleIndices();
-      Vector3D32[] normals = meshData.getVertexNormals();
-
-      TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
-      int[] indices = Arrays.stream(triangleIndices).flatMap(x -> IntStream.of(x, x, x)).toArray();
-      mesh.getFaces().addAll(indices);
-
-      float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.getX(), v.getY(), v.getZ())).collect(FloatArrayCollector.create());
-      mesh.getPoints().addAll(vertexBuffer);
-
-      float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
-      mesh.getTexCoords().addAll(texCoordBuffer);
-
-      float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.getX(), n.getY(), n.getZ())).collect(FloatArrayCollector.create());
-      mesh.getNormals().addAll(normalBuffer);
-
-      return mesh;
+      return JavaFXMeshDataInterpreter.interpretMeshData(meshData);
    }
 
    @Override
