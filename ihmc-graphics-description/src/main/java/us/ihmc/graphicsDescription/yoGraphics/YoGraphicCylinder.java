@@ -1,11 +1,13 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.AffineTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -16,7 +18,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 {
-   private YoDouble baseX, baseY, baseZ, x, y, z;
+   private final YoFramePoint3D base;
+   private final YoFrameVector3D vector;
    private double lineThickness;
    private final AppearanceDefinition appearance;
 
@@ -28,58 +31,48 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
    public YoGraphicCylinder(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, AppearanceDefinition appearance, double lineThickness)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), appearance,
-            lineThickness);
+           lineThickness);
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a YoGraphicCylinder. startPoint = " + startPoint + ", frameVector = "
-               + frameVector);
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicCylinder. startPoint = " + startPoint + ", frameVector = " + frameVector);
       }
    }
 
-   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
-         YoDouble z, AppearanceDefinition appearance)
+   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y, YoDouble z, AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, appearance, -1.0);
    }
 
-   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
-         YoDouble z, AppearanceDefinition appearance, double lineThickness)
+   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y, YoDouble z, AppearanceDefinition appearance,
+                            double lineThickness)
    {
       super(name);
 
-      this.baseX = baseX;
-      this.baseY = baseY;
-      this.baseZ = baseZ;
-      this.x = x;
-      this.y = y;
-      this.z = z;
+      base = new YoFramePoint3D(baseX, baseY, baseZ, ReferenceFrame.getWorldFrame());
+      vector = new YoFrameVector3D(x, y, z, ReferenceFrame.getWorldFrame());
       this.lineThickness = lineThickness;
       this.appearance = appearance;
    }
 
-   public void getBasePosition(Point3D point3d)
+   public void getBasePosition(Point3DBasics point3D)
    {
-      point3d.setX(this.baseX.getDoubleValue());
-      point3d.setY(this.baseY.getDoubleValue());
-      point3d.setZ(this.baseZ.getDoubleValue());
+      point3D.set(base);
    }
 
-   public void getBasePosition(FramePoint3D framePoint)
+   public void getBasePosition(FramePoint3DBasics framePoint3D)
    {
-      framePoint.setX(this.baseX.getDoubleValue());
-      framePoint.setY(this.baseY.getDoubleValue());
-      framePoint.setZ(this.baseZ.getDoubleValue());
+      framePoint3D.setIncludingFrame(base);
    }
 
-   public void getVector(Vector3D vector3d)
+   public void getVector(Vector3DBasics vector3D)
    {
-      vector3d.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
+      vector3D.set(vector3D);
    }
 
-   public void getVector(FrameVector3D frameVector)
+   public void getVector(FrameVector3DBasics frameVector3D)
    {
-      frameVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
+      frameVector3D.setIncludingFrame(vector);
    }
 
    private Vector3D translationVector = new Vector3D();
@@ -90,7 +83,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
    {
       transform3D.setIdentity();
 
-      z_rot.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
+      z_rot.set(vector);
       double length = z_rot.length();
       if (length < 1e-7)
          z_rot.set(0.0, 0.0, 1.0);
@@ -110,7 +103,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
       rotMatrix.setColumns(x_rot, y_rot, z_rot);
 
-      translationVector.set(baseX.getDoubleValue(), baseY.getDoubleValue(), baseZ.getDoubleValue());
+      translationVector.set(base);
 
       transform3D.setScale(lineThickness, lineThickness, length);
       transform3D.setTranslation(translationVector);
@@ -126,20 +119,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
    @Override
    protected boolean containsNaN()
    {
-      if (baseX.isNaN())
-         return true;
-      if (baseY.isNaN())
-         return true;
-      if (baseZ.isNaN())
-         return true;
-      if (x.isNaN())
-         return true;
-      if (y.isNaN())
-         return true;
-      if (z.isNaN())
-         return true;
-
-      return false;
+      return base.containsNaN() || vector.containsNaN();
    }
 
    public RemoteGraphicType getRemoteGraphicType()
@@ -149,12 +129,12 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
    public YoVariable<?>[] getVariables()
    {
-      return new YoDouble[] { baseX, baseY, baseZ, x, y, z };
+      return new YoDouble[] {base.getYoX(), base.getYoY(), base.getYoZ(), vector.getYoX(), vector.getYoY(), vector.getYoZ()};
    }
 
    public double[] getConstants()
    {
-      return new double[] { lineThickness };
+      return new double[] {lineThickness};
    }
 
    public Graphics3DObject getLinkGraphics()
