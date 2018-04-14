@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 
 
 public class SDFAppearance extends YoAppearanceTransparency

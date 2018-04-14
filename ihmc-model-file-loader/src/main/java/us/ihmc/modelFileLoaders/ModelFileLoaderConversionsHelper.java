@@ -4,8 +4,8 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFInertia;
-import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class ModelFileLoaderConversionsHelper
 {
