@@ -9,7 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +29,7 @@ public class FootPositionEditor extends AnimationTimer
    private final Node sceneNode;
 
    private final AtomicReference<Boolean> editModeEnabled;
-   private final APIFactory.Topic<Point3D> positionTopic = FootstepPlannerUserInterfaceAPI.NodeCheckingPosition;
+   private final MessagerAPIFactory.Topic<Point3D> positionTopic = FootstepPlannerUserInterfaceAPI.NodeCheckingPosition;
 
    public FootPositionEditor(REAMessager messager, Node sceneNode)
    {

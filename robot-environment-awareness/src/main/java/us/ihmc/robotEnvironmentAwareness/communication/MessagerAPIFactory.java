@@ -4,27 +4,59 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class APIFactory
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
+/**
+ * This class can be used to generate the API for a set of messagers that are to communicate
+ * messages between each other.
+ * 
+ * @author Sylvain Bertrand
+ */
+public class MessagerAPIFactory
 {
    private boolean isFactoryClosed = false;
    private Map<Integer, CategoryTheme> categoryThemeIdSet = new HashMap<>();
    private Map<Integer, TopicTheme> topicThemeIdSet = new HashMap<>();
 
-   private API api;
+   private MessagerAPI api;
 
-   public APIFactory()
+   public MessagerAPIFactory()
    {
    }
 
-   public Category getRootCategory(CategoryTheme rootTheme)
+   /**
+    * Creates the root category for this API from which sub-categories and topics can be created.
+    * 
+    * @param rootCategoryName the name of the root category.
+    * @return the root category of this API.
+    */
+   public Category createRootCategory(String rootCategoryName)
+   {
+      return createRootCategory(createCategoryTheme(rootCategoryName));
+   }
+
+   /**
+    * Creates the root category for this API from which sub-categories and topics can be created.
+    * 
+    * @param rootTheme the theme for the root category.
+    * @return the root category of this API.
+    */
+   public Category createRootCategory(CategoryTheme rootTheme)
    {
       assertFactoryIsOpen();
       Category root = new Category(null, rootTheme);
-      api = new API(root);
+      api = new MessagerAPI(root);
       return root;
    }
 
-   public API getAPIAndCloseFactory()
+   /**
+    * Gets the generated API and closes this factory, i.e. no additional topic can be created after
+    * calling this method.
+    * 
+    * @return the generated API.
+    */
+   public MessagerAPI getAPIAndCloseFactory()
    {
       isFactoryClosed = true;
       categoryThemeIdSet = null;
@@ -32,6 +64,13 @@ public class APIFactory
       return api;
    }
 
+   /**
+    * Creates a theme for creating categories.
+    * 
+    * @param name the name of the category theme.
+    * @return the category theme.
+    * @see Category#child(CategoryTheme)
+    */
    public CategoryTheme createCategoryTheme(String name)
    {
       assertFactoryIsOpen();
@@ -41,6 +80,18 @@ public class APIFactory
       return newTheme;
    }
 
+   /**
+    * Creates a topic theme with no type associated.
+    * <p>
+    * Prefer creating {@link TypedTopicTheme} which allows to associate a type to a theme providing
+    * extra information at compilation time.
+    * </p>
+    * 
+    * @param name the name of the topic theme.
+    * @return the topic theme.
+    * @see #createTypedTopicTheme(String)
+    * @see Category#topic(TopicTheme)
+    */
    public TopicTheme createTopicTheme(String name)
    {
       assertFactoryIsOpen();
@@ -51,6 +102,13 @@ public class APIFactory
       return newTheme;
    }
 
+   /**
+    * Creates a topic theme with a type associated with it.
+    * 
+    * @param name the name of the topic theme.
+    * @return the topic theme.
+    * @see Category#topic(TypedTopicTheme)
+    */
    public <T> TypedTopicTheme<T> createTypedTopicTheme(String name)
    {
       TypedTopicTheme<T> newTheme = new TypedTopicTheme<T>(name);
@@ -60,16 +118,29 @@ public class APIFactory
       return newTheme;
    }
 
-   public static class API
+   /**
+    * This represent an API that can be used to create messager.
+    * 
+    * @author Sylvain Bertrand
+    *
+    */
+   public static class MessagerAPI
    {
+      /** The root category of this API to which all sub-categories and topics are attached. */
       private final Category root;
 
-      private API(Category root)
+      private MessagerAPI(Category root)
       {
          this.root = root;
       }
 
-      public <T> Topic<T> findTopic(APIElementId topicId)
+      /**
+       * Retrieves the corresponding topic to the given ID.
+       * 
+       * @param topicId the ID of the topic to retrieve.
+       * @return the topic.
+       */
+      public <T> Topic<T> findTopic(TopicID topicId)
       {
          if (topicId.getShortIdAtDepth(0) != root.getShortId())
             throw new RuntimeException("The topic id does not belong to this API.");
@@ -77,12 +148,25 @@ public class APIFactory
             return root.findTopic(topicId);
       }
 
+      /**
+       * Tests whether this API declares the given topic.
+       * 
+       * @param topic the query.
+       * @return {@code true} if this API declares the given topic, {@code false} otherwise.
+       */
       public <T> boolean containsTopic(Topic<T> topic)
       {
          return containsTopic(topic.getUniqueId());
       }
 
-      public boolean containsTopic(APIElementId uniqueId)
+      /**
+       * Tests whether this API declares a topic with an ID equal to the given message ID.
+       * 
+       * @param uniqueId the query.
+       * @return {@code true} if this API declares a topic with the given ID, {@code false}
+       *         otherwise.
+       */
+      public boolean containsTopic(TopicID uniqueId)
       {
          if (uniqueId.getShortIdAtDepth(0) != root.getShortId())
             return false;
@@ -90,6 +174,11 @@ public class APIFactory
             return root.findTopic(uniqueId) != null;
       }
 
+      /**
+       * Gets the root category of this API.
+       * 
+       * @return the root category.
+       */
       public Category getRoot()
       {
          return root;
@@ -102,11 +191,22 @@ public class APIFactory
       }
    }
 
+   /**
+    * A category theme is used to create a category via {@link Category#child(CategoryTheme)} which
+    * in turn can be used to create a topic.
+    * 
+    * @author Sylvain Bertrand
+    */
    public class CategoryTheme
    {
       private final int id;
       private final String name;
 
+      /**
+       * Creates a new category theme with the given name.
+       * 
+       * @param name the name of the new category theme.
+       */
       private CategoryTheme(String name)
       {
          this.name = name;
@@ -114,11 +214,21 @@ public class APIFactory
          assertFactoryIsOpen();
       }
 
+      /**
+       * Gets the ID of this category theme.
+       * 
+       * @return this category theme ID.
+       */
       public int getId()
       {
          return id;
       }
 
+      /**
+       * Gets the name of this category theme.
+       * 
+       * @return this category theme name.
+       */
       public String getName()
       {
          return name;
@@ -145,23 +255,43 @@ public class APIFactory
       }
    }
 
+   /**
+    * A topic theme is used to create a topic via {@link Category#topic(TopicTheme)}.
+    * 
+    * @author Sylvain Bertrand
+    */
    public class TopicTheme
    {
       private final int id;
       private final String name;
 
-      TopicTheme(String name)
+      /**
+       * Creates a new topic theme with the given name.
+       * 
+       * @param name the name of the new topic theme.
+       */
+      private TopicTheme(String name)
       {
          this.name = name;
          id = name.hashCode();
          assertFactoryIsOpen();
       }
 
+      /**
+       * Gets the ID of this topic theme.
+       * 
+       * @return this topic theme ID.
+       */
       public int getId()
       {
          return id;
       }
 
+      /**
+       * Gets the name of this category theme.
+       * 
+       * @return this category theme name.
+       */
       public String getName()
       {
          return name;
@@ -188,9 +318,21 @@ public class APIFactory
       }
    }
 
+   /**
+    * A typed topic theme is a topic theme to which a type can be associated.
+    * 
+    * @author Sylvain Bertrand
+    *
+    * @param <T> the type to associate with this topic theme.
+    */
    public class TypedTopicTheme<T> extends TopicTheme
    {
-      TypedTopicTheme(String name)
+      /**
+       * Creates a new typed topic theme with the given name.
+       * 
+       * @param name the name of the new topic theme.
+       */
+      private TypedTopicTheme(String name)
       {
          super(name);
       }
@@ -205,12 +347,21 @@ public class APIFactory
       }
    }
 
+   /**
+    * A category can be used to create sub-categories and topics.
+    * 
+    * @author Sylvain Bertrand
+    */
    public class Category
    {
+      /** The parent category of this category. */
       private final Category parent;
+      /** This category theme. */
       private final CategoryTheme theme;
-      private final Map<Integer, Category> childrenCategories = new HashMap<>();
-      private final Map<Integer, Topic<?>> childrenTopics = new HashMap<>();
+      /** The map from ID to each child category. */
+      private final TIntObjectMap<Category> childrenCategories = new TIntObjectHashMap<>();
+      /** The map from ID to each child topic. */
+      private final TIntObjectMap<Topic<?>> childrenTopics = new TIntObjectHashMap<>();
 
       private Category(Category parentCategory, CategoryTheme categoryTheme)
       {
@@ -219,6 +370,12 @@ public class APIFactory
          assertFactoryIsOpen();
       }
 
+      /**
+       * Creates and returns a new category registered as child of this category.
+       * 
+       * @param subCategoryTheme the theme of the new child category.
+       * @return the new child category.
+       */
       public Category child(CategoryTheme subCategoryTheme)
       {
          assertFactoryIsOpen();
@@ -240,11 +397,23 @@ public class APIFactory
          }
       }
 
+      /**
+       * Creates and returns a new topic registered as child of this category.
+       * 
+       * @param topicTheme the theme of the new child topic.
+       * @return the new child topic.
+       */
       public <T> Topic<T> topic(TypedTopicTheme<T> topicTheme)
       {
          return topic((TopicTheme) topicTheme);
       }
 
+      /**
+       * Creates and return a new topic registered as child of this category.
+       * 
+       * @param topicTheme the theme of the new child topic.
+       * @return the new child topic.
+       */
       public <T> Topic<T> topic(TopicTheme topicTheme)
       {
          assertFactoryIsOpen();
@@ -267,23 +436,39 @@ public class APIFactory
          }
       }
 
+      /**
+       * Gets the children categories of this category as an array.
+       * 
+       * @return the array of this category's child categories.
+       */
       public Category[] getChildrenCategories()
       {
-         return childrenCategories.values().toArray(new Category[0]);
-      }
-      
-      public Topic<?>[] getChildrenTopics()
-      {
-         return childrenTopics.values().toArray(new Topic[0]);
+         return childrenCategories.values(new Category[childrenCategories.size()]);
       }
 
+      /**
+       * Gets the children categories of this category as an array.
+       * 
+       * @return the array of this category's child topics.
+       */
+      public Topic<?>[] getChildrenTopics()
+      {
+         return childrenTopics.values(new Topic[childrenTopics.size()]);
+      }
+
+      /**
+       * Search for the topic corresponding to the given ID.
+       * 
+       * @param topicId the query.
+       * @return the corresponding topic if found, {@code null} otherwise.
+       */
       @SuppressWarnings("unchecked")
-      public <T> Topic<T> findTopic(APIElementId topicId)
+      public <T> Topic<T> findTopic(TopicID topicId)
       {
          int childrenDepth = getDepth() + 1;
          int shortIdAtDepth = topicId.getShortIdAtDepth(childrenDepth);
 
-         if (childrenDepth == topicId.getElementDepth())
+         if (childrenDepth == topicId.getTopicDepth())
             return (Topic<T>) childrenTopics.get(shortIdAtDepth);
          else if (childrenCategories.containsKey(shortIdAtDepth))
          {
@@ -294,6 +479,11 @@ public class APIFactory
             return null;
       }
 
+      /**
+       * Gets the distance from this category to the root.
+       * 
+       * @return this category's depth.
+       */
       private int getDepth()
       {
          if (parent == null)
@@ -314,16 +504,26 @@ public class APIFactory
          return theme.getId();
       }
 
-      public APIElementId getUniqueId()
+      /**
+       * Creates and returns the ID corresponding to this category.
+       * 
+       * @return this category's unique ID.
+       */
+      private TopicID getUniqueId()
       {
          int idLength = getDepth() + 1;
          int[] uniqueId = new int[idLength];
          uniqueId[idLength - 1] = theme.getId();
          if (parent != null)
             parent.fillChildUniqueId(uniqueId);
-         return new APIElementId(uniqueId);
+         return new TopicID(uniqueId);
       }
 
+      /**
+       * Gets the full name, i.e. including this category's ancestors, of this category.
+       * 
+       * @return this category's name.
+       */
       public String getName()
       {
          if (parent == null)
@@ -332,6 +532,11 @@ public class APIFactory
             return parent.getName() + "/" + getSimpleName();
       }
 
+      /**
+       * Gets the name that was used to create this category.
+       * 
+       * @return this category's simple name.
+       */
       public String getSimpleName()
       {
          return theme.getName();
@@ -360,9 +565,19 @@ public class APIFactory
       }
    }
 
+   /**
+    * A topic can be used to provide additional information to data when sending a
+    * {@link REAMessage}.
+    * 
+    * @author Sylvain Bertrand
+    *
+    * @param <T> the type associated to this topic.
+    */
    public static class Topic<T>
    {
+      /** This topic theme. */
       private final TopicTheme theme;
+      /** The category to which this category belongs. */
       private final Category category;
 
       private Topic(Category topicCategory, TopicTheme topicTheme)
@@ -379,20 +594,35 @@ public class APIFactory
          return category.getDepth() + 1;
       }
 
-      public APIElementId getUniqueId()
+      /**
+       * Creates and returns the ID corresponding to this topic.
+       * 
+       * @return this topic's unique ID.
+       */
+      public TopicID getUniqueId()
       {
          int idLength = getDepth() + 1;
          int[] uniqueId = new int[idLength];
          uniqueId[idLength - 1] = theme.getId();
          category.fillChildUniqueId(uniqueId);
-         return new APIElementId(uniqueId);
+         return new TopicID(uniqueId);
       }
 
+      /**
+       * Gets the full name, i.e. including this topic's category and ancestors, of this topic.
+       * 
+       * @return this category's name.
+       */
       public String getName()
       {
          return category.getName() + "/" + getSimpleName();
       }
 
+      /**
+       * Gets the name that was used to create this topic.
+       * 
+       * @return this topic's simple name.
+       */
       public String getSimpleName()
       {
          return theme.getName();
@@ -422,20 +652,43 @@ public class APIFactory
       }
    }
 
-   public static class APIElementId
+   /**
+    * When using the messager over network, it is preferable to send {@link Topic} information using
+    * simple data types such as {@link TopicID} instead of directly sending the topic itself.
+    * <p>
+    * The ID of a topic can be via {@link Topic#getUniqueId()} and the topic can be retrieved using
+    * its ID via {@link MessagerAPI#findTopic(TopicID)}.
+    * </p>
+    * 
+    * @author Sylvain Bertrand
+    */
+   public static class TopicID
    {
+      /**
+       * The ID of a topic.
+       * <p>
+       * This field is public and non-final only for serialization purposes, it is not meant to be
+       * accessed directly.
+       * </p>
+       */
       public int[] id;
 
-      public APIElementId()
+      /** Empty constructor only used for serialization purposes. */
+      public TopicID()
       {
       }
 
-      public APIElementId(int[] id)
+      /**
+       * Creates a new topic ID.
+       * 
+       * @param id the id of a topic.
+       */
+      public TopicID(int[] id)
       {
          this.id = id;
       }
 
-      private int getElementDepth()
+      private int getTopicDepth()
       {
          return id.length - 1;
       }
@@ -448,13 +701,13 @@ public class APIFactory
       @Override
       public boolean equals(Object obj)
       {
-         if (obj instanceof APIElementId)
-            return equals((APIElementId) obj);
+         if (obj instanceof TopicID)
+            return equals((TopicID) obj);
          else
             return false;
       }
 
-      public boolean equals(APIElementId other)
+      public boolean equals(TopicID other)
       {
          return Arrays.equals(id, other.id);
       }

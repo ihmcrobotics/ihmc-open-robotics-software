@@ -3,12 +3,12 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.CategoryTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TopicTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TypedTopicTheme;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Category;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TopicTheme;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
@@ -23,7 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.D
 
 public class REAModuleAPI
 {
-   private static final APIFactory apiFactory = new APIFactory();
+   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    private static final CategoryTheme Module = apiFactory.createCategoryTheme("Module");
    private static final CategoryTheme UI = apiFactory.createCategoryTheme("UserInterface");
@@ -60,7 +60,7 @@ public class REAModuleAPI
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
 
-   private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("REA"));
+   private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
    private static final Category ModuleCategory = Root.child(Module);
    private static final Category OcTreeCategory = ModuleCategory.child(OcTree);
@@ -126,5 +126,5 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
 
-   public static final API API = apiFactory.getAPIAndCloseFactory();
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

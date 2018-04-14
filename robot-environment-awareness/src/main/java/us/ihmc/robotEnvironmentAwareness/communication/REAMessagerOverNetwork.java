@@ -11,14 +11,14 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
 
 public class REAMessagerOverNetwork implements REAMessager
 {
    private static final boolean DEBUG = false;
 
-   private final API messagerAPI;
+   private final MessagerAPI messagerAPI;
 
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> inputVariablesMap = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
@@ -26,25 +26,25 @@ public class REAMessagerOverNetwork implements REAMessager
 
    private final PacketCommunicator packetCommunicator;
 
-   public static REAMessager createTCPServer(API messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static REAMessager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
    }
 
-   public static REAMessager createTCPClient(API messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
+   public static REAMessager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
    }
 
-   public static REAMessager createIntraprocess(API messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static REAMessager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
    }
 
-   private REAMessagerOverNetwork(API messagerAPI, PacketCommunicator packetCommunicator)
+   private REAMessagerOverNetwork(MessagerAPI messagerAPI, PacketCommunicator packetCommunicator)
    {
       this.messagerAPI = messagerAPI;
       this.packetCommunicator = packetCommunicator;
@@ -160,7 +160,7 @@ public class REAMessagerOverNetwork implements REAMessager
    }
 
    @Override
-   public API getMessagerAPI()
+   public MessagerAPI getMessagerAPI()
    {
       return messagerAPI;
    }
