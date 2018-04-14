@@ -125,12 +125,6 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.YO_FRAME_POLYGON_DGO;
-   }
-
-   @Override
    public YoVariable<?>[] getVariables()
    {
       //poly + framePoint + frameOrientation

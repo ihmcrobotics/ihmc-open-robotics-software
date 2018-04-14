@@ -15,34 +15,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public interface RemoteYoGraphic
 {
-   /*
-    * WARNING: Changing the order here will break old logs. Only add new elements to the end of the list
-    */
-   public enum RemoteGraphicType
-   {
-      CYLINDER_DGO,
-      COORDINATE_SYSTEM_DGO,
-      TRIANGLE_DGO,
-      POSITION_DGO,
-      EMPTY_SLOT_2_DGO,
-      EMPTY_SLOT_3_DGO,
-      VECTOR_DGO,
-      YO_FRAME_POLYGON_DGO,
-      LINE_SEGMENT_DGO,
-      EMPTY_SLOT_4_DGO,
-      POSITION_ARTIFACT,
-      CIRCLE_ARTIFACT,
-      LINE_SEGMENT_2D_ARTIFACT,
-      POLYGON_ARTIFACT,
-      LINE_ARTIFACT,
-      PLANAR_REGIONS_LIST_DGO,
-      POLYNOMIAL_3D_DGO,
-      POLYGON_3D
-   }
-
    public String getName();
-
-   public RemoteGraphicType getRemoteGraphicType();
 
    public YoVariable<?>[] getVariables();
 

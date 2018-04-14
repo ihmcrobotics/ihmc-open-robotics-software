@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 /**
  * Describes the job of a {@link YoGraphic}. When the user creates one, the {@link YoGraphic} is assumed 
  * to be writing in the {@link YoVariable}s.
- * When the graphic is created from {@link YoGraphicFactory}, it is assumed that the graphic is used as a
+ * When the graphic is created from {@link RemoteYoGraphicFactory}, it is assumed that the graphic is used as a
  * {@link RemoteYoGraphic} and thus does only read the {@link YoVariable}s.
  * 
  * <p>

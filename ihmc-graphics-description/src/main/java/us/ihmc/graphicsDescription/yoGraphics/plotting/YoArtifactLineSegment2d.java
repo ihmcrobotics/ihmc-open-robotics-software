@@ -131,12 +131,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
-   }
-
-   @Override
    public YoArtifact duplicate(YoVariableRegistry newRegistry)
    {
       return new YoArtifactLineSegment2d(getName(), lineSegment.duplicate(newRegistry), color, arrowHeadWidth, arrowHeadHeight);

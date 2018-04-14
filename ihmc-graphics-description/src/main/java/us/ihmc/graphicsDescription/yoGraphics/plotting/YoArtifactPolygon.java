@@ -114,12 +114,6 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYGON_ARTIFACT;
-   }
-
-   @Override
    public YoArtifact duplicate(YoVariableRegistry newRegistry)
    {
       return new YoArtifactPolygon(getName(), convexPolygon.duplicate(newRegistry), color, fill, lineWidth, dashedLine);

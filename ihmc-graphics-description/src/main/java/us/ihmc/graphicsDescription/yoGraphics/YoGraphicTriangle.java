@@ -127,11 +127,6 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       return graphics3dObject;
    }
 
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.TRIANGLE_DGO;
-   }
-
    public YoVariable<?>[] getVariables()
    {
       YoVariable<?>[] vars = new YoVariable[9];

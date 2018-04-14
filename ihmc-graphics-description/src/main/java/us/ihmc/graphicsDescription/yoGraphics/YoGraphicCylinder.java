@@ -125,11 +125,6 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       return base.containsNaN() || vector.containsNaN();
    }
 
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.CYLINDER_DGO;
-   }
-
    @Override
    public YoVariable<?>[] getVariables()
    {

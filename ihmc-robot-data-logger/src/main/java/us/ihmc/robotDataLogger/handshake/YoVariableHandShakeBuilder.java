@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -32,6 +33,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableHandShakeBuilder
 {
+   private final RemoteYoGraphicFactory yoGraphicFactory = new RemoteYoGraphicFactory();
    private final Handshake handshake = new Handshake();
    private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();
    private final TObjectIntHashMap<YoVariable<?>> yoVariableIndices = new TObjectIntHashMap<>();
@@ -314,7 +316,7 @@ public class YoVariableHandShakeBuilder
    private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, GraphicObjectMessage objectMessage)
    {
 
-      objectMessage.setType((short) obj.getRemoteGraphicType().ordinal());
+      objectMessage.setType(yoGraphicFactory.getRegistrationID(obj.getClass()));
       objectMessage.setName(obj.getName());
 
       try

@@ -55,12 +55,6 @@ public class YoArtifactLine2d extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.LINE_ARTIFACT;
-   }
-
-   @Override
    public YoArtifactLine2d duplicate(YoVariableRegistry newRegistry)
    {
       return new YoArtifactLine2d(getName(), yoFrameLine2d.duplicate(newRegistry), color);

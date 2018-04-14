@@ -16,9 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotDataLogger.Handshake;
@@ -30,11 +28,16 @@ import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProto
 import us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * Depracated class to support legacy log files that still contain a description based on a protobuffer handshake
+ * Depracated class to support legacy log files that still contain a description based on a
+ * protobuffer handshake
  * 
  * @author jesper
  *
@@ -46,10 +49,10 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
    {
       super();
    }
-   
+
    private static JointType convertJointType(us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType type)
    {
-      switch(type)
+      switch (type)
       {
       case OneDoFJoint:
          return JointType.OneDoFJoint;
@@ -71,11 +74,11 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
          throw new RuntimeException(e);
       }
    }
-   
+
    public void parseFrom(byte[] handShake)
    {
       YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
-      
+
       this.dt = yoProtoHandshake.getDt();
       List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake);
 
@@ -129,36 +132,36 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
          YoVariableDefinition.YoProtoType type = yoVariableDefinition.getType();
          switch (type)
          {
-            case DoubleYoVariable:
-               YoDouble doubleVar = new YoDouble(name, parent);
-               variableList.add(doubleVar);
-               break;
+         case DoubleYoVariable:
+            YoDouble doubleVar = new YoDouble(name, parent);
+            variableList.add(doubleVar);
+            break;
 
-            case IntegerYoVariable:
-               YoInteger intVar = new YoInteger(name, parent);
-               variableList.add(intVar);
-               break;
+         case IntegerYoVariable:
+            YoInteger intVar = new YoInteger(name, parent);
+            variableList.add(intVar);
+            break;
 
-            case BooleanYoVariable:
-               YoBoolean boolVar = new YoBoolean(name, parent);
-               variableList.add(boolVar);
-               break;
+         case BooleanYoVariable:
+            YoBoolean boolVar = new YoBoolean(name, parent);
+            variableList.add(boolVar);
+            break;
 
-            case LongYoVariable:
-               YoLong longVar = new YoLong(name, parent);
-               variableList.add(longVar);
-               break;
+         case LongYoVariable:
+            YoLong longVar = new YoLong(name, parent);
+            variableList.add(longVar);
+            break;
 
-            case EnumYoVariable:
-               List<String> values = yoVariableDefinition.getEnumValuesList();
-               String[] names = values.toArray(new String[values.size()]);
-               boolean allowNullValues = (!yoVariableDefinition.hasAllowNullValues() || yoVariableDefinition.getAllowNullValues());
-               YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
-               variableList.add(enumVar);
-               break;
+         case EnumYoVariable:
+            List<String> values = yoVariableDefinition.getEnumValuesList();
+            String[] names = values.toArray(new String[values.size()]);
+            boolean allowNullValues = (!yoVariableDefinition.hasAllowNullValues() || yoVariableDefinition.getAllowNullValues());
+            YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
+            variableList.add(enumVar);
+            break;
 
-            default:
-               throw new RuntimeException("Unknown YoVariable type: " + type.name());
+         default:
+            throw new RuntimeException("Unknown YoVariable type: " + type.name());
          }
       }
 
@@ -175,7 +178,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       }
       return numberOfJointStates;
    }
-   
+
    private void addJointStates(YoProtoHandshake yoProtoHandshake)
    {
       for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
@@ -241,23 +244,24 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
 
    private RemoteYoGraphic getRemoteGraphic(DynamicGraphicMessage msg)
    {
-      RemoteGraphicType type = RemoteGraphicType.values()[msg.getType()];
-   
+      int registrationID = msg.getType();
+
       String name = msg.getName();
       YoVariable<?>[] vars = new YoVariable[msg.getYoIndexCount()];
       for (int v = 0; v < vars.length; v++)
          vars[v] = variables.get(msg.getYoIndex(v));
-   
+
       double[] consts = ArrayUtils.toPrimitive(msg.getConstantList().toArray(new Double[msg.getConstantCount()]));
-   
+
       AppearanceDefinition appearance = new YoAppearanceRGBColor(Color.red, 0.0);
       if (msg.hasAppearance())
       {
-         appearance = new YoAppearanceRGBColor(new MutableColor((float) msg.getAppearance().getX(), (float) msg.getAppearance().getY(), (float) msg.getAppearance()
-               .getZ()), msg.getAppearance().getTransparency());
+         appearance = new YoAppearanceRGBColor(new MutableColor((float) msg.getAppearance().getX(), (float) msg.getAppearance().getY(),
+                                                                (float) msg.getAppearance().getZ()),
+                                               msg.getAppearance().getTransparency());
       }
-   
-      return YoGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
+
+      return yoGraphicFromMessage(registrationID, name, vars, consts, appearance);
    }
 
    @Override

@@ -229,12 +229,6 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.VECTOR_DGO;
-   }
-
-   @Override
    public YoDouble[] getVariables()
    {
       return new YoDouble[] {base.getYoX(), base.getYoY(), base.getYoZ(), vector.getYoX(), vector.getYoY(), vector.getYoZ()};
