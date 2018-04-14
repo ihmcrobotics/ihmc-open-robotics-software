@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.communication;
+package us.ihmc.javaFXToolkit.messager;
 
 import java.util.Arrays;
 import java.util.HashMap;

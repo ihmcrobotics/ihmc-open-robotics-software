@@ -12,7 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class StartGoalPositionEditor extends AnimationTimer

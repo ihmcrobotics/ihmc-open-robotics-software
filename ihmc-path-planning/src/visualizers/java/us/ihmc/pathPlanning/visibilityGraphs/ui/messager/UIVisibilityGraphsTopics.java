@@ -5,16 +5,16 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicTheme;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Category;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TopicTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class UIVisibilityGraphsTopics
