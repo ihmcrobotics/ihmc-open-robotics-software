@@ -315,6 +315,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          catch (Exception e)
          {
             PrintTools.error(this, "Got exception: " + e.getClass().getSimpleName() + " when loading a YoGraphic.");
+            e.printStackTrace();
          }
       }
 
@@ -340,7 +341,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
    private RemoteYoGraphic getRemoteGraphic(GraphicObjectMessage graphicObjectMessage)
    {
-      int registrationID = graphicObjectMessage.getType();
+      int registrationID = graphicObjectMessage.getRegistrationID();
 
       String name = graphicObjectMessage.getNameAsString();
       YoVariable<?>[] vars = new YoVariable[graphicObjectMessage.getYoVariableIndex().size()];
