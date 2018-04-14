@@ -4,47 +4,55 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
-import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectoryGenerator;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
+import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.robotics.math.trajectories.*;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
+import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-//   private final ThreeDoFSwingFootTrajectory swingTrajectory;
+   private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
+   private final MultipleWaypointsBlendedPositionTrajectoryGenerator blendedSwingTrajectory;
 
-   private final ThreeDoFSwingFootTrajectoryGenerator trajectoryGenerator;
-   private final BlendedPositionTrajectoryGenerator newSwingTrajectory;
+   private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
 
-   private final FramePoint3D goalPosition = new FramePoint3D();
+   private final CurrentRigidBodyStateProvider currentStateProvider;
+
    private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FrameVector3D initialLinearVelocity = new FrameVector3D();
+
+   private final FramePoint3D finalPosition = new FramePoint3D();
+   private final FrameVector3D finalLinearVelocity = new FrameVector3D();
+
    private final GlitchFilteredYoBoolean touchdownTrigger;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
 
-   private final FrameVector3D zeroVector = new FrameVector3D();
+   private final YoFramePoint3D desiredSolePosition;
+   private final YoFrameVector3D desiredSoleLinearVelocity;
 
    private final QuadrupedFootControlModuleParameters parameters;
 
@@ -55,13 +63,14 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
-   private final ReferenceFrame soleFrame;
+   private final MovingReferenceFrame soleFrame;
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final RobotQuadrant robotQuadrant;
 
    private boolean triggerSupport;
-   private final boolean debug = true;
+
+   private final FrameVector3DReadOnly touchdownVelocity;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
@@ -73,14 +82,26 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.currentStepCommand = currentStepCommand;
 
+      String namePrefix = robotQuadrant.getPascalCaseName();
+
+      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
+      touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(),
+                                                                            defaultTouchdownVelocity, registry);
+
       this.parameters = controllerToolbox.getFootControlModuleParameters();
 
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
-//      this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry, graphicsListRegistry);
+      double[] waypointProportions = new double[] {0.25, 0.85};
+      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(this.robotQuadrant.getPascalCaseName(), waypointProportions, waypointProportions, 0.04, 0.3,
+                                                               registry, graphicsListRegistry);
 
-      trajectoryGenerator = new ThreeDoFSwingFootTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), registry, graphicsListRegistry, debug);
-      newSwingTrajectory = new BlendedPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), trajectoryGenerator, ReferenceFrame.getWorldFrame(), registry);
+      MultipleWaypointsPositionTrajectoryGenerator baseTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(),
+                                                                                                                     true, worldFrame, registry);
+      blendedSwingTrajectory = new MultipleWaypointsBlendedPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(), baseTrajectory, worldFrame,
+                                                                                       registry);
+
+      currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
@@ -92,6 +113,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
 
+      desiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
+      desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
    }
 
    @Override
@@ -100,22 +123,16 @@ public class QuadrupedSwingState extends QuadrupedFootState
       controllerToolbox.getFootContactState(robotQuadrant).clear();
 
       // initialize swing trajectory
-      double groundClearance = currentStepCommand.getGroundClearance();
-      TimeInterval timeInterval = currentStepCommand.getTimeInterval();
-
-      initialPosition.setToZero(soleFrame);
+      currentStateProvider.getPosition(initialPosition);
+      currentStateProvider.getLinearVelocity(initialLinearVelocity);
       initialPosition.changeFrame(worldFrame);
+      initialLinearVelocity.changeFrame(worldFrame);
 
-      currentStepCommand.getGoalPosition(goalPosition);
-      goalPosition.changeFrame(worldFrame);
-      goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
+      currentStepCommand.getGoalPosition(finalPosition);
+      finalPosition.changeFrame(worldFrame);
+      finalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
-//      swingTrajectory.initializeTrajectory(initialPosition, goalPosition, groundClearance, timeInterval);
-      trajectoryGenerator.setInitialConditions(initialPosition, zeroVector);
-      trajectoryGenerator.setFinalConditions(goalPosition, zeroVector);
-      trajectoryGenerator.setGroundClearance(groundClearance);
-      trajectoryGenerator.setStepDuration(timeInterval.getDuration());
-      trajectoryGenerator.initialize();
+      fillAndInitializeTrajectories(true);
 
       touchdownTrigger.set(false);
       triggerSupport = false;
@@ -124,28 +141,21 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public void doAction(double timeInState)
    {
+      if (swingTrajectoryOptimizer.doOptimizationUpdate())
+         fillAndInitializeTrajectories(false);
+
       double currentTime = timestamp.getDoubleValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
-      double startTime = currentStepCommand.getTimeInterval().getStartTime();
 
-      // Compute current goal position.
-      currentStepCommand.getGoalPosition(goalPosition);
-      goalPosition.changeFrame(worldFrame);
-      goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
+      blendForStepAdjustment();
 
-      // Compute swing trajectory.
-      if (touchDownTime - currentTime > parameters.getMinimumStepAdjustmentTimeParameter())
-      {
-         newSwingTrajectory.blendFinalConstraint(goalPosition, touchDownTime - startTime, touchDownTime - currentTime);
-//         newSwingTrajectory.blendFinalConstraint(goalPosition, touchDownTime, touchDownTime - currentTime);
-//         swingTrajectory.adjustTrajectory(goalPosition, currentTime);
-      }
-//      swingTrajectory.computeTrajectory(currentTime);
-//      swingTrajectory.getPosition(desiredPosition);
-//      swingTrajectory.getVelocity(desiredVelocity);
-      newSwingTrajectory.compute((timeInState));
-      newSwingTrajectory.getPosition(desiredPosition);
-      newSwingTrajectory.getVelocity(desiredVelocity);
+      blendedSwingTrajectory.compute(timeInState);
+      blendedSwingTrajectory.getPosition(desiredPosition);
+      blendedSwingTrajectory.getVelocity(desiredVelocity);
+
+      desiredSolePosition.setMatchingFrame(desiredPosition);
+      desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
+
 
       // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
       FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
@@ -185,6 +195,61 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
    }
 
+   private void fillAndInitializeTrajectories(boolean initializeOptimizer)
+   {
+      blendedSwingTrajectory.clearTrajectory(worldFrame);
+      blendedSwingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+
+      finalLinearVelocity.setIncludingFrame(touchdownVelocity);
+
+      if (initializeOptimizer)
+      {
+         initializeOptimizer();
+      }
+
+      for (int i = 0; i < swingTrajectoryOptimizer.getNumberOfWaypoints(); i++)
+      {
+         swingTrajectoryOptimizer.getWaypointData(i, tempPositionTrajectoryPoint);
+         blendedSwingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
+      }
+
+      blendedSwingTrajectory.appendPositionWaypoint(currentStepCommand.getTimeInterval().getDuration(), finalPosition, finalLinearVelocity);
+
+      blendedSwingTrajectory.initializeTrajectory();
+      blendedSwingTrajectory.initialize();
+   }
+
+   private void initializeOptimizer()
+   {
+      swingTrajectoryOptimizer.setInitialConditions(initialPosition, initialLinearVelocity);
+      swingTrajectoryOptimizer.setFinalConditions(finalPosition, finalLinearVelocity);
+      swingTrajectoryOptimizer.setStepTime(currentStepCommand.getTimeInterval().getDuration());
+      swingTrajectoryOptimizer.setTrajectoryType(TrajectoryType.DEFAULT);
+      swingTrajectoryOptimizer.setSwingHeight(currentStepCommand.getGroundClearance());
+      swingTrajectoryOptimizer.initialize();
+   }
+
+   private void blendForStepAdjustment()
+   {
+      double currentTime = timestamp.getDoubleValue();
+      double duration = currentStepCommand.getTimeInterval().getDuration();
+      double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
+
+      // Compute current goal position.
+      currentStepCommand.getGoalPosition(finalPosition);
+      finalPosition.changeFrame(worldFrame);
+      finalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
+
+      // Compute swing trajectory.
+      if (touchDownTime - currentTime > parameters.getMinimumStepAdjustmentTimeParameter())
+      {
+         blendedSwingTrajectory.clear();
+         blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
+         blendedSwingTrajectory.initialize();
+      }
+   }
+
+
    @Override
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
@@ -197,6 +262,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
       stepCommandIsValid.set(false);
 
       triggerSupport = false;
+
+      desiredSolePosition.setToNaN();
+      desiredSoleLinearVelocity.setToNaN();
    }
 
    @Override
