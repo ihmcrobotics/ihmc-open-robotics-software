@@ -16,8 +16,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -72,19 +70,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this.appearance = appearance;
    }
 
-   public YoGraphicPosition(String name, YoFramePointInMultipleFrames framePoint, double scale, AppearanceDefinition appearance)
-   {
-      this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, GraphicType.BALL);
-   }
-
    public YoGraphicPosition(String name, YoFramePoint3D framePoint, double scale, AppearanceDefinition appearance)
    {
       this(name, framePoint, scale, appearance, GraphicType.BALL);
-   }
-
-   public YoGraphicPosition(String name, YoFramePointInMultipleFrames framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
-   {
-      this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, type);
    }
 
    public YoGraphicPosition(String name, YoFramePoint3D framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
@@ -103,19 +91,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this.appearance = appearance;
    }
 
-   public YoGraphicPosition(String name, YoFramePoint2dInMultipleFrames framePoint, double scale, AppearanceDefinition appearance)
-   {
-      this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, GraphicType.BALL);
-   }
-
    public YoGraphicPosition(String name, YoFramePoint2D framePoint, double scale, AppearanceDefinition appearance)
    {
       this(name, framePoint, scale, appearance, GraphicType.BALL);
-   }
-
-   public YoGraphicPosition(String name, YoFramePoint2dInMultipleFrames framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
-   {
-      this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, type);
    }
 
    public YoGraphicPosition(String name, YoFramePoint2D framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
