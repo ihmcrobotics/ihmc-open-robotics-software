@@ -16,14 +16,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.AngleTools;
 
 /**
  * This class provides the tools necessary to build a simple controller for computing the orientation of a JavaFX {@link PerspectiveCamera}.
@@ -201,7 +201,7 @@ public class CameraRotationCalculator
          newLatitude = MathTools.clamp(newLatitude, Math.PI);
       latitude.set(newLatitude);
       double newLongitude = longitude.get() + deltaLongitude;
-      newLongitude = AngleTools.trimAngleMinusPiToPi(newLongitude);
+      newLongitude = EuclidCoreTools.trimAngleMinusPiToPi(newLongitude);
       longitude.set(newLongitude);
 
       if (keepRotationLeveled.get())
@@ -211,7 +211,7 @@ public class CameraRotationCalculator
       else
       {
          double newRoll = roll.get() + deltaRoll;
-         newRoll = AngleTools.trimAngleMinusPiToPi(newRoll);
+         newRoll = EuclidCoreTools.trimAngleMinusPiToPi(newRoll);
          roll.set(newRoll);
       }
 
@@ -262,8 +262,8 @@ public class CameraRotationCalculator
       else
          this.latitude.set(MathTools.clamp(latitude, Math.PI / 2.0));
 
-      this.longitude.set(AngleTools.trimAngleMinusPiToPi(longitude));
-      this.roll.set(AngleTools.trimAngleMinusPiToPi(roll));
+      this.longitude.set(EuclidCoreTools.trimAngleMinusPiToPi(longitude));
+      this.roll.set(EuclidCoreTools.trimAngleMinusPiToPi(roll));
       updateRotation();
    }
 

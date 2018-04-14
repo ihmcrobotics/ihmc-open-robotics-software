@@ -9,12 +9,12 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class MeshDataGeneratorVisualizer extends Application
 {
@@ -133,7 +133,7 @@ public class MeshDataGeneratorVisualizer extends Application
 
       while (polygon.getNumberOfVertices() < numberOfPoints)
       {
-         randomVertex.add(RandomGeometry.nextPoint2D(random, 0.03, 0.03));
+         randomVertex.add(EuclidCoreRandomTools.nextPoint2D(random, 0.03));
          polygon.addVertex(randomVertex);
          polygon.update();
       }

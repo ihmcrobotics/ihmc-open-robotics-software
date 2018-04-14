@@ -30,8 +30,6 @@ mainDependencies {
       exclude group: 'java3d', module: 'vecmath'
    }
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: 'us.ihmc.thirdparty', name: 'jassimp', version: '4.0.0-ihmc2'
 }
 
