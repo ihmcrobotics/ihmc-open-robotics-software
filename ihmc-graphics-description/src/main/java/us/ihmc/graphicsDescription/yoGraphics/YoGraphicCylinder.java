@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -33,7 +34,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), appearance,
            lineThickness);
 
-      if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
+      if (!startPoint.getReferenceFrame().isWorldFrame() || !frameVector.getReferenceFrame().isWorldFrame())
       {
          System.err.println("Warning: Should be in a World Frame to create a YoGraphicCylinder. startPoint = " + startPoint + ", frameVector = " + frameVector);
       }
@@ -79,6 +80,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
    private Vector3D z_rot = new Vector3D(), y_rot = new Vector3D(), x_rot = new Vector3D();
    private RotationMatrix rotMatrix = new RotationMatrix();
 
+   @Override
    protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
@@ -111,6 +113,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
    }
 
+   @Override
    public Artifact createArtifact()
    {
       throw new RuntimeException("Implement Me!");
@@ -127,16 +130,19 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       return RemoteGraphicType.CYLINDER_DGO;
    }
 
+   @Override
    public YoVariable<?>[] getVariables()
    {
       return new YoDouble[] {base.getYoX(), base.getYoY(), base.getYoZ(), vector.getYoX(), vector.getYoY(), vector.getYoZ()};
    }
 
+   @Override
    public double[] getConstants()
    {
       return new double[] {lineThickness};
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -145,6 +151,14 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       return linkGraphics;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public YoGraphicCylinder duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicCylinder(getName(), base.duplicate(newRegistry), vector.duplicate(newRegistry), appearance, lineThickness);
+   }
+
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return appearance;

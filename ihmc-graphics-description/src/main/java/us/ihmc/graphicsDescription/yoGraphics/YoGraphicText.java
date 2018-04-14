@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
@@ -16,12 +17,18 @@ public class YoGraphicText extends YoGraphicAbstractShape
 {
    private final Graphics3DObject graphics3dObject;
    private final Font font = new Font("Lucida Sans", Font.BOLD, 26);
+   private final String text;
+   private final Color backgroundColor;
+   private final Color textAppearance;
 
    public YoGraphicText(String name, String text, YoFramePoint3D framePoint, YoFrameYawPitchRoll frameOrientation, double scale, Color backgroundColor,
-         Color textAppearance)
+                        Color textAppearance)
    {
       super(name, framePoint, frameOrientation, scale);
-      this.graphics3dObject = new Graphics3DObject();
+      this.text = text;
+      this.backgroundColor = backgroundColor;
+      this.textAppearance = textAppearance;
+      graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
       //initial guess for block and image dimensions
@@ -40,7 +47,7 @@ public class YoGraphicText extends YoGraphicAbstractShape
       Rectangle2D bounds = font.getStringBounds(text, g.getFontRenderContext());
       g.dispose();
       int textHeight = (int) bounds.getHeight();
-      int textWidth = (int) (bounds.getWidth());
+      int textWidth = (int) bounds.getWidth();
 
       //Adjust image and block dims to just fit text
       imageWidth = textWidth + 10;
@@ -74,4 +81,10 @@ public class YoGraphicText extends YoGraphicAbstractShape
       return graphics3dObject;
    }
 
+   @Override
+   public YoGraphic duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicText(getName(), text, yoFramePoint.duplicate(newRegistry), yoFrameOrientation.duplicate(newRegistry), scale, backgroundColor,
+                               textAppearance);
+   }
 }

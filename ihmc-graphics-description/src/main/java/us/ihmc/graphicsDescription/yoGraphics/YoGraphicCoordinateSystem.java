@@ -46,7 +46,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       pose = new YoFramePoseUsingYawPitchRoll(new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()),
                                               new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame()));
 
-      this.scale = constants[0];
+      scale = constants[0];
       // Ensuring backward compatibility
       if (constants.length == 3)
          setArrowColor(new YoAppearanceRGBColor(new Color((int) constants[1]), constants[2]));
@@ -170,8 +170,8 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    public void setArrowColor(AppearanceDefinition arrowColor)
    {
       this.arrowColor = arrowColor;
-      this.colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
-      this.transparency = arrowColor.getTransparency();
+      colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
+      transparency = arrowColor.getTransparency();
    }
 
    public void hide()
@@ -225,16 +225,25 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       return RemoteGraphicType.COORDINATE_SYSTEM_DGO;
    }
 
+   @Override
    public YoDouble[] getVariables()
    {
       return new YoDouble[] {pose.getYoX(), pose.getYoY(), pose.getYoZ(), pose.getYoYaw(), pose.getYoPitch(), pose.getYoRoll()};
    }
 
+   @Override
    public double[] getConstants()
    {
       return new double[] {scale, colorRGB32BitInt, transparency};
    }
 
+   @Override
+   public YoGraphicCoordinateSystem duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicCoordinateSystem(getName(), pose.duplicate(newRegistry), scale, arrowColor);
+   }
+
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return arrowColor;

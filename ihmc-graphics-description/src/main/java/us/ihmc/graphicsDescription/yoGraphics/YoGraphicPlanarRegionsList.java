@@ -24,6 +24,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,8 +35,6 @@ import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 /**
  * {@link YoGraphic} that can display {@link PlanarRegionsList} locally, with SCS for instance, and remotely, with SCSVisualizer for instance.
@@ -814,6 +814,13 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    protected boolean containsNaN()
    { // Only used to determine if the graphics from this object is valid, and whether to display or hide.
       return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public YoGraphicPlanarRegionsList duplicate(YoVariableRegistry newRegistry)
+   {
+      return new YoGraphicPlanarRegionsList(getName(), getVariables(), getConstants());
    }
 
    @Override
