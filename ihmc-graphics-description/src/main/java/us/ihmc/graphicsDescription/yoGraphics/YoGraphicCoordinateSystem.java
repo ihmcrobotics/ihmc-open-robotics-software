@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGraphic
 {
-   protected final YoDouble x, y, z, yaw, pitch, roll;
+   protected final YoFramePoseUsingYawPitchRoll pose;
    protected final double scale;
    protected AppearanceDefinition arrowColor = YoAppearance.Gray();
    private double colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
@@ -30,34 +30,21 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    private final double[] tempYawPitchRoll = new double[3];
 
-   public YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch,
-         YoDouble roll, double scale)
+   public YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch, YoDouble roll, double scale)
    {
       super(name);
 
-      this.x = x;
-      this.y = y;
-      this.z = z;
-
-      this.yaw = yaw;
-      this.pitch = pitch;
-      this.roll = roll;
-
+      pose = new YoFramePoseUsingYawPitchRoll(new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()),
+                                              new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame()));
       this.scale = scale;
    }
 
-   YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch,
-         YoDouble roll, double[] constants)
+   YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch, YoDouble roll, double[] constants)
    {
       super(name);
 
-      this.x = x;
-      this.y = y;
-      this.z = z;
-
-      this.yaw = yaw;
-      this.pitch = pitch;
-      this.roll = roll;
+      pose = new YoFramePoseUsingYawPitchRoll(new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()),
+                                              new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame()));
 
       this.scale = constants[0];
       // Ensuring backward compatibility
@@ -72,13 +59,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       ReferenceFrame.getWorldFrame().checkReferenceFrameMatch(framePoint);
       framePoint.checkReferenceFrameMatch(orientation.getReferenceFrame());
 
-      x = framePoint.getYoX();
-      y = framePoint.getYoY();
-      z = framePoint.getYoZ();
-
-      yaw = orientation.getYaw();
-      pitch = orientation.getPitch();
-      roll = orientation.getRoll();
+      pose = new YoFramePoseUsingYawPitchRoll(framePoint, orientation);
 
       this.scale = scale;
    }
@@ -90,8 +71,8 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public YoGraphicCoordinateSystem(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition arrowColor)
    {
-      this(namePrefix + nameSuffix, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameYawPitchRoll(namePrefix,
-            nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
+      this(namePrefix + nameSuffix, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry),
+           new YoFrameYawPitchRoll(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
       setArrowColor(arrowColor);
    }
 
@@ -105,7 +86,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    {
       this(name, yoFramePose.getPosition(), yoFramePose.getOrientation(), scale);
    }
-   
+
    public YoGraphicCoordinateSystem(String name, YoFramePoseUsingYawPitchRoll yoFramePose, double scale, AppearanceDefinition arrowColor)
    {
       this(name, yoFramePose.getPosition(), yoFramePose.getOrientation(), scale, arrowColor);
@@ -131,10 +112,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    {
       transformToWorld.getTranslation(translationToWorld);
 
-      x.set(translationToWorld.getX());
-      y.set(translationToWorld.getY());
-      z.set(translationToWorld.getZ());
-
+      pose.setPosition(transformToWorld.getTranslationVector());
       orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), transformToWorld.getRotationMatrix());
       setOrientation(orientation);
    }
@@ -146,30 +124,26 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void getPosition(Vector3D position)
    {
-      position.setX(x.getDoubleValue());
-      position.setY(y.getDoubleValue());
-      position.setZ(z.getDoubleValue());
+      position.setX(pose.getX());
+      position.setY(pose.getY());
+      position.setZ(pose.getZ());
    }
 
    public void getYawPitchRoll(Vector3D yawPitchRoll)
    {
-      yawPitchRoll.setX(yaw.getDoubleValue());
-      yawPitchRoll.setY(pitch.getDoubleValue());
-      yawPitchRoll.setZ(roll.getDoubleValue());
+      yawPitchRoll.setX(pose.getYaw());
+      yawPitchRoll.setY(pose.getPitch());
+      yawPitchRoll.setZ(pose.getRoll());
    }
 
    public void setPosition(double x, double y, double z)
    {
-      this.x.set(x);
-      this.y.set(y);
-      this.z.set(z);
+      pose.setPosition(x, y, z);
    }
 
    public void setPosition(FramePoint3D position)
    {
-      x.set(position.getX());
-      y.set(position.getY());
-      z.set(position.getZ());
+      pose.setPosition(position);
    }
 
    public void setOrientation(FrameQuaternion orientation)
@@ -185,19 +159,12 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      this.yaw.set(yaw);
-      this.pitch.set(pitch);
-      this.roll.set(roll);
+      pose.setYawPitchRoll(yaw, pitch, roll);
    }
 
    public void setPose(FramePose3D pose)
    {
-      pose.getOrientationYawPitchRoll(tempYawPitchRoll);
-      setYawPitchRoll(tempYawPitchRoll);
-
-      x.set(pose.getX());
-      y.set(pose.getY());
-      z.set(pose.getZ());
+      this.pose.set(pose);
    }
 
    public void setArrowColor(AppearanceDefinition arrowColor)
@@ -209,13 +176,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void hide()
    {
-      x.set(Double.NaN);
-      y.set(Double.NaN);
-      z.set(Double.NaN);
-
-      yaw.set(Double.NaN);
-      pitch.set(Double.NaN);
-      roll.set(Double.NaN);
+      pose.setToNaN();
    }
 
    @Override
@@ -234,7 +195,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
-      translationVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
+      translationVector.set(pose.getX(), pose.getY(), pose.getZ());
 
       double globalScale = 1.0;
       if (globalScaleProvider != null)
@@ -243,28 +204,14 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       }
 
       transform3D.setScale(scale * globalScale);
-      transform3D.setRotationEuler(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
+      transform3D.setRotationEuler(pose.getRoll(), pose.getPitch(), pose.getYaw());
       transform3D.setTranslation(translationVector);
    }
 
    @Override
    public boolean containsNaN()
    {
-      if (x.isNaN())
-         return true;
-      if (y.isNaN())
-         return true;
-      if (z.isNaN())
-         return true;
-
-      if (yaw.isNaN())
-         return true;
-      if (pitch.isNaN())
-         return true;
-      if (roll.isNaN())
-         return true;
-
-      return false;
+      return pose.containsNaN();
    }
 
    @Override
@@ -280,12 +227,12 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public YoDouble[] getVariables()
    {
-      return new YoDouble[] { x, y, z, yaw, pitch, roll };
+      return new YoDouble[] {pose.getYoX(), pose.getYoY(), pose.getYoZ(), pose.getYoYaw(), pose.getYoPitch(), pose.getYoRoll()};
    }
 
    public double[] getConstants()
    {
-      return new double[] { scale, colorRGB32BitInt, transparency };
+      return new double[] {scale, colorRGB32BitInt, transparency};
    }
 
    public AppearanceDefinition getAppearance()
