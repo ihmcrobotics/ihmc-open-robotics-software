@@ -87,7 +87,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
       uiConnectionHandler.start();
 
-      uiMessager.notifyModuleConnectionStateListeners();
+      uiMessager.notifyModuleMessagerStateListeners();
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
