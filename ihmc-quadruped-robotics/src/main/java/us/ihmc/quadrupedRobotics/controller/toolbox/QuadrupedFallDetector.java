@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -31,29 +31,33 @@ public class QuadrupedFallDetector
    private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
 
    //Estimation Variables
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final FrameQuaternion bodyOrientation = new FrameQuaternion();
 
    private final ReferenceFrame bodyFrame;
    private final FramePoint3D dcmPositionEstimate;
+   private final FramePoint2D dcmPositionEstimate2D;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final QuadrupedSupportPolygon supportPolygon;
+   private final FixedFrameConvexPolygon2DBasics supportPolygon;
 
    // Yo Variables
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 
-   public QuadrupedFallDetector(ReferenceFrame bodyFrame, DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
+   public QuadrupedFallDetector(ReferenceFrame bodyFrame, DivergentComponentOfMotionEstimator dcmPositionEstimator,
+                                FixedFrameConvexPolygon2DBasics supportPolygon, YoVariableRegistry parentRegistry)
    {
       this.bodyFrame = bodyFrame;
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
+      this.dcmPositionEstimator = dcmPositionEstimator;
+      this.supportPolygon = supportPolygon;
+
       this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       this.isFallDetected.set(false);
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
+
       dcmPositionEstimate = new FramePoint3D();
-      this.dcmPositionEstimator = dcmPositionEstimator;
-      supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePositions());
+      dcmPositionEstimate2D = new FramePoint2D();
+
       parentRegistry.addChild(registry);
    }
 
@@ -94,12 +98,7 @@ public class QuadrupedFallDetector
       bodyOrientation.changeFrame(worldFrame);
 
       dcmPositionEstimator.getDCMPositionEstimate(dcmPositionEstimate);
-
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         taskSpaceEstimates.getSolePosition(quadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         supportPolygon.setFootstep(quadrant, taskSpaceEstimates.getSolePosition(quadrant));
-      }
+      dcmPositionEstimate2D.set(dcmPositionEstimate);
    }
 
    private boolean detectPitchLimitFailure()
@@ -114,7 +113,7 @@ public class QuadrupedFallDetector
 
    private boolean detectDcmDistanceOutsideSupportPolygonLimitFailure()
    {
-      yoDcmDistanceOutsideSupportPolygon.set(supportPolygon.getDistanceOutside2d(dcmPositionEstimate));
-      return supportPolygon.getDistanceOutside2d(dcmPositionEstimate) > dcmOutsideSupportThreshold.getValue();
+      yoDcmDistanceOutsideSupportPolygon.set(supportPolygon.distance(dcmPositionEstimate2D));
+      return supportPolygon.distance(dcmPositionEstimate2D) > dcmOutsideSupportThreshold.getValue();
    }
 }
