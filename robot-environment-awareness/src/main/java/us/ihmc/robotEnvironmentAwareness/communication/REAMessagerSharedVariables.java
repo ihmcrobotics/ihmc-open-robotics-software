@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.javaFXToolkit.messager.Message;
+import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
@@ -20,7 +20,7 @@ public class REAMessagerSharedVariables implements REAMessager
    private final AtomicBoolean isConnected = new AtomicBoolean(false);
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> boundVariables = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
-   private final List<ConnectionStateListener> connectionStateListeners = new ArrayList<>();
+   private final List<MessagerStateListener> connectionStateListeners = new ArrayList<>();
 
    public REAMessagerSharedVariables(MessagerAPI messagerAPI)
    {
@@ -83,14 +83,14 @@ public class REAMessagerSharedVariables implements REAMessager
    public void startMessager() throws IOException
    {
       isConnected.set(true);
-      connectionStateListeners.forEach(ConnectionStateListener::connected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(true));
    }
 
    @Override
    public void closeMessager()
    {
       isConnected.set(false);
-      connectionStateListeners.forEach(ConnectionStateListener::disconnected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(false));
       boundVariables.clear();
    }
 
@@ -101,18 +101,15 @@ public class REAMessagerSharedVariables implements REAMessager
    }
 
    @Override
-   public void registerConnectionStateListener(ConnectionStateListener listener)
+   public void registerMessagerStateListener(MessagerStateListener listener)
    {
       connectionStateListeners.add(listener);
    }
 
    @Override
-   public void notifyConnectionStateListeners()
+   public void notifyMessagerStateListeners()
    {
-      if (isMessagerOpen())
-         connectionStateListeners.forEach(ConnectionStateListener::connected);
-      else
-         connectionStateListeners.forEach(ConnectionStateListener::disconnected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(isMessagerOpen()));
    }
 
    @Override
