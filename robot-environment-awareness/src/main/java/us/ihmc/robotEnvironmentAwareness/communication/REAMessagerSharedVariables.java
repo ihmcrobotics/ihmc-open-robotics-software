@@ -27,12 +27,12 @@ public class REAMessagerSharedVariables implements REAMessager
    }
 
    @Override
-   public <T> void submitMessage(REAMessage<T> message)
+   public <T> void submitMessage(Message<T> message)
    {
-      if (!messagerAPI.containsTopic(message.getTopicId()))
+      if (!messagerAPI.containsTopic(message.getTopicID()))
          throw new RuntimeException("The message is not part of this messager's API.");
 
-      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicId());
+      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
       if (!isConnected.get())
       {
