@@ -109,9 +109,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
       feedbackControlCommand.setFeedForwardAction(initialSoleForces);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
-
-      if (waypointCallback != null)
-         waypointCallback.isDoneMoving(false);
    }
 
    @Override

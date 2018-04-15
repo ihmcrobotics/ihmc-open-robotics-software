@@ -3,6 +3,8 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -179,6 +181,7 @@ public class QuadrupedFootControlModule
       footStateMachine.doAction();
       footStateMachine.doTransitions();
    }
+
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
