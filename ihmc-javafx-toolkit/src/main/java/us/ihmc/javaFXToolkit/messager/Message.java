@@ -5,7 +5,7 @@ import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicID;
 
 /**
- * A message can be used with a {@link REAMessager}.
+ * A message can be used with a {@link Messager}.
  * 
  * @author Sylvain Bertrand
  *

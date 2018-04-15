@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.communication;
+package us.ihmc.javaFXToolkit.messager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,14 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.javaFXToolkit.messager.Message;
-import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
-public class REAMessagerSharedVariables implements Messager
+/**
+ * Implementation of {@code Messager} using shared memory.
+ * 
+ * @author Sylvain Bertrand
+ */
+public class SharedMemoryMessager implements Messager
 {
    private final MessagerAPI messagerAPI;
 
@@ -24,11 +25,17 @@ public class REAMessagerSharedVariables implements Messager
    private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> connectionStateListeners = new ArrayList<>();
 
-   public REAMessagerSharedVariables(MessagerAPI messagerAPI)
+   /**
+    * Creates a new messager.
+    * 
+    * @param messagerAPI the API to use with this messager.
+    */
+   public SharedMemoryMessager(MessagerAPI messagerAPI)
    {
       this.messagerAPI = messagerAPI;
    }
 
+   /** {@inheritDoc} */
    @Override
    public <T> void submitMessage(Message<T> message)
    {
@@ -52,6 +59,7 @@ public class REAMessagerSharedVariables implements Messager
          topicListeners.forEach(listener -> listener.receivedMessageForTopic(message.getMessageContent()));
    }
 
+   /** {@inheritDoc} */
    @Override
    @SuppressWarnings("unchecked")
    public <T> AtomicReference<T> createInput(Topic<T> topic, T defaultValue)
@@ -68,6 +76,7 @@ public class REAMessagerSharedVariables implements Messager
       return boundVariable;
    }
 
+   /** {@inheritDoc} */
    @Override
    @SuppressWarnings("unchecked")
    public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
@@ -81,6 +90,7 @@ public class REAMessagerSharedVariables implements Messager
       topicListeners.add((TopicListener<Object>) listener);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void startMessager() throws IOException
    {
@@ -88,6 +98,7 @@ public class REAMessagerSharedVariables implements Messager
       connectionStateListeners.forEach(listener -> listener.messagerStateChanged(true));
    }
 
+   /** {@inheritDoc} */
    @Override
    public void closeMessager()
    {
@@ -96,24 +107,28 @@ public class REAMessagerSharedVariables implements Messager
       boundVariables.clear();
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean isMessagerOpen()
    {
       return isConnected.get();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void registerMessagerStateListener(MessagerStateListener listener)
    {
       connectionStateListeners.add(listener);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void notifyMessagerStateListeners()
    {
       connectionStateListeners.forEach(listener -> listener.messagerStateChanged(isMessagerOpen()));
    }
 
+   /** {@inheritDoc} */
    @Override
    public MessagerAPI getMessagerAPI()
    {
