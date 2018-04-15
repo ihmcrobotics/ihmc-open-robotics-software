@@ -73,9 +73,9 @@ public class QuadrupedFootControlModule
       factory.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
       factory.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.HOLD);
 
-      factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.HOLD, QuadrupedFootStates.SUPPORT);
       factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
       factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT);
+      factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.HOLD, QuadrupedFootStates.SUPPORT);
 
       factory.addTransition(QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
       factory.addTransition(QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT);
