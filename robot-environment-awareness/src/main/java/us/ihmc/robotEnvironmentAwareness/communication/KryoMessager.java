@@ -18,7 +18,7 @@ import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
-public class REAMessagerOverNetwork implements Messager
+public class KryoMessager implements Messager
 {
    private static final boolean DEBUG = false;
 
@@ -33,22 +33,22 @@ public class REAMessagerOverNetwork implements Messager
    public static Messager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, netClassList);
-      return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
+      return new KryoMessager(messagerAPI, packetCommunicator);
    }
 
    public static Messager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
-      return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
+      return new KryoMessager(messagerAPI, packetCommunicator);
    }
 
    public static Messager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, netClassList);
-      return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
+      return new KryoMessager(messagerAPI, packetCommunicator);
    }
 
-   private REAMessagerOverNetwork(MessagerAPI messagerAPI, PacketCommunicator packetCommunicator)
+   private KryoMessager(MessagerAPI messagerAPI, PacketCommunicator packetCommunicator)
    {
       this.messagerAPI = messagerAPI;
       this.packetCommunicator = packetCommunicator;
