@@ -15,7 +15,11 @@ public abstract class QuadrupedFootState implements EventState
    protected QuadrupedStepTransitionCallback stepTransitionCallback = null;
    protected QuadrupedWaypointCallback waypointCallback = null;
 
-   public abstract VirtualModelControlCommand<?> getVirtualModelControlCommand();
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
    public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
 
