@@ -180,7 +180,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition.setMatchingFrame(desiredPosition);
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
 
-      // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
+      // Detect early touch-down.
       FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
       soleForceEstimate.changeFrame(worldFrame);
       double pressureEstimate = -soleForceEstimate.getZ();
@@ -190,8 +190,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
          touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
       }
 
-         feedbackControlCommand.set(desiredPosition, desiredVelocity);
-         feedbackControlCommand.setGains(parameters.getSolePositionGains());
+      feedbackControlCommand.set(desiredPosition, desiredVelocity);
+      feedbackControlCommand.setGains(parameters.getSolePositionGains());
 
       // Trigger support phase.
       if (currentTime >= touchDownTime)
@@ -260,7 +260,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       if (swingIsDone)
          return QuadrupedFootControlModule.FootEvent.TIMEOUT;
-      if (touchdownTrigger.getBooleanValue() && timeInState > 0.5 * currentStepCommand.getTimeInterval().getDuration())
+      if (touchdownTrigger.getBooleanValue())
          return QuadrupedFootControlModule.FootEvent.LOADED;
 
       return null;
@@ -283,7 +283,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public PointFeedbackControlCommand getFeedbackControlCommand()
    {
-         return feedbackControlCommand;
+      return feedbackControlCommand;
    }
 
    @Override
