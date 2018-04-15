@@ -25,7 +25,7 @@ public class QuadrupedTaskSpaceEstimator
    private final QuadrantDependentList<YoFramePoint3D> yoSolePositionEstimate;
 
    // solvers
-   private final QuadrupedSoleForceEstimator soleForceEstimator;
+//   private final QuadrupedSoleForceEstimator soleForceEstimator;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
@@ -61,7 +61,7 @@ public class QuadrupedTaskSpaceEstimator
       }
 
       // solvers
-      soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
+//      soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -70,13 +70,13 @@ public class QuadrupedTaskSpaceEstimator
    {
       // update solvers
       referenceFrames.updateFrames();
-      soleForceEstimator.compute();
+//      soleForceEstimator.compute();
 
       // compute sole poses, twists, and forces
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          estimates.getSolePosition(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
-         estimates.getSoleContactForces().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleContactForce(robotQuadrant));
+//         estimates.getSoleContactForces().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleContactForce(robotQuadrant));
       }
 
       // update yovariables

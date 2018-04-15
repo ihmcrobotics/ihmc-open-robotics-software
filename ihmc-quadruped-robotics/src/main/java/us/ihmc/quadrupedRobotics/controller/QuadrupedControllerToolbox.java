@@ -34,6 +34,7 @@ public class QuadrupedControllerToolbox
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final QuadrupedFallDetector fallDetector;
 
    private final CenterOfMassJacobian comJacobian;
@@ -77,6 +78,9 @@ public class QuadrupedControllerToolbox
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
+
+      soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
+
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, 1.0, registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
@@ -101,11 +105,14 @@ public class QuadrupedControllerToolbox
          footContactStates.put(robotQuadrant, contactState);
          contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
       }
+
+      update(); 
    }
 
    public void update()
    {
       referenceFrames.updateFrames();
+      soleForceEstimator.compute();
       comJacobian.compute();
 
       updateSupportPolygon();
@@ -213,5 +220,10 @@ public class QuadrupedControllerToolbox
    public FrameVector3DReadOnly getCoMVelocityEstimate()
    {
       return yoCoMVelocityEstimate;
+   }
+
+   public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
+   {
+      return soleForceEstimator.getSoleContactForce(robotQuadrant);
    }
 }
