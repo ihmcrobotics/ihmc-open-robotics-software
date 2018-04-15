@@ -1,6 +1,5 @@
 package us.ihmc.javaFXToolkit.messager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,7 +91,7 @@ public class SharedMemoryMessager implements Messager
 
    /** {@inheritDoc} */
    @Override
-   public void startMessager() throws IOException
+   public void startMessager()
    {
       isConnected.set(true);
       connectionStateListeners.forEach(listener -> listener.messagerStateChanged(true));

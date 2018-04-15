@@ -20,6 +20,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.DatasetNavigationAccordionController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.SimpleUIMenuController;
@@ -27,14 +29,13 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.StartGoalAnchorPaneC
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsAnchorPaneController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsDataExporterAnchorPaneController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsParametersAnchorPaneController;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphsRenderer;
 
 public class SimpleVisibilityGraphsUI
 {
-   private final SimpleUIMessager messager = new SimpleUIMessager(API);
+   private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(API);
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -60,7 +61,7 @@ public class SimpleVisibilityGraphsUI
    @FXML
    private DatasetNavigationAccordionController datasetNavigationAccordionController;
 
-   public SimpleVisibilityGraphsUI(Stage primaryStage) throws IOException
+   public SimpleVisibilityGraphsUI(Stage primaryStage) throws Exception
    {
       this.primaryStage = primaryStage;
 
