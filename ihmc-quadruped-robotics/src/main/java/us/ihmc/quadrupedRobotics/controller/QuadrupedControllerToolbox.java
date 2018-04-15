@@ -11,6 +11,7 @@ import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -24,7 +25,6 @@ public class QuadrupedControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final QuadrupedTaskSpaceController taskSpaceController;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -36,6 +36,7 @@ public class QuadrupedControllerToolbox
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
    private final FullQuadrupedRobotModel fullRobotModel;
 
+   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
    private final List<ContactablePlaneBody> contactablePlaneBodies;
 
@@ -54,7 +55,6 @@ public class QuadrupedControllerToolbox
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry, runtimeEnvironment.getGraphicsListRegistry());
-      taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment, referenceFrames, registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, 1.0, registry);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
@@ -65,14 +65,15 @@ public class QuadrupedControllerToolbox
       double coefficientOfFriction = 1.0; // TODO: magic number...
       QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
 
-      for (RobotQuadrant robotSide : RobotQuadrant.values)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
          RigidBody rigidBody = contactableFoot.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
                                                                     contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
 
-         footContactStates.put(robotSide, contactState);
+         footContactStates.put(robotQuadrant, contactState);
+         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
       }
    }
 
@@ -101,11 +102,6 @@ public class QuadrupedControllerToolbox
    public QuadrupedReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
-   }
-
-   public QuadrupedTaskSpaceController getTaskSpaceController()
-   {
-      return taskSpaceController;
    }
 
    public LinearInvertedPendulumModel getLinearInvertedPendulumModel()
@@ -146,6 +142,16 @@ public class QuadrupedControllerToolbox
    public QuadrantDependentList<YoPlaneContactState> getFootContactStates()
    {
       return footContactStates;
+   }
+
+   public ContactState getContactState(RobotQuadrant robotQuadrant)
+   {
+      return contactStates.get(robotQuadrant);
+   }
+
+   public QuadrantDependentList<ContactState> getContactStates()
+   {
+      return contactStates;
    }
 
    public List<ContactablePlaneBody> getContactablePlaneBodies()

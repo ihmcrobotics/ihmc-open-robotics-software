@@ -19,11 +19,7 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedJointSpaceManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.controller.*;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
@@ -69,7 +65,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private final StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
 
-   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
 
@@ -130,7 +125,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
-         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
       }
 
       this.stateMachine = buildStateMachine();
@@ -142,7 +136,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, contactStates, controlManagerFactory, stepMessageHandler, registry);
+      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
       final QuadrupedController soleWaypointController = new QuadrupedSoleWaypointController(controllerToolbox, controlManagerFactory, stepMessageHandler,
                                                                                              registry);
 
@@ -218,15 +212,12 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       stepMessageHandler.clearFootTrajectory();
       stepMessageHandler.clearSteps();
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
-      }
-
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         controllerToolbox.getContactStates().put(robotQuadrant, ContactState.IN_CONTACT);
+
          tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
          groundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
@@ -310,7 +301,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private void updateManagers()
    {
       // update desired horizontal com forces
-      balanceManager.compute(contactStates);
+      balanceManager.compute();
 
       // update desired body orientation, angular velocity, and torque
       bodyOrientationManager.compute();
@@ -336,9 +327,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactStates.put(robotQuadrant, feetManager.getContactState(robotQuadrant));
+         controllerToolbox.getContactStates().put(robotQuadrant, feetManager.getContactState(robotQuadrant));
       }
-
    }
 
    @Override
@@ -361,7 +351,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotQuadrant);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
-         //planeContactStateCommand.setUseHighCoPDamping(false);
          controllerCoreCommand.addVirtualModelControlCommand(planeContactStateCommand);
       }
 
