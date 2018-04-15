@@ -185,7 +185,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
+      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(tempPoint);
       onLiftOffTriggered.set(true);
    }
 
