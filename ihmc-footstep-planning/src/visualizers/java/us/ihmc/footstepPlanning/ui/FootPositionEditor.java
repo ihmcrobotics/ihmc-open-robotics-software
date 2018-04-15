@@ -10,7 +10,7 @@ import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,13 +25,13 @@ public class FootPositionEditor extends AnimationTimer
 
    private final AtomicBoolean positionValidated = new AtomicBoolean(false);
 
-   private final REAMessager messager;
+   private final Messager messager;
    private final Node sceneNode;
 
    private final AtomicReference<Boolean> editModeEnabled;
    private final MessagerAPIFactory.Topic<Point3D> positionTopic = FootstepPlannerUserInterfaceAPI.NodeCheckingPosition;
 
-   public FootPositionEditor(REAMessager messager, Node sceneNode)
+   public FootPositionEditor(Messager messager, Node sceneNode)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;

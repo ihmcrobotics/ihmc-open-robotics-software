@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -12,12 +12,12 @@ public class FootstepPlannerMenuUIController
 {
    private static final boolean VERBOSE = true;
 
-   private REAMessager messager;
+   private Messager messager;
    private Window ownerWindow;
 
    private PlanarRegionsList loadedPlanarRegions = null;
 
-   public void attachMessager(REAMessager messager)
+   public void attachMessager(Messager messager)
    {
       this.messager = messager;
    }

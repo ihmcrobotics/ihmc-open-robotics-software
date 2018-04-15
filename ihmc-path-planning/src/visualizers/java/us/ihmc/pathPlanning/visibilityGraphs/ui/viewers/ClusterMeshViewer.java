@@ -21,7 +21,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 public class ClusterMeshViewer extends AnimationTimer
 {
@@ -43,12 +43,12 @@ public class ClusterMeshViewer extends AnimationTimer
 
    private final AtomicReference<List<NavigableRegion>> newRequestReference;
 
-   public ClusterMeshViewer(REAMessager messager)
+   public ClusterMeshViewer(Messager messager)
    {
       this(messager, null);
    }
 
-   public ClusterMeshViewer(REAMessager messager, ExecutorService executorService)
+   public ClusterMeshViewer(Messager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 

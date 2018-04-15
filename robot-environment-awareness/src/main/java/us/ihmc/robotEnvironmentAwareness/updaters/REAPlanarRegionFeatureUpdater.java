@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -48,9 +48,9 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
 
-   public REAPlanarRegionFeatureUpdater(NormalOcTree octree, REAMessager reaMessager)
+   public REAPlanarRegionFeatureUpdater(NormalOcTree octree, Messager reaMessager)
    {
       this.octree = octree;
       this.reaMessager = reaMessager;

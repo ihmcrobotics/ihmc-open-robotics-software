@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -20,14 +20,14 @@ public class PlanarRegionIDRandomizer
 
    private AtomicReference<PlanarRegionsList> planarRegionsReference = null;
    private Topic<PlanarRegionsList> dataTopic = null;
-   private final REAMessager messager;
+   private final Messager messager;
 
-   public PlanarRegionIDRandomizer(REAMessager messager)
+   public PlanarRegionIDRandomizer(Messager messager)
    {
       this(messager, null);
    }
 
-   public PlanarRegionIDRandomizer(REAMessager messager, ExecutorService executorService)
+   public PlanarRegionIDRandomizer(Messager messager, ExecutorService executorService)
    {
       this.messager = messager;
       isExecutorServiceProvided = executorService == null;
