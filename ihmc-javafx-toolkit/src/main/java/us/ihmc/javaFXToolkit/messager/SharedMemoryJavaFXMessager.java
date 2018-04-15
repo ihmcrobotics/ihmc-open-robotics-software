@@ -1,8 +1,9 @@
 package us.ihmc.javaFXToolkit.messager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
@@ -16,9 +17,7 @@ import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
  */
 public class SharedMemoryJavaFXMessager extends SharedMemoryMessager implements JavaFXMessager
 {
-   private final ConcurrentHashMap<Topic<?>, AtomicReference<Object>> javaFXThreadSyncedTopicListenerInputsMap = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> javaFXThreadSyncedTopicListenersMap = new ConcurrentHashMap<>();
-
+   private final Map<Topic<?>, JavaFXSyncedTopicListeners> javaFXSyncedTopicListeners = new HashMap<>();
    private final AnimationTimer animationTimer;
 
    /**
@@ -36,12 +35,8 @@ public class SharedMemoryJavaFXMessager extends SharedMemoryMessager implements 
          {
             try
             {
-               for (Topic<?> topic : javaFXThreadSyncedTopicListenersMap.keySet())
-               {
-                  Object listenersInput = javaFXThreadSyncedTopicListenerInputsMap.get(topic).getAndSet(null);
-                  if (listenersInput != null)
-                     javaFXThreadSyncedTopicListenersMap.get(topic).forEach(listener -> listener.receivedMessageForTopic(listenersInput));
-               }
+               for (JavaFXSyncedTopicListeners listener : javaFXSyncedTopicListeners.values())
+                  listener.notifyListeners();
             }
             catch (Exception e)
             {
@@ -53,18 +48,15 @@ public class SharedMemoryJavaFXMessager extends SharedMemoryMessager implements 
 
    /** {@inheritDoc} */
    @Override
-   @SuppressWarnings("unchecked")
    public <T> void registerJavaFXSyncedTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      List<TopicListener<Object>> topicListeners = javaFXThreadSyncedTopicListenersMap.get(topic);
+      JavaFXSyncedTopicListeners topicListeners = javaFXSyncedTopicListeners.get(topic);
       if (topicListeners == null)
       {
-         topicListeners = new ArrayList<>();
-         AtomicReference<Object> listenerInput = (AtomicReference<Object>) createInput(topic);
-         javaFXThreadSyncedTopicListenerInputsMap.put(topic, listenerInput);
-         javaFXThreadSyncedTopicListenersMap.put(topic, topicListeners);
+         topicListeners = new JavaFXSyncedTopicListeners(topic);
+         javaFXSyncedTopicListeners.put(topic, topicListeners);
       }
-      topicListeners.add((TopicListener<Object>) listener);
+      topicListeners.addListener(listener);
    }
 
    /** {@inheritDoc} */
@@ -81,5 +73,29 @@ public class SharedMemoryJavaFXMessager extends SharedMemoryMessager implements 
    {
       super.closeMessager();
       animationTimer.stop();
+   }
+
+   @SuppressWarnings("unchecked")
+   private class JavaFXSyncedTopicListeners
+   {
+      private final AtomicReference<Object> input;
+      private final List<TopicListener<Object>> listeners = new ArrayList<>();
+
+      private JavaFXSyncedTopicListeners(Topic<?> topic)
+      {
+         input = (AtomicReference<Object>) createInput(topic);
+      }
+
+      private void addListener(TopicListener<?> listener)
+      {
+         listeners.add((TopicListener<Object>) listener);
+      }
+
+      private void notifyListeners()
+      {
+         Object newData = input.getAndSet(null);
+         if (newData != null)
+            listeners.forEach(listener -> listener.receivedMessageForTopic(newData));
+      }
    }
 }
