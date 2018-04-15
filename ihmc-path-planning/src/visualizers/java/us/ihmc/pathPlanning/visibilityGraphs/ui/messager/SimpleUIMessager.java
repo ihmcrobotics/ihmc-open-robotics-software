@@ -10,11 +10,11 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding;
 import us.ihmc.javaFXToolkit.messager.TopicListener;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding;
-import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessagerSharedVariables;
 
 public class SimpleUIMessager extends REAMessagerSharedVariables
