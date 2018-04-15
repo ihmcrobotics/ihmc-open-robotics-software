@@ -23,6 +23,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -75,8 +76,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private boolean swingIsDone;
 
+   private final YoBoolean hasMinimumTimePassed;
    private final FrameVector3DReadOnly touchdownVelocity;
    private final FrameVector3DReadOnly touchdownAcceleration;
+
+   private final FootSwitchInterface footSwitch;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
@@ -88,10 +92,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.currentStepCommand = currentStepCommand;
 
+      footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
+
       String namePrefix = robotQuadrant.getPascalCaseName();
 
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
+      hasMinimumTimePassed = new YoBoolean(namePrefix + "HasMinimumTimePassed", registry);
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
@@ -160,9 +167,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public void doAction(double timeInState)
    {
-      double currentTime = timestamp.getDoubleValue();
-      double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
-
       this.timeInState.set(timeInState);
 
       blendForStepAdjustment(timeInState);
@@ -183,18 +187,23 @@ public class QuadrupedSwingState extends QuadrupedFootState
       feedbackControlCommand.set(desiredPosition, desiredVelocity);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
 
-      // Detect early touch-down.
-      FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
-      soleForceEstimate.changeFrame(worldFrame);
-      double pressureEstimate = -soleForceEstimate.getZ();
-      double normalizedTimeInSwing = timeInState / currentStepCommand.getTimeInterval().getDuration();
-      if (normalizedTimeInSwing > 0.5)
+      updateEndOfStateConditions(timeInState);
+   }
+
+   private boolean hasMinimumTimePassed(double timeInState)
+   {
+      return timeInState / currentStepCommand.getTimeInterval().getDuration() > 0.5;
+   }
+
+   private void updateEndOfStateConditions(double timeInState)
+   {
+      hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
+      if (hasMinimumTimePassed.getBooleanValue())
       {
-         touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
+         touchdownTrigger.update(footSwitch.hasFootHitGround());
       }
 
-      // Trigger support phase.
-      if (currentTime >= touchDownTime)
+      if (timeInState >= currentStepCommand.getTimeInterval().getDuration())
       {
          swingIsDone = true;
       }
