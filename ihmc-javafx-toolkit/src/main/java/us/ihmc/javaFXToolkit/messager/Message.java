@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.communication;
+package us.ihmc.javaFXToolkit.messager;
 
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;

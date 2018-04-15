@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.javaFXToolkit.messager.Message;
 
 public class KryoMessage<T> extends Packet<KryoMessage<T>>
 {

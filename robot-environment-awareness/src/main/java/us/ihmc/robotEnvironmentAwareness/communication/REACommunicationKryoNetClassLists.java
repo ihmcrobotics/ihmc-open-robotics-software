@@ -34,6 +34,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
+import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicID;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
