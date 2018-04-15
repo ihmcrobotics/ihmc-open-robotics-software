@@ -10,18 +10,19 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
 import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class REAUIMessager
 {
-   private final REAMessagerSharedVariables internalMessager;
+   private final SharedMemoryMessager internalMessager;
    private final Messager reaMessagerToModule;
 
    public REAUIMessager(Messager reaMessagerToModule)
    {
       this.reaMessagerToModule = reaMessagerToModule;
-      internalMessager = new REAMessagerSharedVariables(reaMessagerToModule.getMessagerAPI());
+      internalMessager = new SharedMemoryMessager(reaMessagerToModule.getMessagerAPI());
    }
 
    public <T> AtomicReference<T> createInput(Topic<T> topic)
