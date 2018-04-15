@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.robotEnvironmentAwareness.communication.Messager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 

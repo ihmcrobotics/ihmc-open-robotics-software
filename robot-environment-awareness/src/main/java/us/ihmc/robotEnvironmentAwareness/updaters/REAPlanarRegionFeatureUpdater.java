@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.Messager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;

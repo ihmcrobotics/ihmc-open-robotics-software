@@ -1,12 +1,9 @@
-package us.ihmc.robotEnvironmentAwareness.communication;
+package us.ihmc.javaFXToolkit.messager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
 
 /**
  * Implements this interface to create a simple messager that can either transport messages using

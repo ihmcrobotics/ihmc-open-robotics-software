@@ -6,6 +6,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import us.ihmc.javaFXToolkit.messager.Message;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
 import us.ihmc.javaFXToolkit.messager.TopicListener;

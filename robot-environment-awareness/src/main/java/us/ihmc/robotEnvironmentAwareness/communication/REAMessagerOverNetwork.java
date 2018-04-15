@@ -12,6 +12,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.Message;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
 import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
