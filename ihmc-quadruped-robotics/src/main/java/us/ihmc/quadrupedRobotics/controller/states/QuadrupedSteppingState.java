@@ -262,7 +262,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();
-      feetManager.updateSupportPolygon();
 
       if (stepMessageHandler.isStepPlanAvailable())
       {

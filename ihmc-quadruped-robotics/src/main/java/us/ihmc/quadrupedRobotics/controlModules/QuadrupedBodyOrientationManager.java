@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -17,6 +16,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -36,6 +36,7 @@ public class QuadrupedBodyOrientationManager
 
    private final GroundPlaneEstimator groundPlaneEstimator;
 
+   private final MovingReferenceFrame bodyFrame;
    private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
    private final YoFrameVector3D yoComTorqueFeedforwardSetpoint;
@@ -59,6 +60,7 @@ public class QuadrupedBodyOrientationManager
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
+      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
