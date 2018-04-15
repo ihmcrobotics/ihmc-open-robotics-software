@@ -16,13 +16,13 @@ public interface REAMessager
 
    default <T> void submitMessage(Topic<T> topic, T messageContent)
    {
-      REAMessage<T> reaMessage = new REAMessage<>();
-      reaMessage.topicId = topic.getUniqueId();
+      Message<T> reaMessage = new Message<>();
+      reaMessage.topicID = topic.getUniqueID();
       reaMessage.messageContent = messageContent;
       submitMessage(reaMessage);
    }
 
-   <T> void submitMessage(REAMessage<T> message);
+   <T> void submitMessage(Message<T> message);
 
    <T> AtomicReference<T> createInput(Topic<T> topic, T defaultValue);
 

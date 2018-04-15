@@ -48,18 +48,23 @@ public class REAMessagerOverNetwork implements REAMessager
    {
       this.messagerAPI = messagerAPI;
       this.packetCommunicator = packetCommunicator;
-      this.packetCommunicator.attachListener(REAMessage.class, this::receiveREAMessage);
+      this.packetCommunicator.attachListener(KryoMessage.class, this::receiveREAMessage);
    }
 
-   private <T> void receiveREAMessage(REAMessage<T> message)
+   private <T> void receiveREAMessage(KryoMessage<T> kryoMessage)
    {
+      if (kryoMessage == null)
+         return;
+
+      Message<T> message = kryoMessage.message;
+
       if (message == null)
          return;
 
-      if (!messagerAPI.containsTopic(message.getTopicId()))
+      if (!messagerAPI.containsTopic(message.getTopicID()))
          throw new RuntimeException("The message is not part of this messager's API.");
 
-      Topic<T> messageTopic = messagerAPI.findTopic(message.getTopicId());
+      Topic<T> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
       if (DEBUG)
          PrintTools.info("Packet received from network with message name: " + messageTopic.getName());
@@ -74,12 +79,12 @@ public class REAMessagerOverNetwork implements REAMessager
    }
 
    @Override
-   public <T> void submitMessage(REAMessage<T> message)
+   public <T> void submitMessage(Message<T> message)
    {
-      if (!messagerAPI.containsTopic(message.getTopicId()))
+      if (!messagerAPI.containsTopic(message.getTopicID()))
          throw new RuntimeException("The message is not part of this messager's API.");
 
-      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicId());
+      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
       if (!packetCommunicator.isConnected())
       {
@@ -91,7 +96,7 @@ public class REAMessagerOverNetwork implements REAMessager
          PrintTools.info("Submit message for topic: " + messageTopic.getName());
 
       // Variable update over network
-      packetCommunicator.send(message);
+      packetCommunicator.send(new KryoMessage<>(message));
    }
 
    @Override

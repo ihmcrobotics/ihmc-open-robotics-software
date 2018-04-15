@@ -51,7 +51,7 @@ public class REAUIMessager
       submitMessageInternal(topic, messageContent);
    }
 
-   public <T> void broadcastMessage(REAMessage<T> message)
+   public <T> void broadcastMessage(Message<T> message)
    {
       submitMessageToModule(message);
       submitMessageInternal(message);
@@ -67,7 +67,7 @@ public class REAUIMessager
       reaMessagerToModule.submitMessage(topic, messageContent);
    }
 
-   public <T> void submitMessageToModule(REAMessage<T> message)
+   public <T> void submitMessageToModule(Message<T> message)
    {
       reaMessagerToModule.submitMessage(message);
    }
@@ -77,7 +77,7 @@ public class REAUIMessager
       internalMessager.submitMessage(topic, messageContent);
    }
 
-   public <T> void submitMessageInternal(REAMessage<T> message)
+   public <T> void submitMessageInternal(Message<T> message)
    {
       internalMessager.submitMessage(message);
    }

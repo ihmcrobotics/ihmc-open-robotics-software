@@ -16,8 +16,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 public class MessagerAPIFactory
 {
    private boolean isFactoryClosed = false;
-   private Map<Integer, CategoryTheme> categoryThemeIdSet = new HashMap<>();
-   private Map<Integer, TopicTheme> topicThemeIdSet = new HashMap<>();
+   private Map<Integer, CategoryTheme> categoryThemeIDSet = new HashMap<>();
+   private Map<Integer, TopicTheme> topicThemeIDSet = new HashMap<>();
 
    private MessagerAPI api;
 
@@ -59,8 +59,8 @@ public class MessagerAPIFactory
    public MessagerAPI getAPIAndCloseFactory()
    {
       isFactoryClosed = true;
-      categoryThemeIdSet = null;
-      topicThemeIdSet = null;
+      categoryThemeIDSet = null;
+      topicThemeIDSet = null;
       return api;
    }
 
@@ -75,7 +75,7 @@ public class MessagerAPIFactory
    {
       assertFactoryIsOpen();
       CategoryTheme newTheme = new CategoryTheme(name);
-      if (categoryThemeIdSet.put(newTheme.getId(), newTheme) != null)
+      if (categoryThemeIDSet.put(newTheme.getID(), newTheme) != null)
          throw new RuntimeException("Duplicate category theme id.");
       return newTheme;
    }
@@ -96,7 +96,7 @@ public class MessagerAPIFactory
    {
       assertFactoryIsOpen();
       TopicTheme newTheme = new TopicTheme(name);
-      TopicTheme oldTheme = topicThemeIdSet.put(newTheme.getId(), newTheme);
+      TopicTheme oldTheme = topicThemeIDSet.put(newTheme.getID(), newTheme);
       if (oldTheme != null && !oldTheme.equals(newTheme))
          throw new RuntimeException("Duplicate topic theme id.");
       return newTheme;
@@ -112,7 +112,7 @@ public class MessagerAPIFactory
    public <T> TypedTopicTheme<T> createTypedTopicTheme(String name)
    {
       TypedTopicTheme<T> newTheme = new TypedTopicTheme<T>(name);
-      TopicTheme oldTheme = topicThemeIdSet.put(newTheme.getId(), newTheme);
+      TopicTheme oldTheme = topicThemeIDSet.put(newTheme.getID(), newTheme);
       if (oldTheme != null && !oldTheme.equals(newTheme))
          throw new RuntimeException("Duplicate topic theme id.");
       return newTheme;
@@ -137,15 +137,15 @@ public class MessagerAPIFactory
       /**
        * Retrieves the corresponding topic to the given ID.
        * 
-       * @param topicId the ID of the topic to retrieve.
+       * @param topicID the ID of the topic to retrieve.
        * @return the topic.
        */
-      public <T> Topic<T> findTopic(TopicID topicId)
+      public <T> Topic<T> findTopic(TopicID topicID)
       {
-         if (topicId.getShortIdAtDepth(0) != root.getShortId())
+         if (topicID.getShortIDAtDepth(0) != root.getShortID())
             throw new RuntimeException("The topic id does not belong to this API.");
          else
-            return root.findTopic(topicId);
+            return root.findTopic(topicID);
       }
 
       /**
@@ -156,22 +156,22 @@ public class MessagerAPIFactory
        */
       public <T> boolean containsTopic(Topic<T> topic)
       {
-         return containsTopic(topic.getUniqueId());
+         return containsTopic(topic.getUniqueID());
       }
 
       /**
        * Tests whether this API declares a topic with an ID equal to the given message ID.
        * 
-       * @param uniqueId the query.
+       * @param topicID the query.
        * @return {@code true} if this API declares a topic with the given ID, {@code false}
        *         otherwise.
        */
-      public boolean containsTopic(TopicID uniqueId)
+      public boolean containsTopic(TopicID topicID)
       {
-         if (uniqueId.getShortIdAtDepth(0) != root.getShortId())
+         if (topicID.getShortIDAtDepth(0) != root.getShortID())
             return false;
          else
-            return root.findTopic(uniqueId) != null;
+            return root.findTopic(topicID) != null;
       }
 
       /**
@@ -219,7 +219,7 @@ public class MessagerAPIFactory
        * 
        * @return this category theme ID.
        */
-      public int getId()
+      private int getID()
       {
          return id;
       }
@@ -282,7 +282,7 @@ public class MessagerAPIFactory
        * 
        * @return this topic theme ID.
        */
-      public int getId()
+      int getID()
       {
          return id;
       }
@@ -379,12 +379,12 @@ public class MessagerAPIFactory
       public Category child(CategoryTheme subCategoryTheme)
       {
          assertFactoryIsOpen();
-         Category childCategory = childrenCategories.get(subCategoryTheme.getId());
+         Category childCategory = childrenCategories.get(subCategoryTheme.getID());
 
          if (childCategory == null)
          {
             Category newChild = new Category(this, subCategoryTheme);
-            childrenCategories.put(subCategoryTheme.getId(), newChild);
+            childrenCategories.put(subCategoryTheme.getID(), newChild);
             return newChild;
          }
          else if (childCategory.theme.equals(subCategoryTheme))
@@ -418,12 +418,12 @@ public class MessagerAPIFactory
       {
          assertFactoryIsOpen();
          @SuppressWarnings("unchecked")
-         Topic<T> childTopic = (Topic<T>) childrenTopics.get(topicTheme.getId());
+         Topic<T> childTopic = (Topic<T>) childrenTopics.get(topicTheme.getID());
 
          if (childTopic == null)
          {
             Topic<T> newChild = new Topic<T>(this, topicTheme);
-            childrenTopics.put(topicTheme.getId(), newChild);
+            childrenTopics.put(topicTheme.getID(), newChild);
             return newChild;
          }
          else if (childTopic.theme.equals(topicTheme))
@@ -459,21 +459,21 @@ public class MessagerAPIFactory
       /**
        * Search for the topic corresponding to the given ID.
        * 
-       * @param topicId the query.
+       * @param topicID the query.
        * @return the corresponding topic if found, {@code null} otherwise.
        */
       @SuppressWarnings("unchecked")
-      public <T> Topic<T> findTopic(TopicID topicId)
+      public <T> Topic<T> findTopic(TopicID topicID)
       {
          int childrenDepth = getDepth() + 1;
-         int shortIdAtDepth = topicId.getShortIdAtDepth(childrenDepth);
+         int shortIDAtDepth = topicID.getShortIDAtDepth(childrenDepth);
 
-         if (childrenDepth == topicId.getTopicDepth())
-            return (Topic<T>) childrenTopics.get(shortIdAtDepth);
-         else if (childrenCategories.containsKey(shortIdAtDepth))
+         if (childrenDepth == topicID.getTopicDepth())
+            return (Topic<T>) childrenTopics.get(shortIDAtDepth);
+         else if (childrenCategories.containsKey(shortIDAtDepth))
          {
-            Category child = childrenCategories.get(shortIdAtDepth);
-            return child.findTopic(topicId);
+            Category child = childrenCategories.get(shortIDAtDepth);
+            return child.findTopic(topicID);
          }
          else
             return null;
@@ -492,16 +492,16 @@ public class MessagerAPIFactory
             return parent.getDepth() + 1;
       }
 
-      private void fillChildUniqueId(int[] topicUniqueIdToFill)
+      private void fillChildUniqueID(int[] topicUniqueIDToFill)
       {
-         topicUniqueIdToFill[getDepth()] = theme.getId();
+         topicUniqueIDToFill[getDepth()] = theme.getID();
          if (parent != null)
-            parent.fillChildUniqueId(topicUniqueIdToFill);
+            parent.fillChildUniqueID(topicUniqueIDToFill);
       }
 
-      private int getShortId()
+      private int getShortID()
       {
-         return theme.getId();
+         return theme.getID();
       }
 
       /**
@@ -509,14 +509,14 @@ public class MessagerAPIFactory
        * 
        * @return this category's unique ID.
        */
-      private TopicID getUniqueId()
+      private TopicID getUniqueID()
       {
          int idLength = getDepth() + 1;
-         int[] uniqueId = new int[idLength];
-         uniqueId[idLength - 1] = theme.getId();
+         int[] uniqueID = new int[idLength];
+         uniqueID[idLength - 1] = theme.getID();
          if (parent != null)
-            parent.fillChildUniqueId(uniqueId);
-         return new TopicID(uniqueId);
+            parent.fillChildUniqueID(uniqueID);
+         return new TopicID(uniqueID);
       }
 
       /**
@@ -561,7 +561,7 @@ public class MessagerAPIFactory
       @Override
       public String toString()
       {
-         return getName() + ", id = " + getUniqueId();
+         return getName() + ", id = " + getUniqueID();
       }
    }
 
@@ -599,13 +599,13 @@ public class MessagerAPIFactory
        * 
        * @return this topic's unique ID.
        */
-      public TopicID getUniqueId()
+      public TopicID getUniqueID()
       {
          int idLength = getDepth() + 1;
-         int[] uniqueId = new int[idLength];
-         uniqueId[idLength - 1] = theme.getId();
-         category.fillChildUniqueId(uniqueId);
-         return new TopicID(uniqueId);
+         int[] uniqueID = new int[idLength];
+         uniqueID[idLength - 1] = theme.getID();
+         category.fillChildUniqueID(uniqueID);
+         return new TopicID(uniqueID);
       }
 
       /**
@@ -648,7 +648,7 @@ public class MessagerAPIFactory
       @Override
       public String toString()
       {
-         return getName() + ", id = " + getUniqueId();
+         return getName() + ", id = " + getUniqueID();
       }
    }
 
@@ -656,7 +656,7 @@ public class MessagerAPIFactory
     * When using the messager over network, it is preferable to send {@link Topic} information using
     * simple data types such as {@link TopicID} instead of directly sending the topic itself.
     * <p>
-    * The ID of a topic can be via {@link Topic#getUniqueId()} and the topic can be retrieved using
+    * The ID of a topic can be via {@link Topic#getUniqueID()} and the topic can be retrieved using
     * its ID via {@link MessagerAPI#findTopic(TopicID)}.
     * </p>
     * 
@@ -693,7 +693,7 @@ public class MessagerAPIFactory
          return id.length - 1;
       }
 
-      private int getShortIdAtDepth(int depth)
+      private int getShortIDAtDepth(int depth)
       {
          return id[depth];
       }
