@@ -46,8 +46,9 @@ import javafx.stage.Stage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
@@ -62,7 +63,7 @@ public class VisibilityGraphsTestVisualizer
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Stage primaryStage;
-   private final SimpleUIMessager messager;
+   private final JavaFXMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
    private final PlanarRegionViewer planarRegionShadowViewer;
    private final StartGoalPositionViewer startGoalViewer;
@@ -94,7 +95,7 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private ListView<String> datasetsListView;
 
-   public VisibilityGraphsTestVisualizer(Stage primaryStage, SimpleUIMessager messager) throws IOException
+   public VisibilityGraphsTestVisualizer(Stage primaryStage, JavaFXMessager messager) throws IOException
    {
       this.primaryStage = primaryStage;
       this.messager = messager;

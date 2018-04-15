@@ -3,10 +3,10 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty.SettableVisibilityGraphsParameters;
@@ -35,13 +35,13 @@ public class VisibilityGraphsParametersAnchorPaneController
    private Slider planarRegionMinSizeSlider;
 
    private final VisibilityGraphsParametersProperty property = new VisibilityGraphsParametersProperty(this, "visibilityGraphsParameters");
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
 
    public VisibilityGraphsParametersAnchorPaneController()
    {
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }

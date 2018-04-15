@@ -1,26 +1,32 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui.messager;
+package us.ihmc.javaFXToolkit.messager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
 
-public class SimpleUIMessager extends SharedMemoryMessager implements JavaFXMessager
+/**
+ * Implementation of {@code JavaFXMessager} using shared memory.
+ *
+ * @author Sylvain Bertrand
+ */
+public class SharedMemoryJavaFXMessager extends SharedMemoryMessager implements JavaFXMessager
 {
    private final ConcurrentHashMap<Topic<?>, AtomicReference<Object>> javaFXThreadSyncedTopicListenerInputsMap = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> javaFXThreadSyncedTopicListenersMap = new ConcurrentHashMap<>();
 
    private final AnimationTimer animationTimer;
 
-   public SimpleUIMessager(MessagerAPI messagerAPI)
+   /**
+    * Creates a new messager.
+    *
+    * @param messagerAPI the API to use with this messager.
+    */
+   public SharedMemoryJavaFXMessager(MessagerAPI messagerAPI)
    {
       super(messagerAPI);
       animationTimer = new AnimationTimer()
@@ -45,6 +51,7 @@ public class SimpleUIMessager extends SharedMemoryMessager implements JavaFXMess
       };
    }
 
+   /** {@inheritDoc} */
    @Override
    @SuppressWarnings("unchecked")
    public <T> void registerJavaFXSyncedTopicListener(Topic<T> topic, TopicListener<T> listener)
@@ -60,13 +67,15 @@ public class SimpleUIMessager extends SharedMemoryMessager implements JavaFXMess
       topicListeners.add((TopicListener<Object>) listener);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void startMessager() throws IOException
+   public void startMessager()
    {
       super.startMessager();
       animationTimer.start();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void closeMessager()
    {
