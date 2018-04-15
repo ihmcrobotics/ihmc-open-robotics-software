@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
@@ -23,11 +24,15 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -37,11 +42,15 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class QuadrupedSteppingState implements QuadrupedController
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+public class QuadrupedSteppingState implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -60,12 +69,21 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
 
+   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
+   private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
+
+   private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
+   private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
+
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
 
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedJointSpaceManager jointSpaceManager;
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -106,6 +124,15 @@ public class QuadrupedSteppingState implements QuadrupedController
       stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), registry);
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
+      // step planner
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      groundPlanePositions = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
+         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
+      }
+
       this.stateMachine = buildStateMachine();
 
       parentRegistry.addChild(registry);
@@ -115,9 +142,9 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
-      final QuadrupedController soleWaypointController = new QuadrupedSoleWaypointController(controllerToolbox, controlManagerFactory,
-                                                                                             stepMessageHandler, registry);
+      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, contactStates, controlManagerFactory, stepMessageHandler, registry);
+      final QuadrupedController soleWaypointController = new QuadrupedSoleWaypointController(controllerToolbox, controlManagerFactory, stepMessageHandler,
+                                                                                             registry);
 
       EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
             QuadrupedSteppingStateEnum.class);
@@ -161,9 +188,28 @@ public class QuadrupedSteppingState implements QuadrupedController
    }
 
    @Override
+   public void onLiftOff(RobotQuadrant thisStepQuadrant)
+   {
+      // update ground plane estimate
+      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
+      onLiftOffTriggered.set(true);
+   }
+
+   @Override
+   public void onTouchDown(RobotQuadrant thisStepQuadrant)
+   {
+      onTouchDownTriggered.set(true);
+   }
+
+   @Override
    public void onEntry()
    {
+      controllerToolbox.update();
+
       commandInputManager.clearAllCommands();
+
+      onLiftOffTriggered.set(false);
+      onTouchDownTriggered.set(false);
 
       JointDesiredOutputList jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
@@ -171,6 +217,23 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       stepMessageHandler.clearFootTrajectory();
       stepMessageHandler.clearSteps();
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
+      }
+
+      // initialize ground plane
+      groundPlaneEstimator.clearContactPoints();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
+         groundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
+      }
+      groundPlaneEstimator.compute();
+
+      feetManager.registerStepTransitionCallback(this);
 
       stateMachine.resetToInitialState();
    }
@@ -182,6 +245,8 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
+
+      controllerToolbox.update();
 
       if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedSteppingStateCommand.class))
       {
@@ -198,6 +263,15 @@ public class QuadrupedSteppingState implements QuadrupedController
       commandConsumer.update();
       commandConsumer.consumeFootCommands();
       commandConsumer.consumeBodyCommands();
+
+      // update ground plane estimate
+      groundPlaneEstimator.clearContactPoints();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
+      }
+      groundPlaneEstimator.compute();
+      feetManager.updateSupportPolygon();
 
       if (stepMessageHandler.isStepPlanAvailable())
       {
@@ -221,12 +295,50 @@ public class QuadrupedSteppingState implements QuadrupedController
       // update controller state machine
       stateMachine.doActionAndTransition();
 
+      updateManagers();
+
+      handleChangeInContactState();
+
       submitControllerCoreCommands();
 
       controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
+   }
+
+   private void updateManagers()
+   {
+      // update desired horizontal com forces
+      balanceManager.compute(contactStates);
+
+      // update desired body orientation, angular velocity, and torque
+      bodyOrientationManager.compute();
+
+      // update desired contact state and sole forces
+      feetManager.compute();
+
+      jointSpaceManager.compute();
+   }
+
+   private void handleChangeInContactState()
+   {
+      // update accumulated step adjustment
+      if (onLiftOffTriggered.getBooleanValue())
+      {
+         onLiftOffTriggered.set(false);
+      }
+      if (onTouchDownTriggered.getBooleanValue())
+      {
+         onTouchDownTriggered.set(false);
+         balanceManager.completedStep();
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactStates.put(robotQuadrant, feetManager.getContactState(robotQuadrant));
+      }
+
    }
 
    @Override

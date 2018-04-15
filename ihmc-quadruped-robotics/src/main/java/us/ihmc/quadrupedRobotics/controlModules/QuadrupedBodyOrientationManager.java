@@ -92,9 +92,9 @@ public class QuadrupedBodyOrientationManager
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FrameQuaternionReadOnly bodyOrientationEstimate)
+   public void initialize()
    {
-      desiredBodyOrientation.setIncludingFrame(bodyOrientationEstimate);
+      desiredBodyOrientation.setToZero(bodyFrame);
       desiredBodyAngularVelocity.setToZero();
       desiredBodyAngularAcceleration.setToZero();
 
