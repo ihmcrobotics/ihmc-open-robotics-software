@@ -5,8 +5,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 
-public class MessageBidirectionalBinding<M, P> implements REATopicListener<M>, ChangeListener<P>
+public class MessageBidirectionalBinding<M, P> implements TopicListener<M>, ChangeListener<P>
 {
    private final AtomicBoolean changedOnMessageReception = new AtomicBoolean(false);
    private final Property<P> boundProperty;

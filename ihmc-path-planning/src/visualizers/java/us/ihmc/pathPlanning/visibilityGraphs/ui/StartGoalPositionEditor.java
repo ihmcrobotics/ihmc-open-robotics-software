@@ -13,7 +13,7 @@ import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 public class StartGoalPositionEditor extends AnimationTimer
 {
@@ -27,7 +27,7 @@ public class StartGoalPositionEditor extends AnimationTimer
    private boolean isLeftClickInterceptorAttached = false;
    private final AtomicBoolean positionValidated = new AtomicBoolean(false);
 
-   private final REAMessager messager;
+   private final Messager messager;
    private final Node sceneNode;
 
    private final AtomicReference<Boolean> startEditModeEnabled;
@@ -38,7 +38,7 @@ public class StartGoalPositionEditor extends AnimationTimer
    private final Topic<Point3D> startPositionTopic;
    private final Topic<Point3D> goalPositionTopic;
 
-   public StartGoalPositionEditor(REAMessager messager, Node sceneNode, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
+   public StartGoalPositionEditor(Messager messager, Node sceneNode, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
                                   Topic<Point3D> startPositionTopic, Topic<Point3D> goalPositionTopic)
    {
       this.messager = messager;

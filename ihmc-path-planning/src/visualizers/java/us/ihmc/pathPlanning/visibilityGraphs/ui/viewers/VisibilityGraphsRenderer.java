@@ -26,7 +26,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -51,9 +51,9 @@ public class VisibilityGraphsRenderer
    private final NavigableRegionViewer navigableRegionViewer;
    private final VisibilityMapHolderViewer interRegionConnectionsViewer;
 
-   private final REAMessager messager;
+   private final Messager messager;
 
-   public VisibilityGraphsRenderer(REAMessager messager)
+   public VisibilityGraphsRenderer(Messager messager)
    {
       this.messager = messager;
       planarRegionsReference = messager.createInput(UIVisibilityGraphsTopics.PlanarRegionData);

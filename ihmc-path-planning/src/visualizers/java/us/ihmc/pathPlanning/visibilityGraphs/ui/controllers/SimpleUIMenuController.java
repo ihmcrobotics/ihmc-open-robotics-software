@@ -11,7 +11,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -24,7 +24,7 @@ public class SimpleUIMenuController
    @FXML
    private MenuItem reloadMenuItem;
 
-   private REAMessager messager;
+   private Messager messager;
    private Window ownerWindow;
 
    private File loadedFile = null;
@@ -37,7 +37,7 @@ public class SimpleUIMenuController
       directoryChooser.setInitialDirectory(defaultDataFolder);
    }
 
-   public void attachMessager(REAMessager messager)
+   public void attachMessager(Messager messager)
    {
       this.messager = messager;
    }

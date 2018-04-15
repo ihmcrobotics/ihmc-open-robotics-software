@@ -25,7 +25,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 public class NavigableRegionViewer extends AnimationTimer
 {
@@ -39,12 +39,12 @@ public class NavigableRegionViewer extends AnimationTimer
 
    private final AtomicReference<List<? extends VisibilityMapHolder>> newRequestReference;
 
-   public NavigableRegionViewer(REAMessager messager)
+   public NavigableRegionViewer(Messager messager)
    {
       this(messager, null);
    }
 
-   public NavigableRegionViewer(REAMessager messager, ExecutorService executorService)
+   public NavigableRegionViewer(Messager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 

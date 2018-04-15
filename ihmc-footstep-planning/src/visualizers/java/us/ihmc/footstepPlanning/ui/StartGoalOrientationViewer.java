@@ -10,7 +10,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,7 +34,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final AtomicReference<Double> startRotationReference;
    private final AtomicReference<Double> goalRotationReference;
 
-   public StartGoalOrientationViewer(REAMessager messager)
+   public StartGoalOrientationViewer(Messager messager)
    {
       startArrow.setMouseTransparent(true);
       goalArrow.setMouseTransparent(true);

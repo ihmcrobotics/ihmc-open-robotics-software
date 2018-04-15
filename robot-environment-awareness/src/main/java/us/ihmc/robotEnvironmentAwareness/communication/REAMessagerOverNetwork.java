@@ -13,34 +13,35 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
-public class REAMessagerOverNetwork implements REAMessager
+public class REAMessagerOverNetwork implements Messager
 {
    private static final boolean DEBUG = false;
 
    private final MessagerAPI messagerAPI;
 
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> inputVariablesMap = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
+   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> messagerStateListeners = new ArrayList<>();
 
    private final PacketCommunicator packetCommunicator;
 
-   public static REAMessager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static Messager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
    }
 
-   public static REAMessager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
+   public static Messager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
    }
 
-   public static REAMessager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static Messager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, netClassList);
       return new REAMessagerOverNetwork(messagerAPI, packetCommunicator);
@@ -75,7 +76,7 @@ public class REAMessagerOverNetwork implements REAMessager
       if (inputVariablesForTopic != null)
          inputVariablesForTopic.forEach(variable -> variable.set(message.getMessageContent()));
 
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
       if (topicListeners != null)
          topicListeners.forEach(listener -> listener.receivedMessageForTopic(message.getMessageContent()));
    }
@@ -119,15 +120,15 @@ public class REAMessagerOverNetwork implements REAMessager
 
    @Override
    @SuppressWarnings("unchecked")
-   public <T> void registerTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(topic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(topic);
       if (topicListeners == null)
       {
          topicListeners = new ArrayList<>();
          topicListenersMap.put(topic, topicListeners);
       }
-      topicListeners.add((REATopicListener<Object>) listener);
+      topicListeners.add((TopicListener<Object>) listener);
    }
 
    @Override

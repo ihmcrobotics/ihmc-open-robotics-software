@@ -10,17 +10,17 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding;
 import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessagerSharedVariables;
-import us.ihmc.robotEnvironmentAwareness.communication.REATopicListener;
 
 public class SimpleUIMessager extends REAMessagerSharedVariables
 {
    private final ConcurrentHashMap<Topic<?>, AtomicReference<Object>> javaFXThreadSyncedTopicListenerInputsMap = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> javaFXThreadSyncedTopicListenersMap = new ConcurrentHashMap<>();
+   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> javaFXThreadSyncedTopicListenersMap = new ConcurrentHashMap<>();
 
    private final AnimationTimer animationTimer;
 
@@ -92,9 +92,9 @@ public class SimpleUIMessager extends REAMessagerSharedVariables
    }
 
    @SuppressWarnings("unchecked")
-   public <T> void registerJavaFXSyncedTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerJavaFXSyncedTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      List<REATopicListener<Object>> topicListeners = javaFXThreadSyncedTopicListenersMap.get(topic);
+      List<TopicListener<Object>> topicListeners = javaFXThreadSyncedTopicListenersMap.get(topic);
       if (topicListeners == null)
       {
          topicListeners = new ArrayList<>();
@@ -102,7 +102,7 @@ public class SimpleUIMessager extends REAMessagerSharedVariables
          javaFXThreadSyncedTopicListenerInputsMap.put(topic, listenerInput);
          javaFXThreadSyncedTopicListenersMap.put(topic, topicListeners);
       }
-      topicListeners.add((REATopicListener<Object>) listener);
+      topicListeners.add((TopicListener<Object>) listener);
    }
 
    @Override

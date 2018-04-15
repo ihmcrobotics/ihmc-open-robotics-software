@@ -19,7 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 
 public class VisibilityMapHolderViewer extends AnimationTimer
 {
@@ -35,14 +35,14 @@ public class VisibilityMapHolderViewer extends AnimationTimer
    private AtomicReference<Boolean> resetRequested;
    private AtomicReference<Boolean> show;
    private AtomicReference<? extends VisibilityMapHolder> newDataReference;
-   private final REAMessager messager;
+   private final Messager messager;
 
-   public VisibilityMapHolderViewer(REAMessager messager)
+   public VisibilityMapHolderViewer(Messager messager)
    {
       this(messager, null);
    }
 
-   public VisibilityMapHolderViewer(REAMessager messager, ExecutorService executorService)
+   public VisibilityMapHolderViewer(Messager messager, ExecutorService executorService)
    {
       this.messager = messager;
       isExecutorServiceProvided = executorService == null;

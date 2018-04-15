@@ -10,16 +10,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
-public class REAMessagerSharedVariables implements REAMessager
+public class REAMessagerSharedVariables implements Messager
 {
    private final MessagerAPI messagerAPI;
 
    private final AtomicBoolean isConnected = new AtomicBoolean(false);
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> boundVariables = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
+   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> connectionStateListeners = new ArrayList<>();
 
    public REAMessagerSharedVariables(MessagerAPI messagerAPI)
@@ -45,7 +46,7 @@ public class REAMessagerSharedVariables implements REAMessager
       if (boundVariablesForTopic != null)
          boundVariablesForTopic.forEach(variable -> variable.set(message.getMessageContent()));
 
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
       if (topicListeners != null)
          topicListeners.forEach(listener -> listener.receivedMessageForTopic(message.getMessageContent()));
    }
@@ -68,15 +69,15 @@ public class REAMessagerSharedVariables implements REAMessager
 
    @Override
    @SuppressWarnings("unchecked")
-   public <T> void registerTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(topic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(topic);
       if (topicListeners == null)
       {
          topicListeners = new ArrayList<>();
          topicListenersMap.put(topic, topicListeners);
       }
-      topicListeners.add((REATopicListener<Object>) listener);
+      topicListeners.add((TopicListener<Object>) listener);
    }
 
    @Override

@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -33,9 +33,9 @@ public class REAOcTreeBuffer
 
    private final REAModuleStateReporter moduleStateReporter;
 
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
 
-   public REAOcTreeBuffer(double octreeResolution, REAMessager reaMessager, REAModuleStateReporter moduleStateReporter, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter, PacketCommunicator publicPacketCommunicator)
    {
       this.octreeResolution = octreeResolution;
       this.reaMessager = reaMessager;

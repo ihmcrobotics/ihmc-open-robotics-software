@@ -1,22 +1,22 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import us.ihmc.javaFXToolkit.messager.Message;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class REAUIMessager
 {
    private final REAMessagerSharedVariables internalMessager;
-   private final REAMessager reaMessagerToModule;
+   private final Messager reaMessagerToModule;
 
-   public REAUIMessager(REAMessager reaMessagerToModule)
+   public REAUIMessager(Messager reaMessagerToModule)
    {
       this.reaMessagerToModule = reaMessagerToModule;
       internalMessager = new REAMessagerSharedVariables(reaMessagerToModule.getMessagerAPI());
@@ -60,7 +60,7 @@ public class REAUIMessager
 
    public void submitStateRequestToModule(Topic<Boolean> requestTopic)
    {
-      reaMessagerToModule.submitStateRequest(requestTopic);
+      reaMessagerToModule.submitMessage(requestTopic, true);
    }
 
    public <T> void submitMessageToModule(Topic<T> topic, T messageContent)
@@ -83,7 +83,7 @@ public class REAUIMessager
       internalMessager.submitMessage(message);
    }
 
-   public <T> void registerTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
       internalMessager.registerTopicListener(topic, listener);
       reaMessagerToModule.registerTopicListener(topic, listener);
@@ -159,7 +159,7 @@ public class REAUIMessager
       observableValue.addListener((observable) -> broadcastMessage(topic, observableValue.getValue()));
    }
 
-   public void startMessager() throws IOException
+   public void startMessager() throws Exception
    {
       internalMessager.startMessager();
       reaMessagerToModule.startMessager();
