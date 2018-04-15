@@ -28,12 +28,11 @@ public class QuadrupedStepController implements QuadrupedController
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrantDependentList<ContactState> contactStates;
 
-   public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrantDependentList<ContactState> contactStates,
-                                  QuadrupedControlManagerFactory controlManagerFactory, QuadrupedStepMessageHandler stepMessageHandler,
-                                  YoVariableRegistry parentRegistry)
+   public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                  QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.contactStates = contactStates;
+      this.contactStates = controllerToolbox.getContactStates();
       this.stepMessageHandler = stepMessageHandler;
 
       // feedback controllers
@@ -67,7 +66,7 @@ public class QuadrupedStepController implements QuadrupedController
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
 
-      balanceManager.initializeForStepping(contactStates);
+      balanceManager.initializeForStepping();
    }
 
    @Override
