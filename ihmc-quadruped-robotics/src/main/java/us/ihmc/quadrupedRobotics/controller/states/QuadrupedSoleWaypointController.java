@@ -27,16 +27,8 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean forceFeedbackControlEnabled;
    // Parameters
-   private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 15.0);
-   private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDamping", registry, 10.0);
-   private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffness", registry, 100.0);
    private final BooleanParameter requestUseForceFeedbackControlParameter = new BooleanParameter("requestUseForceFeedbackControl", registry, false);
    private final BooleanParameter useInitialSoleForces =  new BooleanParameter("useInitialSoleForces", registry, true);
-
-   // Task space controller
-   private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
-   private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   private final QuadrupedTaskSpaceController taskSpaceController;
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
    private final QuadrupedFeetManager feetManager;
@@ -54,9 +46,6 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
       this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
       this.stepMessageHandler = stepMessageHandler;
       feetManager = controlManagerFactory.getOrCreateFeetManager();
-      taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
-      taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       forceFeedbackControlEnabled = new YoBoolean("forceFeedbackControlEnabled", registry);
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
 
@@ -74,16 +63,6 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
    public void onEntry()
    {
       controllerToolbox.update();
-      // Initialize task space controller
-      taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
-      }
-      taskSpaceController.reset();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -114,8 +93,6 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
       feetManager.compute();
-      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
    @Override

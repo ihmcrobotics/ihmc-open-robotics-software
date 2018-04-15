@@ -162,17 +162,6 @@ public class QuadrupedFeetManager
       footControlModules.get(robotQuadrant).compute();
    }
 
-   public void getDesiredSoleForceCommand(QuadrantDependentList<FrameVector3D> soleForceToPack)
-   {
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-         getDesiredSoleForceCommand(soleForceToPack.get(quadrant), quadrant);
-   }
-
-   public void getDesiredSoleForceCommand(FrameVector3D soleForceToPack, RobotQuadrant robotQuadrant)
-   {
-      footControlModules.get(robotQuadrant).getDesiredSoleForce(soleForceToPack);
-   }
-
    public ContactState getContactState(RobotQuadrant robotQuadrant)
    {
       return footControlModules.get(robotQuadrant).getContactState();
