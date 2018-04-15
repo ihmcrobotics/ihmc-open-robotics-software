@@ -17,8 +17,6 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
 {
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   // Parameters
-   private final BooleanParameter useInitialSoleForces = new BooleanParameter("useInitialSoleForces", registry, true);
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
@@ -56,7 +54,7 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
          if (stepMessageHandler.hasFootTrajectoryForSolePositionControl(robotQuadrant))
          {
             feetManager
-                  .initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant), useInitialSoleForces.getValue());
+                  .initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant));
             isDoneMoving.get(robotQuadrant).set(false);
          }
          else
@@ -76,7 +74,7 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
          if (stepMessageHandler.hasFootTrajectoryForSolePositionControl(robotQuadrant))
          {
             feetManager
-                  .initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant), useInitialSoleForces.getValue());
+                  .initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant));
             isDoneMoving.get(robotQuadrant).set(false);
          }
       }
