@@ -34,10 +34,6 @@ public class QuadrupedFeetManager
    private final QuadrantDependentList<QuadrupedFootControlModule> footControlModules = new QuadrantDependentList<>();
    private final QuadrupedControllerToolbox toolbox;
 
-   // support polygon
-   private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
-   private final YoArtifactPolygon supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
-
    public QuadrupedFeetManager(QuadrupedControllerToolbox toolbox, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -46,31 +42,7 @@ public class QuadrupedFeetManager
       }
 
       this.toolbox = toolbox;
-      graphicsListRegistry.registerArtifact("supportPolygon", supportPolygonVisualizer);
       parentRegistry.addChild(registry);
-   }
-
-   public void updateSupportPolygon()
-   {
-      supportPolygon.clear();
-
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         if(footControlModules.get(quadrant).getContactState() == ContactState.IN_CONTACT)
-            supportPolygon.addVertexMatchingFrame(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
-      }
-
-      supportPolygon.update();
-   }
-
-   public void hideSupportPolygon()
-   {
-      supportPolygon.clear();
-   }
-
-   public YoFrameConvexPolygon2D getSupportPolygon()
-   {
-      return supportPolygon;
    }
 
    public void attachStateChangedListener(StateChangedListener<QuadrupedFootStates> stateChangedListener)
