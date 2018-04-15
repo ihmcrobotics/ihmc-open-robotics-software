@@ -51,19 +51,18 @@ public class QuadrupedFeetManager
          footControlModules.get(quadrant).attachStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(SoleTrajectoryCommand soleTrajectoryCommand, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(SoleTrajectoryCommand soleTrajectoryCommand)
    {
-      initializeWaypointTrajectory(soleTrajectoryCommand.getRobotQuadrant(), soleTrajectoryCommand.getPositionTrajectory().getTrajectoryPointList(),
-                                   useInitialSoleForceAsFeedforwardTerm);
+      initializeWaypointTrajectory(soleTrajectoryCommand.getRobotQuadrant(), soleTrajectoryCommand.getPositionTrajectory().getTrajectoryPointList());
    }
 
-   public void initializeWaypointTrajectory(RobotQuadrant robotQuadrant, FrameEuclideanTrajectoryPointList trajectoryPointList, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(RobotQuadrant robotQuadrant, FrameEuclideanTrajectoryPointList trajectoryPointList)
    {
       QuadrupedFootControlModule footControlModule = footControlModules.get(robotQuadrant);
       if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)
       {
          footControlModule.requestMoveViaWaypoints();
-         footControlModule.initializeWaypointTrajectory(trajectoryPointList, useInitialSoleForceAsFeedforwardTerm);
+         footControlModule.initializeWaypointTrajectory(trajectoryPointList);
       }
       else
       {

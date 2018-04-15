@@ -119,10 +119,9 @@ public class QuadrupedFootControlModule
       footStateMachine.addStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(FrameEuclideanTrajectoryPointList trajectoryPointList, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(FrameEuclideanTrajectoryPointList trajectoryPointList)
    {
       moveViaWaypointsState.handleWaypointList(trajectoryPointList);
-      moveViaWaypointsState.initialize(useInitialSoleForceAsFeedforwardTerm);
    }
 
    public void requestSupport()

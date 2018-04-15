@@ -26,17 +26,11 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    private final YoDouble timestamp;
    private double initialTime;
 
-   private final BooleanParameter useSoleForceFeedForwardParameter;
-   private final DoubleParameter feedForwardRampTimeParameter;
-
    private final ReferenceFrame soleFrame;
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final FrameVector3D initialSoleForces = new FrameVector3D();
-
    private final FramePoint3D desiredFootPosition = new FramePoint3D();
    private final FrameVector3D desiredFootVelocity = new FrameVector3D();
-   private final FrameVector3D desiredFeedForwardForce = new FrameVector3D();
 
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
@@ -55,9 +49,6 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
 
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
-
-      useSoleForceFeedForwardParameter = new BooleanParameter("useSoleForceFeedForward", registry, true);
-      feedForwardRampTimeParameter = new DoubleParameter("feedForwardRampTime", registry, 2.0);
    }
 
    @Override
@@ -70,26 +61,14 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
       desiredFootPosition.setToZero(soleFrame);
       desiredFootPosition.changeFrame(worldFrame);
 
-      FrameVector3DReadOnly forceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
-      initialSoleForces.setIncludingFrame(forceEstimate);
-      initialSoleForces.changeFrame(worldFrame);
    }
 
    @Override
    public void doAction(double timeInState)
    {
       desiredFootVelocity.setToZero();
-      desiredFeedForwardForce.setIncludingFrame(initialSoleForces);
-
-      double currentTime = timestamp.getDoubleValue();
-      if (useSoleForceFeedForwardParameter.getValue())
-      {
-         double rampMultiplier = 1.0 - Math.min(1.0, (currentTime - initialTime) / feedForwardRampTimeParameter.getValue());
-         desiredFeedForwardForce.scale(rampMultiplier);
-      }
 
       feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredFeedForwardForce);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
    }
 
