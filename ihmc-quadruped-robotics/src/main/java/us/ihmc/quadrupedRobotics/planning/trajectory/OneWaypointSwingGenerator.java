@@ -3,7 +3,9 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
@@ -33,8 +35,6 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
-
    private final YoDouble stepTime;
    private final YoDouble timeIntoStep;
    private final YoBoolean isDone;
@@ -49,7 +49,6 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoInteger activeSegment;
 
    private final DoubleProvider waypointProportion;
-   private final DoubleProvider obstacleClearanceWaypointProportion;
 
    private TrajectoryType trajectoryType;
 
@@ -77,13 +76,13 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
    public OneWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, Double.NaN, Double.NaN, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, Double.NaN, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneWaypointSwingGenerator(String namePrefix, double waypointProportion, double obstacleClearanceProportion, double minSwingHeight,
-                                    double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneWaypointSwingGenerator(String namePrefix, double waypointProportion, double minSwingHeight, double maxSwingHeight,
+                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
@@ -102,17 +101,11 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       if (!Double.isFinite(waypointProportion))
          waypointProportion = defaultWaypointProportion;
-      if (!Double.isFinite(obstacleClearanceProportion))
-         obstacleClearanceProportion = defaultWaypointProportion;
 
       this.waypointProportion = new DoubleParameter(namePrefix + "WaypointProportion", registry, waypointProportion);
-      this.obstacleClearanceWaypointProportion = new DoubleParameter(namePrefix + "ObstacleClearanceWaypointProportion", registry, obstacleClearanceProportion);
 
       for (Axis axis : Axis.values)
-      {
-         ArrayList<YoPolynomial> segments = new ArrayList<>();
-         trajectories.put(axis, segments);
-      }
+         trajectories.put(axis, new ArrayList<>());
 
       while (waypointTimes.size() <= numberWaypoints)
          extendBySegment(namePrefix, registry);
