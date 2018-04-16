@@ -3,22 +3,25 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.*;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {
    private final YoVariableRegistry registry;
    private final YoBoolean hitGround, fixedOnGround;
-   private final YoDouble switchZThreshold;
+   private final DoubleProvider switchZThreshold;
    private final YoDouble soleZ, ankleZ;
    private final double totalRobotWeight;
    private final ContactablePlaneBody foot;
@@ -26,7 +29,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    private final YoFramePoint2D yoResolvedCoP;
 
-   public KinematicsBasedFootSwitch(String footName, SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet, double switchZThreshold,
+   public KinematicsBasedFootSwitch(String footName, SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet, DoubleProvider switchZThreshold,
                                     double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
@@ -38,8 +41,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
-      this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
-      this.switchZThreshold.set(switchZThreshold);
+      this.switchZThreshold = switchZThreshold;
 
       yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
@@ -55,7 +57,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
     * @param quadrant the foot in question
     * @param parentRegistry
     */
-   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, double switchZThreshold,
+   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, DoubleProvider switchZThreshold,
                                     double totalRobotWeight, RobotQuadrant quadrant, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
@@ -71,8 +73,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
-      this.switchZThreshold = new YoDouble(footName + "footSwitchZThreshold", registry);
-      this.switchZThreshold.set(switchZThreshold);
+      this.switchZThreshold = switchZThreshold;
 
       yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
@@ -96,8 +97,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    {
       double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
-      
-      hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getDoubleValue());
+
+      hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
       soleZ.set(thisFootZ);
       ankleZ.set(getPointInWorld(foot.getFrameAfterParentJoint()).getZ());
       return hitGround.getBooleanValue();
@@ -160,7 +161,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       //a more liberal version of hasFootHitGround
       double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
-      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getDoubleValue() * 2);
+      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
       return fixedOnGround.getBooleanValue();
    }
 
