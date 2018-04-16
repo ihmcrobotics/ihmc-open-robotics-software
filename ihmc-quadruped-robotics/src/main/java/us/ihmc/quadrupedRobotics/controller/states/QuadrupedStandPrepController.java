@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -70,17 +71,23 @@ public class QuadrupedStandPrepController implements QuadrupedController
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          if (yoUseForceFeedbackControl.getBooleanValue())
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          else
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
-         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
+
+         double initialPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
+         double initialVelocity = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : joint.getQd();
+         double initialAcceleration = 0.0;
+
+         trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
       }
 
       // This is a new trajectory. We start at time 0.
