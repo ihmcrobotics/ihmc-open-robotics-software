@@ -414,7 +414,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          FootSwitchInterface footSwitch = null;
          String footName = bipedFeet.get(robotSide).getName();
          ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
-         ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorNames.get(robotSide));
 
          FootSwitchType footSwitchType = walkingControllerParameters.getFootSwitchType();
          switch (footSwitchType)
@@ -427,6 +426,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                    secondContactThresholdForce, copThresholdFraction, yoGraphicsListRegistry, registry);
             break;
          case WrenchAndContactSensorFused:
+            ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorNames.get(robotSide));
             footSwitch = new WrenchAndContactSensorFusedFootSwitch(footName, footForceSensor, footContactSensor, totalRobotWeight, bipedFeet.get(robotSide),
                                                                    contactThresholdForce, secondContactThresholdForce, copThresholdFraction,
                                                                    yoGraphicsListRegistry, registry);
