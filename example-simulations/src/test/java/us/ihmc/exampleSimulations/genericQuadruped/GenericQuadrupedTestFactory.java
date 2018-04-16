@@ -58,6 +58,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = true;
    private static final int TEST_INPUT_UPDATE_FREQUENCY = (int) (0.05 / SIMULATION_DT);
+   private static final boolean EXPORT_SIM_DATA_WHEN_TEST_CRASHES = true;
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
 
@@ -169,7 +170,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
-      GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+      GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters,
+                                                                                          EXPORT_SIM_DATA_WHEN_TEST_CRASHES);
 
       if(useNetworking.get())
       {
