@@ -22,7 +22,7 @@ public class QuadrupedFreezeController implements QuadrupedController
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedFreezeController.class.getSimpleName());
 
    private final DoubleParameter freezeJointStiffness = new DoubleParameter("freezeJointStiffness", registry, 25.0);
-   private final DoubleParameter freezeJointDamping = new DoubleParameter("freezeJointDamping", registry, 15.0);
+   private final DoubleParameter freezeJointDamping = new DoubleParameter("freezeJointDamping", registry, 5.0);
 
    // Yo variables
    private final YoBoolean yoUseForceFeedbackControl;
