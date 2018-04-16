@@ -31,7 +31,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testFlatGroundWalking(90.0, 0.1);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 91.4)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 460000)
    public void testWalkingBackwardsFast()
    {
@@ -122,7 +122,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testWalkingInASemiCircle(180.0, -0.6, - 0.3);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 308.4)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1500000)
    public void testTrottingInABackwardRightCircle()
    {
@@ -171,7 +171,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testWalkingInASemiCircle(0.0, 0.6, - 0.3);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 236.1)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 1200000)
    public void testPacingInABackwardLeftCircle()
    {
