@@ -21,6 +21,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
+   private final boolean exportSimulationDataOnFailure;
    
    private boolean yoTimeChangedListenerActive = false;
    
@@ -39,11 +40,17 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private String assertionFailedMessage = null;
    private String scsCrashedException = null;
-   
+
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
+   {
+      this(scs, simulationTestingParameters, false);
+   }
+
+   public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters, boolean exportSimulationDataOnFailure)
    {
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
+      this.exportSimulationDataOnFailure = exportSimulationDataOnFailure;
       
       YoDouble yoTime = (YoDouble) scs.getVariable("t");
       yoTime.addVariableChangedListener(this::notifyOfVariableChange);
@@ -177,6 +184,18 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       terminalGoals.clear();
       scs.stop();
    }
+
+   private void exportSimulationDataIfRequested()
+   {
+      if(exportSimulationDataOnFailure)
+      {
+         String varGroup = "all";
+         boolean useBinary = true;
+         boolean compress = false;
+         String fileName = "simulation_data_" + System.currentTimeMillis() + ".data";
+         scs.writeData(varGroup, useBinary, compress, fileName);
+      }
+   }
    
    public void simulate() throws AssertionFailedError
    {
@@ -200,6 +219,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          createAssertionFailedException();
          stop();
+         exportSimulationDataIfRequested();
       }
       else if(printSuccessMessage.get())
       {
@@ -210,6 +230,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          stop();
          PrintTools.error(scsCrashedException);
+         exportSimulationDataIfRequested();
          fail();
       }
       
