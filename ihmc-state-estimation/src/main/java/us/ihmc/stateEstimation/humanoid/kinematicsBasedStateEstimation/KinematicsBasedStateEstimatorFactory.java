@@ -159,7 +159,6 @@ public class KinematicsBasedStateEstimatorFactory
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
-         ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
@@ -181,6 +180,7 @@ public class KinematicsBasedStateEstimatorFactory
             break;
 
          case WrenchAndContactSensorFused:
+            ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorName);
             WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix,
                                                                                                                                     footForceSensorForEstimator,
                                                                                                                                     footContactSensor,
