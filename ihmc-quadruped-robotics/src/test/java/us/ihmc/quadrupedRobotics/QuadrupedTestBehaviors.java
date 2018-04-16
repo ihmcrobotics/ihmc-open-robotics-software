@@ -21,14 +21,14 @@ public class QuadrupedTestBehaviors
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.DO_NOTHING));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.025));
+      variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.FREEZE));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
       conductor.simulate();
 
       variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.STAND_READY));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
 
