@@ -238,7 +238,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       // Compute swing trajectory.
-      if (timeInState > parameters.getMinimumStepAdjustmentTimeParameter())
+      if (duration - timeInState > parameters.getMinimumStepAdjustmentTimeParameter())
       {
          blendedSwingTrajectory.clear();
 
