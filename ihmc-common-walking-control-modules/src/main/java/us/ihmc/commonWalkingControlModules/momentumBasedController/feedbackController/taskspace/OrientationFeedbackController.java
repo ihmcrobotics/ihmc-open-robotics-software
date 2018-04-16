@@ -324,7 +324,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       computeFeedbackTorque();
 
-      if (endEffector == rootBody)
+      if (endEffector.getName().equals(rootBody.getName()))
       {
          desiredAngularTorque.changeFrame(worldFrame);
 
@@ -524,6 +524,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return (endEffector == rootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
+      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 }

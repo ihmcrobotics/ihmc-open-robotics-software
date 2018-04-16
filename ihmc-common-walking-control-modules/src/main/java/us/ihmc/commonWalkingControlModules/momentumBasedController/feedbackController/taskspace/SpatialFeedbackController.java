@@ -376,7 +376,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       computeFeedbackWrench();
 
-      if (endEffector == rootBody)
+      if (endEffector.getName().equals(rootBody.getName()))
       {
          desiredLinearForce.changeFrame(worldFrame);
          desiredAngularTorque.changeFrame(worldFrame);
@@ -724,7 +724,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return (endEffector == rootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
+      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 
    @Override
