@@ -179,7 +179,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       }
       else
       {
-         isForceMagnitudePastSecondThreshold.set(true);
+         isForceMagnitudePastSecondThreshold.set(false);
       }
 
       isCoPPastThreshold.set(isCoPPastThreshold());
