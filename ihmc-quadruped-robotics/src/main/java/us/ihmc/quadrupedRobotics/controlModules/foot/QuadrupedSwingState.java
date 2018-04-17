@@ -169,9 +169,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public void doAction(double timeInState)
    {
-      double currentTime = timestamp.getDoubleValue();
-      double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
-
       this.timeInState.set(timeInState);
 
       blendForStepAdjustment(timeInState);
@@ -228,10 +225,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       // Trigger support phase.
       if (currentTime >= touchDownTime)
       {
-         if (stepTransitionCallback != null)
-         {
-            stepTransitionCallback.onTouchDown(robotQuadrant);
-         }
+
          triggerSupport = true;
       }
 
@@ -291,7 +285,14 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
-      return triggerSupport ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
+      QuadrupedFootControlModule.FootEvent eventToReturn = null;
+      if (triggerSupport)
+         eventToReturn = QuadrupedFootControlModule.FootEvent.TIMEOUT;
+
+      if (eventToReturn != null && stepTransitionCallback != null)
+         stepTransitionCallback.onTouchDown(robotQuadrant);
+
+      return eventToReturn;
    }
 
    @Override
