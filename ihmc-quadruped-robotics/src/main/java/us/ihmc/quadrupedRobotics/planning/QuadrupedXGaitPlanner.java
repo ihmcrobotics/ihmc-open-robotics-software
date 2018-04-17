@@ -92,7 +92,7 @@ public class QuadrupedXGaitPlanner
          double deltaTime = thisStepEndTime - timeAtSoS;
          extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
-         step.setStepYaw(xGaitRectanglePoseAtSoS.getYaw());
+         step.setStepYaw(xGaitRectanglePose.getYaw());
 
          // compute step goal position by sampling the corner position of the xGait rectangle at touch down
          RobotQuadrant robotQuadrant = step.getRobotQuadrant();
@@ -164,7 +164,7 @@ public class QuadrupedXGaitPlanner
             double deltaTime = plannedSteps.get(i).getTimeInterval().getEndTime() - currentTime;
             extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
             xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
-            plannedSteps.get(i).setStepYaw(xGaitRectanglePoseAtSoS.getYaw());
+            plannedSteps.get(i).setStepYaw(xGaitRectanglePose.getYaw());
 
             // compute step goal position by sampling the corner position of the xGait rectangle at touchdown
             RobotQuadrant stepQuadrant = plannedSteps.get(i).getRobotQuadrant();
