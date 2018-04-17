@@ -48,10 +48,11 @@ public class PolygonWiggler
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2D bestMatch = null;
       double overlap = 0.0;
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         ConvexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
+         convexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
          if (intersection.getArea() > overlap)
          {
             overlap = intersection.getArea();

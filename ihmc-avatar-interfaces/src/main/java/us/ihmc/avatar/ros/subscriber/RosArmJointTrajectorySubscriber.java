@@ -84,7 +84,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          }
       }
       
-      ihmcMessage.setDestination(PacketDestination.CONTROLLER);
+      ihmcMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       packetCommunicator.send(ihmcMessage);
    }
    

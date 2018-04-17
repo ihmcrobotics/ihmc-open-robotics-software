@@ -5,8 +5,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 
 public class YoParabolicTrajectoryGenerator
@@ -14,7 +14,7 @@ public class YoParabolicTrajectoryGenerator
    private final String nameSuffix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final ReferenceFrame referenceFrame;
-   private final YoFrameVector c0, c1, c2;
+   private final YoFrameVector3D c0, c1, c2;
 
    private final FrameVector3D tempInitialize;
    private final FramePoint3D tempPackPosition;
@@ -24,9 +24,9 @@ public class YoParabolicTrajectoryGenerator
       this.registry = new YoVariableRegistry(namePrefix + nameSuffix);
       this.referenceFrame = referenceFrame;
 
-      c0 = new YoFrameVector("c0", "", referenceFrame, registry);
-      c1 = new YoFrameVector("c1", "", referenceFrame, registry);
-      c2 = new YoFrameVector("c2", "", referenceFrame, registry);
+      c0 = new YoFrameVector3D("c0", "", referenceFrame, registry);
+      c1 = new YoFrameVector3D("c1", "", referenceFrame, registry);
+      c2 = new YoFrameVector3D("c2", "", referenceFrame, registry);
 
       tempInitialize = new FrameVector3D(referenceFrame);
       tempPackPosition = new FramePoint3D(referenceFrame);

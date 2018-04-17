@@ -22,8 +22,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyAngularRatePacket;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
@@ -52,8 +50,6 @@ public class QuadrupedControllerInputProviderTest
 
       ComPositionPacket comPositionPacket = new ComPositionPacket(randomComPosition);
       ComVelocityPacket comVelocityPacket = new ComVelocityPacket(randomComVelocity);
-      BodyOrientationPacket bodyOrientationPacket = new BodyOrientationPacket(randomBodyOrientation);
-      BodyAngularRatePacket bodyAngularRatePacket = new BodyAngularRatePacket(randomBodyAngularVelocity);
       PlanarVelocityPacket planarVelocityPacket = new PlanarVelocityPacket(randomPlanarVelocity);
       
       InputProviderTestNetClassList netClassList = new InputProviderTestNetClassList();
@@ -81,16 +77,6 @@ public class QuadrupedControllerInputProviderTest
       Vector3D comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
       
-      mockCommunicator.send(bodyOrientationPacket);
-      ThreadTools.sleep(3);
-      Quaternion bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-     
-      mockCommunicator.send(bodyAngularRatePacket);
-      ThreadTools.sleep(3);
-      Vector3D bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue(randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
-      
       mockCommunicator.send(planarVelocityPacket);
       ThreadTools.sleep(3);
       Vector3D planarVelocityInput = planarVelocityInputProvider.get();
@@ -107,16 +93,6 @@ public class QuadrupedControllerInputProviderTest
       comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
       
-      mockCommunicator.send(bodyOrientationPacket);
-      ThreadTools.sleep(3);
-      bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-      
-      mockCommunicator.send(bodyAngularRatePacket);
-      ThreadTools.sleep(3);
-      bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue( randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
-      
       mockCommunicator.send(planarVelocityPacket);
       ThreadTools.sleep(3);
       planarVelocityInput = planarVelocityInputProvider.get();
@@ -128,12 +104,6 @@ public class QuadrupedControllerInputProviderTest
       
       comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
-      
-      bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-      
-      bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue(randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
       
       planarVelocityInput = planarVelocityInputProvider.get();
       assertTrue(randomPlanarVelocity.epsilonEquals(planarVelocityInput, epsilon));
@@ -147,9 +117,7 @@ public class QuadrupedControllerInputProviderTest
       Random random = new Random(515151);
       Point3D randomComPosition = RandomGeometry.nextPoint3D(random, 1000.0, 1000.0);
       Vector3D randomComVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
-      Quaternion randomBodyOrientation = RandomGeometry.nextQuaternion(random);
-      Vector3D randomBodyAngularVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
-      Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
+      Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0);
 
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
       TestQuadrupedPhysicalProperties physicalProperties = new TestQuadrupedPhysicalProperties();
@@ -162,12 +130,6 @@ public class QuadrupedControllerInputProviderTest
       YoDouble yoComVelocityInputX = (YoDouble) registry.getVariable("comVelocityInputX");
       YoDouble yoComVelocityInputY = (YoDouble) registry.getVariable("comVelocityInputY");
       YoDouble yoComVelocityInputZ = (YoDouble) registry.getVariable("comVelocityInputZ");
-      YoDouble yoBodyOrientationInputYaw = (YoDouble) registry.getVariable("bodyOrientationInputYaw");
-      YoDouble yoBodyOrientationInputPitch = (YoDouble) registry.getVariable("bodyOrientationInputPitch");
-      YoDouble yoBodyOrientationInputRoll = (YoDouble) registry.getVariable("bodyOrientationInputRoll");
-      YoDouble yoBodyAngularRateInputX = (YoDouble) registry.getVariable("bodyAngularRateInputX");
-      YoDouble yoBodyAngularRateInputY = (YoDouble) registry.getVariable("bodyAngularRateInputY");
-      YoDouble yoBodyAngularRateInputZ = (YoDouble) registry.getVariable("bodyAngularRateInputZ");
       YoDouble yoPlanarVelocityInputX = (YoDouble) registry.getVariable("planarVelocityInputX");
       YoDouble yoPlanarVelocityInputY = (YoDouble) registry.getVariable("planarVelocityInputY");
       YoDouble yoPlanarVelocityInputZ = (YoDouble) registry.getVariable("planarVelocityInputZ");
@@ -185,18 +147,6 @@ public class QuadrupedControllerInputProviderTest
       Vector3D comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
       
-      yoBodyOrientationInputYaw.set(randomBodyOrientation.getYaw());
-      yoBodyOrientationInputPitch.set(randomBodyOrientation.getPitch());
-      yoBodyOrientationInputRoll.set(randomBodyOrientation.getRoll());
-      Quaternion bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-      
-      yoBodyAngularRateInputX.set(randomBodyAngularVelocity.getX());
-      yoBodyAngularRateInputY.set(randomBodyAngularVelocity.getY());
-      yoBodyAngularRateInputZ.set(randomBodyAngularVelocity.getZ());
-      Vector3D bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue(randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
-      
       yoPlanarVelocityInputX.set(randomPlanarVelocity.getX());
       yoPlanarVelocityInputY.set(randomPlanarVelocity.getY());
       yoPlanarVelocityInputZ.set(randomPlanarVelocity.getZ());
@@ -216,18 +166,6 @@ public class QuadrupedControllerInputProviderTest
       comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
       
-      yoBodyOrientationInputYaw.set(randomBodyOrientation.getYaw());
-      yoBodyOrientationInputPitch.set(randomBodyOrientation.getPitch());
-      yoBodyOrientationInputRoll.set(randomBodyOrientation.getRoll());
-      bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-      
-      yoBodyAngularRateInputX.set(randomBodyAngularVelocity.getX());
-      yoBodyAngularRateInputY.set(randomBodyAngularVelocity.getY());
-      yoBodyAngularRateInputZ.set(randomBodyAngularVelocity.getZ());
-      bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue(randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
-      
       yoPlanarVelocityInputX.set(randomPlanarVelocity.getX());
       yoPlanarVelocityInputY.set(randomPlanarVelocity.getY());
       yoPlanarVelocityInputZ.set(randomPlanarVelocity.getZ());
@@ -240,12 +178,6 @@ public class QuadrupedControllerInputProviderTest
       
       comVelocityInput = postureInputProvider.getComVelocityInput();
       assertTrue(randomComVelocity.epsilonEquals(comVelocityInput, epsilon));
-      
-      bodyOrientationInput = postureInputProvider.getBodyOrientationInput();
-      assertTrue(randomBodyOrientation.epsilonEquals(bodyOrientationInput, epsilon));
-      
-      bodyAngularRateInput = postureInputProvider.getBodyAngularRateInput();
-      assertTrue(randomBodyAngularVelocity.epsilonEquals(bodyAngularRateInput, epsilon));
       
       planarVelocityInput = planarVelocityInputProvider.get();
       assertTrue(randomPlanarVelocity.epsilonEquals(planarVelocityInput, epsilon));
@@ -341,8 +273,6 @@ public class QuadrupedControllerInputProviderTest
       {
          registerPacketClass(ComPositionPacket.class);
          registerPacketClass(ComVelocityPacket.class);
-         registerPacketClass(BodyOrientationPacket.class);
-         registerPacketClass(BodyAngularRatePacket.class);
          registerPacketClass(PlanarVelocityPacket.class);
       }
    }

@@ -11,15 +11,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -28,14 +28,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -48,6 +46,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyInverseDynamicsSolver
 {
@@ -73,12 +72,12 @@ public class WholeBodyInverseDynamicsSolver
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
-   private final YoFrameVector yoDesiredMomentumRateLinear;
-   private final YoFrameVector yoDesiredMomentumRateAngular;
+   private final YoFrameVector3D yoDesiredMomentumRateLinear;
+   private final YoFrameVector3D yoDesiredMomentumRateAngular;
    // TODO It seems that the achieved CMP (computed from this guy) can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
-   private final YoFrameVector yoAchievedMomentumRateLinear;
-   private final YoFrameVector yoAchievedMomentumRateAngular;
+   private final YoFrameVector3D yoAchievedMomentumRateLinear;
+   private final YoFrameVector3D yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
    private final FrameVector3D achievedMomentumRateAngular = new FrameVector3D();
 
@@ -86,8 +85,8 @@ public class WholeBodyInverseDynamicsSolver
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
    private final FrameVector3D residualRootJointTorque = new FrameVector3D();
 
-   private final YoFrameVector yoResidualRootJointForce;
-   private final YoFrameVector yoResidualRootJointTorque;
+   private final YoFrameVector3D yoResidualRootJointForce;
+   private final YoFrameVector3D yoResidualRootJointTorque;
 
    private final double controlDT;
 
@@ -169,18 +168,13 @@ public class WholeBodyInverseDynamicsSolver
             optimizationControlModule.setupTorqueMinimizationCommand();
       }
 
-      MomentumModuleSolution momentumModuleSolution;
-
-      try
+      if (!optimizationControlModule.compute())
       {
-         momentumModuleSolution = optimizationControlModule.compute();
-      }
-      catch (MomentumControlModuleException momentumControlModuleException)
-      {
+         // TODO:
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
-         momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
       }
+      MomentumModuleSolution momentumModuleSolution = optimizationControlModule.getMomentumModuleSolution();
 
       DenseMatrix64F jointAccelerations = momentumModuleSolution.getJointAccelerations();
       DenseMatrix64F rhoSolution = momentumModuleSolution.getRhoSolution();

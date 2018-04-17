@@ -3,13 +3,13 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class AlphaFilteredYoFrameVector extends YoFrameVector implements ProcessingYoVariable
+public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final AlphaFilteredYoVariable x, y, z;
 
@@ -50,7 +50,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
 
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
-           YoFrameVector unfilteredVector)
+           YoFrameVector3D unfilteredVector)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoX());
@@ -64,7 +64,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
 
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                             DoubleProvider alpha, YoFrameVector unfilteredVector)
+                                                                             DoubleProvider alpha, YoFrameVector3D unfilteredVector)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoX());
@@ -77,7 +77,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
    }
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                             DoubleProvider alpha, YoFramePoint unfilteredPosition)
+                                                                             DoubleProvider alpha, YoFramePoint3D unfilteredPosition)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPosition.getYoX());

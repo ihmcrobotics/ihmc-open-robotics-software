@@ -22,8 +22,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,6 +33,8 @@ import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
@@ -60,9 +60,9 @@ public class TouchDownState extends AbstractFootControlState
 
    private final YoEnum<LineContactActivationMethod> lineContactActivationMethod;
    private final YoFrameQuaternion initialOrientation;
-   private final YoFrameVector initialAngularVelocity;
+   private final YoFrameVector3D initialAngularVelocity;
    private final YoFrameQuaternion finalOrientation;
-   private final YoFrameVector finalAngularVelocity;
+   private final YoFrameVector3D finalAngularVelocity;
 
    private final FramePoint3D contactPointPosition = new FramePoint3D();
 
@@ -122,9 +122,9 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "OrientationTrajectory", worldFrame, registry);
 
       initialOrientation = new YoFrameQuaternion(namePrefix + "initialOrientation", worldFrame, registry);
-      initialAngularVelocity = new YoFrameVector(namePrefix + "initialAngularVelocity", worldFrame, registry);
+      initialAngularVelocity = new YoFrameVector3D(namePrefix + "initialAngularVelocity", worldFrame, registry);
       finalOrientation = new YoFrameQuaternion(namePrefix + "finalOrientation", worldFrame, registry);
-      finalAngularVelocity = new YoFrameVector(namePrefix + "finalAngularVelocity", worldFrame, registry);
+      finalAngularVelocity = new YoFrameVector3D(namePrefix + "finalAngularVelocity", worldFrame, registry);
 
       timeInContact = new YoDouble(namePrefix + "TimeInContact", registry);
       desiredTouchdownDuration = new YoDouble(namePrefix + "DesiredTouchdownDuration", registry);

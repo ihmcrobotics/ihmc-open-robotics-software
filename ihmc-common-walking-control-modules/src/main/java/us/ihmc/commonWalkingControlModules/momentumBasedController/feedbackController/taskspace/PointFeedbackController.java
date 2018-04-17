@@ -5,10 +5,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,12 +17,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
@@ -34,27 +35,27 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoBoolean isEnabled;
 
-   private final YoFramePoint yoDesiredPosition;
-   private final YoFramePoint yoCurrentPosition;
-   private final YoFrameVector yoErrorPosition;
+   private final YoFramePoint3D yoDesiredPosition;
+   private final YoFramePoint3D yoCurrentPosition;
+   private final YoFrameVector3D yoErrorPosition;
 
-   private final YoFrameVector yoErrorPositionIntegrated;
+   private final YoFrameVector3D yoErrorPositionIntegrated;
 
-   private final YoFrameVector yoDesiredLinearVelocity;
-   private final YoFrameVector yoCurrentLinearVelocity;
-   private final YoFrameVector yoErrorLinearVelocity;
-   private final YoFrameVector yoFeedForwardLinearVelocity;
-   private final YoFrameVector yoFeedbackLinearVelocity;
+   private final YoFrameVector3D yoDesiredLinearVelocity;
+   private final YoFrameVector3D yoCurrentLinearVelocity;
+   private final YoFrameVector3D yoErrorLinearVelocity;
+   private final YoFrameVector3D yoFeedForwardLinearVelocity;
+   private final YoFrameVector3D yoFeedbackLinearVelocity;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearVelocity;
 
-   private final YoFrameVector yoDesiredLinearAcceleration;
-   private final YoFrameVector yoFeedForwardLinearAcceleration;
-   private final YoFrameVector yoFeedbackLinearAcceleration;
+   private final YoFrameVector3D yoDesiredLinearAcceleration;
+   private final YoFrameVector3D yoFeedForwardLinearAcceleration;
+   private final YoFrameVector3D yoFeedbackLinearAcceleration;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
-   private final YoFrameVector yoAchievedLinearAcceleration;
+   private final YoFrameVector3D yoAchievedLinearAcceleration;
 
-   private final YoFrameVector yoDesiredLinearForce;
-   private final YoFrameVector yoFeedbackLinearForce;
+   private final YoFrameVector3D yoDesiredLinearForce;
+   private final YoFrameVector3D yoFeedbackLinearForce;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearForce;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -77,6 +78,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
    private final VirtualForceCommand virtualModelControlOutput = new VirtualForceCommand();
+   private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPID3DGains gains;
@@ -89,6 +91,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame linearGainsFrame;
 
+   private final RigidBody rootBody;
    private final RigidBody endEffector;
 
    private final double dt;
@@ -97,6 +100,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      if (toolbox.getRootJoint() != null)
+         this.rootBody = toolbox.getRootJoint().getSuccessor();
+      else
+         rootBody = null;
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -298,8 +305,24 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+      computeFeedbackForce();
 
+      if (endEffector.getName().equals(rootBody.getName()))
+      {
+         desiredLinearForce.changeFrame(worldFrame);
+
+         virtualModelControlRootOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlRootOutput.setLinearMomentumRate(desiredLinearForce);
+      }
+      else
+      {
+         virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlOutput.setLinearForce(controlFrame, desiredLinearForce);
+      }
+   }
+
+   private void computeFeedbackForce()
+   {
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -315,8 +338,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.changeFrame(controlFrame);
 
       yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
-
-      virtualModelControlOutput.setLinearForce(controlFrame, desiredLinearForce);
    }
 
    private final SpatialAccelerationVector achievedSpatialAccelerationVector = new SpatialAccelerationVector();
@@ -527,10 +548,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public VirtualForceCommand getVirtualModelControlOutput()
+   public VirtualModelControlCommand<?> getVirtualModelControlOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return virtualModelControlOutput;
+      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 }

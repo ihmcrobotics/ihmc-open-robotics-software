@@ -12,15 +12,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoArtifactLineSegment2d extends YoArtifact
 {
    private static final BasicStroke STROKE = new BasicStroke(2);
 
-   private final YoFrameLineSegment2d lineSegment;
+   private final YoFrameLineSegment2D lineSegment;
    
    private final Point2D tempFirstEndpoint = new Point2D();
    private final LineSegment2D tempLineSegment = new LineSegment2D();
@@ -34,22 +34,22 @@ public class YoArtifactLineSegment2d extends YoArtifact
    private Vector2D arrowHeadVector;
    private Vector2D arrowHeadLateralVector;
    
-   public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   public YoArtifactLineSegment2d(String name, YoFramePoint2D startPoint, YoFramePoint2D endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, arrowHeadWidth, arrowHeadHeight);
    }
 
    private YoArtifactLineSegment2d(String name, YoDouble startX, YoDouble startY, YoDouble endX, YoDouble endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      this(name, new YoFrameLineSegment2d(startX, startY, endX, endY, ReferenceFrame.getWorldFrame()), color, arrowHeadWidth, arrowHeadHeight);
+      this(name, new YoFrameLineSegment2D(startX, startY, endX, endY, ReferenceFrame.getWorldFrame()), color, arrowHeadWidth, arrowHeadHeight);
    }
    
-   public YoArtifactLineSegment2d(String name, YoFramePoint2d start, YoFramePoint2d end, Color color)
+   public YoArtifactLineSegment2d(String name, YoFramePoint2D start, YoFramePoint2D end, Color color)
    {
-      this(name, new YoFrameLineSegment2d(start.getYoX(), start.getYoY(), end.getYoX(), end.getYoY(), ReferenceFrame.getWorldFrame()), color);
+      this(name, new YoFrameLineSegment2D(start.getYoX(), start.getYoY(), end.getYoX(), end.getYoY(), ReferenceFrame.getWorldFrame()), color);
    }
    
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2D lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       super(name, new double[0], color,
             lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
@@ -58,7 +58,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
       instatiateArrowObjects(arrowHeadWidth, arrowHeadHeight);
    }
 
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color)
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2D lineSegment, Color color)
    {
       super(name, new double[0], color,
             lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
@@ -80,7 +80,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
 
-      if (lineSegment.areEndpointsTheSame())
+      if (lineSegment.getFirstEndpoint().equals(lineSegment.getSecondEndpoint()))
       {
          tempFirstEndpoint.set(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
          graphics.drawPoint(tempFirstEndpoint);

@@ -1,9 +1,10 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AngleTools;
 
 /**
  * @author jrebula
@@ -25,7 +26,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
    private double alphaDouble;
    private final double dt;
 
-   private final YoDouble alphaVariable;
+   private final DoubleProvider alphaVariable;
    private final YoDouble position;
 
 // private double lastPosition;
@@ -65,7 +66,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, YoDouble positionVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -81,7 +82,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, YoDouble alphaVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, double dt, YoVariableRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -102,6 +103,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       hasBeenCalled.set(false);
    }
 
+   @Override
    public void update()
    {
       if (position == null)
@@ -161,7 +163,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       double previousFilteredDerivative = getDoubleValue();
       double currentRawDerivative = difference / dt;
 
-      double alpha = alphaVariable == null ? alphaDouble : alphaVariable.getDoubleValue();
+      double alpha = alphaVariable == null ? alphaDouble : alphaVariable.getValue();
       set(alpha * previousFilteredDerivative + (1.0 - alpha) * currentRawDerivative);
    }
 
@@ -173,7 +175,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       }
       else
       {
-         alphaVariable.set(alpha);
+         throw new RuntimeException("A double provider was used to construct this filtered variable. Modyfy the value of that provider directly.");
       }
    }
 }

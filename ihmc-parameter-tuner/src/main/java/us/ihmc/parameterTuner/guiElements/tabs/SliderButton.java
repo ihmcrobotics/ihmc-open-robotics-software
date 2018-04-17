@@ -57,9 +57,9 @@ public class SliderButton extends Button
       setGraphic(sliderGraphic);
       isActive = false;
 
-      if (sliderboard != null && sliderIndex != -1)
+      if (tuner != null && sliderboard != null && sliderIndex != -1)
       {
-         sliderboard.clearListeners(sliderIndex);
+         sliderboard.removeListener(tuner, sliderIndex);
       }
       if (tuner != null && listener != null)
       {

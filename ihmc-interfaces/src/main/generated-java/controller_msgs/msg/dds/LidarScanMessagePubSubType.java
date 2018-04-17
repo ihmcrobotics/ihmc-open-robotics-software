@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "LidarScanMessage" defined in "LidarScanMessage_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LidarScanMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit LidarScanMessage_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "LidarScanMessage" defined in "LidarScanMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LidarScanMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LidarScanMessage_.idl instead.
+*
+*/
 public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LidarScanMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LidarScanMessage_";
@@ -50,8 +48,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -67,7 +65,9 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLidarPosition(), current_alignment);
 
@@ -75,6 +75,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getScan().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,22 +89,21 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLidarPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLidarOrientation(), cdr);
-      if (data.getScan().size() <= 100)
-         cdr.write_type_e(data.getScan());
-      else
-         throw new RuntimeException("scan field exceeds the maximum length");
+      if(data.getScan().size() <= 100)
+      cdr.write_type_e(data.getScan());else
+          throw new RuntimeException("scan field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotTimestamp(cdr.read_type_11());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getLidarPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLidarOrientation(), cdr);
-      cdr.read_type_e(data.getScan());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getLidarPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLidarOrientation(), cdr);	
+      cdr.read_type_e(data.getScan());	
 
    }
 
@@ -140,7 +141,6 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return new controller_msgs.msg.dds.LidarScanMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -152,7 +152,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -162,7 +162,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.LidarScanMessage src, controller_msgs.msg.dds.LidarScanMessage dest)
    {
       staticCopy(src, dest);

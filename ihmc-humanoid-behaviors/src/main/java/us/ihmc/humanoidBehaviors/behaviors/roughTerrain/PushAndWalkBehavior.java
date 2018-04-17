@@ -26,21 +26,21 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class PushAndWalkBehavior extends AbstractBehavior
 {
    private final ConcurrentListeningQueue<CapturabilityBasedStatus> statusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
-   private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("DesiredICP", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("ICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("DesiredICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("ICP", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoGraphicPosition desiredCapturePointViz;
    private final YoGraphicPosition capturePointViz;

@@ -10,11 +10,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class CommonInertiaEllipsoidsExampleSimulation
 {
@@ -56,7 +56,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
       CommonInertiaEllipsoidsVisualizer viz = new CommonInertiaEllipsoidsVisualizer(aBody, yoGraphicsListRegistry);
       viz.update();
 
-      YoGraphicCoordinateSystem coordinateSystem = new YoGraphicCoordinateSystem("coord", new YoFramePose("World", ReferenceFrame.getWorldFrame(), null), 1);
+      YoGraphicCoordinateSystem coordinateSystem = new YoGraphicCoordinateSystem("coord", new YoFramePoseUsingYawPitchRoll("World", ReferenceFrame.getWorldFrame(), null), 1);
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);

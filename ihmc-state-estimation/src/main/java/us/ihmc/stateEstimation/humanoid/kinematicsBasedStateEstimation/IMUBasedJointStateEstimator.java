@@ -3,17 +3,21 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Creates an alpha filter defined by:
@@ -25,11 +29,10 @@ import java.util.Map;
 public class IMUBasedJointStateEstimator
 {
    private final IMUBasedJointVelocityEstimator velocityEstimator;
-   private final YoDouble alphaVelocity;
-   private final YoDouble alphaPosition;
+   private final DoubleProvider velocityBreakFrequency;
+   private final DoubleProvider positionBreakFrequency;
    private final GeometricJacobian jacobian;
    private final SensorOutputMapReadOnly sensorMap;
-   private final YoDouble slopTime;
    private final Map<OneDoFJoint, BacklashProcessingYoVariable> jointVelocities = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
@@ -37,8 +40,8 @@ public class IMUBasedJointStateEstimator
 
    private final double estimatorDT;
 
-   public IMUBasedJointStateEstimator(IMUSensorReadOnly pelvisIMU, IMUSensorReadOnly chestIMU, SensorOutputMapReadOnly sensorMap, double estimatorDT,
-                                      double slopTime, YoVariableRegistry registry)
+   public IMUBasedJointStateEstimator(IMUSensorReadOnly pelvisIMU, IMUSensorReadOnly chestIMU, SensorOutputMapReadOnly sensorMap,
+                                      StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry registry)
    {
       this.sensorMap = sensorMap;
       jacobian = new GeometricJacobian(pelvisIMU.getMeasurementLink(), chestIMU.getMeasurementLink(), chestIMU.getMeasurementLink().getBodyFixedFrame());
@@ -46,33 +49,27 @@ public class IMUBasedJointStateEstimator
       this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, pelvisIMU, chestIMU, registry);
 
       String namePrefix = "imuBasedJointVelocityEstimator";
-      alphaVelocity = new YoDouble(namePrefix + "AlphaFuseVelocity", registry);
-      alphaVelocity.set(0.0);
-      alphaPosition = new YoDouble(namePrefix + "AlphaFusePosition", registry);
-      alphaPosition.set(0.0);
+      velocityBreakFrequency = new DoubleParameter(namePrefix + "AlphaFuseVelocity", registry, stateEstimatorParameters.getBreakFrequencyForSpineJointVelocityEstimation());
+      positionBreakFrequency = new DoubleParameter(namePrefix + "AlphaFusePosition", registry, stateEstimatorParameters.getBreakFrequencyForSpineJointPositionEstimation());
 
-      this.estimatorDT = estimatorDT;
-      this.slopTime = new YoDouble(namePrefix + "SlopTime", registry);
-      this.slopTime.set(slopTime);
+      this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
+      DoubleProvider slopTime = new DoubleParameter(namePrefix + "SlopTime", registry, stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime());
       for (OneDoFJoint joint : joints)
       {
-         jointVelocities.put(joint, new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, this.slopTime, registry));
+         jointVelocities.put(joint, new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, slopTime, registry));
 
          jointPositionsFromIMUOnly.put(joint, new YoDouble("q_" + joint.getName() + "_IMUBased", registry));
          jointPositions.put(joint, new YoDouble("q_" + joint.getName() + "_FusedWithIMU", registry));
       }
    }
 
-   public void setAlphaFuse(double alphaVelocity, double alphaPosition)
-   {
-      this.alphaVelocity.set(alphaVelocity);
-      this.alphaPosition.set(alphaPosition);
-   }
-
    public void compute()
    {
       velocityEstimator.compute();
+
+      double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
+      double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
 
       for (int i = 0; i < joints.length; i++)
       {
@@ -80,13 +77,13 @@ public class IMUBasedJointStateEstimator
 
          double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);
-         double qd_fused = (1.0 - alphaVelocity.getDoubleValue()) * qd_sensorMap + alphaVelocity.getDoubleValue() * qd_IMU;
+         double qd_fused = (1.0 - alphaVelocity) * qd_sensorMap + alphaVelocity * qd_IMU;
 
          jointVelocities.get(joint).update(qd_fused);
 
          double q_sensorMap = sensorMap.getJointPositionProcessedOutput(joint);
          double q_IMU = jointPositions.get(joint).getDoubleValue() + estimatorDT * qd_IMU; // is qd_IMU or qd_fused better here?
-         double q_fused = (1.0 - alphaPosition.getDoubleValue()) * q_sensorMap + alphaPosition.getDoubleValue() * q_IMU;
+         double q_fused = (1.0 - alphaPosition) * q_sensorMap + alphaPosition * q_IMU;
 
          jointPositionsFromIMUOnly.get(joint).set(q_IMU);
          jointPositions.get(joint).set(q_fused);

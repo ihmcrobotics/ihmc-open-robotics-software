@@ -8,13 +8,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 public class YoArtifactPolygon extends YoArtifact
 {
-   private final YoFrameConvexPolygon2d convexPolygon;
+   private final YoFrameConvexPolygon2D convexPolygon;
    
    private final ConvexPolygon2D tempConvexPolygon = new ConvexPolygon2D();
 
@@ -23,22 +23,22 @@ public class YoArtifactPolygon extends YoArtifact
    
    private final Point2D legendStringPosition = new Point2D();
    
-   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill)
    {
       this(name, yoConvexPolygon2d, color, fill, 2, false);
    }
 
-   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
       this(name, yoConvexPolygon2d, color, fill, lineWidth, false);
    }
 
-   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, boolean dashedLine)
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill, boolean dashedLine)
    {
       this(name, yoConvexPolygon2d, color, fill, 2, dashedLine);
    }
 
-   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth, boolean dashedLine)
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2D yoConvexPolygon2d, Color color, boolean fill, int lineWidth, boolean dashedLine)
    {
       super(name,  new double[] {fill ? 1.0 : 0.0}, color);
       this.convexPolygon = yoConvexPolygon2d;
@@ -98,7 +98,7 @@ public class YoArtifactPolygon extends YoArtifact
       int i = 0;
       vars[i++] = convexPolygon.getYoNumberOfVertices();
 
-      for (YoFramePoint2d p : convexPolygon.getVertexBuffer())
+      for (YoFramePoint2D p : convexPolygon.getVertexBuffer())
       {
          vars[i++] = p.getYoX();
          vars[i++] = p.getYoY();

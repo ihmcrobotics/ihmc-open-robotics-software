@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import junit.framework.TestCase;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -222,6 +224,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
       ThreadTools.sleep(1000);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
       List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getFootstepDataList();
       for (int i = 0; i < dataList.size(); i++)

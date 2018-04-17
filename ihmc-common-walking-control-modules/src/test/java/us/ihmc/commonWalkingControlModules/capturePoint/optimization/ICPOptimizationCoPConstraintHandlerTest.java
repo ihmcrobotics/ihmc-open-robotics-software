@@ -67,14 +67,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
       FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
@@ -131,14 +124,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
       FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
@@ -235,14 +221,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
       FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
@@ -293,14 +272,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
       FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();

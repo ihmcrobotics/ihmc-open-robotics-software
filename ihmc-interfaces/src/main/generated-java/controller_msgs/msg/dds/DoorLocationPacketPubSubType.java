@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "DoorLocationPacket" defined in "DoorLocationPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from DoorLocationPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * DoorLocationPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "DoorLocationPacket" defined in "DoorLocationPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from DoorLocationPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit DoorLocationPacket_.idl instead.
+*
+*/
 public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DoorLocationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DoorLocationPacket_";
@@ -26,8 +24,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DoorLocationPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DoorLocationPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -47,6 +44,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -61,7 +59,9 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorTransformToWorld(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -76,8 +76,8 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(controller_msgs.msg.dds.DoorLocationPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorTransformToWorld(), cdr);
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorTransformToWorld(), cdr);	
 
    }
 
@@ -107,7 +107,6 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return new controller_msgs.msg.dds.DoorLocationPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -119,7 +118,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.DoorLocationPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -129,7 +128,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.DoorLocationPacket src, controller_msgs.msg.dds.DoorLocationPacket dest)
    {
       staticCopy(src, dest);

@@ -18,9 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -60,14 +60,14 @@ public class LegJointLimitAvoidanceControlModule
    private YoDouble[] adjustedDesiredPositions;
    private YoDouble[] lowerLimits;
    private YoDouble[] upperLimits;
-   private YoFramePose originalDesiredYoPose;
+   private YoFramePoseUsingYawPitchRoll originalDesiredYoPose;
    private FramePose3D originalDesiredPose;
    private FramePoint3D adjustedDesiredPosition;
    private FrameQuaternion adjustedDesiredOrientation;
-   private YoFramePose adjustedDesiredPose;
+   private YoFramePoseUsingYawPitchRoll adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
-   private YoFrameVector originalDesiredLinearVelocity;
-   private YoFrameVector adjustedDesiredLinearVelocity;
+   private YoFrameVector3D originalDesiredLinearVelocity;
+   private YoFrameVector3D adjustedDesiredLinearVelocity;
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final DenseMatrix64F jacobianMatrix;
@@ -117,8 +117,8 @@ public class LegJointLimitAvoidanceControlModule
          }
 
          originalDesiredPose = new FramePose3D();
-         originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
-         adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
+         originalDesiredYoPose = new YoFramePoseUsingYawPitchRoll(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
+         adjustedDesiredPose = new YoFramePoseUsingYawPitchRoll(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
          adjustedDesiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          adjustedDesiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
@@ -149,8 +149,8 @@ public class LegJointLimitAvoidanceControlModule
       jointVelocities = new DenseMatrix64F(numJoints, 1);
       adjustedDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
-      originalDesiredLinearVelocity = new YoFrameVector(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
-      adjustedDesiredLinearVelocity = new YoFrameVector(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+      originalDesiredLinearVelocity = new YoFrameVector3D(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+      adjustedDesiredLinearVelocity = new YoFrameVector3D(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (visualize)

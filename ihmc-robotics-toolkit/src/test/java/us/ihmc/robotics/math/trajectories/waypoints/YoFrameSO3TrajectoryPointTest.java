@@ -23,11 +23,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoFrameSO3TrajectoryPointTest
 {
@@ -357,7 +357,7 @@ public class YoFrameSO3TrajectoryPointTest
 
       // Check some get calls: 
       YoFrameQuaternion quaternionForVerification = new YoFrameQuaternion("quaternionForVerification", worldFrame, registry);
-      YoFrameVector angularVelocityForVerification = new YoFrameVector("angularVelocityForVerification", worldFrame, registry);
+      YoFrameVector3D angularVelocityForVerification = new YoFrameVector3D("angularVelocityForVerification", worldFrame, registry);
 
       yoFrameSO3TrajectoryPoint.getOrientation(quaternionForVerification);
       yoFrameSO3TrajectoryPoint.getAngularVelocity(angularVelocityForVerification);

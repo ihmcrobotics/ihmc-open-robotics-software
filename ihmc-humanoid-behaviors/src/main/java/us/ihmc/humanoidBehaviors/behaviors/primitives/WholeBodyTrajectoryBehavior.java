@@ -55,7 +55,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
-         outgoingMessage.setDestination(PacketDestination.CONTROLLER);  
+         outgoingMessage.setDestination(PacketDestination.CONTROLLER.ordinal());  
          sendPacketToController(outgoingMessage);
          sendPacket(outgoingMessage);
          packetHasBeenSent.set(true);

@@ -14,9 +14,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 {
@@ -51,7 +51,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
       if (isFootInContact())
       {
-         YoFramePoint yoPosition = contactPoint.getYoPosition();
+         YoFramePoint3D yoPosition = contactPoint.getYoPosition();
          touchdownPoint.setIncludingFrame(yoPosition);
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
@@ -68,7 +68,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setContactNormal(contactNormal);
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
-      YoFramePoint yoPosition = contactPoint.getYoPosition();
+      YoFramePoint3D yoPosition = contactPoint.getYoPosition();
       touchdownPoint.setIncludingFrame(yoPosition);
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
