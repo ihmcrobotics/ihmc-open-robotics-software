@@ -24,6 +24,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -80,6 +81,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final FrameVector3DReadOnly touchdownVelocity;
    private final FrameVector3DReadOnly touchdownAcceleration;
 
+   private final FootSwitchInterface footSwitch;
+
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
@@ -89,6 +92,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.currentStepCommand = currentStepCommand;
+
+      footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
 
       String namePrefix = robotQuadrant.getPascalCaseName();
 
@@ -204,14 +209,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private void updateEndOfStateConditions(double timeInState)
    {
-      // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
-      FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
-      soleForceEstimate.changeFrame(worldFrame);
-      double pressureEstimate = -soleForceEstimate.getZ();
+      // Detect early touch-down.
       double normalizedTimeInSwing = timeInState / currentStepCommand.getTimeInterval().getDuration();
       if (normalizedTimeInSwing > 0.5)
       {
-         touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
+         touchdownTrigger.update(footSwitch.hasFootHitGround());
       }
 
       double currentTime = timestamp.getDoubleValue();
