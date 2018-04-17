@@ -58,6 +58,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final QuadrupedFootControlModuleParameters parameters;
 
+   private final YoDouble swingDuration;
+   private final YoDouble timeInState;
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
@@ -86,6 +88,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.currentStepCommand = currentStepCommand;
 
       String namePrefix = robotQuadrant.getPascalCaseName();
+
+      timeInState = new YoDouble(namePrefix + "TimeInState", registry);
+      swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
@@ -122,6 +127,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public void onEntry()
    {
+      timeInState.set(0.0);
       controllerToolbox.getFootContactState(robotQuadrant).clear();
 
       // initialize swing trajectory
@@ -131,8 +137,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
       initialLinearVelocity.changeFrame(worldFrame);
 
       currentStepCommand.getGoalPosition(finalPosition);
+
       finalPosition.changeFrame(worldFrame);
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
+
+      swingDuration.set(currentStepCommand.getTimeInterval().getDuration());
 
       fillAndInitializeTrajectories();
 
@@ -146,10 +155,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double currentTime = timestamp.getDoubleValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
 
+      this.timeInState.set(timeInState);
+
       blendForStepAdjustment(timeInState);
 
       PositionTrajectoryGenerator activeTrajectory;
-      if (timeInState > currentStepCommand.getTimeInterval().getDuration())
+      if (timeInState > swingDuration.getDoubleValue())
          activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
@@ -207,7 +218,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       swingTrajectoryWaypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
       swingTrajectoryWaypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
-      swingTrajectoryWaypointCalculator.setStepTime(currentStepCommand.getTimeInterval().getDuration());
+      swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
       swingTrajectoryWaypointCalculator.setTrajectoryType(TrajectoryType.DEFAULT);
       swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
       swingTrajectoryWaypointCalculator.initialize();
@@ -218,19 +229,18 @@ public class QuadrupedSwingState extends QuadrupedFootState
          blendedSwingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
-      double stepDuration = currentStepCommand.getTimeInterval().getDuration();
-      blendedSwingTrajectory.appendPositionWaypoint(stepDuration, finalPosition, finalLinearVelocity);
+      blendedSwingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
 
       blendedSwingTrajectory.initializeTrajectory();
       blendedSwingTrajectory.initialize();
 
-      touchdownTrajectory.setLinearTrajectory(stepDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
+      touchdownTrajectory.setLinearTrajectory(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.initialize();
    }
 
    private void blendForStepAdjustment(double timeInState)
    {
-      double duration = currentStepCommand.getTimeInterval().getDuration();
+      double duration = swingDuration.getDoubleValue();
 
       // Compute current goal position.
       currentStepCommand.getGoalPosition(finalPosition);
@@ -245,7 +255,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
          touchdownTrajectory.initialize();
 
-         blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration - timeInState);
+         blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
          blendedSwingTrajectory.initialize();
       }
    }
@@ -260,6 +270,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
    public void onExit()
    {
       stepCommandIsValid.set(false);
+      swingDuration.setToNaN();
+      timeInState.setToNaN();
 
       triggerSupport = false;
 
