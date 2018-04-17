@@ -35,6 +35,42 @@ public enum ValkyrieHandJointName implements HandJointName
       return getCamelCaseJointName(robotSide);
    }
 
+   public String getMotorJointName(RobotSide robotSide)
+   {
+      switch (this)
+      {
+      case ThumbRoll:
+         return "ThumbMotorRoll";
+      case ThumbPitch1:
+         return "ThumbMotorPitch1";
+      case ThumbPitch2:
+         return "ThumbMotorPitch2";
+      case ThumbPitch3:
+         return null;
+      case IndexFingerPitch1:
+         return "IndexFingerMotorPitch1";
+      case IndexFingerPitch2:
+         return null;
+      case IndexFingerPitch3:
+         return null;
+      case MiddleFingerPitch1:
+         return "MiddleFingerMotorPitch1";
+      case MiddleFingerPitch2:
+         return null;
+      case MiddleFingerPitch3:
+         return null;
+      case PinkyPitch1:
+         return "PinkyMotorPitch1";
+      case PinkyPitch2:
+         return null;
+      case PinkyPitch3:
+         return null;
+
+      default:
+         return null;
+      }
+   }
+
    public String getCamelCaseJointName(RobotSide side)
    {
       return side.getCamelCaseName() + name();
