@@ -5,17 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -24,7 +18,14 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.commons.FormattingTools;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class IMUYawDriftEstimator implements YawDriftProvider
 {
@@ -41,30 +42,30 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final YoInteger numberOfFeetTrusted = new YoInteger("numberOfFeetTrustedIMUDrift", registry);
 
    private final Map<RigidBody, GlitchFilteredYoBoolean> areFeetTrusted = new LinkedHashMap<>();
-   private final YoDouble delayBeforeTrustingFoot = new YoDouble("delayBeforeTrustingFootIMUDrift", registry);
+   private final DoubleProvider delayBeforeTrustingFoot;
 
    private final YoFramePoint3D referenceAverageFootPosition = new YoFramePoint3D("referenceAverageFootPositionIMUDrift", worldFrame, registry);
    private final Map<RigidBody, YoFramePoint3D> referenceFootPositions = new LinkedHashMap<>();
    private final YoFramePoint3D currentAverageFootPosition = new YoFramePoint3D("currentAverageFootPositionIMUDrift", worldFrame, registry);
    private final Map<RigidBody, YoFramePoint3D> currentFootPositions = new LinkedHashMap<>();
 
-   private final YoDouble footLinearVelocityThreshold = new YoDouble("footLinearVelocityThreshold", registry);
+   private final DoubleProvider footLinearVelocityThreshold;
    private final Map<RigidBody, YoDouble> currentFootLinearVelocities = new LinkedHashMap<>();
 
    private final Map<RigidBody, YoDouble> estimatedYawDriftPerFoot = new LinkedHashMap<>();
 
    private final YoDouble estimatedYawDrift = new YoDouble("estimatedRawYawDrift", registry);
    private final YoDouble estimatedYawDriftPrevious = new YoDouble("estimatedYawDriftPrevious", registry);
-   private final YoDouble yawDriftAlphaFilter = new YoDouble("yawDriftAlphaFilter", registry);
+   private final DoubleProvider yawDriftBreakFrequency;
    private final YoDouble estimatedFilteredYawDrift = new YoDouble("estimatedFilteredYawDrift", registry);
 
    private final YoDouble previouslyEstimatedYawDrift = new YoDouble("previouslyEstimatedYawDrift", registry);
    private final YoDouble totalEstimatedYawDrift = new YoDouble("totalEstimatedYawDrift", registry);
-   private final YoDouble yawDriftRateAlphaFilter = new YoDouble("yawDriftRateAlphaFilter", registry);
-   private final AlphaFilteredYoVariable estimatedYawDriftRate = new AlphaFilteredYoVariable("estimatedYawDriftRate", registry, yawDriftRateAlphaFilter);
+   private final DoubleProvider yawDriftRateBreakFrequency;
+   private final AlphaFilteredYoVariable estimatedYawDriftRate;
 
-   private final YoBoolean enableCompensation = new YoBoolean("enableIMUDriftYawCompensation", registry);
-   private final YoBoolean integrateDriftRate = new YoBoolean("integrateDriftRate", registry);
+   private final BooleanProvider enableCompensation;
+   private final BooleanProvider integrateDriftRate;
 
    private final FramePoint3D footPosition = new FramePoint3D();
    private final FramePoint3D averagePosition = new FramePoint3D();
@@ -76,21 +77,30 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final double estimatorDT;
 
    public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, FootSwitchInterface> footSwitches,
-         Map<RigidBody, ? extends ContactablePlaneBody> feet, final double estimatorDT, YoVariableRegistry parentRegistry)
+                               Map<RigidBody, ? extends ContactablePlaneBody> feet, StateEstimatorParameters stateEstimatorParameters,
+                               YoVariableRegistry parentRegistry)
    {
-      this.estimatorDT = estimatorDT;
+      this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       allFeet = new ArrayList<>(footSwitches.keySet());
       numberOfFeet = allFeet.size();
+
+      enableCompensation = new BooleanParameter("enableIMUDriftYawCompensation", registry, stateEstimatorParameters.enableIMUYawDriftCompensation());
+      integrateDriftRate = new BooleanParameter("integrateDriftRate", registry, stateEstimatorParameters.integrateEstimatedIMUYawDriftRate());
+      delayBeforeTrustingFoot = new DoubleParameter("delayBeforeTrustingFootIMUDrift", registry, stateEstimatorParameters.getIMUYawDriftEstimatorDelayBeforeTrustingFoot());
+      footLinearVelocityThreshold = new DoubleParameter("footLinearVelocityThreshold", registry, stateEstimatorParameters.getIMUYawDriftFootLinearVelocityThreshold());
+      yawDriftBreakFrequency = new DoubleParameter("yawDriftBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz());
+      yawDriftRateBreakFrequency = new DoubleParameter("yawDriftRateBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftRateFilterFreqInHertz());
+
+      DoubleProvider alphaYawDrift = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(yawDriftRateBreakFrequency.getValue(), estimatorDT);
+      estimatedYawDriftRate = new AlphaFilteredYoVariable("estimatedYawDriftRate", registry, alphaYawDrift);
 
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
          String footNamePascalCase = FormattingTools.underscoredToCamelCase(foot.getName(), true);
 
-         int windowSize = (int) (delayBeforeTrustingFoot.getDoubleValue() / estimatorDT);
-         GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry,
-               windowSize);
+         GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry, 0);
          areFeetTrusted.put(foot, isFootTrusted);
 
          ReferenceFrame soleFrame = feet.get(foot).getSoleFrame();
@@ -132,45 +142,9 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          estimatedYawDriftPerFoot.put(foot, estimatedYawDriftFoot);
       }
 
-      delayBeforeTrustingFoot.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            int windowSize = (int) (delayBeforeTrustingFoot.getDoubleValue() / estimatorDT);
-            for (int i = 0; i < allFeet.size(); i++)
-               areFeetTrusted.get(allFeet.get(i)).setWindowSize(windowSize);
-         }
-      });
-
       parentRegistry.addChild(registry);
 
       estimatedYawDriftRate.update(0.0);
-
-//      configureModuleParameters(true, true, 0.5, 0.8, 0.04, 1.5e-3);
-   }
-
-   public void configureModuleParameters(StateEstimatorParameters stateEstimatorParameters)
-   {
-      this.enableCompensation.set(stateEstimatorParameters.enableIMUYawDriftCompensation());
-      this.integrateDriftRate.set(stateEstimatorParameters.integrateEstimatedIMUYawDriftRate());
-      this.delayBeforeTrustingFoot.set(stateEstimatorParameters.getIMUYawDriftEstimatorDelayBeforeTrustingFoot());
-      this.footLinearVelocityThreshold.set(stateEstimatorParameters.getIMUYawDriftFootLinearVelocityThreshold());
-
-      double driftFilterFrequency = stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz();
-      double driftRateFilterFrequency = stateEstimatorParameters.getIMUYawDriftRateFilterFreqInHertz();
-      this.yawDriftAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftFilterFrequency, this.estimatorDT));
-      this.yawDriftRateAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftRateFilterFrequency, this.estimatorDT));
-   }
-
-   public void configureModuleParameters(boolean enableCompensation, boolean integrateRate, double delayBeforeTrustingFoot, double footLinearVelocityThreshold, double driftFilterFrequency, double driftRateFilterFrequency)
-   {
-      this.enableCompensation.set(enableCompensation);
-      this.integrateDriftRate.set(integrateRate);
-      this.delayBeforeTrustingFoot.set(delayBeforeTrustingFoot);
-      this.yawDriftAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftFilterFrequency, this.estimatorDT));
-      this.yawDriftRateAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftRateFilterFrequency, this.estimatorDT));
-      this.footLinearVelocityThreshold.set(footLinearVelocityThreshold);
    }
 
    public void update()
@@ -181,7 +155,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       estimateYawDriftPerFoot();
       updateYawDrift();
 
-      if (enableCompensation.getBooleanValue())
+      if (enableCompensation.getValue())
          totalEstimatedYawDrift.set(previouslyEstimatedYawDrift.getDoubleValue() + estimatedFilteredYawDrift.getDoubleValue());
    }
 
@@ -202,15 +176,19 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
       int newNumberOfFeetTrusted = 0;
 
+      int windowSize = (int) (delayBeforeTrustingFoot.getValue() / estimatorDT);
+      for (int i = 0; i < allFeet.size(); i++)
+         areFeetTrusted.get(allFeet.get(i)).setWindowSize(windowSize);
+
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
          GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
 
          boolean hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
-         boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getDoubleValue();
+         boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getValue();
 
-         if (enableCompensation.getBooleanValue() && hasFootHitGround && isFootStatic)
+         if (enableCompensation.getValue() && hasFootHitGround && isFootStatic)
             isFootTrusted.update(true);
          else
             isFootTrusted.set(false);
@@ -323,7 +301,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          estimatedYawDriftPrevious.set(Double.NaN);
          estimatedFilteredYawDrift.set(0.0);
 
-         if (integrateDriftRate.getBooleanValue())
+         if (integrateDriftRate.getValue())
          {
             previouslyEstimatedYawDrift.add(estimatedYawDriftRate.getDoubleValue() * estimatorDT);
          }
@@ -339,7 +317,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       yawDrift /= numberOfFeet;
       estimatedYawDrift.set(yawDrift);
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(estimatedFilteredYawDrift.getDoubleValue(), estimatedYawDrift.getDoubleValue());
-      estimatedFilteredYawDrift.set(AngleTools.trimAngleMinusPiToPi(yawDriftAlphaFilter.getDoubleValue() * angleDifference + estimatedYawDrift.getDoubleValue()));
+      double alphaYawDrift = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(yawDriftBreakFrequency.getValue(), estimatorDT);
+      estimatedFilteredYawDrift.set(AngleTools.trimAngleMinusPiToPi(alphaYawDrift * angleDifference + estimatedYawDrift.getDoubleValue()));
 
       if (!estimatedYawDriftPrevious.isNaN())
       {

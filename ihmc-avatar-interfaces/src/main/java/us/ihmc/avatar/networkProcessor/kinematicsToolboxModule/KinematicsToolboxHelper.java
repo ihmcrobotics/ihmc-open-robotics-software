@@ -32,6 +32,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
@@ -267,10 +268,8 @@ public class KinematicsToolboxHelper
       feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
       command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
-      DenseMatrix64F weightVector = command.getMomentumRateCommand().getWeightVector();
       DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
-      for (int i = 0; i < 6; i++)
-         weightMatrix.set(i, i, weightVector.get(i, 0));
+      command.getMomentumRateCommand().getWeightMatrix(weightMatrix);
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
       positionError.get(3, error);

@@ -16,8 +16,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -25,8 +23,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MoveViaWaypointsState extends AbstractFootControlState
 {
    private final YoBoolean isPerformingTouchdown;
-   private final SettableDoubleProvider touchdownInitialTimeProvider = new SettableDoubleProvider(0.0);
-   private final SettablePositionProvider currentDesiredFootPosition = new SettablePositionProvider();
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
    private final RigidBodyTaskspaceControlState taskspaceControlState;
@@ -36,6 +32,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private Vector3DReadOnly linearWeight;
 
    private final FramePose3D initialPose = new FramePose3D();
+
+   private final FrameVector3DReadOnly touchdownVelocity;
+   private final FrameVector3DReadOnly touchdownAcceleration;
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private ReferenceFrame controlFrame;
@@ -50,13 +49,14 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       super(footControlHelper);
 
       this.gains = gains;
+      this.touchdownVelocity = touchdownVelocity;
+      this.touchdownAcceleration = touchdownAcceleration;
 
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";
 
       isPerformingTouchdown = new YoBoolean(namePrefix + "IsPerformingTouchdown", registry);
-      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
-                                                                                              touchdownVelocity, touchdownAcceleration, touchdownInitialTimeProvider, registry);
+      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", registry);
 
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -164,8 +164,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       desiredPosition.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
 
-      currentDesiredFootPosition.set(desiredPosition);
-      touchdownInitialTimeProvider.setValue(timeInState);
+      positionTrajectoryForDisturbanceRecovery.setLinearTrajectory(timeInState, desiredAnklePosition, touchdownVelocity, touchdownAcceleration);
       positionTrajectoryForDisturbanceRecovery.initialize();
 
       isPerformingTouchdown.set(true);

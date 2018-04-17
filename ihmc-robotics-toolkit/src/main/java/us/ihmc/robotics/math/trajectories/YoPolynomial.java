@@ -6,11 +6,12 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoPolynomial
+public class YoPolynomial implements PolynomialReadOnly
 {
    private final int maximumNumberOfCoefficients;
    private double pos, vel, acc, dPos;
@@ -65,6 +66,7 @@ public class YoPolynomial
       xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
    }
 
+   @Override
    public double getPosition()
    {
       return pos;
@@ -616,6 +618,7 @@ public class YoPolynomial
       setDirectly(coefficients);
    }
 
+   @Override
    public void compute(double x)
    {
       setXPowers(xPowers, x);
@@ -646,7 +649,7 @@ public class YoPolynomial
       double integral = 0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         integral += (1.0 / ((double) i + 1.0)) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
+         integral += (1.0 / (i + 1.0)) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
       }
       return integral;
    }
@@ -780,6 +783,7 @@ public class YoPolynomial
          a[i].set(Double.NaN);
    }
 
+   @Override
    public String toString()
    {
       String inString = "Polynomial: " + a[0].getDoubleValue();

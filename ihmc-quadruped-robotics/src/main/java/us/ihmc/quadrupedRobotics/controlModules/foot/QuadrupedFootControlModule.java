@@ -62,7 +62,7 @@ public class QuadrupedFootControlModule
       QuadrupedHoldPositionState holdState = new QuadrupedHoldPositionState(robotQuadrant, controllerToolbox, registry);
 
       EventBasedStateMachineFactory<QuadrupedFootStates, QuadrupedFootState> factory = new EventBasedStateMachineFactory<>(QuadrupedFootStates.class);
-      factory.setNamePrefix(prefix + "QuadrupedFootStates").setRegistry(registry);
+      factory.setNamePrefix(prefix + "QuadrupedFootStates").setRegistry(registry).buildYoClock(controllerToolbox.getRuntimeEnvironment().getRobotTimestamp());
 
       factory.addState(QuadrupedFootStates.SUPPORT, supportState);
       factory.addState(QuadrupedFootStates.SWING, swingState);
