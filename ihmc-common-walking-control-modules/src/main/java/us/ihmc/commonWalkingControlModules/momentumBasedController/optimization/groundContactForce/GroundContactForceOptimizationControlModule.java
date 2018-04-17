@@ -169,7 +169,7 @@ public class GroundContactForceOptimizationControlModule
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       momentumRateCommand.set(command);
-      momentumRateCommand.setWeights(command.getWeightVector());
+      momentumRateCommand.setWeights(command.getWeightMatrix());
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

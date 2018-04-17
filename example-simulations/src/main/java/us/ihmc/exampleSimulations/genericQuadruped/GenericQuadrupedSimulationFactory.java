@@ -95,7 +95,6 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      simulationFactory.setXGaitSettings(xGaitSettings);
 
       return simulationFactory.createSimulation();
    }

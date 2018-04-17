@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -59,6 +61,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final FrameVector3D finalVelocity = new FrameVector3D();
    private final FramePoint3D waypointPosition = new FramePoint3D();
    private final RecyclingArrayList<TDoubleArrayList> waypointPositions;
+   private final TIntIntMap indexMap = new TIntIntHashMap(10, 0.5f, -1, -1);
 
    private final TDoubleArrayList initialPositionArray = new TDoubleArrayList(dimensions);
    private final TDoubleArrayList initialVelocityArray = new TDoubleArrayList(dimensions);
@@ -250,8 +253,10 @@ public class PositionOptimizedTrajectoryGenerator
 
       this.waypointPositions.clear();
       coefficients.clear();
+      indexMap.clear();
 
       coefficients.add();
+      int optimizerIndex = 0;
       for (int i = 0; i < waypointPositions.size(); i++)
       {
          waypointPosition.setIncludingFrame(waypointPositions.get(i));
@@ -259,8 +264,13 @@ public class PositionOptimizedTrajectoryGenerator
 
          if (i > 0 && waypointPosition.epsilonEquals(waypointPositions.get(i - 1), 1.0e-4))
          {
+            optimizerIndex--;
+            indexMap.put(i, optimizerIndex);
             continue;
          }
+
+         indexMap.put(i, optimizerIndex);
+         optimizerIndex++;
 
          TDoubleArrayList waypoint = this.waypointPositions.add();
          for (Axis axis : Axis.values)
@@ -404,7 +414,7 @@ public class PositionOptimizedTrajectoryGenerator
     */
    public double getWaypointTime(int waypointIndex)
    {
-      return optimizer.getWaypointTime(waypointIndex);
+      return optimizer.getWaypointTime(indexMap.get(waypointIndex));
    }
 
    /**
@@ -416,7 +426,7 @@ public class PositionOptimizedTrajectoryGenerator
     */
    public void getWaypointVelocity(int waypointIndex, FrameVector3D waypointVelocityToPack)
    {
-      optimizer.getWaypointVelocity(this.waypointVelocity, waypointIndex);
+      optimizer.getWaypointVelocity(this.waypointVelocity, indexMap.get(waypointIndex));
       waypointVelocityToPack.setToZero(trajectoryFrame);
       for (int d = 0; d < Axis.values.length; d++)
          waypointVelocityToPack.setElement(d, this.waypointVelocity.get(d));
