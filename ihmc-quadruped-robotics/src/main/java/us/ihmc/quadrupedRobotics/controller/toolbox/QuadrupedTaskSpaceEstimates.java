@@ -10,14 +10,12 @@ public class QuadrupedTaskSpaceEstimates
 {
    private final FramePoint3D comPosition = new FramePoint3D();
    private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector3D> soleContactForce = new QuadrantDependentList<>();
 
    public QuadrupedTaskSpaceEstimates()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint3D());
-         soleContactForce.set(robotQuadrant, new FrameVector3D());
       }
    }
 
@@ -27,7 +25,6 @@ public class QuadrupedTaskSpaceEstimates
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          this.solePosition.get(robotQuadrant).setIncludingFrame(other.solePosition.get(robotQuadrant));
-         this.soleContactForce.get(robotQuadrant).setIncludingFrame(other.soleContactForce.get(robotQuadrant));
       }
    }
 
@@ -42,13 +39,4 @@ public class QuadrupedTaskSpaceEstimates
    }
 
 
-   public QuadrantDependentList<FrameVector3D> getSoleContactForces()
-   {
-      return soleContactForce;
-   }
-
-   public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
-   {
-      return soleContactForce.get(robotQuadrant);
-   }
 }
