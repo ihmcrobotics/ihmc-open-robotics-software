@@ -94,9 +94,7 @@ public class QuadrupedLowLevelJointController
       double jointStiffness = jointSetpoints.hasStiffness() ? jointSetpoints.getStiffness() : 0.0;
       double jointDamping = jointSetpoints.hasDamping() ? jointSetpoints.getDamping() : 0.0;
 
-      double desiredEffort = 0.0;
-      if (jointSetpoints.hasDesiredTorque())
-         desiredEffort += jointSetpoints.getDesiredTorque();
+      double desiredEffort = jointSetpoints.hasDesiredTorque() ? jointSetpoints.getDesiredTorque() : 0.0;
 
       double desiredVelocity = jointSetpoints.hasDesiredVelocity() ? jointSetpoints.getDesiredVelocity() : 0.0;
       if (jointSetpoints.hasVelocityScaling())
@@ -106,12 +104,10 @@ public class QuadrupedLowLevelJointController
       this.jointDampingFeedback.set(jointDampingFeedback);
       desiredEffort += jointDampingFeedback;
 
-      if (jointSetpoints.hasDesiredPosition())
-      {
-         double jointErrorFeedback = jointStiffness * (jointSetpoints.getDesiredPosition() - jointEstimates.getQ());
-         this.jointErrorFeedback.set(jointErrorFeedback);
-         desiredEffort += jointErrorFeedback;
-      }
+      double desiredPosition = jointSetpoints.hasDesiredPosition() ? jointSetpoints.getDesiredPosition() : jointEstimates.getQ();
+      double jointErrorFeedback = jointStiffness * (desiredPosition - jointEstimates.getQ());
+      this.jointErrorFeedback.set(jointErrorFeedback);
+      desiredEffort += jointErrorFeedback;
 
       this.jointEffort.set(desiredEffort);
 

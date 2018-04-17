@@ -14,28 +14,29 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
 public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 {
    private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
-   private final YoDouble contactThresholdForce;
-   private final YoDouble secondContactThresholdForce;
+   private final DoubleProvider contactThresholdForce;
+   private final DoubleProvider secondContactThresholdForce;
+   private final DoubleProvider footSwitchCoPThresholdFraction;
 
    private final YoVariableRegistry registry;
 
    private final ForceSensorDataReadOnly forceSensorData;
-   private final YoDouble footSwitchCoPThresholdFraction;
 
    private final YoBoolean isForceMagnitudePastThreshold;
    private final GlitchFilteredYoBoolean filteredIsForceMagnitudePastThreshold;
@@ -84,16 +85,15 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final AppearanceDefinition redAppearance = YoAppearance.Red();
    private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
 
-   public WrenchBasedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight,
-         ContactablePlaneBody contactablePlaneBody, YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce,
-         YoVariableRegistry parentRegistry)
+   public WrenchBasedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
+                                DoubleProvider contactThresholdForce, DoubleProvider secondContactThresholdForce, DoubleProvider footSwitchCoPThresholdFraction,
+                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      this.contactThresholdForce = new YoDouble(namePrefix + "ContactThresholdForce", registry);
-      this.contactThresholdForce.set(contactThresholdForce);
-      this.secondContactThresholdForce = new YoDouble(namePrefix + "SecondContactThresholdForce", registry);
-      this.secondContactThresholdForce.set(Double.POSITIVE_INFINITY);
+      this.contactThresholdForce = contactThresholdForce;
+      this.secondContactThresholdForce = secondContactThresholdForce;
+      this.footSwitchCoPThresholdFraction = footSwitchCoPThresholdFraction;
 
       yoFootForce = new YoFrameVector3D(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
       yoFootTorque = new YoFrameVector3D(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
@@ -156,8 +156,6 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       resolvedCoP = new FramePoint2D(contactablePlaneBody.getSoleFrame());
 
       this.forceSensorData = forceSensorData;
-      this.footSwitchCoPThresholdFraction = new YoDouble(namePrefix + "footSwitchCoPThresholdFraction", registry);
-      this.footSwitchCoPThresholdFraction.set(footSwitchCoPThresholdFraction);
 
       this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), null);
 
@@ -169,17 +167,21 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       parentRegistry.addChild(registry);
    }
 
-   public void setSecondContactThresholdForce(double secondContactThresholdForce)
-   {
-      this.secondContactThresholdForce.set(secondContactThresholdForce);
-   }
-
+   @Override
    public boolean hasFootHitGround()
    {
       isForceMagnitudePastThreshold.set(isForceMagnitudePastThreshold());
       filteredIsForceMagnitudePastThreshold.update();
 
-      isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getDoubleValue());
+      if (secondContactThresholdForce != null)
+      {
+         isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getValue());
+      }
+      else
+      {
+         isForceMagnitudePastSecondThreshold.set(false);
+      }
+
       isCoPPastThreshold.set(isCoPPastThreshold());
 
       hasFootHitGround.set(
@@ -194,6 +196,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          return controllerDetectedTouchdown.getBooleanValue();
    }
 
+   @Override
    public void reset()
    {
       pastThresholdFilter.set(false);
@@ -202,16 +205,19 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       controllerDetectedTouchdown.set(false);
    }
 
+   @Override
    public void resetHeelSwitch()
    {
       heelHitGroundFilter.set(false);
    }
 
+   @Override
    public void resetToeSwitch()
    {
       toeHitGroundFilter.set(false);
    }
 
+   @Override
    public boolean hasHeelHitGround()
    {
       heelHitGround.set(isForceMagnitudePastThreshold());
@@ -219,6 +225,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return heelHitGroundFilter.getBooleanValue();
    }
 
+   @Override
    public boolean hasToeHitGround()
    {
       toeHitGround.set(isForceMagnitudePastThreshold());
@@ -226,6 +233,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return toeHitGroundFilter.getBooleanValue();
    }
 
+   @Override
    public double computeFootLoadPercentage()
    {
       readSensorData(footWrench);
@@ -241,11 +249,13 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return footLoadPercentage.getDoubleValue();
    }
 
+   @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
       readSensorData(footWrenchToPack);
    }
 
+   @Override
    public ReferenceFrame getMeasurementFrame()
    {
       return forceSensorData.getMeasurementFrame();
@@ -253,13 +263,13 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private boolean isCoPPastThreshold()
    {
-      if (Double.isNaN(footSwitchCoPThresholdFraction.getDoubleValue()))
+      if (Double.isNaN(footSwitchCoPThresholdFraction.getValue()))
          return true;
 
       updateCoP();
 
-      minThresholdX = (footMinX + footSwitchCoPThresholdFraction.getDoubleValue() * footLength);
-      maxThresholdX = (footMaxX - footSwitchCoPThresholdFraction.getDoubleValue() * footLength);
+      minThresholdX = (footMinX + footSwitchCoPThresholdFraction.getValue() * footLength);
+      maxThresholdX = (footMaxX - footSwitchCoPThresholdFraction.getValue() * footLength);
 
       if (toeHitGroundFilter.getBooleanValue())
          pastThreshold.set(resolvedCoP.getX() <= maxThresholdX);
@@ -277,12 +287,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return pastThresholdFilter.getBooleanValue();
    }
 
+   @Override
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
       updateCoP();
       copToPack.setIncludingFrame(resolvedCoP);
    }
 
+   @Override
    public void updateCoP()
    {
       readSensorData(footWrench);
@@ -361,7 +373,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       //TODO: We switched to just z and made sure it was positive.
       //TODO: Check which reference frames all this stuff is in.
       //TODO: Make SCS and Gazebo consistent if possible.
-      return (yoFootForceInFoot.getZ() > contactThresholdForce.getDoubleValue());
+      return (yoFootForceInFoot.getZ() > contactThresholdForce.getValue());
 
       //      return (footFootMagnitude.getDoubleValue() > contactTresholdForce);
       //      return (footFootMagnitude.getDoubleValue() > MathTools.square(contactTresholdForce));
@@ -394,6 +406,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return maxFront.get(0).getX();
    }
 
+   @Override
    public boolean getForceMagnitudePastThreshhold()
    {
       return isForceMagnitudePastThreshold.getBooleanValue();

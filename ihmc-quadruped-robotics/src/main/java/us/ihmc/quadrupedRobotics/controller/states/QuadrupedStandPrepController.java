@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -34,8 +35,8 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 20.0);
-   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 5.0);
+   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
+   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
 
    private final YoBoolean yoUseForceFeedbackControl;
 
@@ -70,17 +71,25 @@ public class QuadrupedStandPrepController implements QuadrupedController
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
-         if (yoUseForceFeedbackControl.getBooleanValue())
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
-         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
+
+         double initialPosition = jointDesiredOutput.hasDesiredPosition() ? jointDesiredOutput.getDesiredPosition() : joint.getQ();
+         double initialVelocity = jointDesiredOutput.hasDesiredVelocity() ? jointDesiredOutput.getDesiredVelocity() : joint.getQd();
+         double initialAcceleration = 0.0;
+
+         trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
+
+         jointDesiredOutput.clear();
+         if (yoUseForceFeedbackControl.getBooleanValue())
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+         else
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
       }
 
       // This is a new trajectory. We start at time 0.
@@ -100,6 +109,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectory.computeTrajectory(timeInTrajectory);
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(trajectory.getPosition());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(trajectory.getVelocity());
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
 
          jointDesiredOutputList.getJointDesiredOutput(joint).setStiffness(standPrepJointStiffness.getValue());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDamping(standPrepJointDamping.getValue());

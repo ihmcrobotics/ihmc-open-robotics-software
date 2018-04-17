@@ -122,6 +122,11 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
+   public void initializeTrajectory()
+   {
+      trajectory.initialize();
+   }
+
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
