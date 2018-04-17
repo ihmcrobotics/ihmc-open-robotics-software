@@ -462,6 +462,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();

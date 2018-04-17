@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.robotDescription.SpringPinJointDescription;
+import us.ihmc.simulationconstructionset.simulatedSensors.CollisionShapeBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -128,6 +129,11 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          Joint rootJoint = constructJointRecursively(rootJointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
          this.addRootJoint(rootJoint);
       }
+
+      for (JointDescription rootJointDescription : rootJointDescriptions)
+      {
+         addForceSensorRecursively(rootJointDescription);
+      }
    }
 
    private Joint constructJointRecursively(JointDescription jointDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
@@ -139,13 +145,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       addKinematicPoints(jointDescription, joint);
 
       addExternalForcePointsFromCollisionMesh(jointDescription, joint);
-      
+
       addLidarMounts(jointDescription, joint);
       addCameraMounts(jointDescription, joint);
       addIMUMounts(jointDescription, joint);
       addJointWrenchSensors(jointDescription, joint);
-      
-      addForceSensors(jointDescription, joint);
+
+      //addForceSensors(jointDescription, joint);
 
       // Iterate over the children
       ArrayList<JointDescription> childrenJoints = jointDescription.getChildrenJoints();
@@ -165,12 +171,57 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
       return joint;
    }
-   
+
+   private void addForceSensorRecursively(JointDescription jointDescription)
+   {
+      Joint joint = jointNameMap.get(jointDescription.getName());
+
+      ArrayList<ForceSensorDescription> forceSensorDescriptions = jointDescription.getForceSensors();
+
+      for (ForceSensorDescription forceSensorDescription : forceSensorDescriptions)
+      {
+         WrenchCalculatorInterface wrenchCalculator;
+
+         if (forceSensorDescription.useGroundContactPoints())
+         {
+            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+            joint.recursiveGetAllGroundContactPoints(groundContactPoints);
+
+            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, joint,
+                                                                           forceSensorDescription.getTransformToJoint(), yoVariableRegistry);
+
+            if (forceSensorDescription.useShapeCollision())
+            {
+               ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
+               contactPoints = joint.getExternalForcePoints();
+               wrenchCalculator = new CollisionShapeBasedWrenchCalculator(forceSensorDescription.getName(), contactPoints, joint,
+                                                                          forceSensorDescription.getTransformToJoint(), yoVariableRegistry);
+            }
+         }
+         else
+         {
+            Vector3D offsetToPack = new Vector3D();
+            forceSensorDescription.getTransformToJoint().getTranslation(offsetToPack);
+            JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(forceSensorDescription.getName(), offsetToPack, this);
+            joint.addJointWrenchSensor(jointWrenchSensor);
+
+            wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensorDescription.getName(), joint);
+         }
+
+         joint.addForceSensor(wrenchCalculator);
+      }
+
+      ArrayList<JointDescription> childrenJoints = jointDescription.getChildrenJoints();
+
+      for (JointDescription childJointDescription : childrenJoints)
+         addForceSensorRecursively(childJointDescription);
+   }
+
    private void addExternalForcePointsFromCollisionMesh(JointDescription jointDescription, Joint joint)
    {
       Link link = joint.getLink();
       ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
-      
+
       if (collisionMeshDescriptions != null)
       {
          int estimatedNumberOfContactPoints = 0;
@@ -212,7 +263,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<CameraSensorDescription> cameraSensorDescriptions = jointDescription.getCameraSensors();
       for (CameraSensorDescription cameraSensorDescription : cameraSensorDescriptions)
       {
-         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), cameraSensorDescription.getFieldOfView(), cameraSensorDescription.getClipNear(), cameraSensorDescription.getClipFar(), this);
+         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(),
+                                                   cameraSensorDescription.getFieldOfView(), cameraSensorDescription.getClipNear(),
+                                                   cameraSensorDescription.getClipFar(), this);
          cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
          cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
 

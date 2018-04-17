@@ -206,13 +206,20 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
-                                                                                        useCollisionMeshes);
-      
-      collisionMeshDefinitionDataHolder.setVisible(false);
+      RobotDescription robotDescription;
+
       if (useShapeCollision)
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useShapeCollision);
+         collisionMeshDefinitionDataHolder.setVisible(false);
+
          robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
-      
+      }
+      else
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+      }
+
       return robotDescription;
    }
 

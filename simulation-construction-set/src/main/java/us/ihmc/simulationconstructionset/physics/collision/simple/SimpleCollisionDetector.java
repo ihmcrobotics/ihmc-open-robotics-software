@@ -584,13 +584,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
          
          if (simplex.getNumberOfPoints() != 4)
           {
-             System.err.println("\n-------------------\nTroublesome Polytopes!: ");
-             System.err.println("simplex = ");
-             System.err.println(simplex);
-             System.err.println("polytopeOneCopy = ");
-             System.err.println(supportingVertexHolderOne);
-             System.err.println("polytopeTwoCopy = ");
-             System.err.println(supportingVertexHolderTwo);
+//             System.err.println("\n-------------------\nTroublesome Polytopes!: ");
+//             System.err.println("simplex = ");
+//             System.err.println(simplex);
+//             System.err.println("polytopeOneCopy = ");
+//             System.err.println(supportingVertexHolderOne);
+//             System.err.println("polytopeTwoCopy = ");
+//             System.err.println(supportingVertexHolderTwo);
              return false;
           }
             
@@ -617,13 +617,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             }
             catch (RuntimeException e)
             {
-               System.err.println("\n-------------------\nTroublesome Polytopes!: ");
-               System.err.println("simplex = ");
-               System.err.println(simplex);
-               System.err.println("polytopeOneCopy = ");
-               System.err.println(supportingVertexHolderOne);
-               System.err.println("polytopeTwoCopy = ");
-               System.err.println(supportingVertexHolderTwo);
+//               System.err.println("\n-------------------\nTroublesome Polytopes!: ");
+//               System.err.println("simplex = ");
+//               System.err.println(simplex);
+//               System.err.println("polytopeOneCopy = ");
+//               System.err.println(supportingVertexHolderOne);
+//               System.err.println("polytopeTwoCopy = ");
+//               System.err.println(supportingVertexHolderTwo);
             }
          }
 

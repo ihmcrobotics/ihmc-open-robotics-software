@@ -46,12 +46,6 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
       this.sensorFrame = new PoseReferenceFrame(forceSensorName + "Frame", ReferenceFrame.getWorldFrame());
    }
 
-   public void initializeExternalForcePoints(List<ExternalForcePoint> contactPoints)
-   {
-      this.contactPoints.clear();
-      this.contactPoints.addAll(contactPoints);
-   }
-
    @Override
    public String getName()
    {
