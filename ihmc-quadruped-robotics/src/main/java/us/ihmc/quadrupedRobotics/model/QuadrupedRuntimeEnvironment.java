@@ -24,7 +24,6 @@ public class QuadrupedRuntimeEnvironment
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
    private final GlobalDataProducer globalDataProducer;
    private final JointDesiredOutputList jointDesiredOutputList;
-   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
    private final double gravityZ;
@@ -39,7 +38,7 @@ public class QuadrupedRuntimeEnvironment
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      QuadrupedXGaitSettingsReadOnly xGaitSettings, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
+                                      QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -54,7 +53,6 @@ public class QuadrupedRuntimeEnvironment
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
-      this.xGaitSettings = xGaitSettings;
    }
 
    public double getControlDT()
@@ -105,11 +103,6 @@ public class QuadrupedRuntimeEnvironment
    public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
-   }
-
-   public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
-   {
-      return xGaitSettings;
    }
 
    public QuadrantDependentList<ContactablePlaneBody> getContactableFeet()

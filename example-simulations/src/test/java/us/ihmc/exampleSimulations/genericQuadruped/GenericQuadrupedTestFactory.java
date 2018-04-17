@@ -137,7 +137,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
-      simulationFactory.setXGaitSettings(xGaitSettings);
       simulationFactory.setInitialForceControlState(QuadrupedControllerEnum.DO_NOTHING);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
 

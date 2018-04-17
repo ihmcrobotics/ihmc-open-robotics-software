@@ -35,8 +35,8 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 20.0);
-   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 5.0);
+   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
+   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
 
    private final YoBoolean yoUseForceFeedbackControl;
 
@@ -72,10 +72,6 @@ public class QuadrupedStandPrepController implements QuadrupedController
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
          JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-         if (yoUseForceFeedbackControl.getBooleanValue())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
@@ -88,6 +84,12 @@ public class QuadrupedStandPrepController implements QuadrupedController
          double initialAcceleration = 0.0;
 
          trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
+
+         jointDesiredOutput.clear();
+         if (yoUseForceFeedbackControl.getBooleanValue())
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+         else
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
       }
 
       // This is a new trajectory. We start at time 0.
@@ -107,6 +109,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectory.computeTrajectory(timeInTrajectory);
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(trajectory.getPosition());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(trajectory.getVelocity());
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
 
          jointDesiredOutputList.getJointDesiredOutput(joint).setStiffness(standPrepJointStiffness.getValue());
          jointDesiredOutputList.getJointDesiredOutput(joint).setDamping(standPrepJointDamping.getValue());
