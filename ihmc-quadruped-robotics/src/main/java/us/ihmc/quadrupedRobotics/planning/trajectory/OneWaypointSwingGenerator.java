@@ -6,6 +6,8 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
@@ -147,13 +149,13 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
+   public void setInitialConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
       this.finalPosition.setIncludingFrame(finalPosition);
       this.finalVelocity.setIncludingFrame(finalVelocity);
