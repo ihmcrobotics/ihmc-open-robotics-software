@@ -88,7 +88,7 @@ public class StandingState extends WalkingState
    public void onEntry()
    {
       consumePrepareForLocomotion();
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
 
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();

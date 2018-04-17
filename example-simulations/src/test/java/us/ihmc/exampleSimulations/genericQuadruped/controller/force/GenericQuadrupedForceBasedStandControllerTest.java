@@ -25,8 +25,8 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
       return testFactory;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 390000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
       double comZShiftShift = 0.05;
@@ -38,40 +38,40 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 250000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
+   @Test(timeout = 550000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       super.testStandingAndResistingPushesOnBody();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
       super.testStandingAndResistingPushesOnFrontLeftHipRoll();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
       super.testStandingAndResistingPushesOnFrontRightHipRoll();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
       super.testStandingAndResistingPushesOnHindLeftHipRoll();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 340000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
       super.testStandingAndResistingPushesOnHindRightHipRoll();

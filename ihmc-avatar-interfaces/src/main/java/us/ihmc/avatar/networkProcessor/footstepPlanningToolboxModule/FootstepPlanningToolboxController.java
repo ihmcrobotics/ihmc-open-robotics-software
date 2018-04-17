@@ -20,6 +20,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -72,7 +73,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
 
-   private final RobotContactPointParameters contactPointParameters;
+   private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private final PacketCommunicator packetCommunicator;
@@ -238,7 +239,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private void sendMessageToUI(String message)
    {
       TextToSpeechPacket packet = MessageTools.createTextToSpeechPacket(message);
-      packet.setDestination(PacketDestination.UI);
+      packet.setDestination(PacketDestination.UI.ordinal());
       packetCommunicator.send(packet);
    }
 
@@ -277,7 +278,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       for (RobotSide side : RobotSide.values)
       {
          ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
-         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(footPoints);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
          footPolygons.set(side, scaledFoot);
       }
 

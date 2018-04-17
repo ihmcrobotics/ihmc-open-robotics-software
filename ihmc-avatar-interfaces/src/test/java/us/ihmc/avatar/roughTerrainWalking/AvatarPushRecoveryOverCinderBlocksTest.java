@@ -61,6 +61,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
       PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
 
+
+
       FootstepDataListMessage footsteps = createFlatBlocksFootstepDataListMessage(swingTime, transferTime);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.send(planarRegionsListMessage);
@@ -170,6 +172,9 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       swingTime = walkingControllerParameters.getDefaultSwingTime();
       transferTime = walkingControllerParameters.getDefaultTransferTime();
 
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
       return planarRegionsListMessage;
    }
 
@@ -219,7 +224,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       int numberOfSteps = setUpForwardTiltedBlockTest();
 
       double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue("Caught an exception, the robot probably fell", drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       Point3D center = new Point3D(7.3, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
@@ -803,9 +808,10 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       footstep.setSwingHeight(swingHeight);
       message.getFootstepDataList().add().set(footstep);
 
-      location = new Point3D(7.08, 0.15, 0.35);
+      location = new Point3D(7.08, 0.15, 0.3);
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
+      footstep.setTrajectoryType(FootstepDataMessage.TRAJECTORY_TYPE_OBSTACLE_CLEARANCE);
       message.getFootstepDataList().add().set(footstep);
 
       location = new Point3D(7.45, -0.15, 0.0);

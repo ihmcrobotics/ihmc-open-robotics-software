@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -72,7 +71,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
       // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footholdPolygonInLocalFrame);
-      footPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
+      footPolygonInWorld.applyTransform(snapAndWiggleTransform, false);
 
       List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(footPolygonInWorld);
 

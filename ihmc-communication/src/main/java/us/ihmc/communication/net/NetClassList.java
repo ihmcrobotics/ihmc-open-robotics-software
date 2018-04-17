@@ -4,10 +4,15 @@ import java.util.ArrayList;
 
 import com.esotericsoftware.kryo.Kryo;
 
+import controller_msgs.msg.dds.IMUPacket;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 
@@ -88,6 +93,11 @@ public class NetClassList
 
    public void registerWithKryo(Kryo kryo)
    {
+      kryo.addDefaultSerializer(Quaternion.class, QuaternionSerializer.class);
+      kryo.addDefaultSerializer(Vector3D.class, Vector3DSerializer.class);
+      kryo.addDefaultSerializer(Point3D.class, Point3DSerializer.class);
+      kryo.addDefaultSerializer(IMUPacket.class, IMUPacketSerializer.class);
+      kryo.addDefaultSerializer(SpatialVectorMessage.class, SpatialVectorMessageSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Object.class, IDLSequenceObjectSerializer.class);
       kryo.addDefaultSerializer(RecyclingArrayListPubSub.class, RecyclingArrayListPubSubSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Boolean.class, IDLSequenceBooleanSerializer.class);

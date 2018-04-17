@@ -8,6 +8,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -73,7 +74,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
    }
 
-   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
+   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, FullQuadrupedRobotModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
@@ -88,7 +89,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(new Vector3D(offsetFromHipRollToHipPitch), referenceFrames, robotQuadrant);
    }
 
-   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
+   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, FullQuadrupedRobotModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();

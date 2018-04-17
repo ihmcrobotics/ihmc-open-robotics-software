@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -41,9 +42,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +56,9 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
@@ -595,9 +596,9 @@ public class FootstepSnapperSimulationTest
       private final YoDouble soleY = new YoDouble("soleY", registry);
       private final YoDouble soleZ = new YoDouble("soleZ", registry);
       private final YoDouble soleYaw = new YoDouble("soleYaw", registry);
-      private final YoFramePose planePose = new YoFramePose("planePose", "", worldFrame, registry);
-      private final YoFramePoint queryPoint = new YoFramePoint("query", "", worldFrame, registry);
-      private final YoFramePoint planePoint = new YoFramePoint("planePoint", "", worldFrame, registry);
+      private final YoFramePoseUsingYawPitchRoll planePose = new YoFramePoseUsingYawPitchRoll("planePose", "", worldFrame, registry);
+      private final YoFramePoint3D queryPoint = new YoFramePoint3D("query", "", worldFrame, registry);
+      private final YoFramePoint3D planePoint = new YoFramePoint3D("planePoint", "", worldFrame, registry);
       private BagOfBalls pointListBalls = null;
 
 
@@ -620,13 +621,13 @@ public class FootstepSnapperSimulationTest
             robot.getRobotsYoVariableRegistry().addChild(registry);
             YoGraphicsListRegistry yoGraphicsListRegistry = footstepVisualizer.getGraphicsListRegistry();
 
-            ConvexPolygon2D polygon2d = new ConvexPolygon2D(new double[][]
+            ConvexPolygon2D polygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][]
             {
                {0.1, 0.1}, {0.1, -0.1}, {-0.1, -0.1}, {-0.1, 0.1}
-            });
+            }));
 
-            YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("plane", "", worldFrame, 4, registry);
-            yoFrameConvexPolygon2d.setConvexPolygon2d(polygon2d);
+            YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D("plane", "", worldFrame, 4, registry);
+            yoFrameConvexPolygon2d.set(polygon2d);
 
 //          YoGraphicPolygon polygonViz = new YoGraphicPolygon("plane", yoFrameConvexPolygon2d, planePose, 1.0, YoAppearance.Gold());
 //          yoGraphicsListRegistry.registerYoGraphic("Plane", polygonViz);

@@ -1,16 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "StereoVisionPointCloudMessage" defined in
- * "StereoVisionPointCloudMessage_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from StereoVisionPointCloudMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * StereoVisionPointCloudMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "StereoVisionPointCloudMessage" defined in "StereoVisionPointCloudMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from StereoVisionPointCloudMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit StereoVisionPointCloudMessage_.idl instead.
+*
+*/
 public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StereoVisionPointCloudMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StereoVisionPointCloudMessage_";
@@ -19,8 +16,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.StereoVisionPointCloudMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.StereoVisionPointCloudMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -28,8 +24,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StereoVisionPointCloudMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StereoVisionPointCloudMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,11 +44,10 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -69,13 +63,18 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getPointCloud().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getColors().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,26 +85,24 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_11(data.getRobotTimestamp());
 
-      if (data.getPointCloud().size() <= 100)
-         cdr.write_type_e(data.getPointCloud());
-      else
-         throw new RuntimeException("point_cloud field exceeds the maximum length");
+      if(data.getPointCloud().size() <= 100)
+      cdr.write_type_e(data.getPointCloud());else
+          throw new RuntimeException("point_cloud field exceeds the maximum length");
 
-      if (data.getColors().size() <= 100)
-         cdr.write_type_e(data.getColors());
-      else
-         throw new RuntimeException("colors field exceeds the maximum length");
+      if(data.getColors().size() <= 100)
+      cdr.write_type_e(data.getColors());else
+          throw new RuntimeException("colors field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.StereoVisionPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotTimestamp(cdr.read_type_11());
-
-      cdr.read_type_e(data.getPointCloud());
-      cdr.read_type_e(data.getColors());
+      	
+      cdr.read_type_e(data.getPointCloud());	
+      cdr.read_type_e(data.getColors());	
 
    }
 
@@ -137,7 +134,6 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    {
       return new controller_msgs.msg.dds.StereoVisionPointCloudMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -149,7 +145,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.StereoVisionPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -159,7 +155,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.StereoVisionPointCloudMessage src, controller_msgs.msg.dds.StereoVisionPointCloudMessage dest)
    {
       staticCopy(src, dest);

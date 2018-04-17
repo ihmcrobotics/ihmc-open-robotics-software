@@ -22,7 +22,7 @@ public class GenericQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandom
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 500000)
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -30,24 +30,24 @@ public class GenericQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandom
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingRandomly();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 85.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 860000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingAtRandomSpeedsWithStops();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 65.0)
+   @Test(timeout = 1200000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingRandomVelocitiesStoppingAndTurning();

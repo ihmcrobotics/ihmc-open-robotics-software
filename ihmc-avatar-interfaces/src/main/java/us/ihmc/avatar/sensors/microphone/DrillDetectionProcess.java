@@ -43,7 +43,7 @@ public class DrillDetectionProcess extends DrillDetectionThread implements Conne
       if (now - lastSentPacketTimestamp < SEND_PERIOD_MS) { return; }
 
       DrillDetectionPacket packet = new DrillDetectionPacket();
-      packet.setDestination(PacketDestination.UI);
+      packet.setDestination(PacketDestination.UI.ordinal());
       packet.setIsDrillOn(result.isOn);
 //      packet.averageValues = result.averageValues;
 

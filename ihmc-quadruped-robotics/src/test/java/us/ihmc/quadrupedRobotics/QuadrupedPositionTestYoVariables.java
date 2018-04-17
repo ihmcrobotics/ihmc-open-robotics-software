@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -17,6 +17,8 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble yoPlanarVelocityInputY;
    private final YoDouble yoPlanarVelocityInputZ;
 
+   private final YoDouble yoComPositionInputZ;
+
    @SuppressWarnings("unchecked")
    public QuadrupedPositionTestYoVariables(SimulationConstructionSet scs)
    {
@@ -30,6 +32,13 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
       yoPlanarVelocityInputX = (YoDouble) scs.getVariable("planarVelocityInputX");
       yoPlanarVelocityInputY = (YoDouble) scs.getVariable("planarVelocityInputY");
       yoPlanarVelocityInputZ = (YoDouble) scs.getVariable("planarVelocityInputZ");
+
+      yoComPositionInputZ = (YoDouble) scs.getVariable("comPositionInputZ");
+   }
+
+   public YoDouble getYoComPositionInputZ()
+   {
+      return yoComPositionInputZ;
    }
 
    public YoEnum<QuadrupedPositionControllerRequestedEvent> getUserTrigger()

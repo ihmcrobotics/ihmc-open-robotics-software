@@ -16,6 +16,7 @@ import org.junit.rules.TestName;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,10 +30,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class WaypointDefinedBodyPathPlanTest
@@ -44,6 +45,7 @@ public class WaypointDefinedBodyPathPlanTest
    @Rule
    public TestName name = new TestName();
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleBodyPath()
    {
@@ -107,13 +109,13 @@ public class WaypointDefinedBodyPathPlanTest
          double alpha = (double) i / (double) (markers - 1);
          Pose2D pose = new Pose2D();
          plan.getPointAlongPath(alpha, pose);
-         YoFramePoint yoStartPoint = new YoFramePoint("PointStart" + i, worldFrame, registry);
+         YoFramePoint3D yoStartPoint = new YoFramePoint3D("PointStart" + i, worldFrame, registry);
          yoStartPoint.set(pose.getX(), pose.getY(), 0.0);
 
          double length = 0.1;
-         YoFrameVector direction = new YoFrameVector("Direction" + i, worldFrame, registry);
+         YoFrameVector3D direction = new YoFrameVector3D("Direction" + i, worldFrame, registry);
          direction.set(length * Math.cos(pose.getYaw()), length * Math.sin(pose.getYaw()), 0.0);
-         YoFramePoint yoEndPoint = new YoFramePoint("PointEnd" + i, worldFrame, registry);
+         YoFramePoint3D yoEndPoint = new YoFramePoint3D("PointEnd" + i, worldFrame, registry);
          yoEndPoint.set(yoStartPoint);
          yoEndPoint.add(direction);
 

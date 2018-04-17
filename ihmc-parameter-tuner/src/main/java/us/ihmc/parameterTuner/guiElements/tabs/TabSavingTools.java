@@ -22,6 +22,7 @@ import javafx.scene.control.TabPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
+import javafx.util.Pair;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
@@ -57,10 +58,10 @@ public class TabSavingTools
       {
          FileWriter writer = new FileWriter(file);
          writer.write(tab.getName() + "\n");
-         List<String> parameters = tab.getParameterUniqueNames();
-         for (String name : parameters)
+         List<Pair<String, Integer>> info = tab.getParameterSavingInfo();
+         for (Pair<String, Integer> parameterInfo : info)
          {
-            writer.write(name + "\n");
+            writer.write(parameterInfo.getKey() + " " + parameterInfo.getValue() + "\n");
          }
          writer.close();
          return true;
@@ -125,19 +126,24 @@ public class TabSavingTools
          TuningTab newTab = new TuningTab(name, tabPane);
          newTab.setTunerMap(tunerMap);
 
-         String parameter = reader.readLine();
+         String line = reader.readLine();
          List<String> namesNotFound = new ArrayList<>();
-         while (parameter != null)
+         while (line != null)
          {
+            String[] splitLine = line.split("\\s");
+            String parameter = splitLine[0];
+            int sliderIndex = splitLine.length > 1 ? Integer.parseInt(splitLine[1]) : -1;
+
             if (tunerMap.containsKey(parameter))
             {
-               newTab.handleNewParameter(parameter);
+               newTab.handleNewParameter(parameter, sliderIndex);
             }
             else
             {
                namesNotFound.add(parameter);
             }
-            parameter = reader.readLine();
+
+            line = reader.readLine();
          }
          reader.close();
 

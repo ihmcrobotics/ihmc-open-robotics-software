@@ -1,16 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "KinematicsToolboxRigidBodyMessage" defined in
- * "KinematicsToolboxRigidBodyMessage_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from KinematicsToolboxRigidBodyMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * KinematicsToolboxRigidBodyMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "KinematicsToolboxRigidBodyMessage" defined in "KinematicsToolboxRigidBodyMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from KinematicsToolboxRigidBodyMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit KinematicsToolboxRigidBodyMessage_.idl instead.
+*
+*/
 public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_";
@@ -19,8 +16,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -28,8 +24,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -65,6 +60,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -79,7 +75,9 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPositionInWorld(), current_alignment);
 
@@ -96,6 +94,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
       current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getAngularWeightMatrix(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getLinearWeightMatrix(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -119,17 +118,17 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    public static void read(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredOrientationInWorld(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getControlFramePositionInEndEffector(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getControlFrameOrientationInEndEffector(), cdr);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getLinearSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getAngularWeightMatrix(), cdr);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getLinearWeightMatrix(), cdr);
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredOrientationInWorld(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getControlFramePositionInEndEffector(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getControlFrameOrientationInEndEffector(), cdr);	
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);	
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getLinearSelectionMatrix(), cdr);	
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getAngularWeightMatrix(), cdr);	
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getLinearWeightMatrix(), cdr);	
 
    }
 
@@ -144,8 +143,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       ser.write_type_a("control_frame_position_in_end_effector", new geometry_msgs.msg.dds.PointPubSubType(), data.getControlFramePositionInEndEffector());
 
-      ser.write_type_a("control_frame_orientation_in_end_effector", new geometry_msgs.msg.dds.QuaternionPubSubType(),
-                       data.getControlFrameOrientationInEndEffector());
+      ser.write_type_a("control_frame_orientation_in_end_effector", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getControlFrameOrientationInEndEffector());
 
       ser.write_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
 
@@ -168,8 +166,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       ser.read_type_a("control_frame_position_in_end_effector", new geometry_msgs.msg.dds.PointPubSubType(), data.getControlFramePositionInEndEffector());
 
-      ser.read_type_a("control_frame_orientation_in_end_effector", new geometry_msgs.msg.dds.QuaternionPubSubType(),
-                      data.getControlFrameOrientationInEndEffector());
+      ser.read_type_a("control_frame_orientation_in_end_effector", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getControlFrameOrientationInEndEffector());
 
       ser.read_type_a("angular_selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
 
@@ -191,7 +188,6 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       return new controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -203,7 +199,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -213,7 +209,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage src, controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage dest)
    {
       staticCopy(src, dest);

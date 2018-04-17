@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "AtlasAuxiliaryRobotData" defined in
- * "AtlasAuxiliaryRobotData_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from AtlasAuxiliaryRobotData_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * AtlasAuxiliaryRobotData_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "AtlasAuxiliaryRobotData" defined in "AtlasAuxiliaryRobotData_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from AtlasAuxiliaryRobotData_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit AtlasAuxiliaryRobotData_.idl instead.
+*
+*/
 public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AtlasAuxiliaryRobotData>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AtlasAuxiliaryRobotData_";
@@ -18,8 +16,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AtlasAuxiliaryRobotData data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AtlasAuxiliaryRobotData data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,27 +42,22 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (6 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (6 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      for (int i0 = 0; i0 < (15); ++i0)
+      for(int i0 = 0; i0 < (15); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-      for (int i0 = 0; i0 < (15); ++i0)
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      for(int i0 = 0; i0 < (15); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -94,6 +85,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,52 +101,71 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getElectricJointTemperatures().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getElectricJointCurrents().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getElectricJointEnabledArray().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuRates()[i0], current_alignment);
+              current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuRates()[i0], current_alignment);
       }
-      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuDeltas()[i0], current_alignment);
+              current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuDeltas()[i0], current_alignment);
       }
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -163,39 +174,36 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getElectricJointTemperatures().size() <= 6)
-         cdr.write_type_e(data.getElectricJointTemperatures());
-      else
-         throw new RuntimeException("electric_joint_temperatures field exceeds the maximum length");
+      if(data.getElectricJointTemperatures().size() <= 6)
+      cdr.write_type_e(data.getElectricJointTemperatures());else
+          throw new RuntimeException("electric_joint_temperatures field exceeds the maximum length");
 
-      if (data.getElectricJointCurrents().size() <= 6)
-         cdr.write_type_e(data.getElectricJointCurrents());
-      else
-         throw new RuntimeException("electric_joint_currents field exceeds the maximum length");
+      if(data.getElectricJointCurrents().size() <= 6)
+      cdr.write_type_e(data.getElectricJointCurrents());else
+          throw new RuntimeException("electric_joint_currents field exceeds the maximum length");
 
-      if (data.getElectricJointEnabledArray().size() <= 6)
-         cdr.write_type_e(data.getElectricJointEnabledArray());
-      else
-         throw new RuntimeException("electric_joint_enabled_array field exceeds the maximum length");
+      if(data.getElectricJointEnabledArray().size() <= 6)
+      cdr.write_type_e(data.getElectricJointEnabledArray());else
+          throw new RuntimeException("electric_joint_enabled_array field exceeds the maximum length");
 
-      for (int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
       {
-         cdr.write_type_5(data.getRawImuTimestamps()[i0]);
+        	cdr.write_type_5(data.getRawImuTimestamps()[i0]);	
       }
 
-      for (int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
       {
-         cdr.write_type_5(data.getRawImuPacketCounts()[i0]);
+        	cdr.write_type_5(data.getRawImuPacketCounts()[i0]);	
       }
 
-      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuRates()[i0], cdr);
+        	geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuRates()[i0], cdr);		
       }
 
-      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
+      for(int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuDeltas()[i0], cdr);
+        	geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuDeltas()[i0], cdr);		
       }
 
       cdr.write_type_7(data.getBatteryCharging());
@@ -231,59 +239,60 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    public static void read(controller_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getElectricJointTemperatures());
-      cdr.read_type_e(data.getElectricJointCurrents());
-      cdr.read_type_e(data.getElectricJointEnabledArray());
-      for (int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
+      	
+      cdr.read_type_e(data.getElectricJointTemperatures());	
+      cdr.read_type_e(data.getElectricJointCurrents());	
+      cdr.read_type_e(data.getElectricJointEnabledArray());	
+      for(int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
       {
-         data.getRawImuTimestamps()[i0] = cdr.read_type_5();
-
+        	data.getRawImuTimestamps()[i0] = cdr.read_type_5();
+        	
       }
-
-      for (int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
+      	
+      for(int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
       {
-         data.getRawImuPacketCounts()[i0] = cdr.read_type_5();
-
+        	data.getRawImuPacketCounts()[i0] = cdr.read_type_5();
+        	
       }
-
-      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
+      	
+      for(int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuRates()[i0], cdr);
+        	geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuRates()[i0], cdr);	
       }
-
-      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
+      	
+      for(int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuDeltas()[i0], cdr);
+        	geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuDeltas()[i0], cdr);	
       }
-
+      	
       data.setBatteryCharging(cdr.read_type_7());
-
+      	
       data.setBatteryVoltage(cdr.read_type_5());
-
+      	
       data.setBatteryCurrent(cdr.read_type_5());
-
+      	
       data.setRemainingBatteryTime(cdr.read_type_5());
-
+      	
       data.setRemainingAmpHours(cdr.read_type_5());
-
+      	
       data.setRemainingChargePercentage(cdr.read_type_5());
-
+      	
       data.setBatteryCycleCount(cdr.read_type_11());
-
+      	
       data.setPumpInletPressure(cdr.read_type_5());
-
+      	
       data.setPumpSupplyPressure(cdr.read_type_5());
-
+      	
       data.setAirSumpPressure(cdr.read_type_5());
-
+      	
       data.setPumpSupplyTemperature(cdr.read_type_5());
-
+      	
       data.setPumpRpm(cdr.read_type_5());
-
+      	
       data.setMotorTemperature(cdr.read_type_5());
-
+      	
       data.setMotorDriverTemperature(cdr.read_type_5());
+      	
 
    }
 
@@ -351,7 +360,6 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       return new controller_msgs.msg.dds.AtlasAuxiliaryRobotData();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -363,7 +371,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -373,7 +381,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.AtlasAuxiliaryRobotData src, controller_msgs.msg.dds.AtlasAuxiliaryRobotData dest)
    {
       staticCopy(src, dest);

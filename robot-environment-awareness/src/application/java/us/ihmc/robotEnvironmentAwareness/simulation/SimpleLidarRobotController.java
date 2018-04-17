@@ -27,7 +27,6 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -35,6 +34,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SimpleLidarRobotController implements RobotController
@@ -73,7 +73,7 @@ public class SimpleLidarRobotController implements RobotController
       spinLidar.set(true);
       lidarRange.set(30.0);
 
-      final YoFrameOrientation lidarYawPitchRoll = new YoFrameOrientation("lidar", null, registry);
+      final YoFrameYawPitchRoll lidarYawPitchRoll = new YoFrameYawPitchRoll("lidar", null, registry);
       lidarYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
       {
          private final Quaternion localQuaternion = new Quaternion();

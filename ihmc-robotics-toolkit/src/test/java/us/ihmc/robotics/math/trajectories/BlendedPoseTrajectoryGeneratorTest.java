@@ -125,7 +125,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       return referenceTrajectory;
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNoConstraints()
    {
@@ -151,7 +151,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialPoseConstraint()
    {
@@ -190,7 +190,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialPoseAndTwistConstraint()
    {
@@ -367,7 +367,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInitialAndFinalConstraint()
    {
@@ -415,7 +415,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -499,7 +499,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet1WithBlending()
    {
@@ -563,7 +563,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet1WithoutBlending()
    {
@@ -616,7 +616,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublingDataSet2WithBlending()
    {

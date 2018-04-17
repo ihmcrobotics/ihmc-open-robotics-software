@@ -174,13 +174,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public int getRhoSize()
-   {
-      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
-   }
-
-   /** @inheritDoc */
-   @Override
    public List<GroupParameter<Double>> getJointspaceWeights()
    {
       return jointspaceWeightGroups;

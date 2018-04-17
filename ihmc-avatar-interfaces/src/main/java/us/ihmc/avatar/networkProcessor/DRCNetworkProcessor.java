@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.modules.uiConnector.ControllerFilteredConnectionModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
@@ -349,10 +350,18 @@ public class DRCNetworkProcessor
       if (params.isControllerCommunicatorEnabled())
       {
          PacketCommunicator controllerPacketCommunicator;
+
          if(params.isLocalControllerCommunicatorEnabled())
          {
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
+         }
+         else if (params.isFilterControllerInputMessages())
+         {
+            new ControllerFilteredConnectionModule(NET_CLASS_LIST);
+
+            PrintTools.info(this, "Connecting to controller using filtered connection module.");
+            controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_FILTER_MODULE_PORT, NET_CLASS_LIST);
          }
          else
          {

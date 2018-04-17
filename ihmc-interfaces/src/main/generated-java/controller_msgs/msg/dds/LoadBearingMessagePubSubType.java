@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "LoadBearingMessage" defined in "LoadBearingMessage_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LoadBearingMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * LoadBearingMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "LoadBearingMessage" defined in "LoadBearingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LoadBearingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LoadBearingMessage_.idl instead.
+*
+*/
 public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LoadBearingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LoadBearingMessage_";
@@ -26,8 +24,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LoadBearingMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LoadBearingMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -53,6 +50,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -67,13 +65,17 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyFrameToContactFrame(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getContactNormalInWorldFrame(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -93,13 +95,13 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(controller_msgs.msg.dds.LoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setLoad(cdr.read_type_7());
-
+      	
       data.setCoefficientOfFriction(cdr.read_type_6());
-
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getBodyFrameToContactFrame(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getContactNormalInWorldFrame(), cdr);
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getBodyFrameToContactFrame(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getContactNormalInWorldFrame(), cdr);	
 
    }
 
@@ -137,7 +139,6 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return new controller_msgs.msg.dds.LoadBearingMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -149,7 +150,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.LoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -159,7 +160,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.LoadBearingMessage src, controller_msgs.msg.dds.LoadBearingMessage dest)
    {
       staticCopy(src, dest);

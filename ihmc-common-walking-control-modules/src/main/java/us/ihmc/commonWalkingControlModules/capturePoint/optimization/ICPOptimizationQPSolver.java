@@ -3,21 +3,21 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
@@ -300,7 +300,7 @@ public class ICPOptimizationQPSolver
     *
     * @param polygon polygon to add.
     */
-   public void addSupportPolygon(FrameConvexPolygon2d polygon)
+   public void addSupportPolygon(FrameConvexPolygon2D polygon)
    {
       polygon.changeFrame(worldFrame);
       copLocationConstraint.addPolygon(polygon);
@@ -321,10 +321,10 @@ public class ICPOptimizationQPSolver
       hasPlanarRegionConstraint = false;
    }
 
-   public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
+   public void addReachabilityPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
-      polygon.changeFrame(worldFrame);
-      polygon.update();
+      polygon.checkReferenceFrameMatch(worldFrame);
+      polygon.checkIfUpToDate();
       reachabilityConstraint.addPolygon(polygon);
    }
 
@@ -679,12 +679,12 @@ public class ICPOptimizationQPSolver
     * All the tasks must be set every tick before calling this method.
     *
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
-    * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
+    * @returns whether a new solution was found if this is false the last valid solution will be used.
     */
-   public void compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP) throws NoConvergenceException
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP)
    {
       cmpOffsetToThrowAway.setToZero(worldFrame);
-      compute(currentICPError, desiredCoP, cmpOffsetToThrowAway);
+      return compute(currentICPError, desiredCoP, cmpOffsetToThrowAway);
    }
 
    /**
@@ -696,9 +696,9 @@ public class ICPOptimizationQPSolver
     *
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
     * @param desiredCMPOffset current desired distance from the CoP to the CMP.
-    * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
+    * @returns whether a new solution was found if this is false the last valid solution will be used.
     */
-   public void compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP, FrameVector2D desiredCMPOffset) throws NoConvergenceException
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP, FrameVector2D desiredCMPOffset)
    {
       indexHandler.computeProblemSize();
 
@@ -744,17 +744,9 @@ public class ICPOptimizationQPSolver
             addPlanarRegionConstraint();
       }
 
-      NoConvergenceException noConvergenceException = null;
-      try
-      {
-         solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         noConvergenceException = e;
-      }
+      boolean foundSolution = solve(solution);
 
-      if (noConvergenceException == null)
+      if (foundSolution)
       {
          if (indexHandler.useStepAdjustment())
          {
@@ -773,10 +765,8 @@ public class ICPOptimizationQPSolver
          if (computeCostToGo)
             computeCostToGo();
       }
-      else
-      {
-         throw noConvergenceException;
-      }
+
+      return foundSolution;
    }
 
    /**
@@ -941,9 +931,9 @@ public class ICPOptimizationQPSolver
     * Internal call to solves the quadratic program. Adds all the objectives and constraints to the problem and then solves it.
     *
     * @param solutionToPack solution of the QP.
-    * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
+    * @returns whether a solution was found.
     */
-   private void solve(DenseMatrix64F solutionToPack) throws NoConvergenceException
+   private boolean solve(DenseMatrix64F solutionToPack)
    {
       CommonOps.scale(-1.0, solverInput_h);
 
@@ -959,8 +949,7 @@ public class ICPOptimizationQPSolver
 
       numberOfIterations = solver.solve(solutionToPack);
 
-      if (MatrixTools.containsNaN(solutionToPack))
-         throw new NoConvergenceException(numberOfIterations);
+      return !MatrixTools.containsNaN(solutionToPack);
    }
 
    /**

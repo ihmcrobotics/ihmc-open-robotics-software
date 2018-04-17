@@ -1,14 +1,18 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -16,16 +20,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -36,12 +37,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private Vector3DReadOnly defaultLinearMomentumRateWeight;
    private Vector3DReadOnly defaultAngularMomentumRateWeight;
    private Vector3DReadOnly highLinearMomentumRateWeight;
-   private final YoFrameVector angularMomentumRateWeight;
-   private final YoFrameVector linearMomentumRateWeight;
+   private final YoFrameVector3D angularMomentumRateWeight;
+   private final YoFrameVector3D linearMomentumRateWeight;
 
    private final YoBoolean minimizeAngularMomentumRateZ;
 
-   private final YoFrameVector controlledCoMAcceleration;
+   private final YoFrameVector3D controlledCoMAcceleration;
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
@@ -66,15 +67,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
-   protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-   protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+   protected final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+   protected final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
    private boolean controlHeightWithMomentum;
 
-   private final YoFrameConvexPolygon2d yoSafeAreaPolygon;
-   private final YoFrameConvexPolygon2d yoProjectionPolygon;
+   private final YoFrameConvexPolygon2D yoSafeAreaPolygon;
+   private final YoFrameConvexPolygon2D yoProjectionPolygon;
 
-   protected final YoFramePoint2d yoUnprojectedDesiredCMP;
+   protected final YoFramePoint2D yoUnprojectedDesiredCMP;
    protected final CMPProjector cmpProjector;
 
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
@@ -94,15 +95,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
 
-      controlledCoMAcceleration = new YoFrameVector(namePrefix + "ControlledCoMAcceleration", "", centerOfMassFrame, registry);
+      controlledCoMAcceleration = new YoFrameVector3D(namePrefix + "ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
-      angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
-      linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
+      angularMomentumRateWeight = new YoFrameVector3D(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
+      linearMomentumRateWeight = new YoFrameVector3D(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
-      yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
+      yoSafeAreaPolygon = new YoFrameConvexPolygon2D("yoSafeAreaPolygon", worldFrame, 10, registry);
+      yoProjectionPolygon = new YoFrameConvexPolygon2D("yoProjectionPolygon", worldFrame, 10, registry);
 
       linearAndAngularZSelectionMatrix.selectAngularX(false);
       linearAndAngularZSelectionMatrix.selectAngularY(false);
@@ -118,7 +119,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       perfectCoP.setToNaN();
 
-      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
+      yoUnprojectedDesiredCMP = new YoFramePoint2D("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
       if (use2dProjection)
          cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
@@ -317,13 +318,13 @@ public abstract class LinearMomentumRateOfChangeControlModule
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
-   public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
+   public void setCMPProjectionArea(FrameConvexPolygon2DReadOnly areaToProjectInto, FrameConvexPolygon2DReadOnly safeArea)
    {
-      this.areaToProjectInto.setIncludingFrameAndUpdate(areaToProjectInto);
-      this.safeArea.setIncludingFrameAndUpdate(safeArea);
+      this.areaToProjectInto.setIncludingFrame(areaToProjectInto);
+      this.safeArea.setIncludingFrame(safeArea);
 
-      yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
-      yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
+      yoSafeAreaPolygon.set(safeArea);
+      yoProjectionPolygon.set(areaToProjectInto);
    }
 
    public void minimizeAngularMomentumRateZ(boolean enable)

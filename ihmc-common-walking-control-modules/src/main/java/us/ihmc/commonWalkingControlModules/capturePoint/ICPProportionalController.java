@@ -8,28 +8,28 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class ICPProportionalController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2D tempControl = new FrameVector2D(worldFrame);
-   private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
-   private final YoFrameVector2d icpErrorIntegrated = new YoFrameVector2d("icpErrorIntegrated", "", worldFrame, registry);
+   private final YoFrameVector2D icpError = new YoFrameVector2D("icpError", "", worldFrame, registry);
+   private final YoFrameVector2D icpErrorIntegrated = new YoFrameVector2D("icpErrorIntegrated", "", worldFrame, registry);
 
-   private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
+   private final YoFrameVector2D feedbackPart = new YoFrameVector2D("feedbackPart", "", worldFrame, registry);
 
-   private final YoFramePoint2d cmpOutput = new YoFramePoint2d("icpControlCMPOutput", "", worldFrame, registry);
-   private final YoFramePoint2d rateLimitedCMPOutput;
+   private final YoFramePoint2D cmpOutput = new YoFramePoint2D("icpControlCMPOutput", "", worldFrame, registry);
+   private final YoFramePoint2D rateLimitedCMPOutput;
    private final boolean rateLimitFeedbackPart;
    private final DoubleProvider feedbackPartMaxRate;
 
-   private final YoFramePoint icpPosition;
+   private final YoFramePoint3D icpPosition;
 
    private final double controlDT;
    private final DoubleProvider captureKpParallelToMotion;
@@ -48,7 +48,7 @@ public class ICPProportionalController
 
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
-      icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
+      icpPosition = new YoFramePoint3D("icpPosition", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
 
       captureKpParallelToMotion = gains.getYoKpParallelToMotion();
@@ -59,7 +59,7 @@ public class ICPProportionalController
       feedbackPartMaxRate = gains.getFeedbackPartMaxRate();
       rateLimitFeedbackPart = feedbackPartMaxRate != null;
       if (rateLimitFeedbackPart)
-         rateLimitedCMPOutput = new YoFramePoint2d("icpControlRateLimitedCMPOutput", "", worldFrame, registry);
+         rateLimitedCMPOutput = new YoFramePoint2D("icpControlRateLimitedCMPOutput", "", worldFrame, registry);
       else
          rateLimitedCMPOutput = null;
    }

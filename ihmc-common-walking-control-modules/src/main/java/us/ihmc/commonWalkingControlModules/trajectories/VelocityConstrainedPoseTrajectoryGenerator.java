@@ -20,8 +20,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -32,6 +30,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -45,13 +45,13 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final YoFrameVectorInMultipleFrames initialVelocity;
    private final YoFramePointInMultipleFrames finalPosition;
    private final YoFrameVectorInMultipleFrames finalVelocity;
-   private final YoFramePoint finalPositionForViz;
+   private final YoFramePoint3D finalPositionForViz;
 
    private final YoFrameQuaternionInMultipleFrames initialOrientation;
    private final YoFrameVectorInMultipleFrames initialAngularVelocity;
    private final YoFrameQuaternionInMultipleFrames finalOrientation;
    private final YoFrameVectorInMultipleFrames finalAngularVelocity;
-   private final YoFrameOrientation finalOrientationForViz;
+   private final YoFrameYawPitchRoll finalOrientationForViz;
 
    private final YoFramePointInMultipleFrames currentPosition;
    private final YoFrameVectorInMultipleFrames currentVelocity;
@@ -60,7 +60,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final YoFrameQuaternionInMultipleFrames currentOrientation;
    private final YoFrameVectorInMultipleFrames currentAngularVelocity;
    private final YoFrameVectorInMultipleFrames currentAngularAcceleration;
-   private final YoFrameOrientation currentOrientationForViz;
+   private final YoFrameYawPitchRoll currentOrientationForViz;
 
    private final FrameQuaternion tempCurrentOrientation;
    private final FrameVector3D tempCurrentAngularVelocity;
@@ -90,7 +90,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final ReferenceFrame interpolationFrame;
    private ReferenceFrame currentTrajectoryFrame;
    private ReferenceFrame finalFrame;
-   private final YoFrameOrientation interpolationFrameForViz;
+   private final YoFrameYawPitchRoll interpolationFrameForViz;
 
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
@@ -139,13 +139,13 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       initialVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "InitialVelocity", registry, referenceFrame);
       finalPosition = new YoFramePointInMultipleFrames(namePrefix + "FinalPosition", registry, referenceFrame);
       finalVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "FinalVelocity", registry, referenceFrame);
-      finalPositionForViz = new YoFramePoint(namePrefix + "FinalPositionForViz", worldFrame, registry);
+      finalPositionForViz = new YoFramePoint3D(namePrefix + "FinalPositionForViz", worldFrame, registry);
 
       initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "InitialOrientation", registry, referenceFrame);
       initialAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "InitialAngularVelocity", registry, referenceFrame);
       finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "FinalOrientation", registry, referenceFrame);
       finalAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "FinalAngularVelocity", registry, referenceFrame);
-      finalOrientationForViz = new YoFrameOrientation(namePrefix + "FinalOrientationForViz", worldFrame, registry);
+      finalOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "FinalOrientationForViz", worldFrame, registry);
 
       currentPosition = new YoFramePointInMultipleFrames(namePrefix + "CurrentPosition", registry, referenceFrame);
       currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame);
@@ -154,7 +154,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "CurrentOrientation", registry, referenceFrame);
       currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularVelocity", registry, referenceFrame);
       currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularAcceleration", registry, referenceFrame);
-      currentOrientationForViz = new YoFrameOrientation(namePrefix + "CurrentOrientationForViz", worldFrame, registry);
+      currentOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "CurrentOrientationForViz", worldFrame, registry);
 
       tempCurrentOrientation = new FrameQuaternion();
       tempCurrentAngularVelocity = new FrameVector3D();
@@ -230,7 +230,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          }
       };
 
-      interpolationFrameForViz = new YoFrameOrientation(namePrefix + "InterpolationFrameForViz", worldFrame, registry);
+      interpolationFrameForViz = new YoFrameYawPitchRoll(namePrefix + "InterpolationFrameForViz", worldFrame, registry);
 
       parentRegistry.addChild(registry);
 
@@ -406,8 +406,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.finalPosition.set(finalPosition);
       this.finalOrientation.set(finalOrientation);
 
-      finalPositionForViz.setAndMatchFrame(finalPosition);
-      finalOrientationForViz.setAndMatchFrame(finalOrientation);
+      finalPositionForViz.setMatchingFrame(finalPosition);
+      finalOrientationForViz.setMatchingFrame(finalOrientation);
 
       this.finalVelocity.setToZero();
       this.finalAngularVelocity.setToZero();

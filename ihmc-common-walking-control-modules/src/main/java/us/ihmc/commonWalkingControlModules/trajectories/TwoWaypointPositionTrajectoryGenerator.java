@@ -3,26 +3,26 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoConcatenatedSplines;
 import us.ihmc.robotics.trajectories.TwoWaypointTrajectoryGeneratorParameters;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -56,15 +56,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final YoBoolean setInitialSwingVelocityToZero;
 
-   private final YoFramePoint desiredPosition;
-   private final YoFrameVector desiredVelocity;
-   private final YoFrameVector desiredAcceleration;
+   private final YoFramePoint3D desiredPosition;
+   private final YoFrameVector3D desiredVelocity;
+   private final YoFrameVector3D desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
    private final YoDouble[] allTimes = new YoDouble[6];
-   protected final YoFramePoint[] allPositions = new YoFramePoint[6];
-   protected final YoFramePoint stancePosition;
-   private final YoFrameVector[] allVelocities = new YoFrameVector[6];
+   protected final YoFramePoint3D[] allPositions = new YoFramePoint3D[6];
+   protected final YoFramePoint3D stancePosition;
+   private final YoFrameVector3D[] allVelocities = new YoFrameVector3D[6];
 
    private final TrajectoryParametersProvider trajectoryParametersProvider;
    protected TrajectoryParameters trajectoryParameters;
@@ -128,9 +128,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
-      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
-      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+      desiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
       linearSplineLengthFactor = new YoDouble(namePrefix + "LinearSplineLengthFactor", registry);
 
@@ -139,10 +139,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 6; i++)
       {
          allTimes[i] = new YoDouble(namePrefix + "FixedPointTime" + i, registry);
-         allPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
-         allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
+         allPositions[i] = new YoFramePoint3D(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
+         allVelocities[i] = new YoFrameVector3D(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
-      stancePosition = new YoFramePoint(namePrefix + "StancePosition", referenceFrame, registry);
+      stancePosition = new YoFramePoint3D(namePrefix + "StancePosition", referenceFrame, registry);
 
       concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame,
             arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");

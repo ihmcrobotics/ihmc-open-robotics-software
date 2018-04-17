@@ -15,7 +15,7 @@ public class QuadrupedNeckJointPositionPacket extends Packet<QuadrupedNeckJointP
 
    public QuadrupedNeckJointPositionPacket()
    {
-      setDestination(PacketDestination.CONTROLLER);
+      this.setDestination(PacketDestination.CONTROLLER.ordinal());
       neckJointName = new QuadrupedJointName[0];
       neckJointPosition = new double[0];
    }

@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.11"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,8 +22,8 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile "us.ihmc:IHMCRealtime:1.1.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
@@ -33,7 +33,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"

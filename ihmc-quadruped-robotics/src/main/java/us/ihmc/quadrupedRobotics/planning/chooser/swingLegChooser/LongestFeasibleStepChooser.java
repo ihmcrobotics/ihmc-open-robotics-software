@@ -7,16 +7,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class LongestFeasibleStepChooser implements NextSwingLegChooser
 {
@@ -26,7 +26,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    private CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames;
    private final QuadrantDependentList<FrameEllipsoid3d> actualFootstepWorkspaces = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoGraphicEllipsoid> footstepWorkspaceYoEllipsoids = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint3D> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
    private final FramePoint3D temporaryCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -39,9 +39,9 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          actualFootstepWorkspaces.set(robotQuadrant, new FrameEllipsoid3d(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant), 0.0, 0.0, 0.0));
-         YoFramePoint footstepWorkspaceCenterFramePoint = new YoFramePoint(robotQuadrant + "FootstepWorkspaceFramePoint", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footstepWorkspaceCenterFramePoint = new YoFramePoint3D(robotQuadrant + "FootstepWorkspaceFramePoint", ReferenceFrame.getWorldFrame(), registry);
          footstepWorkspaceCenterFramePoints.set(robotQuadrant, footstepWorkspaceCenterFramePoint);
-         YoFrameOrientation footstepWorkspaceOrientation = new YoFrameOrientation(robotQuadrant + "FootstepWorkspaceOrientation", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameYawPitchRoll footstepWorkspaceOrientation = new YoFrameYawPitchRoll(robotQuadrant + "FootstepWorkspaceOrientation", ReferenceFrame.getWorldFrame(), registry);
          footstepWorkspaceYoEllipsoids.set(robotQuadrant, new YoGraphicEllipsoid(robotQuadrant + "YoEllipsoid", footstepWorkspaceCenterFramePoint, footstepWorkspaceOrientation, YoAppearance.Blue(), new Vector3D()));
          yoGraphicsListRegistry.registerYoGraphic(robotQuadrant + "YoEllipsoidReg", footstepWorkspaceYoEllipsoids.get(robotQuadrant));
          footstepWorkspaceYoEllipsoids.get(robotQuadrant).showGraphicObject();
@@ -67,7 +67,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          workspaceCenterPoint.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));
          workspaceCenterPoint.set(0.0, 0.0, hipHeight);
-         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setAndMatchFrame(workspaceCenterPoint);
+         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setMatchingFrame(workspaceCenterPoint);
          
          // Update YoGraphicEllipsoids to footstep workspace
          Vector3D radiiToPack = new Vector3D();

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "HeightQuadTreeMessage" defined in "HeightQuadTreeMessage_.idl".
- * Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from HeightQuadTreeMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * HeightQuadTreeMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "HeightQuadTreeMessage" defined in "HeightQuadTreeMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from HeightQuadTreeMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HeightQuadTreeMessage_.idl instead.
+*
+*/
 public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeightQuadTreeMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HeightQuadTreeMessage_";
@@ -18,8 +16,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeightQuadTreeMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeightQuadTreeMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -54,11 +50,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 5000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -74,19 +68,24 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getLeaves().size(); ++i0)
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getLeaves().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getCdrSerializedSize(data.getLeaves().get(i0), current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getCdrSerializedSize(data.getLeaves().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -103,26 +102,25 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_5(data.getSizeY());
 
-      if (data.getLeaves().size() <= 5000)
-         cdr.write_type_e(data.getLeaves());
-      else
-         throw new RuntimeException("leaves field exceeds the maximum length");
+      if(data.getLeaves().size() <= 5000)
+      cdr.write_type_e(data.getLeaves());else
+          throw new RuntimeException("leaves field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setDefaultHeight(cdr.read_type_5());
-
+      	
       data.setResolution(cdr.read_type_5());
-
+      	
       data.setSizeX(cdr.read_type_5());
-
+      	
       data.setSizeY(cdr.read_type_5());
-
-      cdr.read_type_e(data.getLeaves());
+      	
+      cdr.read_type_e(data.getLeaves());	
 
    }
 
@@ -158,7 +156,6 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       return new controller_msgs.msg.dds.HeightQuadTreeMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -170,7 +167,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -180,7 +177,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.HeightQuadTreeMessage src, controller_msgs.msg.dds.HeightQuadTreeMessage dest)
    {
       staticCopy(src, dest);

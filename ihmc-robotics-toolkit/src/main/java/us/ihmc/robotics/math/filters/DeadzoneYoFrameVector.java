@@ -2,13 +2,13 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameTuple3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYoVariable
+public class DeadzoneYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final DeadzoneYoVariable x, y, z;
 
@@ -37,12 +37,12 @@ public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYo
       return ret;
    }
 
-   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, YoVariableRegistry registry, YoDouble deadzoneSize, YoFrameTuple rawTuple)
+   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, YoVariableRegistry registry, YoDouble deadzoneSize, YoFrameTuple3D rawTuple)
    {
       return createDeadzoneYoFrameVector(namePrefix, "", registry, deadzoneSize, rawTuple);
    }
 
-   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble deadzoneSize, YoFrameTuple rawTuple)
+   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble deadzoneSize, YoFrameTuple3D rawTuple)
    {
       DeadzoneYoVariable x = new DeadzoneYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), rawTuple.getYoX(), deadzoneSize, registry);
       DeadzoneYoVariable y = new DeadzoneYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), rawTuple.getYoY(), deadzoneSize, registry);

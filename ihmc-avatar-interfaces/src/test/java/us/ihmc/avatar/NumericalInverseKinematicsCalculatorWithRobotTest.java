@@ -26,8 +26,6 @@ import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
 import us.ihmc.robotics.kinematics.KinematicSolver;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -36,6 +34,8 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -68,8 +68,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private FloatingRootJointRobot sdfRobot;
    private JointAnglesWriter jointAnglesWriter;
 
-   private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameOrientation testOrientationForwardKinematics = new YoFrameOrientation("testOrientationForwardKinematics",
+   private final YoFramePoint3D testPositionForwardKinematics = new YoFramePoint3D("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll testOrientationForwardKinematics = new YoFrameYawPitchRoll("testOrientationForwardKinematics",
                                                                           ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble yoErrorScalar = new YoDouble("errorScalar", registry);
    private final YoDouble positionError = new YoDouble("positionError", registry);
@@ -77,8 +77,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private final YoDouble numberOfIterations = new YoDouble("numberOfIterations", registry);
 
-   private final YoFramePoint testPositionInverseKinematics = new YoFramePoint("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameOrientation testOrientationInverseKinematics = new YoFrameOrientation("testOrientationInverseKinematics",
+   private final YoFramePoint3D testPositionInverseKinematics = new YoFramePoint3D("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll testOrientationInverseKinematics = new YoFrameYawPitchRoll("testOrientationInverseKinematics",
                                                                           ReferenceFrame.getWorldFrame(), registry);
 
    private enum InverseKinematicsSolver {TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;}

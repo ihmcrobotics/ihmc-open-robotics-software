@@ -21,9 +21,9 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.kinematics.JointLimit;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -40,10 +40,10 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<FrameVector3D> soleContactForce;
    private final QuadrantDependentList<FramePoint3D> solePosition;
    private final QuadrantDependentList<FrameVector3D[]> jointTorques;
-   private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
-   private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
-   private final QuadrantDependentList<YoFramePoint> yoSolePosition;
-   private final QuadrantDependentList<YoFrameVector[]> yoJointTorques;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleVirtualForce;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleContactForce;
+   private final QuadrantDependentList<YoFramePoint3D> yoSolePosition;
+   private final QuadrantDependentList<YoFrameVector3D[]> yoJointTorques;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
    private final LegJointName[] legJointNames;
@@ -54,12 +54,12 @@ public class QuadrupedVirtualModelController
 
    private final YoGraphicsList yoGraphicsList;
    private final QuadrantDependentList<YoGraphicVector> yoSoleVirtualForceGraphic;
-   private final QuadrantDependentList<YoFramePoint> yoSoleVirtualForceGraphicPosition;
+   private final QuadrantDependentList<YoFramePoint3D> yoSoleVirtualForceGraphicPosition;
    private final QuadrantDependentList<YoBoolean> yoSoleVirtualForceGraphicVisible;
    private final QuadrantDependentList<YoGraphicVector> yoSoleContactForceGraphic;
-   private final QuadrantDependentList<YoFramePoint> yoSoleContactForceGraphicPosition;
+   private final QuadrantDependentList<YoFramePoint3D> yoSoleContactForceGraphicPosition;
    private final QuadrantDependentList<YoBoolean> yoSoleContactForceGraphicVisible;
-   private final QuadrantDependentList<YoFramePoint[]> yoJointTorqueGraphicPositions;
+   private final QuadrantDependentList<YoFramePoint3D[]> yoJointTorqueGraphicPositions;
    private final QuadrantDependentList<YoBoolean> yoJointTorqueGraphicsVisible;
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
    private final FrameVector3D jointAxisTempVector = new FrameVector3D();
@@ -103,13 +103,13 @@ public class QuadrupedVirtualModelController
       yoJointTorques = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "SolePosition", worldFrame, registry));
-         yoSoleVirtualForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleVirtualForce", worldFrame, registry));
-         yoSoleContactForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleContactForce", worldFrame, registry));
-         yoJointTorques.set(robotQuadrant, new YoFrameVector[legJointNames.length]);
+         yoSolePosition.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "SolePosition", worldFrame, registry));
+         yoSoleVirtualForce.set(robotQuadrant, new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "SoleVirtualForce", worldFrame, registry));
+         yoSoleContactForce.set(robotQuadrant, new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "SoleContactForce", worldFrame, registry));
+         yoJointTorques.set(robotQuadrant, new YoFrameVector3D[legJointNames.length]);
          for (int i = 0; i < legJointNames.length; i++)
          {
-            yoJointTorques.get(robotQuadrant)[i] = new YoFrameVector(robotQuadrant.getCamelCaseName() + legJointNames[i].getPascalCaseName() + "JointTorques",
+            yoJointTorques.get(robotQuadrant)[i] = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + legJointNames[i].getPascalCaseName() + "JointTorques",
                                                                      worldFrame, registry);
          }
       }
@@ -144,20 +144,20 @@ public class QuadrupedVirtualModelController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
          String prefix = parentRegistry.getName() + robotQuadrant.getPascalCaseName();
-         yoSoleVirtualForceGraphicPosition.set(robotQuadrant, new YoFramePoint(prefix + "SoleVirtualForceGraphicPosition", worldFrame, registry));
+         yoSoleVirtualForceGraphicPosition.set(robotQuadrant, new YoFramePoint3D(prefix + "SoleVirtualForceGraphicPosition", worldFrame, registry));
          yoSoleVirtualForceGraphicVisible.set(robotQuadrant, new YoBoolean(prefix + "SoleVirtualForceGraphicVisible", registry));
          yoSoleVirtualForceGraphic.set(robotQuadrant, new YoGraphicVector(prefix + "SoleVirtualForce", yoSoleVirtualForceGraphicPosition.get(robotQuadrant),
                                                                           yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.Blue()));
-         yoSoleContactForceGraphicPosition.set(robotQuadrant, new YoFramePoint(prefix + "SoleContactForceGraphicPosition", worldFrame, registry));
+         yoSoleContactForceGraphicPosition.set(robotQuadrant, new YoFramePoint3D(prefix + "SoleContactForceGraphicPosition", worldFrame, registry));
          yoSoleContactForceGraphicVisible.set(robotQuadrant, new YoBoolean(prefix + "SoleContactForceGraphicVisible", registry));
          yoSoleContactForceGraphic.set(robotQuadrant, new YoGraphicVector(prefix + "SoleContactForce", yoSoleContactForceGraphicPosition.get(robotQuadrant),
                                                                           yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
          yoJointTorqueGraphicsVisible.set(robotQuadrant, new YoBoolean(prefix + "JointTorqueGraphicVisible", registry));
          yoJointTorqueGraphics.set(robotQuadrant, new YoGraphicVector[legJointNames.length]);
-         yoJointTorqueGraphicPositions.set(robotQuadrant, new YoFramePoint[legJointNames.length]);
+         yoJointTorqueGraphicPositions.set(robotQuadrant, new YoFramePoint3D[legJointNames.length]);
          for (int index = 0; index < legJointNames.length; index++)
          {
-            yoJointTorqueGraphicPositions.get(robotQuadrant)[index] = new YoFramePoint(
+            yoJointTorqueGraphicPositions.get(robotQuadrant)[index] = new YoFramePoint3D(
                   prefix + legJointNames[index].getPascalCaseName() + "JointTorqueGraphicPosition", worldFrame, registry);
             yoJointTorqueGraphics.get(robotQuadrant)[index] = new YoGraphicVector(prefix + legJointNames[index].getPascalCaseName() + "JointTorqueGraphic",
                                                                                   yoJointTorqueGraphicPositions.get(robotQuadrant)[index],
@@ -262,9 +262,9 @@ public class QuadrupedVirtualModelController
       // update yo variables
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
-         yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
-         yoSolePosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+         yoSoleVirtualForce.get(robotQuadrant).setMatchingFrame(soleVirtualForce.get(robotQuadrant));
+         yoSoleContactForce.get(robotQuadrant).setMatchingFrame(soleContactForce.get(robotQuadrant));
+         yoSolePosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          for (int i = 0; i < legJointNames.length; i++)
          {
             yoJointTorques.get(robotQuadrant)[i].set((Tuple3DReadOnly) jointTorques.get(robotQuadrant)[i]);
@@ -276,12 +276,12 @@ public class QuadrupedVirtualModelController
       {
          // move graphics off screen if visible is set to false
          if (yoSoleVirtualForceGraphicVisible.get(robotQuadrant).getBooleanValue())
-            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          else
             yoSoleVirtualForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
 
          if (yoSoleContactForceGraphicVisible.get(robotQuadrant).getBooleanValue())
-            yoSoleContactForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+            yoSoleContactForceGraphicPosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          else
             yoSoleContactForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
          for (int i = 0; i < legJointNames.length; i++)

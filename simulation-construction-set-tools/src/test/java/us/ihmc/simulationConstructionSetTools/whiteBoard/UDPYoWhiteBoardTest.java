@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 2.7)
+	@ContinuousIntegrationTest(estimatedDuration = 2.6)
 	@Test(timeout=300000)
    public void testUDPWhiteBoardOne() throws IOException
    {

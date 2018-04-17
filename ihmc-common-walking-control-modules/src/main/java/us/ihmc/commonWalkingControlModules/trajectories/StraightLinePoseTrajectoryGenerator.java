@@ -14,7 +14,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -26,6 +25,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -43,8 +43,8 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    private final YoFrameQuaternionInMultipleFrames initialOrientation;
    private final YoFrameQuaternionInMultipleFrames finalOrientation;
-   private final YoFrameOrientation initialOrientationForViz;
-   private final YoFrameOrientation finalOrientationForViz;
+   private final YoFrameYawPitchRoll initialOrientationForViz;
+   private final YoFrameYawPitchRoll finalOrientationForViz;
 
    private final YoFrameQuaternionInMultipleFrames currentOrientation;
    private final YoFrameVectorInMultipleFrames currentAngularVelocity;
@@ -74,7 +74,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
-   private YoFrameOrientation currentOrientationForViz;
+   private YoFrameYawPitchRoll currentOrientationForViz;
 
    public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -108,9 +108,9 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
       initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "InitialOrientation", registry, referenceFrame);
       finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "FinalOrientation", registry, referenceFrame);
-      initialOrientationForViz = new YoFrameOrientation(namePrefix + "InitialOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
-      finalOrientationForViz = new YoFrameOrientation(namePrefix + "FinalOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
-      currentOrientationForViz = new YoFrameOrientation(namePrefix + "CurrentOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
+      initialOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "InitialOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
+      finalOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "FinalOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
+      currentOrientationForViz = new YoFrameYawPitchRoll(namePrefix + "CurrentOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
 
       currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "CurrentOrientation", registry, referenceFrame);
       currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularVelocity", registry, referenceFrame);
@@ -225,40 +225,40 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       initialPose.get(tempPosition, tempOrientation);
 
-      initialPosition.setAndMatchFrame(tempPosition);
-      initialOrientation.setAndMatchFrame(tempOrientation);
+      initialPosition.setMatchingFrame(tempPosition);
+      initialOrientation.setMatchingFrame(tempOrientation);
 
-      initialOrientationForViz.setAndMatchFrame(tempOrientation);
+      initialOrientationForViz.setMatchingFrame(tempOrientation);
    }
 
    public void setInitialPose(FramePoint3D initialPosition, FrameQuaternion initialOrientation)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialPosition.setMatchingFrame(initialPosition);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
 
-      initialOrientationForViz.setAndMatchFrame(initialOrientation);
+      initialOrientationForViz.setMatchingFrame(initialOrientation);
    }
 
    public void setFinalPose(FramePose3D finalPose)
    {
       finalPose.get(tempPosition, tempOrientation);
 
-      finalPosition.setAndMatchFrame(tempPosition);
-      finalOrientation.setAndMatchFrame(tempOrientation);
+      finalPosition.setMatchingFrame(tempPosition);
+      finalOrientation.setMatchingFrame(tempOrientation);
 
-      finalOrientationForViz.setAndMatchFrame(tempOrientation);
+      finalOrientationForViz.setMatchingFrame(tempOrientation);
    }
 
    public void setFinalPose(FramePoint3D finalPosition, FrameQuaternion finalOrientation)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
 
-      finalOrientationForViz.setAndMatchFrame(finalOrientation);
+      finalOrientationForViz.setMatchingFrame(finalOrientation);
 
       tempPosition.setIncludingFrame(finalPosition);
       tempOrientation.setIncludingFrame(finalOrientation);
-      finalOrientationForViz.setAndMatchFrame(tempOrientation);
+      finalOrientationForViz.setMatchingFrame(tempOrientation);
    }
 
    public void initialize()

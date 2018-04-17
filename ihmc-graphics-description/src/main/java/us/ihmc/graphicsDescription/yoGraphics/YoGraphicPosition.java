@@ -16,12 +16,12 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
@@ -41,12 +41,12 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public YoGraphicPosition(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition appearance)
    {
-      this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance);
+      this(namePrefix + nameSuffix, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance);
    }
 
    public YoGraphicPosition(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition appearance, GraphicType type)
    {
-      this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance, type);
+      this(namePrefix + nameSuffix, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance, type);
    }
 
    public YoGraphicPosition(String name, YoDouble x, YoDouble y, YoDouble z, double scale, AppearanceDefinition appearance)
@@ -77,7 +77,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, GraphicType.BALL);
    }
 
-   public YoGraphicPosition(String name, YoFramePoint framePoint, double scale, AppearanceDefinition appearance)
+   public YoGraphicPosition(String name, YoFramePoint3D framePoint, double scale, AppearanceDefinition appearance)
    {
       this(name, framePoint, scale, appearance, GraphicType.BALL);
    }
@@ -87,7 +87,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, type);
    }
 
-   public YoGraphicPosition(String name, YoFramePoint framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
+   public YoGraphicPosition(String name, YoFramePoint3D framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
    {
       super(name);
 
@@ -108,7 +108,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, GraphicType.BALL);
    }
 
-   public YoGraphicPosition(String name, YoFramePoint2d framePoint, double scale, AppearanceDefinition appearance)
+   public YoGraphicPosition(String name, YoFramePoint2D framePoint, double scale, AppearanceDefinition appearance)
    {
       this(name, framePoint, scale, appearance, GraphicType.BALL);
    }
@@ -118,7 +118,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(name, framePoint.buildUpdatedYoFramePointForVisualizationOnly(), scale, appearance, type);
    }
 
-   public YoGraphicPosition(String name, YoFramePoint2d framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
+   public YoGraphicPosition(String name, YoFramePoint2D framePoint, double scale, AppearanceDefinition appearance, GraphicType type)
    {
       super(name);
 

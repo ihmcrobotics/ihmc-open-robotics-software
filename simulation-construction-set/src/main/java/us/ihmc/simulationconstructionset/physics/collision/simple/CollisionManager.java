@@ -148,16 +148,13 @@ public class CollisionManager
 
       if (collisionMeshDescriptions != null)
       {
-         int estimatedNumberOfContactPoints = 0;
-
          for (int i = 0; i < collisionMeshDescriptions.size(); i++)
          {
             CollisionMeshDescription collisionMesh = collisionMeshDescriptions.get(i);
             collisionShapeFactory.addCollisionMeshDescription(link, collisionMesh);
-            estimatedNumberOfContactPoints += collisionMesh.getEstimatedNumberOfContactPoints();
          }
 
-         link.enableCollisions(estimatedNumberOfContactPoints, collisionHandler, registry);
+         link.enableCollisions(collisionHandler);
       }
 
       ArrayList<Joint> childrenJoints = joint.getChildrenJoints();

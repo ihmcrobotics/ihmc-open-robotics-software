@@ -409,7 +409,7 @@ public class FourBarKinematicLoopTest
       assertEquals(jointAMax, 0.5 * Math.PI, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_NoLimitsAreSet_RandomQuadrilateral()
    {

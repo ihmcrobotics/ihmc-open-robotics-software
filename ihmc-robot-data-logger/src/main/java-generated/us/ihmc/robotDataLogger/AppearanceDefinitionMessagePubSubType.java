@@ -1,20 +1,34 @@
 package us.ihmc.robotDataLogger;
 
 /**
- * Topic data type of the struct "AppearanceDefinitionMessage" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit Handshake.idl instead.
- */
+* 
+* Topic data type of the struct "AppearanceDefinitionMessage" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit Handshake.idl instead.
+*
+*/
 public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.AppearanceDefinitionMessage>
 {
    public static final java.lang.String name = "us::ihmc::robotDataLogger::AppearanceDefinitionMessage";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public AppearanceDefinitionMessagePubSubType()
+   @Override
+   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -34,6 +48,7 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -48,18 +63,22 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_6(data.getR());
 
       cdr.write_type_6(data.getG());
@@ -67,18 +86,38 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_6(data.getB());
 
       cdr.write_type_6(data.getTransparency());
+
    }
 
    public static void read(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setR(cdr.read_type_6());
-
+      	
       data.setG(cdr.read_type_6());
-
+      	
       data.setB(cdr.read_type_6());
-
+      	
       data.setTransparency(cdr.read_type_6());
+      	
+
+   }
+
+   @Override
+   public final void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_6("r", data.getR());
+      ser.write_type_6("g", data.getG());
+      ser.write_type_6("b", data.getB());
+      ser.write_type_6("transparency", data.getTransparency());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data)
+   {
+      data.setR(ser.read_type_6("r"));
+      data.setG(ser.read_type_6("g"));
+      data.setB(ser.read_type_6("b"));
+      data.setTransparency(ser.read_type_6("transparency"));
    }
 
    public static void staticCopy(us.ihmc.robotDataLogger.AppearanceDefinitionMessage src, us.ihmc.robotDataLogger.AppearanceDefinitionMessage dest)
@@ -87,53 +126,10 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_6("r", data.getR());
-
-      ser.write_type_6("g", data.getG());
-
-      ser.write_type_6("b", data.getB());
-
-      ser.write_type_6("transparency", data.getTransparency());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data)
-   {
-      data.setR(ser.read_type_6("r"));
-
-      data.setG(ser.read_type_6("g"));
-
-      data.setB(ser.read_type_6("b"));
-
-      data.setTransparency(ser.read_type_6("transparency"));
-   }
-
-   @Override
    public us.ihmc.robotDataLogger.AppearanceDefinitionMessage createData()
    {
       return new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -145,7 +141,7 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-
+   
    public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -155,7 +151,7 @@ public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-
+   
    public void copy(us.ihmc.robotDataLogger.AppearanceDefinitionMessage src, us.ihmc.robotDataLogger.AppearanceDefinitionMessage dest)
    {
       staticCopy(src, dest);

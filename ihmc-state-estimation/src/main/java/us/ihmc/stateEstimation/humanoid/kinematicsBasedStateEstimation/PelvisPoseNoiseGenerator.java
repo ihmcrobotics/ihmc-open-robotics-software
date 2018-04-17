@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
@@ -35,13 +35,13 @@ public class PelvisPoseNoiseGenerator
    private final RotationMatrix pelvisRotation = new RotationMatrix();
    
    
-   private final YoFramePoint nonProcessedRootJointPosition;
+   private final YoFramePoint3D nonProcessedRootJointPosition;
    private final YoFrameQuaternion nonProcessedRootJointQuaternion;
    private final YoDouble nonProcessedRootJointPitch;
    private final YoDouble nonProcessedRootJointRoll;
    private final YoDouble nonProcessedRootJointYaw;
    
-   private final YoFramePoint processedRootJointPosition;
+   private final YoFramePoint3D processedRootJointPosition;
    private final YoFrameQuaternion processedRootJointQuaternion;
    private final YoDouble processedRootJointPitch;
    private final YoDouble processedRootJointRoll;
@@ -79,13 +79,13 @@ public class PelvisPoseNoiseGenerator
       rotationError.setIdentity();
       pelvisRotation.setIdentity();
       
-      nonProcessedRootJointPosition = new YoFramePoint("PelvisPose_beforeNoise_position", ReferenceFrame.getWorldFrame(), registry);
+      nonProcessedRootJointPosition = new YoFramePoint3D("PelvisPose_beforeNoise_position", ReferenceFrame.getWorldFrame(), registry);
       nonProcessedRootJointQuaternion = new YoFrameQuaternion("PelvisPose_beforeNoise_quaternion", ReferenceFrame.getWorldFrame(), registry);
       nonProcessedRootJointYaw = new YoDouble("PelvisPose_beforeNoise_yaw", registry);
       nonProcessedRootJointPitch = new YoDouble("PelvisPose_beforeNoise_pitch", registry);
       nonProcessedRootJointRoll = new YoDouble("PelvisPose_beforeNoise_roll", registry);
       
-      processedRootJointPosition = new YoFramePoint("PelvisPose_afterNoise_position", ReferenceFrame.getWorldFrame(), registry);
+      processedRootJointPosition = new YoFramePoint3D("PelvisPose_afterNoise_position", ReferenceFrame.getWorldFrame(), registry);
       processedRootJointQuaternion = new YoFrameQuaternion("PelvisPose_afterNoise_quaternion", ReferenceFrame.getWorldFrame(), registry);
       processedRootJointYaw = new YoDouble("PelvisPose_afterNoise_yaw", registry);
       processedRootJointPitch = new YoDouble("PelvisPose_afterNoise_pitch", registry);

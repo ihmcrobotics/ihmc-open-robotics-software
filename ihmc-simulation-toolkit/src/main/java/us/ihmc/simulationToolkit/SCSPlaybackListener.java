@@ -1,6 +1,7 @@
 package us.ihmc.simulationToolkit;
 
 import controller_msgs.msg.dds.SCSListenerPacket;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
@@ -22,7 +23,11 @@ public class SCSPlaybackListener implements PlaybackListener
    {
 //      System.out.println("SCSPlaybackListener: stopped");
       if (networkServer != null)
-         networkServer.queueDataToSend(new SCSListenerPacket());
+      {
+         SCSListenerPacket packet = new SCSListenerPacket();
+         packet.setDestination(PacketDestination.UI.ordinal());
+         networkServer.queueDataToSend(packet);
+      }
    }
 
    public void notifyOfIndexChange(int newIndex)

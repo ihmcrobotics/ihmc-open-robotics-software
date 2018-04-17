@@ -2,17 +2,17 @@ package us.ihmc.robotics.math;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
-public class TimestampedVelocityYoFrameVector extends YoFrameVector
+public class TimestampedVelocityYoFrameVector extends YoFrameVector3D
 {
    private final TimestampedVelocityYoVariable xDot, yDot, zDot;
 
    public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
-           double dt, YoVariableRegistry registry, YoFrameVector yoFrameVectorToDifferentiate, double epsilonChange)
+           double dt, YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate, double epsilonChange)
    {
       TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoX(),
                                               timestamp, registry, epsilonChange);
@@ -27,7 +27,7 @@ public class TimestampedVelocityYoFrameVector extends YoFrameVector
    }
 
    public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
-           double dt, YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate, double epsilonChange)
+           double dt, YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate, double epsilonChange)
    {
       TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoX(),
                                               timestamp, registry, epsilonChange);

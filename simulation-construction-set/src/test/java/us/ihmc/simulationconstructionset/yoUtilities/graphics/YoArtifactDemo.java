@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -13,12 +14,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameLine2d;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameLine2D;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class YoArtifactDemo
 {
@@ -35,59 +36,59 @@ public class YoArtifactDemo
       
       YoVariableRegistry registry = new YoVariableRegistry("plotterDemo");
       
-      YoFramePoint2d center = new YoFramePoint2d("center", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector2d radii = new YoFrameVector2d("radii", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D center = new YoFramePoint2D("center", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector2D radii = new YoFrameVector2D("radii", ReferenceFrame.getWorldFrame(), registry);
       center.set(-1.0, -1.0);
       radii.set(1.0, 0.7);
       
-      YoFrameLineSegment2d lineSegment = new YoFrameLineSegment2d("segmentGuy", "", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameLineSegment2D lineSegment = new YoFrameLineSegment2D("segmentGuy", "", ReferenceFrame.getWorldFrame(), registry);
       lineSegment.getYoFirstEndpointX().set(1.0);
       lineSegment.getYoFirstEndpointY().set(1.0);
       lineSegment.getYoSecondEndpointX().set(2.0);
       lineSegment.getYoSecondEndpointY().set(2.0);
       
-      YoFrameLine2d line = new YoFrameLine2d("line", "", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameLine2D line = new YoFrameLine2D("line", "", ReferenceFrame.getWorldFrame(), registry);
       line.getYoPointX().set(-1.0);
       line.getYoPointY().set(1.0);
-      line.getYoVectorX().set(-0.5);
-      line.getYoVectorY().set(1.0);
+      line.getYoDirectionX().set(-0.5);
+      line.getYoDirectionY().set(1.0);
       
-      YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("polygon", ReferenceFrame.getWorldFrame(), 5, registry);
+      YoFrameConvexPolygon2D polygon = new YoFrameConvexPolygon2D("polygon", ReferenceFrame.getWorldFrame(), 5, registry);
       
-      YoFrameConvexPolygon2d polygon2 = new YoFrameConvexPolygon2d("polygon1", ReferenceFrame.getWorldFrame(), 5, registry);
-      YoFramePoint2d point1 = new YoFramePoint2d("point1", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d polyPoint1 = point1;
+      YoFrameConvexPolygon2D polygon2 = new YoFrameConvexPolygon2D("polygon1", ReferenceFrame.getWorldFrame(), 5, registry);
+      YoFramePoint2D point1 = new YoFramePoint2D("point1", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D polyPoint1 = point1;
       polyPoint1.set(1.5, 2.0);
-      polygon2.setConvexPolygon2d(new FramePoint2DReadOnly[] {polyPoint1});
+      polygon2.set(FrameVertex2DSupplier.asFrameVertex2DSupplier(new FramePoint2DReadOnly[] {polyPoint1}));
       
-      YoFrameConvexPolygon2d polygon3 = new YoFrameConvexPolygon2d("polygon2", ReferenceFrame.getWorldFrame(), 5, registry);
-      YoFramePoint2d polyPoint2 = new YoFramePoint2d("point2", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameConvexPolygon2D polygon3 = new YoFrameConvexPolygon2D("polygon2", ReferenceFrame.getWorldFrame(), 5, registry);
+      YoFramePoint2D polyPoint2 = new YoFramePoint2D("point2", ReferenceFrame.getWorldFrame(), registry);
       polyPoint2.set(2.0, 2.5);
-      YoFramePoint2d polyPoint3 = new YoFramePoint2d("point3", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D polyPoint3 = new YoFramePoint2D("point3", ReferenceFrame.getWorldFrame(), registry);
       polyPoint3.set(1.0, 3.0);
-      polygon3.setConvexPolygon2d(new FramePoint2DReadOnly[] {polyPoint1, polyPoint2, polyPoint3});
+      polygon3.set(FrameVertex2DSupplier.asFrameVertex2DSupplier(new FramePoint2DReadOnly[] {polyPoint1, polyPoint2, polyPoint3}));
       
-      YoFramePoint2d pointZ = new YoFramePoint2d("pointZ", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D pointZ = new YoFramePoint2D("pointZ", ReferenceFrame.getWorldFrame(), registry);
       pointZ.set(-2.2, 3.0);
-      YoFramePoint2d point4 = new YoFramePoint2d("point4", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point4 = new YoFramePoint2D("point4", ReferenceFrame.getWorldFrame(), registry);
       point4.set(-2.0, 3.0);
-      YoFramePoint2d point5 = new YoFramePoint2d("point5", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point5 = new YoFramePoint2D("point5", ReferenceFrame.getWorldFrame(), registry);
       point5.set(-1.8, 3.0);
-      YoFramePoint2d point6 = new YoFramePoint2d("point6", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point6 = new YoFramePoint2D("point6", ReferenceFrame.getWorldFrame(), registry);
       point6.set(-1.6, 3.0);
-      YoFramePoint2d point7 = new YoFramePoint2d("point7", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point7 = new YoFramePoint2D("point7", ReferenceFrame.getWorldFrame(), registry);
       point7.set(-1.4, 3.0);
-      YoFramePoint2d point8 = new YoFramePoint2d("point8", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point8 = new YoFramePoint2D("point8", ReferenceFrame.getWorldFrame(), registry);
       point8.set(-1.2, 3.0);
-      YoFramePoint2d point9 = new YoFramePoint2d("point9", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point9 = new YoFramePoint2D("point9", ReferenceFrame.getWorldFrame(), registry);
       point9.set(-1.0, 3.0);
-      YoFramePoint2d point10 = new YoFramePoint2d("point10", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point10 = new YoFramePoint2D("point10", ReferenceFrame.getWorldFrame(), registry);
       point10.set(-0.8, 3.0);
-      YoFramePoint2d point11 = new YoFramePoint2d("point11", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point11 = new YoFramePoint2D("point11", ReferenceFrame.getWorldFrame(), registry);
       point11.set(-0.6, 3.0);
-      YoFramePoint2d point12 = new YoFramePoint2d("point12", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point12 = new YoFramePoint2D("point12", ReferenceFrame.getWorldFrame(), registry);
       point12.set(-0.4, 3.0);
-      YoFramePoint2d point13 = new YoFramePoint2d("point13", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D point13 = new YoFramePoint2D("point13", ReferenceFrame.getWorldFrame(), registry);
       point13.set(-0.2, 3.0);
       
       

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -154,7 +155,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {
             partialFootholdPolygon.clear();
-            partialFootholdPolygon.addVertices(footstep.getPredictedContactPoints(), footstep.getPredictedContactPoints().size());
+            partialFootholdPolygon.addVertices(Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));
             partialFootholdPolygon.update();
 
             if (partialFootholdPolygon.getNumberOfVertices() != 4)

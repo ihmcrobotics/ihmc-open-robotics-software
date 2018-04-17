@@ -28,112 +28,112 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.8)
+   @Test(timeout = 180000)
    public void testLookingLeftAndRight() throws Exception
    {
       super.testLookingLeftAndRight();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.1)
+   @Test(timeout = 190000)
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
    {
       super.testLookingLeftAndRightInVariousTrajectoryFrames();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.4)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 34.9)
+   @Test(timeout = 170000)
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
    {
       super.testMessageWithALotOfTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.4)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.4)
+   @Test(timeout = 180000)
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
    {
       super.testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 19.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 24.5)
+   @Test(timeout = 120000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 23.6)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 43.2)
+   @Test(timeout = 220000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.8)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 26.4)
+   @Test(timeout = 130000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.3)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 41.2)
+   @Test(timeout = 210000)
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
    {
       super.testQueueWithUsingDifferentTrajectoryFrameWithoutOverride();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.3)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 17.3)
+   @Test(timeout = 87000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.5)
+   @Test(timeout = 130000)
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
    {
       super.testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 26.7)
+   @Test(timeout = 130000)
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
    {
       super.testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 23.8)
+   @Test(timeout = 120000)
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
    {
       super.testSettingWeightMatrixUsingSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 27.3)
+   @Test(timeout = 140000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 21.8)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 34.2)
+   @Test(timeout = 170000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

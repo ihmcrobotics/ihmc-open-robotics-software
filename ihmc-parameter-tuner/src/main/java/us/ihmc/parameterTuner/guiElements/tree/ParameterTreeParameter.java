@@ -3,12 +3,14 @@ package us.ihmc.parameterTuner.guiElements.tree;
 import org.apache.commons.lang3.StringUtils;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
@@ -21,13 +23,15 @@ public class ParameterTreeParameter implements ParameterTreeValue
 {
    private final GuiParameter parameter;
    private final Node treeTuner;
+   private final ObservableList<TreeItem<ParameterTreeValue>> selectedItems;
 
    private ParameterNode node;
 
-   public ParameterTreeParameter(GuiParameter parameter, Node treeTuner)
+   public ParameterTreeParameter(GuiParameter parameter, Node treeTuner, ObservableList<TreeItem<ParameterTreeValue>> selectedItems)
    {
       this.parameter = parameter;
       this.treeTuner = treeTuner;
+      this.selectedItems = selectedItems;
    }
 
    @Override
@@ -42,6 +46,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
       return parameter.getName();
    }
 
+   @Override
    public GuiParameter getParameter()
    {
       return parameter;
@@ -92,14 +97,17 @@ public class ParameterTreeParameter implements ParameterTreeValue
          contextMenu.getItems().add(new SeparatorMenuItem());
 
          // Setup context menu for discarding changes.
-         discard.setDisable(true);
          contextMenu.getItems().add(discard);
          setOnContextMenuRequested((event) -> contextMenu.show(name, event.getScreenX(), event.getScreenY()));
-         discard.setOnAction(event -> parameter.reset());
+         discard.setOnAction(event -> {
+            selectedItems.filtered(item -> !item.getValue().isRegistry()).forEach(item -> item.getValue().getParameter().reset());
+         });
 
          // Setup context menu for marking a parameter as modified.
          contextMenu.getItems().add(markModified);
-         markModified.setOnAction((event) -> parameter.markAsModified());
+         markModified.setOnAction(event -> {
+            selectedItems.filtered(item -> !item.getValue().isRegistry()).forEach(item -> item.getValue().getParameter().markAsModified());
+         });
 
          // Set up the css styles for the parameter status.
          updateStyle(parameter);
@@ -118,21 +126,16 @@ public class ParameterTreeParameter implements ParameterTreeValue
       {
          if (parameter.getStatus() == GuiParameterStatus.DEFAULT)
          {
-            discard.setDisable(true);
             name.setId("default-parameter-name-in-tree-view");
          }
          else if (parameter.getStatus() == GuiParameterStatus.MODIFIED)
          {
-            discard.setDisable(false);
             name.setId("modified-parameter-name-in-tree-view");
          }
          else
          {
-            discard.setDisable(true);
             name.setId("parameter-name-in-tree-view");
          }
-
-         markModified.setDisable(!discard.isDisable());
       }
    }
 }

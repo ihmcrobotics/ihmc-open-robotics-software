@@ -7,12 +7,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * This class runs a PD controller between two external force points with
@@ -30,13 +30,13 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
    private final ExternalForcePoint connectionPointA;
    private final ExternalForcePoint connectionPointB;
 
-   private final YoFramePoint yoConnectionAPosition;
-   private final YoFramePoint yoConnectionBPosition;
-   private final YoFrameVector yoConnectionPositionError;
+   private final YoFramePoint3D yoConnectionAPosition;
+   private final YoFramePoint3D yoConnectionBPosition;
+   private final YoFrameVector3D yoConnectionPositionError;
 
-   private final YoFrameVector yoConnectionAVelocity;
-   private final YoFrameVector yoConnectionBVelocity;
-   private final YoFrameVector yoConnectionVelocityError;
+   private final YoFrameVector3D yoConnectionAVelocity;
+   private final YoFrameVector3D yoConnectionBVelocity;
+   private final YoFrameVector3D yoConnectionVelocityError;
 
    private final ReferenceFrame stiffnessFrame;
 
@@ -75,11 +75,11 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
       yoConnectionAPosition = connectionPointA.getYoPosition();
       yoConnectionBPosition = connectionPointB.getYoPosition();
-      yoConnectionPositionError = new YoFrameVector(name + "_ConnectionPositionError", worldFrame, registry);
+      yoConnectionPositionError = new YoFrameVector3D(name + "_ConnectionPositionError", worldFrame, registry);
 
       yoConnectionAVelocity = connectionPointA.getYoVelocity();
       yoConnectionBVelocity = connectionPointB.getYoVelocity();
-      yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityErrorMagnitude", worldFrame, registry);
+      yoConnectionVelocityError = new YoFrameVector3D(name + "_ConnectionVelocityErrorMagnitude", worldFrame, registry);
 
       parentRegistry.addChild(registry);
 

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -16,22 +17,20 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
@@ -49,7 +48,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
    private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
-   private final YoFramePoint trajectoryPosition;
+   private final YoFramePoint3D trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
@@ -60,7 +59,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final SphereWithConvexPolygonIntersector sphereWithConvexPolygonIntersector;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D> closestPolygonPointMap;
    private final FrameSphere3d footCollisionSphere;
-   private final FrameConvexPolygon2d framePlanarRegion;
+   private final FrameConvexPolygon2D framePlanarRegion;
    private final TransformReferenceFrame planarRegionReferenceFrame;
    private final FramePoint3D midGroundPoint;
    private final Vector3D waypointAdjustmentVector;
@@ -119,7 +118,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
-      trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
+      trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
@@ -131,7 +130,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
       }
       footCollisionSphere = new FrameSphere3d();
-      framePlanarRegion = new FrameConvexPolygon2d();
+      framePlanarRegion = new FrameConvexPolygon2D();
       planarRegionReferenceFrame = new TransformReferenceFrame("planarRegionReferenceFrame", WORLD);
       midGroundPoint = new FramePoint3D();
       waypointAdjustmentVector = new Vector3D();

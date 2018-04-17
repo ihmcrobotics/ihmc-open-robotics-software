@@ -43,7 +43,7 @@ public final class SpatialFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConvergence() throws Exception
    {
@@ -141,7 +141,7 @@ public final class SpatialFeedbackControllerTest
 
          differenceOrientation.difference(desiredOrientation, currentOrientation);
          differenceOrientation.normalizeAndLimitToPi();
-         differenceOrientation.get(rotationError);
+         differenceOrientation.getRotationVector(rotationError);
 
          errorMagnitude = Math.sqrt(positionError.lengthSquared() + rotationError.lengthSquared());
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
@@ -282,7 +282,7 @@ public final class SpatialFeedbackControllerTest
 
          differenceOrientation.difference(desiredOrientation, currentOrientation);
          differenceOrientation.normalizeAndLimitToPi();
-         differenceOrientation.get(rotationError);
+         differenceOrientation.getRotationVector(rotationError);
 
          errorMagnitude = Math.sqrt(positionError.lengthSquared() + rotationError.lengthSquared());
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;

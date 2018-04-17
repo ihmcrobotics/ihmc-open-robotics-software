@@ -23,8 +23,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -35,6 +33,8 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
 {
@@ -101,9 +101,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final FrameVector3D unachievedSwingVelocityTemp = new FrameVector3D();
    private final FrameVector3D unachievedSwingAccelerationTemp = new FrameVector3D();
 
-   private final YoFrameVector unachievedSwingTranslation;
-   private final YoFrameVector unachievedSwingVelocity;
-   private final YoFrameVector unachievedSwingAcceleration;
+   private final YoFrameVector3D unachievedSwingTranslation;
+   private final YoFrameVector3D unachievedSwingVelocity;
+   private final YoFrameVector3D unachievedSwingAcceleration;
 
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D anklePosition = new FramePoint3D(worldFrame);
@@ -119,12 +119,12 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final FrameVector3D desiredFootLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredFootLinearAcceleration = new FrameVector3D();
 
-   private final YoFramePoint yoCurrentFootPosition;
-   private final YoFramePoint yoDesiredFootPosition;
-   private final YoFramePoint yoCorrectedDesiredFootPosition;
+   private final YoFramePoint3D yoCurrentFootPosition;
+   private final YoFramePoint3D yoDesiredFootPosition;
+   private final YoFramePoint3D yoCorrectedDesiredFootPosition;
 
-   private final YoFrameVector yoDesiredFootLinearVelocity;
-   private final YoFrameVector yoCorrectedDesiredFootLinearVelocity;
+   private final YoFrameVector3D yoDesiredFootLinearVelocity;
+   private final YoFrameVector3D yoCorrectedDesiredFootLinearVelocity;
 
    private final YoGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
@@ -161,9 +161,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      unachievedSwingTranslation = new YoFrameVector("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);
-      unachievedSwingVelocity = new YoFrameVector("unachievedSwingVelocity", ReferenceFrame.getWorldFrame(), registry);
-      unachievedSwingAcceleration = new YoFrameVector("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);
+      unachievedSwingTranslation = new YoFrameVector3D("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);
+      unachievedSwingVelocity = new YoFrameVector3D("unachievedSwingVelocity", ReferenceFrame.getWorldFrame(), registry);
+      unachievedSwingAcceleration = new YoFrameVector3D("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
       maximumLegLength = new YoDouble(namePrefix + "MaxLegLength", registry);
       maximumLegLength.set(walkingControllerParameters.getMaximumLegLengthForSingularityAvoidance());
@@ -327,11 +327,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 
-      yoCurrentFootPosition = new YoFramePoint(namePrefix + "CurrentFootPosition", worldFrame, registry);
-      yoDesiredFootPosition = new YoFramePoint(namePrefix + "DesiredFootPosition", worldFrame, registry);
-      yoCorrectedDesiredFootPosition = new YoFramePoint(namePrefix + "CorrectedDesiredFootPosition", worldFrame, registry);
-      yoDesiredFootLinearVelocity = new YoFrameVector(namePrefix + "DesiredFootLinearVelocity", worldFrame, registry);
-      yoCorrectedDesiredFootLinearVelocity = new YoFrameVector(namePrefix + "CorrectedDesiredFootLinearVelocity", worldFrame, registry);
+      yoCurrentFootPosition = new YoFramePoint3D(namePrefix + "CurrentFootPosition", worldFrame, registry);
+      yoDesiredFootPosition = new YoFramePoint3D(namePrefix + "DesiredFootPosition", worldFrame, registry);
+      yoCorrectedDesiredFootPosition = new YoFramePoint3D(namePrefix + "CorrectedDesiredFootPosition", worldFrame, registry);
+      yoDesiredFootLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredFootLinearVelocity", worldFrame, registry);
+      yoCorrectedDesiredFootLinearVelocity = new YoFrameVector3D(namePrefix + "CorrectedDesiredFootLinearVelocity", worldFrame, registry);
       yoDesiredFootPosition.setToNaN();
       yoCorrectedDesiredFootPosition.setToNaN();
       yoDesiredFootLinearVelocity.setToNaN();

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSpatialVector
 {
@@ -16,8 +17,8 @@ public class YoSpatialVector
    protected final String nameSuffix;
 
    /** This is where the data is stored. All operations must act on these numbers. */
-   protected final YoFrameVector linearPart;
-   protected final YoFrameVector angularPart;
+   protected final YoFrameVector3D linearPart;
+   protected final YoFrameVector3D angularPart;
    /** Redundant but allows to make sure the frame isn't changed. */
    protected final ReferenceFrame expressedInFrame;
 
@@ -26,8 +27,8 @@ public class YoSpatialVector
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      linearPart = new YoFrameVector(namePrefix + "Linear", nameSuffix, expressedInFrame, registry);
-      angularPart = new YoFrameVector(namePrefix + "Angular", nameSuffix, expressedInFrame, registry);
+      linearPart = new YoFrameVector3D(namePrefix + "Linear", nameSuffix, expressedInFrame, registry);
+      angularPart = new YoFrameVector3D(namePrefix + "Angular", nameSuffix, expressedInFrame, registry);
       this.expressedInFrame = expressedInFrame;
    }
 
@@ -36,7 +37,7 @@ public class YoSpatialVector
       this(namePrefix, "", expressedInFrame, registry);
    }
 
-   public YoSpatialVector(YoFrameVector yoLinearPart, YoFrameVector yoAngularPart)
+   public YoSpatialVector(YoFrameVector3D yoLinearPart, YoFrameVector3D yoAngularPart)
    {
       yoLinearPart.checkReferenceFrameMatch(yoAngularPart);
 
@@ -64,7 +65,7 @@ public class YoSpatialVector
       linearPart.set(frameVector);
    }
 
-   public void setLinearPart(YoFrameVector yoFrameVector)
+   public void setLinearPart(YoFrameVector3D yoFrameVector)
    {
       linearPart.set(yoFrameVector);
    }
@@ -79,7 +80,7 @@ public class YoSpatialVector
       angularPart.set(frameVector);
    }
 
-   public void setAngularPart(YoFrameVector yoFrameVector)
+   public void setAngularPart(YoFrameVector3D yoFrameVector)
    {
       angularPart.set(yoFrameVector);
    }
@@ -96,7 +97,7 @@ public class YoSpatialVector
       setAngularPart(angularPart);
    }
 
-   public void set(YoFrameVector linearPart, YoFrameVector angularPart)
+   public void set(YoFrameVector3D linearPart, YoFrameVector3D angularPart)
    {
       setLinearPart(linearPart);
       setAngularPart(angularPart);
@@ -124,12 +125,12 @@ public class YoSpatialVector
       angularPart.setToZero();
    }
 
-   public YoFrameVector getYoLinearPart()
+   public YoFrameVector3D getYoLinearPart()
    {
       return linearPart;
    }
 
-   public YoFrameVector getYoAngularPart()
+   public YoFrameVector3D getYoAngularPart()
    {
       return angularPart;
    }
@@ -146,12 +147,12 @@ public class YoSpatialVector
 
    public void setAndMatchFrameLinearPart(FrameTuple3DReadOnly frameVector)
    {
-      linearPart.setAndMatchFrame(frameVector);
+      linearPart.setMatchingFrame(frameVector);
    }
 
    public void setAndMatchFrameAngularPart(FrameTuple3DReadOnly frameVector)
    {
-      angularPart.setAndMatchFrame(frameVector);
+      angularPart.setMatchingFrame(frameVector);
    }
 
    public void setAndMatchFrame(FrameTuple3DReadOnly linearPart, FrameTuple3DReadOnly angularPart)
@@ -205,7 +206,7 @@ public class YoSpatialVector
       linearPartToPack.setIncludingFrame(this.linearPart);
    }
 
-   public void getLinearPart(YoFrameVector linearPartToPack)
+   public void getLinearPart(YoFrameVector3D linearPartToPack)
    {
       linearPartToPack.set(this.linearPart);
    }
@@ -225,7 +226,7 @@ public class YoSpatialVector
       angularPartToPack.setIncludingFrame(this.angularPart);
    }
 
-   public void getAngularPart(YoFrameVector angularPartToPack)
+   public void getAngularPart(YoFrameVector3D angularPartToPack)
    {
       angularPartToPack.set(this.angularPart);
    }
@@ -248,7 +249,7 @@ public class YoSpatialVector
       getAngularPartIncludingFrame(angularPartToPack);
    }
 
-   public void get(YoFrameVector linearPartToPack, YoFrameVector angularPartToPack)
+   public void get(YoFrameVector3D linearPartToPack, YoFrameVector3D angularPartToPack)
    {
       getLinearPart(linearPartToPack);
       getAngularPart(angularPartToPack);

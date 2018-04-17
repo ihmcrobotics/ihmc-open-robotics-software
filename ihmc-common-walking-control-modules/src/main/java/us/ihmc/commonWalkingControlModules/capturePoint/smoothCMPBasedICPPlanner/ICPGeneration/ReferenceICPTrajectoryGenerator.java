@@ -10,14 +10,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -46,7 +46,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
    private final FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
    private final FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
-   private final YoFrameVector yoICPVelocityDynamicsCurrent;
+   private final YoFrameVector3D yoICPVelocityDynamicsCurrent;
 
    private final FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
    private final FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
@@ -98,7 +98,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
       localTimeInCurrentPhase.set(0.0);
 
-      yoICPVelocityDynamicsCurrent = new YoFrameVector(namePrefix + "ICPVelocityDynamics", ReferenceFrame.getWorldFrame(), registry);
+      yoICPVelocityDynamicsCurrent = new YoFrameVector3D(namePrefix + "ICPVelocityDynamics", ReferenceFrame.getWorldFrame(), registry);
 
       currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegment", registry);
 
@@ -448,7 +448,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       positionToPack.set(icpPositionDesiredCurrent);
    }
 
-   public void getPosition(YoFramePoint positionToPack)
+   public void getPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(icpPositionDesiredCurrent);
    }
@@ -459,7 +459,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       velocityToPack.set(icpVelocityDesiredCurrent);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       velocityToPack.set(icpVelocityDesiredCurrent);
    }
@@ -470,7 +470,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       accelerationToPack.set(icpAccelerationDesiredCurrent);
    }
 
-   public void getAcceleration(YoFrameVector accelerationToPack)
+   public void getAcceleration(YoFrameVector3D accelerationToPack)
    {
       accelerationToPack.set(icpAccelerationDesiredCurrent);
    }
@@ -483,7 +483,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

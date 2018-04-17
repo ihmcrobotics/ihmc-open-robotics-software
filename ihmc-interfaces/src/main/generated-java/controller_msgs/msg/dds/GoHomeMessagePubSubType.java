@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "GoHomeMessage" defined in "GoHomeMessage_.idl". Use this class to
- * provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from GoHomeMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit GoHomeMessage_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "GoHomeMessage" defined in "GoHomeMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from GoHomeMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit GoHomeMessage_.idl instead.
+*
+*/
 public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.GoHomeMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::GoHomeMessage_";
@@ -52,6 +50,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -66,13 +65,19 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -94,14 +99,15 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    public static void read(controller_msgs.msg.dds.GoHomeMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setHumanoidBodyPart(cdr.read_type_9());
-
+      	
       data.setRobotSide(cdr.read_type_9());
-
+      	
       data.setTrajectoryTime(cdr.read_type_6());
-
+      	
       data.setExecutionDelayTime(cdr.read_type_6());
+      	
 
    }
 
@@ -135,7 +141,6 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       return new controller_msgs.msg.dds.GoHomeMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -147,7 +152,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.GoHomeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -157,7 +162,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.GoHomeMessage src, controller_msgs.msg.dds.GoHomeMessage dest)
    {
       staticCopy(src, dest);

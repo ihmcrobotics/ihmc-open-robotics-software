@@ -4,8 +4,8 @@ import java.util.Random;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class RandomExternalForceApplier implements RobotController
@@ -15,7 +15,7 @@ public class RandomExternalForceApplier implements RobotController
 
    private final ForcePerturbable perturbable;
    private final YoDouble maximalDisturbanceMagnitude;
-   private final YoFrameVector currentDisturbanceForce;
+   private final YoFrameVector3D currentDisturbanceForce;
 
    private final Random random = new Random(1776L);
 
@@ -25,7 +25,7 @@ public class RandomExternalForceApplier implements RobotController
       this.name = name;
       this.maximalDisturbanceMagnitude = new YoDouble("maximalDisturbanceMagnitude", registry);
       this.maximalDisturbanceMagnitude.set(maximalDisturbanceMagnitude);
-      this.currentDisturbanceForce = new YoFrameVector("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
+      this.currentDisturbanceForce = new YoFrameVector3D("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
    @Override

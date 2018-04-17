@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.PolygonArtifact;
 import us.ihmc.plotting.PlotterPanel;
@@ -48,14 +49,14 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -100.0, 200.0), generateRandomDouble(random, -100.0, 100.0));
          Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 100.0));
          ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
-         ConvexPolygon2D polygon = new ConvexPolygon2D(points);
+         ConvexPolygon2D polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
          convexPolygon2ds.add(polygon);
 
          polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, polygon));
       }
 
       ArrayList<Point2D> points = generateRandomCircularPoints(-50.0, 50.0, -50.0, 50.0, 7);
-      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(points);
+      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
 
       polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.red, captureRegionPolygon));
 
@@ -76,7 +77,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         boolean success = new ConvexPolygonTools().computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
          if (success)
          {
             intersectingPolygon2ds.add(intersection);
@@ -145,7 +146,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       points1.add(new Point2D(-6.0, 2.0));
       points1.add(new Point2D(6.0, 2.0));
       points1.add(new Point2D(6.0, -2.0));
-      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D(points1);
+      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points1));
 
       polygon1.add(new PolygonArtifact("polygon" + 1, false, Color.BLACK, points1));
       convexPolygon2ds.add(convexPolygon2d);
@@ -155,14 +156,14 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       points2.add(new Point2D(5.0, 5.0));
       points2.add(new Point2D(5.0, -5.0));
 
-      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(points2);
+      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points2));
 
       polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.red, points2));
 
       ConvexPolygon2dIntersectionSetCalculator convexPolygon2dIntersectionSetCalculator = new ConvexPolygon2dIntersectionSetCalculator(convexPolygon2ds);
       steppintStonesIntersectingCaptureRegion = convexPolygon2dIntersectionSetCalculator.findIntersectionPolygonList(captureRegionPolygon);
 
-      ConvexPolygon2D correctAnswer = new ConvexPolygon2D(new double[][] { { -5.0, 2.0 }, { 5.0, 2.0 }, { 5.0, -2.0 }, { -5.0, -2.0 } });
+      ConvexPolygon2D correctAnswer = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][] { { -5.0, 2.0 }, { 5.0, 2.0 }, { 5.0, -2.0 }, { -5.0, -2.0 } }));
 
       if (!steppintStonesIntersectingCaptureRegion.get(0).epsilonEquals(correctAnswer, 1e-7))
       {
@@ -201,7 +202,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       points.add(new Point2D(-0.5, 0.5));
       points.add(new Point2D(0.5, 0.5));
       points.add(new Point2D(0.5, -0.5));
-      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D(points);
+      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
 
       SteppingStones steppingStones = new SteppingStones();
       steppingStones = SteppingStones.generateRectangularUniformSteppingStones(-15.0, -10.0, 2.0, 2.0, 0.5, 0.5, -0.1, 0.0, 9, 13, convexPolygon2d, false);
@@ -218,7 +219,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       points.add(new Point2D(5.0, 5.0));
       points.add(new Point2D(5.0, -5.0));
 
-      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(points);
+      ConvexPolygon2D captureRegionPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
       polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.blue, points));
 
       ConvexPolygon2dIntersectionSetCalculator convexPolygon2dIntersectionSetCalculator = new ConvexPolygon2dIntersectionSetCalculator(convexPolygon2ds);
@@ -236,7 +237,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         boolean success = new ConvexPolygonTools().computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
          if (success)
          {
             intersectingPolygon2ds.add(intersection);
@@ -283,7 +284,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
@@ -301,7 +302,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -200.0, 200.0), generateRandomDouble(random, -200.0, 200.0));
          Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 200.0));
          ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 15);
-         ConvexPolygon2D polygon = new ConvexPolygon2D(points);
+         ConvexPolygon2D polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
          convexPolygon2ds.add(polygon);
       }
 
@@ -332,7 +333,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -50.0, 50.0), generateRandomDouble(random, -50.0, 50.0));
          Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 50.0), generateRandomDouble(random, randomPoint1.getY(), 50.0));
          ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
-         captureRegionPolygon.add(new ConvexPolygon2D(points));
+         captureRegionPolygon.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points)));
       }
 
       startTime = System.currentTimeMillis();
@@ -391,7 +392,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       points.add(new Point2D(47.1996820005182, 37.28788526977694));
       points.add(new Point2D(47.20659834223872, 36.93933424308558));
 
-      new ConvexPolygon2D(points);
+      new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
    }
 
    private ArrayList<Point2D> generateRandomCircularPoints(double xMin, double xMax, double yMin, double yMax, int numberOfPoints)

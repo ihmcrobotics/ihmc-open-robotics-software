@@ -251,7 +251,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
 
       boolean success = simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
+      assertTrue("Caught an exception when testing the behavior, the robot probably fell.", success);
    }
    
    public void sendBehaviorToDispatcher(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
