@@ -6,13 +6,11 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -24,6 +22,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JointStateUpdaterTest
 {
@@ -81,6 +81,8 @@ public class JointStateUpdaterTest
       JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, null, registry);
       
       fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, sensorMap);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
       
       jointStateUpdater.initialize();
       

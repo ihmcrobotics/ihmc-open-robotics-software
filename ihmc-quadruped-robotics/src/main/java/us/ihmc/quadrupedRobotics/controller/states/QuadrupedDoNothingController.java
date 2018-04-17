@@ -39,11 +39,8 @@ public class QuadrupedDoNothingController implements QuadrupedController
 
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
-         if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
-         {
             legJoints.add(joint);
             desiredDoNothingTorques.add(new YoDouble(joint.getName() + "DoNothingTorque", registry));
-         }
       }
 
       forceFeedbackControlEnabled = new YoBoolean("forceFeedbackControlEnabled", registry);

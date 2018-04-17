@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter slopTimeParameter = new DoubleParameter("stateChangeSmootherSlopTime", registry, 0.0);
-   private final DoubleParameter slopBreakFrequencyParameter = new DoubleParameter("stateChangeSmootherSlopBreakFrequency", registry, 1000.0);
+   private final DoubleParameter slopTimeParameter = new DoubleParameter("stateChangeSmootherSlopTime", registry, 0.04);
+   private final DoubleParameter slopBreakFrequencyParameter = new DoubleParameter("stateChangeSmootherSlopBreakFrequency", registry, 30.0);
 
    private final PairList<JointDesiredOutput, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new PairList<>();
    private final YoDouble alphaJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);

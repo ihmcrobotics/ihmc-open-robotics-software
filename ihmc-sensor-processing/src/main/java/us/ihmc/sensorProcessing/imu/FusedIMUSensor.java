@@ -72,7 +72,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private final double[] tempYawPitchRoll = new double[3];
 
-   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT, double imuDriftFilterFreqInHertz,
+   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT,
                          YoVariableRegistry parentRegistry)
    {
       this.firstIMU = firstIMU;

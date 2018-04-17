@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -172,6 +171,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
          this.controlBaseFrame = controlBaseFrame;
       else
          throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
+   }
+
+   /**
+    * Resets the control base frame to its default value.
+    *
+    * @see #setControlBaseFrame(ReferenceFrame)
+    */
+   public void resetControlBaseFrame()
+   {
+      controlBaseFrame = null;
    }
 
    /**

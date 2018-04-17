@@ -1,17 +1,18 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameTuple3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final BacklashProcessingYoVariable xDot, yDot, zDot;
 
-   public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, YoDouble slopTime,
+   public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, DoubleProvider slopTime,
            YoVariableRegistry registry, YoFrameTuple3D yoFrameTupleToProcess)
    {
       String xName = YoFrameVariableNameTools.createXName(namePrefix, nameSuffix);

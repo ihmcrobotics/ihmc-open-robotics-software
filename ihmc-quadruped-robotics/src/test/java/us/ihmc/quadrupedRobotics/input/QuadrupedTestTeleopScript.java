@@ -19,17 +19,18 @@ public class QuadrupedTestTeleopScript implements Script
    private final Random random = new Random(125937L);
    private final int updateJitter;
 
-   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager teleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency)
+   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager teleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency, YoVariableRegistry parentRegistry)
    {
-      this(teleopManager, bodyPoseTeleopManager, updateFrequency, 0);
+      this(teleopManager, bodyPoseTeleopManager, updateFrequency, 0, parentRegistry);
    }
 
-   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager stepTeleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency, int updateJitter)
+   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager stepTeleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency, int updateJitter, YoVariableRegistry parentRegistry)
    {
       this.stepTeleopManager = stepTeleopManager;
       this.bodyPoseTeleopManager = bodyPoseTeleopManager;
       this.updateFrequency = updateFrequency;
       this.updateJitter = updateJitter;
+      parentRegistry.addChild(registry);
    }
 
    @Override

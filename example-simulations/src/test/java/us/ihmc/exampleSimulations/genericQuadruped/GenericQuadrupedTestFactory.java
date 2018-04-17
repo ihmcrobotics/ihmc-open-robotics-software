@@ -137,7 +137,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
-      simulationFactory.setXGaitSettings(xGaitSettings);
       simulationFactory.setInitialForceControlState(QuadrupedControllerEnum.DO_NOTHING);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
 
@@ -173,7 +172,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       if(useNetworking.get())
       {
-         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, bodyPoseTeleopManager, TEST_INPUT_UPDATE_FREQUENCY));
+         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, bodyPoseTeleopManager, TEST_INPUT_UPDATE_FREQUENCY,
+                                                                                    sdfRobot.getRobotsYoVariableRegistry()));
       }
 
       FactoryTools.disposeFactory(this);

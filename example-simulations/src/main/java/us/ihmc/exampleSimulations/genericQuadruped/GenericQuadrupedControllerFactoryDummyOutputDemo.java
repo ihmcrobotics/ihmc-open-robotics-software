@@ -148,11 +148,10 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       YoGraphicsListRegistry ignoredYoGraphicsListRegistry = new YoGraphicsListRegistry();
-      GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, controllerCoreOptimizationSettings, jointDesiredOutputList,
                                                            registry, yoGraphicsListRegistry, ignoredYoGraphicsListRegistry, dataProducer, contactableFeet,
-                                                           contactablePlaneBodies, xGaitSettings, footSwitches, GRAVITY);
+                                                           contactablePlaneBodies, footSwitches, GRAVITY);
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties, initialPositionParameters);
 
       InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
