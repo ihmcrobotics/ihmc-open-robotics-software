@@ -5,10 +5,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class BasicHeightController
 {
@@ -27,7 +27,7 @@ public class BasicHeightController
    private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
 
-   private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoDouble yoDesiredHeight = new YoDouble("desiredHeight", registry);
 
    private final YoDouble heightKp = new YoDouble("heightKp", registry);

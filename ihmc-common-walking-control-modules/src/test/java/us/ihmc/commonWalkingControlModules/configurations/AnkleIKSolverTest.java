@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class AnkleIKSolverTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPitchRollAnkleWithSolePlaneConstraintSolver()
    {

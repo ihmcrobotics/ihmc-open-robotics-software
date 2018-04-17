@@ -24,12 +24,15 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -37,8 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,6 +57,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
@@ -64,7 +66,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
+   private SideDependentList<YoFrameConvexPolygon2D> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
    private ContactPointController contactPointController;
@@ -249,7 +251,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       soleVertices.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
-      ConvexPolygon2D solePolygon = new ConvexPolygon2D(soleVertices);
+      ConvexPolygon2D solePolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(soleVertices));
       solePolygon.update();
 
       // shrink polygon and project line origin inside
@@ -269,15 +271,15 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       line.applyTransform(transform);
 
       line.shiftToLeft(lineWidth/2.0);
-      Point2D[] leftIntersections = solePolygon.intersectionWith(line);
+      Point2DBasics[] leftIntersections = solePolygon.intersectionWith(line);
       line.shiftToRight(lineWidth);
-      Point2D[] rightIntersections = solePolygon.intersectionWith(line);
+      Point2DBasics[] rightIntersections = solePolygon.intersectionWith(line);
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
-      ret.add(leftIntersections[0]);
-      ret.add(leftIntersections[1]);
-      ret.add(rightIntersections[0]);
-      ret.add(rightIntersections[1]);
+      ret.add(new Point2D(leftIntersections[0]));
+      ret.add(new Point2D(leftIntersections[1]));
+      ret.add(new Point2D(rightIntersections[0]));
+      ret.add(new Point2D(rightIntersections[1]));
       return ret;
    }
 
@@ -404,9 +406,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      supportPolygons = new SideDependentList<YoFrameConvexPolygon2d>();
-      supportPolygons.set(RobotSide.LEFT, new YoFrameConvexPolygon2d("FootPolygonLeft", "", worldFrame, 4, registry));
-      supportPolygons.set(RobotSide.RIGHT, new YoFrameConvexPolygon2d("FootPolygonRight", "", worldFrame, 4, registry));
+      supportPolygons = new SideDependentList<YoFrameConvexPolygon2D>();
+      supportPolygons.set(RobotSide.LEFT, new YoFrameConvexPolygon2D("FootPolygonLeft", "", worldFrame, 4, registry));
+      supportPolygons.set(RobotSide.RIGHT, new YoFrameConvexPolygon2D("FootPolygonRight", "", worldFrame, 4, registry));
 
       footContactsInAnkleFrame = new SideDependentList<ArrayList<Point2D>>();
       footContactsInAnkleFrame.set(RobotSide.LEFT, null);
@@ -422,7 +424,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private class VizUpdater implements RobotController
    {
-      FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D footSupport = new FrameConvexPolygon2D(worldFrame);
       FramePoint2D point = new FramePoint2D(worldFrame);
       FramePoint3D point3d = new FramePoint3D();
 
@@ -449,7 +451,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
             }
 
             footSupport.update();
-            supportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupport);
+            supportPolygons.get(robotSide).set(footSupport);
          }
       }
 

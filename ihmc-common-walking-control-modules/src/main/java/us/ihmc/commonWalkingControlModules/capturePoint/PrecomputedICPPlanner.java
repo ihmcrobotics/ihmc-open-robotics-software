@@ -21,22 +21,22 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PrecomputedICPPlanner
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final YoFramePoint yoDesiredCoPPosition = new YoFramePoint(name + "DesiredCoPPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint yoDesiredCMPPosition = new YoFramePoint(name + "DesiredCMPPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint yoDesiredCoMPosition = new YoFramePoint(name + "DesiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint yoDesiredICPPosition = new YoFramePoint(name + "DesiredICPPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector yoDesiredICPVelocity = new YoFrameVector(name + "DesiredICPVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoDesiredCoPPosition = new YoFramePoint3D(name + "DesiredCoPPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoDesiredCMPPosition = new YoFramePoint3D(name + "DesiredCMPPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D(name + "DesiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoDesiredICPPosition = new YoFramePoint3D(name + "DesiredICPPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoDesiredICPVelocity = new YoFrameVector3D(name + "DesiredICPVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoBoolean currentlyBlendingICPTrajectories = new YoBoolean("currentlyBlendingICPTrajectories", registry);
    private final YoBoolean isBlending = new YoBoolean("isBlending", registry);

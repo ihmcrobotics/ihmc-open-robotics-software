@@ -3,6 +3,8 @@ package us.ihmc.atlas;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
+import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
 import org.junit.Assert;
@@ -16,17 +18,18 @@ import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.robotics.allocations.AllocationTest;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -42,12 +45,13 @@ public class AtlasAllocationTest implements AllocationTest
    static
    {
       simulationTestingParameters.setCreateGUI(false);
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    private DRCSimulationTestHelper testHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 53.3, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 270000)
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -62,16 +66,16 @@ public class AtlasAllocationTest implements AllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 600000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
       double defaultTransferDuration = 0.1;
 
-      int warmupSteps = 2;
+      int warmupSteps = 4;
       testHelper.send(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
-      testHelper.simulateAndBlockAndCatchExceptions(defaultTransferDuration + warmupSteps * (defaultSwingDuration * defaultTransferDuration) + 0.25);
+      testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       int steps = 4;
       FootstepDataListMessage footsteps = createFootsteps(steps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.3);
@@ -80,13 +84,15 @@ public class AtlasAllocationTest implements AllocationTest
          try
          {
             testHelper.send(footsteps);
-            testHelper.simulateAndBlockAndCatchExceptions(defaultTransferDuration + steps * (defaultSwingDuration * defaultTransferDuration) + 0.25);
+            testHelper.simulateAndBlockAndCatchExceptions(4.0);
          }
          catch (SimulationExceededMaximumTimeException e)
          {
             Assert.fail(e.getMessage());
          }
       });
+
+      testHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(0.9, -0.1, 0.0, 1.1, 0.1, 5.0));
    }
 
    private FootstepDataListMessage createFootsteps(int steps, double defaultSwingDuration, double defaultTransferDuration, double xLocation, double stepLength)
@@ -140,13 +146,13 @@ public class AtlasAllocationTest implements AllocationTest
    public List<Class<?>> getClassesToIgnore()
    {
       List<Class<?>> classesToIgnore = new ArrayList<>();
+
+      // These are places specific to the simulation and will not show up on the real robot.
       classesToIgnore.add(MirroredYoVariableRegistry.class);
       classesToIgnore.add(MeshDataGenerator.class);
 
-      // TODO: fix these.
+      // TODO: fix these!
       classesToIgnore.add(StatusMessageOutputManager.class);
-      classesToIgnore.add(ConvexPolygonTools.class);
-      classesToIgnore.add(OneStepCaptureRegionCalculator.class);
 
       return classesToIgnore;
    }
@@ -155,10 +161,20 @@ public class AtlasAllocationTest implements AllocationTest
    public List<String> getMethodsToIgnore()
    {
       List<String> methodsToIgnore = new ArrayList<>();
+
+      // These methods are "safe" as they will only allocate to increase their capacity.
       methodsToIgnore.add(DenseMatrix64F.class.getName() + ".reshape");
       methodsToIgnore.add(TIntArrayList.class.getName() + ".ensureCapacity");
       methodsToIgnore.add(ConvexPolygon2D.class.getName() + ".setOrCreate");
+      methodsToIgnore.add(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
       methodsToIgnore.add(RecyclingArrayList.class.getName() + ".ensureCapacity");
+      methodsToIgnore.add(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
+      methodsToIgnore.add(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
+
+      // Ignore the following methods as they are related to printouts.
+      methodsToIgnore.add(Throwable.class.getName() + ".printStackTrace");
+      methodsToIgnore.add(PrintTools.class.getName() + ".print");
+
       return methodsToIgnore;
    }
 

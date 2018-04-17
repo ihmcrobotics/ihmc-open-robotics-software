@@ -19,10 +19,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -35,7 +35,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoFrameVector inertiaEllipsoidGhostOffset = new YoFrameVector("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
+   private final YoFrameVector3D inertiaEllipsoidGhostOffset = new YoFrameVector3D("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
 
    private final ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
@@ -45,10 +45,10 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
    private class RigidBodyVisualizationData
    {
       public RigidBody rigidBody;
-      public YoFramePoint position;
-      public YoFrameOrientation orientation;
+      public YoFramePoint3D position;
+      public YoFrameYawPitchRoll orientation;
 
-      public RigidBodyVisualizationData(RigidBody rigidBody, YoFramePoint position, YoFrameOrientation orientation)
+      public RigidBodyVisualizationData(RigidBody rigidBody, YoFramePoint3D position, YoFrameYawPitchRoll orientation)
       {
          this.rigidBody = rigidBody;
          this.position = position;
@@ -138,8 +138,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          //         if(radii.length() > 1e-4)
          //         {
          String rigidBodyName = currentRigidBody.getName();
-         YoFramePoint comPosition = new YoFramePoint("centerOfMassPosition", rigidBodyName, worldFrame, registry);
-         YoFrameOrientation comOrientation = new YoFrameOrientation("rigidBodyOrientation", rigidBodyName, worldFrame, registry);
+         YoFramePoint3D comPosition = new YoFramePoint3D("centerOfMassPosition", rigidBodyName, worldFrame, registry);
+         YoFrameYawPitchRoll comOrientation = new YoFrameYawPitchRoll("rigidBodyOrientation", rigidBodyName, worldFrame, registry);
          RigidBodyVisualizationData comData = new RigidBodyVisualizationData(currentRigidBody, comPosition, comOrientation);
          centerOfMassData.add(comData);
 

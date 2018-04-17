@@ -1,9 +1,11 @@
 package us.ihmc.robotics.geometry.algorithms;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 public class FrameConvexPolygonWithLineIntersector2d
 {
@@ -25,11 +27,10 @@ public class FrameConvexPolygonWithLineIntersector2d
       intersectionResult = IntersectionResult.NO_INTERSECTION;
    }
 
-   public void intersectWithLine(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2D frameLine2d)
+   public void intersectWithLine(FrameConvexPolygon2DReadOnly frameConvexPolygon2d, FrameLine2DReadOnly frameLine2d)
    {
       checkAndSetFrames(frameConvexPolygon2d, frameLine2d);
-      int intersectionTypeInt = frameConvexPolygon2d.getConvexPolygon2d().intersectionWith(frameLine2d, intersectionPointOne,
-                                                                                           intersectionPointTwo);
+      int intersectionTypeInt = frameConvexPolygon2d.intersectionWith(frameLine2d, intersectionPointOne, intersectionPointTwo);
 
       packIntersectionType(intersectionTypeInt);
    }
@@ -39,11 +40,10 @@ public class FrameConvexPolygonWithLineIntersector2d
     *
     * TODO: Make ray classes and use them. @dcalvert
     */
-   public void intersectWithRay(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2D frameRay2d)
+   public void intersectWithRay(FrameConvexPolygon2D frameConvexPolygon2d, FrameLine2D frameRay2d)
    {
       checkAndSetFrames(frameConvexPolygon2d, frameRay2d);
-      int intersectionTypeInt = frameConvexPolygon2d.getConvexPolygon2d().intersectionWithRay(frameRay2d, intersectionPointOne,
-                                                                                              intersectionPointTwo);
+      int intersectionTypeInt = frameConvexPolygon2d.intersectionWithRay(frameRay2d, intersectionPointOne, intersectionPointTwo);
 
       packIntersectionType(intersectionTypeInt);
    }

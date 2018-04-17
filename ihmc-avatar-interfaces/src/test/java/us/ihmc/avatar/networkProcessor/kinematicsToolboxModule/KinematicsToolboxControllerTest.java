@@ -23,6 +23,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -161,6 +162,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
@@ -182,6 +184,7 @@ public class KinematicsToolboxControllerTest
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
@@ -215,10 +218,11 @@ public class KinematicsToolboxControllerTest
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             PrintTools.info(this, "Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-4);
+         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-3);
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
@@ -331,6 +335,7 @@ public class KinematicsToolboxControllerTest
             if (initializationSucceeded.getBooleanValue())
             {
                toolboxController.updateInternal();
+               PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
                jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
                numberOfIterations.increment();
             }

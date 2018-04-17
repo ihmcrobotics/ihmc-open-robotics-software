@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.11"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -27,10 +27,10 @@ testSuites {
 mainDependencies {
    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-   compile group: 'us.ihmc', name: 'euclid', version: '0.7.9.1'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'us.ihmc', name: 'joctomap', version: '1.6.7'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
    
    compile group: 'us.ihmc', name: 'ihmc-communication', version: "source"
    compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: "source"

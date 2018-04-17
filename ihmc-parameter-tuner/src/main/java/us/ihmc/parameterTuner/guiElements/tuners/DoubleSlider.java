@@ -5,7 +5,7 @@ public class DoubleSlider extends NumericSlider<Double>
    private static final int ticks = 100;
 
    @Override
-   public double doDouble(Double number)
+   public double toDouble(Double number)
    {
       return number;
    }

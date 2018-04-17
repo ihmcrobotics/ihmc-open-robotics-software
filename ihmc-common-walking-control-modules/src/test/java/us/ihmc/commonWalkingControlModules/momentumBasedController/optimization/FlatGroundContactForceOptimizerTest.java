@@ -18,6 +18,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FlatGroundContactForceOptimizerTest
@@ -25,6 +26,7 @@ public class FlatGroundContactForceOptimizerTest
 
    private static final boolean showSCS = false;
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void simpleTest()
    {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -947,10 +948,10 @@ public class SteppingStones
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Null"));
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D(new double[][]
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][]
       {
          {-0.2, -0.2}, {-0.2, 0.2}, {0.2, 0.2}, {0.2, -0.2}
-      });
+      }));
 
 
 //    SteppingStones steppingStones = SteppingStones.generateRandomSteppingStones(new Random(1776L), 20, footPolygon); // Inside out?

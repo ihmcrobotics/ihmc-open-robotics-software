@@ -1,12 +1,29 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footLengthForControl;
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footWidthForControl;
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.toeWidthForControl;
+import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
+import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.BasicCoPPlanner;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -20,10 +37,6 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,17 +48,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footLengthForControl;
-import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footWidthForControl;
-import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.toeWidthForControl;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class BasicCoPPlannerVisualizer
 {
@@ -58,7 +63,7 @@ public class BasicCoPPlannerVisualizer
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private ReferenceFrame midFeetZUpFrame;
@@ -71,13 +76,13 @@ public class BasicCoPPlannerVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
 
-   private final YoFramePoint yoDesiredCoP = new YoFramePoint("desiredCoP", worldFrame, registry);
-   private final YoFramePose yoNextFootstepPose = new YoFramePose("nextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextFootstepPose = new YoFramePose("nextNextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextNextFootstepPose = new YoFramePose("nextNextNextFootstepPose", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoNextFootstepPolygon = new YoFrameConvexPolygon2d("nextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFramePoint3D yoDesiredCoP = new YoFramePoint3D("desiredCoP", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -112,7 +117,7 @@ public class BasicCoPPlannerVisualizer
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         currentFootPoses.put(robotSide, new YoFramePose(sidePrefix + "FootPose", worldFrame, registry));
+         currentFootPoses.put(robotSide, new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootPose", worldFrame, registry));
 
          Graphics3DObject footGraphics = new Graphics3DObject();
          AppearanceDefinition footColor = robotSide == RobotSide.LEFT ? YoAppearance.Color(defaultLeftColor) : YoAppearance.Color(defaultRightColor);
@@ -205,8 +210,8 @@ public class BasicCoPPlannerVisualizer
       ThreadTools.sleepForever();
    }
 
-   private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D footstepPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D tempFootstepPolygonForShrinking = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private void simulate(List<Footstep> footsteps, List<FootstepTiming> timings)
@@ -342,9 +347,9 @@ public class BasicCoPPlannerVisualizer
          yoNextFootstepPose.setToNaN();
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextFootstepPolygon.hide();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextFootstepPolygon.clear();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
@@ -353,54 +358,54 @@ public class BasicCoPPlannerVisualizer
 
       double polygonShrinkAmount = 0.005;
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), nextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
-      yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
+      yoNextFootstepPose.setMatchingFrame(nextFootstepPose);
 
       if (nextNextFootstep == null)
       {
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
       if (nextNextFootstep.getPredictedContactPoints() == null)
          nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextFootstep.getSoleReferenceFrame(), nextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
-      yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
+      yoNextNextFootstepPose.setMatchingFrame(nextNextFootstepPose);
 
       if (nextNextNextFootstep == null)
       {
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
       if (nextNextNextFootstep.getPredictedContactPoints() == null)
          nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextNextFootstep.getSoleReferenceFrame(), nextNextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextNextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
-      yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
+      yoNextNextNextFootstepPose.setMatchingFrame(nextNextNextFootstepPose);
    }
 
    private void callUpdatables()

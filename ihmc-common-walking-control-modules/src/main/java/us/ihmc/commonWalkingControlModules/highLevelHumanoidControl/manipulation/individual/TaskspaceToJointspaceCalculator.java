@@ -24,16 +24,16 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class TaskspaceToJointspaceCalculator
@@ -80,19 +80,19 @@ public class TaskspaceToJointspaceCalculator
    private final YoDouble maximumTaskspaceAngularVelocityMagnitude;
    private final YoDouble maximumTaskspaceLinearVelocityMagnitude;
 
-   private final YoFramePose yoDesiredControlFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoDesiredControlFramePose;
 
-   private final YoFrameVector yoErrorRotation;
-   private final YoFrameVector yoErrorTranslation;
+   private final YoFrameVector3D yoErrorRotation;
+   private final YoFrameVector3D yoErrorTranslation;
 
-   private final YoFrameVector yoAngularVelocityFromError;
-   private final YoFrameVector yoLinearVelocityFromError;
+   private final YoFrameVector3D yoAngularVelocityFromError;
+   private final YoFrameVector3D yoLinearVelocityFromError;
 
    private final YoDouble alphaSpatialVelocityFromError;
    private final AlphaFilteredYoFrameVector filteredAngularVelocityFromError;
    private final AlphaFilteredYoFrameVector filteredLinearVelocityFromError;
 
-   private final YoFramePoint yoBaseParentJointFramePosition;
+   private final YoFramePoint3D yoBaseParentJointFramePosition;
    private final YoFrameQuaternion yoBaseParentJointFrameOrientation;
 
    private final YoDouble alphaBaseParentJointPose;
@@ -195,13 +195,13 @@ public class TaskspaceToJointspaceCalculator
          jointAnglesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
       }
 
-      yoDesiredControlFramePose = new YoFramePose(namePrefix + "Desired", worldFrame, registry);
+      yoDesiredControlFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "Desired", worldFrame, registry);
 
-      yoErrorRotation = new YoFrameVector(namePrefix + "ErrorRotation", localControlFrame, registry);
-      yoErrorTranslation = new YoFrameVector(namePrefix + "ErrorTranslation", localControlFrame, registry);
+      yoErrorRotation = new YoFrameVector3D(namePrefix + "ErrorRotation", localControlFrame, registry);
+      yoErrorTranslation = new YoFrameVector3D(namePrefix + "ErrorTranslation", localControlFrame, registry);
 
-      yoAngularVelocityFromError = new YoFrameVector(namePrefix + "AngularVelocityFromError", localControlFrame, registry);
-      yoLinearVelocityFromError = new YoFrameVector(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
+      yoAngularVelocityFromError = new YoFrameVector3D(namePrefix + "AngularVelocityFromError", localControlFrame, registry);
+      yoLinearVelocityFromError = new YoFrameVector3D(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
 
       alphaSpatialVelocityFromError = new YoDouble(namePrefix + "AlphaSpatialVelocityFromError", registry);
       filteredAngularVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredAngularVelocityFromError", "",
@@ -209,7 +209,7 @@ public class TaskspaceToJointspaceCalculator
       filteredLinearVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredLinearVelocityFromError", "",
             registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
 
-      yoBaseParentJointFramePosition = new YoFramePoint(namePrefix + "BaseParentJointFrame", worldFrame, registry);
+      yoBaseParentJointFramePosition = new YoFramePoint3D(namePrefix + "BaseParentJointFrame", worldFrame, registry);
       yoBaseParentJointFrameOrientation = new YoFrameQuaternion(namePrefix + "BaseParentJointFrame", worldFrame, registry);
 
       alphaBaseParentJointPose = new YoDouble(namePrefix + "AlphaBaseParentJointPose", registry);
@@ -447,7 +447,7 @@ public class TaskspaceToJointspaceCalculator
 
       desiredControlFrameTwist.checkReferenceFramesMatch(originalEndEffectorFrame, originalBaseFrame, originalControlFrame);
 
-      yoDesiredControlFramePose.setAndMatchFrame(desiredControlFramePose);
+      yoDesiredControlFramePose.setMatchingFrame(desiredControlFramePose);
 
       ReferenceFrame originalControlledWithRespectToFrame = desiredControlFramePose.getReferenceFrame();
       ReferenceFrame localControlledWithRespectToFrame = originalToLocalFramesMap.get(originalControlledWithRespectToFrame);
@@ -612,11 +612,11 @@ public class TaskspaceToJointspaceCalculator
       CommonOps.add(previousSpatialVector, controlDT, spatialVectorRate, spatialVectorToPack);
    }
 
-   private void getAngularAndLinearPartsFromSpatialVector(YoFrameVector angularPartToPack, YoFrameVector linearPartToPack, DenseMatrix64F spatialVector)
+   private void getAngularAndLinearPartsFromSpatialVector(YoFrameVector3D angularPartToPack, YoFrameVector3D linearPartToPack, DenseMatrix64F spatialVector)
    {
       getAngularAndLinearPartsFromSpatialVector(angularPart, linearPart, spatialVector);
-      angularPartToPack.setAndMatchFrame(angularPart);
-      linearPartToPack.setAndMatchFrame(linearPart);
+      angularPartToPack.setMatchingFrame(angularPart);
+      linearPartToPack.setMatchingFrame(linearPart);
    }
 
    private void getAngularAndLinearPartsFromSpatialVector(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack, DenseMatrix64F spatialVector)
@@ -625,7 +625,7 @@ public class TaskspaceToJointspaceCalculator
       MatrixTools.extractFrameTupleFromEJMLVector(linearPartToPack, spatialVector, localControlFrame, 3);
    }
 
-   private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector yoAngularPart, YoFrameVector yoLinearPart)
+   private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector3D yoAngularPart, YoFrameVector3D yoLinearPart)
    {
       angularPart.setIncludingFrame(yoAngularPart);
       linearPart.setIncludingFrame(yoLinearPart);

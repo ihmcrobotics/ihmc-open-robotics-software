@@ -75,6 +75,11 @@ public class AllocationSampler implements Sampler
       {
          return;
       }
+      // Skip things inside constructors.
+      if (stackTrace[0].getMethodName().contains("<init>"))
+      {
+         return;
+      }
 
       Throwable throwable = new Throwable("Allocation of Object: " + newObj.getClass().getSimpleName());
       throwable.setStackTrace(stackTrace);

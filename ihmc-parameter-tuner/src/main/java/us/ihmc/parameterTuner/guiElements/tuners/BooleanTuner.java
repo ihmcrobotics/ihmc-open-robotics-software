@@ -58,4 +58,16 @@ public class BooleanTuner extends HBox implements InputNode
    {
       return this;
    }
+
+   @Override
+   public void setValueFromPercent(double percent)
+   {
+      value.setSelected(percent > 0.5);
+   }
+
+   @Override
+   public double getValuePercent()
+   {
+      return value.isSelected() ? 1.0 : 0.0;
+   }
 }

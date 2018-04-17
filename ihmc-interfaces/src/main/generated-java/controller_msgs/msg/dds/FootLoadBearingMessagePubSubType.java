@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "FootLoadBearingMessage" defined in "FootLoadBearingMessage_.idl".
- * Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from FootLoadBearingMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * FootLoadBearingMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "FootLoadBearingMessage" defined in "FootLoadBearingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from FootLoadBearingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FootLoadBearingMessage_.idl instead.
+*
+*/
 public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.FootLoadBearingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::FootLoadBearingMessage_";
@@ -18,8 +16,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.FootLoadBearingMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.FootLoadBearingMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,6 +48,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -66,11 +63,16 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,12 +92,13 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    public static void read(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotSide(cdr.read_type_9());
-
+      	
       data.setLoadBearingRequest(cdr.read_type_9());
-
+      	
       data.setExecutionDelayTime(cdr.read_type_6());
+      	
 
    }
 
@@ -127,7 +130,6 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       return new controller_msgs.msg.dds.FootLoadBearingMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -139,7 +141,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -149,7 +151,7 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.FootLoadBearingMessage src, controller_msgs.msg.dds.FootLoadBearingMessage dest)
    {
       staticCopy(src, dest);

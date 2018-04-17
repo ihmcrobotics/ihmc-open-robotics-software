@@ -1,16 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "PelvisOrientationTrajectoryMessage" defined in
- * "PelvisOrientationTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from PelvisOrientationTrajectoryMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * PelvisOrientationTrajectoryMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "PelvisOrientationTrajectoryMessage" defined in "PelvisOrientationTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PelvisOrientationTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PelvisOrientationTrajectoryMessage_.idl instead.
+*
+*/
 public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisOrientationTrajectoryMessage_";
@@ -19,8 +16,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -28,8 +24,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -51,6 +46,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
 
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -65,9 +61,12 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSo3Trajectory(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,10 +83,10 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    public static void read(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
-
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);
+      	
+      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);	
 
    }
 
@@ -109,8 +108,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
 
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage src,
-                                 controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage src, controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage dest)
    {
       dest.set(src);
    }
@@ -120,7 +118,6 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    {
       return new controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -132,7 +129,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -142,7 +139,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage src, controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage dest)
    {
       staticCopy(src, dest);

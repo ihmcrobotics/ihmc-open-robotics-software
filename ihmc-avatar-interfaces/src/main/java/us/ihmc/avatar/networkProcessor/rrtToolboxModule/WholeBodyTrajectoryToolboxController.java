@@ -34,7 +34,6 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -42,6 +41,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
@@ -102,11 +102,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private SpatialNodePlotter nodePlotter;
 
-   private final SideDependentList<YoFramePose> endeffectorPose = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> endeffectorPose = new SideDependentList<>();
 
    private final SideDependentList<YoGraphicCoordinateSystem> endeffectorFrame = new SideDependentList<>();
 
-   private final YoFramePose testFramePose;
+   private final YoFramePoseUsingYawPitchRoll testFramePose;
    private final YoGraphicCoordinateSystem testFrameViz;
    private final YoDouble minimumDistanceFromManifold = new YoDouble("minimumDistanceFromManifold", registry);
 
@@ -175,7 +175,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
+         endeffectorPose.put(robotSide, new YoFramePoseUsingYawPitchRoll("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
 
          endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", endeffectorPose.get(robotSide), 0.25));
          endeffectorFrame.get(robotSide).setVisible(true);
@@ -193,7 +193,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
-      testFramePose = new YoFramePose("testFramePose", ReferenceFrame.getWorldFrame(), registry);
+      testFramePose = new YoFramePoseUsingYawPitchRoll("testFramePose", ReferenceFrame.getWorldFrame(), registry);
       testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.25);
       yoGraphicsListRegistry.registerYoGraphic("testFrameYoGraphic", testFrameViz);
    }
@@ -766,7 +766,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void terminateToolboxController()
    {
-      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
+      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
       reportMessage(toolboxSolution);
 

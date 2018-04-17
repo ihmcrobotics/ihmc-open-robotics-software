@@ -40,15 +40,15 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class VisibilityGraphsOcclusionTest
 {
@@ -123,6 +123,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Ignore
    public void testMazeWithOcclusions()
    {
@@ -157,13 +158,13 @@ public class VisibilityGraphsOcclusionTest
 
       SimulationConstructionSet scs = null;
 
-      YoFramePoint currentPosition = new YoFramePoint("CurrentPosition", worldFrame, registry);
+      YoFramePoint3D currentPosition = new YoFramePoint3D("CurrentPosition", worldFrame, registry);
       currentPosition.set(start);
 
-      YoFramePoint observerPoint = null;
-      List<YoFramePoint> rayIntersectionVisualizations = null;
-      List<YoFrameConvexPolygon2d> visiblePolygons = null;
-      List<YoFramePose> visiblePolygonPoses = null;
+      YoFramePoint3D observerPoint = null;
+      List<YoFramePoint3D> rayIntersectionVisualizations = null;
+      List<YoFrameConvexPolygon2D> visiblePolygons = null;
+      List<YoFramePoseUsingYawPitchRoll> visiblePolygonPoses = null;
       List<YoGraphicPolygon> polygonVisualizations = null;
 
       BagOfBalls bodyPathViz = null;
@@ -174,9 +175,9 @@ public class VisibilityGraphsOcclusionTest
 
       if (visualize)
       {
-         YoFramePoint yoStart = new YoFramePoint("start", worldFrame, registry);
+         YoFramePoint3D yoStart = new YoFramePoint3D("start", worldFrame, registry);
          yoStart.set(start);
-         YoFramePoint yoGoal = new YoFramePoint("goal", worldFrame, registry);
+         YoFramePoint3D yoGoal = new YoFramePoint3D("goal", worldFrame, registry);
          yoGoal.set(start);
 
          visiblePolygons = new ArrayList<>();
@@ -184,8 +185,8 @@ public class VisibilityGraphsOcclusionTest
          polygonVisualizations = new ArrayList<>();
          for (int i = 0; i < maxPolygonsToVisualize; i++)
          {
-            YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("Polygon" + i, worldFrame, maxPolygonsVertices, registry);
-            YoFramePose pose = new YoFramePose("PolygonPose" + i, worldFrame, registry);
+            YoFrameConvexPolygon2D polygon = new YoFrameConvexPolygon2D("Polygon" + i, worldFrame, maxPolygonsVertices, registry);
+            YoFramePoseUsingYawPitchRoll pose = new YoFramePoseUsingYawPitchRoll("PolygonPose" + i, worldFrame, registry);
             pose.setToNaN();
             visiblePolygons.add(polygon);
             visiblePolygonPoses.add(pose);
@@ -201,7 +202,7 @@ public class VisibilityGraphsOcclusionTest
             rayIntersectionVisualizations = new ArrayList<>();
             for (int i = 0; i < rays; i++)
             {
-               YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoint3D point = new YoFramePoint3D("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
                point.setToNaN();
                YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
                rayIntersectionVisualizations.add(point);
@@ -209,7 +210,7 @@ public class VisibilityGraphsOcclusionTest
             }
          }
 
-         observerPoint = new YoFramePoint("Observer", worldFrame, registry);
+         observerPoint = new YoFramePoint3D("Observer", worldFrame, registry);
          observerPoint.setToNaN();
          YoGraphicPosition observerVisualization = new YoGraphicPosition("Observer", observerPoint, 0.05, YoAppearance.Red());
          graphicsListRegistry.registerYoGraphic("viz", observerVisualization);
@@ -286,7 +287,7 @@ public class VisibilityGraphsOcclusionTest
                planarRegion.getTransformToWorld(transformToWorld);
                pose.set(transformToWorld);
                visiblePolygonPoses.get(polygonIdx).set(pose);
-               visiblePolygons.get(polygonIdx).setConvexPolygon2d(planarRegion.getConvexHull());
+               visiblePolygons.get(polygonIdx).set(planarRegion.getConvexHull());
             }
          }
 
@@ -478,7 +479,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    private PlanarRegionsList createVisibleRegions(PlanarRegionsList regions, Point3D observer, PlanarRegionsList knownRegions,
-                                                  List<YoFramePoint> rayPointsToPack)
+                                                  List<YoFramePoint3D> rayPointsToPack)
    {
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(observer, 1.0, rays);
       List<ConvexPolygon2D> visiblePolygons = new ArrayList<>();

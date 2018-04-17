@@ -414,6 +414,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate() throws Exception
    {
@@ -441,7 +442,7 @@ public class RotationToolsTest
          Vector3D expectedAngularVelocity = new Vector3D();
          Quaternion difference = new Quaternion();
          difference.difference(previousRotation, rotation);
-         difference.get(expectedAngularVelocity);
+         difference.getRotationVector(expectedAngularVelocity);
          expectedAngularVelocity.scale(1.0 / dt);
 
          Vector3D actualAngularVelocity = new Vector3D();
@@ -451,6 +452,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate() throws Exception
    {
@@ -478,6 +480,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame() throws Exception
    {
@@ -503,6 +506,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame() throws Exception
    {

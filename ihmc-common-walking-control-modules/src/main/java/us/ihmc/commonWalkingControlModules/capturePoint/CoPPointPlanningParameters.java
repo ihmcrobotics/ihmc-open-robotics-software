@@ -3,15 +3,15 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class CoPPointPlanningParameters
 {
    private final CoPPointName copPointName;
-   private final SideDependentList<YoFrameVector2d> copOffsets = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector2D> copOffsets = new SideDependentList<>();
 
    private boolean isConstrainedToMinMax;
    private boolean isConstrainedToSupportPolygon;
@@ -64,7 +64,7 @@ public class CoPPointPlanningParameters
       this.copOffsetBoundsInFootFrame = copOffsetBoundsInFootFrame;
    }
 
-   public void setCoPOffsets(RobotSide robotSide, YoFrameVector2d copOffsets)
+   public void setCoPOffsets(RobotSide robotSide, YoFrameVector2D copOffsets)
    {
       this.copOffsets.put(robotSide, copOffsets);
    }
@@ -115,7 +115,7 @@ public class CoPPointPlanningParameters
       return copOffsetBoundsInFootFrame;
    }
 
-   public YoFrameVector2d getCoPOffsets(RobotSide robotSide)
+   public YoFrameVector2D getCoPOffsets(RobotSide robotSide)
    {
       return copOffsets.get(robotSide);
    }

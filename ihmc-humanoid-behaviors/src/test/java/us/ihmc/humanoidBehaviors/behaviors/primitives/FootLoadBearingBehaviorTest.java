@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootLoadBearingBehaviorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSetInput()
    {
@@ -24,7 +24,7 @@ public class FootLoadBearingBehaviorTest
       FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
 
       PacketDestination destination = PacketDestination.UI;
-      message.setDestination(destination);
+      message.setDestination(destination.ordinal());
 
       footLoadBearingBehavior.setInput(message);
 

@@ -14,29 +14,29 @@ public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
    private static final boolean visualize = false;
    private final TurnWalkTurnPlanner planner = new TurnWalkTurnPlanner();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustStraightLine()
    {
       super.testJustStraightLine();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStraightLineWithInitialTurn()
    {
       super.testStraightLineWithInitialTurn();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustTurnInPlace()
    {
       super.testJustTurnInPlace();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testRandomPoses()
    {
       super.testRandomPoses();

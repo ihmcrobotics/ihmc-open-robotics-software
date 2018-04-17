@@ -34,8 +34,8 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 48.8)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 63.1)
+   @Test(timeout = 320000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchPelvisPoseBehavior();
@@ -50,16 +50,16 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.2)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 57.8)
+   @Test(timeout = 290000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 68.3)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 102.0)
+   @Test(timeout = 510000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorPauseAndResume();

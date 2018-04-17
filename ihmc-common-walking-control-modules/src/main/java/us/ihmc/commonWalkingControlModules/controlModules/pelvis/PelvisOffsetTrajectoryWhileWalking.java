@@ -11,8 +11,8 @@ import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -53,7 +53,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final YoDouble trailingLegAngle = new YoDouble("pelvisPitchTrailingLegAngle", registry);
    private final YoDouble interpolatedLegAngle = new YoDouble("pelvisPitchInterpolatedLegAngle", registry);
 
-   private final YoFrameOrientation desiredWalkingPelvisOffsetOrientation = new YoFrameOrientation("desiredWalkingPelvisOffset", worldFrame, registry);
+   private final YoFrameYawPitchRoll desiredWalkingPelvisOffsetOrientation = new YoFrameYawPitchRoll("desiredWalkingPelvisOffset", worldFrame, registry);
    private final RateLimitedYoFrameOrientation limitedDesiredWalkingPelvisOffsetOrientation;
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;

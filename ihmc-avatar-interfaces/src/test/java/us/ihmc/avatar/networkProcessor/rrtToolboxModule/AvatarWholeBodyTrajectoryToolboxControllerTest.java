@@ -39,9 +39,11 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -109,8 +111,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private HumanoidFloatingRootJointRobot ghost;
    private RobotController toolboxUpdater;
 
-   protected SideDependentList<Pose3D> handControlFrames;
-
    private WholeBodyTrajectoryToolboxCommandConverter commandConversionHelper;
    private KinematicsToolboxOutputConverter converter;
 
@@ -137,6 +137,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       commandInputManager = new CommandInputManager(WholeBodyTrajectoryToolboxModule.supportedCommands());
       commandConversionHelper = new WholeBodyTrajectoryToolboxCommandConverter(desiredFullRobotModel);
       commandInputManager.registerConversionHelper(commandConversionHelper);
+      commandInputManager.registerMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
 
       converter = new KinematicsToolboxOutputConverter(robotModel);
 
@@ -219,6 +220,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
    {
@@ -260,7 +262,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             selectionMatrix.resetSelection();
             selectionMatrix.clearAngularSelection();
             WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-            Pose3D controlFramePose = handControlFrames.get(robotSide);
+            Pose3D controlFramePose = new Pose3D();
 
             trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
             trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
@@ -285,6 +287,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, 100000);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {
@@ -323,7 +326,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-         Pose3D controlFramePose = handControlFrames.get(robotSide);
+         Pose3D controlFramePose = new Pose3D();
 
          trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
          trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
@@ -346,6 +349,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, 100000);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testHandCirclePositionAndYawPitchRoll() throws Exception, UnreasonableAccelerationException
    {
@@ -385,7 +389,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-         Pose3D controlFramePose = handControlFrames.get(robotSide);
+         Pose3D controlFramePose = new Pose3D();
 
          trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
          trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());

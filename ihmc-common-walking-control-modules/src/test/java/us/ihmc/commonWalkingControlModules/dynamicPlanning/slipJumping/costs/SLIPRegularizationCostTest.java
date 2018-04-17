@@ -54,7 +54,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCost()
    {
@@ -101,7 +101,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostStateGradientNumerically()
    {
@@ -109,7 +109,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostControlGradientNumerically()
    {
@@ -117,7 +117,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostStateHessianNumerically()
    {
@@ -125,7 +125,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostControlHessianNumerically()
    {
@@ -133,7 +133,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostStateControlHessianNumerically()
    {
@@ -145,7 +145,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostStateGradient()
    {
@@ -251,7 +251,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCostControlGradient()
    {

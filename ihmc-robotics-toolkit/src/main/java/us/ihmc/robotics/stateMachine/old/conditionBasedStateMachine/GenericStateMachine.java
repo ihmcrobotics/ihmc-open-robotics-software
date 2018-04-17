@@ -3,11 +3,11 @@ package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 /**
  * GenericStateMachine. Class for construction a finite state machine. Requires an Enum, which lists all the possible state names.

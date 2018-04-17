@@ -10,6 +10,7 @@ import java.util.Set;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -234,7 +235,7 @@ public class MeshDataGenerator
     * @param convexPolygon the polygon to create a mesh from.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(ConvexPolygon2D convexPolygon)
+   public static MeshDataHolder Polygon(ConvexPolygon2DReadOnly convexPolygon)
    {
       Point3D32[] points = new Point3D32[convexPolygon.getNumberOfVertices()];
       int reverseIndex = convexPolygon.getNumberOfVertices();
@@ -254,7 +255,7 @@ public class MeshDataGenerator
     * @param convexPolygon the polygon to create a mesh from.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, ConvexPolygon2D convexPolygon)
+   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, ConvexPolygon2DReadOnly convexPolygon)
    {
       Point3D32[] points = new Point3D32[convexPolygon.getNumberOfVertices()];
       int reverseIndex = convexPolygon.getNumberOfVertices();
@@ -313,7 +314,7 @@ public class MeshDataGenerator
     * @param extrusionHeight thickness of the extrusion. If {@code extrusionHeight < 0}, the polygon is extruded toward z negative.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder ExtrudedPolygon(ConvexPolygon2D convexPolygon2d, double extrusionHeight)
+   public static MeshDataHolder ExtrudedPolygon(ConvexPolygon2DReadOnly convexPolygon2d, double extrusionHeight)
    {
       Point2D[] points = new Point2D[convexPolygon2d.getNumberOfVertices()];
       int reverseIndex = convexPolygon2d.getNumberOfVertices();

@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepVisualizer
 {
@@ -25,8 +25,8 @@ public class FootstepVisualizer
 
    private static final int maxNumberOfContactPoints = 6;
 
-   private final YoFramePose yoFootstepPose;
-   private final YoFrameConvexPolygon2d yoFoothold;
+   private final YoFramePoseUsingYawPitchRoll yoFootstepPose;
+   private final YoFrameConvexPolygon2D yoFoothold;
 
    private final FramePose3D footstepPose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
@@ -41,8 +41,8 @@ public class FootstepVisualizer
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
-      yoFootstepPose = new YoFramePose(name + "Pose", worldFrame, registry);
-      yoFoothold = new YoFrameConvexPolygon2d(name + "Foothold", "", worldFrame, maxNumberOfContactPoints, registry);
+      yoFootstepPose = new YoFramePoseUsingYawPitchRoll(name + "Pose", worldFrame, registry);
+      yoFoothold = new YoFrameConvexPolygon2D(name + "Foothold", "", worldFrame, maxNumberOfContactPoints, registry);
 
       double coordinateSystemSize = 0.2;
       double footholdScale = 1.0;
@@ -59,7 +59,7 @@ public class FootstepVisualizer
    public void update(Footstep footstep)
    {
       footstep.getPose(footstepPose);
-      yoFootstepPose.setAndMatchFrame(footstepPose);
+      yoFootstepPose.setMatchingFrame(footstepPose);
 
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       List<Point2D> contactPointsToVisualize;
@@ -68,9 +68,12 @@ public class FootstepVisualizer
       else
          contactPointsToVisualize = predictedContactPoints;
 
-      foothold.setAndUpdate(contactPointsToVisualize, contactPointsToVisualize.size());
+      foothold.clear();
+      for (int i = 0; i < contactPointsToVisualize.size(); i++)
+         foothold.addVertex(contactPointsToVisualize.get(i));
+      foothold.update();
 
-      yoFoothold.setConvexPolygon2d(foothold);
+      yoFoothold.set(foothold);
 
       poseViz.update();
       footholdViz.update();

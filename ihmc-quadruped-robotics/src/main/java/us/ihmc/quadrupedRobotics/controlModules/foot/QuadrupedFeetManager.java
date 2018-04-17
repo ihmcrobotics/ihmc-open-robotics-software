@@ -1,9 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -13,32 +9,36 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+
+import java.awt.*;
+import java.util.List;
+
 public class QuadrupedFeetManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrantDependentList<QuadrupedFootControlModule> footControlModules = new QuadrantDependentList<>();
-   private final QuadrupedForceControllerToolbox toolbox;
+   private final QuadrupedControllerToolbox toolbox;
 
    // support polygon
-   private final List<FramePoint3D> contactPoints = new ArrayList<>();
-   private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
 
-   public QuadrupedFeetManager(QuadrupedForceControllerToolbox toolbox, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedFeetManager(QuadrupedControllerToolbox toolbox, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -52,22 +52,23 @@ public class QuadrupedFeetManager
 
    public void updateSupportPolygon()
    {
-      contactPoints.clear();
+      supportPolygon.clear();
+
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          if(footControlModules.get(quadrant).getContactState() == ContactState.IN_CONTACT)
-            contactPoints.add(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
+            supportPolygon.addVertexMatchingFrame(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
       }
 
-      supportPolygon.setConvexPolygon2d(contactPoints);
+      supportPolygon.update();
    }
 
    public void hideSupportPolygon()
    {
-      supportPolygon.hide();
+      supportPolygon.clear();
    }
 
-   public YoFrameConvexPolygon2d getSupportPolygon()
+   public YoFrameConvexPolygon2D getSupportPolygon()
    {
       return supportPolygon;
    }
@@ -78,21 +79,23 @@ public class QuadrupedFeetManager
          footControlModules.get(quadrant).attachStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(SoleTrajectoryCommand soleTrajectoryCommand, boolean useInitialSoleForceAsFeedforwardTerm)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      initializeWaypointTrajectory(soleTrajectoryCommand.getRobotQuadrant(), soleTrajectoryCommand.getPositionTrajectory().getTrajectoryPointList(),
+                                   useInitialSoleForceAsFeedforwardTerm);
+   }
+
+   public void initializeWaypointTrajectory(RobotQuadrant robotQuadrant, FrameEuclideanTrajectoryPointList trajectoryPointList, boolean useInitialSoleForceAsFeedforwardTerm)
+   {
+      QuadrupedFootControlModule footControlModule = footControlModules.get(robotQuadrant);
+      if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)
       {
-         QuadrupedSoleWaypointList waypointList = quadrupedSoleWaypointLists.get(robotQuadrant);
-         QuadrupedFootControlModule footControlModule = footControlModules.get(robotQuadrant);
-         if (waypointList.size() > 0)
-         {
-            footControlModule.requestMoveViaWaypoints();
-            footControlModule.initializeWaypointTrajectory(waypointList, useInitialSoleForceAsFeedforwardTerm);
-         }
-         else
-         {
-            footControlModule.requestSupport();
-         }
+         footControlModule.requestMoveViaWaypoints();
+         footControlModule.initializeWaypointTrajectory(trajectoryPointList, useInitialSoleForceAsFeedforwardTerm);
+      }
+      else
+      {
+         footControlModule.requestSupport();
       }
    }
 
@@ -117,6 +120,7 @@ public class QuadrupedFeetManager
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+
    public void adjustStep(QuadrupedStep step)
    {
       step.getGoalPosition(tempPoint);

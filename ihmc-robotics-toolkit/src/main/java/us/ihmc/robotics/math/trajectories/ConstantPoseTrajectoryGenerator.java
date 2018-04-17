@@ -7,24 +7,24 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 
 public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private final boolean allowMultipleFrames;
 
-   private final YoFramePoint position;
+   private final YoFramePoint3D position;
    private final YoFrameQuaternion orientation;
 
    private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
 
-   public ConstantPoseTrajectoryGenerator(YoFramePoint position, YoFrameQuaternion orientation)
+   public ConstantPoseTrajectoryGenerator(YoFramePoint3D position, YoFrameQuaternion orientation)
    {
       position.checkReferenceFrameMatch(orientation);
 

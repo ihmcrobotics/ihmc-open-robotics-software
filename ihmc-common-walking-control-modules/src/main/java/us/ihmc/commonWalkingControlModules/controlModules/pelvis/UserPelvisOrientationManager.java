@@ -101,6 +101,7 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
       spatialFeedbackControlCommand.getFeedForwardAngularActionIncludingFrame(feedForwardAngularAcceleration);
       orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
       orientationFeedbackControlCommand.setFeedForwardAction(feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       return orientationFeedbackControlCommand;
    }
 }

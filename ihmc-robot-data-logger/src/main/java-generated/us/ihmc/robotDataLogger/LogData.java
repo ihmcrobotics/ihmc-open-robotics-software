@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class LogData extends Packet<LogData> implements Settable<LogData>, EpsilonComparable<LogData>
 {
@@ -13,19 +13,20 @@ public class LogData extends Packet<LogData> implements Settable<LogData>, Epsil
    public int registry_;
    public int offset_;
    public int numberOfVariables_;
-   public us.ihmc.idl.IDLSequence.Byte data_;
-   public us.ihmc.idl.IDLSequence.Double jointStates_;
+   public us.ihmc.idl.IDLSequence.Byte  data_;
+   public us.ihmc.idl.IDLSequence.Double  jointStates_;
 
    public LogData()
    {
+      data_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");
 
-      data_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
+      jointStates_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
-      jointStates_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
    }
 
    public LogData(LogData other)
    {
+      this();
       set(other);
    }
 
@@ -49,120 +50,106 @@ public class LogData extends Packet<LogData> implements Settable<LogData>, Epsil
       jointStates_.set(other.jointStates_);
    }
 
-   public long getUid()
-   {
-      return uid_;
-   }
-
    public void setUid(long uid)
    {
       uid_ = uid;
    }
-
-   public long getTimestamp()
+   public long getUid()
    {
-      return timestamp_;
+      return uid_;
    }
 
    public void setTimestamp(long timestamp)
    {
       timestamp_ = timestamp;
    }
-
-   public long getTransmitTime()
+   public long getTimestamp()
    {
-      return transmitTime_;
+      return timestamp_;
    }
 
    public void setTransmitTime(long transmitTime)
    {
       transmitTime_ = transmitTime;
    }
-
-   public us.ihmc.robotDataLogger.LogDataType getType()
+   public long getTransmitTime()
    {
-      return type_;
+      return transmitTime_;
    }
 
    public void setType(us.ihmc.robotDataLogger.LogDataType type)
    {
       type_ = type;
    }
-
-   public int getRegistry()
+   public us.ihmc.robotDataLogger.LogDataType getType()
    {
-      return registry_;
+      return type_;
    }
 
    public void setRegistry(int registry)
    {
       registry_ = registry;
    }
-
-   public int getOffset()
+   public int getRegistry()
    {
-      return offset_;
+      return registry_;
    }
 
    public void setOffset(int offset)
    {
       offset_ = offset;
    }
-
-   public int getNumberOfVariables()
+   public int getOffset()
    {
-      return numberOfVariables_;
+      return offset_;
    }
 
    public void setNumberOfVariables(int numberOfVariables)
    {
       numberOfVariables_ = numberOfVariables;
    }
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables_;
+   }
 
-   public us.ihmc.idl.IDLSequence.Byte getData()
+
+   public us.ihmc.idl.IDLSequence.Byte  getData()
    {
       return data_;
    }
 
-   public us.ihmc.idl.IDLSequence.Double getJointStates()
+
+   public us.ihmc.idl.IDLSequence.Double  getJointStates()
    {
       return jointStates_;
    }
 
+
    @Override
    public boolean epsilonEquals(LogData other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.uid_, other.uid_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.uid_, other.uid_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transmitTime_, other.transmitTime_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transmitTime_, other.transmitTime_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.registry_, other.registry_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.registry_, other.registry_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.offset_, other.offset_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.offset_, other.offset_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.numberOfVariables_, other.numberOfVariables_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.numberOfVariables_, other.numberOfVariables_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.data_, other.data_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.data_, other.data_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.jointStates_, other.jointStates_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.jointStates_, other.jointStates_, epsilon)) return false;
+
 
       return true;
    }
@@ -170,41 +157,28 @@ public class LogData extends Packet<LogData> implements Settable<LogData>, Epsil
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof LogData))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof LogData)) return false;
 
       LogData otherMyClass = (LogData) other;
 
-      if (this.uid_ != otherMyClass.uid_)
-         return false;
+      if(this.uid_ != otherMyClass.uid_) return false;
 
-      if (this.timestamp_ != otherMyClass.timestamp_)
-         return false;
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
-      if (this.transmitTime_ != otherMyClass.transmitTime_)
-         return false;
+      if(this.transmitTime_ != otherMyClass.transmitTime_) return false;
 
-      if (this.type_ != otherMyClass.type_)
-         return false;
+      if(this.type_ != otherMyClass.type_) return false;
 
-      if (this.registry_ != otherMyClass.registry_)
-         return false;
+      if(this.registry_ != otherMyClass.registry_) return false;
 
-      if (this.offset_ != otherMyClass.offset_)
-         return false;
+      if(this.offset_ != otherMyClass.offset_) return false;
 
-      if (this.numberOfVariables_ != otherMyClass.numberOfVariables_)
-         return false;
+      if(this.numberOfVariables_ != otherMyClass.numberOfVariables_) return false;
 
-      if (!this.data_.equals(otherMyClass.data_))
-         return false;
-
-      if (!this.jointStates_.equals(otherMyClass.jointStates_))
-         return false;
+      if (!this.data_.equals(otherMyClass.data_)) return false;
+      if (!this.jointStates_.equals(otherMyClass.jointStates_)) return false;
 
       return true;
    }
@@ -216,40 +190,23 @@ public class LogData extends Packet<LogData> implements Settable<LogData>, Epsil
 
       builder.append("LogData {");
       builder.append("uid=");
-      builder.append(this.uid_);
-
-      builder.append(", ");
+      builder.append(this.uid_);      builder.append(", ");
       builder.append("timestamp=");
-      builder.append(this.timestamp_);
-
-      builder.append(", ");
+      builder.append(this.timestamp_);      builder.append(", ");
       builder.append("transmitTime=");
-      builder.append(this.transmitTime_);
-
-      builder.append(", ");
+      builder.append(this.transmitTime_);      builder.append(", ");
       builder.append("type=");
-      builder.append(this.type_);
-
-      builder.append(", ");
+      builder.append(this.type_);      builder.append(", ");
       builder.append("registry=");
-      builder.append(this.registry_);
-
-      builder.append(", ");
+      builder.append(this.registry_);      builder.append(", ");
       builder.append("offset=");
-      builder.append(this.offset_);
-
-      builder.append(", ");
+      builder.append(this.offset_);      builder.append(", ");
       builder.append("numberOfVariables=");
-      builder.append(this.numberOfVariables_);
-
-      builder.append(", ");
+      builder.append(this.numberOfVariables_);      builder.append(", ");
       builder.append("data=");
-      builder.append(this.data_);
-
-      builder.append(", ");
+      builder.append(this.data_);      builder.append(", ");
       builder.append("jointStates=");
       builder.append(this.jointStates_);
-
       builder.append("}");
       return builder.toString();
    }

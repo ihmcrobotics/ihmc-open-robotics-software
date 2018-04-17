@@ -1,20 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import static org.junit.Assert.assertTrue;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationQPSolverTest
@@ -22,9 +22,9 @@ public class ICPOptimizationQPSolverTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = 1e-3;
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testStandingWithPerfectTrackingAndAngularMomentum() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStandingWithPerfectTrackingAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -34,7 +34,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -49,9 +49,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testStandingUnconstrainedWithAndAngularMomentum() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStandingUnconstrainedWithAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -61,7 +61,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -79,9 +79,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testStandingUnconstrained() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStandingUnconstrained()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -90,7 +90,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -108,16 +108,16 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testStandingConstrained() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStandingConstrained()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
 
       solver.setFeedbackConditions(0.1, 3.0, 1000.0);
       solver.addSupportPolygon(supportPolygon);
@@ -125,7 +125,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -150,16 +150,16 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testStandingConstrainedWithAngularMomentum() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testStandingConstrainedWithAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
 
       solver.setFeedbackConditions(0.1, 3.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
@@ -168,7 +168,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -199,9 +199,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingUnconstrainedFeedbackPreferred() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingUnconstrainedFeedbackPreferred()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -221,7 +221,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -245,9 +245,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingUnconstrainedFootstepAdjustmentPreferred() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingUnconstrainedFootstepAdjustmentPreferred()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -267,7 +267,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -290,9 +290,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -313,7 +313,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -336,9 +336,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingUnconstrainedWithAdjustment() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingUnconstrainedWithAdjustment()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -358,7 +358,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.06, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -406,9 +406,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -429,7 +429,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.06, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -477,9 +477,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testSteppingCoPConstrainedWithAdjustment() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSteppingCoPConstrainedWithAdjustment()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -491,7 +491,7 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 100000.0);
 
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
       solver.addSupportPolygon(supportPolygon);
 
       double timeRemainingInState = 1.0;
@@ -503,7 +503,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.04, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.04);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -531,8 +531,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCoPAndFootstepConstrainedWithAdjustment() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -545,10 +545,10 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 100000.0);
 
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
       solver.addSupportPolygon(supportPolygon);
 
-      FrameConvexPolygon2d reachabilityPolygon = createReachabilityPolygon();
+      FrameConvexPolygon2D reachabilityPolygon = createReachabilityPolygon();
       solver.addReachabilityPolygon(reachabilityPolygon);
 
       double timeRemainingInState = 1.0;
@@ -560,7 +560,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.04, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.04);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -591,9 +591,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   private FrameConvexPolygon2d createSupportPolygon(double sideLength)
+   private FrameConvexPolygon2D createSupportPolygon(double sideLength)
    {
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
       FramePoint2D backLeft = new FramePoint2D(worldFrame, -sideLength, sideLength);
       FramePoint2D frontLeft = new FramePoint2D(worldFrame, sideLength, sideLength);
       FramePoint2D frontRight = new FramePoint2D(worldFrame, sideLength, -sideLength);
@@ -609,9 +609,9 @@ public class ICPOptimizationQPSolverTest
       return supportPolygon;
    }
 
-   private FrameConvexPolygon2d createReachabilityPolygon()
+   private FrameConvexPolygon2D createReachabilityPolygon()
    {
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
       FramePoint2D backLeft = new FramePoint2D(worldFrame, 0.35, 0.08);
       FramePoint2D frontLeft = new FramePoint2D(worldFrame, 0.35, 0.13);
       FramePoint2D frontRight = new FramePoint2D(worldFrame, 0.05, 0.13);
@@ -627,8 +627,8 @@ public class ICPOptimizationQPSolverTest
       return supportPolygon;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNoExceptions() throws Exception
    {
          ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -660,14 +660,14 @@ public class ICPOptimizationQPSolverTest
          solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
          // set constraints
-         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+         FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
          supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12497345851902948, 0.22376754760881368));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10434696885177858, 0.2110446302571209));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10438193051572264, 0.12238795176076478));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12418538788019835, 0.10913840779165224));
          supportPolygon.update();
 
-         FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+         FrameConvexPolygon2D reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.5065556308152076, -0.0163509564360857));
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893444112012186, -0.015502379303478447));
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.8938502168058939, -0.6855022562280167));
@@ -680,21 +680,11 @@ public class ICPOptimizationQPSolverTest
          FrameVector2D icpError = new FrameVector2D(worldFrame, -0.07380072407166109, -0.05497512056196603);
          FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020230791294742534, 0.1586256502408977);
 
-         NoConvergenceException exception = null;
-         try
-         {
-            solver.compute(icpError, perfectCMP);
-         }
-         catch (NoConvergenceException e)
-         {
-            exception = e;
-         }
-
-         Assert.assertTrue("There should not have been an exception.", exception == null);
+         assertTrue(solver.compute(icpError, perfectCMP));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleNoExceptions() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -727,14 +717,14 @@ public class ICPOptimizationQPSolverTest
       solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
       // set constraints
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
       supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.125, 0.224));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.211));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.122));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.124, 0.109));
       supportPolygon.update();
 
-      FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.507, -0.016));
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893, -0.016));
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.894, -0.686));
@@ -747,17 +737,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, -0.074, -0.055);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020, 0.159);
 
-      NoConvergenceException exception = null;
-      try
-      {
-         solver.compute(icpError, perfectCMP);
-      }
-      catch (NoConvergenceException e)
-      {
-         exception = e;
-      }
-
-      Assert.assertTrue(exception == null);
+      assertTrue(solver.compute(icpError, perfectCMP));
    }
 }
 

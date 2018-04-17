@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "FisheyePacket" defined in "FisheyePacket_.idl". Use this class to
- * provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from FisheyePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit FisheyePacket_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "FisheyePacket" defined in "FisheyePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from FisheyePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FisheyePacket_.idl instead.
+*
+*/
 public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.FisheyePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::FisheyePacket_";
@@ -46,6 +44,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
       current_alignment += controller_msgs.msg.dds.VideoPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -60,7 +59,9 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += controller_msgs.msg.dds.VideoPacketPubSubType.getCdrSerializedSize(data.getVideoPacket(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,8 +76,8 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    public static void read(controller_msgs.msg.dds.FisheyePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      controller_msgs.msg.dds.VideoPacketPubSubType.read(data.getVideoPacket(), cdr);
+      	
+      controller_msgs.msg.dds.VideoPacketPubSubType.read(data.getVideoPacket(), cdr);	
 
    }
 
@@ -106,7 +107,6 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       return new controller_msgs.msg.dds.FisheyePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -118,7 +118,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.FisheyePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -128,7 +128,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.FisheyePacket src, controller_msgs.msg.dds.FisheyePacket dest)
    {
       staticCopy(src, dest);

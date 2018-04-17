@@ -7,12 +7,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class PelvisLeapOfFaithModule
 {
@@ -21,7 +21,7 @@ public class PelvisLeapOfFaithModule
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFrameOrientation orientationOffset = new YoFrameOrientation(yoNamePrefix + "PelvisOrientationOffset", worldFrame, registry);
+   private final YoFrameYawPitchRoll orientationOffset = new YoFrameYawPitchRoll(yoNamePrefix + "PelvisOrientationOffset", worldFrame, registry);
 
    private final YoBoolean isInSwing = new YoBoolean(yoNamePrefix + "IsInSwing", registry);
    private final YoBoolean usePelvisRotation = new YoBoolean(yoNamePrefix + "UsePelvisRotation", registry);

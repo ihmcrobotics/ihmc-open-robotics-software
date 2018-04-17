@@ -278,7 +278,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    public void getDesiredAngularTorque(PoseReferenceFrame controlFrameToPack, FrameVector3D desiredAngularTorqueToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredAngularTorqueToPack.set(controlFrameToPack, desiredAngularTorque);
+      desiredAngularTorqueToPack.setIncludingFrame(controlFrameToPack, desiredAngularTorque);
    }
 
    /**

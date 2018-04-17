@@ -2,6 +2,7 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -18,8 +19,10 @@ import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
+import us.ihmc.robotics.sliderboard.SliderboardListener;
 
-public class Tuner extends VBox
+public class Tuner extends VBox implements SliderboardListener
 {
    private static final int MAX_DESCRIPTION_CHARACTERS = 255;
 
@@ -28,8 +31,12 @@ public class Tuner extends VBox
    private final TextField description = new TextField();
    private final InputNode inputNode;
 
+   private final GuiParameter parameter;
+
    public Tuner(GuiParameter parameter)
    {
+      this.parameter = parameter;
+
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
       description.setTextFormatter(TextFormatterTools.maxLengthTextFormatter(MAX_DESCRIPTION_CHARACTERS));
@@ -114,4 +121,24 @@ public class Tuner extends VBox
       return inputNode.getSimpleInputNode(100.0, 20.0);
    }
 
+   @Override
+   public void sliderMoved(double sliderPercentage)
+   {
+      Platform.runLater(() -> inputNode.setValueFromPercent(sliderPercentage));
+   }
+
+   public void addChangeListener(ParameterChangeListener listener)
+   {
+      parameter.addChangedListener(listener);
+   }
+
+   public void removeChangeListener(ParameterChangeListener listener)
+   {
+      parameter.removeChangeListener(listener);
+   }
+
+   public double getValuePercent()
+   {
+      return inputNode.getValuePercent();
+   }
 }

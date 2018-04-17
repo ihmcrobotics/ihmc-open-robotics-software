@@ -4,6 +4,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class ToolboxController
 {
@@ -11,8 +12,7 @@ public abstract class ToolboxController
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StatusMessageOutputManager statusOutputManager;
-
-   private boolean initialize = true;
+   private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
    // TODO Figure out to do multiple destination. Would be useful for modules like the quad-tree.
    private PacketDestination packetDestination = null;
 
@@ -20,11 +20,12 @@ public abstract class ToolboxController
    {
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
+      requestInitialize();
    }
 
    public void requestInitialize()
    {
-      initialize = true;
+      initialize.set(true);
    }
 
    public void setPacketDestination(PacketDestination packetDestination)
@@ -34,11 +35,11 @@ public abstract class ToolboxController
 
    public void update()
    {
-      if (initialize)
+      if (initialize.getBooleanValue())
       {
          if (!initialize()) // Return until the initialization succeeds
             return;
-         initialize = false;
+         initialize.set(false);
       }
 
       try
@@ -59,7 +60,7 @@ public abstract class ToolboxController
       if (packetDestination == null)
          return;
 
-      statusMessage.setDestination(packetDestination);
+      statusMessage.setDestination(packetDestination.ordinal());
       statusOutputManager.reportStatusMessage(statusMessage);
    }
 

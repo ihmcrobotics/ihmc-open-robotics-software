@@ -5,17 +5,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
-public class RateLimitedYoFrameOrientation extends YoFrameOrientation
+public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
 {
    private final DoubleProvider maxRateVariable;
 
-   private final YoFrameOrientation rawOrientation;
+   private final YoFrameYawPitchRoll rawOrientation;
    private final YoBoolean limited;
    private final YoBoolean hasBeenCalled;
    private final double dt;
@@ -28,7 +28,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    }
 
    public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
-                                        YoFrameOrientation rawOrientation)
+                                        YoFrameYawPitchRoll rawOrientation)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawOrientation, rawOrientation.getReferenceFrame());
    }
@@ -40,7 +40,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    }
 
    public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
-                                        YoFrameOrientation rawOrientation)
+                                        YoFrameYawPitchRoll rawOrientation)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawOrientation,
            rawOrientation.getReferenceFrame());
@@ -53,7 +53,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    }
 
    private RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
-                                         YoFrameOrientation rawOrientation, ReferenceFrame referenceFrame)
+                                         YoFrameYawPitchRoll rawOrientation, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
@@ -88,7 +88,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
       update(rawOrientation);
    }
 
-   public void update(YoFrameOrientation yoFrameVectorUnfiltered)
+   public void update(YoFrameYawPitchRoll yoFrameVectorUnfiltered)
    {
       checkReferenceFrameMatch(yoFrameVectorUnfiltered);
       update(yoFrameVectorUnfiltered.getYaw().getDoubleValue(), yoFrameVectorUnfiltered.getPitch().getDoubleValue(),
@@ -135,13 +135,13 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
          difference.preMultiplyConjugateOther(quaternionFiltered);
       }
 
-      difference.get(limitedRotationVector);
+      difference.getRotationVector(limitedRotationVector);
       boolean clipped = limitedRotationVector.clipToMaxLength(dt * maxRateVariable.getValue());
       limited.set(clipped);
 
       if (clipped)
       {
-         difference.set(limitedRotationVector);
+         difference.setRotationVector(limitedRotationVector);
          quaternionFiltered.multiply(difference);
          set(quaternionFiltered);
       }

@@ -10,9 +10,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -20,6 +17,9 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 /**
  * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained from the IMU to update the pelvis orientation and angular velocity in world. 
@@ -31,13 +31,13 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameOrientation yoRootJointFrameOrientation;
+   private final YoFrameYawPitchRoll yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
    private final YoDouble rootJointYawOffsetFromFrozenState;
 
-   private final YoFrameVector yoRootJointAngularVelocityMeasFrame;
-   private final YoFrameVector yoRootJointAngularVelocity;
-   private final YoFrameVector yoRootJointAngularVelocityInWorld;
+   private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
+   private final YoFrameVector3D yoRootJointAngularVelocity;
+   private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
 
@@ -72,14 +72,14 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       measurementFrame = imuProcessedOutput.getMeasurementFrame();
       measurementLink = imuProcessedOutput.getMeasurementLink();
 
-      yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJoint", worldFrame, registry);
+      yoRootJointFrameOrientation = new YoFrameYawPitchRoll("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
 
       rootJointYawOffsetFromFrozenState = new YoDouble("rootJointYawOffsetFromFrozenState", registry);
 
-      yoRootJointAngularVelocity = new YoFrameVector("estimatedRootJointAngularVelocity", rootJointFrame, registry);
-      yoRootJointAngularVelocityInWorld = new YoFrameVector("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
-      yoRootJointAngularVelocityMeasFrame = new YoFrameVector("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
+      yoRootJointAngularVelocity = new YoFrameVector3D("estimatedRootJointAngularVelocity", rootJointFrame, registry);
+      yoRootJointAngularVelocityInWorld = new YoFrameVector3D("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
+      yoRootJointAngularVelocityMeasFrame = new YoFrameVector3D("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
 
       yoRootJointAngularVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector("estimatedRootJointAngularVelocityFromFD", yoRootJointFrameQuaternion, dt, registry);
 
@@ -276,9 +276,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       rootJoint.updateFramesRecursively();
 
-      yoRootJointAngularVelocity.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);
-      yoRootJointAngularVelocityMeasFrame.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);
-      yoRootJointAngularVelocityInWorld.setAndMatchFrame(angularVelocityRootJointFrameRelativeToWorld);
+      yoRootJointAngularVelocity.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);
+      yoRootJointAngularVelocityMeasFrame.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);
+      yoRootJointAngularVelocityInWorld.setMatchingFrame(angularVelocityRootJointFrameRelativeToWorld);
    }
 
    private void updateViz()

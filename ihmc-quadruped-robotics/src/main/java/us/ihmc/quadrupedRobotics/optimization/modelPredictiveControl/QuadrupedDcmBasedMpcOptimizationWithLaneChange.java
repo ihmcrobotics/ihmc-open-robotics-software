@@ -11,20 +11,20 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
+import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements QuadrupedMpcOptimizationWithLaneChange
 {
@@ -58,8 +58,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private int numberOfIntervals = 0;
    private int numberOfPreviewSteps = 0;
 
-   private YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
-   private YoFrameVector yoStepAdjustmentVector = new YoFrameVector("stepAdjustmentVector", ReferenceFrame.getWorldFrame(), registry);
+   private YoFramePoint3D yoCmpPositionSetpoint = new YoFramePoint3D("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   private YoFrameVector3D yoStepAdjustmentVector = new YoFrameVector3D("stepAdjustmentVector", ReferenceFrame.getWorldFrame(), registry);
 
    public QuadrupedDcmBasedMpcOptimizationWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -176,8 +176,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       stepAdjustmentVector.setElement(1, u.get(rowOffset++, 0));
 
       // Update logging variables
-      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
-      yoStepAdjustmentVector.setAndMatchFrame(stepAdjustmentVector);
+      yoCmpPositionSetpoint.setMatchingFrame(cmpPositionSetpoint);
+      yoStepAdjustmentVector.setMatchingFrame(stepAdjustmentVector);
    }
 
    private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)

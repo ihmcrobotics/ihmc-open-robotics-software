@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ReachingManifoldMessage" defined in
- * "ReachingManifoldMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ReachingManifoldMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ReachingManifoldMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ReachingManifoldMessage" defined in "ReachingManifoldMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ReachingManifoldMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ReachingManifoldMessage_.idl instead.
+*
+*/
 public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ReachingManifoldMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ReachingManifoldMessage_";
@@ -18,8 +16,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ReachingManifoldMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ReachingManifoldMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,14 +48,12 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,7 +69,9 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getManifoldOriginPosition(), current_alignment);
 
@@ -84,11 +80,15 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getManifoldConfigurationSpaceNames().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getManifoldLowerLimits().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getManifoldUpperLimits().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -101,34 +101,31 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getManifoldOriginPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getManifoldOriginOrientation(), cdr);
-      if (data.getManifoldConfigurationSpaceNames().size() <= 100)
-         cdr.write_type_e(data.getManifoldConfigurationSpaceNames());
-      else
-         throw new RuntimeException("manifold_configuration_space_names field exceeds the maximum length");
+      if(data.getManifoldConfigurationSpaceNames().size() <= 100)
+      cdr.write_type_e(data.getManifoldConfigurationSpaceNames());else
+          throw new RuntimeException("manifold_configuration_space_names field exceeds the maximum length");
 
-      if (data.getManifoldLowerLimits().size() <= 100)
-         cdr.write_type_e(data.getManifoldLowerLimits());
-      else
-         throw new RuntimeException("manifold_lower_limits field exceeds the maximum length");
+      if(data.getManifoldLowerLimits().size() <= 100)
+      cdr.write_type_e(data.getManifoldLowerLimits());else
+          throw new RuntimeException("manifold_lower_limits field exceeds the maximum length");
 
-      if (data.getManifoldUpperLimits().size() <= 100)
-         cdr.write_type_e(data.getManifoldUpperLimits());
-      else
-         throw new RuntimeException("manifold_upper_limits field exceeds the maximum length");
+      if(data.getManifoldUpperLimits().size() <= 100)
+      cdr.write_type_e(data.getManifoldUpperLimits());else
+          throw new RuntimeException("manifold_upper_limits field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setEndEffectorNameBasedHashCode(cdr.read_type_11());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getManifoldOriginPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getManifoldOriginOrientation(), cdr);
-      cdr.read_type_e(data.getManifoldConfigurationSpaceNames());
-      cdr.read_type_e(data.getManifoldLowerLimits());
-      cdr.read_type_e(data.getManifoldUpperLimits());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getManifoldOriginPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getManifoldOriginOrientation(), cdr);	
+      cdr.read_type_e(data.getManifoldConfigurationSpaceNames());	
+      cdr.read_type_e(data.getManifoldLowerLimits());	
+      cdr.read_type_e(data.getManifoldUpperLimits());	
 
    }
 
@@ -170,7 +167,6 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return new controller_msgs.msg.dds.ReachingManifoldMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -182,7 +178,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -192,7 +188,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ReachingManifoldMessage src, controller_msgs.msg.dds.ReachingManifoldMessage dest)
    {
       staticCopy(src, dest);

@@ -407,7 +407,7 @@ public class MessageTools
          message.getBoundingBoxInWorldForRequest().getMaxPoint().set(boundingBoxInWorldForRequest.getMaxPoint());
       }
       if (destination != null)
-         message.setDestination(destination);
+         message.setDestination(destination.ordinal());
       return message;
    }
 

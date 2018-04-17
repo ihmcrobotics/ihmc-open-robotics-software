@@ -3,16 +3,16 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
@@ -20,7 +20,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    private final BipedSupportPolygons bipedSupportPolygons;
    private final YoBoolean desiredCMPinSafeArea;
    
-   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
 
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
@@ -62,8 +62,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
          desiredCMPinSafeArea.set(safeArea.isPointInside(desiredCMP));
          if (safeArea.isPointInside(desiredCMP))
          {
-            supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-            areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
+            supportPolygon.setIncludingFrame(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+            areaToProjectInto.setIncludingFrame(supportPolygon);
          }
 
          cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);

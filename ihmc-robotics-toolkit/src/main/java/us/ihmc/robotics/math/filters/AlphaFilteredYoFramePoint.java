@@ -3,12 +3,12 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-public class AlphaFilteredYoFramePoint extends YoFramePoint
+public class AlphaFilteredYoFramePoint extends YoFramePoint3D
 {
    private final AlphaFilteredYoVariable x, y, z;
 
@@ -49,7 +49,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
 
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
-           YoFramePoint unfilteredPoint)
+           YoFramePoint3D unfilteredPoint)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
@@ -63,7 +63,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
 
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                           DoubleProvider alpha, YoFramePoint unfilteredPoint)
+                                                                           DoubleProvider alpha, YoFramePoint3D unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
@@ -76,7 +76,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
    }
    
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         double alphaX, double alphaY, double alphaZ, YoFramePoint unfilteredPoint)
+         double alphaX, double alphaY, double alphaZ, YoFramePoint3D unfilteredPoint)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());
@@ -89,7 +89,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
    }
    
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-                                                                           DoubleProvider alphaX, DoubleProvider alphaY, DoubleProvider alphaZ, YoFramePoint unfilteredPoint)
+                                                                           DoubleProvider alphaX, DoubleProvider alphaY, DoubleProvider alphaZ, YoFramePoint3D unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());

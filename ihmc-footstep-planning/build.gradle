@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.11"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -19,11 +19,12 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+   maximumSuiteDuration = 15.0
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"

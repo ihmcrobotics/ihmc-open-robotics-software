@@ -1,0 +1,55 @@
+#ifndef __controller_msgs__msg__QuadrupedControllerStateChangeMessage__idl__
+#define __controller_msgs__msg__QuadrupedControllerStateChangeMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet JOINT_INITIALIZATION =
+      0;
+
+      const octet DO_NOTHING =
+      1;
+
+      const octet STAND_PREP =
+      2;
+
+      const octet STAND_READY =
+      3;
+
+      const octet FREEZE =
+      4;
+
+      const octet STEPPING =
+      5;
+
+      const octet FALL =
+      6;
+
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message notifies the user of a change in the high level controller state.
+       * This message's primary use is to signal a requested state change is completed.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedControllerStateChangeMessage_")
+      struct QuadrupedControllerStateChangeMessage
+      {
+        /**
+         * Specifies the controller's state prior to transition.
+         */
+        @defaultValue(value=255)
+        octet initial_controller_name;
+        /**
+         * Specifies the state the controller has transitioned into.
+         */
+        @defaultValue(value=255)
+        octet end_controller_name;
+      };
+    };
+  };
+};
+
+#endif

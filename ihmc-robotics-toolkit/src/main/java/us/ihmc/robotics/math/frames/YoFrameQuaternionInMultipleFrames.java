@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion implements YoMultipleFramesHolder
 {

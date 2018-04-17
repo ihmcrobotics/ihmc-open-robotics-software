@@ -1,31 +1,31 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    protected final YoVariableRegistry registry;
    private final YoDouble currentTime;
-   private final YoFramePoint currentPosition;
-   private final YoFrameVector currentVelocity;
-   private final YoFrameVector currentAcceleration;
+   private final YoFramePoint3D currentPosition;
+   private final YoFrameVector3D currentVelocity;
+   private final YoFrameVector3D currentAcceleration;
 
    private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
-   private final YoFramePoint initialPosition;
-   private final YoFramePoint finalPosition;
+   private final YoFramePoint3D initialPosition;
+   private final YoFramePoint3D finalPosition;
 
-   private final YoFrameVector differenceVector;
+   private final YoFrameVector3D differenceVector;
 
    private final PositionProvider initialPositionProvider;
    private final PositionProvider finalPositionProvider;
@@ -43,15 +43,15 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
       this.currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
-      this.currentPosition = new YoFramePoint(namePrefix + "CurrentPosition", referenceFrame, registry);
-      this.currentVelocity = new YoFrameVector(namePrefix + "CurrentVelocity", referenceFrame, registry);
-      this.currentAcceleration = new YoFrameVector(namePrefix + "CurrentAcceleration", referenceFrame, registry);
+      this.currentPosition = new YoFramePoint3D(namePrefix + "CurrentPosition", referenceFrame, registry);
+      this.currentVelocity = new YoFrameVector3D(namePrefix + "CurrentVelocity", referenceFrame, registry);
+      this.currentAcceleration = new YoFrameVector3D(namePrefix + "CurrentAcceleration", referenceFrame, registry);
 
-      this.differenceVector = new YoFrameVector(namePrefix + "DifferenceVector", referenceFrame, registry);
+      this.differenceVector = new YoFrameVector3D(namePrefix + "DifferenceVector", referenceFrame, registry);
 
       this.parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
-      this.initialPosition = new YoFramePoint(namePrefix + "InitialPos", referenceFrame, registry);
-      this.finalPosition = new YoFramePoint(namePrefix + "FinalPos", referenceFrame, registry);
+      this.initialPosition = new YoFramePoint3D(namePrefix + "InitialPos", referenceFrame, registry);
+      this.finalPosition = new YoFramePoint3D(namePrefix + "FinalPos", referenceFrame, registry);
       this.continuouslyUpdateFinalPosition = new YoBoolean(namePrefix + "ContinuouslyUpdate", registry);
 
       this.initialPositionProvider = initialPositionProvider;

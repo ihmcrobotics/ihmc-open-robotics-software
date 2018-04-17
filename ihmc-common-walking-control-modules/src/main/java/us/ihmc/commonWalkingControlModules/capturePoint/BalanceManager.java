@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -43,12 +44,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -56,6 +53,9 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class BalanceManager
 {
@@ -75,21 +75,21 @@ public class BalanceManager
    private final MomentumRecoveryControlModule momentumRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
-   private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredICP", worldFrame, registry);
-   private final YoFrameVector2d yoDesiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", worldFrame, registry);
-   private final YoFramePoint2d yoFinalDesiredICP = new YoFramePoint2d("finalDesiredICP", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
+   private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
 
    /** CoP position according to the ICP planner */
-   private final YoFramePoint2d yoPerfectCoP = new YoFramePoint2d("perfectCoP", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
    /** CMP position according to the ICP planner */
-   private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d("perfectCMP", worldFrame, registry);
+   private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
    /** CMP position according to the ICP controller */
-   private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
+   private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
 
    // TODO It seems that the achieved CMP can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
-   private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
+   private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
 
    private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
@@ -111,7 +111,7 @@ public class BalanceManager
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
    private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
-   private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
+   private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
 
    private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D achievedCMP = new FramePoint2D();
@@ -119,7 +119,7 @@ public class BalanceManager
    private final FrameVector2D icpError2d = new FrameVector2D();
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
-   private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D shrunkSupportPolygon = new FrameConvexPolygon2D();
 
    private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
    private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
@@ -132,8 +132,8 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
    private final boolean useICPOptimizationControl;
 
@@ -247,7 +247,7 @@ public class BalanceManager
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
-      SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
+      SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
       double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       boolean alwaysAllowMomentum = walkingControllerParameters.alwaysAllowMomentum();
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, alwaysAllowMomentum, registry, yoGraphicsListRegistry);
@@ -728,7 +728,7 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2D supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
@@ -752,7 +752,7 @@ public class BalanceManager
    public void update()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
-      yoCenterOfMass.setAndMatchFrame(centerOfMassPosition);
+      yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
       double omega0 = controllerToolbox.getOmega0();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
       yoPerfectCoP.set(yoPerfectCMP);
@@ -762,7 +762,7 @@ public class BalanceManager
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
-      yoAchievedCMP.setAndMatchFrame(achievedCMP);
+      yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
@@ -775,7 +775,7 @@ public class BalanceManager
       capturePoint2d.checkReferenceFrameMatch(worldFrame);
       desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
 
-      SideDependentList<FrameConvexPolygon2d> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
+      SideDependentList<FrameConvexPolygon2D> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
 
       capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
       capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);

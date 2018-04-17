@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.*;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -19,6 +18,7 @@ import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link MomentumRateCommand} is a command meant to be submitted to the
@@ -53,7 +53,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * Weights on a per component basis to use in the optimization function. A higher weight means
     * higher priority of this task.
     */
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the rate of change
     * of momentum that are to be controlled. It is initialized such that the controller will by
@@ -71,6 +71,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public MomentumRateCommand()
    {
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -79,9 +81,21 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    @Override
    public void set(MomentumRateCommand other)
    {
-      weightVector.set(other.weightVector);
+      weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       momentumRateOfChange.set(other.momentumRateOfChange);
+   }
+
+   /**
+    * Copies all the fields of the given {@link MomentumRateCommand} into this except for the
+    * desired rate of change of momentum.
+    *
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(SpatialAccelerationCommand command)
+   {
+      weightMatrix.set(command.getWeightMatrix());
+      command.getSelectionMatrix(selectionMatrix);
    }
 
    /**
@@ -286,8 +300,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeight(double weight)
    {
-      for (int i = 0; i < Momentum.SIZE; i++)
-         weightVector.set(i, 0, weight);
+      weightMatrix.setAngularWeights(weight, weight, weight);
+      weightMatrix.setLinearWeights(weight, weight, weight);
    }
 
    /**
@@ -303,10 +317,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeight(double angular, double linear)
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, angular);
-      for (int i = 3; i < Momentum.SIZE; i++)
-         weightVector.set(i, 0, linear);
+      weightMatrix.setLinearWeights(linear, linear, linear);
+      weightMatrix.setAngularWeights(angular, angular, angular);
    }
 
    /**
@@ -326,12 +338,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
-      weightVector.set(0, 0, angularX);
-      weightVector.set(1, 0, angularY);
-      weightVector.set(2, 0, angularZ);
-      weightVector.set(3, 0, linearX);
-      weightVector.set(4, 0, linearY);
-      weightVector.set(5, 0, linearZ);
+      weightMatrix.setAngularWeights(angularX, angularY, angularZ);
+      weightMatrix.setLinearWeights(linearX, linearY, linearZ);
    }
 
    /**
@@ -342,17 +350,12 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weight dense matrix holding the weights to use for each component of the desired rate
-    *           of change of momentum. It is expected to be a 6-by-1 vector ordered as:
-    *           {@code angularX}, {@code angularY}, {@code angularZ}, {@code linearX},
-    *           {@code linearY}, {@code linearZ}. Not modified.
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
     */
-   public void setWeights(DenseMatrix64F weight)
+   public void setWeights(WeightMatrix6D weightMatrix)
    {
-      for (int i = 0; i < Momentum.SIZE; i++)
-      {
-         weightVector.set(i, 0, weight.get(i, 0));
-      }
+      this.weightMatrix.set(weightMatrix);
    }
 
    /**
@@ -367,9 +370,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setAngularWeights(Tuple3DReadOnly angular)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
+      weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
 
    /**
@@ -384,9 +385,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
    /**
@@ -402,12 +401,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      setLinearWeights(linear);
+      setAngularWeights(angular);
    }
 
    /**
@@ -421,8 +416,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setAngularWeightsToZero()
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -436,8 +430,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < Momentum.SIZE; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -452,12 +445,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public boolean isHardConstraint()
    {
-      for (int i = 0; i < Momentum.SIZE; i++)
-      {
-         if (weightVector.get(i, 0) == HARD_CONSTRAINT)
-            return true;
-      }
-      return false;
+      return weightMatrix.containsHardConstraint();
    }
 
    /**
@@ -485,32 +473,17 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
       weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
-      CommonOps.setIdentity(weightMatrixToPack);
-      for (int i = 0; i < Momentum.SIZE; i++)
-         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
+      weightMatrix.getFullWeightMatrixInFrame(worldFrame, weightMatrixToPack);
    }
 
    /**
-    * Returns the reference to the 6-by-1 weight vector to use with this command:
-    * 
-    * <pre>
-    *     / w0 \
-    *     | w1 |
-    * W = | w2 |
-    *     | w3 |
-    *     | w4 |
-    *     \ w5 /
-    * </pre>
-    * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
-    * </p>
-    * 
+    * Returns the weight matrix used in this command:
+    *
     * @return the reference to the weights to use with this command.
     */
-   public DenseMatrix64F getWeightVector()
+   public WeightMatrix6D getWeightMatrix()
    {
-      return weightVector;
+      return weightMatrix;
    }
 
    /**
@@ -536,6 +509,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
       selectionMatrixToPack.set(selectionMatrix);
+   }
+
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    /**

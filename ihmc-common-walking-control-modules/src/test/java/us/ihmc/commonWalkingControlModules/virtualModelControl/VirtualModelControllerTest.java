@@ -115,7 +115,7 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, null);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testVMCSelectAll()
    {
@@ -604,8 +604,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.1)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 6.3)
+   @Test(timeout = 32000)
    public void testVMCWithArm() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -643,7 +643,7 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.8)
+   @ContinuousIntegrationTest(estimatedDuration = 4.3)
    @Test(timeout = 30000)
    public void testVMCWithPlanarArm() throws Exception
    {

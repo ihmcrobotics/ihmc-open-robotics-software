@@ -7,6 +7,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
 
 public class PacketRouter<T extends Enum<T>>
 {
@@ -128,7 +129,8 @@ public class PacketRouter<T extends Enum<T>>
    {
       if (packet.getDestination() < 0 || packet.getDestination() >= destinationConstants.length)
       {
-         System.err.println("Invalid destination: " + packet.getDestination() + " sending to Broadcast");
+         PrintTools.error(this, packet.getClass().getSimpleName() + " from: " + PacketDestination.fromOrdinal(packet.getSource()) + " Invalid destination: "
+               + packet.getDestination() + " sending to Broadcast");
          return destinationConstants[0];
       }
 

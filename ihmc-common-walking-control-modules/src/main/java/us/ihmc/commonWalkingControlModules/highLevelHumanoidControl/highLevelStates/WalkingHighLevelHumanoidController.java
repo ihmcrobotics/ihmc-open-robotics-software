@@ -414,7 +414,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
 
@@ -574,7 +574,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          walkingMessageHandler.clearFootsteps();
          walkingMessageHandler.clearFootTrajectory();
-         commandInputManager.flushAllCommands();
+         commandInputManager.clearAllCommands();
 
          if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
          {

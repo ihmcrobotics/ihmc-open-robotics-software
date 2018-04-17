@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
@@ -38,10 +40,11 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       registry.getRegistries().stream().forEach(child -> {
          createItemsRecursive(child, tuningNodes);
       });
+      ObservableList<TreeItem<ParameterTreeValue>> selectedItems = getSelectionModel().getSelectedItems();
       registry.getParameters().stream().forEach(parameter -> {
          Tuner tuner = tuningNodes.get(parameter.getUniqueName());
          Node inputNode = tuner.getSimpleInputNode();
-         ParameterTreeItem parameterItem = new ParameterTreeItem(new ParameterTreeParameter(parameter, inputNode));
+         ParameterTreeItem parameterItem = new ParameterTreeItem(new ParameterTreeParameter(parameter, inputNode, selectedItems));
          treeItemMap.put(parameter.getUniqueName(), parameterItem);
 
          MenuItem revealInTree = new MenuItem("Reveal in Tree");

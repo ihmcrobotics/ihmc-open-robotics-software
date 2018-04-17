@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -411,7 +412,7 @@ public class PointCloudTools
 
          for (Cluster cluster1 : clusters)
          {
-            ConvexPolygon2D convexPolygon = new ConvexPolygon2D(cluster1.getRawPointsInLocal2D());
+            ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(cluster1.getRawPointsInLocal2D()));
 
             PlanarRegion planarRegion = new PlanarRegion(cluster1.getTransformToWorld(), convexPolygon);
             

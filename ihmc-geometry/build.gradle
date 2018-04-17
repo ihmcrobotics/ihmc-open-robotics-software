@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.11"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.7.9.1'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"

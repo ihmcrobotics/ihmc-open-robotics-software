@@ -58,7 +58,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          if(footstep.hasFoothold())
             footstep.getFoothold(foothold);
          else
-            foothold.setAndUpdate(defaultFootPolygon);
+            foothold.set(defaultFootPolygon);
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
