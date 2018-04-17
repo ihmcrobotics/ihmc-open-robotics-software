@@ -143,6 +143,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       }
 
       parentRegistry.addChild(registry);
+
+      estimatedYawDriftRate.update(0.0);
    }
 
    public void update()
@@ -317,11 +319,6 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(estimatedFilteredYawDrift.getDoubleValue(), estimatedYawDrift.getDoubleValue());
       double alphaYawDrift = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(yawDriftBreakFrequency.getValue(), estimatorDT);
       estimatedFilteredYawDrift.set(AngleTools.trimAngleMinusPiToPi(alphaYawDrift * angleDifference + estimatedYawDrift.getDoubleValue()));
-
-      if (!estimatedYawDriftRate.getHasBeenCalled())
-      {
-         estimatedYawDriftRate.update(0.0);
-      }
 
       if (!estimatedYawDriftPrevious.isNaN())
       {

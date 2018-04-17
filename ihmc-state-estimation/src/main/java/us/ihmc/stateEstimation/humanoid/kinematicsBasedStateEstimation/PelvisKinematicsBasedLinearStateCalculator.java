@@ -161,6 +161,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
          AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
+         copFilteredInFootFrame.update(0.0, 0.0);
          copsFilteredInFootFrame.put(foot, copFilteredInFootFrame);
 
          YoFramePoint3D copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
@@ -443,22 +444,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
-   private boolean initialized = false;
-
    public void estimatePelvisLinearState(List<RigidBody> trustedFeet, List<RigidBody> unTrustedFeet, FramePoint3D pelvisPosition)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
-
-      if (!initialized)
-      {
-         for (int i = 0; i < feetRigidBodies.size(); i++)
-         {
-            RigidBody foot = feetRigidBodies.get(i);
-            copsFilteredInFootFrame.get(foot).update(0.0, 0.0);
-         }
-         initialized = true;
-      }
 
       for(int i = 0; i < trustedFeet.size(); i++)
       {
