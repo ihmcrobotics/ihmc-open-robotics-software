@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
    private final MultipleWaypointsBlendedPositionTrajectoryGenerator blendedSwingTrajectory;
