@@ -68,6 +68,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
          "leftForearmYaw", "leftWristRoll", "leftWristPitch", 
          "rightForearmYaw", "rightWristRoll", "rightWristPitch",
+         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2",
+         "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2",
          "leftIndexFingerPitch1", "leftMiddleFingerPitch1", "leftPinkyPitch1", "leftThumbRoll", "leftThumbPitch1", "leftThumbPitch2",
          "rightIndexFingerPitch1", "rightMiddleFingerPitch1", "rightPinkyPitch1", "rightThumbRoll", "rightThumbPitch1", "rightThumbPitch2"
          };
@@ -80,8 +82,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
          "leftForearmYaw", "leftWristRoll", "leftWristPitch",
          "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-         "leftIndexFingerPitch1", "leftMiddleFingerPitch1", "leftPinkyPitch1", "leftThumbRoll", "leftThumbPitch1", "leftThumbPitch2",
-         "rightIndexFingerPitch1", "rightMiddleFingerPitch1", "rightPinkyPitch1", "rightThumbRoll", "rightThumbPitch1", "rightThumbPitch2"
+         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2",
+         "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"
          };
 
    private static final String[] positionControlledJoints = {
@@ -239,6 +241,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
             jointStateHandles.put(joint, createJointStateHandle(joint));
          }
       }
+
+      effortJointHandles.values().forEach(h -> PrintTools.error(h.getName()));
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
       for (String imu : readIMUs)
