@@ -182,15 +182,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition.setMatchingFrame(desiredPosition);
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
 
-      // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
-      FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
-      soleForceEstimate.changeFrame(worldFrame);
-      double pressureEstimate = -soleForceEstimate.getZ();
-      double normalizedTimeInSwing = timeInState / currentStepCommand.getTimeInterval().getDuration();
-      if (normalizedTimeInSwing > 0.5)
-      {
-         touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
-      }
+
+      updateEndOfStateConditions(timeInState);
 
       // Compute sole force.
       if (touchdownTrigger.getBooleanValue())
@@ -207,7 +200,22 @@ public class QuadrupedSwingState extends QuadrupedFootState
          feedbackControlCommand.set(desiredPosition, desiredVelocity);
          feedbackControlCommand.setGains(parameters.getSolePositionGains());
       }
+   }
 
+   private void updateEndOfStateConditions(double timeInState)
+   {
+      // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
+      FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
+      soleForceEstimate.changeFrame(worldFrame);
+      double pressureEstimate = -soleForceEstimate.getZ();
+      double normalizedTimeInSwing = timeInState / currentStepCommand.getTimeInterval().getDuration();
+      if (normalizedTimeInSwing > 0.5)
+      {
+         touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
+      }
+
+      double currentTime = timestamp.getDoubleValue();
+      double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
       // Trigger support phase.
       if (currentTime >= touchDownTime)
       {
@@ -217,6 +225,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          }
          triggerSupport = true;
       }
+
    }
 
    private void fillAndInitializeTrajectories()
