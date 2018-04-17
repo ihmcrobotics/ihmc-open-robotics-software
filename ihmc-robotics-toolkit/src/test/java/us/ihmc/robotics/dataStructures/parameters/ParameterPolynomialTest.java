@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterPolynomialTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstYoPolynomial()
    {
       Random random = new Random(438218L);
