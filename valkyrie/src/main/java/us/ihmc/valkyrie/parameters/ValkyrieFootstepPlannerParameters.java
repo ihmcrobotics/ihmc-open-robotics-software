@@ -20,13 +20,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.45;
+      return 0.55;
    }
 
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.5;
+      return 1.0;
    }
 
    @Override
@@ -38,7 +38,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMinimumStepWidth()
    {
-      return 0.2;
+      return 0.15;
    }
 
    @Override
@@ -63,5 +63,17 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public int getMinimumStepsForBestEffortPlan()
    {
       return 3;
+   }
+
+   @Override
+   public double getMinXClearanceFromStance()
+   {
+      return 0.2;
+   }
+
+   @Override
+   public double getMinYClearanceFromStance()
+   {
+      return 0.15;
    }
 }

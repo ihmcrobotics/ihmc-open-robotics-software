@@ -13,21 +13,24 @@ import java.util.function.Consumer;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.VideoPacket;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.geometry.GeometryMath_F64;
 import georegression.struct.EulerType;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
-import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -37,15 +40,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -54,7 +54,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
    private final Quaternion tempFiducialRotationQuat = new Quaternion();
-   private final FramePose tempFiducialDetectorFrame = new FramePose();
+   private final FramePose3D tempFiducialDetectorFrame = new FramePose3D();
    private final Vector3D cameraRigidPosition = new Vector3D();
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
@@ -83,9 +83,9 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
    private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
 
-   private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D cameraPose = new YoFramePose3D(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D locatedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
    private final AtomicBoolean detectionRunning = new AtomicBoolean(false);
    private final List<Consumer<DetectionVisualizationPackets>> detectionResultListeners = Collections.synchronizedList(new ArrayList<>());
@@ -125,7 +125,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            locatedFiducialPoseInWorldFrame.getPose(transformToParent);
+            locatedFiducialPoseInWorldFrame.get(transformToParent);
          }
       };
 
@@ -192,7 +192,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
             {
                ThreadTools.sleep(5);
             }
-            BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
+            BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
             detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
          } finally
          {
@@ -237,14 +237,14 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 //         }
 //         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
 
-         BoundingBoxesPacket boundingBoxes = result.boundingBoxes;
-         HeatMapPacket heatMap = result.heatMap;
+         BoundingBoxesPacket boundingBoxes = result.getBoundingBoxes();
+         HeatMapPacket heatMap = result.getHeatMap();
          DetectionVisualizationPackets coactiveVisualizationPackets = new DetectionVisualizationPackets(boundingBoxes, heatMap);
          detectionResultListeners.forEach(consumer -> consumer.accept(coactiveVisualizationPackets));
 
-         if (boundingBoxes.labels.length > 0)
+         if (boundingBoxes.getLabels().size() > 0)
          {
-            Rectangle rectangle = new Rectangle(boundingBoxes.boundingBoxXCoordinates[0], boundingBoxes.boundingBoxYCoordinates[0], boundingBoxes.boundingBoxWidths[0], boundingBoxes.boundingBoxHeights[0]);
+            Rectangle rectangle = new Rectangle(boundingBoxes.getBoundingBoxesXCoordinates().get(0), boundingBoxes.getBoundingBoxesYCoordinates().get(0), boundingBoxes.getBoundingBoxesWidths().get(0), boundingBoxes.getBoundingBoxesHeights().get(0));
             double knownWidth = expectedObjectSize.getDoubleValue();
             Point2D_F64 topLeft = new Point2D_F64(rectangle.x, rectangle.y);
             Point2D_F64 bottomRight = new Point2D_F64(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
@@ -333,9 +333,9 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
       return targetIDHasBeenLocated.getBooleanValue();
    }
 
-   public void getReportedFiducialPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedFiducialPoseWorldFrame(FramePose3D framePoseToPack)
    {
-      reportedFiducialPoseInWorldFrame.getFramePoseIncludingFrame(framePoseToPack);
+      framePoseToPack.setIncludingFrame(reportedFiducialPoseInWorldFrame);
    }
 
    public void setFieldOfView(double fieldOfViewXinRadians, double fieldOfViewYinRadians)

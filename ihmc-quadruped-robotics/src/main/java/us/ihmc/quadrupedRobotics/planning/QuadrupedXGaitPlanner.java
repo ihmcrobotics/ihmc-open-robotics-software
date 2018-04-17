@@ -3,10 +3,10 @@ package us.ihmc.quadrupedRobotics.planning;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -19,8 +19,8 @@ public class QuadrupedXGaitPlanner
    private final FramePoint3D goalPosition;
    private final FramePoint3D goalPositionAdjustment;
    private final QuadrantDependentList<FramePoint3D> xGaitRectangle;
-   private final FramePose xGaitRectanglePose;
-   private final FramePose xGaitRectanglePoseAtSoS;
+   private final FramePose3D xGaitRectanglePose;
+   private final FramePose3D xGaitRectanglePoseAtSoS;
    private final PoseReferenceFrame xGaitRectangleFrame;
    private final EndDependentList<QuadrupedTimedStep> pastSteps;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -30,8 +30,8 @@ public class QuadrupedXGaitPlanner
       goalPosition = new FramePoint3D();
       goalPositionAdjustment = new FramePoint3D();
       xGaitRectangle = new QuadrantDependentList<>();
-      xGaitRectanglePose = new FramePose(worldFrame);
-      xGaitRectanglePoseAtSoS = new FramePose(worldFrame);
+      xGaitRectanglePose = new FramePose3D(worldFrame);
+      xGaitRectanglePoseAtSoS = new FramePose3D(worldFrame);
       xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -43,7 +43,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
-         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
+         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -56,7 +56,7 @@ public class QuadrupedXGaitPlanner
       ReferenceFrame supportCentroidFrame = supportCentroidAtSoS.getReferenceFrame();
       supportCentroidAtSoS.changeFrame(worldFrame);
       xGaitRectanglePoseAtSoS.setPosition(supportCentroidAtSoS);
-      xGaitRectanglePoseAtSoS.setYawPitchRoll(yawAtSoS, 0, 0);
+      xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(yawAtSoS, 0, 0);
       supportCentroidAtSoS.changeFrame(supportCentroidFrame);
 
       // plan steps
@@ -109,7 +109,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
-         Vector3D planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+         Vector3D planarVelocity, double currentTime, double currentYaw, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -126,8 +126,8 @@ public class QuadrupedXGaitPlanner
          xGaitRectangle.get(robotQuadrant).setY(robotQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth() / 2.0));
          xGaitRectangle.get(robotQuadrant).setZ(0);
       }
-      xGaitRectanglePoseAtSoS.setPosition(0, 0, 0);
-      xGaitRectanglePoseAtSoS.setYawPitchRoll(currentYaw, 0, 0);
+      xGaitRectanglePoseAtSoS.setPosition(0, 0, currentHeight);
+      xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(currentYaw, 0, 0);
 
       // compute step quadrants and time intervals
       {
@@ -194,13 +194,14 @@ public class QuadrupedXGaitPlanner
          {
             plannedSteps.get(i).getGoalPosition(goalPosition);
             goalPosition.changeFrame(worldFrame);
-            goalPosition.add(goalPositionAdjustment);
+            goalPosition.addX(goalPositionAdjustment.getX());
+            goalPosition.addY(goalPositionAdjustment.getY());
             plannedSteps.get(i).setGoalPosition(goalPosition);
          }
       }
    }
 
-   private void extrapolatePose(FramePose finalPose, FramePose initialPose, Vector3D planarVelocity, double deltaTime)
+   private void extrapolatePose(FramePose3D finalPose, FramePose3D initialPose, Vector3D planarVelocity, double deltaTime)
    {
 
       double a0 = initialPose.getYaw();
@@ -231,11 +232,11 @@ public class QuadrupedXGaitPlanner
       finalPose.setX(x);
       finalPose.setY(y);
       finalPose.setZ(initialPose.getZ());
-      finalPose.setYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
+      finalPose.setOrientationYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
    }
 
    private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,
-         QuadrupedXGaitSettings xGaitSettings)
+         QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotEnd thisStepEnd = thisStep.getRobotQuadrant().getEnd();
       RobotSide thisStepSide = thisStep.getRobotQuadrant().getSide();

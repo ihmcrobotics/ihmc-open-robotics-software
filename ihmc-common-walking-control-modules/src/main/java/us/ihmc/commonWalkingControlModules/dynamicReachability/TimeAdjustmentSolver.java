@@ -101,7 +101,7 @@ public class TimeAdjustmentSolver
 
    /**
     * Sets the number of footsteps to consider, which reflects the number considered in the
-    * {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface}. This is used to set whether or not higher steps will be considered.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface}. This is used to set whether or not higher steps will be considered.
     *
     * @param numberOfFootstepsToConsider
     */

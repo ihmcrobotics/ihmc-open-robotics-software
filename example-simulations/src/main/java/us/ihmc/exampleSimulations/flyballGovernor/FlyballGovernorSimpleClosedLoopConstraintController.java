@@ -5,16 +5,16 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
 public class FlyballGovernorSimpleClosedLoopConstraintController implements RobotController
 {
-   private final YoFramePoint position1A, position1B, position2A, position2B;
-   private final YoFrameVector velocity1A, velocity1B, velocity2A, velocity2B;
-   private final YoFrameVector force1A, force1B, force2A, force2B;
+   private final YoFramePoint3D position1A, position1B, position2A, position2B;
+   private final YoFrameVector3D velocity1A, velocity1B, velocity2A, velocity2B;
+   private final YoFrameVector3D force1A, force1B, force2A, force2B;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -72,13 +72,13 @@ public class FlyballGovernorSimpleClosedLoopConstraintController implements Robo
 
    }
 
-   private void doConstraint(YoFramePoint positionA, YoFramePoint positionB, YoFrameVector velocityA, YoFrameVector velocityB,
-         YoFrameVector forceA, YoFrameVector forceB, YoDouble positionErrorMagnitude)
+   private void doConstraint(YoFramePoint3D positionA, YoFramePoint3D positionB, YoFrameVector3D velocityA, YoFrameVector3D velocityB,
+         YoFrameVector3D forceA, YoFrameVector3D forceB, YoDouble positionErrorMagnitude)
    {
-      positionA.get(posA);
-      positionB.get(posB);
-      velocityA.get(velA);
-      velocityB.get(velB);
+      posA.set(positionA);
+      posB.set(positionB);
+      velA.set(velocityA);
+      velB.set(velocityB);
 
       springForceA.sub(posB, posA);
       positionErrorMagnitude.set(springForceA.length());

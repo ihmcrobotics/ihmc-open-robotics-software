@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -36,14 +34,14 @@ public class TorqueTrajectoryTest
    {
       int numberOfSegments = minSegments + (int) Math.floor(Math.random() * (maxSegments - minSegments));
       int numberOfCoefficients = minCoefficients + (int) Math.floor(Math.random() * (maxCoefficients - minCoefficients));
-      angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
+      angularMomentumTrajectory = new AngularMomentumTrajectory(numberOfSegments, numberOfCoefficients);
       torqueTrajectory = new TorqueTrajectory(numberOfSegments, numberOfCoefficients);
       generateRandomAngularMomentumTrajectory(angularMomentumTrajectory);
       torqueTrajectory.setNext(angularMomentumTrajectory);
       calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetter()
    {
@@ -62,7 +60,7 @@ public class TorqueTrajectoryTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testScaling()
    {

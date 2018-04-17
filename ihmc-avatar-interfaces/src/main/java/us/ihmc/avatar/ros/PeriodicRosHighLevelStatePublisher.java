@@ -2,9 +2,9 @@ package us.ihmc.avatar.ros;
 
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -17,7 +17,7 @@ public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLe
    private final RosHighLevelStatePublisher statePublisher = new RosHighLevelStatePublisher(false);
    private final RosMainNode rosMainNode;
 
-   private HighLevelState currentState = HighLevelState.DO_NOTHING_BEHAVIOR;
+   private HighLevelControllerName currentState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    private final PeriodicNonRealtimeThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler(getClass().getName());
 
    public PeriodicRosHighLevelStatePublisher(RosMainNode rosMainNode, String rosNameSpace)
@@ -36,9 +36,9 @@ public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLe
    @Override
    public void receivedPacket(HighLevelStateChangeStatusMessage packet)
    {
-      if (packet.getEndState() != currentState)
+      if (packet.getEndHighLevelControllerName() != currentState.toByte())
       {
-         currentState = packet.getEndState();
+         currentState = HighLevelControllerName.fromByte(packet.getEndHighLevelControllerName());
       }
    }
 

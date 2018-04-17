@@ -11,14 +11,14 @@ import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoArtifactPosition extends YoArtifact
 {
    private static final int LEGEND_RADIUS = 20;
    private static final BasicStroke STROKE = new BasicStroke(1.2f);
    
-   private final YoFramePoint2d point;
+   private final YoFramePoint2D point;
    private final Vector2D radii = new Vector2D();
    private final GraphicType graphicType;
    
@@ -32,10 +32,10 @@ public class YoArtifactPosition extends YoArtifact
    
    public YoArtifactPosition(String name, YoDouble x, YoDouble y, GraphicType type, Color color, double radius)
    {
-      this(name, new YoFramePoint2d(x, y, ReferenceFrame.getWorldFrame()), type, color, radius);
+      this(name, new YoFramePoint2D(x, y, ReferenceFrame.getWorldFrame()), type, color, radius);
    }
    
-   public YoArtifactPosition(String name, YoFramePoint2d point, GraphicType type, Color color, double radius)
+   public YoArtifactPosition(String name, YoFramePoint2D point, GraphicType type, Color color, double radius)
    {
       super(name, new double[] {radius, type.ordinal()}, color, point.getYoX(), point.getYoY());
       
@@ -94,7 +94,7 @@ public class YoArtifactPosition extends YoArtifact
    @Override
    public void draw(Graphics2DAdapter graphics)
    {
-      point.get(tempPoint);
+      tempPoint.set(point);
       drawLocal(graphics);
    }
 

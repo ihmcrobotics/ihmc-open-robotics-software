@@ -3,6 +3,7 @@ package us.ihmc.avatar.testTools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
@@ -39,7 +39,7 @@ public class EndToEndTestTools
 
    public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage waypoint, SimulationConstructionSet scs, double epsilon)
    {
-      assertCurrentDesiredsMatch(bodyName, waypoint.orientation, waypoint.angularVelocity, scs, epsilon);
+      assertCurrentDesiredsMatch(bodyName, waypoint.getOrientation(), waypoint.getAngularVelocity(), scs, epsilon);
    }
 
    public static void assertCurrentDesiredsMatch(String bodyName, QuaternionReadOnly expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs, double epsilon)
@@ -55,8 +55,8 @@ public class EndToEndTestTools
       assertTrue("Index too high: " + index, index < RigidBodyTaskspaceControlState.maxPointsInGenerator);
       SimpleSO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
       assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), epsilon);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
    }
 
    public static SimpleSO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, SimulationConstructionSet scs)

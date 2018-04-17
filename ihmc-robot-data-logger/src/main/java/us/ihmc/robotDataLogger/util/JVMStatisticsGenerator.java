@@ -29,10 +29,10 @@ public class JVMStatisticsGenerator
    private final YoVariableRegistry registry = new YoVariableRegistry("JVMStatistics");
    private final RobotVisualizer visualizer;
 
-   private final YoLong freeMemory = new YoLong("freeMemory", registry);
-   private final YoLong maxMemory = new YoLong("maxMemory", registry);
-   private final YoLong usedMemory = new YoLong("usedMemory", registry);
-   private final YoLong totalMemory = new YoLong("totalMemory", registry);
+   private final YoLong freeMemory = new YoLong("freeMemoryInBytes", registry);
+   private final YoLong maxMemory = new YoLong("maxMemoryInBytes", registry);
+   private final YoLong usedMemory = new YoLong("usedMemoryInBytes", registry);
+   private final YoLong totalMemory = new YoLong("totalMemoryInBytes", registry);
 
    private final YoLong totalGCInvocations = new YoLong("totalGCInvocations", registry);
    private final YoLong totalGCTotalCollectionTimeMs = new YoLong("gcTotalCollectionTimeMs", registry);
@@ -62,9 +62,26 @@ public class JVMStatisticsGenerator
       visualizer.addRegistry(registry, null);
    }
 
+   public JVMStatisticsGenerator(YoVariableRegistry parentRegistry)
+   {
+      this.visualizer = null;
+      createGCBeanHolders();
+
+      availableProcessors.set(operatingSystemMXBean.getAvailableProcessors());
+      maxMemory.set(Runtime.getRuntime().maxMemory());
+
+      parentRegistry.addChild(registry);
+   }
+
+
    public void start()
    {
       executor.scheduleAtFixedRate(jvmStatisticsGeneratorThread, 0, 1, TimeUnit.SECONDS);
+   }
+   
+   public void runManual()
+   {
+      jvmStatisticsGeneratorThread.run();
    }
 
    public void createGCBeanHolders()
@@ -115,7 +132,10 @@ public class JVMStatisticsGenerator
 
          systemLoadAverage.set(operatingSystemMXBean.getSystemLoadAverage());
 
-         visualizer.update(visualizer.getLatestTimestamp(), registry);
+         if(visualizer != null)
+         {
+            visualizer.update(visualizer.getLatestTimestamp(), registry);
+         }
       }
 
       public void updateMemoryUsageStatistics()

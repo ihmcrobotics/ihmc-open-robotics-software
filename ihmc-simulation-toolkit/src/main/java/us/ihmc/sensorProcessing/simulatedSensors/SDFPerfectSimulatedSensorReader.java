@@ -7,13 +7,12 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -23,7 +22,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -31,6 +29,8 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
@@ -124,8 +124,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       // Think about adding root body acceleration to the fullrobotmodel
       readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations();
       readAndUpdateRootJointPositionAndOrientation();
-      updateReferenceFrames();
       readAndUpdateRootJointAngularAndLinearVelocity();
+      // Update frames after setting angular and linear velocities to correctly update zup frames
+      updateReferenceFrames();
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
@@ -144,17 +145,21 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
-   {
+   {      
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
+      // Update base frames without updating all frames to transform velocity into pelvis
+      elevatorFrame.update();
+      pelvisFrame.update();
+      
       FrameVector3D linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
       FrameVector3D angularVelocity = robot.getRootJointAngularVelocityInRootJointFrame(pelvisFrame);
       angularVelocity.changeFrame(pelvisFrame);
 
-      Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
+      Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
       rootJoint.setJointTwist(bodyTwist);
    }
 
@@ -295,7 +300,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public AuxiliaryRobotData getAuxiliaryRobotData()
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
    {
       return null;
    }

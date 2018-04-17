@@ -1,14 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -18,14 +23,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubSuppToSingSuppCond4DistRecov;
@@ -44,8 +46,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -56,36 +58,24 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WalkingHighLevelHumanoidController extends HighLevelBehavior
+public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider
 {
-   private final static HighLevelState controllerState = HighLevelState.WALKING;
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -100,6 +90,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final CenterOfMassHeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
+   private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
+   private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -109,9 +101,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
-   private final GenericStateMachine<WalkingStateEnum, WalkingState> stateMachine;
+   private final StateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
    private final WalkingMessageHandler walkingMessageHandler;
+   private final PlanarRegionsListHandler planarRegionsListHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
    private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
@@ -135,32 +128,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   /**
-    * This command is used only when
-    * {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code true}. It works along with {@link #jointAccelerationIntegrationParameters}.
-    * <p>
-    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code false}.
-    * </p>
-    */
-   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand;
-   /**
-    * Sets of joints for which specific parameters are to be used during the acceleration
-    * integration calculation.
-    * <p>
-    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code false}.
-    * </p>
-    */
-   private final Map<OneDoFJoint, JointAccelerationIntegrationParametersReadOnly> jointAccelerationIntegrationParameters;
-
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                             ICPTrajectoryPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
+                                             HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      super(controllerState);
-
       this.managerFactory = managerFactory;
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
@@ -182,12 +153,12 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      
+
       ReferenceFrame chestBodyFrame = null;
-      if(chest != null)
+      if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame,trajectoryFrames);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
          bodyManagers.add(chestManager);
       }
 
@@ -206,6 +177,24 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          bodyManagers.add(handManager);
       }
 
+      for (RigidBodyControlManager manager : bodyManagers)
+      {
+         if (manager == null)
+         {
+            continue;
+         }
+         Arrays.asList(manager.getControlledJoints()).stream().forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         OneDoFJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class);
+         Set<String> jointNames = new HashSet<>();
+         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         legJointNames.put(robotSide, jointNames);
+      }
+
       this.walkingControllerParameters = walkingControllerParameters;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -219,12 +208,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters, registry);
+      planarRegionsListHandler = walkingMessageHandler.getPlanarRegionsListHandler();
+      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
+                                                   registry);
 
-      String namePrefix = "walking";
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", WalkingStateEnum.class, yoTime, registry); // this is used by name, and it is ugly.
-
-      setupStateMachine();
+      stateMachine = setupStateMachine();
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
       double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
@@ -233,7 +221,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
       JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestictiveLimits();
-      OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
+      OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits),
+                                                                         OneDoFJoint.class);
       for (OneDoFJoint joint : jointsWithRestrictiveLimit)
       {
          if (limitParameters == null)
@@ -242,85 +231,69 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
-
-      if (walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints())
-      {
-         accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         jointAccelerationIntegrationParameters = new HashMap<>();
-         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = new HashMap<>();
-         ParameterTools.extractAccelerationIntegrationParameterMap(walkingControllerParameters.getJointAccelerationIntegrationParameters(), parameters, registry);
-
-         for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
-         {
-            if (joint instanceof OneDoFJoint)
-            {
-               OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-               accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(oneDoFJoint);
-
-               if (parameters != null && parameters.containsKey(oneDoFJoint.getName()))
-                  jointAccelerationIntegrationParameters.put(oneDoFJoint, parameters.get(oneDoFJoint.getName()));
-            }
-         }
-      }
-      else
-      {
-         accelerationIntegrationCommand = null;
-         jointAccelerationIntegrationParameters = null;
-      }
    }
 
-   private void setupStateMachine()
+   private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
    {
-      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, walkingControllerParameters, registry);
-      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
-      WalkingStateEnum toStandingStateEnum = toStandingState.getStateEnum();
+      StateMachineFactory<WalkingStateEnum, WalkingState> factory = new StateMachineFactory<>(WalkingStateEnum.class);
+      factory.setNamePrefix("walking").setRegistry(registry).buildYoClock(yoTime);
 
-      stateMachine.addState(toStandingState);
-      stateMachine.addState(standingState);
+      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, controllerToolbox, managerFactory,
+                                                      failureDetectionControlModule, walkingControllerParameters, registry);
+      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, controllerToolbox, managerFactory,
+                                                                            failureDetectionControlModule, registry);
+      factory.addState(WalkingStateEnum.TO_STANDING, toStandingState);
+      factory.addState(WalkingStateEnum.STANDING, standingState);
 
       SideDependentList<TransferToWalkingSingleSupportState> walkingTransferStates = new SideDependentList<>();
 
       for (RobotSide transferToSide : RobotSide.values)
       {
          double minimumTransferTime = walkingControllerParameters.getMinimumTransferTime();
-         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(transferToSide, walkingMessageHandler,
-               controllerToolbox, managerFactory, walkingControllerParameters, failureDetectionControlModule, minimumTransferTime, registry);
+         WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
+         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
+                                                                                                     managerFactory, walkingControllerParameters,
+                                                                                                     failureDetectionControlModule, minimumTransferTime,
+                                                                                                     registry);
          walkingTransferStates.put(transferToSide, transferState);
-         stateMachine.addState(transferState);
+         factory.addState(stateEnum, transferState);
       }
 
       SideDependentList<WalkingSingleSupportState> walkingSingleSupportStates = new SideDependentList<>();
 
       for (RobotSide supportSide : RobotSide.values)
       {
-         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(supportSide, walkingMessageHandler, controllerToolbox,
-               managerFactory, walkingControllerParameters, failureDetectionControlModule, registry);
+         WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingSingleSupportState(supportSide);
+         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory,
+                                                                                      walkingControllerParameters, failureDetectionControlModule, registry);
          walkingSingleSupportStates.put(supportSide, singleSupportState);
-         stateMachine.addState(singleSupportState);
+         factory.addState(stateEnum, singleSupportState);
       }
 
       SideDependentList<TransferToFlamingoStanceState> flamingoTransferStates = new SideDependentList<>();
 
       for (RobotSide transferToSide : RobotSide.values)
       {
-         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(transferToSide, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
+         WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
+         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingControllerParameters, walkingMessageHandler,
+                                                                                         controllerToolbox, managerFactory, failureDetectionControlModule,
+                                                                                         registry);
          flamingoTransferStates.put(transferToSide, transferState);
-         stateMachine.addState(transferState);
+         factory.addState(stateEnum, transferState);
       }
 
       SideDependentList<FlamingoStanceState> flamingoSingleSupportStates = new SideDependentList<>();
 
       for (RobotSide supportSide : RobotSide.values)
       {
-         FlamingoStanceState singleSupportState = new FlamingoStanceState(supportSide, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
+         WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoSingleSupportState(supportSide);
+         FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory,
+                                                                          failureDetectionControlModule, registry);
          flamingoSingleSupportStates.put(supportSide, singleSupportState);
-         stateMachine.addState(singleSupportState);
+         factory.addState(stateEnum, singleSupportState);
       }
 
-      // Encapsulate toStandingTransition to make sure it is not used afterwards
-      {
-         toStandingState.addDoneWithStateTransition(WalkingStateEnum.STANDING);
-      }
+      factory.addDoneTransition(WalkingStateEnum.TO_STANDING, WalkingStateEnum.STANDING);
 
       // Setup start/stop walking conditions
       for (RobotSide robotSide : RobotSide.values)
@@ -329,47 +302,45 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          SingleSupportState singleSupportState = walkingSingleSupportStates.get(robotSide);
 
          WalkingStateEnum transferStateEnum = transferState.getStateEnum();
+         WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Start walking
-         StartWalkingCondition startWalkingCondition = new StartWalkingCondition(transferState.getTransferToSide(), walkingMessageHandler);
-         StateTransition<WalkingStateEnum> toTransfer = new StateTransition<WalkingStateEnum>(transferStateEnum, startWalkingCondition);
-         standingState.addStateTransition(toTransfer);
-         toStandingState.addStateTransition(toTransfer);
+         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING), transferStateEnum,
+                               new StartWalkingCondition(transferStateEnum.getTransferToSide(), walkingMessageHandler));
 
          // Stop walking when in transfer
-         StopWalkingFromTransferCondition stopWalkingFromTranferCondition = new StopWalkingFromTransferCondition(transferState, walkingMessageHandler);
-         StateTransition<WalkingStateEnum> fromTransferToStanding = new StateTransition<WalkingStateEnum>(toStandingStateEnum, stopWalkingFromTranferCondition);
-         transferState.addStateTransition(fromTransferToStanding);
+         factory.addTransition(transferStateEnum, WalkingStateEnum.TO_STANDING, new StopWalkingFromTransferCondition(transferState, walkingMessageHandler));
 
          // Stop walking when in single support
-         StopWalkingFromSingleSupportCondition stopWalkingFromSingleSupportCondition = new StopWalkingFromSingleSupportCondition(singleSupportState, walkingMessageHandler);
-         StateTransition<WalkingStateEnum> fromSingleSupportToStanding = new StateTransition<WalkingStateEnum>(toStandingStateEnum, stopWalkingFromSingleSupportCondition);
-         singleSupportState.addStateTransition(fromSingleSupportToStanding);
+         factory.addTransition(singleSupportStateEnum, WalkingStateEnum.TO_STANDING,
+                               new StopWalkingFromSingleSupportCondition(singleSupportState, walkingMessageHandler));
       }
 
       // Setup walking transfer to single support conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         TransferToWalkingSingleSupportState transferState = walkingTransferStates.get(robotSide);
-         SingleSupportState singleSupportState = walkingSingleSupportStates.get(robotSide);
+         WalkingState transferState = walkingTransferStates.get(robotSide);
+         WalkingState singleSupportState = walkingSingleSupportStates.get(robotSide);
+
+         WalkingStateEnum transferStateEnum = transferState.getStateEnum();
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         transferState.addDoneWithStateTransition(singleSupportStateEnum);
+         factory.addDoneTransition(transferStateEnum, singleSupportStateEnum);
       }
 
       // Setup walking single support to transfer conditions
       for (RobotSide robotSide : RobotSide.values)
       {
          SingleSupportState singleSupportState = walkingSingleSupportStates.get(robotSide);
+         WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Single support to transfer with same side
          {
             TransferToWalkingSingleSupportState transferState = walkingTransferStates.get(robotSide);
             WalkingStateEnum transferStateEnum = transferState.getStateEnum();
 
-            SingleSupportToTransferToCondition singleSupportToTransferToCondition = new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler);
-            StateTransition<WalkingStateEnum> toTransfer = new StateTransition<>(transferStateEnum, singleSupportToTransferToCondition);
-            singleSupportState.addStateTransition(toTransfer);
+            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+                                  new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
          }
 
          // Single support to transfer with opposite side
@@ -377,9 +348,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             TransferToWalkingSingleSupportState transferState = walkingTransferStates.get(robotSide.getOppositeSide());
             WalkingStateEnum transferStateEnum = transferState.getStateEnum();
 
-            SingleSupportToTransferToCondition singleSupportToTransferToCondition = new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler);
-            StateTransition<WalkingStateEnum> toTransfer = new StateTransition<>(transferStateEnum, singleSupportToTransferToCondition);
-            singleSupportState.addStateTransition(toTransfer);
+            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+                                  new SingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
          }
       }
 
@@ -390,17 +360,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          FlamingoStanceState singleSupportState = flamingoSingleSupportStates.get(robotSide);
 
          WalkingStateEnum transferStateEnum = transferState.getStateEnum();
+         WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Start flamingo
-         StartFlamingoCondition startFlamingoCondition = new StartFlamingoCondition(transferState.getTransferToSide(), walkingMessageHandler);
-         StateTransition<WalkingStateEnum> toTransfer = new StateTransition<>(transferStateEnum, startFlamingoCondition);
-         standingState.addStateTransition(toTransfer);
-         toStandingState.addStateTransition(toTransfer);
+         factory.addTransition(Arrays.asList(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING), transferStateEnum,
+                               new StartFlamingoCondition(transferState.getTransferToSide(), walkingMessageHandler));
 
          // Stop flamingo
-         StopFlamingoCondition stopFlamingoCondition = new StopFlamingoCondition(singleSupportState, walkingMessageHandler);
-         StateTransition<WalkingStateEnum> toStanding = new StateTransition<>(toStandingStateEnum, stopFlamingoCondition);
-         singleSupportState.addStateTransition(toStanding);
+         factory.addTransition(singleSupportStateEnum, WalkingStateEnum.TO_STANDING, new StopFlamingoCondition(singleSupportState, walkingMessageHandler));
       }
 
       // Setup tranfer to flamingo stance condition
@@ -409,59 +376,33 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          TransferToFlamingoStanceState transferState = flamingoTransferStates.get(robotSide);
          FlamingoStanceState singleSupportState = flamingoSingleSupportStates.get(robotSide);
 
+         WalkingStateEnum transferStateEnum = transferState.getStateEnum();
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         transferState.addDoneWithStateTransition(singleSupportStateEnum);
+         factory.addDoneTransition(transferStateEnum, singleSupportStateEnum);
       }
 
       // Setup the abort condition from all states to the toStandingState
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         AbortCondition abortCondition = new AbortCondition();
-         StateTransition<WalkingStateEnum> abortTransition = new StateTransition<>(toStandingStateEnum, abortCondition);
-
-         walkingSingleSupportStates.get(robotSide).addStateTransition(abortTransition);
-         walkingTransferStates.get(robotSide).addStateTransition(abortTransition);
-         flamingoSingleSupportStates.get(robotSide).addStateTransition(abortTransition);
-         flamingoTransferStates.get(robotSide).addStateTransition(abortTransition);
-      }
+      Set<WalkingStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(WalkingStateEnum.STANDING, WalkingStateEnum.TO_STANDING));
+      factory.addTransition(allButStandingStates, WalkingStateEnum.TO_STANDING, new AbortCondition());
 
       // Setup transition condition for push recovery, when recovering from double support.
-      SideDependentList<StateTransition<WalkingStateEnum>> fromFallingToSingleSupportsTransitions = new SideDependentList<>();
+      Set<WalkingStateEnum> allDoubleSupportStates = Stream.of(WalkingStateEnum.values).filter(state -> state.isDoubleSupport()).collect(Collectors.toSet());
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         WalkingSingleSupportState walkingSingleSupportState = walkingSingleSupportStates.get(robotSide);
-         WalkingStateEnum walkingSingleSupportStateEnum = walkingSingleSupportState.getStateEnum();
-         RobotSide swingSide = walkingSingleSupportState.getSwingSide();
-
-         DoubSuppToSingSuppCond4DistRecov isFallingFromDoubleSupportCondition = new DoubSuppToSingSuppCond4DistRecov(swingSide, balanceManager);
-         StateTransition<WalkingStateEnum> fromFallingToSingleSupport = new StateTransition<WalkingStateEnum>(walkingSingleSupportStateEnum, isFallingFromDoubleSupportCondition);
-         fromFallingToSingleSupportsTransitions.put(robotSide, fromFallingToSingleSupport);
+         WalkingStateEnum singleSupportStateEnum = WalkingStateEnum.getWalkingSingleSupportState(robotSide);
+         RobotSide swingSide = singleSupportStateEnum.getSupportSide().getOppositeSide();
+         factory.addTransition(allDoubleSupportStates, singleSupportStateEnum, new DoubSuppToSingSuppCond4DistRecov(swingSide, balanceManager));
       }
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         toStandingState.addStateTransition(fromFallingToSingleSupportsTransitions.get(robotSide));
-         standingState.addStateTransition(fromFallingToSingleSupportsTransitions.get(robotSide));
+      // Update the previous state info for each state using state changed listeners.
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
+      factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
 
-         for (RobotSide transferSide : RobotSide.values)
-         {
-            walkingTransferStates.get(transferSide).addStateTransition(fromFallingToSingleSupportsTransitions.get(robotSide));
-         }
-      }
-
-      stateMachine.attachStateChangedListener(new StateChangedListener<WalkingStateEnum>()
-      {
-         @Override
-         public void stateChanged(State<WalkingStateEnum> oldState, State<WalkingStateEnum> newState, double time)
-         {
-            controllerToolbox.reportControllerStateChangeToListeners(oldState.getStateEnum(), newState.getStateEnum());
-         }
-      });
+      return factory.build(WalkingStateEnum.TO_STANDING);
    }
 
-   @Override
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
@@ -473,7 +414,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
 
@@ -514,7 +455,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
       hasICPPlannerBeenInitializedAtStart.set(false);
-      stateMachine.setCurrentState(WalkingStateEnum.TO_STANDING);
+      stateMachine.resetToInitialState();
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
@@ -538,7 +479,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private class AbortCondition implements StateTransitionCondition
    {
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (!abortWalkingRequested.getBooleanValue())
             return false;
@@ -558,7 +499,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
-   @Override
    public void doAction()
    {
       controllerToolbox.update();
@@ -580,13 +520,16 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
+      commandConsumer.consumePlanarRegionsListCommand();
 
       updateFailureDetection();
 
       balanceManager.update();
 
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      if (planarRegionsListHandler.hasNewPlanarRegions())
+         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
+
+      stateMachine.doActionAndTransition();
 
       currentState = stateMachine.getCurrentState();
 
@@ -631,7 +574,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          walkingMessageHandler.clearFootsteps();
          walkingMessageHandler.clearFootTrajectory();
-         commandInputManager.flushAllCommands();
+         commandInputManager.clearAllCommands();
 
          if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
          {
@@ -639,9 +582,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
          {
-            FrameVector2D fallingDirection = failureDetectionControlModule.getFallingDirection();
-            walkingMessageHandler.reportControllerFailure(fallingDirection);
-            controllerToolbox.reportControllerFailureToListeners(fallingDirection);
+            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
          }
       }
 
@@ -680,12 +622,17 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
-            isRecoveringFromPush, feetManager));
+                                                                                               isRecoveringFromPush, feetManager));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
-      balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+      if (currentState.isDoubleSupportState())
+         balanceManager.compute(currentState.getTransferToSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
+                                controlHeightWithMomentum);
+      else
+         balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
+                                controlHeightWithMomentum);
    }
 
    private void submitControllerCoreCommands()
@@ -705,6 +652,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+         controllerCoreCommand.completeLowLevelJointData(feetManager.getJointDesiredData(robotSide));
 
          controllerCoreCommand.addFeedbackControlCommand(legConfigurationManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(legConfigurationManager.getInverseDynamicsCommand(robotSide));
@@ -723,7 +671,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          {
             controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
             controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
-            controllerCoreCommand.completeLowLevelJointData(bodyManager.getLowLevelJointDesiredData());
          }
       }
 
@@ -732,27 +679,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
-      if (accelerationIntegrationCommand != null)
-      {
-         if (!jointAccelerationIntegrationParameters.isEmpty())
-         {
-            int numberOfJointsToComputeDesiredPositionFor = accelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor();
-            for (int jointIndex = 0; jointIndex < numberOfJointsToComputeDesiredPositionFor; jointIndex++)
-            {
-               OneDoFJoint joint = accelerationIntegrationCommand.getJointToComputeDesiredPositionFor(jointIndex);
-               JointAccelerationIntegrationParametersReadOnly parameters = jointAccelerationIntegrationParameters.get(joint);
-               if (parameters != null)
-                  accelerationIntegrationCommand.setJointParameters(jointIndex, parameters);
-            }
-         }
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
-      }
-
       /*
-       * FIXME: This is mainly used for resetting the integrators at touchdown.
-       * It is done in SingleSupportState.doTransitionOutOfAction. Need to
-       * figure out how to use directly the joint data holder instead of
-       * OneDoFJoint.
+       * FIXME: This is mainly used for resetting the integrators at touchdown. It is done in
+       * SingleSupportState.doTransitionOutOfAction. Need to figure out how to use directly the joint data
+       * holder instead of OneDoFJoint.
        */
       LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
 
@@ -774,21 +704,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       pelvisOrientationManager.initialize();
    }
 
-   @Override
-   public void doTransitionIntoAction()
-   {
-      for (int i = 0; i < allOneDoFjoints.length; i++)
-      {
-         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
-         allOneDoFjoints[i].setQddDesired(0.0);
-         allOneDoFjoints[i].setTau(0.0);
-      }
-
-      initialize();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
+   public void resetJointIntegrators()
    {
       for (int i = 0; i < allOneDoFjoints.length; i++)
       {
@@ -798,13 +714,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
    }
 
-   @Override
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
    }
 
-   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -812,10 +726,32 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    /**
     * Returns the currently active walking state. This is used for unit testing.
+    * 
     * @return WalkingStateEnum
     */
    public WalkingStateEnum getWalkingStateEnum()
    {
-      return stateMachine.getCurrentStateEnum();
+      return stateMachine.getCurrentStateKey();
+   }
+
+   @Override
+   public boolean isJointLoadBearing(String jointName)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         boolean legLoaded = feetManager.getCurrentConstraintType(robotSide).isLoadBearing();
+         if (legLoaded && legJointNames.get(robotSide).contains(jointName))
+         {
+            return true;
+         }
+      }
+
+      RigidBodyControlManager manager = bodyManagerByJointName.get(jointName);
+      if (manager != null && manager.isLoadBearing())
+      {
+         return true;
+      }
+
+      return false;
    }
 }

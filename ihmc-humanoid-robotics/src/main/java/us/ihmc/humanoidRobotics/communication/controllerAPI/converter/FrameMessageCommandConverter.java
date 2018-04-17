@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FrameMessageCommandConverter implements CommandConversionInterface
@@ -19,7 +18,7 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message)
    {
-      return command instanceof FrameBasedCommand && message instanceof FrameBasedMessage;
+      return command instanceof FrameBasedCommand;
    }
    
    /** {@inheritDoc} */

@@ -2,9 +2,9 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceX</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootForceX</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -14,9 +14,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceX</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootForceX</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -26,9 +26,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceY</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootForceY</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -38,9 +38,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceY</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootForceY</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -50,9 +50,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootForceZ</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -62,9 +62,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootForceZ</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -74,9 +74,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueX</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueX</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -86,9 +86,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueX</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameX,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueX</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -98,9 +98,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueY</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueY</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -110,9 +110,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueY</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameY,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueY</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -122,9 +122,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueZ</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -134,9 +134,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameZ,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControlCoreToolbox.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueZ</Variables>
 		<GraphConfiguration>
-			<Name>config12</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>

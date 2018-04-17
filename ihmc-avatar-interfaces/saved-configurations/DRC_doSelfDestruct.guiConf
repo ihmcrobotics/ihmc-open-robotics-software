@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,doSelfDestruct,desiredICPX,desiredICPY,alphaDesiredVelocity,kForceVel</Entry Boxes>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelControllerName,transitionToFullControl,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,doSelfDestruct,desiredICPX,desiredICPY,alphaDesiredVelocity,kForceVel</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

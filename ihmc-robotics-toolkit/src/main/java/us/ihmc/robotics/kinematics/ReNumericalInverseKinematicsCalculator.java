@@ -261,7 +261,6 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    @Override
    public void setLimitJointAngles(boolean limitJointAngles)
    {
-      // TODO Auto-generated method stub
       
    }
 }

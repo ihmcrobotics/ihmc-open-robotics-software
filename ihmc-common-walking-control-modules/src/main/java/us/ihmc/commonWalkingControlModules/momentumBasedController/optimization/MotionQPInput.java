@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+
 public class MotionQPInput
 {
    public final DenseMatrix64F taskJacobian;
@@ -9,19 +11,23 @@ public class MotionQPInput
    public final DenseMatrix64F taskWeightMatrix;
    private double taskWeightScalar;
    private boolean useWeightScalar = false;
-   private boolean isMotionConstraint = false;
    private final int numberOfDoFs;
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    /**
     * <p>
-    *    Motion objective input into the QP solver.
-    *    Must be in the form
+    * Motion objective input into the QP solver. Must be in the form
     * </p>
     * <p>
-    *    J*x - x
+    * A * x - b
     * </p>
+    * where:
+    * <ul>
+    * <li>A is {@code taskJacobian}
+    * <li>b is {@code taskObjective}
+    * <li>x is the vector of the problem variables, for instance joint accelerations.
     * <p>
-    *    where the overall desire is minimize the objective.
+    * where the overall desire is minimize the objective.
     * </p>
     */
    public MotionQPInput(int numberOfDoFs)
@@ -54,11 +60,6 @@ public class MotionQPInput
       this.taskWeightMatrix.set(taskWeightMatrix);
    }
 
-   public void setIsMotionConstraint(boolean isMotionConstraint)
-   {
-      this.isMotionConstraint = isMotionConstraint;
-   }
-
    public void setUseWeightScalar(boolean useWeightScalar)
    {
       this.useWeightScalar = useWeightScalar;
@@ -79,9 +80,14 @@ public class MotionQPInput
       return useWeightScalar;
    }
 
-   public boolean isMotionConstraint()
+   public void setConstraintType(ConstraintType constraintType)
    {
-      return isMotionConstraint;
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    @Override
@@ -90,8 +96,8 @@ public class MotionQPInput
       String ret = getClass().getSimpleName();
       ret += "Jacobian:\n" + taskJacobian;
       ret += "Objective:\n" + taskObjective;
-      if (isMotionConstraint)
-         ret += "Motion constraint.";
+      if (constraintType != ConstraintType.OBJECTIVE)
+         ret += constraintType.toString();
       else if (useWeightScalar)
          ret += "Weight: " + taskWeightScalar;
       else

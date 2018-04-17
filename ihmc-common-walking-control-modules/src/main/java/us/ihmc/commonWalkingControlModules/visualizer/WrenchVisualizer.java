@@ -15,8 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -30,9 +30,9 @@ public class WrenchVisualizer
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final Map<RigidBody, YoFrameVector> forces = new LinkedHashMap<RigidBody, YoFrameVector>();
-   private final Map<RigidBody, YoFrameVector> torques = new LinkedHashMap<RigidBody, YoFrameVector>();
-   private final Map<RigidBody, YoFramePoint> pointsOfApplication = new LinkedHashMap<RigidBody, YoFramePoint>();
+   private final Map<RigidBody, YoFrameVector3D> forces = new LinkedHashMap<RigidBody, YoFrameVector3D>();
+   private final Map<RigidBody, YoFrameVector3D> torques = new LinkedHashMap<RigidBody, YoFrameVector3D>();
+   private final Map<RigidBody, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<RigidBody, YoFramePoint3D>();
    private final Map<RigidBody, YoGraphicVector> forceVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
    private final Map<RigidBody, YoGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
 
@@ -62,13 +62,13 @@ public class WrenchVisualizer
       for (RigidBody rigidBody : rigidBodies)
       {
          String prefix = name + rigidBody.getName();
-         YoFrameVector force = new YoFrameVector(prefix + "Force", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameVector3D force = new YoFrameVector3D(prefix + "Force", ReferenceFrame.getWorldFrame(), registry);
          forces.put(rigidBody, force);
 
-         YoFrameVector torque = new YoFrameVector(prefix + "Torque", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameVector3D torque = new YoFrameVector3D(prefix + "Torque", ReferenceFrame.getWorldFrame(), registry);
          torques.put(rigidBody, torque);
 
-         YoFramePoint pointOfApplication = new YoFramePoint(prefix + "PointOfApplication", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D pointOfApplication = new YoFramePoint3D(prefix + "PointOfApplication", ReferenceFrame.getWorldFrame(), registry);
          pointsOfApplication.put(rigidBody, pointOfApplication);
 
          YoGraphicVector forceVisualizer = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE * vizScaling, forceAppearance,
@@ -98,19 +98,19 @@ public class WrenchVisualizer
             tempWrench.set(wrench);
             tempWrench.changeFrame(tempWrench.getBodyFrame());
 
-            YoFrameVector force = forces.get(rigidBody);
+            YoFrameVector3D force = forces.get(rigidBody);
             tempVector.setToZero(tempWrench.getExpressedInFrame());
             tempWrench.getLinearPart(tempVector);
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             force.set(tempVector);
 
-            YoFrameVector torque = torques.get(rigidBody);
+            YoFrameVector3D torque = torques.get(rigidBody);
             tempVector.setToZero(tempWrench.getExpressedInFrame());
             tempWrench.getAngularPart(tempVector);
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());
             torque.set(tempVector);
 
-            YoFramePoint pointOfApplication = pointsOfApplication.get(rigidBody);
+            YoFramePoint3D pointOfApplication = pointsOfApplication.get(rigidBody);
             tempPoint.setToZero(wrench.getBodyFrame());
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
             pointOfApplication.set(tempPoint);

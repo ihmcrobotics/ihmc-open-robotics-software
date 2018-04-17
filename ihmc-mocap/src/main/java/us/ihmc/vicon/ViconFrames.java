@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class ViconFrames
 {
@@ -136,7 +136,7 @@ public class ViconFrames
                System.out.println("Model: " + name);
                ViconReferenceFrame drone = viconFrames.getBodyFrame(name);
 
-               FramePose point = new FramePose(drone);
+               FramePose3D point = new FramePose3D(drone);
                point.changeFrame(viconFrames.getViconWorldFrame());
 
                System.out.println(drone.isDataValid());

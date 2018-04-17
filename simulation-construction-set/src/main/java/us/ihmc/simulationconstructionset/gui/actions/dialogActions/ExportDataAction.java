@@ -19,7 +19,7 @@ public class ExportDataAction extends AbstractAction
       super("Export Data...");
       this.constructor = constructor;
 
-      String iconFilename = "icons/Export24.gif";
+      String iconFilename = "icons/ExportData.png";
       int shortKey = KeyEvent.VK_E;
       String longDescription = "Export simulation data to a file.";
       String shortDescription = "Export Data";

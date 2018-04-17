@@ -1,17 +1,61 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.Map;
+import java.util.List;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
-   public abstract Vector3D getLinearMomentumWeight();
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
+   public Vector3DReadOnly getLinearMomentumWeight()
+   {
+      return null;
+   }
 
-   public abstract Vector3D getHighLinearMomentumWeightForRecovery();
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
+   public Vector3DReadOnly getHighLinearMomentumWeightForRecovery()
+   {
+      return null;
+   }
 
-   public abstract Vector3D getAngularMomentumWeight();
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
+   public Vector3DReadOnly getAngularMomentumWeight()
+   {
+      return null;
+   }
+
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    * <p>
+    * Returns the optimization weight for the linear objective of the foot whenever the foot is
+    * in support (loaded). When the foot is not loaded the default weight from
+    * {@link #getTaskspaceLinearWeights()} will be used.
+    * </p>
+    */
+   public Vector3DReadOnly getLoadedFootLinearWeight()
+   {
+      return null;
+   }
+
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    * <p>
+    * Returns the optimization weight for the angular objective of the foot whenever the foot is
+    * in support (loaded).When the foot is not loaded the default weight from
+    * {@link #getTaskspaceAngularWeights()} will be used.
+    * </p>
+    */
+   public Vector3DReadOnly getLoadedFootAngularWeight()
+   {
+      return null;
+   }
 
    /**
     * The map returned contains all optimization weights for jointspace objectives. The key of the map
@@ -20,7 +64,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     *
     * @return map containing jointspace QP weights by joint name
     */
-   public abstract TObjectDoubleHashMap<String> getJointspaceWeights();
+   public abstract List<GroupParameter<Double>> getJointspaceWeights();
 
    /**
     * The map returned contains all optimization weights for user desired acceleration objectives. The
@@ -29,7 +73,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     *
     * @return map containing user desired acceleration QP weights by joint name
     */
-   public abstract TObjectDoubleHashMap<String> getUserModeWeights();
+   public abstract List<GroupParameter<Double>> getUserModeWeights();
 
    /**
     * The map returned contains all optimization weights for taskspace orientation objectives. The key
@@ -38,7 +82,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     *
     * @return map containing taskspace orientation QP weights by rigid body name
     */
-   public abstract Map<String, Vector3D> getTaskspaceAngularWeights();
+   public abstract List<GroupParameter<Vector3DReadOnly>> getTaskspaceAngularWeights();
 
    /**
     * The map returned contains all optimization weights for taskspace position objectives. The key
@@ -47,24 +91,5 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     *
     * @return map containing taskspace position QP weights by rigid body name
     */
-   public abstract Map<String, Vector3D> getTaskspaceLinearWeights();
-
-   // TODO: nuke this once the rigid body manager stuff is done and these weights are contained in the maps above
-   public abstract double getHandJointspaceWeight();
-   public abstract double getHeadJointspaceWeight();
-   public abstract double getChestUserModeWeight();
-   public abstract double getHandUserModeWeight();
-   public abstract double getHeadUserModeWeight();
-   public abstract Vector3D getHeadAngularWeight();
-   public abstract Vector3D getChestAngularWeight();
-   public abstract Vector3D getPelvisAngularWeight();
-   public abstract Vector3D getPelvisLinearWeight();
-   public abstract Vector3D getHandAngularTaskspaceWeight();
-   public abstract Vector3D getHandLinearTaskspaceWeight();
-
-   // TODO: figure out how to handle these with the maps:
-   public abstract Vector3D getDefaultLinearFootWeight();
-   public abstract Vector3D getDefaultAngularFootWeight();
-   public abstract Vector3D getHighLinearFootWeight();
-   public abstract Vector3D getHighAngularFootWeight();
+   public abstract List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights();
 }

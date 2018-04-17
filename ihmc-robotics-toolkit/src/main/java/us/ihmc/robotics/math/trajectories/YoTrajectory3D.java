@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectory3D
@@ -684,13 +684,13 @@ public class YoTrajectory3D
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
    }
 
-   public void getStartPoint(Point3D positionToPack)
+   public void getStartPoint(Point3DBasics positionToPack)
    {
       compute(getInitialTime());
       positionToPack.set(getPosition());
    }
 
-   public void getEndPoint(Point3D positionToPack)
+   public void getEndPoint(Point3DBasics positionToPack)
    {
       compute(getFinalTime());
       positionToPack.set(getPosition());

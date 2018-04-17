@@ -7,10 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -100,7 +100,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       robot.setOrientation(pelvisInitialPose.getYaw(), pelvisInitialPose.getPitch(), pelvisInitialPose.getRoll());
    }
 
-   private final static FramePose pelvisInitialPose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final static FramePose3D pelvisInitialPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final static Map<LegJointName, Double> legInitialJointPositions = new LinkedHashMap<LegJointName, Double>();
    private final static SideDependentList<Map<ArmJointName, Double>> armInitialJointPositions = SideDependentList.createListOfHashMaps();
 

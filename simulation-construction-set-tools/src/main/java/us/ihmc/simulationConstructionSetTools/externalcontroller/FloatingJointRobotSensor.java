@@ -59,7 +59,6 @@ class FloatingJointRobotSensor implements SensorInterface
 
    public int getNumberOfVariables()
    {
-      // TODO Auto-generated method stub
       return 19;
    }
 

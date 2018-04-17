@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -7,8 +8,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * The purpose of this class is to check if it is probable that the foot is rotating, given a
@@ -23,7 +23,7 @@ public class RotationVerificator
    private final YoVariableRegistry registry;
 
    private final ReferenceFrame soleFrame;
-   private final YoFrameVector2d yoCopError;
+   private final YoFrameVector2D yoCopError;
 
    /**
     * Check if the error between cop and desired cop perpendicular the line of
@@ -56,7 +56,7 @@ public class RotationVerificator
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
-      yoCopError = new YoFrameVector2d(namePrefix + "CopError", "", soleFrame, registry);
+      yoCopError = new YoFrameVector2D(namePrefix + "CopError", "", soleFrame, registry);
 
       perpendicularCopError = new YoDouble(namePrefix + "PerpendicularCopError", registry);
       perpendicluarCopErrorThreshold = explorationParameters.getPerpendicluarCopErrorThreshold();
@@ -73,7 +73,7 @@ public class RotationVerificator
 
    public boolean isRotating(FramePoint2D cop,
          FramePoint2D desiredCop,
-         FrameLine2d lineOfRotation)
+         FrameLine2D lineOfRotation)
    {
       cop.checkReferenceFrameMatch(soleFrame);
       desiredCop.checkReferenceFrameMatch(soleFrame);

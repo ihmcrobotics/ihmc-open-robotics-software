@@ -4,16 +4,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.modules.uiConnector.ControllerFilteredConnectionModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -22,7 +24,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -51,8 +52,8 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupROSAPIModule(params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
-      tryToStartModule(() -> setupMultisenseManualTestModule(robotModel, params));
       tryToStartModule(() -> setupDrillDetectionModule(params));
+      tryToStartModule(() -> setupConstrainedWholebodyPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts()));
@@ -114,12 +115,12 @@ public class DRCNetworkProcessor
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
          try
          {
-		   	packetCommunicator.connect();
-		   }
+            packetCommunicator.connect();
+         }
          catch (IOException e)
          {
-   			e.printStackTrace();
-	   	}
+            e.printStackTrace();
+         }
          printModuleConnectedDebugStatement(destinationId, "addRobotSpecificModuleCommunicators");
       }
    }
@@ -163,6 +164,24 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.OBJECT_DETECTOR, methodName);
       }
    }
+   
+   private void setupConstrainedWholebodyPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isConstrainedWholeBodyPlanningToolboxEnabled())
+         return;
+      
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
+      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
+
+      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
+      cwbPlanningToolboxCommunicator.connect();
+
+      String methodName = "setupConstrainedWholebodyPlanningModule";
+      printModuleConnectedDebugStatement(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
+   }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
@@ -177,6 +196,7 @@ public class DRCNetworkProcessor
 
       String methodName = "setupWholeBodyInverseKinematicsModule";
       printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupKinematicsToolboxModule");
    }
 
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -194,28 +214,6 @@ public class DRCNetworkProcessor
 
       String methodName = "setupFootstepPlanningModule";
       printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
-   }
-
-   private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
-   {
-      if (params.isMultisenseManualTestModuleEnabled())
-      {
-         new MultisenseMocapManualCalibrationTestModule(robotModel, params.getRosUri());
-
-         PacketCommunicator multisenseModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NET_CLASS_LIST);
-         packetRouter.attachPacketCommunicator(PacketDestination.MULTISENSE_TEST_MODULE, multisenseModuleCommunicator);
-         try
-         {
-            multisenseModuleCommunicator.connect();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-
-         String methodName = "setupMultisenseManualTestModule";
-         printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
-      }
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
@@ -352,10 +350,18 @@ public class DRCNetworkProcessor
       if (params.isControllerCommunicatorEnabled())
       {
          PacketCommunicator controllerPacketCommunicator;
+
          if(params.isLocalControllerCommunicatorEnabled())
          {
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
+         }
+         else if (params.isFilterControllerInputMessages())
+         {
+            new ControllerFilteredConnectionModule(NET_CLASS_LIST);
+
+            PrintTools.info(this, "Connecting to controller using filtered connection module.");
+            controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_FILTER_MODULE_PORT, NET_CLASS_LIST);
          }
          else
          {

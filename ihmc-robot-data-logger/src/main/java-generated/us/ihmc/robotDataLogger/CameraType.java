@@ -1,6 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
 /**
 * 
@@ -10,14 +8,19 @@ import java.util.Arrays;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum CameraType
 {
-        	CAPTURE_CARD,
-        
-        	NETWORK_STREAM,
-        
-	;
-	
-	public static CameraType[] values = values();
+         CAPTURE_CARD,
+      
+         NETWORK_STREAM,
+      
+   ;
+   public static CameraType[] values = values();
 
+   public boolean epsilonEquals(CameraType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

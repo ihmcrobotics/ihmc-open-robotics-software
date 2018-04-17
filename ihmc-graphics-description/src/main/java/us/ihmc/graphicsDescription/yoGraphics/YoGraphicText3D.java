@@ -5,15 +5,15 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGraphicText3D extends YoGraphicAbstractShape
 {
    private final Graphics3DObject graphics3dObject;
    private final Graphics3DAddExtrusionInstruction instruction;
 
-   public YoGraphicText3D(String name, String text, YoFramePoint framePoint, YoFrameOrientation orientation, double scale, AppearanceDefinition appearance)
+   public YoGraphicText3D(String name, String text, YoFramePoint3D framePoint, YoFrameYawPitchRoll orientation, double scale, AppearanceDefinition appearance)
    {
       super(name, framePoint, orientation, scale);
       this.graphics3dObject = new Graphics3DObject();
@@ -24,7 +24,7 @@ public class YoGraphicText3D extends YoGraphicAbstractShape
    public YoGraphicText3D(String name, String text, String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale,
          AppearanceDefinition appearance)
    {
-      this(name, text, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameOrientation(namePrefix, nameSuffix,
+      this(name, text, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameYawPitchRoll(namePrefix, nameSuffix,
             ReferenceFrame.getWorldFrame(), registry), scale, appearance);
    }
 

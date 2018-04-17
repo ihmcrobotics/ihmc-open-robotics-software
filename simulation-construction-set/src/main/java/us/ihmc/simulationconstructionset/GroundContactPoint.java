@@ -6,18 +6,18 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class GroundContactPoint extends ExternalForcePoint
 {
    private static final long serialVersionUID = 2334921180229856021L;
  
-   private final YoFramePoint touchdownLocation;
+   private final YoFramePoint3D touchdownLocation;
    
    private final YoDouble fs;    // Foot Switch TODO: YoBoolean or YoEnum
-   private final YoFrameVector surfaceNormal;
+   private final YoFrameVector3D surfaceNormal;
 
    private final YoBoolean slip;    // Whether or not it is slipping.
    private final YoInteger collisionCount;
@@ -41,14 +41,14 @@ public class GroundContactPoint extends ExternalForcePoint
    {
       super(name, offset, registry);
 
-      touchdownLocation = new YoFramePoint(name + "_td", "", ReferenceFrame.getWorldFrame(), registry);
+      touchdownLocation = new YoFramePoint3D(name + "_td", "", ReferenceFrame.getWorldFrame(), registry);
 
       fs = new YoDouble(name + "_fs", "GroundContactPoint foot switch", registry);
 
       slip = new YoBoolean(name + "_slip", "GroundContactPoint slipping", registry);
       collisionCount = new YoInteger(name + "_coll", "GroundContactPoint colliding", registry);
       
-      surfaceNormal = new YoFrameVector(name + "_n", "", ReferenceFrame.getWorldFrame(), registry);
+      surfaceNormal = new YoFrameVector3D(name + "_n", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
    public boolean isSlipping()
@@ -104,10 +104,10 @@ public class GroundContactPoint extends ExternalForcePoint
 
    public void getTouchdownLocation(Point3D touchdownLocationToPack)
    {
-      touchdownLocation.get(touchdownLocationToPack);
+      touchdownLocationToPack.set(touchdownLocation);
    }
    
-   public YoFramePoint getYoTouchdownLocation()
+   public YoFramePoint3D getYoTouchdownLocation()
    {
       return touchdownLocation;
    }
@@ -130,7 +130,7 @@ public class GroundContactPoint extends ExternalForcePoint
    
    public void getSurfaceNormal(Vector3D vectorToPack)
    {
-      surfaceNormal.get(vectorToPack);
+      vectorToPack.set(surfaceNormal);
    }
 
    public void setSurfaceNormal(Vector3D surfaceNormal)
@@ -143,7 +143,7 @@ public class GroundContactPoint extends ExternalForcePoint
       this.surfaceNormal.set(fx, fy, fz);
    }
    
-   public YoFrameVector getYoSurfaceNormal()
+   public YoFrameVector3D getYoSurfaceNormal()
    {
 	   return this.surfaceNormal;
    }

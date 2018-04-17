@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 
 public interface FramePoseProvider
 {
-   public abstract void getPose(FramePose framePoseToPack);
+   public abstract void getPose(FramePose3D framePoseToPack);
 }

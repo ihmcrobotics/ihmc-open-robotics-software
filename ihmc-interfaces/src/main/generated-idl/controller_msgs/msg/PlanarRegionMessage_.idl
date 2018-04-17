@@ -1,0 +1,41 @@
+#ifndef __controller_msgs__msg__PlanarRegionMessage__idl__
+#define __controller_msgs__msg__PlanarRegionMessage__idl__
+
+#include "controller_msgs/msg/./Polygon2DMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const long NO_REGION_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * This message contains a single planar region.
+       * It is defined by an origin, a normal, and a concave hull.
+       * For easier processing, a set of convex polygons approximating the concave hull are also provided.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PlanarRegionMessage_")
+      struct PlanarRegionMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=-1)
+        long region_id;
+        geometry_msgs::msg::dds::Point region_origin;
+        geometry_msgs::msg::dds::Vector3 region_normal;
+        controller_msgs::msg::dds::Polygon2DMessage concave_hull;
+        sequence<controller_msgs::msg::dds::Polygon2DMessage> convex_polygons;
+      };
+    };
+  };
+};
+
+#endif

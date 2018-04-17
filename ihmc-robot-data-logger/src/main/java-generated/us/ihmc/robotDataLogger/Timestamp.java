@@ -1,74 +1,74 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
-/**
-* 
-* Definition of the class "Timestamp" defined in Timestamp.idl. 
-*
-* This file was automatically generated from Timestamp.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Timestamp.idl instead.
-*
-*/
-public class Timestamp
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+public class Timestamp extends Packet<Timestamp> implements Settable<Timestamp>, EpsilonComparable<Timestamp>
 {
-    public Timestamp()
-    {
-        
-        
-    }
+   public long timestamp_;
 
-    public void set(Timestamp other)
-    {
-        	timestamp_ = other.timestamp_;
+   public Timestamp()
+   {
+   }
 
-    }
+   public Timestamp(Timestamp other)
+   {
+      this();
+      set(other);
+   }
 
-    public void setTimestamp(long timestamp)
-    {
-        timestamp_ = timestamp;
-    }
+   public void set(Timestamp other)
+   {
+      timestamp_ = other.timestamp_;
 
-    public long getTimestamp()
-    {
-        return timestamp_;
-    }
+   }
 
-        
+   public void setTimestamp(long timestamp)
+   {
+      timestamp_ = timestamp;
+   }
+   public long getTimestamp()
+   {
+      return timestamp_;
+   }
 
 
+   @Override
+   public boolean epsilonEquals(Timestamp other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof Timestamp)) return false;
+
+      Timestamp otherMyClass = (Timestamp) other;
+
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof Timestamp)) return false;
-        Timestamp otherMyClass = (Timestamp)other;
-        boolean returnedValue = true;
+      return true;
+   }
 
-        returnedValue &= this.timestamp_ == otherMyClass.timestamp_;
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
 
-                
-
-        return returnedValue;
-    }
-    
-     @Override
-    public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("Timestamp {");
-        builder.append("timestamp=");
-        builder.append(this.timestamp_);
-
-                
-        builder.append("}");
-		return builder.toString();
-    }
-
-    private long timestamp_; 
-
+      builder.append("Timestamp {");
+      builder.append("timestamp=");
+      builder.append(this.timestamp_);
+      builder.append("}");
+      return builder.toString();
+   }
 }

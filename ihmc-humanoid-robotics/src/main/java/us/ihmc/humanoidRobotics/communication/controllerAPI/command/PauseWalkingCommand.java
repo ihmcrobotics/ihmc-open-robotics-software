@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 
 public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWalkingMessage>
 {
@@ -26,7 +26,7 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
    @Override
    public void set(PauseWalkingMessage message)
    {
-      isPauseRequested = message.pause;
+      isPauseRequested = message.getPause();
    }
 
    public boolean isPauseRequested()

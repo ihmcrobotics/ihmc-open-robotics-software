@@ -9,8 +9,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,13 +35,13 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private final EnumMap<RobotSide, YoEnum<SlipState>> slipStateMap = new EnumMap<RobotSide, YoEnum<SlipState>>(RobotSide.class);
    private final EnumMap<RobotSide, List<GroundContactPoint>> groundContactPointsMap = new EnumMap<RobotSide, List<GroundContactPoint>>(RobotSide.class);
 
-   private final YoFrameVector maxTranslationToSlipNextStep;
-   private final YoFrameVector minTranslationToSlipNextStep;
-   private final YoFrameVector nextTranslationToSlip;
+   private final YoFrameVector3D maxTranslationToSlipNextStep;
+   private final YoFrameVector3D minTranslationToSlipNextStep;
+   private final YoFrameVector3D nextTranslationToSlip;
 
-   private final YoFrameOrientation maxRotationToSlipNextStep;
-   private final YoFrameOrientation minRotationToSlipNextStep;
-   private final YoFrameOrientation nextRotationToSlip;
+   private final YoFrameYawPitchRoll maxRotationToSlipNextStep;
+   private final YoFrameYawPitchRoll minRotationToSlipNextStep;
+   private final YoFrameYawPitchRoll nextRotationToSlip;
 
    private double probabilitySlip = 0.0;
    private final Random random = new Random();
@@ -88,13 +88,13 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
       this.slipNextStep = new YoBoolean(name + "SlipNextStep", registry);
 
-      maxTranslationToSlipNextStep = new YoFrameVector(name + "MaxTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      minTranslationToSlipNextStep = new YoFrameVector(name + "MinTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      nextTranslationToSlip = new YoFrameVector(name + "NextTranslationToSlip", ReferenceFrame.getWorldFrame(), registry);
+      maxTranslationToSlipNextStep = new YoFrameVector3D(name + "MaxTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      minTranslationToSlipNextStep = new YoFrameVector3D(name + "MinTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      nextTranslationToSlip = new YoFrameVector3D(name + "NextTranslationToSlip", ReferenceFrame.getWorldFrame(), registry);
 
-      maxRotationToSlipNextStep = new YoFrameOrientation(name + "MaxRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      minRotationToSlipNextStep = new YoFrameOrientation(name + "MinRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
-      nextRotationToSlip = new YoFrameOrientation(name + "NextRotationToSlip", ReferenceFrame.getWorldFrame(), registry);
+      maxRotationToSlipNextStep = new YoFrameYawPitchRoll(name + "MaxRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      minRotationToSlipNextStep = new YoFrameYawPitchRoll(name + "MinRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
+      nextRotationToSlip = new YoFrameYawPitchRoll(name + "NextRotationToSlip", ReferenceFrame.getWorldFrame(), registry);
 
       setTranslationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.05, 0.05, 0.0 });
       setRotationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.3, 0.15, 0.1 });
@@ -247,7 +247,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       groundContactPointsSlipper.setGroundContactPoints(groundContactPointsMap.get(robotSide));
       groundContactPointsSlipper.setPercentToSlipPerTick(nextSlipPercentSlipPerTick.getDoubleValue());
       groundContactPointsSlipper.setDoSlip(true);
-      groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip.getVector3dCopy());
+      groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip);
       groundContactPointsSlipper.setSlipRotationYawPitchRoll(nextRotationToSlip.getYawPitchRoll());
 
       //      System.out.println("Slip of " + robotSide.getLowerCaseName() + " foot with amount" + nextTranslationToSlip.getVector3dCopy().toString()

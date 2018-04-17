@@ -120,13 +120,13 @@ ChestCoMOffsets
 <Title>
 Car
 </Title>
-<Entry Boxes>requestedHighLevelState,highLevelState,doIHMCControlRatio,requestReInitializeInWalking,desiredPumpPSI,doVelocityControlLocally</Entry Boxes>
+<Entry Boxes>requestedHighLevelControllerState,highLevelControllerState,doIHMCControlRatio,requestReInitializeInWalking,desiredPumpPSI,doVelocityControlLocally</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Rumble
 </Title>
-<Entry Boxes>l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,slopTimeForSmoothedJointTorques,desiredPumpPSI,timeToGetPreparedForLocomotion,highLevelState,requestedHighLevelState,additionalSwingTimeForICP</Entry Boxes>
+<Entry Boxes>l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,slopTimeForSmoothedJointTorques,desiredPumpPSI,timeToGetPreparedForLocomotion,highLevelControllerState,requestedHighLevelControllerState,additionalSwingTimeForICP</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -180,7 +180,7 @@ wristY
 <Title>
 wristX
 </Title>
-<Entry Boxes>ll_out_l_arm_wrx_a_k_q_p,ll_out_l_arm_wrx_a_k_qd_p,ll_out_l_arm_wrx_a_ff_const,ll_out_l_arm_wrx_q_d,ll_out_elec_motor_l_arm_wrx_enable_elec_motor,requestCalibrateLeftWristSensor,requestedHighLevelState</Entry Boxes>
+<Entry Boxes>ll_out_l_arm_wrx_a_k_q_p,ll_out_l_arm_wrx_a_k_qd_p,ll_out_l_arm_wrx_a_ff_const,ll_out_l_arm_wrx_q_d,ll_out_elec_motor_l_arm_wrx_enable_elec_motor,requestCalibrateLeftWristSensor,requestedHighLevelControllerState</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 
 /**
  * StatusMessageOutputManager is used to create an output API for a controller.
- * The controller can submit status messages through the method {@link #reportStatusMessage(SettablePacket)}.
+ * The controller can submit status messages through the method {@link #reportStatusMessage(Packet)}.
  * Each status is then saved into a local copy.
  * This copy of the status to report is then given to all the corresponding listeners.
  * 
@@ -27,13 +27,13 @@ import us.ihmc.concurrent.Builder;
 public class StatusMessageOutputManager
 {
    /** Local copies of the status messages reported by the controller. */
-   private final Map<Class<? extends SettablePacket<?>>, SettablePacket<?>> statusClassToObjectMap = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, Packet<?>> statusClassToObjectMap = new HashMap<>();
 
    /** Exhaustive list of all the supported status messages that this API can process. */
-   private final List<Class<? extends SettablePacket<?>>> listOfSupportedMessages = new ArrayList<>();
+   private final List<Class<? extends Packet<?>>> listOfSupportedMessages = new ArrayList<>();
 
    /** Map of the listeners and the status message type they listen to. */
-   private final Map<Class<? extends SettablePacket<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
    /** List of all the attached global listeners. */
    private final List<GlobalStatusMessageListener> globalStatusMessageListeners = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class StatusMessageOutputManager
     * 
     * @param statusMessagesToRegister list of the status messages that this API should support.
     */
-   public StatusMessageOutputManager(List<Class<? extends SettablePacket<?>>> statusMessagesToRegister)
+   public StatusMessageOutputManager(List<Class<? extends Packet<?>>> statusMessagesToRegister)
    {
       registerStatusMessages(statusMessagesToRegister);
    }
@@ -53,7 +53,7 @@ public class StatusMessageOutputManager
     * @param statusMessageClasses
     */
    @SuppressWarnings("unchecked")
-   private <S extends SettablePacket<S>> void registerStatusMessages(List<Class<? extends SettablePacket<?>>> statusMessageClasses)
+   private <S extends Packet<S>> void registerStatusMessages(List<Class<? extends Packet<?>>> statusMessageClasses)
    {
       for (int i = 0; i < statusMessageClasses.size(); i++)
          registerStatusMessage((Class<S>) statusMessageClasses.get(i));
@@ -64,7 +64,7 @@ public class StatusMessageOutputManager
     * It is used to register in the API a status message.
     * @param statusMessageClass
     */
-   private <S extends SettablePacket<S>> void registerStatusMessage(Class<S> statusMessageClass)
+   private <S extends Packet<S>> void registerStatusMessage(Class<S> statusMessageClass)
    {
       Builder<S> builer = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
       statusClassToObjectMap.put(statusMessageClass, builer.newInstance());
@@ -94,7 +94,7 @@ public class StatusMessageOutputManager
     * @param statusMessageClass refers to the type of status message the listener will be listening to.
     * @param statusMessageListener the listener to be attached.
     */
-   public <S extends SettablePacket<S>> void attachStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
+   public <S extends Packet<S>> void attachStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
    {
       if (statusClassToObjectMap.get(statusMessageClass) == null)
       {
@@ -117,7 +117,7 @@ public class StatusMessageOutputManager
     * @param statusMessageClass refers to the type of status message the listener was listening to.
     * @param statusMessageListener the listener to be removed.
     */
-   public <S extends SettablePacket<S>> void detachStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
+   public <S extends Packet<S>> void detachStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
    {
       List<StatusMessageListener<?>> specificStatusMessageListenerList = specificStatusMessageListenerMap.get(statusMessageClass);
       if (specificStatusMessageListenerList != null)
@@ -131,7 +131,7 @@ public class StatusMessageOutputManager
     * @param statusMessage the status message to report.
     */
    @SuppressWarnings("unchecked")
-   public <S extends SettablePacket<S>> void reportStatusMessage(S statusMessage)
+   public <S extends Packet<S>> void reportStatusMessage(S statusMessage)
    {
       List<StatusMessageListener<?>> specificStatusMessageListeners = specificStatusMessageListenerMap.get(statusMessage.getClass());
       S statusMessageClone = (S) statusClassToObjectMap.get(statusMessage.getClass());
@@ -164,7 +164,7 @@ public class StatusMessageOutputManager
    /**
     * @return The list of all the status messages supported by this API. 
     */
-   public List<Class<? extends SettablePacket<?>>> getListOfSupportedMessages()
+   public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
    }
@@ -175,7 +175,7 @@ public class StatusMessageOutputManager
     *
     * @param <S> The status message type to be listening for.
     */
-   public static interface StatusMessageListener<S extends SettablePacket<S>>
+   public static interface StatusMessageListener<S extends Packet<S>>
    {
       public abstract void receivedNewMessageStatus(S statusMessage);
    }
@@ -186,6 +186,6 @@ public class StatusMessageOutputManager
     */
    public static interface GlobalStatusMessageListener
    {
-      public abstract void receivedNewMessageStatus(SettablePacket<?> statusMessage);
+      public abstract void receivedNewMessageStatus(Packet<?> statusMessage);
    }
 }

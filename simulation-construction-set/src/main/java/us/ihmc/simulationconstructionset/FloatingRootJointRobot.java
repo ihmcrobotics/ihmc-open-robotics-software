@@ -79,7 +79,7 @@ public class FloatingRootJointRobot extends RobotFromDescription
    public FrameVector3D getRootJointVelocity()
    {
       FrameVector3D ret = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      rootJoint.getVelocity(ret.getVector());
+      rootJoint.getVelocity(ret);
 
       return ret;
    }

@@ -8,10 +8,10 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
-public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
+public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
 {
    private final List<JointDesiredOutput> unusedData;
    private final List<OneDoFJoint> jointsWithDesiredData;
@@ -100,20 +100,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       }
    }
 
-   public void extractAllDataFromJoints(OneDoFJoint[] joints, JointDesiredControlMode controlMode)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setJointControlMode(joint, controlMode);
-         setDesiredJointTorque(joint, joint.getTau());
-         setDesiredJointPosition(joint, joint.getqDesired());
-         setDesiredJointVelocity(joint, joint.getQdDesired());
-         setDesiredJointAcceleration(joint, joint.getQddDesired());
-         setResetJointIntegrators(joint, joint.getResetDesiredAccelerationIntegrator());
-      }
-   }
-
    public void setJointsControlMode(OneDoFJoint[] joints, JointDesiredControlMode controlMode)
    {
       for (int i = 0; i < joints.length; i++)
@@ -165,15 +151,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       {
          OneDoFJoint joint = joints[i];
          setDesiredJointAcceleration(joint, joint.getQddDesired());
-      }
-   }
-
-   public void setResetIntegratorsFromJoints(OneDoFJoint[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setResetJointIntegrators(joint, joint.getResetDesiredAccelerationIntegrator());
       }
    }
 
@@ -256,7 +233,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   public void completeWith(JointDesiredOutputListReadOnly other)
    {
       if (other == null)
          return;
@@ -282,7 +259,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    /**
     * Clear this and copy the data held in other.
     */
-   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       clear();
 

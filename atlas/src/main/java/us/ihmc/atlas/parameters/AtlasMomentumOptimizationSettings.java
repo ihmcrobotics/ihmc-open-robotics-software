@@ -1,17 +1,17 @@
 package us.ihmc.atlas.parameters;
 
-import java.util.HashMap;
-import java.util.Map;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_PITCH;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_ROLL;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.atlas.AtlasJointMap;
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -23,18 +23,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    private static final boolean useWarmStartInSolver = true;
    private static final boolean disableRhosWhenNotInContact = true;
-
-   private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
-   private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
-   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
-
-   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
-   private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
-
-   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 50.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = AtlasContactPointParameters.USE_SIX_CONTACT_POINTS ? 6 : 4;
@@ -52,27 +40,12 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double rhoRateDefaultWeight;
    private final double rhoRateHighWeight;
 
-   private final double neckJointspaceWeight = 1.0;
-   private final double spineJointspaceWeightYaw = 15.0;
-   private final double spineJointspaceWeightPitch = 45.0;
-   private final double spineJointspaceWeightRoll = 45.0;
-   private final double armJointspaceWeight = 1.0;
-   private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
+   private final List<GroupParameter<Double>> jointspaceWeightGroups = new ArrayList<>();
+   private final List<GroupParameter<Double>> userModeWeightGroups = new ArrayList<>();
+   private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeightGroups = new ArrayList<>();
+   private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeightGroups = new ArrayList<>();
 
-   private final double neckUserModeWeight = 1.0;
-   private final double spineUserModeWeight = 200.0;
-   private final double armUserModeWeight = 50.0;
-   private final TObjectDoubleHashMap<String> userModeWeights = new TObjectDoubleHashMap<>();
-
-   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
-   private final Vector3D handAngularWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Map<String, Vector3D> taskspaceAngularWeights = new HashMap<>();
-
-   private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Map<String, Vector3D> taskspaceLinearWeights = new HashMap<>();
-
-   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap, int numberOfContactableBodies)
+   public AtlasMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
@@ -81,62 +54,31 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       rhoRateDefaultWeight = defaultRhoRateDefaultWeight / (scale * scale);
       rhoRateHighWeight = defaultRhoRateHighWeight / (scale * scale);
 
-      linearMomentumWeight.scale(1.0 / scale);
-      highLinearMomentumWeightForRecovery.scale(1.0 / scale);
-      angularMomentumWeight.scale(1.0 / scale);
+      userModeWeightGroups.add(new GroupParameter<>("Spine", jointMap.getSpineJointNamesAsStrings()));
+      jointspaceWeightGroups.add(new GroupParameter<>(SPINE_YAW.toString(), jointMap.getSpineJointName(SPINE_YAW)));
+      jointspaceWeightGroups.add(new GroupParameter<>(SPINE_PITCH.toString(), jointMap.getSpineJointName(SPINE_PITCH)));
+      jointspaceWeightGroups.add(new GroupParameter<>(SPINE_ROLL.toString(), jointMap.getSpineJointName(SPINE_ROLL)));
 
-      for (SpineJointName jointName : jointMap.getSpineJointNames())
-         userModeWeights.put(jointMap.getSpineJointName(jointName), spineUserModeWeight);
+      jointspaceWeightGroups.add(new GroupParameter<>("Arms", jointMap.getArmJointNamesAsStrings()));
+      userModeWeightGroups.add(new GroupParameter<>("Arms", jointMap.getArmJointNamesAsStrings()));
 
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), spineJointspaceWeightYaw);
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), spineJointspaceWeightPitch);
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), spineJointspaceWeightRoll);
+      jointspaceWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));
+      userModeWeightGroups.add(new GroupParameter<>("Neck", jointMap.getNeckJointNamesAsStrings()));
 
-      for (ArmJointName jointName : jointMap.getArmJointNames())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            jointspaceWeights.put(jointMap.getArmJointName(robotSide, jointName), armJointspaceWeight);
-            userModeWeights.put(jointMap.getArmJointName(robotSide, jointName), armUserModeWeight);
-         }
-      }
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Chest", jointMap.getChestName()));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Head", jointMap.getHeadName()));
 
-      for (NeckJointName jointName : jointMap.getNeckJointNames())
-      {
-         jointspaceWeights.put(jointMap.getNeckJointName(jointName), neckJointspaceWeight);
-         userModeWeights.put(jointMap.getNeckJointName(jointName), neckUserModeWeight);
-      }
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Pelvis", jointMap.getPelvisName()));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Pelvis", jointMap.getPelvisName()));
 
-      taskspaceAngularWeights.put(jointMap.getChestName(), chestAngularWeight);
-      taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         taskspaceAngularWeights.put(jointMap.getHandName(robotSide), handAngularWeight);
-         taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
-      }
+      List<String> handNames = jointMap.getHandNames();
+      List<String> footNames = jointMap.getFootNames();
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Hand", handNames));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Hand", handNames));
+      taskspaceAngularWeightGroups.add(new GroupParameter<>("Foot", footNames));
+      taskspaceLinearWeightGroups.add(new GroupParameter<>("Foot", footNames));
 
       this.nContactableBodies = numberOfContactableBodies;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getLinearMomentumWeight()
-   {
-      return linearMomentumWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighLinearMomentumWeightForRecovery()
-   {
-      return highLinearMomentumWeightForRecovery;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getAngularMomentumWeight()
-   {
-      return angularMomentumWeight;
    }
 
    /** @inheritDoc */
@@ -211,111 +153,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public double getHeadUserModeWeight()
-   {
-      return neckUserModeWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHeadJointspaceWeight()
-   {
-      return neckJointspaceWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHeadAngularWeight()
-   {
-      return headAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getChestAngularWeight()
-   {
-      return chestAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getPelvisAngularWeight()
-   {
-      return pelvisAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getPelvisLinearWeight()
-   {
-      return pelvisLinearWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return defaultLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultAngularFootWeight()
-   {
-      return defaultAngularFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighLinearFootWeight()
-   {
-      return highLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighAngularFootWeight()
-   {
-      return highAngularFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHandUserModeWeight()
-   {
-      return armUserModeWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getChestUserModeWeight()
-   {
-      return spineUserModeWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHandJointspaceWeight()
-   {
-      return armJointspaceWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHandAngularTaskspaceWeight()
-   {
-      return handAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHandLinearTaskspaceWeight()
-   {
-      return handLinearWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
    public int getNumberOfBasisVectorsPerContactPoint()
    {
       return nBasisVectorsPerContactPoint;
@@ -337,37 +174,30 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public int getRhoSize()
+   public List<GroupParameter<Double>> getJointspaceWeights()
    {
-      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+      return jointspaceWeightGroups;
    }
 
    /** @inheritDoc */
    @Override
-   public TObjectDoubleHashMap<String> getJointspaceWeights()
+   public List<GroupParameter<Double>> getUserModeWeights()
    {
-      return jointspaceWeights;
+      return userModeWeightGroups;
    }
 
    /** @inheritDoc */
    @Override
-   public TObjectDoubleHashMap<String> getUserModeWeights()
+   public List<GroupParameter<Vector3DReadOnly>> getTaskspaceAngularWeights()
    {
-      return userModeWeights;
+      return taskspaceAngularWeightGroups;
    }
 
    /** @inheritDoc */
    @Override
-   public Map<String, Vector3D> getTaskspaceAngularWeights()
+   public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
-      return taskspaceAngularWeights;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Map<String, Vector3D> getTaskspaceLinearWeights()
-   {
-      return taskspaceLinearWeights;
+      return taskspaceLinearWeightGroups;
    }
 
    /** @inheritDoc */

@@ -12,7 +12,6 @@ public class RosJointStateSubscriber extends AbstractRosTopicSubscriber<sensor_m
 	@Override
 	public void onNewMessage(JointState message)
 	{
-		// TODO Auto-generated method stub
 		
 	}
 	

@@ -10,20 +10,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.imageio.ImageIO;
 
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.ObjectDetectorResultPacket;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {
@@ -113,7 +113,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    }
 
    @Override
-   public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedGoalPoseWorldFrame(FramePose3D framePoseToPack)
    {
       synchronized (detectorFromCameraImagesConch)
       {
@@ -174,7 +174,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       public void queueVideoPacket(VideoPacket packet)
       {
-         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData()));
+         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
 
          if(waiting)
          {

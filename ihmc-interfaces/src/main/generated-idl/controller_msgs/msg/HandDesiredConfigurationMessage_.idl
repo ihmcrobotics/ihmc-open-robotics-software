@@ -1,0 +1,137 @@
+#ifndef __controller_msgs__msg__HandDesiredConfigurationMessage__idl__
+#define __controller_msgs__msg__HandDesiredConfigurationMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      const octet HAND_CONFIGURATION_STOP =
+      0;
+
+      const octet HAND_CONFIGURATION_OPEN =
+      1;
+
+      const octet HAND_CONFIGURATION_CLOSE =
+      2;
+
+      const octet HAND_CONFIGURATION_CRUSH =
+      3;
+
+      const octet HAND_CONFIGURATION_HOOK =
+      4;
+
+      const octet HAND_CONFIGURATION_BASIC_GRIP =
+      5;
+
+      const octet HAND_CONFIGURATION_PINCH_GRIP =
+      6;
+
+      const octet HAND_CONFIGURATION_WIDE_GRIP =
+      7;
+
+      const octet HAND_CONFIGURATION_SCISSOR_GRIP =
+      8;
+
+      const octet HAND_CONFIGURATION_RESET =
+      9;
+
+      const octet HAND_CONFIGURATION_OPEN_FINGERS =
+      10;
+
+      const octet HAND_CONFIGURATION_OPEN_THUMB =
+      11;
+
+      const octet HAND_CONFIGURATION_CLOSE_FINGERS =
+      12;
+
+      const octet HAND_CONFIGURATION_CLOSE_THUMB =
+      13;
+
+      const octet HAND_CONFIGURATION_OPEN_INDEX =
+      14;
+
+      const octet HAND_CONFIGURATION_OPEN_MIDDLE =
+      15;
+
+      const octet HAND_CONFIGURATION_HALF_CLOSE =
+      16;
+
+      const octet HAND_CONFIGURATION_CONNECT =
+      17;
+
+      const octet HAND_CONFIGURATION_CRUSH_INDEX =
+      18;
+
+      const octet HAND_CONFIGURATION_CRUSH_MIDDLE =
+      19;
+
+      const octet HAND_CONFIGURATION_CRUSH_THUMB =
+      20;
+
+      const octet HAND_CONFIGURATION_INVERT_POWER =
+      21;
+
+      const octet HAND_CONFIGURATION_T_SPREAD =
+      22;
+
+      const octet HAND_CONFIGURATION_BEND_BACKWARD =
+      23;
+
+      const octet HAND_CONFIGURATION_CALIBRATE =
+      24;
+
+      const octet HAND_CONFIGURATION_FINGER_MANIPULATION =
+      25;
+
+      const octet HAND_CONFIGURATION_PRE_CREEPY_GRASP =
+      26;
+
+      const octet HAND_CONFIGURATION_PARTIAL_CREEPY_GRASP =
+      27;
+
+      const octet HAND_CONFIGURATION_CREEPY_GRASPING =
+      28;
+
+      const octet HAND_CONFIGURATION_CREEPY_GRASPING_HARD =
+      29;
+
+      const octet HAND_CONFIGURATION_SLOW_CLOSE =
+      30;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is old will be refreshed in a future release.
+       * Message for commanding the hands to perform various predefined grasps.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HandDesiredConfigurationMessage_")
+      struct HandDesiredConfigurationMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the side of the robot that will execute the trajectory
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Specifies the grasp to perform
+         */
+        @defaultValue(value=255)
+        octet desired_hand_configuration;
+      };
+    };
+  };
+};
+
+#endif

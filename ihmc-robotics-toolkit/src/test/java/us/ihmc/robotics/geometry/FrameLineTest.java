@@ -8,6 +8,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -16,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameLineTest
 {
 
@@ -96,15 +100,15 @@ public class FrameLineTest
       FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getDirection(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getDirection(), 1e-12));
 
       vector.changeFrame(target2);
-      FrameVector3D frameVector = line.getFrameNormalizedVectorCopy();
+      FrameVector3D frameVector = new FrameVector3D(line.getDirection());
       frameVector.changeFrame(target2);
       assertTrue(frameVector.epsilonEquals(vector, 1e-12));
    }
@@ -126,15 +130,15 @@ public class FrameLineTest
       FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getDirection(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getDirection(), 1e-12));
 
       vector.changeFrame(target2);
-      FrameVector3D frameNormalizedVectorCopy = line.getFrameNormalizedVectorCopy();
+      FrameVector3D frameNormalizedVectorCopy = new FrameVector3D(line.getDirection());
       frameNormalizedVectorCopy.changeFrame(target2);
       assertTrue(frameNormalizedVectorCopy.epsilonEquals(vector, 1e-12));
    }

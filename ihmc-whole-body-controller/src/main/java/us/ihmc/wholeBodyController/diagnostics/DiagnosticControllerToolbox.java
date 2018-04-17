@@ -16,7 +16,7 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,11 +41,11 @@ public class DiagnosticControllerToolbox
 
    private final double dt;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput;
+   private final JointDesiredOutputList lowLevelOutput;
    private final WalkingControllerParameters walkingControllerParameters;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
-   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
+   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, JointDesiredOutputList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
          DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoVariableRegistry parentRegistry)
    {
@@ -76,7 +76,7 @@ public class DiagnosticControllerToolbox
       return fullRobotModel;
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderList getLowLevelOutput()
+   public JointDesiredOutputList getLowLevelOutput()
    {
       return lowLevelOutput;
    }

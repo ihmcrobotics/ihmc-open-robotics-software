@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
+public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
 {
    private final YoEnum<JointDesiredControlMode> controlMode;
 
@@ -20,6 +20,10 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
    private final YoDouble stiffness;
    private final YoDouble damping;
    private final YoDouble masterGain;
+
+   private final YoDouble velocityScaling;
+   private final YoDouble velocityIntegrationBreakFrequency;
+   private final YoDouble positionIntegrationBreakFrequency;
 
    public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -36,6 +40,10 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
       damping = new YoDouble(namePrefix + "Damping" + suffixString, registry);
       masterGain = new YoDouble(namePrefix + "MasterGain" + suffixString, registry);
 
+      velocityScaling = new YoDouble(namePrefix + "VelocityScaling" + suffixString, registry);
+      velocityIntegrationBreakFrequency = new YoDouble(namePrefix + "VelocityIntegrationBreakFrequency" + suffixString, registry);
+      positionIntegrationBreakFrequency = new YoDouble(namePrefix + "PositionIntegrationBreakFrequency" + suffixString, registry);
+
       clear();
    }
 
@@ -49,6 +57,9 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
       stiffness.set(Double.NaN);
       damping.set(Double.NaN);
       masterGain.set(Double.NaN);
+      velocityScaling.set(Double.NaN);
+      velocityIntegrationBreakFrequency.set(Double.NaN);
+      positionIntegrationBreakFrequency.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -63,6 +74,9 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
       stiffness.set(other.getStiffness());
       damping.set(other.getDamping());
       masterGain.set(other.getMasterGain());
+      velocityScaling.set(other.getVelocityScaling());
+      velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
+      positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
    }
 
    /**
@@ -89,6 +103,12 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
          damping.set(other.getDamping());
       if(!hasMasterGain())
          masterGain.set(other.getMasterGain());
+      if(!hasVelocityScaling())
+         velocityScaling.set(other.getVelocityScaling());
+      if(!hasVelocityIntegrationBreakFrequency())
+         velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
+      if(!hasPositionIntegrationBreakFrequency())
+         positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -196,18 +216,6 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
    }
 
    @Override
-   public String toString()
-   {
-      String ret = "controlMode = " + getControlMode() + "\n";
-      ret += "desiredTorque = " + getDesiredTorque() + "\n";
-      ret += "desiredPosition = " + getDesiredPosition() + "\n";
-      ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
-      ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
-      ret += "masterGain = " + getMasterGain() + "\n";
-      return ret;
-   }
-
-   @Override
    public boolean hasStiffness()
    {
       return !stiffness.isNaN();
@@ -216,7 +224,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
    @Override
    public boolean hasDamping()
    {
-      return damping.isNaN();
+      return !damping.isNaN();
    }
 
    @Override
@@ -256,5 +264,56 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
    public void setMasterGain(double masterGain)
    {
       this.masterGain.set(masterGain);
+   }
+
+   @Override
+   public boolean hasVelocityScaling()
+   {
+      return !velocityScaling.isNaN();
+   }
+
+   @Override
+   public double getVelocityScaling()
+   {
+      return velocityScaling.getDoubleValue();
+   }
+
+   public void setVelocityScaling(double velocityScaling)
+   {
+      this.velocityScaling.set(velocityScaling);
+   }
+
+   @Override
+   public boolean hasVelocityIntegrationBreakFrequency()
+   {
+      return !velocityIntegrationBreakFrequency.isNaN();
+   }
+
+   @Override
+   public double getVelocityIntegrationBreakFrequency()
+   {
+      return velocityIntegrationBreakFrequency.getDoubleValue();
+   }
+
+   public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
+   {
+      this.velocityIntegrationBreakFrequency.set(velocityIntegrationBreakFrequency);
+   }
+
+   @Override
+   public boolean hasPositionIntegrationBreakFrequency()
+   {
+      return !positionIntegrationBreakFrequency.isNaN();
+   }
+
+   @Override
+   public double getPositionIntegrationBreakFrequency()
+   {
+      return positionIntegrationBreakFrequency.getDoubleValue();
+   }
+
+   public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
+   {
+      this.positionIntegrationBreakFrequency.set(positionIntegrationBreakFrequency);
    }
 }

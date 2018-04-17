@@ -16,12 +16,12 @@ import javax.swing.JLabel;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
+import controller_msgs.msg.dds.DrillDetectionPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 
 /**
@@ -193,8 +193,8 @@ public class SoundDetector implements Runnable
          {
 
             DrillDetectionPacket drillDetectionPacket = new DrillDetectionPacket();
-            drillDetectionPacket.isDrillOn = detectDrillFrequency(audioBytes);
-            if(drillDetectionPacket.isDrillOn){
+            drillDetectionPacket.setIsDrillOn(detectDrillFrequency(audioBytes));
+            if(drillDetectionPacket.getIsDrillOn()){
                System.out.println("isDrillOn = true");
             }
             client.send(drillDetectionPacket);

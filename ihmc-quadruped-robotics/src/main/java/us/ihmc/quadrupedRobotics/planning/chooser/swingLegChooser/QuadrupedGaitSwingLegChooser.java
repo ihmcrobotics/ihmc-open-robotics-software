@@ -1,41 +1,42 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedGaitSwingLegChooser");
-   private final YoFrameVector lastVelocity;
+   private final YoFrameVector3D lastVelocity;
    private final QuadrantDependentList<TranslationReferenceFrame> feetFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> feet = new QuadrantDependentList<>();
    private final FramePoint3D feetCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FramePose feetCentroidPose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D feetCentroidPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame centroidFrame = new PoseReferenceFrame("", feetCentroidPose);
    private final YoGraphicReferenceFrame centroidFrameViz;
    
    public QuadrupedGaitSwingLegChooser(CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      lastVelocity = new YoFrameVector("lastVelocity", referenceFrames.getBodyFrame(), registry);
+      lastVelocity = new YoFrameVector3D("lastVelocity", referenceFrames.getBodyFrame(), registry);
       centroidFrameViz = new YoGraphicReferenceFrame(centroidFrame, registry, 0.5);
       yoGraphicsListRegistry.registerYoGraphic("centroidFrameViz", centroidFrameViz);
       parentRegistry.addChild(registry);
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3DReadOnly desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       
@@ -51,7 +52,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       {
          nextSwingLeg = lastStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
       }
-      lastVelocity.setAndMatchFrame(desiredVelocity);
+      lastVelocity.setMatchingFrame(desiredVelocity);
       
       return nextSwingLeg;
    }
@@ -78,7 +79,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
          yaw += Math.PI;
       }
       yaw -= desiredYawRate;
-      feetCentroidPose.setYawPitchRoll(yaw, 0.0, 0.0);
+      feetCentroidPose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       
       supportPolygon.getCentroid(feetCentroid);
       feetCentroidPose.setPosition(feetCentroid);
@@ -117,7 +118,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
 //            nextSwingLeg = lastStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
 //         }
 //      }
-      lastVelocity.setAndMatchFrame(desiredVelocity);
+      lastVelocity.setMatchingFrame(desiredVelocity);
       
       return nextSwingLeg;
    }

@@ -1,6 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
 /**
 * 
@@ -10,20 +8,25 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum YoType
 {
-        	DoubleYoVariable,
-        
-        	BooleanYoVariable,
-        
-        	IntegerYoVariable,
-        
-        	LongYoVariable,
-        
-        	EnumYoVariable,
-        
-	;
-	
-	public static YoType[] values = values();
+         DoubleYoVariable,
+      
+         BooleanYoVariable,
+      
+         IntegerYoVariable,
+      
+         LongYoVariable,
+      
+         EnumYoVariable,
+      
+   ;
+   public static YoType[] values = values();
 
+   public boolean epsilonEquals(YoType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

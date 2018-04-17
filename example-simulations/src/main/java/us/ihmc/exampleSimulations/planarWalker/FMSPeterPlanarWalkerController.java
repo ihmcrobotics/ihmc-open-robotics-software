@@ -23,7 +23,6 @@ public class FMSPeterPlanarWalkerController implements RobotController
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
@@ -49,7 +48,7 @@ public class FMSPeterPlanarWalkerController implements RobotController
    {
       for(RobotSide robotSide : RobotSide.values)
       {
-         walkerStateMachine.get(robotSide).getStateMachine().process();
+         walkerStateMachine.get(robotSide).getStateMachine().doActionAndTransition();
       }
    }
 }

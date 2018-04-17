@@ -42,7 +42,7 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       originTwo.changeFrame(parentFrame);
 
       // Place this frame between the two frames.
-      translation.interpolate(originOne.getPoint(), originTwo.getPoint(), 0.5);
+      translation.interpolate(originOne, originTwo, 0.5);
       transformToParent.setTranslation(translation);
 
       vectorBetweenFrames.setToZero(parentFrame);

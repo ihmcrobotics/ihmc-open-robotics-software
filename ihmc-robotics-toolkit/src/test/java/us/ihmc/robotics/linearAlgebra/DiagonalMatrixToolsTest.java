@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -16,8 +17,8 @@ public class DiagonalMatrixToolsTest
 {
    private final double epsilon = 1e-6;
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 14.4)
+   @Test(timeout = 72000)
    public void testSquareInvert()
    {
       Random random = new Random();
@@ -54,8 +55,8 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 9.9)
+   @Test(timeout = 50000)
    public void testPreMult()
    {
       Random random = new Random();
@@ -93,8 +94,8 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.4)
+   @Test(timeout = 52000)
    public void testPostMult()
    {
       Random random = new Random();
@@ -129,6 +130,71 @@ public class DiagonalMatrixToolsTest
          CommonOps.mult(randomMatrix, diagonal, otherSolution);
 
          JUnitTools.assertMatrixEquals(solution, otherSolution, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPostMultTransA()
+   {
+         DenseMatrix64F diagonal = new DenseMatrix64F(2, 4);
+         DenseMatrix64F A = new DenseMatrix64F(2, 3);
+         DenseMatrix64F solution = new DenseMatrix64F(3, 4);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(3, 4);
+
+         diagonal.set(0, 0, 7.0);
+         diagonal.set(1, 1, 8.0);
+
+         A.set(0, 0, 1.0);
+         A.set(0, 1, 2.0);
+         A.set(0, 2, 3.0);
+
+         A.set(1, 0, 4.0);
+         A.set(1, 1, 5.0);
+         A.set(1, 2, 6.0);
+
+         DiagonalMatrixTools.postMultTransA(A, diagonal, solution);
+         CommonOps.multTransA(A, diagonal, expectedSolution);
+
+         JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 8.1)
+   @Test(timeout = 40000)
+   public void testRandomPostMultTransA()
+   {
+      Random random = new Random(124L);
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int leadingRows = RandomNumbers.nextInt(random, 1, 1000);
+         int interiorCols = RandomNumbers.nextInt(random, 1, 1000);
+         int randomCols = RandomNumbers.nextInt(random, 1, 1000);
+
+         DenseMatrix64F diagonal = CommonOps.identity(interiorCols, randomCols);
+         DenseMatrix64F randomMatrix = new DenseMatrix64F(interiorCols, leadingRows);
+         DenseMatrix64F solution = new DenseMatrix64F(leadingRows, randomCols);
+         DenseMatrix64F expectedSolution = new DenseMatrix64F(leadingRows, randomCols);
+
+         for (int row = 0; row < interiorCols; row++)
+         {
+            for (int col = 0; col < leadingRows; col++)
+            {
+               randomMatrix.set(row, col, RandomNumbers.nextDouble(random, 5000.0));
+            }
+         }
+
+         for (int index = 0; index < Math.min(randomCols, interiorCols); index++)
+         {
+            diagonal.set(index, index, RandomNumbers.nextDouble(random, 5000.0));
+         }
+
+         DiagonalMatrixTools.postMultTransA(randomMatrix, diagonal, solution);
+         CommonOps.multTransA(randomMatrix, diagonal, expectedSolution);
+
+         JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
       }
    }
 }

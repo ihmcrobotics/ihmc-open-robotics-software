@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
 public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePointPDConstraintToIntegrate
@@ -13,7 +13,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoDouble integralStiffness;
-   private final YoFrameVector yoConnectionPositionIntegratedError;
+   private final YoFrameVector3D yoConnectionPositionIntegratedError;
    private final FrameVector3D integralForce;
 
    private final Vector3D tempForce = new Vector3D();
@@ -24,7 +24,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
       super(name, connectionPointA, connectionPointB, parentRegistry);
 
       integralStiffness = new YoDouble(name + "_IntegralStiffness", registry);
-      yoConnectionPositionIntegratedError = new YoFrameVector(name + "_ConnectionPositionIntegratedError", worldFrame, registry);
+      yoConnectionPositionIntegratedError = new YoFrameVector3D(name + "_ConnectionPositionIntegratedError", worldFrame, registry);
 
       integralForce = new FrameVector3D(worldFrame);
    }
@@ -39,10 +39,10 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
    {
       super.updateClosedJoint();
 
-      integralForce.setAndScale(integralStiffness.getDoubleValue(), yoConnectionPositionIntegratedError.getFrameTuple());
+      integralForce.setAndScale(integralStiffness.getDoubleValue(), yoConnectionPositionIntegratedError);
 
       connectionPointA.getForce(tempForce);
-      tempForce.add(integralForce.getVector());
+      tempForce.add(integralForce);
 
       connectionPointA.setForce(tempForce);
       tempForce.scale(-1.0);

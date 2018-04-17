@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.PointCloudWorldPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
 public class GetLidarScanExampleBehavior extends AbstractBehavior
 {
@@ -29,7 +31,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       if (pointCloudQueue.isNewPacketAvailable())
       {
-         processPointCloud(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
+         processPointCloud(HumanoidMessageTools.getDecayingWorldScan(pointCloudQueue.getLatestPacket()));
       }
    }
 
@@ -51,7 +53,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       scanNumber = 0;
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Lidar");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Getting Lidar");
       sendPacket(p1);
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);

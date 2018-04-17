@@ -3,13 +3,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
 
 public class Trajectory3D
 {
@@ -638,6 +638,12 @@ public class Trajectory3D
 
    }
 
+   public void setQuinticWithZeroTerminalVelocityAndAcceleration(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getTrajectory(index).setQuinticWithZeroTerminalVelocityAndAcceleration(t0, tFinal, z0.getElement(index), zFinal.getElement(index));
+   }
+
    public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
                                                      Vector3DReadOnly zdFinal)
    {
@@ -694,13 +700,13 @@ public class Trajectory3D
       }
    }
 
-   public void getStartPoint(Point3D positionToPack)
+   public void getStartPoint(Point3DBasics positionToPack)
    {
       compute(getInitialTime());
       positionToPack.set(getPosition());
    }
 
-   public void getEndPoint(Point3D positionToPack)
+   public void getEndPoint(Point3DBasics positionToPack)
    {
       compute(getFinalTime());
       positionToPack.set(getPosition());

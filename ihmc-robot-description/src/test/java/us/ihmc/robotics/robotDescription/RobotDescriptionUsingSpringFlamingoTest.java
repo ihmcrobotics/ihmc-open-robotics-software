@@ -55,8 +55,8 @@ public class RobotDescriptionUsingSpringFlamingoTest
    private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
    private static final double HIP_OFFSET_Y = 0.12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 300)
-   @Test(timeout = 1000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testUsingSpringFlamingoRobotDescription()
    {
       FloatingPlanarJointDescription plane;

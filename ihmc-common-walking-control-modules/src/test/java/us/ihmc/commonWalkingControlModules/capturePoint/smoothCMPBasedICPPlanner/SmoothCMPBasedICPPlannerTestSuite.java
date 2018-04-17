@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGeneratorTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointAdjustmentToolboxTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolboxTest;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commons.MutationTestFacilitator;
 
 @RunWith(Suite.class)
@@ -24,7 +23,7 @@ import us.ihmc.commons.MutationTestFacilitator;
            CoMIntegrationToolsTest.class,
            SmoothCapturePointAdjustmentToolboxTest.class,
            CoPPointsInFootTest.class,
-           ReferenceCenterOfPressureWaypointCalculatorTest.class,
+           ReferenceCoPTrajectoryGeneratorTest.class,
            CapturePointToolsTest.class,
            ReferenceICPTrajectoryGeneratorTest.class,
            SmoothCapturePointAdjustmentToolboxTest.class,

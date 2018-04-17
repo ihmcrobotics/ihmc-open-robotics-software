@@ -17,6 +17,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,7 +31,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,7 +53,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<FramePose>(new FramePose(), new FramePose());
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
 
    private boolean makeAssertions = true;
 
@@ -223,11 +223,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                updatable.update(time);
             }
 
-            FramePoint2D transferFromFootPosition = new FramePoint2D();
-            FramePoint2D transferToFootPosition = new FramePoint2D();
-
-            transferFromFootstep.getFootstepPose().getPosition2dIncludingFrame(transferFromFootPosition);
-            transferToFootstep.getFootstepPose().getPosition2dIncludingFrame(transferToFootPosition);
+            FramePoint2D transferFromFootPosition = new FramePoint2D(transferFromFootstep.getFootstepPose().getPosition());
+            FramePoint2D transferToFootPosition = new FramePoint2D(transferToFootstep.getFootstepPose().getPosition());
 
             FramePoint2D queryPosition = new FramePoint2D();
 
@@ -314,7 +311,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
 
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
+         FramePose3D startingPose = footPosesAtTouchdown.get(robotSide);
          startingPose.setToZero(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.15));
 

@@ -1,6 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
 /**
 * 
@@ -10,14 +8,19 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum JointType
 {
-        	SiXDoFJoint,
-        
-        	OneDoFJoint,
-        
-	;
-	
-	public static JointType[] values = values();
+         SiXDoFJoint,
+      
+         OneDoFJoint,
+      
+   ;
+   public static JointType[] values = values();
 
+   public boolean epsilonEquals(JointType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

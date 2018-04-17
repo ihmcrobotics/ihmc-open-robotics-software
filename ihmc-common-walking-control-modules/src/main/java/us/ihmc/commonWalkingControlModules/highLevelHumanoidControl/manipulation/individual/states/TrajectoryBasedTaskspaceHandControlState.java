@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 
 public abstract class TrajectoryBasedTaskspaceHandControlState extends HandControlState
@@ -25,7 +24,7 @@ public abstract class TrajectoryBasedTaskspaceHandControlState extends HandContr
 
    public abstract void setHoldPositionDuration(double holdPositionDuration);
 
-   public abstract void getDesiredPose(FramePose desiredPoseToPack);
+   public abstract void getDesiredPose(FramePose3D desiredPoseToPack);
 
    public abstract ReferenceFrame getReferenceFrame();
 

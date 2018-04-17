@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
@@ -12,14 +13,14 @@ public interface CollisionShapeFactory
    /**
     * The default margin which should be used by all implementations.
     */
-   public static final double DEFAULT_MARGIN = 0.04;
+   static final double DEFAULT_MARGIN = 0.04;
 
    /**
     * Specifies the collision margin for the next shape which is to be added.  For small objects this needs to be set to a smaller value
     *
     * @param margin Collision margin
     */
-   public abstract void setMargin(double margin);
+   void setMargin(double margin);
 
    /**
     * Creates a box shape.  The box will be centered around the origin (0,0,0) with vertexes spaced at the specified distances from the origin.
@@ -29,13 +30,15 @@ public interface CollisionShapeFactory
     * @param radiusZ Radius of box along z-axis
     * @return Description of the shape.
     */
-   public abstract CollisionShapeDescription<?> createBox(double radiusX, double radiusY, double radiusZ);
+   CollisionShapeDescription<?> createSimpleCollisionShape(Shape3D<?> shape3D);
 
-   public abstract CollisionShapeDescription<?> createCylinder(double radius, double height);
+   CollisionShapeDescription<?> createBox(double radiusX, double radiusY, double radiusZ);
 
-   public abstract CollisionShapeDescription<?> createSphere(double radius);
+   CollisionShapeDescription<?> createCylinder(double radius, double height);
 
-   public abstract CollisionShapeDescription<?> createCapsule(double radius, double objectHeight);
+   CollisionShapeDescription<?> createSphere(double radius);
+
+   CollisionShapeDescription<?> createCapsule(double radius, double objectHeight);
 
    /**
     * Adds a shape.
@@ -50,9 +53,10 @@ public interface CollisionShapeFactory
     * @param collisionMask Bit field specifying which groups it can collide against.  Set to 0xFFFFFFFF to collide against all groups
     * @return The resulting collision shape.  Already attached to the provided link.
     */
-   public abstract CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask);
+   CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround,
+                                           int collisionGroup, int collisionMask);
 
-   public abstract CollisionShape addShape(CollisionShapeDescription<?> description);
+   CollisionShape addShape(CollisionShapeDescription<?> description);
 
-   public abstract void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription);
- }
+   void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription);
+}

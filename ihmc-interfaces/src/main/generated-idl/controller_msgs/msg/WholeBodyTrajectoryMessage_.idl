@@ -1,0 +1,69 @@
+#ifndef __controller_msgs__msg__WholeBodyTrajectoryMessage__idl__
+#define __controller_msgs__msg__WholeBodyTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./ArmTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./ChestTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./FootTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./HandTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./HeadTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./PelvisTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyTrajectoryMessage_")
+      struct WholeBodyTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Trajectory for the left hand
+         */
+        controller_msgs::msg::dds::HandTrajectoryMessage left_hand_trajectory_message;
+        /**
+         * Trajectory for the right hand
+         */
+        controller_msgs::msg::dds::HandTrajectoryMessage right_hand_trajectory_message;
+        /**
+         * Trajectory for the left arm joints
+         */
+        controller_msgs::msg::dds::ArmTrajectoryMessage left_arm_trajectory_message;
+        /**
+         * Trajectory for the right arm joints
+         */
+        controller_msgs::msg::dds::ArmTrajectoryMessage right_arm_trajectory_message;
+        /**
+         * Trajectory for the chest
+         */
+        controller_msgs::msg::dds::ChestTrajectoryMessage chest_trajectory_message;
+        /**
+         * Trajectory for the pelvis
+         */
+        controller_msgs::msg::dds::PelvisTrajectoryMessage pelvis_trajectory_message;
+        /**
+         * Trajectory for the left foot
+         */
+        controller_msgs::msg::dds::FootTrajectoryMessage left_foot_trajectory_message;
+        /**
+         * Trajectory for the right foot
+         */
+        controller_msgs::msg::dds::FootTrajectoryMessage right_foot_trajectory_message;
+        /**
+         * Trajectory for the head
+         */
+        controller_msgs::msg::dds::HeadTrajectoryMessage head_trajectory_message;
+      };
+    };
+  };
+};
+
+#endif

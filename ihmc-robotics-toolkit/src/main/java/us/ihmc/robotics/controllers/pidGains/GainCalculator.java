@@ -2,11 +2,6 @@ package us.ihmc.robotics.controllers.pidGains;
 
 public class GainCalculator
 {
-   private GainCalculator()
-   {
-      // empty
-   }
-
    /**
     * Assumes unit mass.
     */
@@ -20,7 +15,7 @@ public class GainCalculator
     */
    public static double computeDampingRatio(double proportionalGain, double dampingGain)
    {
-      return dampingGain / (2 * Math.sqrt(proportionalGain));
+      return dampingGain / (2.0 * Math.sqrt(proportionalGain));
    }
 
    public static double computeDampingForSecondOrderSystem(double mass, double stiffness, double dampingRatio)

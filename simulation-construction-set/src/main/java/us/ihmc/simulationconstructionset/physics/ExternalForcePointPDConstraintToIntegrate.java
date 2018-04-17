@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.physics;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 
@@ -22,14 +22,14 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
    protected final ExternalForcePoint connectionPointA;
    protected final ExternalForcePoint connectionPointB;
 
-   private final YoFramePoint yoConnectionAPosition;
-   private final YoFramePoint yoConnectionBPosition;
-   protected final YoFrameVector yoConnectionPositionError;
+   private final YoFramePoint3D yoConnectionAPosition;
+   private final YoFramePoint3D yoConnectionBPosition;
+   protected final YoFrameVector3D yoConnectionPositionError;
    private final YoDouble yoConnectionPositionErrorMagnitude;
 
-   private final YoFrameVector yoConnectionAVelocity;
-   private final YoFrameVector yoConnectionBVelocity;
-   private final YoFrameVector yoConnectionVelocityError;
+   private final YoFrameVector3D yoConnectionAVelocity;
+   private final YoFrameVector3D yoConnectionBVelocity;
+   private final YoFrameVector3D yoConnectionVelocityError;
    private final YoDouble yoConnectionVelocityErrorMagnitude;
 
    // Temporary variables:
@@ -55,12 +55,12 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
       yoConnectionAPosition = connectionPointA.getYoPosition();
       yoConnectionBPosition = connectionPointB.getYoPosition();
-      yoConnectionPositionError = new YoFrameVector(name + "_ConnectionPositionError", worldFrame, registry);
+      yoConnectionPositionError = new YoFrameVector3D(name + "_ConnectionPositionError", worldFrame, registry);
       yoConnectionPositionErrorMagnitude = new YoDouble(name + "_ConnectionPositionErrorMagnitude", registry);
 
       yoConnectionAVelocity = connectionPointA.getYoVelocity();
       yoConnectionBVelocity = connectionPointB.getYoVelocity();
-      yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityError", worldFrame, registry);
+      yoConnectionVelocityError = new YoFrameVector3D(name + "_ConnectionVelocityError", worldFrame, registry);
       yoConnectionVelocityErrorMagnitude = new YoDouble(name + "_ConnectionVelocityErrorMagnitude", registry);
 
       parentRegistry.addChild(registry);
@@ -95,18 +95,18 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
       totalForce.add(springForce);
       totalForce.add(damperForce);
 
-      connectionPointA.setForce(totalForce.getVector());
+      connectionPointA.setForce(totalForce);
       totalForce.scale(-1.0);
-      connectionPointB.setForce(totalForce.getVector());
+      connectionPointB.setForce(totalForce);
    }
 
    private void updateFrameAndKinematics()
    {
-      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
-      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
+      connectionAPosition.setIncludingFrame(yoConnectionAPosition);
+      connectionBPosition.setIncludingFrame(yoConnectionBPosition);
 
-      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
-      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
+      connectionAVelocity.setIncludingFrame(yoConnectionAVelocity);
+      connectionBVelocity.setIncludingFrame(yoConnectionBVelocity);
    }
 
    private void computeErrors()

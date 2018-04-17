@@ -20,7 +20,7 @@ public class ExportGraphsToFileAction extends AbstractAction
       super("Export Graphs To File");
       this.constructor = constructor;
 
-      String iconFilename = "icons/exportGraph.png";
+      String iconFilename = "icons/ExportGraphs.png";
       int shortKey = KeyEvent.VK_UNDEFINED;
       String longDescription = "Export Graphs To File";
       String shortDescription = "Export Graphs To File";

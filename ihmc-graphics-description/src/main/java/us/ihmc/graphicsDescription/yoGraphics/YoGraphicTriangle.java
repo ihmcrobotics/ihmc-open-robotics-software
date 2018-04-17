@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -15,14 +16,14 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
-   private final YoFramePoint pointOne;
-   private final YoFramePoint pointTwo;
-   private final YoFramePoint pointThree;
+   private final YoFramePoint3D pointOne;
+   private final YoFramePoint3D pointTwo;
+   private final YoFramePoint3D pointThree;
 
    private final Graphics3DObject graphics3dObject;
    private final Graphics3DAddMeshDataInstruction instruction;
@@ -33,11 +34,11 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
 
    public YoGraphicTriangle(String name, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
-      this(name, new YoFramePoint(name + "0", ReferenceFrame.getWorldFrame(), registry), new YoFramePoint(name + "1", ReferenceFrame.getWorldFrame(), registry),
-            new YoFramePoint(name + "2", ReferenceFrame.getWorldFrame(), registry), appearance);
+      this(name, new YoFramePoint3D(name + "0", ReferenceFrame.getWorldFrame(), registry), new YoFramePoint3D(name + "1", ReferenceFrame.getWorldFrame(), registry),
+            new YoFramePoint3D(name + "2", ReferenceFrame.getWorldFrame(), registry), appearance);
    }
 
-   public YoGraphicTriangle(String name, YoFramePoint pointOne, YoFramePoint pointTwo, YoFramePoint pointThree, AppearanceDefinition appearance)
+   public YoGraphicTriangle(String name, YoFramePoint3D pointOne, YoFramePoint3D pointTwo, YoFramePoint3D pointThree, AppearanceDefinition appearance)
    {
       super(name);
 
@@ -50,7 +51,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
-      instruction = graphics3dObject.addPolygon(appearance, pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy());
+      instruction = graphics3dObject.addPolygon(appearance, pointOne, pointTwo, pointThree);
 
       VariableChangedListener listener = new VariableChangedListener()
       {
@@ -69,8 +70,8 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
    public YoGraphicTriangle(String name, YoDouble pointOneX, YoDouble pointOneY, YoDouble pointOneZ, YoDouble pointTwoX, YoDouble pointTwoY, YoDouble pointTwoZ,
          YoDouble pointThreeX, YoDouble pointThreeY, YoDouble pointThreeZ, AppearanceDefinition appearance)
    {
-      this(name, new YoFramePoint(pointOneX, pointOneY, pointOneZ, ReferenceFrame.getWorldFrame()), new YoFramePoint(pointTwoX, pointTwoY, pointTwoZ, ReferenceFrame.getWorldFrame()),
-            new YoFramePoint(pointThreeX, pointThreeY, pointThreeZ, ReferenceFrame.getWorldFrame()), appearance);
+      this(name, new YoFramePoint3D(pointOneX, pointOneY, pointOneZ, ReferenceFrame.getWorldFrame()), new YoFramePoint3D(pointTwoX, pointTwoY, pointTwoZ, ReferenceFrame.getWorldFrame()),
+            new YoFramePoint3D(pointThreeX, pointThreeY, pointThreeZ, ReferenceFrame.getWorldFrame()), appearance);
    }
 
    public Artifact createArtifact()
@@ -85,7 +86,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       {
          if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
          {
-            instruction.setMesh(MeshDataGenerator.Polygon(new Point3D[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+            instruction.setMesh(MeshDataGenerator.Polygon(new Point3DReadOnly[] { pointOne, pointTwo, pointThree }));
          }
          else
          {

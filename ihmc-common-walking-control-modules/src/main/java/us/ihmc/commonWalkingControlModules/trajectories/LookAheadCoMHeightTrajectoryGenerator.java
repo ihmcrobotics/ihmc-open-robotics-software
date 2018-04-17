@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.*;
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -23,12 +24,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -38,6 +37,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -85,12 +85,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final SideDependentList<YoDouble> previousZFinals = new SideDependentList<YoDouble>(previousZFinalLeft, previousZFinalRight);
 
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
-   private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final LineSegment2D projectionSegment = new LineSegment2D();
 
-   private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
-   private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
+   private final YoFramePoint3D contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
+   private final YoFramePoint3D contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
 
    private final YoGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
    private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
@@ -757,6 +757,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
             initializeOffsetTrajectoryGenerator(command, firstTrajectoryPointTime);
             offsetHeightTrajectoryGenerator.compute(deltaTime);
          }
+         else if (offsetHeightTrajectoryGenerator.isDone())
+         {
+            offsetHeightAboveGround.set(offsetHeightTrajectoryGenerator.getValue());
+         }
       }
       offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightTrajectoryGenerator.getValue());
 
@@ -803,7 +807,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
          double heightOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightAboveGround.set(heightOffset);
-         offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
 
          offsetHeightTrajectoryGenerator.clear();
@@ -817,21 +820,21 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if (!command.getSelectionMatrix().isLinearZSelected())
+      if (!command.getSE3Trajectory().getSelectionMatrix().isLinearZSelected())
          return; // The user does not want to control the height, do nothing.
 
-      command.changeFrame(worldFrame);
+      command.getSE3Trajectory().changeFrame(worldFrame);
       tempPelvisHeightTrajectoryCommand.set(command);
       handlePelvisHeightTrajectoryCommand(tempPelvisHeightTrajectoryCommand);
    }
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      switch (command.getExecutionMode())
+      switch (command.getEuclideanTrajectory().getExecutionMode())
       {
       case OVERRIDE:
          isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getCommandId());
+         clearCommandQueue(command.getEuclideanTrajectory().getCommandId());
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
          initializeOffsetTrajectoryGenerator(command, 0.0);
          return;
@@ -847,7 +850,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
          return;
       default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getEuclideanTrajectory().getExecutionMode() + ". Command ignored.");
          return;
       }
    }
@@ -860,7 +863,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      long previousCommandId = command.getEuclideanTrajectory().getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -869,7 +872,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          return false;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
          PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
@@ -877,18 +880,18 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       commandQueue.add(command);
       numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(command.getEuclideanTrajectory().getCommandId());
 
       return true;
    }
 
    private void initializeOffsetTrajectoryGenerator(PelvisHeightTrajectoryCommand command, double firstTrajectoryPointTime)
    {
-      command.addTimeOffset(firstTrajectoryPointTime);
+      command.getEuclideanTrajectory().addTimeOffset(firstTrajectoryPointTime);
 
       offsetHeightTrajectoryGenerator.clear();
 
-      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
          offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
@@ -897,7 +900,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         FrameEuclideanTrajectoryPoint waypoint = command.getTrajectoryPoint(trajectoryPointIndex);
+         FrameEuclideanTrajectoryPoint waypoint = command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex);
          double time = waypoint.getTime();
          double z = waypoint.getPositionZ();
          double zDot = waypoint.getLinearVelocityZ();
@@ -917,7 +920,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private int queueExceedingTrajectoryPointsIfNeeded(PelvisHeightTrajectoryCommand command)
    {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = command.getEuclideanTrajectory().getNumberOfTrajectoryPoints();
 
       int maximumNumberOfWaypoints = offsetHeightTrajectoryGenerator.getMaximumNumberOfWaypoints() - offsetHeightTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
@@ -927,15 +930,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
       PelvisHeightTrajectoryCommand commandForExcedent = commandQueue.addFirst();
       numberOfQueuedCommands.increment();
       commandForExcedent.clear();
-      commandForExcedent.setPropertiesOnly(command);
+      commandForExcedent.getEuclideanTrajectory().setPropertiesOnly(command.getEuclideanTrajectory());
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         commandForExcedent.getEuclideanTrajectory().addTrajectoryPoint(command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+      double timeOffsetToSubtract = command.getEuclideanTrajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.getEuclideanTrajectory().subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
    }
@@ -963,6 +966,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       isTrajectoryOffsetStopped.set(command.isStopAllTrajectory());
+      offsetHeightAboveGround.set(offsetHeightAboveGroundPrevValue.getDoubleValue());
    }
 
    public void initializeDesiredHeightToCurrent()
@@ -1034,12 +1038,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
       orientation.changeFrame(worldFrame);
 
       System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3D(" + position.getX() + ", "
-            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getQuaternion().getS() + ", " + orientation.getQuaternion().getX()
-            + ", " + orientation.getQuaternion().getY() + ", " + orientation.getQuaternion().getZ() + ")));");
+            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getS() + ", " + orientation.getX()
+            + ", " + orientation.getY() + ", " + orientation.getZ() + ")));");
    }
 
    public void getCurrentDesiredHeight(FramePoint3D positionToPack)
    {
-      desiredCoMPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredCoMPosition);
    }
 }

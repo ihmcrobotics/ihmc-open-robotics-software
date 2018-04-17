@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 
 /**
  * Call updatePointAndPolygon to initialize polygon and seed point on the PolygonReferenceFrame
@@ -38,7 +39,7 @@ public class YoFramePoint2dInPolygonCoordinate
       return framePoint2d;
    }
 
-   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, FramePoint2D pointInAnyFrame)
+   public void updatePointAndPolygon(FrameConvexPolygon2D polygon, FramePoint2D pointInAnyFrame)
    {
       FramePoint2D temp = new FramePoint2D(pointInAnyFrame);
       temp.changeFrame(polygon.getReferenceFrame());
@@ -49,13 +50,13 @@ public class YoFramePoint2dInPolygonCoordinate
     * This function is called at beginning of every DoubleSupport, not frequent enough to preallocate eveything. 
     */
 
-   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, Point2D pointInPolygonFrame)
+   public void updatePointAndPolygon(FrameConvexPolygon2D polygon, Point2D pointInPolygonFrame)
    {
       //copy external point back to polygon frame
       framePoint2d = new FramePoint2D(polygon.getReferenceFrame(), pointInPolygonFrame);
 
       //update polygon class
-      point2dInConvexPolygon2d = new Point2dInConvexPolygon2d(polygon.getConvexPolygon2d(), framePoint2d.getX(), framePoint2d.getY());
+      point2dInConvexPolygon2d = new Point2dInConvexPolygon2d(new ConvexPolygon2D(polygon), framePoint2d.getX(), framePoint2d.getY());
       angle.set(point2dInConvexPolygon2d.getAngle());
       eccentricity.set(point2dInConvexPolygon2d.getEccentricity());
    }

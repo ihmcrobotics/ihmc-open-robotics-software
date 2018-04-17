@@ -24,8 +24,8 @@ public class AtlasWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTes
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.0)
+   @Test(timeout = 190000)
    public void testOne() throws SimulationExceededMaximumTimeException
    {
       super.testOne();

@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,7 +42,7 @@ public class ValkyrieFingerController implements RobotController
       gains.setKp(7.0);
       gains.setKi(3.0);
       gains.setKd(0.0);
-      gains.setMaximumOutput(3.0);
+      gains.setMaximumFeedback(3.0);
       gains.setIntegralLeakRatio(0.999);
       gains.setMaximumIntegralError(0.5);
 
@@ -93,7 +93,7 @@ public class ValkyrieFingerController implements RobotController
       {
          if (subscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = subscribers.get(robotSide).pollMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getDesiredHandConfiguration());
 
             switch (handDesiredConfiguration)
             {

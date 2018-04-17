@@ -101,22 +101,22 @@ public class PlotterTest
       point.set(1.0, 5.0);
 
       System.out.println(point);
-      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(1.0, 5.0), point.getPoint(), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(1.0, 5.0), point, 1e-7);
 
       point.changeFrame(pixelsFrame);
 
       System.out.println(point);
-      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(10.0, 25.0), point.getPoint(), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(10.0, 25.0), point, 1e-7);
 
       point.changeFrame(screenFrame);
 
       System.out.println(point);
-      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(40.0, 75.0), point.getPoint(), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(40.0, 75.0), point, 1e-7);
 
       point.changeFrame(metersFrame);
 
       System.out.println(point);
-      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(1.0, 5.0), point.getPoint(), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals("Point not equal", new Point2D(1.0, 5.0), point, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)

@@ -10,6 +10,9 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -18,7 +21,7 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -26,10 +29,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -37,7 +38,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -64,6 +64,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRobotTestInterface
@@ -483,7 +484,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(yawTransform, timeStamp);
-      StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+      StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1);
       externalPelvisPoseCreator.setNewestPose(posePacket);
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
@@ -497,7 +498,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform outsideOfFootTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1.5, 1.0, 0.8, 0.0, 0.0, 0.0);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(outsideOfFootTransform, timeStamp);
-      StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+      StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       externalPelvisPoseCreator.setNewestPose(posePacket);
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
@@ -555,7 +556,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(yawTransform, timeStamp);
-      StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+      StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1);
       externalPelvisPoseCreator.setNewestPose(posePacket);
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
@@ -598,7 +599,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private boolean testTranslationAndRotationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
-      YoFramePose target = new YoFramePose("target_", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll target = new YoFramePoseUsingYawPitchRoll("target_", ReferenceFrame.getWorldFrame(), registry);
       RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
       boolean success = true;
 
@@ -621,7 +622,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 3);
          externalPelvisPosePublisher.setNewestPose(posePacket);
@@ -670,7 +671,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private boolean testTranslationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
-      YoFramePose target = new YoFramePose("target_", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll target = new YoFramePoseUsingYawPitchRoll("target_", ReferenceFrame.getWorldFrame(), registry);
       RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
       boolean success = true;
 
@@ -693,7 +694,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 3);
          externalPelvisPosePublisher.setNewestPose(posePacket);
@@ -758,7 +759,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
                   long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
                   Thread.sleep((int) (random.nextDouble() * 200));
                   TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(pelvisTransform, timeStamp);
-                  StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+                  StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
                   externalPelvisPoseCreator.setNewestPose(posePacket);
                }
                catch (InterruptedException e)
@@ -850,8 +851,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       scsInitialSetup.setDrawGroundProfile(false);
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotModel.getDefaultRobotInitialSetup(0.0, 0.0), guiInitialSetup,
-            scsInitialSetup, true, false,
-            getRobotModel());
+            scsInitialSetup, true, false, getRobotModel());
 
       simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
@@ -924,7 +924,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       @Override
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
-         // TODO Auto-generated method stub
 
       }
    }
@@ -936,14 +935,14 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       private final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds;
       private final ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints;
 
-      private final YoEnum<HighLevelState> requestedHighLevelState;
+      private final YoEnum<HighLevelControllerName> requestedHighLevelState;
 
 
       public StandStillDoNothingPelvisPoseHistoryCorrectorController()
       {
-         requestedHighLevelState = (YoEnum<HighLevelState>) simulationConstructionSet.getVariable(
-               HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
-         requestedHighLevelState.set(HighLevelState.DO_NOTHING_BEHAVIOR);
+         requestedHighLevelState = (YoEnum<HighLevelControllerName>) simulationConstructionSet.getVariable(
+               HumanoidHighLevelControllerManager.class.getSimpleName(), "requestedHighLevelState");
+         requestedHighLevelState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
          jointMap = getRobotModel().getJointMap();
 

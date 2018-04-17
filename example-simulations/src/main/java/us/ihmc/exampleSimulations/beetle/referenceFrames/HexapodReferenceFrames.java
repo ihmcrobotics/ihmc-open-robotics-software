@@ -35,7 +35,7 @@ public class HexapodReferenceFrames implements ReferenceFrames
    {
       this.fullRobotModel = fullRobotModel;
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
-      bodyZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), fullRobotModel.getPelvis().getBodyFixedFrame(), "bodyZUpFrame");
+      bodyZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), fullRobotModel.getRootBody().getBodyFixedFrame(), "bodyZUpFrame");
       centerOfMassFrameWithBodyZUpOrientation = new PoseReferenceFrame("centerOfMassFrameWithBodyOrientation", ReferenceFrame.getWorldFrame());
 
       for (RobotSextant robotSextant : RobotSextant.values)
@@ -111,7 +111,6 @@ public class HexapodReferenceFrames implements ReferenceFrames
    @Override
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 }

@@ -1171,14 +1171,14 @@ public class Graphics3DObject
     * @param polygonPoints Array containing the points
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link AppearanceDefinition} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addPolygon(Point3D[] polygonPoints, AppearanceDefinition yoAppearance)
+   public Graphics3DAddMeshDataInstruction addPolygon(Point3DReadOnly[] polygonPoints, AppearanceDefinition yoAppearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonPoints);
 
       return addMeshData(meshData, yoAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction addPolygon(AppearanceDefinition yoAppearance, Point3D... polygonPoints)
+   public Graphics3DAddMeshDataInstruction addPolygon(AppearanceDefinition yoAppearance, Point3DReadOnly... polygonPoints)
    {
       return addPolygon(polygonPoints, yoAppearance);
    }

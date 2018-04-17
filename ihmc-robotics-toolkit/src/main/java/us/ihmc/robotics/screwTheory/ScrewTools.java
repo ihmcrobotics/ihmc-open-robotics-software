@@ -540,6 +540,7 @@ public class ScrewTools
       clone.setJointLimitLower(original.getJointLimitLower());
       clone.setJointLimitUpper(original.getJointLimitUpper());
       clone.setVelocityLimit(original.getVelocityLimitLower(), original.getVelocityLimitUpper());
+      clone.setEffortLimits(original.getMinEffortLimit(), original.getMaxEffortLimit());
       return clone;
    }
 
@@ -1029,5 +1030,28 @@ public class ScrewTools
          return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
       else
          return jointsHashCode;
+   }
+
+   /**
+    * Will return the {@code numberOfBodies}'eth parent of the provided {@code startBody}. E.g. if
+    * {@code numberOfBodies == 1} this will return the parent of the {@code startBody} and so on.
+    * @throws RuntimeException if the body chain is not long enough to reach the desired parent.
+    * @param startBody the body to start at.
+    * @param numberOfBodies the amount of steps to go up the body chain.
+    * @return the {@link RigidBody} that is {@code numberOfBodies} higher up the rigid body chain
+    * then the {@code startBody}.
+    */
+   public static RigidBody goUpBodyChain(RigidBody startBody, int numberOfBodies)
+   {
+      if (numberOfBodies == 0)
+      {
+         return startBody;
+      }
+      InverseDynamicsJoint parentJoint = startBody.getParentJoint();
+      if (parentJoint == null)
+      {
+         throw new RuntimeException("Reached root body. Can not move up the chain any further.");
+      }
+      return goUpBodyChain(parentJoint.getPredecessor(), numberOfBodies - 1);
    }
 }

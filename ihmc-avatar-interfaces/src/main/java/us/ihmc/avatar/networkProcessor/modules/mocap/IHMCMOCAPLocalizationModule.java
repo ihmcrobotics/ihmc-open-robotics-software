@@ -3,6 +3,11 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.list.array.TFloatArrayList;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
@@ -10,6 +15,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,20 +26,17 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -104,7 +107,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       mocapDataClient.registerRigidBodiesListener(this);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
-      packetCommunicator.attachListener(FootstepStatus.class, walkingStatusManager);
+      packetCommunicator.attachListener(FootstepStatusMessage.class, walkingStatusManager);
 
       PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
@@ -239,20 +242,20 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
 
-      float[] newJointAngles = packet.getJointAngles();
-      float[] newJointVelocities = packet.getJointAngles();
-      float[] newJointTorques = packet.getJointTorques();
+      TFloatArrayList newJointAngles = packet.getJointAngles();
+      TFloatArrayList newJointVelocities = packet.getJointAngles();
+      TFloatArrayList newJointTorques = packet.getJointTorques();
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      for (int i = 0; i < newJointAngles.length; i++)
+      for (int i = 0; i < newJointAngles.size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles[i]);
-         oneDoFJoints[i].setQd(newJointVelocities[i]);
-         oneDoFJoints[i].setTau(newJointTorques[i]);
+         oneDoFJoints[i].setQ(newJointAngles.get(i));
+         oneDoFJoints[i].setQd(newJointVelocities.get(i));
+         oneDoFJoints[i].setTau(newJointTorques.get(i));
       }
 
-      pelvisTranslationFromRobotConfigurationData.set(packet.getPelvisTranslation());
-      pelvisOrientationFromRobotConfigurationData.set(packet.getPelvisOrientation());
+      pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
+      pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
       rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
       rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
@@ -301,8 +304,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       overallListOfSteps.addAll(listOfStepsForward);
       overallListOfSteps.addAll(listOfStepsBackward);
 
-      FootstepDataListMessage footstepsListMessage = new FootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
-      footstepsListMessage.setDestination(PacketDestination.CONTROLLER);
+      FootstepDataListMessage footstepsListMessage = HumanoidMessageTools.createFootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
+      footstepsListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       walkingStatusManager.sendFootstepList(footstepsListMessage);
    }
 
@@ -326,28 +329,28 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
             position.setX(startingPoint -i * 0.2 - 0.2);
          }
 
-         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
+         FootstepDataMessage footStep = HumanoidMessageTools.createFootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
          listOfSteps.set(i, footStep);
          robotSide = robotSide.getOppositeSide();
       }
       return listOfSteps;
    }
       
-   private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
+   private class WalkingStatusManager implements PacketConsumer<FootstepStatusMessage>
    {
       private final YoInteger footstepsCompleted = new YoInteger("footstepsCompleted", registry);
       private final YoInteger numberOfFootstepsToTake = new YoInteger("numberOfFootstepsToTake", registry);
       
       @Override
-      public void receivedPacket(FootstepStatus packet)
+      public void receivedPacket(FootstepStatusMessage packet)
       {
-         if(packet.getStatus().equals(FootstepStatus.Status.COMPLETED))
+         if(packet.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
             footstepsCompleted.increment();
       }
       
       public void sendFootstepList(FootstepDataListMessage footstepDataListMessage)
       {
-         numberOfFootstepsToTake.set(footstepDataListMessage.getDataList().size());
+         numberOfFootstepsToTake.set(footstepDataListMessage.getFootstepDataList().size());
          footstepsCompleted.set(0);
          packetCommunicator.send(footstepDataListMessage);
       }

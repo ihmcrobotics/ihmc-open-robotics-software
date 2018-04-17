@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -62,30 +62,26 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    }
 
    @Override
-   public double getInitalCoMHeight()
+   public double getInitialCoMHeight()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSwingHeight()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSwingDuration()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSubCircleRadius()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
    

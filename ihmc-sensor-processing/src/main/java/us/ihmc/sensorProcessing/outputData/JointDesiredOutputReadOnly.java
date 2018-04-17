@@ -5,7 +5,7 @@ package us.ihmc.sensorProcessing.outputData;
  * (setpoints and controller properties) from a whole body controller to joint level
  * controllers.
  */
-public interface JointDesiredOutputReadOnly
+public abstract class JointDesiredOutputReadOnly
 {
    public abstract boolean hasDesiredTorque();
    public abstract boolean hasDesiredPosition();
@@ -78,4 +78,78 @@ public interface JointDesiredOutputReadOnly
     * from the whole body controller to the joint control level.
     */
    public abstract double getMasterGain();
+
+   /**
+    * Returns true if a velocity scaling was set for this joint.
+    * @see #getVelocityScaling()
+    */
+   public abstract boolean hasVelocityScaling();
+
+   /**
+    * <p>
+    * This allows to specify a desired velocity scaling for the joint level controller. In the
+    * simplest for the joint control law contains a damping / velocity term that looks like this:</br>
+    * damping * (velocityScaling * qd_d - qd)
+    * </p>
+    * By default this parameter should be set to 1.0 but can be set to a value between 0.0 and 1.0.
+    * If set to zero the velocity tracking of this joint will be deactivated and the joint damping
+    * will simulate viscous friction. If set to one the damping term will attempt to track the desired
+    * velocity.
+    */
+   public abstract double getVelocityScaling();
+
+   /**
+    * Returns true if a break frequency for the integration of the desired acceleration to a desired
+    * velocity was set for this joint.
+    * @see #getVelocityIntegrationBreakFrequency()
+    */
+   public abstract boolean hasVelocityIntegrationBreakFrequency();
+
+   /**
+    * If the integration of desired accelerations is handled on the joint level this value allows
+    * to specify a break frequency for the integration of the desired acceleration to a desired velocity.
+    *
+    * @return the value of this parameter needs to be between 0.0 and infinity.
+    */
+   public abstract double getVelocityIntegrationBreakFrequency();
+
+   /**
+    * Returns true if a break frequency for the integration of the desired acceleration to a desired
+    * position was set for this joint.
+    * @see #getPositionIntegrationBreakFrequency()
+    */
+   public abstract boolean hasPositionIntegrationBreakFrequency();
+
+   /**
+    * If the integration of desired accelerations is handled on the joint level this value allows
+    * to specify a break frequency for the integration of the desired velocity to a desired position.
+    *
+    * @return the value of this parameter needs to be between 0.0 and infinity.
+    */
+   public abstract double getPositionIntegrationBreakFrequency();
+
+   @Override
+   public String toString()
+   {
+      String ret = "Joint Desired Output:\n";
+      if (hasControlMode())
+         ret += "controlMode = " + getControlMode() + "\n";
+      if (hasDesiredTorque())
+         ret += "desiredTorque = " + getDesiredTorque() + "\n";
+      if (hasDesiredPosition())
+         ret += "desiredPosition = " + getDesiredPosition() + "\n";
+      if (hasDesiredVelocity())
+         ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
+      if (hasDesiredAcceleration())
+         ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
+      if (hasMasterGain())
+         ret += "masterGain = " + getMasterGain() + "\n";
+      if (hasVelocityScaling())
+         ret += "velocityScaling = " + getVelocityScaling() + "\n";
+      if (hasVelocityIntegrationBreakFrequency())
+         ret += "velocityIntegrationBreakFrequency = " + getVelocityIntegrationBreakFrequency() + "\n";
+      if (hasPositionIntegrationBreakFrequency())
+         ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
+      return ret;
+   }
 }

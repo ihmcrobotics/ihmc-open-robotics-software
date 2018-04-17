@@ -1,18 +1,19 @@
 package us.ihmc.avatar.testTools;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -48,16 +49,15 @@ public class ScriptedFootstepGenerator
 
    public FootstepDataListMessage generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (int i = 0; i < robotSides.length; i++)
       {
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(),
-                                                                    footstep.getFootstepPose().getOrientation());
-         footstepDataList.add(footstepData);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(), footstep.getFootstepPose().getOrientation());
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
 
       return footstepDataList;
@@ -80,7 +80,7 @@ public class ScriptedFootstepGenerator
       RigidBodyTransform anklePose = new RigidBodyTransform();
       anklePose.setRotation(orientation);
       anklePose.setTranslation(position);
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), anklePose);
+      FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), anklePose);
 
       footstep.setFromAnklePose(pose, transformsFromAnkleToSole.get(robotSide));
 

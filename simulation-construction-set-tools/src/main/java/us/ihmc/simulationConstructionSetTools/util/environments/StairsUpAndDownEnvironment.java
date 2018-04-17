@@ -3,9 +3,9 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -32,7 +32,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
    private static final double landingDepth = 0.85;
    private static final double landingWidth = 2.1;
 
-   private final List<List<FramePose>> stairPoses = new ArrayList<>();
+   private final List<List<FramePose3D>> stairPoses = new ArrayList<>();
 
    public StairsUpAndDownEnvironment()
    {
@@ -64,7 +64,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
          }
       }
 
-      List<FramePose> stepPoses = new ArrayList<>();
+      List<FramePose3D> stepPoses = new ArrayList<>();
 
       //double xPosition = startingPosition + 0.5 * stairDepth;
       double xPosition = startingPosition + 1.5 * stairUpDepth;
@@ -72,7 +72,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
       double zPosition = stepUpHeight;
       for (int i = 0; i < totalStepsUp; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame());
          pose.setX(xPosition);
          pose.setY(yPosition);
          pose.setZ(zPosition);
@@ -106,14 +106,14 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
          }
       }
 
-      List<FramePose> stepPoses = new ArrayList<>();
+      List<FramePose3D> stepPoses = new ArrayList<>();
 
       double xPosition = startingPosition + totalStepsUp * stairUpDepth + landingDepth + 0.5 * stairDownDepth;
       double yPosition = 1.0;
       double zPosition = totalHeightUp - stepDownHeight;
       for (int i = 0; i < totalStepsDown; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame());
          pose.setX(xPosition);
          pose.setY(yPosition);
          pose.setZ(zPosition);
@@ -163,7 +163,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
          contactableRobots.get(0).setController(contactController);
    }
 
-   public List<List<FramePose>> getStairPoses()
+   public List<List<FramePose3D>> getStairPoses()
    {
       return stairPoses;
    }

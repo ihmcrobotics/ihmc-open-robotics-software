@@ -101,7 +101,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.get(this.goalPosition);
+      this.goalPosition.set(goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 

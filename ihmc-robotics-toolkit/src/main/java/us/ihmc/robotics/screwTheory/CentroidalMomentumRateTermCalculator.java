@@ -170,7 +170,7 @@ public class CentroidalMomentumRateTermCalculator
          bodyMomenta[j].set(tempSpatialForceVector);
       }
 
-      tempVector.scale(1 / robotMass);
+      tempVector.scale(1.0 / robotMass);
 
       comTwist.setLinearPart(tempVector);
 
@@ -210,8 +210,7 @@ public class CentroidalMomentumRateTermCalculator
       {
          spatialAccelerationCalculator.getAccelerationOfBody(rigidBodies[j], tempSpatialAcceleration);
          tempSpatialAcceleration.getMatrix(tempSpatialMotionMatrix, 0);
-         CommonOps.mult(denseAdjTimesI[j], tempSpatialMotionMatrix, tempMatrix);
-         CommonOps.add(aDotV, tempMatrix, aDotV);
+         CommonOps.multAdd(denseAdjTimesI[j], tempSpatialMotionMatrix, aDotV);
       }
    }
 

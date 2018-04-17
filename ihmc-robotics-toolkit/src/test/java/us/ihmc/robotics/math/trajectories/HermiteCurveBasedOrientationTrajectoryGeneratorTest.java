@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -21,7 +22,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
    private static final boolean DEBUG = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -68,13 +69,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             traj.compute(time);
             traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-            currentAngularVelocity.get(angularVelocityVector);
+            angularVelocityVector.set(currentAngularVelocity);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
             quaternionFromIntegration.set(orientationFromIntegration);
             quaternionFromIntegration.multiply(integratedAngularVelocity, quaternionFromIntegration);
             orientationFromIntegration.set(quaternionFromIntegration);
 
-            currentAngularAcceleration.get(integratedAngularAcceleration);
+            integratedAngularAcceleration.set(currentAngularAcceleration);
             integratedAngularAcceleration.scale(dt);
             angularVelocityFromIntegration.add(integratedAngularAcceleration);
 
@@ -84,7 +85,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
@@ -148,7 +149,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.compute(trajectoryTime - dt);
          traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation.getGeometryObject(), orientationEpsilon);
+         boolean goodFinalOrientation = finalOrientation.geometricallyEquals(currentOrientation, orientationEpsilon);
          boolean goodFinalAngularVelocity = finalAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
          boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
 
@@ -291,7 +292,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
@@ -401,6 +402,47 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          System.out.println("maxVelocityRecorded    : " + maxVelocityRecorded);
          System.out.println("maxAccelerationRecorded: " + maxAccelerationRecorded);
          System.out.println("maxJerkRecorded        : " + maxJerkRecorded);
+      }
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   public void testMostBasicTrajectory() throws Exception
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      Random random = new Random(5165165161L);
+      double dt = 1.0e-5;
+      double trajectoryTime = 3.0;
+      double startIntegrationTime = 1.0;
+      double endIntegrationTime = 2.0;
+
+      FrameQuaternion currentOrientation = new FrameQuaternion();
+      FrameVector3D currentAngularVelocity = new FrameVector3D();
+      FrameVector3D currentAngularAcceleration = new FrameVector3D();
+
+      HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
+                                                                                                                 new YoVariableRegistry("null"));
+      traj.setTrajectoryTime(trajectoryTime);
+
+      for (int i = 0; i < 5; i++)
+      {
+         FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+         FrameVector3D angularVelocity = new FrameVector3D(worldFrame);
+
+         traj.setInitialConditions(initialOrientation, angularVelocity);
+         traj.setFinalConditions(initialOrientation, angularVelocity);
+         traj.initialize();
+
+         for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
+         {
+            traj.compute(time);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+
+            EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, currentOrientation, 1.0e-2);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularVelocity, 1.0e-2);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularAcceleration, 1.0e-2);
+         }
       }
    }
 

@@ -124,13 +124,11 @@ public class RealLifeEncoderTrajectory
    
    public double getPosition()
    {
-      // TODO Auto-generated method stub
       return sign*pos[cursor];
    }
 
    public double getVelocity()
    {
-      // TODO Auto-generated method stub
       return sign*vel[cursor];
    }
 

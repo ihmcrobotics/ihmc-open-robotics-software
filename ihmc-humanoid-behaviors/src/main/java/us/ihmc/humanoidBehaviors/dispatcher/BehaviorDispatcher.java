@@ -9,36 +9,33 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
-import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.commons.thread.ThreadTools;
 
 /**
- * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands as pause, resume, stop, etc.
- * DO NOT add smart AI stuff in there, create and register a new behavior in {@link IHMCHumanoidBehaviorManager} instead.
+ * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands
+ * as pause, resume, stop, etc. DO NOT add smart AI stuff in there, create and register a new
+ * behavior in {@link IHMCHumanoidBehaviorManager} instead.
  *
  */
 public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 {
-   private static final boolean DEBUG = true;
    private final Class<E> behaviorEnum;
    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("BehaviorDispatcher"));
 
@@ -47,8 +44,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final YoDouble yoTime;
-   private final YoVariableServer yoVaribleServer;
-   private final BehaviorStateMachine<E> stateMachine;
+   private final YoVariableServer yoVariableServer;
+   private StateMachineFactory<E, BehaviorAction> stateMachineFactory;
+   private BehaviorStateMachine<E> stateMachine;
 
    private final YoEnum<E> requestedBehavior;
 
@@ -64,17 +62,17 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
-   private E stopBehavior;
-   private E currentBehavior;
+   private E stopBehaviorKey;
+   private E currentBehaviorKey;
 
    public BehaviorDispatcher(YoDouble yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-         BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum,
-         E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                             BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer,
+                             Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
-      this.stopBehavior = stopBehavior;
+      this.stopBehaviorKey = stopBehavior;
       this.yoTime = yoTime;
-      this.yoVaribleServer = yoVaribleServer;
+      this.yoVariableServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.requestedBehavior = new YoEnum<E>("requestedBehavior", registry, behaviourEnum, true);
@@ -83,11 +81,11 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       this.desiredBehaviorSubscriber = desiredBehaviorSubscriber;
       this.desiredBehaviorControlSubscriber = desiredBehaviorControlSubscriber;
 
-      stateMachine = new BehaviorStateMachine<E>("behaviorState", "behaviorSwitchTime", behaviourEnum, yoTime, registry);
+      stateMachineFactory = new StateMachineFactory<>(behaviourEnum);
+      stateMachineFactory.setNamePrefix("behaviorDispatcher").setRegistry(registry).buildYoClock(yoTime);
 
       SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(communicationBridge);
       addBehavior(stopBehavior, simpleForwardingBehavior);
-      stateMachine.setCurrentState(stopBehavior);
 
       requestedBehavior.set(null);
 
@@ -110,11 +108,12 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       }
    }
 
-   public void addBehavior(E E, AbstractBehavior behaviorToAdd)
+   public void addBehavior(E behaviorKey, AbstractBehavior behaviorToAdd)
    {
-      BehaviorAction<E> behaviorStateToAdd = new BehaviorAction<E>(E, behaviorToAdd);
+      BehaviorAction behaviorStateToAdd = new BehaviorAction(behaviorToAdd);
 
-      this.stateMachine.addState(behaviorStateToAdd);
+      stateMachineFactory.addState(behaviorKey, behaviorStateToAdd);
+
       try
       {
          this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
@@ -124,29 +123,13 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          PrintTools.info(e.getMessage());
       }
 
-      ArrayList<BehaviorAction<E>> allOtherBehaviorStates = new ArrayList<BehaviorAction<E>>();
-
-      for (E otherBehaviorType : behaviorEnum.getEnumConstants())
+      for (E otherBehaviorKey : behaviorEnum.getEnumConstants())
       {
-         BehaviorAction<E> otherBehaviorState = stateMachine.getState(otherBehaviorType);
-
-         if (otherBehaviorState == null)
-         {
+         if (!stateMachineFactory.isStateRegistered(otherBehaviorKey))
             continue;
-         }
-         else
-         {
-            allOtherBehaviorStates.add(otherBehaviorState);
 
-            boolean waitUntilDone = false;
-
-            SwitchGlobalListenersAction switchToOtherBehaviorState = new SwitchGlobalListenersAction(behaviorStateToAdd, otherBehaviorState);
-            StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, switchToOtherBehaviorState, behaviorStateToAdd, otherBehaviorState);
-
-            SwitchGlobalListenersAction switchFromOtherBehaviorState = new SwitchGlobalListenersAction(otherBehaviorState, behaviorStateToAdd);
-            StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, switchFromOtherBehaviorState, otherBehaviorState,
-                  behaviorStateToAdd);
-         }
+         stateMachineFactory.addRequestedTransition(behaviorKey, otherBehaviorKey, requestedBehavior);
+         stateMachineFactory.addRequestedTransition(otherBehaviorKey, behaviorKey, requestedBehavior);
       }
    }
 
@@ -157,8 +140,15 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private void initialize()
    {
-      BehaviorAction<E> currentState = stateMachine.getCurrentState();
-      currentState.doTransitionIntoAction();
+      if (stateMachine == null)
+      {
+         stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
+         stateMachine.initialize();
+      }
+      else
+      {
+         stateMachine.resetCurrentState();
+      }
    }
 
    private void doControl()
@@ -168,18 +158,15 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       updateRequestedBehavior();
       callUpdatables();
 
-
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransitions();
 
       //a behavior has finished or has aborted and has transitioned to STOP
 
-
-      if (stateMachine.getCurrentStateEnum().equals(stopBehavior) && currentBehavior!=null && !currentBehavior.equals(stopBehavior))
+      if (stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey) && currentBehaviorKey != null && !currentBehaviorKey.equals(stopBehaviorKey))
       {
-         communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+         communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
       }
-      currentBehavior = stateMachine.getCurrentStateEnum();
+      currentBehaviorKey = stateMachine.getCurrentBehaviorKey();
 
       yoGraphicsListRegistry.update();
    }
@@ -225,20 +212,20 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          {
          case STOP:
             stateMachine.stop();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
             stateMachine.pause();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
 
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
 
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          default:
             throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
@@ -260,9 +247,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
          doControl();
 
-         if (yoVaribleServer != null)
+         if (yoVariableServer != null)
          {
-            yoVaribleServer.update(Conversions.secondsToNanoseconds(yoTime.getDoubleValue()));
+            yoVariableServer.update(Conversions.secondsToNanoseconds(yoTime.getDoubleValue()));
          }
       }
       catch (Exception e)
@@ -275,24 +262,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   private class SwitchGlobalListenersAction implements StateTransitionAction
-   {
-      private final BehaviorAction<E> fromBehaviorState;
-      private final BehaviorAction<E> toBehaviorState;
-
-      public SwitchGlobalListenersAction(BehaviorAction<E> fromBehaviorState, BehaviorAction<E> toBehaviorState)
-      {
-         this.fromBehaviorState = fromBehaviorState;
-         this.toBehaviorState = toBehaviorState;
-      }
-
-      @Override
-      public void doTransitionAction()
-      {
-
-      }
    }
 
    public void start()

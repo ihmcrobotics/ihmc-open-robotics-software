@@ -2,7 +2,9 @@ package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.simulationconstructionset.SpatialVector;
 
 public final class SpatialTransformationMatrix implements java.io.Serializable
@@ -23,7 +25,7 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
       return ret;
    }
 
-   public void setFromOffsetAndRotation(Vector3D r_i, RotationMatrix Rin)
+   public void setFromOffsetAndRotation(Vector3DReadOnly r_i, RotationMatrixReadOnly Rin)
    {
       R.set(Rin);
 

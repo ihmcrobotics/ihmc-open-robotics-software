@@ -2,8 +2,8 @@ package us.ihmc.avatar.handControl.packetsAndConsumers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.ManualHandControlPacket;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ManualHandControlProvider implements PacketConsumer<ManualHandControlPacket>
@@ -19,7 +19,7 @@ public class ManualHandControlProvider implements PacketConsumer<ManualHandContr
    
    public void receivedPacket(ManualHandControlPacket packet)
    {
-      if(packet.getRobotSide() == this.robotSide)
+      if(packet.getRobotSide() == this.robotSide.toByte())
     	  packetQueue.add(packet);
    }
 

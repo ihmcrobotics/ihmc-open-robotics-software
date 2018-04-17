@@ -1,0 +1,54 @@
+#ifndef __controller_msgs__msg__VideoPacket__idl__
+#define __controller_msgs__msg__VideoPacket__idl__
+
+#include "controller_msgs/msg/./IntrinsicParametersMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet VIDEO_SOURCE_MULTISENSE_LEFT_EYE =
+      0;
+
+      const octet VIDEO_SOURCE_MULTISENSE_RIGHT_EYE =
+      1;
+
+      const octet VIDEO_SOURCE_FISHEYE_LEFT =
+      2;
+
+      const octet VIDEO_SOURCE_FISHEYE_RIGHT =
+      3;
+
+      const octet VIDEO_SOURCE_CV_THRESHOLD =
+      4;
+
+      const octet VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR =
+      5;
+
+      const octet VIDEO_SOURCE_AWARE_FACE_TRACKER =
+      6;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::VideoPacket_")
+      struct VideoPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet video_source;
+        long long timestamp;
+        sequence<octet> data;
+        geometry_msgs::msg::dds::Point position;
+        geometry_msgs::msg::dds::Quaternion orientation;
+        controller_msgs::msg::dds::IntrinsicParametersMessage intrinsic_parameters;
+      };
+    };
+  };
+};
+
+#endif

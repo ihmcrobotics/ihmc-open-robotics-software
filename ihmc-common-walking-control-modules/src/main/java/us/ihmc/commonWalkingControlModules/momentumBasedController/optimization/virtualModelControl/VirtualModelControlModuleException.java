@@ -9,7 +9,7 @@ public class VirtualModelControlModuleException extends NoConvergenceException
 
    private final VirtualModelControlSolution virtualModelControlSolution;
 
-   public VirtualModelControlModuleException(NoConvergenceException noConvergenceException, VirtualModelControlSolution virtualModelControlSolution)
+   public VirtualModelControlModuleException(VirtualModelControlSolution virtualModelControlSolution)
    {
       this.virtualModelControlSolution = virtualModelControlSolution;
    }

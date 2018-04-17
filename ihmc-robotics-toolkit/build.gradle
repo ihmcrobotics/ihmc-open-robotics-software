@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.0"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.7.4'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'org.ejml', name: 'denseC64', version: '0.30'
    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
    compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
@@ -37,8 +37,9 @@ mainDependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'com.google.code.java-allocation-instrumenter', name: 'java-allocation-instrumenter', version: '3.1.0'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
@@ -46,6 +47,6 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
    compile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
 }

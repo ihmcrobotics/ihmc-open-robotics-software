@@ -329,9 +329,8 @@ public class InverseDynamicsCalculatorSCSTest
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(elevator, -gravity);
-      LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator, rootAcceleration, jointsToIgnore, doVelocityTerms, doAcceleration);
 //      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
       inverseDynamicsCalculator.compute();
       return inverseDynamicsCalculator;
@@ -575,7 +574,7 @@ public class InverseDynamicsCalculatorSCSTest
 
       floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector, angularVelocityFrameVector);
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 
@@ -591,8 +590,8 @@ public class InverseDynamicsCalculatorSCSTest
       FrameVector3D originAcceleration = new FrameVector3D(sixDoFJoint.getFrameBeforeJoint());
       FrameVector3D angularAcceleration = new FrameVector3D(sixDoFJoint.getFrameAfterJoint());
 
-      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());

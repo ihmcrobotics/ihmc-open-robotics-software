@@ -22,21 +22,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetManager
 {
@@ -61,10 +61,11 @@ public class FeetManager
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final FramePoint3D tempSolePosition = new FramePoint3D();
-   private final YoDouble blindFootstepsHeightOffset = new YoDouble("blindFootstepsHeightOffset", registry);
+   private final DoubleParameter blindFootstepsHeightOffset;
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry)
+                      PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
+                      YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       feet = controllerToolbox.getContactableFeet();
@@ -91,13 +92,6 @@ public class FeetManager
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      PIDSE3Gains swingGains = walkingControllerParameters.getSwingFootControlGains();
-      YoPIDSE3Gains swingFootControlGains = new DefaultYoPIDSE3Gains("SwingFoot", swingGains, registry);
-      PIDSE3Gains holdGains = walkingControllerParameters.getHoldPositionFootControlGains();
-      YoPIDSE3Gains holdPositionFootControlGains = new DefaultYoPIDSE3Gains("HoldFoot", holdGains, registry);
-      PIDSE3Gains toeGains = walkingControllerParameters.getToeOffFootControlGains();
-      YoPIDSE3Gains toeOffFootControlGains = new DefaultYoPIDSE3Gains("ToeOffFoot", toeGains, registry);
-
       ExplorationParameters explorationParameters = null;
       if (walkingControllerParameters.createFootholdExplorationTools())
       {
@@ -106,32 +100,25 @@ public class FeetManager
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, explorationParameters, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
+                                                                     toeOffFootGains, controllerToolbox, explorationParameters, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
 
-      blindFootstepsHeightOffset.set(walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset());
+      double defaultBlindFootstepsHeightOffset = walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset();
+      blindFootstepsHeightOffset = new DoubleParameter("blindFootstepsHeightOffset", registry, defaultBlindFootstepsHeightOffset);
 
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(double highFootWeight, double defaultFootWeight)
+   public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
+                          Vector3DReadOnly footLinearWeight)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.setWeights(highFootWeight, defaultFootWeight);
-      }
-   }
-
-   public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
+         footControlModule.setWeights(loadedFootAngularWeight, loadedFootLinearWeight, footAngularWeight, footLinearWeight);
       }
    }
 
@@ -158,7 +145,7 @@ public class FeetManager
       {
          tempSolePosition.setToZero(soleZUpFrames.get(footstep.getRobotSide().getOppositeSide()));
          tempSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
-         footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getDoubleValue());
+         footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getValue());
       }
    }
 
@@ -184,9 +171,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime, boolean continuousReplan)
+   public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime, continuousReplan);
+      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
@@ -504,6 +491,11 @@ public class FeetManager
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).getFeedbackControlCommand();
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredData(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getJointDesiredData();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

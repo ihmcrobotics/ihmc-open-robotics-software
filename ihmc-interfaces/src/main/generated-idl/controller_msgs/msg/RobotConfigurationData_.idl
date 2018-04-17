@@ -1,0 +1,51 @@
+#ifndef __controller_msgs__msg__RobotConfigurationData__idl__
+#define __controller_msgs__msg__RobotConfigurationData__idl__
+
+#include "controller_msgs/msg/./IMUPacket_.idl"
+#include "controller_msgs/msg/./SpatialVectorMessage_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_MOTION_STATUS_STANDING =
+      0;
+
+      const octet ROBOT_MOTION_STATUS_IN_MOTION =
+      1;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::RobotConfigurationData_")
+      struct RobotConfigurationData
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        long long timestamp;
+        long long sensor_head_pps_timestamp;
+        long joint_name_hash;
+        sequence<float, 1> joint_angles;
+        sequence<float, 1> joint_velocities;
+        sequence<float, 1> joint_torques;
+        geometry_msgs::msg::dds::Vector3 root_translation;
+        geometry_msgs::msg::dds::Quaternion root_orientation;
+        geometry_msgs::msg::dds::Vector3 pelvis_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 pelvis_angular_velocity;
+        geometry_msgs::msg::dds::Vector3 pelvis_linear_acceleration;
+        sequence<controller_msgs::msg::dds::SpatialVectorMessage, 1> force_sensor_data;
+        sequence<controller_msgs::msg::dds::IMUPacket, 1> imu_sensor_data;
+        @defaultValue(value=255)
+        octet robot_motion_status;
+        long last_received_packet_type_id;
+        long long last_received_packet_unique_id;
+        long long last_received_packet_robot_timestamp;
+      };
+    };
+  };
+};
+
+#endif

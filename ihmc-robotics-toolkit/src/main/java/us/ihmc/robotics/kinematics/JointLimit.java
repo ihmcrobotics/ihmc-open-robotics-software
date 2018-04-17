@@ -2,7 +2,9 @@ package us.ihmc.robotics.kinematics;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class JointLimit 
+/** This class is replaced with JointLimitData. It will be removed on 02/04/2018 (April 2). */
+@Deprecated
+public class JointLimit
 {
    private double upperPositionLimit;
    private double lowerPositionLimit;

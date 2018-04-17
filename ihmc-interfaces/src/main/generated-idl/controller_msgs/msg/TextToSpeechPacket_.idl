@@ -1,0 +1,54 @@
+#ifndef __controller_msgs__msg__TextToSpeechPacket__idl__
+#define __controller_msgs__msg__TextToSpeechPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const string FOOTSTEP_COMPLETED =
+      "Finished Taking Footstep";
+
+      const string FINISHED_WALKING =
+      "Finished walking";
+
+      const string WALKING_ABORTED =
+      "walking aborted";
+
+      const string STARTING_CONTROLLER =
+      "starting controller";
+
+      const string WALKING =
+      "walking";
+
+      const string MOVING_LEFT_ARM =
+      "moving the left arm";
+
+      const string MOVING_RIGHT_ARM =
+      "moving the right arm";
+
+      const string NETWORKPROCESSOR_ONLINE =
+      "Reestablished Connection To The Network Processor";
+
+
+      /**
+       * Use this message for the robot to speak.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::TextToSpeechPacket_")
+      struct TextToSpeechPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        boolean speak_packet;
+        @defaultValue(value=True)
+        boolean beep;
+        string text_to_speak;
+      };
+    };
+  };
+};
+
+#endif

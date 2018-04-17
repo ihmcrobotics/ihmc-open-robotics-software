@@ -25,7 +25,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.2)
+	@ContinuousIntegrationTest(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {
@@ -93,12 +93,13 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB.getVector(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB, 1e-7);
    }
 
 	/**
 	 * This test is used to prove that the reference frame in which the linear acceleration of a body fixed point in computed in does not matter.
 	 */
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAccelerationOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
    {
@@ -135,7 +136,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          
          // Verify that they are the same
          bodyFixedPointLinearAccelerationInBody.changeFrame(baseFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase.getVector(), bodyFixedPointLinearAccelerationInBody.getVector(), 1.0e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase, bodyFixedPointLinearAccelerationInBody, 1.0e-12);
       }
    }
 
@@ -367,7 +368,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.getLinearAccelerationFromOriginAcceleration(twistOfBodyWithRespectToBase, linearAccelerationCheck);
       linearAccelerationCheck.changeFrame(originAcceleration.getReferenceFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck, originAcceleration, 1e-12);
       
       FrameVector3D originAccelerationBack = new FrameVector3D(twistOfBodyWithRespectToBase.getExpressedInFrame());
       FramePoint3D origin = new FramePoint3D(acceleration.getBodyFrame());
@@ -377,7 +378,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.getAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack, originAcceleration, 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

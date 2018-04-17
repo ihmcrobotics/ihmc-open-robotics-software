@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
@@ -423,5 +424,11 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
          pboAwtPanelListeners.clear();
          pboAwtPanelListeners = null;
       }
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      
    }
 }

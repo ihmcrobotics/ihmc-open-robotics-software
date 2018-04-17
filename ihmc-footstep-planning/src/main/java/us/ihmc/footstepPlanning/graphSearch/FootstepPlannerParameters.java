@@ -169,7 +169,7 @@ public interface FootstepPlannerParameters
     */
    public default double getMinimumFootholdPercent()
    {
-      return 0.95;
+      return 0.9;
    }
 
    /**
@@ -257,7 +257,7 @@ public interface FootstepPlannerParameters
    public abstract double getMaximumStepWidth();
 
    /**
-    * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
     * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
@@ -267,14 +267,14 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getCliffHeightToShiftAwayFrom()
+   public default double getCliffHeightToAvoid()
    {
-      return 0.0;
+      return Double.MAX_VALUE;
    }
 
    /**
-    * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region
-    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
@@ -306,7 +306,7 @@ public interface FootstepPlannerParameters
     */
    public default int getMinimumStepsForBestEffortPlan()
    {
-      return 0;
+      return 3;
    }
 
    /**
@@ -336,5 +336,25 @@ public interface FootstepPlannerParameters
    public default double getBodyGroundClearance()
    {
       return 0.25;
+   }
+
+   /**
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
+    */
+   public default double getMinXClearanceFromStance()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
+    */
+   public default double getMinYClearanceFromStance()
+   {
+      return 0.0;
    }
 }

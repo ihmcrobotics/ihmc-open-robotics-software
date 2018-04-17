@@ -308,7 +308,6 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    @Override
    public void setLimitJointAngles(boolean limitJointAngles)
    {
-      // TODO Auto-generated method stub
       
    }
 

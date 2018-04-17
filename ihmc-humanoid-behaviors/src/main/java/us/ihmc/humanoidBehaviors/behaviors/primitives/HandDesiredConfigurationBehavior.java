@@ -1,14 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandDesiredConfigurationBehavior extends AbstractBehavior
 {
@@ -62,7 +63,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
 //         sendPacketToController(outgoingHandDesiredConfigurationMessage);
          
-         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST);
+         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST.ordinal());
          
          sendPacket(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
@@ -79,8 +80,8 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopMessage.setDestination(PacketDestination.UI);
+         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         stopMessage.setDestination(PacketDestination.UI.ordinal());
          sendPacketToController(stopMessage);
          sendPacket(stopMessage);
       }
@@ -94,8 +95,8 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopMessage.setDestination(PacketDestination.UI);
+         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         stopMessage.setDestination(PacketDestination.UI.ordinal());
          sendPacketToController(stopMessage);
          sendPacket(stopMessage);
       }

@@ -4,14 +4,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPPlanarProjector;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPPlanarProjectorTest
@@ -32,7 +32,7 @@ public class SmartCMPPlanarProjectorTest
 
       // Test all in same place
       double[][] pointList = new double[][] { { 0.0, 0.0 }, { 1.0, 0.0 }, { 1.0, 1.0 }, { 0.0, 1.0 } };
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame, pointList);
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame, Vertex2DSupplier.asVertex2DSupplier(pointList));
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, 0.5, 0.5);
       FramePoint2D desiredCMP = new FramePoint2D(worldFrame, 0.5, 0.5);
@@ -120,7 +120,7 @@ public class SmartCMPPlanarProjectorTest
       checkOne(cmpProjector, supportPolygon, capturePoint, desiredCMP, expectedCMPProjection);
    }
 
-   private void checkOne(SmartCMPPlanarProjector cmpProjection, FrameConvexPolygon2d supportPolygon, FramePoint2D capturePoint,
+   private void checkOne(SmartCMPPlanarProjector cmpProjection, FrameConvexPolygon2D supportPolygon, FramePoint2D capturePoint,
          FramePoint2D desiredCMP, FramePoint2D expectedCMPProjection)
    {
       FramePoint2D desiredCMPProjection = new FramePoint2D(desiredCMP);

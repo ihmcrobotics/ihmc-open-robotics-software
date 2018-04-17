@@ -1,25 +1,27 @@
 package us.ihmc.ihmcPerception.objectDetector;
 
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
-import us.ihmc.communication.packets.ObjectDetectorResultPacket;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.commons.thread.ThreadTools;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -51,15 +53,15 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
       executorService.submit(() ->
                              {
                                 Pair<List<Rectangle>, ValveDetector.HeatMap> rectanglesAndHeatMaps = valveDetector
-                                      .detect(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData()));
+                                      .detect(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
 
                                 rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
 
                                 HeatMapPacket heatMapPacket = new HeatMapPacket();
-                                heatMapPacket.width = rectanglesAndHeatMaps.getRight().w;
-                                heatMapPacket.height = rectanglesAndHeatMaps.getRight().h;
-                                heatMapPacket.data = rectanglesAndHeatMaps.getRight().data;
-                                heatMapPacket.name = "Valve";
+                                heatMapPacket.setWidth(rectanglesAndHeatMaps.getRight().w);
+                                heatMapPacket.setHeight(rectanglesAndHeatMaps.getRight().h);
+                                heatMapPacket.getData().add(rectanglesAndHeatMaps.getRight().data);
+                                heatMapPacket.setName("Valve");
 
                                 int[] packedBoxes = rectanglesAndHeatMaps.getLeft().stream()
                                                                          .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height)).toArray();
@@ -68,10 +70,10 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
                                 {
                                    names[i] = "Valve " + i;
                                 }
-                                BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
+                                BoundingBoxesPacket boundingBoxesPacket = MessageTools.createBoundingBoxesPacket(packedBoxes, names);
 
-                                ObjectDetectorResultPacket resultPacket = new ObjectDetectorResultPacket(heatMapPacket, boundingBoxesPacket);
-                                resultPacket.setDestination(PacketDestination.BEHAVIOR_MODULE);
+                                ObjectDetectorResultPacket resultPacket = MessageTools.createObjectDetectorResultPacket(heatMapPacket, boundingBoxesPacket);
+                                resultPacket.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
                                 detectionStatusClient.send(resultPacket);
                              });

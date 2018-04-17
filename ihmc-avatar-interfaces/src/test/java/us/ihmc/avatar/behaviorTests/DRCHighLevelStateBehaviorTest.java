@@ -7,13 +7,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -74,14 +75,14 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    @Test(timeout = 64580)
    public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
-      testState(HighLevelState.WALKING);
+      testState(HighLevelControllerName.WALKING);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 21.5)
    @Test(timeout = 64580)
    public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
-      testState(HighLevelState.DO_NOTHING_BEHAVIOR);
+      testState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
       OneDegreeOfFreedomJoint[] oneDofJoints = drcBehaviorTestHelper.getRobot().getOneDegreeOfFreedomJoints();
 
@@ -101,10 +102,10 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    @Test(timeout = 64580)
    public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
    {
-      testState(HighLevelState.DIAGNOSTICS);
+      testState(HighLevelControllerName.DIAGNOSTICS);
    }
 
-   private void testState(HighLevelState desiredState) throws SimulationExceededMaximumTimeException
+   private void testState(HighLevelControllerName desiredState) throws SimulationExceededMaximumTimeException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -114,21 +115,21 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
       highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStateMessage(desiredState));
+      highLevelStateBehavior.setInput(HumanoidMessageTools.createHighLevelStateMessage(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
       assertTrue(success);
 
-      HighLevelState actualState = getCurrentHighLevelState();
+      HighLevelControllerName actualState = getCurrentHighLevelState();
 
       assertTrue(highLevelStateBehavior.isDone());
       assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
             desiredState.equals(actualState));
    }
 
-   private HighLevelState getCurrentHighLevelState()
+   private HighLevelControllerName getCurrentHighLevelState()
    {
-      return drcBehaviorTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory().getCurrentHighLevelState();
+      return drcBehaviorTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getCurrentHighLevelControlState();
    }
 }

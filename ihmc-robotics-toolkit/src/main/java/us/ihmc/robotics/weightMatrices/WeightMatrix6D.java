@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
  * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 
@@ -249,7 +249,7 @@ public class WeightMatrix6D
     * to.
     * </p>
     */
-   public void setAngularWeights(Vector3D angularWeights)
+   public void setAngularWeights(Vector3DReadOnly angularWeights)
    {
       this.angularWeights.setWeights(angularWeights.getX(), angularWeights.getY(), angularWeights.getZ());
    }
@@ -323,7 +323,7 @@ public class WeightMatrix6D
     * to.
     * </p>
     */
-   public void setLinearWeights(Vector3D linearWeights)
+   public void setLinearWeights(Vector3DReadOnly linearWeights)
    {
       this.linearWeights.setWeights(linearWeights.getX(), linearWeights.getY(), linearWeights.getZ());
    }
@@ -380,6 +380,36 @@ public class WeightMatrix6D
    }
 
    /**
+    * Get the X axis weight for the angular part.
+    * 
+    * @return the X axis weight for the angular part.
+    */
+   public double getAngularXAxisWeight()
+   {
+      return angularWeights.getXAxisWeight();
+   }
+
+   /**
+    * Get the Y axis weight for the angular part.
+    * 
+    * @return the Y axis weight for the angular part.
+    */
+   public double getAngularYAxisWeight()
+   {
+      return angularWeights.getYAxisWeight();
+   }
+
+   /**
+    * Get the Z axis weight for the angular part.
+    * 
+    * @return the Z axis weight for the angular part.
+    */
+   public double getAngularZAxisWeight()
+   {
+      return angularWeights.getZAxisWeight();
+   }
+
+   /**
     * The reference frame to which the angular weights are referring.
     * <p>
     * This weight frame can be {@code null}.
@@ -390,6 +420,36 @@ public class WeightMatrix6D
    public ReferenceFrame getAngularWeightFrame()
    {
       return angularWeights.getWeightFrame();
+   }
+
+   /**
+    * Get the X axis weight for the linear part.
+    * 
+    * @return the X axis weight for the linear part.
+    */
+   public double getLinearXAxisWeight()
+   {
+      return linearWeights.getXAxisWeight();
+   }
+
+   /**
+    * Get the Y axis weight for the linear part.
+    * 
+    * @return the Y axis weight for the linear part.
+    */
+   public double getLinearYAxisWeight()
+   {
+      return linearWeights.getYAxisWeight();
+   }
+
+   /**
+    * Get the Z axis weight for the linear part.
+    * 
+    * @return the Z axis weight for the linear part.
+    */
+   public double getLinearZAxisWeight()
+   {
+      return linearWeights.getZAxisWeight();
    }
 
    /**

@@ -18,8 +18,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -45,8 +45,8 @@ public class GroundContactForceOptimizationControlModule
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
-   private final YoFrameVector desiredLinearMomentumRate;
-   private final YoFrameVector desiredAngularMomentumRate;
+   private final YoFrameVector3D desiredLinearMomentumRate;
+   private final YoFrameVector3D desiredAngularMomentumRate;
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
@@ -72,8 +72,8 @@ public class GroundContactForceOptimizationControlModule
 
       if (DEBUG)
       {
-         desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRateToQP", null, registry);
-         desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRateToQP", null, registry);
+         desiredLinearMomentumRate = new YoFrameVector3D("desiredLinearMomentumRateToQP", null, registry);
+         desiredAngularMomentumRate = new YoFrameVector3D("desiredAngularMomentumRateToQP", null, registry);
       }
       else
       {
@@ -107,7 +107,7 @@ public class GroundContactForceOptimizationControlModule
          setupRhoTasks();
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
-      qpSolver.addMomentumTask(momentumJacobian, momentumObjective, momentumWeight);
+      qpSolver.addMotionTask(momentumJacobian, momentumObjective, momentumWeight);
 
       NoConvergenceException noConvergenceException = null;
 
@@ -169,7 +169,7 @@ public class GroundContactForceOptimizationControlModule
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       momentumRateCommand.set(command);
-      momentumRateCommand.setWeights(command.getWeightVector());
+      momentumRateCommand.setWeights(command.getWeightMatrix());
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

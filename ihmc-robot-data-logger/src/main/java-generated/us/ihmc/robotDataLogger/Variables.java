@@ -1,222 +1,233 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
-/**
-* 
-* Definition of the class "Variables" defined in LogProperties.idl. 
-*
-* This file was automatically generated from LogProperties.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit LogProperties.idl instead.
-*
-*/
-public class Variables
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+public class Variables extends Packet<Variables> implements Settable<Variables>, EpsilonComparable<Variables>
 {
-    public Variables()
-    {
-        	handshake_ = new StringBuilder(255); 
-        	data_ = new StringBuilder(255); 
-        	summary_ = new StringBuilder(255); 
-        	index_ = new StringBuilder(255); 
-        
-        
-    }
+   public us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType_;
+   public java.lang.StringBuilder handshake_;
+   // Handshake file name
+   public java.lang.StringBuilder data_;
+   // Data file name
+   public java.lang.StringBuilder summary_;
+   // Summary file name
+   public java.lang.StringBuilder index_;
+   // Variable index file
+   public boolean timestamped_;
+   // Does the index contain timestamps
+   public boolean compressed_;
 
-    public void set(Variables other)
-    {
-        	handshakeFileType_ = other.handshakeFileType_;
-        	handshake_.setLength(0);
-        	handshake_.append(other.handshake_);
-        	data_.setLength(0);
-        	data_.append(other.data_);
-        	summary_.setLength(0);
-        	summary_.append(other.summary_);
-        	index_.setLength(0);
-        	index_.append(other.index_);
-        	timestamped_ = other.timestamped_;
-        	compressed_ = other.compressed_;
+   public Variables()
+   {
+      handshake_ = new java.lang.StringBuilder(255);
+      data_ = new java.lang.StringBuilder(255);
+      summary_ = new java.lang.StringBuilder(255);
+      index_ = new java.lang.StringBuilder(255);
+   }
 
-    }
+   public Variables(Variables other)
+   {
+      this();
+      set(other);
+   }
 
-    public void setHandshakeFileType(us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType)
-    {
-        handshakeFileType_ = handshakeFileType;
-    }
+   public void set(Variables other)
+   {
+      handshakeFileType_ = other.handshakeFileType_;
 
-    public us.ihmc.robotDataLogger.HandshakeFileType getHandshakeFileType()
-    {
-        return handshakeFileType_;
-    }
+      handshake_.setLength(0);
+      handshake_.append(other.handshake_);
 
-        
-        public void setHandshake(String handshake)
-        {
-        	handshake_.setLength(0);
-        	handshake_.append(handshake);
-        }
-        
-        public String getHandshakeAsString()
-        {
-        	return getHandshake().toString();
-        }
+      data_.setLength(0);
+      data_.append(other.data_);
 
-    public StringBuilder getHandshake()
-    {
-        return handshake_;
-    }
+      summary_.setLength(0);
+      summary_.append(other.summary_);
 
-        
-        public void setData(String data)
-        {
-        	data_.setLength(0);
-        	data_.append(data);
-        }
-        
-        public String getDataAsString()
-        {
-        	return getData().toString();
-        }
+      index_.setLength(0);
+      index_.append(other.index_);
 
-    public StringBuilder getData()
-    {
-        return data_;
-    }
+      timestamped_ = other.timestamped_;
 
-        
-        public void setSummary(String summary)
-        {
-        	summary_.setLength(0);
-        	summary_.append(summary);
-        }
-        
-        public String getSummaryAsString()
-        {
-        	return getSummary().toString();
-        }
+      compressed_ = other.compressed_;
 
-    public StringBuilder getSummary()
-    {
-        return summary_;
-    }
+   }
 
-        
-        public void setIndex(String index)
-        {
-        	index_.setLength(0);
-        	index_.append(index);
-        }
-        
-        public String getIndexAsString()
-        {
-        	return getIndex().toString();
-        }
+   public void setHandshakeFileType(us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType)
+   {
+      handshakeFileType_ = handshakeFileType;
+   }
+   public us.ihmc.robotDataLogger.HandshakeFileType getHandshakeFileType()
+   {
+      return handshakeFileType_;
+   }
 
-    public StringBuilder getIndex()
-    {
-        return index_;
-    }
+   public void setHandshake(java.lang.String handshake)
+   {
+      handshake_.setLength(0);
+      handshake_.append(handshake);
+   }
 
-        
-    public void setTimestamped(boolean timestamped)
-    {
-        timestamped_ = timestamped;
-    }
+   public java.lang.String getHandshakeAsString()
+   {
+      return getHandshake().toString();
+   }
+   public java.lang.StringBuilder getHandshake()
+   {
+      return handshake_;
+   }
 
-    public boolean getTimestamped()
-    {
-        return timestamped_;
-    }
+   // Handshake file name
+   public void setData(java.lang.String data)
+   {
+      data_.setLength(0);
+      data_.append(data);
+   }
 
-        
-    public void setCompressed(boolean compressed)
-    {
-        compressed_ = compressed;
-    }
+   // Handshake file name
+   public java.lang.String getDataAsString()
+   {
+      return getData().toString();
+   }
+   // Handshake file name
+   public java.lang.StringBuilder getData()
+   {
+      return data_;
+   }
 
-    public boolean getCompressed()
-    {
-        return compressed_;
-    }
+   // Data file name
+   public void setSummary(java.lang.String summary)
+   {
+      summary_.setLength(0);
+      summary_.append(summary);
+   }
 
-        
+   // Data file name
+   public java.lang.String getSummaryAsString()
+   {
+      return getSummary().toString();
+   }
+   // Data file name
+   public java.lang.StringBuilder getSummary()
+   {
+      return summary_;
+   }
+
+   // Summary file name
+   public void setIndex(java.lang.String index)
+   {
+      index_.setLength(0);
+      index_.append(index);
+   }
+
+   // Summary file name
+   public java.lang.String getIndexAsString()
+   {
+      return getIndex().toString();
+   }
+   // Summary file name
+   public java.lang.StringBuilder getIndex()
+   {
+      return index_;
+   }
+
+   // Variable index file
+   public void setTimestamped(boolean timestamped)
+   {
+      timestamped_ = timestamped;
+   }
+   // Variable index file
+   public boolean getTimestamped()
+   {
+      return timestamped_;
+   }
+
+   // Does the index contain timestamps
+   public void setCompressed(boolean compressed)
+   {
+      compressed_ = compressed;
+   }
+   // Does the index contain timestamps
+   public boolean getCompressed()
+   {
+      return compressed_;
+   }
 
 
+   @Override
+   public boolean epsilonEquals(Variables other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.handshakeFileType_, other.handshakeFileType_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.handshake_, other.handshake_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.data_, other.data_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.summary_, other.summary_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.index_, other.index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.timestamped_, other.timestamped_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compressed_, other.compressed_, epsilon)) return false;
 
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof Variables)) return false;
-        Variables otherMyClass = (Variables)other;
-        boolean returnedValue = true;
+      return true;
+   }
 
-        returnedValue &= this.handshakeFileType_ == otherMyClass.handshakeFileType_;
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof Variables)) return false;
 
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.handshake_, otherMyClass.handshake_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.data_, otherMyClass.data_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.summary_, otherMyClass.summary_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.index_, otherMyClass.index_);
-                
-        returnedValue &= this.timestamped_ == otherMyClass.timestamped_;
+      Variables otherMyClass = (Variables) other;
 
-                
-        returnedValue &= this.compressed_ == otherMyClass.compressed_;
+      if(this.handshakeFileType_ != otherMyClass.handshakeFileType_) return false;
 
-                
+      if (!us.ihmc.idl.IDLTools.equals(this.handshake_, otherMyClass.handshake_)) return false;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("Variables {");
-        builder.append("handshakeFileType=");
-        builder.append(this.handshakeFileType_);
+      if (!us.ihmc.idl.IDLTools.equals(this.data_, otherMyClass.data_)) return false;
 
-                builder.append(", ");
-        builder.append("handshake=");
-        builder.append(this.handshake_);
+      if (!us.ihmc.idl.IDLTools.equals(this.summary_, otherMyClass.summary_)) return false;
 
-                builder.append(", ");
-        builder.append("data=");
-        builder.append(this.data_);
+      if (!us.ihmc.idl.IDLTools.equals(this.index_, otherMyClass.index_)) return false;
 
-                builder.append(", ");
-        builder.append("summary=");
-        builder.append(this.summary_);
+      if(this.timestamped_ != otherMyClass.timestamped_) return false;
 
-                builder.append(", ");
-        builder.append("index=");
-        builder.append(this.index_);
+      if(this.compressed_ != otherMyClass.compressed_) return false;
 
-                builder.append(", ");
-        builder.append("timestamped=");
-        builder.append(this.timestamped_);
 
-                builder.append(", ");
-        builder.append("compressed=");
-        builder.append(this.compressed_);
+      return true;
+   }
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
 
-    private us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType_; 
-    private StringBuilder handshake_; 
-    private StringBuilder data_; 
-    private StringBuilder summary_; 
-    private StringBuilder index_; 
-    private boolean timestamped_; 
-    private boolean compressed_; 
-
+      builder.append("Variables {");
+      builder.append("handshakeFileType=");
+      builder.append(this.handshakeFileType_);      builder.append(", ");
+      builder.append("handshake=");
+      builder.append(this.handshake_);      builder.append(", ");
+      builder.append("data=");
+      builder.append(this.data_);      builder.append(", ");
+      builder.append("summary=");
+      builder.append(this.summary_);      builder.append(", ");
+      builder.append("index=");
+      builder.append(this.index_);      builder.append(", ");
+      builder.append("timestamped=");
+      builder.append(this.timestamped_);      builder.append(", ");
+      builder.append("compressed=");
+      builder.append(this.compressed_);
+      builder.append("}");
+      return builder.toString();
+   }
 }

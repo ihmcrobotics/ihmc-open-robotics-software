@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="879.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController">
+   <children>
+      <HBox layoutX="14.0" layoutY="14.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" spacing="5.0">
+               <children>
+                  <ToggleButton fx:id="enableButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable OcTree" />
+                  <Button fx:id="clearButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
+                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
+               </children>
+            </VBox>
+            <GridPane hgap="5.0" vgap="10.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Slider fx:id="depthSlider" blockIncrement="1.0" majorTickUnit="1.0" max="16.0" min="10.0" minorTickCount="0" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label maxWidth="1.7976931348623157E308" text="Current Depth:" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="3" />
+                  <Label maxWidth="1.7976931348623157E308" text="Buffer size:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Slider fx:id="bufferSizeSlider" blockIncrement="5000.0" majorTickUnit="10000.0" max="100000.0" prefHeight="38.0" prefWidth="218.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10000.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <ToggleButton fx:id="showBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show buffer" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <ToggleButton fx:id="showInputScanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input scan" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  <Label maxWidth="1.7976931348623157E308" text="Node Display Type:" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

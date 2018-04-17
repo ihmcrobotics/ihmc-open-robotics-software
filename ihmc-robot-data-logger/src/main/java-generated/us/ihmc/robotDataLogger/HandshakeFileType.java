@@ -1,6 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
 /**
 * 
@@ -10,16 +8,21 @@ import java.util.Arrays;
 * Do not update this file directly, edit LogProperties.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum HandshakeFileType
 {
-        	PROTOBUFFER,
-        
-        	IDL_YAML,
-        
-        	IDL_CDR,
-        
-	;
-	
-	public static HandshakeFileType[] values = values();
+         PROTOBUFFER,
+      
+         IDL_YAML,
+      
+         IDL_CDR,
+      
+   ;
+   public static HandshakeFileType[] values = values();
 
+   public boolean epsilonEquals(HandshakeFileType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

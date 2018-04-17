@@ -1,7 +1,41 @@
 package us.ihmc.simulationconstructionset;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.AbstractButton;
+import javax.swing.ImageIcon;
+import javax.swing.JApplet;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
 import com.jme3.renderer.Camera;
+
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -23,40 +57,62 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
-import us.ihmc.simulationconstructionset.commands.*;
+import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.PreviousCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.RemoveCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
+import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.StepBackwardCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.*;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
+import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
+import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.DepthImageCallback;
 import us.ihmc.tools.image.ImageCallback;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.dataBuffer.*;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.GotoOutPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -172,11 +228,11 @@ import java.util.Vector;
  * @version 1.0
  */
 public class SimulationConstructionSet implements Runnable, YoVariableHolder, RunCommandsExecutor, AddKeyPointCommandExecutor, AddCameraKeyCommandExecutor,
-      CreateNewGraphWindowCommandExecutor, CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, CutBufferCommandExecutor, ExportSnapshotCommandExecutor,
-      GotoInPointCommandExecutor, GotoOutPointCommandExecutor, NextCameraKeyCommandExecutor, PackBufferCommandExecutor, PreviousCameraKeyCommandExecutor,
-      RemoveCameraKeyCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
-      ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder, ParameterRootNamespaceHolder,
-      DataBufferCommandsExecutor, TickAndUpdatable
+      CreateNewGraphWindowCommandExecutor, CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, CutBufferCommandExecutor,
+      ExportSnapshotCommandExecutor, GotoInPointCommandExecutor, GotoOutPointCommandExecutor, NextCameraKeyCommandExecutor, PackBufferCommandExecutor,
+      PreviousCameraKeyCommandExecutor, RemoveCameraKeyCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor,
+      StepForwardCommandExecutor, ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor,
+      TimeHolder, ParameterRootNamespaceHolder, DataBufferCommandsExecutor, TickAndUpdatable
 {
    private static final boolean TESTING_LOAD_STUFF = false;
 
@@ -201,7 +257,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    // private int count = 0;
    private double simulateDurationInSeconds = 10000.0;
-
 
    private StandardSimulationGUI myGUI;
    private StandardAllCommandsExecutor standardAllCommandsExecutor;
@@ -245,7 +300,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    private final YoGraphicMenuManager yoGraphicMenuManager;
 
    private NameSpace parameterRootPath = null;
-   
+   private File defaultParameterFile = null;
+
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
       // / get file stuff
@@ -294,7 +350,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this(robots, new SimulationConstructionSetParameters());
    }
 
-
    /**
     * Creates a SimulationConstructionSet with no Robot.
     */
@@ -318,17 +373,18 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public SimulationConstructionSet(Robot robot, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, parameters);
+      this(new Robot[] {robot}, parameters);
    }
 
    public SimulationConstructionSet(Robot[] robotArray, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, parameters.getDataBufferSize()), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()), parameters);
+      this(new Simulation(robotArray, parameters.getDataBufferSize()), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()),
+           parameters);
    }
 
    public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, graphicsAdapter, parameters);
+      this(new Robot[] {robot}, graphicsAdapter, parameters);
    }
 
    public SimulationConstructionSet(Robot[] robotArray, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
@@ -377,7 +433,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       ArrayList<YoVariable<?>> originalRootVariables = rootRegistry.getAllVariablesIncludingDescendants();
 
-      
       for (YoVariable<?> yoVariable : originalRootVariables)
       {
          System.out.println("Original Variable: " + yoVariable);
@@ -385,7 +440,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       this.myDataBuffer.addVariables(originalRootVariables);
 
-      setupVarGroup("all", new String[0], new String[] { ".*" });
+      setupVarGroup("all", new String[0], new String[] {".*"});
 
       recomputeTiming();
       this.robots = mySimulation.getRobots();
@@ -500,7 +555,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public SimulationConstructionSet(Robot robot, JApplet jApplet, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, jApplet, parameters);
+      this(new Robot[] {robot}, jApplet, parameters);
    }
 
    /**
@@ -879,7 +934,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param staticLink The Link to be added statically to the environment.
     */
-   public Graphics3DNode  addStaticLink(Link staticLink)
+   public Graphics3DNode addStaticLink(Link staticLink)
    {
       return addStaticLinkGraphics(staticLink.getLinkGraphics());
    }
@@ -1170,11 +1225,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    private boolean isCloseAndDispose = false;
+
    @Override
    public void closeAndDispose()
    {
       isCloseAndDispose = true;
-      if(myGUI != null)
+      if (myGUI != null)
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
@@ -1216,7 +1272,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          rootRegistry.closeAndDispose();
       }
 
-
       if (standardAllCommandsExecutor != null)
       {
          standardAllCommandsExecutor.closeAndDispose();
@@ -1245,8 +1300,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          mySimulation.closeAndDispose();
       }
 
-
-
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Disposing of JFrame");
 
@@ -1265,10 +1318,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation = null;
       jFrame = null;
 
-//      System.out.println("closeAndDisposeLocal in SCSGUI");
+      //      System.out.println("closeAndDisposeLocal in SCSGUI");
 
       // Destroy the LWJGL Threads. Not sure if need to do Display.destroy() or not.
-//      Display.destroy();
+      //      Display.destroy();
       ThreadTools.interruptLiveThreadsExceptThisOneContaining("LWJGL Timer"); // This kills the silly LWJGL sleeping thread which just sleeps and does nothing else...
    }
 
@@ -1770,7 +1823,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (!configs.exists())
       {
          boolean res = configs.mkdir();
-         if (!res) { return false; }
+         if (!res)
+         {
+            return false;
+         }
       }
 
       String path = configs.toURI().getPath();
@@ -1898,7 +1954,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
          // +++JEP: For Applets to work...
          {
-            if (parameters.getShowSplashScreen()) StandardSimulationGUI.showSplashScreen();
+            if (parameters.getShowSplashScreen())
+               StandardSimulationGUI.showSplashScreen();
          }
          catch (Exception e)
          {
@@ -1909,7 +1966,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame = new JFrame("Simulation Construction Set");
-      jFrame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-2-32x32-Sim.png")).getImage());
+      jFrame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("Icon-v6.png")).getImage());
 
       try
       {
@@ -1949,7 +2006,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
       if (parentRegistry != null)
       {
-         throw new RuntimeException("SimulationConstructionSet.addRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: " + parentRegistry);
+         throw new RuntimeException("SimulationConstructionSet.addRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: "
+               + parentRegistry);
       }
 
       boolean notifyListeners = false; // TODO: This is very hackish. If listeners are on, then the variables will be added to the data buffer. But mySimulation.setRobots() in a few lines does that...
@@ -1984,13 +2042,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
       if (parentRegistry != null)
       {
-         throw new RuntimeException("SimulationConstructionSet.setRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: " + parentRegistry);
+         throw new RuntimeException("SimulationConstructionSet.setRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: "
+               + parentRegistry);
       }
 
       boolean notifyListeners = false; // TODO: This is very hackish. If listeners are on, then the variables will be added to the data buffer. But mySimulation.setRobots() in a few lines does that...
       rootRegistry.addChild(robotsYoVariableRegistry, notifyListeners);
 
-      mySimulation.setRobots(new Robot[] { robot });
+      mySimulation.setRobots(new Robot[] {robot});
 
       // recomputeTiming();
       this.robots = mySimulation.getRobots();
@@ -2024,12 +2083,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (jFrame != null)
       {
          myGUI = new StandardSimulationGUI(graphicsAdapter, simulationSynchronizer, standardAllCommandsExecutor, null, this, this, robots, myDataBuffer,
-               varGroupList, jFrame, rootRegistry);
+                                           varGroupList, jFrame, rootRegistry);
       }
       else
       {
          myGUI = new StandardSimulationGUI(graphicsAdapter, simulationSynchronizer, standardAllCommandsExecutor, null, this, this, robots, myDataBuffer,
-               varGroupList, jApplet, rootRegistry);
+                                           varGroupList, jApplet, rootRegistry);
       }
 
       // +++JEP: They don't seem to be getting added to the GUI... this.addVariablesToSimulationAndGUI(rootRegistry);
@@ -2188,7 +2247,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          myGUI.setupSky(skyBox);
       }
    }
-   
+
    /**
     * Setup the skybox 
     * 
@@ -2207,7 +2266,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   
    /**
     * Sets the ground visibility.
     *
@@ -2285,7 +2343,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if (myGUI != null)
       {
-         if (parameters.getShowWindows()) myGUI.show();
+         if (parameters.getShowWindows())
+            myGUI.show();
 
          if (!parameters.getShowYoGraphicObjects() && yoGraphicMenuManager != null)
          {
@@ -2339,7 +2398,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                   System.err.println("     " + joint.getName());
                }
 
-//               ex.printStackTrace();
+               //               ex.printStackTrace();
 
                stop();
 
@@ -2633,10 +2692,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       /*
        * if (numTicks == 1) graphDelayTicks--; else graphDelayTicks =
-       * graphDelayTicks + numTicks*5;
-       *
-       * graphTicks++; if (graphTicks > graphDelayTicks) { graphTicks = 0;
-       * myGUI.updateGraphs(); }
+       * graphDelayTicks + numTicks*5; graphTicks++; if (graphTicks >
+       * graphDelayTicks) { graphTicks = 0; myGUI.updateGraphs(); }
        */
 
       // if(last> myDataBuffer.ordinal())
@@ -2729,7 +2786,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       ticksToSimulate = 0;
       setScrollGraphsEnabled(true);
 
-      if(!isCloseAndDispose)
+      if (!isCloseAndDispose)
       {
          synchronized (simulationSynchronizer)
          {
@@ -2762,7 +2819,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          }
       }
 
-      if(myDataBuffer != null)
+      if (myDataBuffer != null)
       {
          myDataBuffer.notifyRewindListeners();
       }
@@ -3521,14 +3578,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       dataWriter.writeData(robots[0].getName(), mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars, binary, compress, robots[0]);
    }
 
-
    public void writeMatlabData(String varGroup, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
       ArrayList<YoVariable<?>> vars = DataBufferTools.getVarsFromGroup(myDataBuffer, varGroup, varGroupList);
-      dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);
+      dataWriter.writeMatlabBinaryData(mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);
    }
 
    public File createVideo(String videoFilename)
@@ -4323,9 +4379,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
 
-      if (yoGraphicsLists == null) return;
+      if (yoGraphicsLists == null)
+         return;
 
-      if(yoGraphicMenuManager != null)
+      if (yoGraphicMenuManager != null)
       {
          addCheckBoxesToYoGraphicCheckBoxMenuItem(yoGraphicsLists);
          displayYoGraphicMenu();
@@ -4467,11 +4524,55 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Tags: publisher, communicator, video, viewport
     */
    public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, ImageCallback imageCallback,
-         TimestampProvider timestampProvider, int framesPerSecond)
+                                       TimestampProvider timestampProvider, int framesPerSecond)
    {
       if (myGUI != null)
       {
          myGUI.startStreamingVideoData(cameraConfiguration, width, height, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param timestampProvider Provider for the current timestamp to mark the image with
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       TimestampProvider timestampProvider, int framesPerSecond)
+
+   {
+      if(myGUI != null)
+      {
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       int framesPerSecond)
+   
+   {
+      if(myGUI != null)
+      {
+         TimestampProvider timestampProvider = () -> Conversions.secondsToNanoseconds(getTime());
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
       }
    }
 
@@ -4517,17 +4618,18 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   public void initializeShapeCollision(CollisionManager collisionManager)
    {
-      mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      collisionManager.setUpCollisionVisualizer(this);
+      mySimulation.initializeShapeCollision(collisionManager);
    }
-
+   
    @Override
    public NameSpace getParameterRootPath()
    {
       return parameterRootPath;
    }
-   
+
    /**
     * Sets the parameter root path.
     * 
@@ -4540,8 +4642,25 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       this.parameterRootPath = registry.getNameSpace();
    }
-   
-   
+
+   /** 
+    * Set the default file to show in the the parameter save/load dialog.
+    *
+    *  This file will not get loaded automatically by SCS, this is only to set the default path to 
+    *  save the user some time browsing to the correct file.
+    *  
+    * @param parameterFile URL. Ignored if not a local file
+    */
+   public void setDefaultParameterFile(File parameterFile)
+   {
+      this.defaultParameterFile = parameterFile;
+   }
+
+   public File getDefaultParameterFile()
+   {
+      return this.defaultParameterFile;
+   }
+
    /**
     * Clear all directional lights from the 3D render
     */
@@ -4552,7 +4671,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          myGUI.clearDirectionalLights();
       }
    }
-   
+
    /**
     * Add a directional light to the 3D render.
     * 
@@ -4569,7 +4688,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          myGUI.addDirectionalLight(color, direction);
       }
    }
-   
+
    /**
     * Set the ambient light color and intensity.
     * 
@@ -4584,7 +4703,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          myGUI.setAmbientLight(color);
       }
    }
-   
+
    /**
     * Add a spotlight to the 3D render
     * 
@@ -4607,7 +4726,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       if (myGUI != null)
       {
-         myGUI.removeSpotLight(spotLight);         
+         myGUI.removeSpotLight(spotLight);
       }
    }
+
 }

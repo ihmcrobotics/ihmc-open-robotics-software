@@ -4,16 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
@@ -32,8 +31,6 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, packetCommunicator,
                                                                                 registry, yoGraphicsListRegistry, Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
-      
-      packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
 
@@ -51,9 +48,9 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
+      List<Class<? extends Packet<?>>> status = new ArrayList<>();
       status.add(FootstepPlanningToolboxOutputStatus.class);
       return status;
    }

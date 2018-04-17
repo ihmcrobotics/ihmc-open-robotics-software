@@ -12,7 +12,7 @@ hide all fields
         <class className="us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager" project="CommonWalkingControlModules" xLocation="786" yLocation="788"/>
         <class className="us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator" project="CommonWalkingControlModules" xLocation="307" yLocation="578"/>
         <class className="us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator" project="CommonWalkingControlModules" xLocation="-135" yLocation="573"/>
-        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory" project="CommonWalkingControlModules" xLocation="376" yLocation="437"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory" project="CommonWalkingControlModules" xLocation="376" yLocation="437"/>
         <class className="us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager" project="CommonWalkingControlModules" xLocation="348" yLocation="786"/>
         <class className="us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber" project="CommonWalkingControlModules" xLocation="870" yLocation="580"/>
         <class className="us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper" project="DarpaRoboticsChallenge" xLocation="1276" yLocation="344"/>

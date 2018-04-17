@@ -15,14 +15,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
-public abstract class RigidBodyControlState extends FinishableState<RigidBodyControlMode>
+public abstract class RigidBodyControlState implements State
 {
    protected final YoVariableRegistry registry;
    protected final String warningPrefix;
@@ -34,16 +34,17 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    private final YoDouble yoTime;
 
    protected final ArrayList<YoGraphic> graphics = new ArrayList<>();
+   private final RigidBodyControlMode controlMode;
 
-   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum);
+      this.controlMode = controlMode;
       this.yoTime = yoTime;
 
       warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
-      registry = new YoVariableRegistry(createRegistryName(bodyName, stateEnum));
+      registry = new YoVariableRegistry(createRegistryName(bodyName, controlMode));
 
-      String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
+      String prefix = bodyName + StringUtils.capitalize(controlMode.toString().toLowerCase());
       lastCommandId = new YoLong(prefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
@@ -120,10 +121,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
    public abstract double getLastTrajectoryPointTime();
 
-   public abstract void clear();
-
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return true;
    }
@@ -162,5 +161,10 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    {
       String prefix = bodyName + StringUtils.capitalize(stateEnum.toString().toLowerCase());
       return prefix + "ControlModule";
+   }
+
+   public RigidBodyControlMode getControlMode()
+   {
+      return controlMode;
    }
 }

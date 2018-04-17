@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -26,7 +27,7 @@ public class TwistCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainComposedOfPrismaticJoints() throws Exception
    {
@@ -63,7 +64,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainComposedOfRevoluteJointsAssertAngularVelocityOnly() throws Exception
    {
@@ -102,7 +103,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.02)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTreeComposedOfPrismaticJoints() throws Exception
    {
@@ -192,7 +193,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainRobotAgainstFiniteDifference() throws Exception
    {
@@ -238,7 +239,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.03)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTreeRobotAgainstFiniteDifference() throws Exception
    {
@@ -284,7 +285,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.05)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
@@ -349,20 +350,20 @@ public class TwistCalculatorTest
             FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
 
             expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 1.0e-5);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 1.0e-5);
 
             FrameVector3D expectedAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
             FrameVector3D actualAngularVelocity = new FrameVector3D();
             twistCalculator.getAngularVelocityOfBody(body, actualAngularVelocity);
 
             expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity.getVector(), actualAngularVelocity.getVector(), 1.0e-5);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
          }
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.4)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 6.4)
+   @Test(timeout = 32000)
    public void testRelativeTwistWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
       Random random = new Random(435345L);
@@ -440,7 +441,7 @@ public class TwistCalculatorTest
                                                                                                     baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 2.0e-5);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
 
                FrameVector3D expectedAngularVelocity = new FrameVector3D();
                expectedRelativeTwist.getAngularPart(expectedAngularVelocity);
@@ -448,7 +449,7 @@ public class TwistCalculatorTest
                twistCalculator.getRelativeAngularVelocity(base, body, actualAngularVelocity);
 
                expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity.getVector(), actualAngularVelocity.getVector(), 1.0e-5);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
             }
          }
       }
@@ -493,7 +494,7 @@ public class TwistCalculatorTest
       pointInFuture.changeFrame(baseFrameInFuture);
 
       FrameVector3D pointLinearVelocity = new FrameVector3D(baseFrame);
-      pointLinearVelocity.sub(pointInFuture.getPoint(), point.getPoint());
+      pointLinearVelocity.sub((Point3DReadOnly) pointInFuture, point);
       pointLinearVelocity.scale(1.0 / dt);
       return pointLinearVelocity;
    }
@@ -534,8 +535,8 @@ public class TwistCalculatorTest
       FrameVector3D bodyAngularVelocity = new FrameVector3D(worldFrame);
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Vector4D qDot = new Vector4D();
-      quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation.getQuaternion(), bodyOrientationInFuture.getQuaternion(), 0.5 * dt, qDot);
-      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation.getQuaternion(), qDot, bodyAngularVelocity.getVector());
+      quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation, bodyOrientationInFuture, 0.5 * dt, qDot);
+      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation, qDot, bodyAngularVelocity);
 
       bodyAngularVelocity.changeFrame(bodyFrame);
       return bodyAngularVelocity;

@@ -5,26 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.PIDGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
@@ -43,40 +38,6 @@ public abstract class WalkingControllerParameters
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
       legConfigurationParameters = new LegConfigurationParameters();
-   }
-
-   /**
-    * Specifies if the controller should by default compute for all the robot joints desired
-    * position and desired velocity from the desired acceleration.
-    * <p>
-    * It is {@code false} by default and this method should be overridden to return otherwise.
-    * </p>
-    *
-    * @return {@code true} if the desired acceleration should be integrated into desired velocity
-    *         and position for all the joints.
-    */
-   public boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return false;
-   }
-
-   /**
-    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
-    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
-    * parameters. The name will be used to create YoVariables in the controller.
-    * <p>
-    * Note that this method is only called if
-    * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
-    * </p>
-    * <p>
-    * This method is called by the controller to know the set of joints for which specific
-    * parameters are to be used. If a joint is not added to this map, the default parameters will be used.
-    * </p>
-    * @return list containing acceleration integration parameters and the corresponding joints
-    */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
-   {
-      return null;
    }
 
    /**
@@ -157,7 +118,7 @@ public abstract class WalkingControllerParameters
    {
       return 0.04;
    }
-   
+
    /**
     * This parameter sets the buffer around the support polygon to constrain the offset ICP used in {@link PelvisICPBasedTranslationManager}. It's defined in meters.
     */
@@ -185,21 +146,27 @@ public abstract class WalkingControllerParameters
    public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * Returns a list with pairs of joint control gains and the names of the joints that the gain will
-    * be used for. The names of the joints are defined in the robots joint map. If a joint is not
-    * contained in one of the pairs, jointspace control is not supported for that joint.
+    * Returns a list of joint control gains for groups of joints.
+    * <p>
+    * Each {@link GroupParameter} contains gains for one joint group:</br>
+    *  - The name of the joint group that the gain is used for (e.g. Arms).</br>
+    *  - The gains for the joint group.</br>
+    *  - The names of all rigid bodies in the joint group.
+    * </p>
+    * If a joint is not contained in the list, jointspace control is not supported
+    * for that joint.
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
 
    /**
-    * Returns a list of triples containing taskspace orientation control gains.
+    * Returns a list of taskspace orientation control gains for groups of bodies.
     * <p>
-    * Each triple contains gains for one body group:</br>
+    * Each {@link GroupParameter} contains gains for one body group:</br>
     *  - The name of the body group that the gain is used for (e.g. Hands).</br>
     *  - The gains for the body group.</br>
     *  - The names of all rigid bodies in the body group.
@@ -211,15 +178,15 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
       return new ArrayList<>();
    }
 
    /**
-    * Returns a list of triples containing taskspace position control gains.
+    * Returns a list of taskspace position control gains for groups of bodies.
     * <p>
-    * Each triple contains gains for one body group:</br>
+    * Each {@link GroupParameter} contains gains for one body group:</br>
     *  - The name of the body group that the gain is used for (e.g. Hands).</br>
     *  - The gains for the body group.</br>
     *  - The names of all rigid bodies in the body group.
@@ -229,9 +196,9 @@ public abstract class WalkingControllerParameters
     * taskspace position trajectories (or the position part of a pose trajectory) for a
     * rigid body.
     *
-    * @return list containing orientation PID gains and the corresponding rigid bodies
+    * @return list containing position PID gains and the corresponding rigid bodies
     */
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
    }
@@ -282,46 +249,22 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * The list of strings returned contains all joint names that are position controlled. The names
-    * of the joints are defined in the robots joint map.
-    *
-    * @return list of position controlled joint names
-    */
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      return new ArrayList<String>();
-   }
-
-   /**
-    * The map returned contains the integration settings for position controlled joints. The settings
-    * define how the controller core integrated desired accelerations to find desired joint positions
-    * and velocities. The key of the map is the joint name as defined in the robot joint map. If a
-    * joint is not contained in the map, position control is not supported for that joint.
-    *
-    * @return map containing acceleration integration settings by joint name
-    */
-   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
-   {
-      return new HashMap<String, JointAccelerationIntegrationSettings>();
-   }
-
-   /**
     * Returns the gains used for the foot pose when in swing.
     */
-   public abstract PIDSE3Gains getSwingFootControlGains();
+   public abstract PIDSE3Configuration getSwingFootControlGains();
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
     * is not loaded or close to tipping. Of that is not the case the foot pose when in support is not controlled
     * using a feedback controller.
     */
-   public abstract PIDSE3Gains getHoldPositionFootControlGains();
+   public abstract PIDSE3Configuration getHoldPositionFootControlGains();
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
     * will not use these gains. The foot pitch for example is usually not controlled explicitly during tow off.
     */
-   public abstract PIDSE3Gains getToeOffFootControlGains();
+   public abstract PIDSE3Configuration getToeOffFootControlGains();
 
    /**
     * Specifies if the arm controller should be switching
@@ -375,10 +318,10 @@ public abstract class WalkingControllerParameters
     * swing foot to the next foothold.
     */
    public abstract double getDefaultSwingTime();
-   
+
 
    /**
-    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state 
+    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state
     * @return
     */
    public double getDefaultTouchdownTime()
@@ -464,6 +407,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getContactThresholdForce();
 
    /**
@@ -475,6 +419,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // move this to the state estimator parameters
    public abstract double getSecondContactThresholdForceIgnoringCoP();
 
    /**
@@ -486,6 +431,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getCoPThresholdFraction();
 
    /**
@@ -496,6 +442,7 @@ public abstract class WalkingControllerParameters
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#KinematicBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public double getContactThresholdHeight()
    {
       return 0.05;
@@ -663,7 +610,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return whether the z-component swing initial angular velocity should be zeroed out or not.
     */
    public boolean ignoreSwingInitialAngularVelocityZ()
@@ -677,7 +624,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial linear velocity maximum magnitude.
     */
    public double getMaxSwingInitialLinearVelocityMagnitude()
@@ -691,7 +638,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial angular velocity maximum magnitude.
     */
    public double getMaxSwingInitialAngularVelocityMagnitude()
@@ -828,5 +775,29 @@ public abstract class WalkingControllerParameters
    public boolean enableLegSingularityAndKneeCollapseAvoidanceModule()
    {
       return true;
+   }
+
+   /**
+    * When taking steps that cause the swing foot to collide with the support leg this parameter can
+    * be used to increase the clearance that the swing trajectory will have from the swing foot. More
+    * specifically, when a straight line from swing start (at sole frame) to swing end point is closer
+    * to the stance foot (sole frame) then this distance the swing trajectory will be adjusted.
+    */
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return Double.NEGATIVE_INFINITY;
+   }
+
+   /**
+    * A robot can implement an ankle IK solver. Optionally, the walking controller will add desired
+    * joint angles and velocities for the ankle to the output of the controller core. Depending on the
+    * implementation of the robots joint control this can be used to better track the foot pose on a
+    * robot. The desired torque and acceleration computed by the whole body controller will still
+    * be available. Note, that the output of this module might be inconsistent with the output of the
+    * whole body controller as it does not consider other objectives such as balancing.
+    */
+   public AnkleIKSolver getAnkleIKSolver()
+   {
+      return null;
    }
 }

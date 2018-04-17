@@ -5,8 +5,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 
 public class IMUMount
@@ -19,14 +19,14 @@ public class IMUMount
 
    private Robot robot;
 
-   private final YoFrameVector angularVelocityInBody;
-   private final YoFrameVector angularAccelerationInBody;
+   private final YoFrameVector3D angularVelocityInBody;
+   private final YoFrameVector3D angularAccelerationInBody;
 
-   private final YoFrameVector linearVelocityInBody;
-   private final YoFrameVector linearVelocityInWorld;
+   private final YoFrameVector3D linearVelocityInBody;
+   private final YoFrameVector3D linearVelocityInWorld;
 
-   private final YoFrameVector linearAccelerationInBody;
-   private final YoFrameVector linearAccelerationInWorld;
+   private final YoFrameVector3D linearAccelerationInBody;
+   private final YoFrameVector3D linearAccelerationInWorld;
 
    private final YoFrameQuaternion orientation;
    
@@ -47,14 +47,14 @@ public class IMUMount
 
       orientation = new YoFrameQuaternion(name + "Orientation", null, registry);
 
-      linearVelocityInBody = new YoFrameVector(name + "LinearVelocity", null, registry);
-      linearVelocityInWorld = new YoFrameVector(name + "LinearVelocityWorld", null, registry);
+      linearVelocityInBody = new YoFrameVector3D(name + "LinearVelocity", null, registry);
+      linearVelocityInWorld = new YoFrameVector3D(name + "LinearVelocityWorld", null, registry);
 
-      angularVelocityInBody = new YoFrameVector(name + "AngularVelocity", null, registry);
-      angularAccelerationInBody = new YoFrameVector(name + "AngularAcceleration", null, registry);
+      angularVelocityInBody = new YoFrameVector3D(name + "AngularVelocity", null, registry);
+      angularAccelerationInBody = new YoFrameVector3D(name + "AngularAcceleration", null, registry);
 
-      linearAccelerationInBody = new YoFrameVector(name + "LinearAcceleration", null, registry);
-      linearAccelerationInWorld = new YoFrameVector(name + "LinearAccelerationWorld", null, registry);
+      linearAccelerationInBody = new YoFrameVector3D(name + "LinearAcceleration", null, registry);
+      linearAccelerationInWorld = new YoFrameVector3D(name + "LinearAccelerationWorld", null, registry);
    }
 
    public String getName()
@@ -158,12 +158,12 @@ public class IMUMount
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    public void getOrientation(RotationMatrix rotationMatrixToPack)
    {
-      orientation.get(rotationMatrixToPack);
+      rotationMatrixToPack.set(orientation);
    }
 
    public void setAngularVelocityInBody(Vector3D angularVelocityInBody)
@@ -173,7 +173,7 @@ public class IMUMount
    
    public void getAngularVelocityInBody(Vector3D angularVelocityInBodyToPack)
    {
-      angularVelocityInBody.get(angularVelocityInBodyToPack);
+      angularVelocityInBodyToPack.set(angularVelocityInBody);
    }
    
    public void setAngularAccelerationInBody(Vector3D angularAccelerationInBody)
@@ -183,7 +183,7 @@ public class IMUMount
    
    public void getAngularAccelerationInBody(Vector3D angularAccelerationInBodyToPack)
    {
-      angularAccelerationInBody.get(angularAccelerationInBodyToPack);
+      angularAccelerationInBodyToPack.set(angularAccelerationInBody);
    }
 
    public void setLinearAccelerationInBody(Vector3D linearAccelerationInBody)
@@ -193,7 +193,7 @@ public class IMUMount
    
    public void getLinearAccelerationInBody(Vector3D linearAccelerationInBodyToPack)
    {
-      linearAccelerationInBody.get(linearAccelerationInBodyToPack);
+      linearAccelerationInBodyToPack.set(linearAccelerationInBody);
    }
 
    public void getTransformFromMountToJoint(RigidBodyTransform transformToPack)

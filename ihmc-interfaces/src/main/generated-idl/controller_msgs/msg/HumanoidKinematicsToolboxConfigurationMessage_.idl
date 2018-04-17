@@ -1,0 +1,38 @@
+#ifndef __controller_msgs__msg__HumanoidKinematicsToolboxConfigurationMessage__idl__
+#define __controller_msgs__msg__HumanoidKinematicsToolboxConfigurationMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body inverse kinematics module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HumanoidKinematicsToolboxConfigurationMessage_")
+      struct HumanoidKinematicsToolboxConfigurationMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * When set to true, the solver will hold the current x and y coordinates of the center
+         * of mass. By 'current', it means that the solver will use the robot configuration data
+         * broadcasted by the controller to obtain the center of mass position.
+         */
+        @defaultValue(value=True)
+        boolean hold_current_center_of_mass_xy_position;
+        /**
+         * When set to true, the solver will hold the pose of the active support foot/feet.
+         */
+        @defaultValue(value=True)
+        boolean hold_support_foot_positions;
+      };
+    };
+  };
+};
+
+#endif

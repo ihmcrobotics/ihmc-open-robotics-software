@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="563.0" prefWidth="1020.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <BorderPane fx:id="mainPane" layoutY="-109.0" prefHeight="425.0" prefWidth="514.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <bottom>
+            <AnchorPane prefHeight="100.0" prefWidth="781.0" BorderPane.alignment="CENTER">
+               <children>
+                  <GridPane hgap="5.0" layoutX="14.0" layoutY="14.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <TextField fx:id="startTextField" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                        <TextField fx:id="goalTextField" editable="false" prefHeight="25.0" prefWidth="149.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="Start" />
+                        <Label text="Goal" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+                  <GridPane hgap="10.0" layoutX="233.0" layoutY="5.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <ToggleButton fx:id="showInnerRegionMapsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show inner-region maps" GridPane.columnIndex="2" />
+                        <ToggleButton fx:id="showBodyPathToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="1" />
+                        <ToggleButton fx:id="showInterRegionMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show inter-region map" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <ToggleButton fx:id="showPlanarRegionsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.rowIndex="2" />
+                        <ToggleButton fx:id="showClusterRawPointsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="1" />
+                        <ToggleButton fx:id="showClusterNavigableExtrusionsToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <ToggleButton fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <ToggleButton fx:id="showStartMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" />
+                        <ToggleButton fx:id="showGoalMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </children>
+            </AnchorPane>
+         </bottom>
+         <left>
+            <AnchorPane minWidth="-Infinity" prefHeight="408.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <HBox spacing="5.0">
+                           <children>
+                              <ToggleButton fx:id="previousDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Previous" HBox.hgrow="ALWAYS" />
+                              <ToggleButton fx:id="reloadDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reload" />
+                              <ToggleButton fx:id="nextDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Next" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
+                        <ListView fx:id="datasetsListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                        <ToggleButton fx:id="stopWalkingToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Stop walking!!!" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </left>
+      </BorderPane>
+   </children>
+</AnchorPane>

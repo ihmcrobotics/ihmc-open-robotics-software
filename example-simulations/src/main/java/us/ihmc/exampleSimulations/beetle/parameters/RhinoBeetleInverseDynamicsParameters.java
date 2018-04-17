@@ -8,9 +8,9 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerParameters
 {
@@ -26,8 +26,8 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    private final SymmetricYoPIDSE3Gains bodySpatialGains;
    private final double bodyProportionalGains = 500.0;
    private final double bodyDampingRatio = 1.1;
-   private final YoFrameVector bodySpatialLinearQPWeight;
-   private final YoFrameVector bodySpatialAngularQPWeight;
+   private final YoFrameVector3D bodySpatialLinearQPWeight;
+   private final YoFrameVector3D bodySpatialAngularQPWeight;
    private final SelectionMatrix6D bodySpatialSelectionMatrix = new SelectionMatrix6D();
 
    public RhinoBeetleInverseDynamicsParameters(YoVariableRegistry parentRegistry)
@@ -36,10 +36,10 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
       bodySpatialGains.setProportionalGains(bodyProportionalGains);
       bodySpatialGains.setDampingRatios(bodyDampingRatio);
 
-      bodySpatialLinearQPWeight = new YoFrameVector("bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
-      bodySpatialAngularQPWeight = new YoFrameVector("bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
-      bodySpatialAngularQPWeight.setVector(angularWeight);
-      bodySpatialLinearQPWeight.setVector(linearWeight);
+      bodySpatialLinearQPWeight = new YoFrameVector3D("bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
+      bodySpatialAngularQPWeight = new YoFrameVector3D("bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
+      bodySpatialAngularQPWeight.set(angularWeight);
+      bodySpatialLinearQPWeight.set(linearWeight);
 
       DefaultYoPID3DGains positionGains = new DefaultYoPID3DGains(name + "FootPosition", GainCoupling.XY, false, registry);
       positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingXYProportionalGain(), getSwingZProportionalGain());
@@ -84,13 +84,13 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    @Override
    public void getBodySpatialLinearQPWeight(Vector3D linearWeight)
    {
-      bodySpatialLinearQPWeight.get(linearWeight);
+      linearWeight.set(bodySpatialLinearQPWeight);
    }
 
    @Override
    public void getBodySpatialAngularQPWeight(Vector3D angularWeight)
    {
-      bodySpatialAngularQPWeight.get(angularWeight);
+      angularWeight.set(bodySpatialAngularQPWeight);
    }
 
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion implements YoMultipleFramesHolder
 {
@@ -23,6 +24,12 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
@@ -31,7 +38,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(quaternion);
+      quaternion.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       frameOrientation.setIncludingFrame(currentReferenceFrame, quaternion);
       frameOrientation.changeFrame(desiredFrame);
@@ -47,7 +54,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame referenceFrame)
    {
       ReferenceFrame previousReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
-      set(0.0, 0.0, 0.0);
+      setYawPitchRoll(0.0, 0.0, 0.0);
       return previousReferenceFrame;
    }
 
@@ -95,7 +102,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameOrientationIncludingFrame(frameOrientation);
+      frameOrientation.setIncludingFrame(this);
       frameOrientation.changeFrame(referenceFrame);
       return frameOrientation.toString();
    }

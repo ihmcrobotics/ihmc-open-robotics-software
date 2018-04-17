@@ -74,21 +74,18 @@ public class JPanelCameraStreamer extends JPanel implements CameraStreamer
 
    public Point3D getCameraPosition()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
 
    public Quaternion getCameraOrientation()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
 
    public double getFieldOfView()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 

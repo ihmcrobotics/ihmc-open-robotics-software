@@ -1,128 +1,127 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
-/**
-* 
-* Definition of the class "CameraAnnouncement" defined in Announcement.idl. 
-*
-* This file was automatically generated from Announcement.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Announcement.idl instead.
-*
-*/
-public class CameraAnnouncement
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+public class CameraAnnouncement extends Packet<CameraAnnouncement> implements Settable<CameraAnnouncement>, EpsilonComparable<CameraAnnouncement>
 {
-    public CameraAnnouncement()
-    {
-        	name_ = new StringBuilder(255); 
-        	identifier_ = new StringBuilder(255); 
-        
-        
-    }
+   public us.ihmc.robotDataLogger.CameraType type_;
+   public java.lang.StringBuilder name_;
+   public java.lang.StringBuilder identifier_;
 
-    public void set(CameraAnnouncement other)
-    {
-        	type_ = other.type_;
-        	name_.setLength(0);
-        	name_.append(other.name_);
-        	identifier_.setLength(0);
-        	identifier_.append(other.identifier_);
+   public CameraAnnouncement()
+   {
+      name_ = new java.lang.StringBuilder(255);
+      identifier_ = new java.lang.StringBuilder(255);
+   }
 
-    }
+   public CameraAnnouncement(CameraAnnouncement other)
+   {
+      this();
+      set(other);
+   }
 
-    public void setType(us.ihmc.robotDataLogger.CameraType type)
-    {
-        type_ = type;
-    }
+   public void set(CameraAnnouncement other)
+   {
+      type_ = other.type_;
 
-    public us.ihmc.robotDataLogger.CameraType getType()
-    {
-        return type_;
-    }
+      name_.setLength(0);
+      name_.append(other.name_);
 
-        
-        public void setName(String name)
-        {
-        	name_.setLength(0);
-        	name_.append(name);
-        }
-        
-        public String getNameAsString()
-        {
-        	return getName().toString();
-        }
+      identifier_.setLength(0);
+      identifier_.append(other.identifier_);
 
-    public StringBuilder getName()
-    {
-        return name_;
-    }
+   }
 
-        
-        public void setIdentifier(String identifier)
-        {
-        	identifier_.setLength(0);
-        	identifier_.append(identifier);
-        }
-        
-        public String getIdentifierAsString()
-        {
-        	return getIdentifier().toString();
-        }
+   public void setType(us.ihmc.robotDataLogger.CameraType type)
+   {
+      type_ = type;
+   }
+   public us.ihmc.robotDataLogger.CameraType getType()
+   {
+      return type_;
+   }
 
-    public StringBuilder getIdentifier()
-    {
-        return identifier_;
-    }
+   public void setName(java.lang.String name)
+   {
+      name_.setLength(0);
+      name_.append(name);
+   }
 
-        
+   public java.lang.String getNameAsString()
+   {
+      return getName().toString();
+   }
+   public java.lang.StringBuilder getName()
+   {
+      return name_;
+   }
+
+   public void setIdentifier(java.lang.String identifier)
+   {
+      identifier_.setLength(0);
+      identifier_.append(identifier);
+   }
+
+   public java.lang.String getIdentifierAsString()
+   {
+      return getIdentifier().toString();
+   }
+   public java.lang.StringBuilder getIdentifier()
+   {
+      return identifier_;
+   }
 
 
+   @Override
+   public boolean epsilonEquals(CameraAnnouncement other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.identifier_, other.identifier_, epsilon)) return false;
 
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof CameraAnnouncement)) return false;
-        CameraAnnouncement otherMyClass = (CameraAnnouncement)other;
-        boolean returnedValue = true;
+      return true;
+   }
 
-        returnedValue &= this.type_ == otherMyClass.type_;
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof CameraAnnouncement)) return false;
 
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_);
-                
+      CameraAnnouncement otherMyClass = (CameraAnnouncement) other;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("CameraAnnouncement {");
-        builder.append("type=");
-        builder.append(this.type_);
+      if(this.type_ != otherMyClass.type_) return false;
 
-                builder.append(", ");
-        builder.append("name=");
-        builder.append(this.name_);
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-                builder.append(", ");
-        builder.append("identifier=");
-        builder.append(this.identifier_);
+      if (!us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_)) return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
 
-    private us.ihmc.robotDataLogger.CameraType type_; 
-    private StringBuilder name_; 
-    private StringBuilder identifier_; 
+      return true;
+   }
 
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("CameraAnnouncement {");
+      builder.append("type=");
+      builder.append(this.type_);      builder.append(", ");
+      builder.append("name=");
+      builder.append(this.name_);      builder.append(", ");
+      builder.append("identifier=");
+      builder.append(this.identifier_);
+      builder.append("}");
+      return builder.toString();
+   }
 }

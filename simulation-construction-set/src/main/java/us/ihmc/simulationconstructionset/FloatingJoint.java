@@ -5,6 +5,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -412,22 +413,22 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       return new Vector3D(qdd_wx.getDoubleValue(), qdd_wy.getDoubleValue(), qdd_wz.getDoubleValue());
    }
    
-   public void getAngularAccelerationInBody(Vector3D angularAccelerationInBodyToPack)
+   public void getAngularAccelerationInBody(Vector3DBasics angularAccelerationInBodyToPack)
    {
       angularAccelerationInBodyToPack.set(qdd_wx.getDoubleValue(), qdd_wy.getDoubleValue(), qdd_wz.getDoubleValue());
    }
 
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack, ReferenceFrame bodyFrame)
+   public void getAngularAcceleration(FrameVector3DBasics angularAccelerationToPack, ReferenceFrame bodyFrame)
    {
       angularAccelerationToPack.setIncludingFrame(bodyFrame, qdd_wx.getDoubleValue(), qdd_wy.getDoubleValue(), qdd_wz.getDoubleValue());      
    }
    
-   public void getLinearAccelerationInWorld(Vector3D accelerationInWorldToPack)
+   public void getLinearAccelerationInWorld(Vector3DBasics accelerationInWorldToPack)
    {
       accelerationInWorldToPack.set(qdd_x.getDoubleValue(), qdd_y.getDoubleValue(), qdd_z.getDoubleValue()); 
    }
    
-   public void getLinearAcceleration(FrameVector3D linearAccelerationToPack)
+   public void getLinearAcceleration(FrameVector3DBasics linearAccelerationToPack)
    {
       linearAccelerationToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qdd_x.getDoubleValue(), qdd_y.getDoubleValue(), qdd_z.getDoubleValue()); 
    }

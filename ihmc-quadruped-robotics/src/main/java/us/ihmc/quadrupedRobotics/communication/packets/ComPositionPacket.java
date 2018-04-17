@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ComPositionPacket extends Packet<ComPositionPacket>
 {
-   private Point3D position;
+   public Point3D position;
 
    public ComPositionPacket()
    {
@@ -21,6 +21,13 @@ public class ComPositionPacket extends Packet<ComPositionPacket>
    public ComPositionPacket(double x, double y, double z)
    {
       this.position = new Point3D(x, y, z);
+   }
+
+   @Override
+   public void set(ComPositionPacket other)
+   {
+      position = new Point3D(other.position);
+      setPacketInformation(other);
    }
 
    public void get(Point3D position)

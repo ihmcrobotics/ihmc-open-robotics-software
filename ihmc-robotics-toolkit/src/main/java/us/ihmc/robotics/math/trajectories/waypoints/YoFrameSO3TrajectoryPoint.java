@@ -8,17 +8,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3TrajectoryPoint, FrameSO3TrajectoryPoint, SimpleSO3TrajectoryPoint>
       implements SO3TrajectoryPointInterface<YoFrameSO3TrajectoryPoint>
 {
    private final YoFrameQuaternion orientation;
-   private final YoFrameVector angularVelocity;
+   private final YoFrameVector3D angularVelocity;
 
    public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -70,7 +70,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, YoFrameQuaternion orientation, YoFrameVector angularVelocity)
+   public void set(double time, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.orientation.set(orientation);
@@ -120,33 +120,33 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override
    public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
-      angularVelocity.get(angularVelocityToPack);
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientation(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
-      angularVelocity.getFrameTuple(angularVelocityToPack);
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
-      angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(angularVelocity);
    }
 
    public void getOrientation(YoFrameQuaternion orientationToPack)
@@ -154,7 +154,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       orientationToPack.set(orientation);
    }
 
-   public void getAngularVelocity(YoFrameVector angularVelocityToPack)
+   public void getAngularVelocity(YoFrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
@@ -170,7 +170,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    /**
     * Return the original angularVelocity held by this trajectory point.
     */
-   public YoFrameVector getAngularVelocity()
+   public YoFrameVector3D getAngularVelocity()
    {
       return angularVelocity;
    }
@@ -192,8 +192,8 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setOrientation(orientation.getFrameOrientation());
-      frameWaypoint.setAngularVelocity(angularVelocity.getFrameTuple());
+      frameWaypoint.setOrientation(orientation);
+      frameWaypoint.setAngularVelocity(angularVelocity);
    }
 
    @Override

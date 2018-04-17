@@ -26,7 +26,7 @@ public class SelectionMatrix3DTest
 {
    private static final int ITERATIONS = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSettersGetters() throws Exception
    {
@@ -136,13 +136,13 @@ public class SelectionMatrix3DTest
                selectionMatrix3D.applySelection(actualVector);
 
                assertEquals(expectedVector.getReferenceFrame(), actualVector.getReferenceFrame());
-               EuclidCoreTestTools.assertTuple3DEquals(expectedVector.getGeometryObject(), actualVector.getGeometryObject(), 1.0e-12);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, 1.0e-12);
             }
          }
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testGetFullSelectionMatrixInFrame() throws Exception
    {
@@ -216,7 +216,7 @@ public class SelectionMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testGetEfficientSelectionMatrixInFrame() throws Exception
    {

@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
@@ -110,6 +111,12 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
                public void exportSnapshot(File snapshotFile)
                {
                }
+
+               @Override
+               public void streamTo(RGBDStreamer cameraStreamer, int framesPerSecond)
+               {
+                  
+               }
             };
          }
 
@@ -158,7 +165,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
                public Quaternion getCameraRotation()
                {
-                  // TODO Auto-generated method stub
                   return new Quaternion();
                }
 

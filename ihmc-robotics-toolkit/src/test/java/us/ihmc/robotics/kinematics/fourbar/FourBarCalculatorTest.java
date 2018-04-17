@@ -28,21 +28,18 @@ public class FourBarCalculatorTest
          @Override
          public boolean isElbowDown()
          {
-            // TODO Auto-generated method stub
             return false;
          }
          
          @Override
          public double getRightLinkageBeta0()
          {
-            // TODO Auto-generated method stub
             return 0;
          }
          
          @Override
          public double getLeftLinkageBeta0()
          {
-            // TODO Auto-generated method stub
             return 0;
          }
          

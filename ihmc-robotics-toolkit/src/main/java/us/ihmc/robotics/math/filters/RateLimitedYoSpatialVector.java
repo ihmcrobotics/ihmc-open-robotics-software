@@ -1,19 +1,18 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RateLimitedYoSpatialVector extends YoSpatialVector
 {
    private final RateLimitedYoFrameVector rateLimitedLinearPart;
    private final RateLimitedYoFrameVector rateLimitedAngularPart;
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maximumLinearRate,
-                                     YoDouble maximumAngularRate, double dt, YoFrameVector rawLinearPart, YoFrameVector rawAngularPart)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumLinearRate,
+                                     DoubleProvider maximumAngularRate, double dt, FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawLinearPart),
             new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawAngularPart));
@@ -21,8 +20,8 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
       this.rateLimitedAngularPart = (RateLimitedYoFrameVector) angularPart;
    }
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maximumLinearRate,
-                                     YoDouble maximumAngularRate, double dt, YoSpatialVector rawSpatialVector)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumLinearRate,
+                                     DoubleProvider maximumAngularRate, double dt, YoSpatialVector rawSpatialVector)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawSpatialVector.getYoLinearPart()),
             new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawSpatialVector.getYoAngularPart()));
@@ -37,12 +36,6 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
       this.rateLimitedAngularPart = yoAngularPart;
    }
 
-   public void setMaxRate(double maximumLinearRate, double maximumAngularRate)
-   {
-      rateLimitedLinearPart.setMaxRate(maximumLinearRate);
-      rateLimitedAngularPart.setMaxRate(maximumAngularRate);
-   }
-
    public void reset()
    {
       rateLimitedLinearPart.reset();
@@ -55,13 +48,7 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
       rateLimitedAngularPart.update();
    }
 
-   public void update(YoFrameVector rawLinearPart, YoFrameVector rawAngularPart)
-   {
-      rateLimitedLinearPart.update(rawLinearPart);
-      rateLimitedAngularPart.update(rawAngularPart);
-   }
-
-   public void update(FrameVector3D rawLinearPart, FrameVector3D rawAngularPart)
+   public void update(FrameVector3DReadOnly rawLinearPart, FrameVector3DReadOnly rawAngularPart)
    {
       rateLimitedLinearPart.update(rawLinearPart);
       rateLimitedAngularPart.update(rawAngularPart);

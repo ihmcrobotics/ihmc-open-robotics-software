@@ -1,13 +1,13 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -74,7 +74,7 @@ public class SE3PIDController
     * @param desiredPose desired pose that we want to achieve.
     * @param desiredTwist feed forward twist from a reference trajectory
     */
-   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);
@@ -82,17 +82,17 @@ public class SE3PIDController
 
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
-      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
       desiredTwist.getAngularPart(desiredAngularVelocity);
       desiredTwist.getAngularPart(feedForwardAngularAction);
       orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
-      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+      twistToPack.setAngularPart(angularActionFromOrientationController);
 
-      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredPosition.setIncludingFrame(desiredPose.getPosition());
       desiredTwist.getLinearPart(desiredVelocity);
       desiredTwist.getLinearPart(feedForwardLinearAction);
       positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
-      twistToPack.setLinearPart(actionFromPositionController.getVector());
+      twistToPack.setLinearPart(actionFromPositionController);
    }
 
    /**
@@ -103,7 +103,7 @@ public class SE3PIDController
     * @param feedForwardAcceleration feed forward acceleration from a reference trajectory.
     * @param currentTwist current twist of the rigid body.
     */
-   public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose desiredPose, Twist desiredTwist,
+   public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose3D desiredPose, Twist desiredTwist,
          SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
       checkBodyFrames(desiredTwist, feedForwardAcceleration, currentTwist);
@@ -112,19 +112,19 @@ public class SE3PIDController
 
       spatialAccelerationToPack.setToZero(bodyFrame, feedForwardAcceleration.getBaseFrame(), bodyFrame);
 
-      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
       desiredTwist.getAngularPart(desiredAngularVelocity);
       feedForwardAcceleration.getAngularPart(feedForwardAngularAction);
       currentTwist.getAngularPart(currentAngularVelocity);
       orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAction);
-      spatialAccelerationToPack.setAngularPart(angularActionFromOrientationController.getVector());
+      spatialAccelerationToPack.setAngularPart(angularActionFromOrientationController);
 
-      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredPosition.setIncludingFrame(desiredPose.getPosition());
       desiredTwist.getLinearPart(desiredVelocity);
       feedForwardAcceleration.getLinearPart(feedForwardLinearAction);
       currentTwist.getLinearPart(currentVelocity);
       positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, currentVelocity, feedForwardLinearAction);
-      spatialAccelerationToPack.setLinearPart(actionFromPositionController.getVector());
+      spatialAccelerationToPack.setLinearPart(actionFromPositionController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)

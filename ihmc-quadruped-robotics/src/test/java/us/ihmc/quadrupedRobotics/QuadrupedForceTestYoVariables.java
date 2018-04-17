@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -9,19 +11,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final YoEnum<QuadrupedForceControllerRequestedEvent> userTrigger;
-   private final YoEnum<QuadrupedForceControllerState> forceControllerState;
-   
+   private final YoEnum<QuadrupedControllerRequestedEvent> userTrigger;
+   private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
+   private final YoEnum<QuadrupedControllerEnum> controllerState;
+   private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
+
    private final YoDouble stanceHeight;
    private final YoDouble groundPlanePointZ;
-   
-   // XGait
-   private final YoDouble xGaitEndPhaseShiftInput;
-   private final YoDouble xGaitEndDoubleSupportDurationInput;
-   private final YoDouble xGaitStanceWidthInput;
-   private final YoDouble xGaitStanceLengthInput;
-   private final YoDouble xGaitStepGroundClearanceInput;
-   private final YoDouble xGaitStepDurationInput;
    
    // Step
    private final YoEnum<RobotQuadrant> timedStepQuadrant;
@@ -31,31 +27,34 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble timedStepGoalPositionY;
    private final YoDouble timedStepGoalPositionZ;
 
+   // CoM
    private final YoDouble comPositionEstimateX;
    private final YoDouble comPositionEstimateY;
-   private final YoDouble comPositionEstimateZ;
+   private final YoDouble currentHeightInWorld;
+   private final YoDouble comPositionEstimateYaw;
+   private final YoDouble comPositionEstimatePitch;
+   private final YoDouble comPositionEstimateRoll;
+
+   private final YoDouble comPositionSetpointX;
+   private final YoDouble comPositionSetpointY;
+   private final YoDouble desiredHeightInWorld;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
    {
       super(scs);
       
-      userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
-      forceControllerState = (YoEnum<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
-      
-      stanceHeight = (YoDouble) scs.getVariable("param__stanceHeight");
+      userTrigger = (YoEnum<QuadrupedControllerRequestedEvent>) scs.getVariable("requestedControllerState");
+      stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
+      controllerState = (YoEnum<QuadrupedControllerEnum>) scs.getVariable("controllerCurrentState");
+      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
+
+      stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
-      
-      xGaitEndPhaseShiftInput = (YoDouble) scs.getVariable("endPhaseShiftInput");
-      xGaitEndDoubleSupportDurationInput = (YoDouble) scs.getVariable("endDoubleSupportDurationInput");
-      xGaitStanceWidthInput = (YoDouble) scs.getVariable("stanceWidthInput");
-      xGaitStanceLengthInput = (YoDouble) scs.getVariable("stanceLengthInput");
-      xGaitStepGroundClearanceInput = (YoDouble) scs.getVariable("stepGroundClearanceInput");
-      xGaitStepDurationInput = (YoDouble) scs.getVariable("stepDurationInput");
       
       comPositionEstimateX = (YoDouble) scs.getVariable("comPositionEstimateX");
       comPositionEstimateY = (YoDouble) scs.getVariable("comPositionEstimateY");
-      comPositionEstimateZ = (YoDouble) scs.getVariable("comPositionEstimateZ");
+      currentHeightInWorld = (YoDouble) scs.getVariable("currentHeightInWorld");
       
       timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
       timedStepDuration = (YoDouble) scs.getVariable("timedStepDuration");
@@ -63,16 +62,34 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timedStepGoalPositionX = (YoDouble) scs.getVariable("timedStepGoalPositionX");
       timedStepGoalPositionY = (YoDouble) scs.getVariable("timedStepGoalPositionY");
       timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
+
+      comPositionEstimateYaw = (YoDouble) scs.getVariable("comPositionEstimateYaw");
+      comPositionEstimatePitch = (YoDouble) scs.getVariable("comPositionEstimatePitch");
+      comPositionEstimateRoll = (YoDouble) scs.getVariable("comPositionEstimateRoll");
+
+      comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
+      comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
+      desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
    }
 
-   public YoEnum<QuadrupedForceControllerRequestedEvent> getUserTrigger()
+   public YoEnum<QuadrupedControllerRequestedEvent> getUserTrigger()
    {
       return userTrigger;
    }
 
-   public YoEnum<QuadrupedForceControllerState> getForceControllerState()
+   public YoEnum<QuadrupedSteppingRequestedEvent> getStepTrigger()
    {
-      return forceControllerState;
+      return stepTrigger;
+   }
+
+   public YoEnum<QuadrupedControllerEnum> getControllerState()
+   {
+      return controllerState;
+   }
+
+   public YoEnum<QuadrupedSteppingStateEnum> getSteppingState()
+   {
+      return steppingState;
    }
 
    public YoDouble getStanceHeight()
@@ -85,36 +102,6 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return groundPlanePointZ;
    }
 
-   public YoDouble getXGaitEndDoubleSupportDurationInput()
-   {
-      return xGaitEndDoubleSupportDurationInput;
-   }
-
-   public YoDouble getXGaitEndPhaseShiftInput()
-   {
-      return xGaitEndPhaseShiftInput;
-   }
-
-   public YoDouble getXGaitStanceWidthInput()
-   {
-      return xGaitStanceWidthInput;
-   }
-
-   public YoDouble getXGaitStanceLengthInput()
-   {
-      return xGaitStanceLengthInput;
-   }
-
-   public YoDouble getXGaitStepGroundClearanceInput()
-   {
-      return xGaitStepGroundClearanceInput;
-   }
-
-   public YoDouble getXGaitStepDurationInput()
-   {
-      return xGaitStepDurationInput;
-   }
-
    public YoDouble getComPositionEstimateX()
    {
       return comPositionEstimateX;
@@ -125,9 +112,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return comPositionEstimateY;
    }
 
-   public YoDouble getComPositionEstimateZ()
+   public YoDouble getCurrentHeightInWorld()
    {
-      return comPositionEstimateZ;
+      return currentHeightInWorld;
    }
    
    public YoEnum<RobotQuadrant> getTimedStepQuadrant()
@@ -158,5 +145,35 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getTimedStepGoalPositionZ()
    {
       return timedStepGoalPositionZ;
+   }
+
+   public YoDouble getComPositionEstimateYaw()
+   {
+      return comPositionEstimateYaw;
+   }
+
+   public YoDouble getComPositionEstimatePitch()
+   {
+      return comPositionEstimatePitch;
+   }
+
+   public YoDouble getComPositionEstimateRoll()
+   {
+      return comPositionEstimateRoll;
+   }
+
+   public YoDouble getComPositionSetpointX()
+   {
+      return comPositionSetpointX;
+   }
+
+   public YoDouble getComPositionSetpointY()
+   {
+      return comPositionSetpointY;
+   }
+
+   public YoDouble getHeightInWorldSetpoint()
+   {
+      return desiredHeightInWorld;
    }
 }

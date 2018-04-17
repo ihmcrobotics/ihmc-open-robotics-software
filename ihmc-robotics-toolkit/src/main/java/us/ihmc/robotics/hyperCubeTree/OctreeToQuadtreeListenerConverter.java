@@ -37,7 +37,6 @@ public class OctreeToQuadtreeListenerConverter implements HyperCubeTreeListener<
 
    public void treeCleared()
    {
-      // TODO Auto-generated method stub
 
    }
 

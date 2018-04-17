@@ -47,7 +47,6 @@ class FloatingPlanarJointRobotSensor implements SensorInterface
    @Override
    public int getNumberOfVariables()
    {
-      // TODO Auto-generated method stub
       return 9;
    }
 

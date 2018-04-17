@@ -6,6 +6,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
@@ -159,6 +160,12 @@ public class LidarSceneViewPort implements SceneProcessor
    public Texture getTexture2D()
    {
       return sceneTexture;
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      
    }
 
 }

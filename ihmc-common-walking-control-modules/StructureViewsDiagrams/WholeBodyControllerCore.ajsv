@@ -24,7 +24,7 @@ hide all methods
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-1087" yLocation="896"/>
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-588" yLocation="765"/>
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool" project="CommonWalkingControlModules" xLocation="189" yLocation="916"/>
-        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager" project="CommonWalkingControlModules" xLocation="763" yLocation="-213"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager" project="CommonWalkingControlModules" xLocation="763" yLocation="-213"/>
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface" project="CommonWalkingControlModules" xLocation="379" yLocation="202"/>
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox" project="CommonWalkingControlModules" xLocation="953" yLocation="426"/>
         <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsSolver" project="CommonWalkingControlModules" xLocation="405" yLocation="507"/>

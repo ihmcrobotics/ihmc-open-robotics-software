@@ -29,28 +29,28 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
             getRRTTree().getNewNode().addChildNode(getGoalNode());
             getRRTTree().updatePathNode(getGoalNode());
             setOptimalPath(getRRTTree().getPathNode());
-            
-            PrintTools.info("path size is "+getOptimalPath().size());
+
+            PrintTools.info("path size is " + getOptimalPath().size());
             return true;
          }
          return false;
       }
       return false;
    }
-   
+
    public void createFootStepPlanner(double stepLength, double stepWidth)
    {
       double[] pathX = new double[getOptimalPath().size()];
       double[] pathY = new double[getOptimalPath().size()];
-      
-      for(int i=0;i<getOptimalPath().size();i++)
+
+      for (int i = 0; i < getOptimalPath().size(); i++)
       {
          pathX[i] = getOptimalPath().get(i).getNodeData(0);
          pathY[i] = getOptimalPath().get(i).getNodeData(1);
       }
       footStepPlanner = new SkeletonPathFootStepPlanner(pathX, pathY, stepLength, stepWidth);
    }
-   
+
    public SkeletonPathFootStepPlanner getFootStepPlanner()
    {
       return footStepPlanner;

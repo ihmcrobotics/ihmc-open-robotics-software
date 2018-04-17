@@ -1,13 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
@@ -15,7 +16,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    private long timestamp = -1L;
    private final RecyclingArrayList<Point3D32> scan = new RecyclingArrayList<>(Point3D32.class);
    private final ReferenceFrame pointCloudFrame = ReferenceFrame.getWorldFrame();
-   private final FramePose lidarPose = new FramePose();
+   private final FramePose3D lidarPose = new FramePose3D();
 
    @Override
    public void clear()
@@ -38,19 +39,19 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    @Override
    public void set(LidarScanMessage message)
    {
-      timestamp = message.robotTimestamp;
-      message.getLidarPose(lidarPose);
+      timestamp = message.getRobotTimestamp();
+      lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());
 
       int index = 0;
-      float[] newPointCloud = message.scan;
+      TFloatArrayList newPointCloud = message.getScan();
       scan.clear();
 
-      while (index < newPointCloud.length)
+      while (index < newPointCloud.size())
       {
          Point3D32 point = scan.add();
-         point.setX(newPointCloud[index++]);
-         point.setY(newPointCloud[index++]);
-         point.setZ(newPointCloud[index++]);
+         point.setX(newPointCloud.get(index++));
+         point.setY(newPointCloud.get(index++));
+         point.setZ(newPointCloud.get(index++));
       }
    }
 
@@ -76,12 +77,12 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
 
    public void getLidarPosition(Point3D positionToPack)
    {
-      lidarPose.getPosition(positionToPack);
+      positionToPack.set(lidarPose.getPosition());
    }
    
    public void getLidarOrientation(Quaternion orientationToPack)
    {
-      lidarPose.getOrientation(orientationToPack);
+      orientationToPack.set(lidarPose.getOrientation());
    }
 
    @Override

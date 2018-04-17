@@ -1,130 +1,128 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
+import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior.WalkOverTerrainState;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
+public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 {
-   public enum WalkOverTerrainState
+   enum WalkOverTerrainState
    {
-      LOOK_FOR_GOAL, SLEEP, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
+      WAIT, PLAN_FROM_DOUBLE_SUPPORT, PLAN_FROM_SINGLE_SUPPORT
    }
 
-   private final CommunicationBridge coactiveBehaviorsNetworkManager;
+   private static final double defaultSwingTime = 2.2;
+   private static final double defaultTransferTime = 0.5;
 
-   private final AtlasPrimitiveActions atlasPrimitiveActions;
+   private final StateMachine<WalkOverTerrainState, State> stateMachine;
 
-   private final FindGoalBehavior lookForGoalBehavior;
-   private final SleepBehavior sleepBehavior;
-   private final LookDownBehavior lookDownAtTerrainBehavior;
-   private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
-   private final TakeSomeStepsBehavior takeSomeStepsBehavior;
-   private final ClearPlanarRegionsListBehavior clearPlanarRegionsListBehavior;
-   private final SimpleDoNothingBehavior reachedGoalBehavior;
+   private final WaitState waitState;
+   private final PlanFromDoubleSupportState planFromDoubleSupportState;
+   private final PlanFromSingleSupportState planFromSingleSupportState;
 
-   private final GetUserValidationBehavior userValidationExampleBehavior;
-   private final ReferenceFrame midZupFrame;
+   private final HumanoidReferenceFrames referenceFrames;
+   private final AtomicReference<FramePose3D> goalPose = new AtomicReference<>();
+   private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
-   private final YoDouble yoTime;
+   private final YoDouble swingTime = new YoDouble("swingTime", registry);
+   private final YoDouble transferTime = new YoDouble("transferTime", registry);
+   private final YoInteger planId = new YoInteger("planId", registry);
 
-   private final YoEnum<RobotSide> nextSideToSwing;
-
-   private final String prefix = getClass().getSimpleName();
-   private final YoDouble swingTime = new YoDouble(prefix + "SwingTime", registry);
-   private final YoDouble transferTime = new YoDouble(prefix + "TransferTime", registry);
-   private final YoInteger maxNumberOfStepsToTake = new YoInteger(prefix + "NumberOfStepsToTake", registry);
-
-   private final FullRobotModel fullRobotModel;
-
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
-                                              HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridgeInterface communicationBridge, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, HumanoidReferenceFrames referenceFrames)
    {
-      super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);
+      super(communicationBridge);
 
-      this.yoTime = yoTime;
-      this.fullRobotModel = fullRobotModel;
+      communicationBridge.attachListener(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
+      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
+      communicationBridge.attachListener(PlanarRegionsListMessage.class, planarRegions::set);
 
-      nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
-      nextSideToSwing.set(RobotSide.LEFT);
-      midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
-      coactiveBehaviorsNetworkManager = communicationBridge;
-      //      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
-      this.atlasPrimitiveActions = atlasPrimitiveActions;
+      waitState = new WaitState(yoTime);
+      planFromDoubleSupportState = new PlanFromDoubleSupportState();
+      planFromSingleSupportState = new PlanFromSingleSupportState();
 
-      //create your behaviors
-      this.lookForGoalBehavior = new FindGoalBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames,
-                                                      goalDetectorBehaviorService);
+      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
+      {
+         goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation()));
+      });
 
-      sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-      sleepBehavior.setSleepTime(2.0);
-      lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
+      planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
+      this.referenceFrames = referenceFrames;
 
-      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, referenceFrames);
-//      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
-      planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
+      swingTime.set(defaultSwingTime);
+      transferTime.set(defaultTransferTime);
 
-      clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
-      takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
-      reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
+      stateMachine = setupStateMachine(yoTime);
+   }
 
-      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
+   private StateMachine<WalkOverTerrainState, State> setupStateMachine(DoubleProvider timeProvider)
+   {
+      StateMachineFactory<WalkOverTerrainState, State> factory = new StateMachineFactory<>(WalkOverTerrainState.class);
+      factory.setNamePrefix(getName() + "StateMachine").setRegistry(registry).buildYoClock(timeProvider);
+      
+      factory.addState(WalkOverTerrainState.WAIT, waitState);
+      factory.addState(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, planFromDoubleSupportState);
+      factory.addState(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromSingleSupportState);
 
-      this.registry.addChild(lookForGoalBehavior.getYoVariableRegistry());
-      this.registry.addChild(sleepBehavior.getYoVariableRegistry());
-      this.registry.addChild(lookDownAtTerrainBehavior.getYoVariableRegistry());
-      this.registry.addChild(planHumanoidFootstepsBehavior.getYoVariableRegistry());
-      this.registry.addChild(takeSomeStepsBehavior.getYoVariableRegistry());
-      //      this.registry.addChild(reachedGoalBehavior.getYoVariableRegistry());
-      this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
+      StateTransitionCondition planFromDoubleSupportToWait = (time) -> plannerResult.get() != null && !FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWalking = (time) -> plannerResult.get() != null && FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
 
-      setupStateMachine();
+      factory.addTransition(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, WalkOverTerrainState.WAIT, planFromDoubleSupportToWait);
+      factory.addTransition(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
+      factory.addTransition(WalkOverTerrainState.WAIT, WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, t -> waitState.isDoneWaiting());
+      factory.addTransition(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, WalkOverTerrainState.WAIT, t -> planFromSingleSupportState.doneWalking());
 
-      swingTime.set(1.5);
-      transferTime.set(0.3);
-      maxNumberOfStepsToTake.set(3);
+      return factory.build(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT);
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Walk Over Terrain Behavior");
-      sendPacket(p1);
-      super.onBehaviorEntered();
+      sendTextToSpeechPacket("Starting walk over terrain behavior");
    }
 
    @Override
@@ -132,291 +130,238 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    {
    }
 
-   private void setupStateMachine()
+   @Override
+   public void doControl()
    {
+      stateMachine.doActionAndTransition();
+   }
 
-      BehaviorAction<WalkOverTerrainState> lookForGoalAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.LOOK_FOR_GOAL, lookForGoalBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for Goal");
-            sendPacket(p1);
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> sleepAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.SLEEP, sleepBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Sleeping");
-            sendPacket(p1);
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> lookDownAtTerrainAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN, lookDownAtTerrainBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking Down at Terrain");
-            sendPacket(p1);
-
-            lookDownAtTerrainBehavior.setupPipeLine();
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> planHumanoidFootstepsAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.PLAN_TO_GOAL, planHumanoidFootstepsBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            FramePose goalPose = new FramePose();
-            lookForGoalBehavior.getGoalPose(goalPose);
-            Tuple3DBasics goalPosition = new Point3D();
-            goalPose.getPosition(goalPosition);
-
-            String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
-            String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
-
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to (" + xString + ", " + yString + ")");
-            sendPacket(p1);
-
-            planHumanoidFootstepsBehavior.setGoalPoseAndFirstSwingSide(goalPose, nextSideToSwing.getEnumValue());
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> takeSomeStepsAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.TAKE_SOME_STEPS, takeSomeStepsBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Taking some Footsteps");
-            sendPacket(p1);
-
-            FootstepDataListMessage footstepDataListMessageForPlan = planHumanoidFootstepsBehavior.getFootstepDataListMessageForPlan(maxNumberOfStepsToTake.getIntegerValue(), swingTime.getDoubleValue(), transferTime.getDoubleValue());
-            takeSomeStepsBehavior.setFootstepsToTake(footstepDataListMessageForPlan);
-
-            nextSideToSwing.set(footstepDataListMessageForPlan.footstepDataList.get(footstepDataListMessageForPlan.footstepDataList.size() - 1).getRobotSide().getOppositeSide());
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> clearPlanarRegionsListAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST, clearPlanarRegionsListBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Clearing Planar Regions List.");
-            sendPacket(p1);
-         }
-      };
-
-      BehaviorAction<WalkOverTerrainState> reachedGoalAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.REACHED_GOAL, reachedGoalBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Reached Goal.");
-            sendPacket(p1);
-         }
-      };
-
-      //setup the state machine
-
-      statemachine.addStateWithDoneTransition(lookForGoalAction, WalkOverTerrainState.SLEEP);
-      statemachine.addStateWithDoneTransition(sleepAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
-      statemachine.addStateWithDoneTransition(lookDownAtTerrainAction, WalkOverTerrainState.PLAN_TO_GOAL);
-      statemachine.addStateWithDoneTransition(planHumanoidFootstepsAction, WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST);
-      statemachine.addStateWithDoneTransition(clearPlanarRegionsListAction, WalkOverTerrainState.TAKE_SOME_STEPS);
-      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.PLAN_TO_GOAL); //REACHED_GOAL);
-//      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
-      //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
-      statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
-
-      //the state machine will transition into this state every time the behavior starts.
-      statemachine.setStartState(WalkOverTerrainState.LOOK_FOR_GOAL);
+   @Override
+   public void onBehaviorAborted()
+   {
 
    }
 
-   private class ClearPlanarRegionsListBehavior extends AbstractBehavior
+   @Override
+   public void onBehaviorPaused()
    {
 
-      public ClearPlanarRegionsListBehavior(CommunicationBridgeInterface communicationBridge)
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(goalPose.get());
+      goalPoseInMidFeetZUpFrame.changeFrame(referenceFrames.getMidFeetZUpFrame());
+      double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(goalPoseInMidFeetZUpFrame.getX(), goalPoseInMidFeetZUpFrame.getY());
+      double yawFromGoal = Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame.getYaw()));
+      return goalXYDistance < 0.2 && yawFromGoal < Math.toRadians(25.0);
+   }
+
+   class WaitState implements State
+   {
+      private static final double initialWaitTime = 5.0;
+      private static final double maxWaitTime = 30.0;
+
+      private final YoDouble waitTime = new YoDouble("waitTime", registry);
+      private final YoBoolean hasWalkedBetweenWaiting = new YoBoolean("hasWalkedBetweenWaiting", registry);
+      private final YoStopwatch stopwatch;
+
+      WaitState(YoDouble yoTime)
       {
-         super(communicationBridge);
+         stopwatch = new YoStopwatch("waitStopWatch", yoTime, registry);
+         stopwatch.start();
+         waitTime.set(initialWaitTime);
       }
 
       @Override
-      public void doControl()
+      public void doAction(double timeInState)
       {
+
       }
 
       @Override
-      public void onBehaviorEntered()
+      public void onEntry()
       {
+         lookDown();
          clearPlanarRegionsList();
+
+         stopwatch.reset();
+
+         if(hasWalkedBetweenWaiting.getBooleanValue())
+         {
+            waitTime.set(initialWaitTime);
+            hasWalkedBetweenWaiting.set(false);
+         }
+         else
+         {
+            waitTime.set(Math.min(maxWaitTime, 2.0 * waitTime.getDoubleValue()));
+         }
+
+         sendTextToSpeechPacket("Waiting for " + waitTime.getDoubleValue() + " seconds");
+      }
+
+      private void lookDown()
+      {
+         AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
+         Quaternion headOrientation = new Quaternion();
+         headOrientation.set(orientationAxisAngle);
+         HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(), referenceFrames.getChestFrame());
+         headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+         sendPacket(headTrajectoryMessage);
+      }
+
+      private void clearPlanarRegionsList()
+      {
+         RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CLEAR);
+         requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
+         sendPacket(requestPlanarRegionsListMessage);
       }
 
       @Override
-      public void onBehaviorAborted()
+      public void onExit()
       {
       }
 
-      @Override
-      public void onBehaviorPaused()
+      boolean isDoneWaiting()
       {
+         return stopwatch.totalElapsed() >= waitTime.getDoubleValue();
       }
-
-      @Override
-      public void onBehaviorResumed()
-      {
-      }
-
-      @Override
-      public void onBehaviorExited()
-      {
-      }
-
-      @Override
-      public boolean isDone()
-      {
-         return true;
-      }
-
    }
 
-   private class LookDownBehavior extends AbstractBehavior
+   class PlanFromDoubleSupportState implements State
    {
-      private PipeLine<BehaviorAction> pipeLine = new PipeLine<>();
+      private final YoBoolean planningRequestHasBeenSent = new YoBoolean("planningRequestHasBeenSent", registry);
 
-      public LookDownBehavior(CommunicationBridge communicationBridge)
+      @Override
+      public void doAction(double timeInState)
       {
-         super(communicationBridge);
-      }
-
-      public void setupPipeLine()
-      {
-         ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-
-         BehaviorAction lookUpAction = new BehaviorAction(atlasPrimitiveActions.headTrajectoryBehavior)
+         if(!goalHasBeenSet())
          {
-            @Override
-            protected void setBehaviorInput()
-            {
-               AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0);
-               Quaternion headOrientation = new Quaternion();
-               headOrientation.set(orientationAxisAngle);
-               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(0.5, headOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-               atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
-            }
-         };
+            return;
+         }
 
-         BehaviorAction lookDownAction = new BehaviorAction(atlasPrimitiveActions.headTrajectoryBehavior)
+         if(!planningRequestHasBeenSent.getBooleanValue())
          {
-            @Override
-            protected void setBehaviorInput()
-            {
-               AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
-               Quaternion headOrientation = new Quaternion();
-               headOrientation.set(orientationAxisAngle);
-               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-               atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
-            }
-         };
+            PrintTools.info("sending planning request...");
+            MovingReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+            FramePoint3D goalPoint = new FramePoint3D(goalPose.get().getPosition());
+            goalPoint.changeFrame(pelvisZUpFrame);
 
-         //ENABLE LIDAR
-         BehaviorAction enableLidarTask = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior)
-         {
-            @Override
-            protected void setBehaviorInput()
-            {
-               atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
-            }
-         };
+            RobotSide initialStanceSide = goalPoint.getY() > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
+            FramePose3D initialStanceFootPose = new FramePose3D(referenceFrames.getSoleFrame(initialStanceSide));
+            initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            sendPlanningRequest(initialStanceFootPose, initialStanceSide);
 
-         //REDUCE LIDAR RANGE *******************************************
-
-         BehaviorAction setLidarMediumRangeTask = new BehaviorAction(atlasPrimitiveActions.setLidarParametersBehavior)
-         {
-            @Override
-            protected void setBehaviorInput()
-            {
-
-               DepthDataFilterParameters param = new DepthDataFilterParameters();
-               param.nearScanRadius = 4.0f;
-               atlasPrimitiveActions.setLidarParametersBehavior.setInput(param);
-            }
-         };
-
-         //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-         BehaviorAction clearLidarTask = new BehaviorAction(atlasPrimitiveActions.clearLidarBehavior);
-
-         final SleepBehavior sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-         BehaviorAction sleepTask = new BehaviorAction(sleepBehavior)
-         {
-            @Override
-            protected void setBehaviorInput()
-            {
-               sleepBehavior.setSleepTime(4.0);
-            }
-         };
-
-         pipeLine.clearAll();
-         //         pipeLine.submitSingleTaskStage(lookUpAction);
-         pipeLine.submitSingleTaskStage(enableLidarTask);
-         pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
-//         pipeLine.submitSingleTaskStage(clearLidarTask);
-//         pipeLine.submitSingleTaskStage(clearPlanarRegionsListTask);
-         pipeLine.submitSingleTaskStage(lookDownAction);
-//         pipeLine.submitSingleTaskStage(sleepTask);
+            planningRequestHasBeenSent.set(true);
+         }
       }
 
       @Override
-      public void doControl()
+      public void onEntry()
       {
-         pipeLine.doControl();
+         planningRequestHasBeenSent.set(false);
       }
 
       @Override
-      public boolean isDone()
+      public void onExit()
       {
-         return pipeLine.isDone();
-      }
-
-      @Override
-      public void onBehaviorEntered()
-      {
-      }
-
-      @Override
-      public void onBehaviorAborted()
-      {
-      }
-
-      @Override
-      public void onBehaviorPaused()
-      {
-      }
-
-      @Override
-      public void onBehaviorResumed()
-      {
-      }
-
-      @Override
-      public void onBehaviorExited()
-      {
+         sendFootstepPlan();
+         PrintTools.info("transitioning to walking");
       }
    }
 
-
-   private void clearPlanarRegionsList()
+   class PlanFromSingleSupportState implements State
    {
-      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.CLEAR);
-      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
-      sendPacket(requestPlanarRegionsListMessage);
+      private final AtomicReference<FootstepStatusMessage> footstepStatus = new AtomicReference<>();
+      private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
+
+      private final FramePose3D touchdownPose = new FramePose3D();
+      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+
+      PlanFromSingleSupportState()
+      {
+         communicationBridge.attachListener(FootstepStatusMessage.class, footstepStatus::set);
+         communicationBridge.attachListener(WalkingStatusMessage.class, packet -> { walkingStatus.set(packet); waitState.hasWalkedBetweenWaiting.set(true);});
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+         FootstepStatusMessage footstepStatus = this.footstepStatus.getAndSet(null);
+         if(footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.STARTED.toByte())
+         {
+            Point3D touchdownPosition = footstepStatus.getDesiredFootPositionInWorld();
+            Quaternion touchdownOrientation = footstepStatus.getDesiredFootOrientationInWorld();
+            touchdownPose.set(touchdownPosition, touchdownOrientation);
+            swingSide.set(footstepStatus.getRobotSide());
+            sendPlanningRequest(touchdownPose, swingSide.getEnumValue());
+         }
+
+         FootstepPlanningToolboxOutputStatus plannerResult = WalkOverTerrainStateMachineBehavior.this.plannerResult.get();
+         if(plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.getFootstepPlanningResult()).validForExecution())
+         {
+            sendFootstepPlan();
+         }
+      }
+
+      @Override
+      public void onEntry()
+      {
+      }
+
+      @Override
+      public void onExit()
+      {
+         footstepStatus.set(null);
+      }
+
+      boolean doneWalking()
+      {
+         return (walkingStatus.get() != null) && (walkingStatus.get().getWalkingStatus() == WalkingStatus.COMPLETED.toByte());
+      }
    }
 
+   private boolean goalHasBeenSet()
+   {
+      return goalPose.get() != null;
+   }
 
+   private void sendFootstepPlan()
+   {
+      FootstepPlanningToolboxOutputStatus plannerResult = this.plannerResult.getAndSet(null);
+      FootstepDataListMessage footstepDataListMessage = plannerResult.getFootstepDataList();
+      footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
+      footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
+
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      communicationBridge.sendPacket(footstepDataListMessage);
+   }
+
+   private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
+   {
+      ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
+      wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
+      communicationBridge.sendPacket(wakeUp);
+
+      planId.increment();
+      FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose.get(), FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      request.getPlanarRegionsListMessage().set(planarRegions.get());
+      request.setTimeout(swingTime.getDoubleValue() - 0.25);
+      request.setPlannerRequestId(planId.getIntegerValue());
+      request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
+      communicationBridge.sendPacket(request);
+      plannerResult.set(null);
+   }
+
+   private void sendTextToSpeechPacket(String text)
+   {
+      sendPacketToUI(MessageTools.createTextToSpeechPacket(text));
+   }
 }

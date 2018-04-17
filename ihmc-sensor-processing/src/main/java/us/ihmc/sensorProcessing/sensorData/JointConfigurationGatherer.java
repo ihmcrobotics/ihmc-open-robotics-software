@@ -3,8 +3,11 @@ package us.ihmc.sensorProcessing.sensorData;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -13,7 +16,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class JointConfigurationGatherer
 {
@@ -90,19 +93,22 @@ public class JointConfigurationGatherer
       rootJoint.getLinearVelocity(rootLinearVelocity);
       rootJoint.getLinearAcceleration(rootLinearAcceleration);
 
-      jointConfigurationData.setPelvisAngularVelocity(rootAngularVelocity);
-      jointConfigurationData.setPelvisLinearVelocity(rootLinearVelocity);
-      jointConfigurationData.setPelvisLinearAcceleration(rootLinearAcceleration);
-      jointConfigurationData.setRootTranslation(rootTranslation);
-      jointConfigurationData.setRootOrientation(rootOrientation);
-      jointConfigurationData.setJointState(joints);
+      jointConfigurationData.getPelvisAngularVelocity().set(rootAngularVelocity);
+      jointConfigurationData.getPelvisLinearVelocity().set(rootLinearVelocity);
+      jointConfigurationData.getPelvisLinearAcceleration().set(rootLinearAcceleration);
+      jointConfigurationData.getRootTranslation().set(rootTranslation);
+      jointConfigurationData.getRootOrientation().set(rootOrientation);
+      RobotConfigurationDataFactory.packJointState(jointConfigurationData, joints);
       jointConfigurationData.setTimestamp(timestamp);
-      jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
+      jointConfigurationData.setSensorHeadPpsTimestamp(sensorHeadPPSTimestamp);
+
+      RecyclingArrayListPubSub<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
+      momentAndForceDataAllForceSensors.clear();
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         float[] forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
-         forceSensorDataList.get(sensorNumber).getWrench(forceAndMomentVector);
+         SpatialVectorMessage wrench = momentAndForceDataAllForceSensors.add();
+         forceSensorDataList.get(sensorNumber).getWrench(wrench.getAngularPart(), wrench.getLinearPart());
       }
    }
 
