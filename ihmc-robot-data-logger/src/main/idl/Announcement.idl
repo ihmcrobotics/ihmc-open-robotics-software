@@ -33,6 +33,7 @@ module robotDataLogger{
 		
 		string name;
 		string hostName;
+		string reconnectKey;
 		sequence<CameraAnnouncement, 127> cameras;
 		ModelFileDescription modelFileDescription;
 		

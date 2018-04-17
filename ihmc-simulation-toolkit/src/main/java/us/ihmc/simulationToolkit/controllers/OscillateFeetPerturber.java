@@ -4,13 +4,13 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
 
 public class OscillateFeetPerturber extends ModularRobotController
@@ -18,11 +18,11 @@ public class OscillateFeetPerturber extends ModularRobotController
    private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
    private final SideDependentList<List<GroundContactPoint>> groundContactPointsMap = new SideDependentList<List<GroundContactPoint>>();
 
-   private final YoFrameVector translationMagnitude;
-   private final YoFrameOrientation rotationMagnitude;
+   private final YoFrameVector3D translationMagnitude;
+   private final YoFrameYawPitchRoll rotationMagnitude;
 
-   private final SideDependentList<YoFrameVector> translationPhases = new SideDependentList<YoFrameVector>();
-   private final SideDependentList<YoFrameVector> rotationPhasesEuler = new SideDependentList<YoFrameVector>();
+   private final SideDependentList<YoFrameVector3D> translationPhases = new SideDependentList<YoFrameVector3D>();
+   private final SideDependentList<YoFrameVector3D> rotationPhasesEuler = new SideDependentList<YoFrameVector3D>();
    
    private final SideDependentList<double[]> translationFrequenciesHz = new SideDependentList<double[]>();
    private final SideDependentList<double[]> rotationFrequenciesHzYawPitchRoll = new SideDependentList<double[]>();
@@ -40,8 +40,8 @@ public class OscillateFeetPerturber extends ModularRobotController
       {
          groundContactPointsMap.put(robotSide, robot.getFootGroundContactPoints(robotSide));
          
-         YoFrameVector translationPhase = new YoFrameVector(robotSide.getLowerCaseName() + "TranslationPhase", null, registry);
-         YoFrameVector rotationPhaseEuler = new YoFrameVector(robotSide.getLowerCaseName() + "RotationPhase", null, registry);
+         YoFrameVector3D translationPhase = new YoFrameVector3D(robotSide.getLowerCaseName() + "TranslationPhase", null, registry);
+         YoFrameVector3D rotationPhaseEuler = new YoFrameVector3D(robotSide.getLowerCaseName() + "RotationPhase", null, registry);
          
          double[] translationalFreqHz = new double[3];
          double[] rotationFreqHzYawPitchRoll = new double[3];
@@ -53,8 +53,8 @@ public class OscillateFeetPerturber extends ModularRobotController
          rotationFrequenciesHzYawPitchRoll.put(robotSide,  rotationFreqHzYawPitchRoll);
       }
 
-      translationMagnitude = new YoFrameVector(name + "TranslationMagnitude", ReferenceFrame.getWorldFrame(), registry);
-      rotationMagnitude = new YoFrameOrientation(name + "TotationMagnitude", ReferenceFrame.getWorldFrame(), registry);
+      translationMagnitude = new YoFrameVector3D(name + "TranslationMagnitude", ReferenceFrame.getWorldFrame(), registry);
+      rotationMagnitude = new YoFrameYawPitchRoll(name + "TotationMagnitude", ReferenceFrame.getWorldFrame(), registry);
 
       GroundContactPointsSlipper leftSlipper = new GroundContactPointsSlipper("left");
       GroundContactPointsSlipper rightSlipper = new GroundContactPointsSlipper("right");
@@ -107,8 +107,8 @@ public class OscillateFeetPerturber extends ModularRobotController
 
    private void startSlipping(RobotSide robotSide)
    {
-      YoFrameVector translationPhase = translationPhases.get(robotSide);
-      YoFrameVector rotationPhaseEuler = rotationPhasesEuler.get(robotSide);
+      YoFrameVector3D translationPhase = translationPhases.get(robotSide);
+      YoFrameVector3D rotationPhaseEuler = rotationPhasesEuler.get(robotSide);
       
       double[] translationFreqHz = translationFrequenciesHz.get(robotSide);
       double[] rotationFreqHzYawPitchRoll = rotationFrequenciesHzYawPitchRoll.get(robotSide);
@@ -128,7 +128,7 @@ public class OscillateFeetPerturber extends ModularRobotController
       rotationPhaseEuler.setZ(rotationPhaseEuler.getZ() + 2.0  * Math.PI * rotationFreqHzYawPitchRoll[0] * deltaT);
 
       
-      Vector3D nextTranslationToSlip = translationMagnitude.getVector3dCopy();
+      Vector3D nextTranslationToSlip = new Vector3D(translationMagnitude);
       nextTranslationToSlip.setX(nextTranslationToSlip.getX() * (2.0 * Math.PI * translationFreqHz[0] * Math.sin(translationPhase.getX()) * deltaT));
       nextTranslationToSlip.setY(nextTranslationToSlip.getY() * (2.0 * Math.PI * translationFreqHz[1] * Math.sin(translationPhase.getY()) * deltaT));
       nextTranslationToSlip.setZ(nextTranslationToSlip.getZ() * (2.0 * Math.PI * translationFreqHz[2] * Math.sin(translationPhase.getZ()) * deltaT));
@@ -145,10 +145,10 @@ public class OscillateFeetPerturber extends ModularRobotController
 
    private void stopSlipping(RobotSide robotSide)
    {
-       YoFrameVector translationPhase = translationPhases.get(robotSide);
+       YoFrameVector3D translationPhase = translationPhases.get(robotSide);
        translationPhase.setToZero();
        
-       YoFrameVector rotationPhaseEuler = rotationPhasesEuler.get(robotSide);
+       YoFrameVector3D rotationPhaseEuler = rotationPhasesEuler.get(robotSide);
        rotationPhaseEuler.setToZero();
    }
    

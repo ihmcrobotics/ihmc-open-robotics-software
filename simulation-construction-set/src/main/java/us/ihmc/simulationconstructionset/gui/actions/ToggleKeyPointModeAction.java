@@ -1,23 +1,27 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.net.URL;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
 import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
 import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
+
+import javax.swing.*;
 
 public class ToggleKeyPointModeAction extends AbstractAction implements ToggleKeyPointModeCommandListener
 {
    private static final long serialVersionUID = 1500047530568017379L;
-   private URL iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKey.gif");
-   private ImageIcon icon = new ImageIcon(iconURL);
+   
+   private final String iconFilename = "icons/ToggleKeyMode.png";
+   private final String altFilename = "icons/ToggleKeyModePressed.png";
+   
+   private Image iconImage = AbstractActionTools.loadActionImageUsingInputStream(this, iconFilename);
+   private Image altImage = AbstractActionTools.loadActionImageUsingInputStream(this, altFilename);
+   
+   private ImageIcon icon = new ImageIcon(iconImage);
 
    private ToggleKeyPointModeCommandExecutor executor;
-
 
    public ToggleKeyPointModeAction(ToggleKeyPointModeCommandExecutor executor)
    {
@@ -25,28 +29,24 @@ public class ToggleKeyPointModeAction extends AbstractAction implements ToggleKe
       this.executor = executor;
 
       this.putValue(Action.SMALL_ICON, icon);
-
       // this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_F));
       this.putValue(Action.LONG_DESCRIPTION, "Long Description");
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
 
       executor.registerToggleKeyPointModeCommandListener(this);
    }
+      
 
    @Override
    public void updateKeyPointModeStatus()
    {
       if (executor.isKeyPointModeToggled())
       {
-         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKeyPressed.gif");
-         ImageIcon tmp = new ImageIcon(iconURL);
-         icon.setImage(tmp.getImage());
+         icon.setImage(iconImage);
       }
       else
       {
-         iconURL = ToggleKeyPointModeAction.class.getClassLoader().getResource("icons/toggleKey.gif");
-         ImageIcon tmp = new ImageIcon(iconURL);
-         icon.setImage(tmp.getImage());
+         icon.setImage(altImage);
       }
    }
 
@@ -59,11 +59,10 @@ public class ToggleKeyPointModeAction extends AbstractAction implements ToggleKe
    @Override
    public void closeAndDispose()
    {
-      iconURL = null;
+      iconImage = null;
+      altImage = null;
       icon = null;
       if (executor != null) executor.closeAndDispose();
       executor = null;
    }
-
-
 }

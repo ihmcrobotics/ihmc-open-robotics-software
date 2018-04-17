@@ -9,28 +9,28 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
@@ -48,7 +48,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
    private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
-   private final YoFramePoint trajectoryPosition;
+   private final YoFramePoint3D trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
@@ -59,7 +59,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final SphereWithConvexPolygonIntersector sphereWithConvexPolygonIntersector;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D> closestPolygonPointMap;
    private final FrameSphere3d footCollisionSphere;
-   private final FrameConvexPolygon2d framePlanarRegion;
+   private final FrameConvexPolygon2D framePlanarRegion;
    private final TransformReferenceFrame planarRegionReferenceFrame;
    private final FramePoint3D midGroundPoint;
    private final Vector3D waypointAdjustmentVector;
@@ -118,7 +118,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
-      trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
+      trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
@@ -130,7 +130,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
       }
       footCollisionSphere = new FrameSphere3d();
-      framePlanarRegion = new FrameConvexPolygon2d();
+      framePlanarRegion = new FrameConvexPolygon2D();
       planarRegionReferenceFrame = new TransformReferenceFrame("planarRegionReferenceFrame", WORLD);
       midGroundPoint = new FramePoint3D();
       waypointAdjustmentVector = new Vector3D();
@@ -159,18 +159,18 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
-   public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose,
-                                                 FramePose swingEndPose, PlanarRegionsList planarRegionsList)
+   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose,
+                                                 FramePose3D swingEndPose, PlanarRegionsList planarRegionsList)
    {
-      stanceFootPose.getPositionIncludingFrame(stanceFootPosition);
+      stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
       stanceFootPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
 
-      swingStartPose.getPositionIncludingFrame(swingStartPosition);
+      swingStartPosition.setIncludingFrame(swingStartPose.getPosition());
       swingStartPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setInitialConditions(swingStartPosition, initialVelocity);
 
-      swingEndPose.getPositionIncludingFrame(swingEndPosition);
+      swingEndPosition.setIncludingFrame(swingEndPose.getPosition());
       swingEndPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
@@ -191,23 +191,23 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       adjustSwingEndIfCoincidentWithSwingStart();
 
-      waypointAdjustmentPlane.set(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
+      waypointAdjustmentPlane.set(swingStartPosition, adjustedWaypoints.get(0), swingEndPosition);
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
       rigidBodyTransform.setRotation(axisAngle);
-      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       rigidBodyTransform.transform(tempPlaneNormal);
       tempPlaneNormal.normalize();
-      swingFloorPlane.set(swingStartPosition.getPoint(), tempPlaneNormal);
+      swingFloorPlane.set(swingStartPosition, tempPlaneNormal);
 
-      tempPlaneNormal.sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
+      tempPlaneNormal.sub(swingEndPosition, swingStartPosition);
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition);
       swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
 
-      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition);
       swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
@@ -246,10 +246,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       for (double time = 0.0; time < 1.0; time += stepAmount)
       {
          twoWaypointSwingGenerator.compute(time);
-         FramePoint3D frameTupleUnsafe = trajectoryPosition.getFrameTuple();
+         FramePoint3D frameTupleUnsafe = new FramePoint3D(trajectoryPosition);
          twoWaypointSwingGenerator.getPosition(frameTupleUnsafe);
-         trajectoryPosition.setWithoutChecks(frameTupleUnsafe);
-         solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition.getFrameTuple());
+         trajectoryPosition.set(frameTupleUnsafe);
+         solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition);
 
          footCollisionSphere.setToZero(WORLD);
          footCollisionSphere.setRadius(collisionSphereRadius);
@@ -276,13 +276,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                {
                   updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE);
 
-                  if (swingFloorPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
-                        && swingFloorPlane.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()) > ignoreDistanceFromFloor)
+                  if (swingFloorPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
+                        && swingFloorPlane.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) > ignoreDistanceFromFloor)
                   {
                      updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY);
 
-                     if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
-                           && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()))
+                     if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
+                           && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()))
                            || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPosition()))
                      {
                         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.CRITICAL_INTERSECTION);
@@ -290,14 +290,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                         axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI * time);
                         rigidBodyTransform.setRotation(axisAngle);
 
-                        waypointAdjustmentVector.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+                        waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
                         waypointAdjustmentVector.normalize();
                         rigidBodyTransform.transform(waypointAdjustmentVector);
                         waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());
                         waypointAdjustmentVector.scale(1.0 - time);
                         adjustedWaypoints.get(0).add(waypointAdjustmentVector);
 
-                        waypointAdjustmentVector.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+                        waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
                         waypointAdjustmentVector.normalize();
                         rigidBodyTransform.transform(waypointAdjustmentVector);
                         waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());

@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public class ConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
@@ -53,7 +53,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)

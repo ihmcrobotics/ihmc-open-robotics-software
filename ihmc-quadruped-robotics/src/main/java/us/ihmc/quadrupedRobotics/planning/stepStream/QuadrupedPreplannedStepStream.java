@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
@@ -11,9 +12,9 @@ import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
@@ -22,38 +23,34 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final YoDouble timestamp;
-   private final YoFrameOrientation bodyOrientation;
+   private final YoFrameYawPitchRoll bodyOrientation;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
-   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoVariableRegistry parentRegistry)
+   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames,
+                                        YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       this.preplannedStepProvider = preplannedStepProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
-      this.bodyOrientation = new YoFrameOrientation("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
-      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,
-            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
-            {
-               @Override
-               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
-               {
-                  return new YoQuadrupedTimedStep(prefix, registry);
-               }
-            });
+      this.bodyOrientation = new YoFrameYawPitchRoll("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
+      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
 
-      if (parentRegistry != null)
-      {
-         parentRegistry.addChild(registry);
-      }
+      parentRegistry.addChild(registry);
    }
 
    @Override
    public void onEntry()
    {
+      updateStepSequence();
+   }
+
+   private void updateStepSequence()
+   {
       double currentTime = timestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = preplannedStepProvider.isStepPlanExpressedInAbsoluteTime();
-      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
+      List<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
+
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)
       {
@@ -67,13 +64,15 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
          }
       }
       TimeIntervalTools.sortByEndTime(stepSequence);
-
       bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
    @Override
    public void process()
    {
+      if(preplannedStepProvider.isStepPlanAvailable())
+         updateStepSequence();
+
       // dequeue completed steps
       double currentTime = timestamp.getDoubleValue();
       TimeIntervalTools.removeEndTimesLessThan(currentTime, stepSequence);
@@ -91,6 +90,12 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    public void getBodyOrientation(FrameQuaternion bodyOrientation)
    {
       bodyOrientation.setIncludingFrame(this.bodyOrientation.getFrameOrientation());
+   }
+
+   @Override
+   public FrameQuaternionReadOnly getBodyOrientation()
+   {
+      return bodyOrientation.getFrameOrientation();
    }
 
    @Override

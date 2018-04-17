@@ -13,7 +13,6 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-// moved to in development
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
@@ -31,8 +30,8 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 48.9)
-   @Test(timeout = 80000)
+   @ContinuousIntegrationTest(estimatedDuration = 84.4)
+   @Test(timeout = 420000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverEasySteppingStones();

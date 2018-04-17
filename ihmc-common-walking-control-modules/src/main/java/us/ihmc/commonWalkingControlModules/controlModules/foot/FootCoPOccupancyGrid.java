@@ -4,26 +4,27 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -45,15 +46,15 @@ public class FootCoPOccupancyGrid
    private final YoInteger currentYIndex;
    private final YoBoolean areCurrentCoPIndicesValid;
 
-   private final YoFramePoint[][] cellViz;
+   private final YoFramePoint3D[][] cellViz;
 
-   private final YoFrameVector2d cellSize;
+   private final YoFrameVector2D cellSize;
    private final YoDouble cellArea;
 
    private final ReferenceFrame soleFrame;
    private final Point2D tempPoint = new Point2D();
    private final FramePoint2D gridOrigin = new FramePoint2D();
-   private final FrameConvexPolygon2d gridBoundaries = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D gridBoundaries = new FrameConvexPolygon2D();
 
    private final double footLength;
    private final double footWidth;
@@ -107,20 +108,20 @@ public class FootCoPOccupancyGrid
       currentYIndex = new YoInteger(namePrefix + "CurrentYIndex", registry);
       areCurrentCoPIndicesValid = new YoBoolean(namePrefix + "IsCurrentCoPIndicesValid", registry);
 
-      cellSize = new YoFrameVector2d(namePrefix + "CellSize", soleFrame, registry);
+      cellSize = new YoFrameVector2D(namePrefix + "CellSize", soleFrame, registry);
       cellArea = new YoDouble(namePrefix + "CellArea", registry);
 
       setupChangedGridParameterListeners();
 
       if (VISUALIZE)
       {
-         cellViz = new YoFramePoint[nLengthSubdivisions][nWidthSubdivisions];
+         cellViz = new YoFramePoint3D[nLengthSubdivisions][nWidthSubdivisions];
          for (int i = 0; i < cellViz.length; i++)
          {
             for (int j = 0; j < cellViz[0].length; j++)
             {
                String namePrefix2 = "CellViz_X" + String.valueOf(i) + "Y" + String.valueOf(j);
-               YoFramePoint pointForViz = new YoFramePoint(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoint3D pointForViz = new YoFramePoint3D(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
                pointForViz.setToNaN();
                cellViz[i][j] = pointForViz;
                YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.004, YoAppearance.Orange());
@@ -196,10 +197,7 @@ public class FootCoPOccupancyGrid
    public void registerCenterOfPressureLocation(FramePoint2D copToRegister)
    {
       copToRegister.checkReferenceFrameMatch(soleFrame);
-      copToRegister.get(tempPoint);
-
-      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
-      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
+      tempPoint.sub(copToRegister, gridOrigin);
 
       int xIndex = findXIndex(tempPoint.getX());
       int yIndex = findYIndex(tempPoint.getY());
@@ -220,7 +218,7 @@ public class FootCoPOccupancyGrid
             {
                getCellCenter(cellCenter, xIndex, yIndex);
                cellPosition.setIncludingFrame(cellCenter, 0.0);
-               cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
+               cellViz[xIndex][yIndex].setMatchingFrame(cellPosition);
             }
 
          }
@@ -256,9 +254,7 @@ public class FootCoPOccupancyGrid
    public boolean isCellAtLocationOccupied(FramePoint2D location)
    {
       location.checkReferenceFrameMatch(soleFrame);
-      location.get(tempPoint);
-      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
-      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
+      tempPoint.sub(location, gridOrigin);
 
       int xIndex = findXIndex(tempPoint.getX());
       int yIndex = findYIndex(tempPoint.getY());
@@ -298,7 +294,7 @@ public class FootCoPOccupancyGrid
       return true;
    }
 
-   private final FrameLine2d shiftedLine = new FrameLine2d();
+   private final FrameLine2D shiftedLine = new FrameLine2D();
    private final FrameVector2D shiftedLineVector = new FrameVector2D();
    private final FramePoint2D shiftedLinePoint = new FramePoint2D();
    private final FrameVector2D shiftingVector = new FrameVector2D();
@@ -310,19 +306,19 @@ public class FootCoPOccupancyGrid
     * @param sideToLookAt
     * @return
     */
-   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2d frameLine, RobotSide sideToLookAt)
+   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2D frameLine, RobotSide sideToLookAt)
    {
       return computeNumberOfCellsOccupiedOnSideOfLine(frameLine, sideToLookAt, 0.0);
    }
 
-   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2d frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
+   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2D frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
    {
       // First create a shifted line towards the sideToLookAt such that we don't check the cells for which the line goes through.
       frameLine.checkReferenceFrameMatch(soleFrame);
-      frameLine.getNormalizedFrameVector(shiftingVector);
+      shiftingVector.setIncludingFrame(frameLine.getDirection());
 
-      frameLine.getFramePoint2d(shiftedLinePoint);
-      frameLine.getNormalizedFrameVector(shiftedLineVector);
+      shiftedLinePoint.setIncludingFrame(frameLine.getPoint());
+      shiftedLineVector.setIncludingFrame(frameLine.getDirection());
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
@@ -349,7 +345,7 @@ public class FootCoPOccupancyGrid
          for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
          {
             getCellCenter(cellCenter, xIndex, yIndex);
-            if (shiftedLine.isPointOnSideOfLine(cellCenter, sideToLookAt))
+            if (shiftedLine.isPointOnSideOfLine(cellCenter, sideToLookAt == RobotSide.LEFT))
                numberOfCellsActivatedOnSideToLookAt += occupancyGrid.get(xIndex, yIndex);
          }
       }
@@ -363,17 +359,17 @@ public class FootCoPOccupancyGrid
     * @param sideToLookAt
     * @return
     */
-   public int computeNumberOfCellsOccupiedOnSideOfLineSmarter(FrameLine2d frameLine, RobotSide sideToLookAt)
+   public int computeNumberOfCellsOccupiedOnSideOfLineSmarter(FrameLine2D frameLine, RobotSide sideToLookAt)
    {
       int returnFailure = -1;
 
       // First create a shifted line towards the sideToLookAt such that we don't check the cells for which the line goes through.
 
       frameLine.checkReferenceFrameMatch(soleFrame);
-      frameLine.getNormalizedFrameVector(shiftingVector);
+      shiftingVector.setIncludingFrame(frameLine.getDirection());
 
-      frameLine.getFramePoint2d(shiftedLinePoint);
-      frameLine.getNormalizedFrameVector(shiftedLineVector);
+      shiftedLinePoint.setIncludingFrame(frameLine.getPoint());
+      shiftedLineVector.setIncludingFrame(frameLine.getDirection());
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
@@ -396,7 +392,7 @@ public class FootCoPOccupancyGrid
       // I tried to make it clever such that this algorithm doesn't check every of the cells
 
       // Get the intersections
-      FramePoint2D[] intersections = gridBoundaries.intersectionWith(shiftedLine);
+      FramePoint2DBasics[] intersections = gridBoundaries.intersectionWith(shiftedLine);
 
       if (intersections == null || intersections.length == 1)
          return returnFailure;
@@ -511,7 +507,7 @@ public class FootCoPOccupancyGrid
                {
                   getCellCenter(cellCenter, xIndex, yIndex);
                   cellPosition.setIncludingFrame(cellCenter, 0.0);
-                  cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
+                  cellViz[xIndex][yIndex].setMatchingFrame(cellPosition);
                }
                else
                {
@@ -523,7 +519,7 @@ public class FootCoPOccupancyGrid
    }
 
    private final FramePoint2D tempCellCenter = new FramePoint2D();
-   public void computeConvexHull(FrameConvexPolygon2d convexHullToPack)
+   public void computeConvexHull(FrameConvexPolygon2D convexHullToPack)
    {
       convexHullToPack.clear(soleFrame);
       tempCellCenter.setToZero(soleFrame);
@@ -553,7 +549,7 @@ public class FootCoPOccupancyGrid
    private final FramePoint2D pointA = new FramePoint2D();
    private final FramePoint2D pointB = new FramePoint2D();
 
-   public boolean fitLineToData(FrameLine2d lineToPack)
+   public boolean fitLineToData(FrameLine2D lineToPack)
    {
       // TODO: instead of counting keep track of number of occupied positions
       int numberOfPoints = 0;
@@ -585,7 +581,7 @@ public class FootCoPOccupancyGrid
                }
             }
          }
-         lineToPack.set(pointA, pointB);
+         lineToPack.setIncludingFrame(pointA, pointB);
          return true;
       }
 
@@ -621,7 +617,7 @@ public class FootCoPOccupancyGrid
 
       lineToPack.setToZero(soleFrame);
       lineToPack.setPoint(lineOrigin);
-      lineToPack.setVector(lineDirection);
+      lineToPack.setDirection(lineDirection);
       return true;
    }
 }

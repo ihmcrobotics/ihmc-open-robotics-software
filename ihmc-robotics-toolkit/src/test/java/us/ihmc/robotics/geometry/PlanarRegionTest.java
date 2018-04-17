@@ -13,10 +13,14 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,12 +28,14 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.random.RandomGeometry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PlanarRegionTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -107,7 +113,7 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testIsPointOnOrSlightlyAbove()
    {
@@ -142,7 +148,7 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testIsPointOnOrSlightlyBelow()
    {
@@ -456,7 +462,7 @@ public class PlanarRegionTest
       // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
       LineSegment2D lineSegment = new LineSegment2D(0.0, 0.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
-      ArrayList<Point2D[]> intersectionsInPlaneFrame = new ArrayList<>();
+      List<Point2DBasics[]> intersectionsInPlaneFrame = new ArrayList<>();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(3, intersectionsInPlaneFrame.size());
 
@@ -471,7 +477,7 @@ public class PlanarRegionTest
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(2, intersectionsInPlaneFrame.size());
-      Point2D[] points = intersectionsInPlaneFrame.get(0);
+      Point2DBasics[] points = intersectionsInPlaneFrame.get(0);
       assertEquals(1, points.length);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       points = intersectionsInPlaneFrame.get(1);
@@ -629,67 +635,67 @@ public class PlanarRegionTest
 
          // Do a bunch of trivial queries with isPointInside(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 0.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 0.0, 2.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
-         assertFalse(planarRegion.isPointInside(point2d.getPoint()));
+         assertFalse(planarRegion.isPointInside(point2d));
 
          FramePoint3D point3d = new FramePoint3D();
          double maximumOrthogonalDistance = 1.0e-3;
          // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, 0.0);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 2.0, 0.0);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point below plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, -0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, -0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, -0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, -1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, -1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, -1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point above plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, 0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, 0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, 1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, 1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
-         assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
+         assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
 
          // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(double, double) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
@@ -708,34 +714,34 @@ public class PlanarRegionTest
          // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 0.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 0.0, 2.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
 
          // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3D) method.
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
          point3d.setZ(Double.POSITIVE_INFINITY);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
          point3d.setIncludingFrame(localFrame, 2.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
          point3d.setZ(Double.POSITIVE_INFINITY);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, 0.0);
          point3d.changeFrame(worldFrame);
          point3d.setZ(Double.POSITIVE_INFINITY);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
          point3d.setIncludingFrame(localFrame, 2.0, 2.0, 0.0);
          point3d.changeFrame(worldFrame);
          point3d.setZ(Double.POSITIVE_INFINITY);
-         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d.getPoint()));
+         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
 
          ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
          convexPolygon.addVertex(0.2, 0.2);
@@ -760,7 +766,8 @@ public class PlanarRegionTest
 
          for (ConvexPolygon2D convexPolygon2d : regionConvexPolygons)
          {
-            ConvexPolygon2D convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
+            ConvexPolygon2D convexPolygon2dInWorld = new ConvexPolygon2D(convexPolygon2d);
+            convexPolygon2dInWorld.applyTransform(transformToWorld, false);
             for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
             {
                Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
@@ -850,16 +857,16 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.5), 1e-7));
    }
 
-   static ConvexPolygon2D translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2D convexPolygon)
+   static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
    {
       Vector2D translation = new Vector2D(xTranslation, yTranslation);
       return convexPolygon.translateCopy(translation);
    }
 
-   private static ConvexPolygon2D transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2D convexPolygon)
+   private static ConvexPolygon2D transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2DReadOnly convexPolygon2D)
    {
-      ConvexPolygon2D transformedConvexPolygon = new ConvexPolygon2D(convexPolygon);
-      transformedConvexPolygon.applyTransformAndProjectToXYPlane(transform);
+      ConvexPolygon2D transformedConvexPolygon = new ConvexPolygon2D(convexPolygon2D);
+      transformedConvexPolygon.applyTransform(transform, false);
       return transformedConvexPolygon;
    }
 

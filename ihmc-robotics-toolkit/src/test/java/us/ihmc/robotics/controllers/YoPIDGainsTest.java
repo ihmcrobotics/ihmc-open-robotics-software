@@ -8,8 +8,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class YoPIDGainsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -24,7 +28,6 @@ public class YoPIDGainsTest
          double kp = random.nextDouble() * 100;
          double kd = random.nextDouble() * 100;
          double ki = random.nextDouble() * 100;
-         double maxOutput = random.nextDouble() * 100;
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
@@ -34,30 +37,27 @@ public class YoPIDGainsTest
          pidGains.setKp(kp);
          pidGains.setKd(kd);
          pidGains.setKi(ki);
-         pidGains.setMaximumOutput(maxOutput);
          pidGains.setMaximumFeedback(maxAcc);
          pidGains.setMaximumFeedbackRate(maxJerk);
          pidGains.setMaximumIntegralError(maxIntegralError);
          pidGains.setIntegralLeakRatio(integratorLeakRatio);
          pidGains.setZeta(zeta);
-         
-         
+
+
          assertEquals(kp, pidGains.getKp(), 1e-6);
          assertEquals(kd, pidGains.getKd(), 1e-6);
          assertEquals(kp, pidGains.getYoKp().getDoubleValue(), 1e-6);
          assertEquals(kd, pidGains.getYoKd().getDoubleValue(), 1e-6);
          assertEquals(ki, pidGains.getYoKi().getDoubleValue(), 1e-6);
-         assertEquals(maxOutput, pidGains.getMaximumOutput(), 1e-6);
          assertEquals(maxAcc, pidGains.getMaximumFeedback(), 1e-6);
          assertEquals(maxJerk, pidGains.getMaximumFeedbackRate(), 1e-6);
-         assertEquals(maxOutput, pidGains.getYoMaximumOutput().getDoubleValue(), 1e-6);
          assertEquals(maxAcc, pidGains.getYoMaximumFeedback().getDoubleValue(), 1e-6);
          assertEquals(maxJerk, pidGains.getYoMaximumFeedbackRate().getDoubleValue(), 1e-6);
          assertEquals(integratorLeakRatio, pidGains.getYoIntegralLeakRatio().getDoubleValue(), 1e-6);
          assertEquals(zeta, pidGains.getZeta(), 1e-6);
       }
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testParameters_2()
@@ -70,39 +70,35 @@ public class YoPIDGainsTest
          double kp = random.nextDouble() * 100;
          double kd = random.nextDouble() * 100;
          double ki = random.nextDouble() * 100;
-         double maxOutput = random.nextDouble() * 100;
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
          double integratorLeakRatio = random.nextDouble();
          double zeta = random.nextDouble() * 100;
-         
+
          pidGains.setPDGains(kp, zeta);
          pidGains.setKd(kd);
          pidGains.setKi(ki);
-         pidGains.setMaximumOutput(maxOutput);
          pidGains.setMaximumFeedback(maxAcc);
          pidGains.setMaximumFeedbackRate(maxJerk);
          pidGains.setMaximumIntegralError(maxIntegralError);
          pidGains.setIntegralLeakRatio(integratorLeakRatio);
 
-         
+
          assertEquals(kp, pidGains.getKp(), 1e-6);
          assertEquals(kd, pidGains.getKd(), 1e-6);
          assertEquals(kp, pidGains.getYoKp().getDoubleValue(), 1e-6);
          assertEquals(kd, pidGains.getYoKd().getDoubleValue(), 1e-6);
          assertEquals(ki, pidGains.getYoKi().getDoubleValue(), 1e-6);
-         assertEquals(maxOutput, pidGains.getMaximumOutput(), 1e-6);
          assertEquals(maxAcc, pidGains.getMaximumFeedback(), 1e-6);
          assertEquals(maxJerk, pidGains.getMaximumFeedbackRate(), 1e-6);
-         assertEquals(maxOutput, pidGains.getYoMaximumOutput().getDoubleValue(), 1e-6);
          assertEquals(maxAcc, pidGains.getYoMaximumFeedback().getDoubleValue(), 1e-6);
          assertEquals(maxJerk, pidGains.getYoMaximumFeedbackRate().getDoubleValue(), 1e-6);
          assertEquals(integratorLeakRatio, pidGains.getYoIntegralLeakRatio().getDoubleValue(), 1e-6);
          assertEquals(zeta, pidGains.getZeta(), 1e-6);
       }
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testParameters_3()
@@ -115,16 +111,14 @@ public class YoPIDGainsTest
          double kp = random.nextDouble() * 100;
          double kd = random.nextDouble() * 100;
          double ki = random.nextDouble() * 100;
-         double maxOutput = random.nextDouble() * 100;
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
          double integratorLeakRatio = random.nextDouble();
          double zeta = random.nextDouble() * 100;
-         
+
          pidGains.setPIDGains(kp, zeta, ki, maxIntegralError);
          pidGains.setKd(kd);
-         pidGains.setMaximumOutput(maxOutput);
          pidGains.setMaximumFeedback(maxAcc);
          pidGains.setMaximumFeedbackRate(maxJerk);
          pidGains.setIntegralLeakRatio(integratorLeakRatio);
@@ -134,10 +128,8 @@ public class YoPIDGainsTest
          assertEquals(kp, pidGains.getYoKp().getDoubleValue(), 1e-6);
          assertEquals(kd, pidGains.getYoKd().getDoubleValue(), 1e-6);
          assertEquals(ki, pidGains.getYoKi().getDoubleValue(), 1e-6);
-         assertEquals(maxOutput, pidGains.getMaximumOutput(), 1e-6);
          assertEquals(maxAcc, pidGains.getMaximumFeedback(), 1e-6);
          assertEquals(maxJerk, pidGains.getMaximumFeedbackRate(), 1e-6);
-         assertEquals(maxOutput, pidGains.getYoMaximumOutput().getDoubleValue(), 1e-6);
          assertEquals(maxAcc, pidGains.getYoMaximumFeedback().getDoubleValue(), 1e-6);
          assertEquals(maxJerk, pidGains.getYoMaximumFeedbackRate().getDoubleValue(), 1e-6);
          assertEquals(zeta, pidGains.getZeta(), 1e-6);

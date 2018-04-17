@@ -1,5 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -10,35 +14,33 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class PushAndWalkBehavior extends AbstractBehavior
 {
    private final ConcurrentListeningQueue<CapturabilityBasedStatus> statusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
-   private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("DesiredICP", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("ICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("DesiredICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("ICP", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoGraphicPosition desiredCapturePointViz;
    private final YoGraphicPosition capturePointViz;
@@ -113,21 +115,21 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (walkingStatusQueue.isNewPacketAvailable())
       {
          WalkingStatusMessage latestPacket = walkingStatusQueue.getLatestPacket();
-         Status walkingStatus = latestPacket.getWalkingStatus();
-         walking.set(walkingStatus != Status.COMPLETED);
+         WalkingStatus walkingStatus = WalkingStatus.fromByte(latestPacket.getWalkingStatus());
+         walking.set(walkingStatus != WalkingStatus.COMPLETED);
          walkingStatusQueue.clear();
       }
 
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2D desiredCapturePoint = latestPacket.getDesiredCapturePoint();
-         FramePoint2D capturePoint = latestPacket.getCapturePoint();
+         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.getDesiredCapturePoint2d());
+         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.getCapturePoint2d());
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)
          {
-            doubleSupport &= !latestPacket.getFootSupportPolygon(robotSide).isEmpty();
+            doubleSupport &= !HumanoidMessageTools.unpackFootSupportPolygon(latestPacket, robotSide).isEmpty();
          }
 
          double error = desiredCapturePoint.distance(capturePoint);
@@ -139,13 +141,13 @@ public class PushAndWalkBehavior extends AbstractBehavior
          if (doubleSupport && shouldWalk && !walking.getBooleanValue())
          {
             Vector2D direction = new Vector2D();
-            direction.sub(capturePoint.getPoint(), desiredCapturePoint.getPoint());
+            direction.sub(capturePoint, desiredCapturePoint);
             direction.normalize();
             takeSteps(direction);
          }
 
-         yoDesiredCapturePoint.setAndMatchFrame(desiredCapturePoint);
-         yoCapturePoint.setAndMatchFrame(capturePoint);
+         yoDesiredCapturePoint.setMatchingFrame(desiredCapturePoint);
+         yoCapturePoint.setMatchingFrame(capturePoint);
          if (desiredCapturePointViz != null)
          {
             desiredCapturePointViz.update();
@@ -209,8 +211,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location.getPoint(), orientation.getQuaternion());
-      footsteps.add(footstep);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, location, orientation);
+      footsteps.getFootstepDataList().add().set(footstep);
       sendPacketToController(footsteps);
    }
 
@@ -273,7 +275,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       //System.out.println(localDirection.getX() + " " + localDirection.getY());
       //System.out.println(reachableRegion.toString());
       Line2D ray = new Line2D(swingLocation.getX(), swingLocation.getY(), localDirection.getX(), localDirection.getY());
-      Point2D[] location2d = reachableRegion.intersectionWithRay(ray);
+      Point2DBasics[] location2d = reachableRegion.intersectionWithRay(ray);
       
       int index = 0;
       if(location2d == null)
@@ -297,42 +299,36 @@ public class PushAndWalkBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 }

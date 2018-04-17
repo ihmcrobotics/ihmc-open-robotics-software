@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -148,12 +147,12 @@ public class ValkyrieAccelerationIntegration
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
          YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
-         JointDesiredOutput desiredJointData = jointHandle.getDesiredJointData();
+         YoJointDesiredOutput desiredJointData = jointHandle.getDesiredJointData();
          computeAndApplyDesiredTauOffset(i, desiredJointData);
       }
    }
 
-   private void computeAndApplyDesiredTauOffset(int index, JointDesiredOutputReadOnly desiredJointData)
+   private void computeAndApplyDesiredTauOffset(int index, YoJointDesiredOutput desiredJointData)
    {
       YoEffortJointHandleHolder jointHandle = processedJointHandles.get(index);
       OneDoFJoint joint = jointHandle.getOneDoFJoint();
@@ -187,6 +186,9 @@ public class ValkyrieAccelerationIntegration
       }
       tauFromVelocityList.get(index).set(tau_vel);
 
-      jointHandle.addOffetControllerTauDesired(tau_pos + tau_vel);
+      double tau = tau_pos + tau_vel;
+      if (desiredJointData.hasDesiredTorque())
+         tau += desiredJointData.getDesiredTorque();
+      desiredJointData.setDesiredTorque(tau);
    }
 }

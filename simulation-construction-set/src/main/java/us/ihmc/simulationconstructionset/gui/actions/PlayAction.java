@@ -19,7 +19,7 @@ public class PlayAction extends AbstractAction
       super("Play");
       this.executor = executor;
 
-      String iconFilename = "icons/Play24.gif";
+      String iconFilename = "icons/Play.png";
       int shortKey = KeyEvent.VK_P;
       String longDescription = "Start playing simulation.";
       String shortDescription = "Play";

@@ -27,14 +27,14 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 
 /**
  * {@link YoGraphic} that can display {@link PlanarRegionsList} locally, with SCS for instance, and remotely, with SCSVisualizer for instance.
@@ -90,7 +90,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * <p>
     * Any non used vertex is set to {@link Double#NaN}.
     */
-   private final List<YoFramePoint2d> vertexBuffer;
+   private final List<YoFramePoint2D> vertexBuffer;
    /**
     * Corresponds the current mesh index in the {@link #meshBuffer} to be updated.
     * When there is no mesh to render, {@link #currentMeshIndex} equals to {@code -1}.
@@ -116,7 +116,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * It is used to transform the vertices so they're expressed in world.
     * When there is no mesh to render, {@link #currentRegionId} equals to {@code -1}.
     */
-   private final YoFramePoseUsingQuaternions currentRegionPose;
+   private final YoFramePose3D currentRegionPose;
    /**
     * Stores custom colors for planar regions.
     * When constructed without using custom colors, {@link #planarRegionsColorBuffer} is {@code null}
@@ -165,7 +165,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       for (int i = 0; i < vertexBufferSize; i++)
       {
-         YoFramePoint2d vertex = new YoFramePoint2d(name + "Vertex" + i, worldFrame, registry);
+         YoFramePoint2D vertex = new YoFramePoint2D(name + "Vertex" + i, worldFrame, registry);
          vertex.setToNaN();
          vertexBuffer.add(vertex);
       }
@@ -174,7 +174,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentRegionId = new YoInteger(name + "CurrentRegionId", registry);
       isPlanarRegionsListComplete = new YoBoolean(name + "IsComplete", registry);
       clear = new YoBoolean(name + "Clear", registry);
-      currentRegionPose = new YoFramePoseUsingQuaternions(name + "CurrentRegionPose", worldFrame, registry);
+      currentRegionPose = new YoFramePose3D(name + "CurrentRegionPose", worldFrame, registry);
 
       clearYoVariables();
 
@@ -237,7 +237,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       {
          YoDouble x = (YoDouble) yoVariables[variableIndex++];
          YoDouble y = (YoDouble) yoVariables[variableIndex++];
-         YoFramePoint2d vertex = new YoFramePoint2d(x, y, worldFrame);
+         YoFramePoint2D vertex = new YoFramePoint2D(x, y, worldFrame);
          vertexBuffer.add(vertex);
       }
 
@@ -253,9 +253,9 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       YoDouble qy = (YoDouble) yoVariables[variableIndex++];
       YoDouble qz = (YoDouble) yoVariables[variableIndex++];
       YoDouble qs = (YoDouble) yoVariables[variableIndex++];
-      YoFramePoint position = new YoFramePoint(x, y, z, worldFrame);
+      YoFramePoint3D position = new YoFramePoint3D(x, y, z, worldFrame);
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, worldFrame);
-      currentRegionPose = new YoFramePoseUsingQuaternions(position, orientation);
+      currentRegionPose = new YoFramePose3D(position, orientation);
 
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
@@ -414,12 +414,12 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       Vector3D32[] vertexNormals = new Vector3D32[numberOfVertices];
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      currentRegionPose.getPose(transform);
+      currentRegionPose.get(transform);
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
          Point3D32 vertex = new Point3D32();
-         vertexBuffer.get(vertexIndex + indexInVertexBuffer).get(vertex);
+         vertex.set(vertexBuffer.get(vertexIndex + indexInVertexBuffer));
          transform.transform(vertex);
          vertices[vertexIndex] = vertex;
       }
@@ -650,7 +650,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentIndex++;
       currentMeshIndex.set(currentIndex);
       planarRegionToProcess.getTransformToWorld(regionTransform);
-      currentRegionPose.setPose(regionTransform);
+      currentRegionPose.set(regionTransform);
       currentRegionId.set(planarRegionToProcess.getRegionId());
 
       boolean isDonePackingPolygons = false;

@@ -1,8 +1,9 @@
 package us.ihmc.ihmcPerception;
 
+import controller_msgs.msg.dds.LocalizationStatusPacket;
 import std_msgs.Float64;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -21,7 +22,7 @@ public class RosLocalizationStatusSubscriber
          @Override
          public void onNewMessage(std_msgs.Float64 message) {
             overlap = message.getData();
-            LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,null);
+            LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, null);
             packetCommunicator.send(localizationOverlapPacket);
          }
       };
@@ -32,7 +33,7 @@ public class RosLocalizationStatusSubscriber
          @Override
          public void onNewMessage(std_msgs.String message) {
             String status = message.getData();
-            LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,status);
+            LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, status);
             packetCommunicator.send(localizationOverlapPacket);
          }
 

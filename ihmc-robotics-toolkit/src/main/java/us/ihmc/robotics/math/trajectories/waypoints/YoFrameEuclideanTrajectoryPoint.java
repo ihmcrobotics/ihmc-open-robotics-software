@@ -3,25 +3,29 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoFrameEuclideanTrajectoryPoint
       extends YoFrameTrajectoryPoint<YoFrameEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>
 {
-   private final YoFramePoint position;
-   private final YoFrameVector linearVelocity;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D linearVelocity;
 
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -36,7 +40,7 @@ public class YoFrameEuclideanTrajectoryPoint
       this.position.set(position);
    }
 
-   public void setPosition(FramePoint3D position)
+   public void setPosition(FramePoint3DReadOnly position)
    {
       this.position.set(position);
    }
@@ -47,7 +51,7 @@ public class YoFrameEuclideanTrajectoryPoint
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void setLinearVelocity(FrameVector3D linearVelocity)
+   public void setLinearVelocity(FrameVector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
@@ -66,14 +70,7 @@ public class YoFrameEuclideanTrajectoryPoint
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void set(double time, FramePoint3D position, FrameVector3D linearVelocity)
-   {
-      this.time.set(time);
-      this.position.set(position);
-      this.linearVelocity.set(linearVelocity);
-   }
-
-   public void set(double time, YoFramePoint position, YoFrameVector linearVelocity)
+   public void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       this.time.set(time);
       this.position.set(position);
@@ -131,49 +128,39 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void getPosition(Point3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionToPack.set(position);
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
-   public void getPosition(FramePoint3D positionToPack)
-   {
-      position.getFrameTuple(positionToPack);
-   }
-
-   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
-   {
-      linearVelocity.getFrameTuple(linearVelocityToPack);
-   }
-
-   public void getPositionIncludingFrame(FramePoint3D positionToPack)
-   {
-      position.getFrameTupleIncludingFrame(positionToPack);
-   }
-
-   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
-   {
-      linearVelocity.getFrameTupleIncludingFrame(linearVelocityToPack);
-   }
-
-   public void getPosition(YoFramePoint positionToPack)
+   public void getPosition(FixedFramePoint3DBasics positionToPack)
    {
       positionToPack.set(position);
    }
 
-   public void getLinearVelocity(YoFrameVector linearVelocityToPack)
+   public void getLinearVelocity(FixedFrameVector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(linearVelocity);
+   }
+
+   public void getPositionIncludingFrame(FramePoint3D positionToPack)
+   {
+      positionToPack.setIncludingFrame(position);
+   }
+
+   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
+   {
+      linearVelocityToPack.setIncludingFrame(linearVelocity);
    }
 
    /**
     * Return the original position held by this trajectory point.
     */
-   public YoFramePoint getPosition()
+   public YoFramePoint3D getPosition()
    {
       return position;
    }
@@ -181,7 +168,7 @@ public class YoFrameEuclideanTrajectoryPoint
    /**
     * Return the original linearVelocity held by this trajectory point.
     */
-   public YoFrameVector getLinearVelocity()
+   public YoFrameVector3D getLinearVelocity()
    {
       return linearVelocity;
    }
@@ -203,8 +190,8 @@ public class YoFrameEuclideanTrajectoryPoint
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setPosition(position.getFrameTuple());
-      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+      frameWaypoint.setPosition(position);
+      frameWaypoint.setLinearVelocity(linearVelocity);
    }
 
    @Override

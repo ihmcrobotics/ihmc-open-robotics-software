@@ -174,7 +174,6 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    public void actuatorToJointPosition(LinearActuator[] act_data, ValkyrieJointInterface[] jnt_data)
    {
 
-      // TODO Auto-generated method stub
    }
 
    @Override
@@ -245,7 +244,6 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    public void jointToActuatorVelocity(LinearActuator[] act_data, ValkyrieJointInterface[] jnt_data)
    {
 
-      // TODO Auto-generated method stub
    }
 
    @Override

@@ -2,16 +2,15 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
 
 import java.io.File;
 
-import org.jmonkeyengine.scene.plugins.ogre.matext.MaterialExtension;
-import org.jmonkeyengine.scene.plugins.ogre.matext.MaterialExtensionSet;
-import org.jmonkeyengine.scene.plugins.ogre.matext.OgreMaterialKey;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.ClasspathLocator;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.plugins.ogre.matext.MaterialExtension;
+import com.jme3.scene.plugins.ogre.matext.MaterialExtensionSet;
+import com.jme3.scene.plugins.ogre.matext.OgreMaterialKey;
 import com.jme3.texture.Texture;
 
 public class JMEAssetLocator
@@ -67,7 +66,7 @@ public class JMEAssetLocator
       if (!ogreLoaderInitialized)
       {
          assetManager.unregisterLoader(com.jme3.scene.plugins.ogre.MaterialLoader.class);
-         assetManager.registerLoader(org.jmonkeyengine.scene.plugins.ogre.MaterialLoader.class, "material");
+         assetManager.registerLoader(com.jme3.scene.plugins.ogre.MaterialLoader.class, "material");
          ogreLoaderInitialized = true;
       }
 

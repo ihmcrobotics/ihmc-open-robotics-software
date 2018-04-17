@@ -4,8 +4,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 
 public class ContactingExternalForcePoint extends ExternalForcePoint
@@ -13,7 +13,7 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
 
    private static final long serialVersionUID = -5919153372698232766L;
 
-   private final YoFrameVector surfaceNormalInJointFrame;
+   private final YoFrameVector3D surfaceNormalInJointFrame;
    private final YoInteger indexOfContactingPair;
    private final YoBoolean isSlipping;
 
@@ -28,7 +28,7 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       super(name, registry);
       
       this.setParentJoint(parentJoint);
-      this.surfaceNormalInJointFrame = new YoFrameVector(name + "SurfaceNormal", null, registry);
+      this.surfaceNormalInJointFrame = new YoFrameVector3D(name + "SurfaceNormal", null, registry);
       indexOfContactingPair = new YoInteger(name + "PairIndex", registry);
       isSlipping = new YoBoolean(name + "IsSlipping", registry);
       
@@ -98,7 +98,7 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
    
    public void getSurfaceNormalInWorld(Vector3D surfaceNormalInWorldToPack)
    {
-      this.surfaceNormalInJointFrame.get(surfaceNormalInWorldToPack);
+      surfaceNormalInWorldToPack.set(this.surfaceNormalInJointFrame);
       parentJoint.getTransformToWorld(tempTransform);
       tempTransform.transform(surfaceNormalInWorldToPack);
    }

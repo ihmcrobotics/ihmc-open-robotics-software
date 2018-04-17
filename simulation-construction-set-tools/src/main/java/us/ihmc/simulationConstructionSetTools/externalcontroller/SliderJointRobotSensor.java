@@ -37,7 +37,6 @@ class SliderJointRobotSensor implements SensorInterface
    @Override
    public int getNumberOfVariables()
    {
-      // TODO Auto-generated method stub
       return 4;
    }
 

@@ -11,8 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -23,6 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -31,6 +31,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private static final String fullPelvisNameInSdf = pelvisName;
    private static final String headName = "upperNeckPitchLink";
    private static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Palm", getRobotSidePrefix(RobotSide.RIGHT) + "Palm");
+   private static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Foot", getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
@@ -219,9 +220,16 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
+   }
+
+   @Override
+   public String getFootName(RobotSide robotSide)
+   {
+      return footNames.get(robotSide);
    }
 
    @Override
@@ -390,13 +398,13 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
+   public RobotSide[] getRobotSegments()
    {
       return RobotSide.values;
    }
 
    @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotSide getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotSide robotSide : RobotSide.values)
       {

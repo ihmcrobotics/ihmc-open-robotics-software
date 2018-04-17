@@ -1,13 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorService
 {
@@ -29,7 +29,7 @@ public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorSer
    }
 
    @Override
-   public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedGoalPoseWorldFrame(FramePose3D framePoseToPack)
    {
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FramePoint3D goalPosition = new FramePoint3D(midFeetZUpFrame, constantGoalLocationInMidFeetZUpFrame);

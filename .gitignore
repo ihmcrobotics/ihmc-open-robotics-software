@@ -90,5 +90,3 @@
 **/.apdisk
 **/rebel.xml
 **/generatedTestSuites/*TestSuite.java
-
-!gradle/wrapper/gradle-wrapper.jar

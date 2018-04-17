@@ -9,22 +9,23 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
@@ -83,7 +84,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       ReferenceFrame pelvisZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisZUpFrame();
 
       Quaternion desiredChestQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
 
       ChestTrajectoryBehavior chestOrientationBehavior = testChestOrientationBehavior(chestTrajectoryMessage);
 
@@ -103,18 +104,18 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       chestTrajectoryBehavior.setInput(chestTrajectoryMessage);
       assertTrue(chestTrajectoryBehavior.hasInputBeenSet());
 
-      double totalSimTime = chestTrajectoryMessage.getTrajectoryTime();
+      double totalSimTime = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
       totalSimTime += 1.0;
 
-      FramePose initialChestPose = getCurrentChestPose();
+      FramePose3D initialChestPose = getCurrentChestPose();
       success = success && drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(chestTrajectoryBehavior, totalSimTime);
-      FramePose finalChestPose = getCurrentChestPose();
+      FramePose3D finalChestPose = getCurrentChestPose();
 
       PrintTools.debug(this, " initial Chest Pose :\n" + initialChestPose);
       PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
-      FramePose desiredChestPose = new FramePose();
+      FramePose3D desiredChestPose = new FramePose3D();
 
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      desiredChestPose.set(initialChestPose.getPosition(), chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);
@@ -122,18 +123,18 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       return chestTrajectoryBehavior;
    }
 
-   private FramePose getCurrentChestPose()
+   private FramePose3D getCurrentChestPose()
    {
       drcBehaviorTestHelper.updateRobotModel();
 
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getChest().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   private void assertPosesAreWithinThresholds(FramePose3D framePose1, FramePose3D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);

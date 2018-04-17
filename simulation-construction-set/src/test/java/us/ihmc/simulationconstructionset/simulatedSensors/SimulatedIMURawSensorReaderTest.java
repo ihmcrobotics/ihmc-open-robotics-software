@@ -79,8 +79,8 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testRead()
    {
       for (int i = 0; i < 10000; i++)
@@ -331,13 +331,13 @@ public class SimulatedIMURawSensorReaderTest
          updateFrames();
 
          // Update Body Velocity
-         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity.getVector(), angularVelocity.getVector());
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity, angularVelocity);
          rootJoint.setJointTwist(bodyTwist);
 
          // Update Body Acceleration
          SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
-                                                                                                         linearAcceleration.getVector(),
-                                                                                                         angularAcceleration.getVector());
+                                                                                                         linearAcceleration,
+                                                                                                         angularAcceleration);
          accelerationOfChestWithRespectToWorld.changeBaseFrameNoRelativeAcceleration(getElevatorFrame());
          rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
 

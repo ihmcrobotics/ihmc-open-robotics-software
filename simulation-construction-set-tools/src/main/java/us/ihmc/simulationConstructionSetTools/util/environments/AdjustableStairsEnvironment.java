@@ -332,7 +332,6 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 }

@@ -195,21 +195,18 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
    @Override
    public void createAndSetContactControllerToARobot()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
-      // TODO Auto-generated method stub
 
    }
 

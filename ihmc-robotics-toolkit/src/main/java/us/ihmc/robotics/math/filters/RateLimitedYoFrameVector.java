@@ -2,70 +2,74 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class RateLimitedYoFrameVector extends YoFrameVector
+public class RateLimitedYoFrameVector extends YoFrameVector3D
 {
-   private final YoDouble maxRateVariable;
+   private final DoubleProvider maxRateVariable;
 
-   private final YoFrameVector rawPosition;
+   private final FrameTuple3DReadOnly rawPosition;
    private final YoBoolean limited;
    private final YoBoolean hasBeenCalled;
    private final double dt;
 
    private final FrameVector3D differenceVector = new FrameVector3D();
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
-                                   YoFrameVector rawPosition)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   {
+      YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
+      maxRate.set(initialValue);
+      return maxRate;
+   }
+
+   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                   FrameTuple3DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPosition, rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
+   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
                                    ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, YoFrameVector rawPosition)
+   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+                                   FrameTuple3DReadOnly rawPosition)
    {
-      this(namePrefix, nameSuffix, registry, null, dt, rawPosition, rawPosition.getReferenceFrame());
-      setMaxRate(maxRate);
+      this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawPosition,
+           rawPosition.getReferenceFrame());
    }
 
    public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, nameSuffix, registry, null, dt, null, referenceFrame);
-      setMaxRate(maxRate);
+      this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
-                                    YoFrameVector rawPosition, ReferenceFrame referenceFrame)
+   private RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                    FrameTuple3DReadOnly rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
       this.hasBeenCalled = new YoBoolean(namePrefix + "HasBeenCalled" + nameSuffix, registry);
       this.limited = new YoBoolean(namePrefix + "Limited" + nameSuffix, registry);
 
-      if (maxRate != null)
-         this.maxRateVariable = maxRate;
-      else
-         this.maxRateVariable = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
+      if (maxRate == null)
+         maxRate = createMaxRateYoDouble(namePrefix, nameSuffix, Double.POSITIVE_INFINITY, registry);
+
+      maxRateVariable = maxRate;
 
       this.rawPosition = rawPosition;
 
       this.dt = dt;
 
       reset();
-   }
-
-   public void setMaxRate(double maxRate)
-   {
-      this.maxRateVariable.set(maxRate);
    }
 
    public void reset()
@@ -84,19 +88,13 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       update(rawPosition);
    }
 
-   public void update(YoFrameVector yoFrameVectorUnfiltered)
-   {
-      checkReferenceFrameMatch(yoFrameVectorUnfiltered);
-      update(yoFrameVectorUnfiltered.getX(), yoFrameVectorUnfiltered.getY(), yoFrameVectorUnfiltered.getZ());
-   }
-
-   public void update(FrameVector3D frameVectorUnfiltered)
+   public void update(FrameTuple3DReadOnly frameVectorUnfiltered)
    {
       checkReferenceFrameMatch(frameVectorUnfiltered);
       update(frameVectorUnfiltered.getX(), frameVectorUnfiltered.getY(), frameVectorUnfiltered.getZ());
    }
 
-   public void update(Vector3DReadOnly vectorUnfiltered)
+   public void update(Tuple3DReadOnly vectorUnfiltered)
    {
       update(vectorUnfiltered.getX(), vectorUnfiltered.getY(), vectorUnfiltered.getZ());
    }
@@ -109,14 +107,14 @@ public class RateLimitedYoFrameVector extends YoFrameVector
          set(xUnfiltered, yUnfiltered, zUnfiltered);
       }
 
-      if (maxRateVariable.getDoubleValue() < 0)
+      if (maxRateVariable.getValue() < 0)
          throw new RuntimeException("The maxRate parameter in the " + getClass().getSimpleName() + " cannot be negative.");
 
       differenceVector.setToZero(getReferenceFrame());
       differenceVector.set(xUnfiltered, yUnfiltered, zUnfiltered);
       differenceVector.sub(getX(), getY(), getZ());
 
-      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getDoubleValue() * dt));
+      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getValue() * dt));
       add(differenceVector);
    }
 }

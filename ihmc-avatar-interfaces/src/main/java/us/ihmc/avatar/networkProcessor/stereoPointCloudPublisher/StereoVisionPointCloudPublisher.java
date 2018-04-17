@@ -10,20 +10,21 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.RequestStereoPointCloudMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
-import us.ihmc.communication.packets.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -146,9 +147,9 @@ public class StereoVisionPointCloudPublisher
                float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
 
                int[] colors = pointCloudData.getColors();
-               StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
+               StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
 
-               message.setDestination(destination);
+               message.setDestination(destination.ordinal());
                packetCommunicator.send(message);
             }
 

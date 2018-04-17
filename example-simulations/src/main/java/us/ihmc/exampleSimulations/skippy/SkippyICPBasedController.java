@@ -12,9 +12,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class SkippyICPBasedController extends SimpleRobotController
@@ -50,18 +50,18 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final FrameVector3D hipAxis = new FrameVector3D(worldFrame);
    private final FrameVector3D shoulderAxis = new FrameVector3D(worldFrame);
 
-   private final YoFramePoint comViz = new YoFramePoint("CoM", worldFrame, registry);
-   private final YoFramePoint icpViz = new YoFramePoint("ICP", worldFrame, registry);
-   private final YoFramePoint desiredCMPViz = new YoFramePoint("DesiredCMP", worldFrame, registry);
-   private final YoFramePoint footLocationViz = new YoFramePoint("FootLocation", worldFrame, registry);
-   private final YoFramePoint hipLocationViz = new YoFramePoint("HipLocation", worldFrame, registry);
-   private final YoFramePoint shoulderLocationViz = new YoFramePoint("ShoulderLocation", worldFrame, registry);
-   private final YoFrameVector desiredGroundReactionViz = new YoFrameVector("DesiredGroundReaction", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector groundReachtionViz = new YoFrameVector("GroundReaction", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector hipToFootDirectionViz = new YoFrameVector("HipToFootDirection", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector hipAxisViz = new YoFrameVector("HipAxis", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector shoulderAxisViz = new YoFrameVector("ShoulderAxis", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector angularMomentumViz = new YoFrameVector("AngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D comViz = new YoFramePoint3D("CoM", worldFrame, registry);
+   private final YoFramePoint3D icpViz = new YoFramePoint3D("ICP", worldFrame, registry);
+   private final YoFramePoint3D desiredCMPViz = new YoFramePoint3D("DesiredCMP", worldFrame, registry);
+   private final YoFramePoint3D footLocationViz = new YoFramePoint3D("FootLocation", worldFrame, registry);
+   private final YoFramePoint3D hipLocationViz = new YoFramePoint3D("HipLocation", worldFrame, registry);
+   private final YoFramePoint3D shoulderLocationViz = new YoFramePoint3D("ShoulderLocation", worldFrame, registry);
+   private final YoFrameVector3D desiredGroundReactionViz = new YoFrameVector3D("DesiredGroundReaction", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D groundReachtionViz = new YoFrameVector3D("GroundReaction", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D hipToFootDirectionViz = new YoFrameVector3D("HipToFootDirection", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D hipAxisViz = new YoFrameVector3D("HipAxis", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D shoulderAxisViz = new YoFrameVector3D("ShoulderAxis", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D angularMomentumViz = new YoFrameVector3D("AngularMomentum", ReferenceFrame.getWorldFrame(), registry);
 
    public SkippyICPBasedController(SkippyRobot skippy, double dt, YoGraphicsListRegistry yoGraphicsListRegistries)
    {
@@ -128,7 +128,7 @@ public class SkippyICPBasedController extends SimpleRobotController
    public void doControl()
    {
       skippy.computeComAndICP(com, comVelocity, icp, angularMomentum);
-      skippy.computeFootContactForce(groundReaction.getVector());
+      skippy.computeFootContactForce(groundReaction);
       footLocation.set(skippy.computeFootLocation());
       cmpFromIcpDynamics(icp, footLocation, desiredCMP);
 
@@ -158,8 +158,8 @@ public class SkippyICPBasedController extends SimpleRobotController
       }
       tickCounter.increment();
 
-      skippy.getHipJoint().getTranslationToWorld(worldToHip.getVector());
-      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder.getVector());
+      skippy.getHipJoint().getTranslationToWorld(worldToHip);
+      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder);
       skippy.getShoulderJointAxis(shoulderAxis);
       skippy.getHipJointAxis(hipAxis);
 

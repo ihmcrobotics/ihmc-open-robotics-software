@@ -207,7 +207,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public FrameVector3D getAngularVelocityCopy()
@@ -220,7 +220,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(getReferenceFrame());
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public double get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)

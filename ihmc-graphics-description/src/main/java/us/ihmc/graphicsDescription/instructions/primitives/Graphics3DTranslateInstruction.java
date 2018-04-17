@@ -1,7 +1,6 @@
 package us.ihmc.graphicsDescription.instructions.primitives;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 
@@ -23,7 +22,6 @@ public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstru
    {
       return translation;
    }
-
 
    public String toString()
    {

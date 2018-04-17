@@ -17,19 +17,30 @@ public enum HumanoidBehaviorType
    TEST_STATEMACHINE,
    FOLLOW_FIDUCIAL_50,
    LOCATE_FIDUCIAL,
-   WAlK_OVER_TERRAIN,
+   WALK_OVER_TERRAIN,
    FOLLOW_VALVE,
    LOCATE_VALVE,
    WALK_OVER_TERRAIN_TO_VALVE,
    DEBUG_PARTIAL_FOOTHOLDS,
    WALK_TO_GOAL_ANYTIME_PLANNER,
    TEST_ICP_OPTIMIZATION,
+   TEST_GC_GENERATION,
    TEST_SMOOTH_ICP_PLANNER,
-   SOLARPANEL_BEHAVIOR,
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
-   FIRE_FIGHTING,
+   FIRE_FIGHTING,   
+   CUTTING_WALL,
    REPEATEDLY_WALK_FOOTSTEP_LIST;
 
    public static final HumanoidBehaviorType[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static HumanoidBehaviorType fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

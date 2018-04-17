@@ -32,7 +32,7 @@ public class CenterOfMassReferenceFrame extends ReferenceFrame
    {
       centerOfMassCalculator.compute();
       centerOfMassCalculator.getCenterOfMass(centerOfMass);
-      centerOfMassVector3d.set(centerOfMass.getPoint());
+      centerOfMassVector3d.set(centerOfMass);
       transformToParent.setIdentity();
       transformToParent.setTranslation(centerOfMassVector3d);
    }

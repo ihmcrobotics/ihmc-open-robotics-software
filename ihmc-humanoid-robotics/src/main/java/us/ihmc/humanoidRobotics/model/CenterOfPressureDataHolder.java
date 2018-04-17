@@ -42,7 +42,7 @@ public class CenterOfPressureDataHolder
       if (centerOfPressure != null)
       {
          centerOfPressure.checkReferenceFrameMatch(soleFrames.get(foot));
-         centerOfPressure.get(centerOfPressures.get(foot));
+         centerOfPressures.get(foot).set(centerOfPressure);
       }
       else
       {

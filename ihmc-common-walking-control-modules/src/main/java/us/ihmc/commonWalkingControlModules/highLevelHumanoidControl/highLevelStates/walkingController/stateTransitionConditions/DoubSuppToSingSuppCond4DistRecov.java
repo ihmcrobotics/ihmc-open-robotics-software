@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class DoubSuppToSingSuppCond4DistRecov implements StateTransitionCondition
 {
@@ -16,7 +16,7 @@ public class DoubSuppToSingSuppCond4DistRecov implements StateTransitionConditio
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
       if (!balanceManager.isPushRecoveryEnabled())
          return false;

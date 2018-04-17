@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class YoGraphicsListRegistry
 {

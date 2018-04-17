@@ -1,23 +1,22 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class LongestFeasibleStepChooser implements NextSwingLegChooser
 {
@@ -27,7 +26,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    private CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames;
    private final QuadrantDependentList<FrameEllipsoid3d> actualFootstepWorkspaces = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoGraphicEllipsoid> footstepWorkspaceYoEllipsoids = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint3D> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
    private final FramePoint3D temporaryCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -40,9 +39,9 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          actualFootstepWorkspaces.set(robotQuadrant, new FrameEllipsoid3d(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant), 0.0, 0.0, 0.0));
-         YoFramePoint footstepWorkspaceCenterFramePoint = new YoFramePoint(robotQuadrant + "FootstepWorkspaceFramePoint", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footstepWorkspaceCenterFramePoint = new YoFramePoint3D(robotQuadrant + "FootstepWorkspaceFramePoint", ReferenceFrame.getWorldFrame(), registry);
          footstepWorkspaceCenterFramePoints.set(robotQuadrant, footstepWorkspaceCenterFramePoint);
-         YoFrameOrientation footstepWorkspaceOrientation = new YoFrameOrientation(robotQuadrant + "FootstepWorkspaceOrientation", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameYawPitchRoll footstepWorkspaceOrientation = new YoFrameYawPitchRoll(robotQuadrant + "FootstepWorkspaceOrientation", ReferenceFrame.getWorldFrame(), registry);
          footstepWorkspaceYoEllipsoids.set(robotQuadrant, new YoGraphicEllipsoid(robotQuadrant + "YoEllipsoid", footstepWorkspaceCenterFramePoint, footstepWorkspaceOrientation, YoAppearance.Blue(), new Vector3D()));
          yoGraphicsListRegistry.registerYoGraphic(robotQuadrant + "YoEllipsoidReg", footstepWorkspaceYoEllipsoids.get(robotQuadrant));
          footstepWorkspaceYoEllipsoids.get(robotQuadrant).showGraphicObject();
@@ -60,7 +59,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          QuadrupedGeometryTools.updateFootstepWorkspace(robotQuadrant, actualFootstepWorkspaces.get(robotQuadrant), commonQuadrupedReferenceFrames);
          
          // Update workspace center YoFramePoints
-         FramePoint3D workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
+         FramePoint3D workspaceCenterPoint = new FramePoint3D(footstepWorkspaceCenterFramePoints.get(robotQuadrant));
          double hipHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
          
          double x = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM03();
@@ -68,7 +67,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          workspaceCenterPoint.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));
          workspaceCenterPoint.set(0.0, 0.0, hipHeight);
-         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setAndMatchFrame(workspaceCenterPoint);
+         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setMatchingFrame(workspaceCenterPoint);
          
          // Update YoGraphicEllipsoids to footstep workspace
          Vector3D radiiToPack = new Vector3D();
@@ -82,7 +81,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    /**
     * Do the interesting part.
     */
-   private RobotQuadrant doTheCalculations(FrameVector3D desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
+   private RobotQuadrant doTheCalculations(FrameVector3DReadOnly desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
    {
       if (desiredVelocity.getX() < ZERO_THRESHOLD && desiredVelocity.getY() < ZERO_THRESHOLD && desiredYawRate < ZERO_THRESHOLD)
       {
@@ -106,7 +105,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          // Construct a polygon moved and yawed by some scalar times the desired velocity and yaw
          QuadrupedSupportPolygon desiredPerfectPolygon = new QuadrupedSupportPolygon(actualPerfectPolygon);
-         Vector3D stepTranslation = new Vector3D(desiredVelocity.getVector());
+         Vector3D stepTranslation = new Vector3D(desiredVelocity);
          stepTranslation.scale(MYSTERIOUS_SCALAR);
          desiredPerfectPolygon.translate(stepTranslation);
          desiredPerfectPolygon.yawAboutCentroid(MYSTERIOUS_SCALAR * desiredYawRate);
@@ -140,7 +139,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector3D desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector3DReadOnly desiredVelocity, double desiredYawRate)
    {
       updateState();
       return doTheCalculations(desiredVelocity, desiredYawRate, lastStepFoot, supportPolygon);

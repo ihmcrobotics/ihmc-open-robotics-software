@@ -6,15 +6,11 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -23,14 +19,17 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
    private static final boolean UPDATE_CAPTURE_POINT_FROM_SCS = false;
 
-   private final SideDependentList<YoFramePoint2d> desiredCoPsUpdatedFromSCS = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint2D> desiredCoPsUpdatedFromSCS = new SideDependentList<>();
 
-   private final YoFramePoint capturePointUpdatedFromSCS;
+   private final YoFramePoint3D capturePointUpdatedFromSCS;
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -48,7 +47,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
          YoDouble capturePointX = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointX");
          YoDouble capturePointY = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointY");
          YoDouble capturePointZ = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointZ");
-         capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
+         capturePointUpdatedFromSCS = new YoFramePoint3D(capturePointX, capturePointY, capturePointZ, worldFrame);
       }
       else
       {
@@ -63,7 +62,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
          YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
          YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrame);
+         YoFramePoint2D desiredCoP = new YoFramePoint2D(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPsUpdatedFromSCS.put(robotSide, desiredCoP);
       }
    }
@@ -84,8 +83,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         FramePoint2D desiredCop = desiredCoPsUpdatedFromSCS.get(robotSide).getFrameTuple2d();
-         setDesiredCenterOfPressure(contactableFoot, desiredCop);
+         setDesiredCenterOfPressure(contactableFoot, desiredCoPsUpdatedFromSCS.get(robotSide));
       }
    }
 }

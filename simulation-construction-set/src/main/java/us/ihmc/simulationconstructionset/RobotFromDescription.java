@@ -138,11 +138,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       addExternalForcePoints(jointDescription, joint);
       addKinematicPoints(jointDescription, joint);
 
+      addExternalForcePointsFromCollisionMesh(jointDescription, joint);
+      
       addLidarMounts(jointDescription, joint);
       addCameraMounts(jointDescription, joint);
       addIMUMounts(jointDescription, joint);
       addJointWrenchSensors(jointDescription, joint);
-
+      
       addForceSensors(jointDescription, joint);
 
       // Iterate over the children
@@ -162,6 +164,25 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       }
 
       return joint;
+   }
+   
+   private void addExternalForcePointsFromCollisionMesh(JointDescription jointDescription, Joint joint)
+   {
+      Link link = joint.getLink();
+      ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
+      
+      if (collisionMeshDescriptions != null)
+      {
+         int estimatedNumberOfContactPoints = 0;
+
+         for (int i = 0; i < collisionMeshDescriptions.size(); i++)
+         {
+            CollisionMeshDescription collisionMesh = collisionMeshDescriptions.get(i);
+            estimatedNumberOfContactPoints += collisionMesh.getEstimatedNumberOfContactPoints();
+         }
+
+         link.enableContactingExternalForcePoints(estimatedNumberOfContactPoints, yoVariableRegistry);
+      }
    }
 
    private void addLidarMounts(JointDescription jointDescription, Joint joint)
@@ -191,10 +212,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<CameraSensorDescription> cameraSensorDescriptions = jointDescription.getCameraSensors();
       for (CameraSensorDescription cameraSensorDescription : cameraSensorDescriptions)
       {
-         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), this);
+         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), cameraSensorDescription.getFieldOfView(), cameraSensorDescription.getClipNear(), cameraSensorDescription.getClipFar(), this);
          cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
          cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
-         cameraMount.setFieldOfView(cameraSensorDescription.getFieldOfView());
 
          joint.addCameraMount(cameraMount);
 
@@ -236,7 +256,6 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
       for (ForceSensorDescription forceSensorDescription : forceSensorDescriptions)
       {
-         OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = (OneDegreeOfFreedomJoint) joint;
          WrenchCalculatorInterface wrenchCalculator;
 
          if (forceSensorDescription.useGroundContactPoints())
@@ -246,7 +265,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             //TODO: Not sure if you want all of the ground contact points from here down, or just the ones attached to this joint.
             joint.recursiveGetAllGroundContactPoints(groundContactPoints);
 
-            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint,
+            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, joint,
                                                                            forceSensorDescription.getTransformToJoint(), yoVariableRegistry);
          }
          else
@@ -258,7 +277,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(forceSensorDescription.getName(), offsetToPack, this);
             joint.addJointWrenchSensor(jointWrenchSensor);
 
-            wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensorDescription.getName(), oneDegreeOfFreedomJoint);
+            wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensorDescription.getName(), joint);
          }
 
          joint.addForceSensor(wrenchCalculator);
@@ -273,7 +292,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       {
          GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(),
                                                                         groundContactPointDescription.getOffsetFromJoint(), this);
-         joint.addGroundContactPoint(groundContactPoint);
+         joint.addGroundContactPoint(groundContactPointDescription.getGroupIdentifier(), groundContactPoint);
 
          if (!jointToGroundContactPointsMap.containsKey(joint))
          {

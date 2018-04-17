@@ -1,13 +1,14 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.AffineTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoGraphicLineSegment extends YoGraphicVector
 {
@@ -16,20 +17,20 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
    public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
-      this(namePrefix, new YoFramePoint(namePrefix, nameSuffix + "Start", referenceFrame, registry), new YoFramePoint(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
+      this(namePrefix, new YoFramePoint3D(namePrefix, nameSuffix + "Start", referenceFrame, registry), new YoFramePoint3D(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
    }
 
-   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, AppearanceDefinition appearance)
+   public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, AppearanceDefinition appearance)
    {
       this(name, startPoint, endPoint, 1.0, appearance);
    }
 
-   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance)
+   public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, double scale, AppearanceDefinition appearance)
    {
       this(name, startPoint, endPoint, scale, appearance, false);
    }
 
-   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicLineSegment(String name, YoFramePoint3D startPoint, YoFramePoint3D endPoint, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance, drawArrowhead);
 
@@ -51,13 +52,13 @@ public class YoGraphicLineSegment extends YoGraphicVector
       this(name, baseX, baseY, baseZ, endX, endY, endZ, createDirectionVector(name, baseX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead);
    }
 
-   private static YoFrameVector createDirectionVector(String name, YoVariableRegistry registry)
+   private static YoFrameVector3D createDirectionVector(String name, YoVariableRegistry registry)
    {
-      YoFrameVector directionVector = new YoFrameVector(name, "Direction", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D directionVector = new YoFrameVector3D(name, "Direction", ReferenceFrame.getWorldFrame(), registry);
       return directionVector;
    }
 
-   private YoGraphicLineSegment(String name, YoDouble startX, YoDouble startY, YoDouble startZ, YoDouble endX, YoDouble endY, YoDouble endZ, YoFrameVector yoFrameVector,
+   private YoGraphicLineSegment(String name, YoDouble startX, YoDouble startY, YoDouble startZ, YoDouble endX, YoDouble endY, YoDouble endZ, YoFrameVector3D yoFrameVector,
          double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead);
@@ -109,7 +110,14 @@ public class YoGraphicLineSegment extends YoGraphicVector
       return new double[] { scaleFactor };
    }
 
-   public void setStartAndEnd(Point3D startPoint, Point3D endPoint)
+   public void setStartAndEnd(FramePoint3DReadOnly startPoint, FramePoint3DReadOnly endPoint)
+   {
+      startPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      endPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      setStartAndEnd((Point3DReadOnly) startPoint, (Point3DReadOnly) endPoint);
+   }
+
+   public void setStartAndEnd(Point3DReadOnly startPoint, Point3DReadOnly endPoint)
    {
       this.startX.set(startPoint.getX());
       this.startY.set(startPoint.getY());

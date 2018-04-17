@@ -61,15 +61,4 @@ public interface ICPTrajectoryPlannerParameters
     * around 0.5sec to 1.0sec seems reasonable.
     */
    double getVelocityDecayDurationWhenDone();
-
-   /**
-    * <p>
-    * Pretty much refers to how fast the CoP should move from the entry CoP to the exit CoP in
-    * single support. 0.5sec seems reasonable. This parameter allows to reduce unexpected behaviors
-    * due to smoothing the exponentially unstable motion of the ICP with a minimum acceleration
-    * trajectory (cubic).
-    * </p>
-    * Note this is only used when using the smooth cmp trajectory generator.
-    */
-   double getMaxDurationForSmoothingEntryToExitCoPSwitch();
 }

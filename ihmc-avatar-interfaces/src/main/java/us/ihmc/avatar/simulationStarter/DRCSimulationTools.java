@@ -74,6 +74,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableLocalControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
+         networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.MANIPULATION_PLANNING_TOOLBOX));
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
          networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }
@@ -116,7 +117,7 @@ public abstract class DRCSimulationTools
    private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack, T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
-      JPanel checkBoxesPanel = new JPanel(new GridLayout(2, 5));
+      JPanel checkBoxesPanel = new JPanel(new GridLayout(4, 3));
 
       String configFile = System.getProperty("user.home") + "/.ihmc/drcSimulationDefaultOptions.config";
       Properties properties = new Properties();
@@ -354,7 +355,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI, MOCAP_MODULE, KINEMATICS_TOOLBOX, FOOTSTEP_PLANNING_TOOLBOX;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI, MOCAP_MODULE, KINEMATICS_TOOLBOX, FOOTSTEP_PLANNING_TOOLBOX, MANIPULATION_PLANNING_TOOLBOX;
 
       public String getPropertyNameForEnable()
       {

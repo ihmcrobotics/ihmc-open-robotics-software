@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlan
@@ -29,7 +29,7 @@ public class FootstepPlan
       footsteps.add(footstep);
    }
 
-   public SimpleFootstep addFootstep(RobotSide robotSide, FramePose soleFramePose)
+   public SimpleFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
       SimpleFootstep simpleFootstep = new SimpleFootstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);

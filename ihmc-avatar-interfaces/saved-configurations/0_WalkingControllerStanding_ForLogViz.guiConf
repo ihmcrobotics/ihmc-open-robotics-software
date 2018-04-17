@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,useFiniteDifferencesForVelocities,wRhoSmoother,wRhoPlaneContacts</Entry Boxes>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelControllerName,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,useFiniteDifferencesForVelocities,wRhoSmoother,wRhoPlaneContacts</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

@@ -19,7 +19,7 @@ public class StopAction extends AbstractAction
       super("Stop");
       this.executor = executor;
 
-      String iconFilename = "icons/Stop24.gif";
+      String iconFilename = "icons/Stop.png";
       int shortKey = KeyEvent.VK_T;
       String longDescription = "Stop playing simulation.";
       String shortDescription = "Stop";

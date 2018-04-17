@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class CompositeOverheadPath extends OverheadPath
 {
@@ -40,15 +40,15 @@ public class CompositeOverheadPath extends OverheadPath
    {
       if (paths.size() > 0)
       {
-         FramePose2d lastPose = getPoseAtS(1.0);
-         FramePose2d nextPose = newPath.getPoseAtS(0.0);
+         FramePose2D lastPose = getPoseAtS(1.0);
+         FramePose2D nextPose = newPath.getPoseAtS(0.0);
          if (!lastPose.epsilonEquals(nextPose, EPSILON))
             throw new PoseDiscontinuityException("lastPose " + lastPose + " does not match next pose " + nextPose + " in CompositeOverheadPath");
       }
    }
 
    @Override
-   public FramePose2d getPoseAtS(double pathVariableS)
+   public FramePose2D getPoseAtS(double pathVariableS)
    {
       double subpathVariablS = getSForSubpath(pathVariableS);
 
@@ -56,7 +56,7 @@ public class CompositeOverheadPath extends OverheadPath
    }
 
    @Override
-   public FramePose2d getExtrapolatedPoseAtS(double pathVariableS)
+   public FramePose2D getExtrapolatedPoseAtS(double pathVariableS)
    {
       if (pathVariableS > 1.0)
          return getPoseAtS((pathVariableS - 1) * paths.size(), 0);
@@ -67,7 +67,7 @@ public class CompositeOverheadPath extends OverheadPath
    }
 
    //getPoseAtS allows "negative" pathVariableS values (or values greater than 1) without crossing onto a different segment.
-   public FramePose2d getPoseAtS(double subpathVariablS, int pathIndex)
+   public FramePose2D getPoseAtS(double subpathVariablS, int pathIndex)
    {
       currentPath = paths.get(pathIndex);
 

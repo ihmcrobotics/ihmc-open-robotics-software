@@ -131,8 +131,8 @@ public class RobotTools
             rootJointTwist.getAngularPart(angularVelocity);
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
             angularVelocity.changeFrame(rootBodyFrame);
-            scsFloatingJoint.setVelocity(linearVelocity.getVector());
-            scsFloatingJoint.setAngularVelocityInBody(angularVelocity.getVector());
+            scsFloatingJoint.setVelocity(linearVelocity);
+            scsFloatingJoint.setAngularVelocityInBody(angularVelocity);
          }
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
@@ -167,7 +167,7 @@ public class RobotTools
             scsFloatingJoint.getVelocity(linearVelocity);
             linearVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity.getVector(), angularVelocity.getVector());
+            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
             idFloatingJoint.setJointTwist(rootJointTwist);
          }
 
@@ -238,8 +238,7 @@ public class RobotTools
       else if (idJoint instanceof RevoluteJoint)
       {
          RevoluteJoint idRevoluteJoint = (RevoluteJoint) idJoint;
-         Vector3D axis = new Vector3D();
-         idRevoluteJoint.getJointAxis().get(axis);
+         Vector3D axis = new Vector3D(idRevoluteJoint.getJointAxis());
          PinJoint scsRevoluteJoint = new PinJoint(jointName, offsetVector, scsRobot, axis);
          scsJoint = scsRevoluteJoint;
       }
@@ -255,7 +254,7 @@ public class RobotTools
       Vector3D comOffset = new Vector3D();
       FramePoint3D centerOfMassOffset = idInertia.getCenterOfMassOffset();
       centerOfMassOffset.changeFrame(idJoint.getFrameAfterJoint());
-      centerOfMassOffset.get(comOffset);
+      comOffset.set(centerOfMassOffset);
       double mass = idInertia.getMass();
       Matrix3D momentOfInertia = idInertia.getMassMomentOfInertiaPartCopy();
 

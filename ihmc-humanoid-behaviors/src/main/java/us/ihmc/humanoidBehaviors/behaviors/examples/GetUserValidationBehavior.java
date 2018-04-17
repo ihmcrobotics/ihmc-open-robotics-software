@@ -1,10 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 
 public class GetUserValidationBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
 {
@@ -42,7 +43,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    public void onBehaviorEntered()
    {
       //reset necessary values so this behavior can run again properly
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For User Validation");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Waiting For User Validation");
       sendPacket(p1);
 
       validated = false;
@@ -55,7 +56,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Got User Validation");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Got User Validation");
       sendPacket(p1);
       //let the UI know this specific behavior has ended
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 0);
@@ -66,9 +67,9 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      if (data.key.equalsIgnoreCase("validate"))
+      if (data.getKeyAsString().equalsIgnoreCase("validate"))
       {
-         if (data.value == 1)
+         if (data.getValue() == 1)
          {
             validated = true;
          }

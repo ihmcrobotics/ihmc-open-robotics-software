@@ -3,13 +3,17 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -19,29 +23,29 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
    
-   private final YoFramePoint initialPosition;
+   private final YoFramePoint3D initialPosition;
    private final YoDouble intermediateZPosition;
 
-   private final YoFramePoint finalPosition;
-   private final YoFrameVector finalVelocity;
+   private final YoFramePoint3D finalPosition;
+   private final YoFrameVector3D finalVelocity;
 
-   private final YoFramePoint currentPosition;
-   private final YoFrameVector currentVelocity;
-   private final YoFrameVector currentAcceleration;
+   private final YoFramePoint3D currentPosition;
+   private final YoFrameVector3D currentVelocity;
+   private final YoFrameVector3D currentAcceleration;
 
    public ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
       
-      initialPosition = new YoFramePoint(name + "InitialPosition", referenceFrame, registry);
+      initialPosition = new YoFramePoint3D(name + "InitialPosition", referenceFrame, registry);
       intermediateZPosition = new YoDouble(name + "IntermediateZPosition", registry);
       
-      finalPosition = new YoFramePoint(name + "FinalPosition", referenceFrame, registry);
-      finalVelocity = new YoFrameVector(name + "FinalVelocity", referenceFrame, registry);
+      finalPosition = new YoFramePoint3D(name + "FinalPosition", referenceFrame, registry);
+      finalVelocity = new YoFrameVector3D(name + "FinalVelocity", referenceFrame, registry);
 
-      currentPosition = new YoFramePoint(name + "CurrentPosition", referenceFrame, registry);
-      currentVelocity = new YoFrameVector(name + "CurrentVelocity", referenceFrame, registry);
-      currentAcceleration = new YoFrameVector(name + "CurrentAcceleration", referenceFrame, registry);
+      currentPosition = new YoFramePoint3D(name + "CurrentPosition", referenceFrame, registry);
+      currentVelocity = new YoFrameVector3D(name + "CurrentVelocity", referenceFrame, registry);
+      currentAcceleration = new YoFrameVector3D(name + "CurrentAcceleration", referenceFrame, registry);
 
       currentTime = new YoDouble(name + "CurrentTime", registry);
       trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
@@ -58,14 +62,9 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       trajectoryTime.set(duration);
    }
    
-   public void setInitialConditions(FramePoint3D initialPosition)
+   public void setInitialConditions(FramePoint3DReadOnly initialPosition)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
-   }
-
-   public void setInitialConditions(YoFramePoint initialPosition)
-   {
-      this.initialPosition.set(initialPosition);
+      this.initialPosition.setMatchingFrame(initialPosition);
    }
 
    public void setIntermediateConditions(double intermediateZPosition)
@@ -78,25 +77,13 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.intermediateZPosition.set(intermediateZPosition.getDoubleValue());  
    }
    
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
-   public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity)
-   {
-      this.finalPosition.set(finalPosition);
-      this.finalVelocity.set(finalVelocity);
-   }
-   
-   public void setFinalConditions(YoFramePoint finalPosition, FrameVector3D finalVelocity)
-   {
-      this.finalPosition.set(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
-   }
-
-   public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, double intermediateZPosition, FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint3DReadOnly initialPosition, double intermediateZPosition, FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -106,7 +93,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, YoFramePoint initialPosition, YoDouble intermediateZPosition, YoFramePoint finalPosition, YoFrameVector finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint3DReadOnly initialPosition, YoDouble intermediateZPosition, FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -116,7 +103,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, Point3D initialPosition, double intermediatePosition, Point3D finalPosition, Vector3D finalVelocity)
+   public void setTrajectoryParameters(double duration, Point3DReadOnly initialPosition, double intermediatePosition, Point3DReadOnly finalPosition, Vector3DReadOnly finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -176,44 +163,44 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
-   public void get(YoFramePoint positionToPack)
+   public void get(YoFramePoint3D positionToPack)
    {
       positionToPack.set(currentPosition);
    }
 
    public void get(Point3D positionToPack)
    {
-      currentPosition.get(positionToPack);
+      positionToPack.set(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       velocityToPack.set(currentVelocity);
    }
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      currentVelocity.get(velocityToPack);
+      velocityToPack.set(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    public void getAcceleration(Vector3D accelerationToPack)
    {
-      currentAcceleration.get(accelerationToPack);
+      accelerationToPack.set(currentAcceleration);
    }
 
    @Override
@@ -224,7 +211,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
    {
       positionToPack.set(currentPosition);
       velocityToPack.set(currentVelocity);

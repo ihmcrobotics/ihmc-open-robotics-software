@@ -83,7 +83,6 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
    {
       String fileEnding = ".graphConf";
 
-      // TODO Auto-generated method stub
       try
       {
          String filename = file.getName();

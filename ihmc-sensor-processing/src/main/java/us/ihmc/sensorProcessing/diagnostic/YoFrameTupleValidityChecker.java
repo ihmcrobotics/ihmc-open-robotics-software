@@ -5,12 +5,12 @@ import java.util.EnumMap;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
+import us.ihmc.yoVariables.variable.YoFrameTuple3D;
 
 public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
-   private final YoFrameTuple<?, ?> input;
+   private final YoFrameTuple3D input;
 
    private final EnumMap<Axis, DoubleYoVariableValidityChecker> validityCheckers = new EnumMap<>(Axis.class);
 
@@ -19,12 +19,12 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
       this(inputName, null, parentRegistry);
    }
    
-   public YoFrameTupleValidityChecker(YoFrameTuple<?, ?> input, YoVariableRegistry parentRegistry)
+   public YoFrameTupleValidityChecker(YoFrameTuple3D input, YoVariableRegistry parentRegistry)
    {
       this(input.getNamePrefix() + input.getNameSuffix(), input, parentRegistry);
    }
 
-   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple<?, ?> input, YoVariableRegistry parentRegistry)
+   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple3D input, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);

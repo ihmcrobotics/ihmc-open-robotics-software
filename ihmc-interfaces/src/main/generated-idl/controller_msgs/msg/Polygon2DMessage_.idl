@@ -1,0 +1,28 @@
+#ifndef __controller_msgs__msg__Polygon2DMessage__idl__
+#define __controller_msgs__msg__Polygon2DMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * General purpose message that contains vertices to represent a 2D polygon (z ignored).
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::Polygon2DMessage_")
+      struct Polygon2DMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        sequence<geometry_msgs::msg::dds::Point, 100> vertices;
+      };
+    };
+  };
+};
+
+#endif

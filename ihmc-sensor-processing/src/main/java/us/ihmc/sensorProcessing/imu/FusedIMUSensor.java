@@ -10,16 +10,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class FusedIMUSensor implements IMUSensorReadOnly
 {
@@ -33,9 +33,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private final YoVariableRegistry registry;
    private final YoFrameQuaternion quaternion;
-   private final YoFrameOrientation orientation;
-   private final YoFrameVector angularVelocity;
-   private final YoFrameVector linearAcceleration;
+   private final YoFrameYawPitchRoll orientation;
+   private final YoFrameVector3D angularVelocity;
+   private final YoFrameVector3D linearAcceleration;
 
    // Variables use estimating the IMUs drift around z
    private final YoDouble firstIMUYaw;
@@ -72,7 +72,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private final double[] tempYawPitchRoll = new double[3];
 
-   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT, double imuDriftFilterFreqInHertz,
+   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT,
                          YoVariableRegistry parentRegistry)
    {
       this.firstIMU = firstIMU;
@@ -91,9 +91,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
       registry = new YoVariableRegistry(sensorName);
       quaternion = new YoFrameQuaternion(sensorName, fusedMeasurementFrame, registry);
-      orientation = new YoFrameOrientation(sensorName, fusedMeasurementFrame, registry);
-      angularVelocity = new YoFrameVector("qd_w", sensorName, fusedMeasurementFrame, registry);
-      linearAcceleration = new YoFrameVector("qdd_", sensorName, fusedMeasurementFrame, registry);
+      orientation = new YoFrameYawPitchRoll(sensorName, fusedMeasurementFrame, registry);
+      angularVelocity = new YoFrameVector3D("qd_w", sensorName, fusedMeasurementFrame, registry);
+      linearAcceleration = new YoFrameVector3D("qdd_", sensorName, fusedMeasurementFrame, registry);
 
       firstIMUYaw = new YoDouble(firstIMU.getSensorName() + "Yaw", registry);
       secondIMUYaw = new YoDouble(secondIMU.getSensorName() + "Yaw", registry);
@@ -315,19 +315,19 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    @Override
    public void getOrientationMeasurement(RotationMatrix orientationToPack)
    {
-      quaternion.get(orientationToPack);
+      orientationToPack.set(quaternion);
    }
 
    @Override
    public void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
    {
-      angularVelocity.get(angularVelocityToPack);
+      angularVelocityToPack.set(angularVelocity);
    }
 
    @Override
    public void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
    {
-      linearAcceleration.get(linearAccelerationToPack);
+      linearAccelerationToPack.set(linearAcceleration);
    }
 
    @Override

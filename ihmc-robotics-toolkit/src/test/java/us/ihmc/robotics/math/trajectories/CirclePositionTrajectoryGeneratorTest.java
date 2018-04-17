@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 

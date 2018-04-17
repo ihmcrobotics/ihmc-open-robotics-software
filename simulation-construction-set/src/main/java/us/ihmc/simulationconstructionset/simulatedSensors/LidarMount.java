@@ -56,7 +56,6 @@ public class LidarMount implements SimulatedSensor
    @Override
    public void setWorld(Graphics3DAdapter graphics3dAdapter)
    {
-      // TODO Auto-generated method stub
       
    }
    

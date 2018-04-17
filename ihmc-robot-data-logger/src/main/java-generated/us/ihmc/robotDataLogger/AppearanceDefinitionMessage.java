@@ -1,134 +1,129 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
-/**
-* 
-* Definition of the class "AppearanceDefinitionMessage" defined in Handshake.idl. 
-*
-* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Handshake.idl instead.
-*
-*/
-public class AppearanceDefinitionMessage
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+public class AppearanceDefinitionMessage extends Packet<AppearanceDefinitionMessage> implements Settable<AppearanceDefinitionMessage>, EpsilonComparable<AppearanceDefinitionMessage>
 {
-    public AppearanceDefinitionMessage()
-    {
-        
-        
-    }
+   public double r_;
+   public double g_;
+   public double b_;
+   public double transparency_;
 
-    public void set(AppearanceDefinitionMessage other)
-    {
-        	r_ = other.r_;
-        	g_ = other.g_;
-        	b_ = other.b_;
-        	transparency_ = other.transparency_;
+   public AppearanceDefinitionMessage()
+   {
+   }
 
-    }
+   public AppearanceDefinitionMessage(AppearanceDefinitionMessage other)
+   {
+      this();
+      set(other);
+   }
 
-    public void setR(double r)
-    {
-        r_ = r;
-    }
+   public void set(AppearanceDefinitionMessage other)
+   {
+      r_ = other.r_;
 
-    public double getR()
-    {
-        return r_;
-    }
+      g_ = other.g_;
 
-        
-    public void setG(double g)
-    {
-        g_ = g;
-    }
+      b_ = other.b_;
 
-    public double getG()
-    {
-        return g_;
-    }
+      transparency_ = other.transparency_;
 
-        
-    public void setB(double b)
-    {
-        b_ = b;
-    }
+   }
 
-    public double getB()
-    {
-        return b_;
-    }
+   public void setR(double r)
+   {
+      r_ = r;
+   }
+   public double getR()
+   {
+      return r_;
+   }
 
-        
-    public void setTransparency(double transparency)
-    {
-        transparency_ = transparency;
-    }
+   public void setG(double g)
+   {
+      g_ = g;
+   }
+   public double getG()
+   {
+      return g_;
+   }
 
-    public double getTransparency()
-    {
-        return transparency_;
-    }
+   public void setB(double b)
+   {
+      b_ = b;
+   }
+   public double getB()
+   {
+      return b_;
+   }
 
-        
+   public void setTransparency(double transparency)
+   {
+      transparency_ = transparency;
+   }
+   public double getTransparency()
+   {
+      return transparency_;
+   }
 
 
+   @Override
+   public boolean epsilonEquals(AppearanceDefinitionMessage other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.r_, other.r_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.g_, other.g_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.b_, other.b_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transparency_, other.transparency_, epsilon)) return false;
 
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof AppearanceDefinitionMessage)) return false;
-        AppearanceDefinitionMessage otherMyClass = (AppearanceDefinitionMessage)other;
-        boolean returnedValue = true;
+      return true;
+   }
 
-        returnedValue &= this.r_ == otherMyClass.r_;
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof AppearanceDefinitionMessage)) return false;
 
-                
-        returnedValue &= this.g_ == otherMyClass.g_;
+      AppearanceDefinitionMessage otherMyClass = (AppearanceDefinitionMessage) other;
 
-                
-        returnedValue &= this.b_ == otherMyClass.b_;
+      if(this.r_ != otherMyClass.r_) return false;
 
-                
-        returnedValue &= this.transparency_ == otherMyClass.transparency_;
+      if(this.g_ != otherMyClass.g_) return false;
 
-                
+      if(this.b_ != otherMyClass.b_) return false;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("AppearanceDefinitionMessage {");
-        builder.append("r=");
-        builder.append(this.r_);
+      if(this.transparency_ != otherMyClass.transparency_) return false;
 
-                builder.append(", ");
-        builder.append("g=");
-        builder.append(this.g_);
 
-                builder.append(", ");
-        builder.append("b=");
-        builder.append(this.b_);
+      return true;
+   }
 
-                builder.append(", ");
-        builder.append("transparency=");
-        builder.append(this.transparency_);
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
-
-    private double r_; 
-    private double g_; 
-    private double b_; 
-    private double transparency_; 
-
+      builder.append("AppearanceDefinitionMessage {");
+      builder.append("r=");
+      builder.append(this.r_);      builder.append(", ");
+      builder.append("g=");
+      builder.append(this.g_);      builder.append(", ");
+      builder.append("b=");
+      builder.append(this.b_);      builder.append(", ");
+      builder.append("transparency=");
+      builder.append(this.transparency_);
+      builder.append("}");
+      return builder.toString();
+   }
 }

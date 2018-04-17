@@ -15,6 +15,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -60,6 +61,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
+   private final HighLevelControllerParameters highLevelControllerParameters;
    private final StickRobotJointMap jointMap;
    private final StickRobotContactPointParameters contactPointParameters;
    private final String robotName = "STICK_BOT";
@@ -135,6 +137,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       capturePointPlannerParameters = null;
       walkingControllerParameters = null;
       stateEstimatorParamaters = null;
+      highLevelControllerParameters = null;
 
       //
       robotDescription = createRobotDescription();
@@ -246,6 +249,12 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
+   }
+
+   @Override
    public DRCRobotJointMap getJointMap()
    {
       return jointMap;
@@ -254,7 +263,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -321,14 +329,12 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getStandPrepAngle(String jointName)
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -344,7 +350,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          HumanoidGlobalDataProducer globalDataProducer,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

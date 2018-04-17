@@ -74,8 +74,8 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testRandomPoses()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);

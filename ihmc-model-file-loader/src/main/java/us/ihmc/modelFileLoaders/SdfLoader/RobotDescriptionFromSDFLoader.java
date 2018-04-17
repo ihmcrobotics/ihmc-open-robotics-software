@@ -116,7 +116,7 @@ public class RobotDescriptionFromSDFLoader
          Vector3D gcOffset = jointContactPoint.getRight();
 
          GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + ModelFileLoaderConversionsHelper
-               .sanitizeJointName(jointName) + "_" + count++, gcOffset);
+               .sanitizeJointName(jointName) + "_" + count++, gcOffset, contactPointHolder.getGroupIdentifier(jointContactPoint));
          ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + ModelFileLoaderConversionsHelper
                .sanitizeJointName(jointName) + "_" + count++, gcOffset);
 
@@ -433,6 +433,7 @@ public class RobotDescriptionFromSDFLoader
             {
             case "camera":
             case "multicamera":
+            case "depth":
                addCameraMounts(sensor, scsJoint, child);
                break;
             case "imu":

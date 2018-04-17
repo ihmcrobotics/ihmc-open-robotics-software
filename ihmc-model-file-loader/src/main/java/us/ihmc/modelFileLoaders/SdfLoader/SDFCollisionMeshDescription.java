@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -16,6 +17,8 @@ import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 
 public class SDFCollisionMeshDescription extends CollisionMeshDescription
 {
+   private static final boolean verbose = false;
+
    public SDFCollisionMeshDescription(List<? extends AbstractSDFMesh> sdfVisuals)
    {
       this(sdfVisuals, new RigidBodyTransform());
@@ -45,9 +48,9 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
 
             SDFGeometry geometry = sdfVisual.getGeometry();
             Mesh mesh = geometry.getMesh();
-            if(mesh != null)
+            if(verbose && mesh != null)
             {
-               System.err.println("Meshes not implemented yet for CollisionMeshes!! Skipping " + mesh.getUri());
+               PrintTools.error("Meshes not implemented yet for CollisionMeshes!! Skipping " + mesh.getUri());
             }
             else if(geometry.getCylinder() != null)
             {
@@ -55,7 +58,7 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
                double radius = Double.parseDouble(geometry.getCylinder().getRadius());
 //               translate(0.0, 0.0, -length/2.0);
 
-               addCylinderReferencedAtCenter(length, radius);
+               addCylinderReferencedAtCenter(radius, length);
             }
             else if(geometry.getBox() != null)
             {
@@ -88,9 +91,11 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
             }
             else
             {
-               System.err.println("Visual for " + sdfVisual.getName() + " not implemented yet");
-               System.err.println("Defined visual" + ToStringBuilder.reflectionToString(geometry));
-
+               if(verbose)
+               {
+                  PrintTools.error("Visual for " + sdfVisual.getName() + " not implemented yet");
+                  PrintTools.error("Defined visual" + ToStringBuilder.reflectionToString(geometry));
+               }
             }
          }
       }

@@ -5,15 +5,15 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToStandingState extends WalkingState
 {
@@ -51,14 +51,14 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       if (!balanceManager.isICPPlanDone())
          return false;
@@ -67,15 +67,15 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
 
       feetManager.initializeContactStatesForDoubleSupport(null);
 
-      WalkingState previousState = (WalkingState) getPreviousState();
-      RobotSide previousSupportSide = previousState.getSupportSide();
+      WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+      RobotSide previousSupportSide = previousStateEnum != null ? previousStateEnum.getSupportSide() : null;
 
       if (doFootExplorationInTransferToStanding.getBooleanValue())
       {
@@ -117,7 +117,7 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 }

@@ -27,16 +27,16 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
-import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
+import us.ihmc.tools.string.RegularExpression;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener, FocusListener, CreatedNewRegistriesListener
 {
@@ -56,14 +56,14 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    private final YoVariableRegistry root;
    private ArrayList<RegistrySettingsChangedListener> registrySettingsChangedListeners = new ArrayList<RegistrySettingsChangedListener>();
-   
+
    private String filterText = "";
    private boolean showOnlyParameters = false;
 
    public NameSpaceHierarchyTree(RegistrySelectedListener nameSpaceSelectedListener, JFrame frame, WriteDataCommandExecutor writeDataCommandExecutor, YoVariableRegistry rootRegistry)
    {
       super();
-      
+
       EventDispatchThreadHelper.checkThatInEventDispatchThread();
 
       this.registrySelectedListener = nameSpaceSelectedListener;
@@ -89,13 +89,13 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
       tree.setCellRenderer(new NameSpaceHierarchyNodeRenderer(treeNodeRegistryMap));
    }
-   
+
    public void filter(String filterText)
    {
       this.filterText = filterText;
       createdNewRegistries();
    }
-   
+
    public void filterParameters(boolean showOnlyParameters)
    {
       this.showOnlyParameters = showOnlyParameters;
@@ -105,7 +105,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    private boolean needToSetupTree = true;
    private YoVariableRegistry topOfTreeRegistry;
-   
+
    @Override
    public void paintComponent(Graphics g)
    {
@@ -114,10 +114,10 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          setUpTree(topOfTreeRegistry);
          needToSetupTree = false;
       }
-      
+
       super.paintComponent(g);
    }
-   
+
    private void setUpTree(final YoVariableRegistry currentregistry)
    {
       //TODO: This is incorrect but exo breaks when using invokelater for some reason.
@@ -134,7 +134,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       for (YoVariableRegistry child : currentregistry.getChildren())
       {
          setUpTree(child);
-      }        
+      }
       //         }});
    }
 
@@ -152,7 +152,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          }
       });
       popupMenu.add(toggleVaribleSend);
-      
+
       JMenuItem recursiveToggleVaribleSend = new JMenuItem("Recursive Toggle Variable Send");
       recursiveToggleVaribleSend.addActionListener(new ActionListener()
       {
@@ -176,7 +176,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          }
       });
       popupMenu.add(toggleVariableLog);
-      
+
       JMenuItem recursiveToggleVariableLog = new JMenuItem("Recursive Toggle Variable Log");
       recursiveToggleVariableLog.addActionListener(new ActionListener()
       {
@@ -188,11 +188,11 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          }
       });
       popupMenu.add(recursiveToggleVariableLog);
-      
+
       JMenuItem exportBinaryRegistryData = new JMenuItem("Export to binary format");
       exportBinaryRegistryData.addActionListener(new ActionListener()
       {
-         
+
          @Override
          public void actionPerformed(ActionEvent e)
          {
@@ -201,11 +201,11 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          }
       });
       popupMenu.add(exportBinaryRegistryData);
-      
+
       JMenuItem exportASCIIRegistryData = new JMenuItem("Export to ASCII format");
       exportASCIIRegistryData.addActionListener(new ActionListener()
       {
-         
+
          @Override
          public void actionPerformed(ActionEvent e)
          {
@@ -250,18 +250,18 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    private void addNode(YoVariableRegistry registry)
    {
       EventDispatchThreadHelper.checkThatInEventDispatchThread();
-      
+
       if (!tree.isExpanded(new TreePath(top.getPath())))
       {
          tree.expandPath(new TreePath(top.getPath()));
       }
-      
+
       boolean match = RegularExpression.check(registry.getNameSpace().getName(), filterText);
       if(showOnlyParameters && match)
       {
          match = registry.getIfRegistryOrChildrenHaveParameters();
       }
-       
+
       if(match)
       {
          // create the top of the tree
@@ -271,7 +271,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
             registryTreeNodeMap.put(registry, newTopLevelAncestor);
             treeNodeRegistryMap.put(newTopLevelAncestor, registry);
             top.add(newTopLevelAncestor);
-            
+
             model.setRoot(top);
          }
          else
@@ -350,39 +350,39 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    private void recursiveToggleVariableSend(ActionEvent arg0)
    {
       boolean toggleSend = true;
-      boolean toggleLog = false; 
+      boolean toggleLog = false;
       boolean recursive = true;
-      
+
       toggleVariableSendOrLog(arg0, toggleSend, toggleLog, recursive);
    }
-   
+
    private void toggleVariableSend(ActionEvent arg0)
    {
       boolean toggleSend = true;
-      boolean toggleLog = false; 
+      boolean toggleLog = false;
       boolean recursive = false;
-      
+
       toggleVariableSendOrLog(arg0, toggleSend, toggleLog, recursive);
    }
-   
+
    private void recursiveToggleVariableLog(ActionEvent arg0)
    {
       boolean toggleSend = false;
-      boolean toggleLog = true; 
+      boolean toggleLog = true;
       boolean recursive = true;
-      
+
       toggleVariableSendOrLog(arg0, toggleSend, toggleLog, recursive);
    }
 
    private void toggleVariableLog(ActionEvent arg0)
    {
       boolean toggleSend = false;
-      boolean toggleLog = true; 
+      boolean toggleLog = true;
       boolean recursive = false;
-      
+
       toggleVariableSendOrLog(arg0, toggleSend, toggleLog, recursive);
    }
-   
+
    private void toggleVariableSendOrLog(ActionEvent arg0, boolean toggleSend, boolean toggleLog, boolean recursive)
    {
       TreePath[] selectionPaths = tree.getSelectionPaths();
@@ -391,7 +391,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       {
          TreePath path = selectionPaths[i];
          TreeNode parentNode = (TreeNode) path.getLastPathComponent();
-        
+
          YoVariableRegistry parentRegistry = treeNodeRegistryMap.get(parentNode);
          boolean send = !parentRegistry.isSent();
          boolean log = !parentRegistry.isLogged();
@@ -401,8 +401,8 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
       notifyRegistrySettingsChangedListeners(changedRegistries);
    }
-   
-   
+
+
    private void exportRegistryData(ActionEvent e, final boolean binary)
    {
       TreePath[] selectionPaths = tree.getSelectionPaths();
@@ -412,11 +412,11 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       {
          TreePath path = selectionPaths[i];
          TreeNode parentNode = (TreeNode) path.getLastPathComponent();
-        
+
          YoVariableRegistry parentRegistry = treeNodeRegistryMap.get(parentNode);
          allVariables.addAll(parentRegistry.getAllVariables());
       }
-      
+
       FileFilter filterFilter = new FileFilter()
       {
 
@@ -442,15 +442,15 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
                return false;
          }
       };
-      
+
       fileChooser.setFileFilter(filterFilter);
-      
+
       if(fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
       {
          String fileExt = filterFilter.getDescription();
          File chosenFile = fileChooser.getSelectedFile();
          String fileName = chosenFile.getName();
-         
+
          if (!fileName.endsWith(fileExt))
          {
             fileName = fileName.concat(fileExt);
@@ -460,26 +460,26 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
                chosenFile = new File(chosenFile.getParent(), fileName);
             }
          }
-         
+
          writeDataCommandExecutor.writeData(allVariables, binary, binary?true:false, chosenFile);
       }
-      
+
 
    }
-   
-   private void recursiveToggleVariableSendOrLog(boolean recursive, boolean toggleSend, boolean send, boolean toggleLog, boolean log, 
+
+   private void recursiveToggleVariableSendOrLog(boolean recursive, boolean toggleSend, boolean send, boolean toggleLog, boolean log,
          TreeNode parentNode, YoVariableRegistry parentRegistry, ArrayList<YoVariableRegistry> changedRegistries)
    {
       if (toggleSend) parentRegistry.setSending(send);
       if (toggleLog) parentRegistry.setLogging(log);
-      
+
       changedRegistries.add(parentRegistry);
       model.nodeChanged(parentNode);
-      
+
       if (recursive)
-      {         
+      {
          Enumeration<TreeNode> childrenNodes = parentNode.children();
-         
+
          while(childrenNodes.hasMoreElements())
          {
             TreeNode childNode = childrenNodes.nextElement();
@@ -489,7 +489,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
          }
       }
    }
-  
+
 
    @Override
    public void focusGained(FocusEvent e)
@@ -625,7 +625,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       top.removeAllChildren();
       registryTreeNodeMap.clear();
       treeNodeRegistryMap.clear();
-      
+
       this.topOfTreeRegistry = root;
       this.needToSetupTree = true;
 //      setUpTree(root);

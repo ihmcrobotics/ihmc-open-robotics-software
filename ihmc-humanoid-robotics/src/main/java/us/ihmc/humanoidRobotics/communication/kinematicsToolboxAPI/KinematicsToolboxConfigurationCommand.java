@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
@@ -68,8 +68,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       else
          privilegedRootJointOrientation.setToNaN();
 
-      long[] messageHashCodes = message.getPrivilegedJointNameBasedHashCodes();
-      float[] messageJointAngles = message.getPrivilegedJointAngles();
+      TLongArrayList messageHashCodes = message.getPrivilegedJointNameBasedHashCodes();
+      TFloatArrayList messageJointAngles = message.getPrivilegedJointAngles();
 
       hasPrivilegedJointAngles = messageHashCodes != null && messageJointAngles != null;
       jointNameBasedHashCodes.reset();

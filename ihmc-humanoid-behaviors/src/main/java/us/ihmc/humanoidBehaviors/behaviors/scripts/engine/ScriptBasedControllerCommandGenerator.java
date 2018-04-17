@@ -6,7 +6,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -14,11 +20,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class ScriptBasedControllerCommandGenerator
@@ -89,20 +90,20 @@ public class ScriptBasedControllerCommandGenerator
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-         message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-         message.getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(worldFrame));
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          FootTrajectoryCommand command = new FootTrajectoryCommand();
-         command.set(worldFrame, worldFrame, message);
+         command.getSE3Trajectory().set(worldFrame, worldFrame, message.getSe3Trajectory());
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
-         message.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-         message.getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          HandTrajectoryCommand command = new HandTrajectoryCommand();
-         command.set(worldFrame, chestFrame, message);
+         command.getSE3Trajectory().set(worldFrame, chestFrame, message.getSe3Trajectory());
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PelvisHeightTrajectoryMessage)

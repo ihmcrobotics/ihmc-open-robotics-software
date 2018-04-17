@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -89,9 +88,9 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
-      Point3D nodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth()));
+      Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
       snapTransform.transform(nodePosition);
-      Point3D previousNodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(previousNode, parameters.getIdealFootstepWidth()));
+      Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
       previousSnapTransform.transform(previousNodePosition);
 
       double heightChange = Math.abs(nodePosition.getZ() - previousNodePosition.getZ());

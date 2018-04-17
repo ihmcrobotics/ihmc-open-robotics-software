@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
+import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -153,11 +153,9 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

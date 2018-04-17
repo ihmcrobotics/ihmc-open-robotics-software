@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 /**
  * Created by agrabertilton on 3/6/15.
@@ -13,7 +13,7 @@ public class CompositeFootstepOverheadPath extends FootstepOverheadPath
 {
    ReferenceFrame referenceFrame;
    double totalDistance = 0;
-   FramePose2d endPose;
+   FramePose2D endPose;
    ArrayList<FootstepOverheadPath> overheadPaths = new ArrayList<>();
 
    public CompositeFootstepOverheadPath(FootstepOverheadPath startingPath){
@@ -52,7 +52,7 @@ public class CompositeFootstepOverheadPath extends FootstepOverheadPath
 
 
    @Override
-   public FramePose2d getPoseAtDistance(double distanceAlongPath)
+   public FramePose2D getPoseAtDistance(double distanceAlongPath)
    {
       double currentDistanceInPath = distanceAlongPath;
       if (distanceAlongPath > totalDistance){

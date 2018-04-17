@@ -7,8 +7,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoMGeneration.SmoothCoMIntegrationToolbox;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -202,8 +201,8 @@ public class SmoothCoMIntegrationToolboxTest
          
          double time = t0 + Math.random() * (tFinal - t0);                
          
-         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
-         FramePoint3D comPositionDesiredInitial = new FramePoint3D(worldFrame, cmp0.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal);
+         FramePoint3D comPositionDesiredInitial = new FramePoint3D(worldFrame, cmp0);
          
          FramePoint3D icpPositionDesiredInitial = new FramePoint3D(worldFrame);
          icpToolbox.computeDesiredCapturePointPosition3D(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
@@ -232,7 +231,7 @@ public class SmoothCoMIntegrationToolboxTest
 //         PrintTools.debug("CoM pos hand: " + comPositionDesiredCurrentByHand.toString());
 //         PrintTools.debug("");
 
-         EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredCurrent.getPoint(), comPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredCurrent, comPositionDesiredCurrentByHand, EPSILON);
          
          // Velocity
          FrameVector3D comVelocityDesiredCurrent = new FrameVector3D(worldFrame);

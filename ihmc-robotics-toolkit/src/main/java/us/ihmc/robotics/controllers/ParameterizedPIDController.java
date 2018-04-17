@@ -45,7 +45,7 @@ public class ParameterizedPIDController extends AbstractPIDController
    }
 
    @Override
-   public double getMaximumOutputLimit()
+   public double getMaximumFeedback()
    {
       return maxOutput.getValue();
    }

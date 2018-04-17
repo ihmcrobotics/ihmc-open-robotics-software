@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.0"
+      classpath "us.ihmc:ihmc-build:0.13.0"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -19,37 +19,39 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+   maximumSuiteDuration = 15.0
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.7.4'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile "org.apache.commons:commons-lang3:3.7"
    compile "us.ihmc.thirdparty.jinput:jinput:160414"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
+   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-robotics-test", version: "source"
 }

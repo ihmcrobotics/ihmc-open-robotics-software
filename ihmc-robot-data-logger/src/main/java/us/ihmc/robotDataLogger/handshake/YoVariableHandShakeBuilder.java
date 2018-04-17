@@ -19,11 +19,13 @@ import us.ihmc.robotDataLogger.EnumType;
 import us.ihmc.robotDataLogger.GraphicObjectMessage;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.JointDefinition;
+import us.ihmc.robotDataLogger.LoadStatus;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -248,6 +250,29 @@ public class YoVariableHandShakeBuilder
          yoVariableDefinition.setIsParameter(variable.isParameter());
          yoVariableDefinition.setMin(variable.getManualScalingMin());
          yoVariableDefinition.setMax(variable.getManualScalingMax());
+         if (variable.isParameter())
+         {
+            ParameterLoadStatus loadStatus = variable.getParameter().getLoadStatus();
+            switch (loadStatus)
+            {
+            case UNLOADED:
+               yoVariableDefinition.setLoadStatus(LoadStatus.Unloaded);
+               break;
+            case DEFAULT:
+               yoVariableDefinition.setLoadStatus(LoadStatus.Default);
+               break;
+            case LOADED:
+               yoVariableDefinition.setLoadStatus(LoadStatus.Loaded);
+               break;
+            default:
+               throw new RuntimeException("Unknown load status: " + loadStatus);
+            }
+         }
+         else
+         {
+            yoVariableDefinition.setLoadStatus(LoadStatus.NoParameter);
+         }
+
          switch (variable.getYoVariableType())
          {
          case DOUBLE:

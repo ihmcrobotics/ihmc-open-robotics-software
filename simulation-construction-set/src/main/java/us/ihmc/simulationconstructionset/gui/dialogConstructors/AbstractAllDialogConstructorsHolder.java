@@ -398,14 +398,12 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          @Override
          public void constructDialog()
          {
-            // TODO Auto-generated method stub
             
          }
          
          @Override
          public void closeAndDispose()
          {
-            // TODO Auto-generated method stub
             
          }
       };
@@ -421,14 +419,12 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          @Override
          public void constructDialog()
          {
-            // TODO Auto-generated method stub
             
          }
          
          @Override
          public void closeAndDispose()
          {
-            // TODO Auto-generated method stub
             
          }
       };

@@ -14,6 +14,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -22,6 +23,7 @@ import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -45,7 +47,7 @@ public class CapturabilityBasedStatusTest
       KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      CapturabilityBasedStatus cbs = new CapturabilityBasedStatus(new Random());
+      CapturabilityBasedStatus cbs = RandomHumanoidMessages.nextCapturabilityBasedStatus(new Random());
 
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       kryoStreamSerializer.write(outputStream, cbs);
@@ -67,9 +69,9 @@ public class CapturabilityBasedStatusTest
       KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      CapturabilityBasedStatus cbs1 = new CapturabilityBasedStatus(random);
-      CapturabilityBasedStatus cbs2 = new CapturabilityBasedStatus(random);
-      CapturabilityBasedStatus cbs3 = new CapturabilityBasedStatus(random);
+      CapturabilityBasedStatus cbs1 = RandomHumanoidMessages.nextCapturabilityBasedStatus(random);
+      CapturabilityBasedStatus cbs2 = RandomHumanoidMessages.nextCapturabilityBasedStatus(random);
+      CapturabilityBasedStatus cbs3 = RandomHumanoidMessages.nextCapturabilityBasedStatus(random);
 
       DataOutputStream fileDataOutputStream = FileTools.newFileDataOutputStream(TEST_FILE_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       kryoStreamSerializer.write(fileDataOutputStream, cbs1);

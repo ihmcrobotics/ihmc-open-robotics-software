@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,requestedHighLevelState,transitionToFullControl,ll_transitionRatio</Entry Boxes>
+<Entry Boxes>requestedBehavior,requestedHighLevelControllerName,transitionToFullControl,ll_transitionRatio</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

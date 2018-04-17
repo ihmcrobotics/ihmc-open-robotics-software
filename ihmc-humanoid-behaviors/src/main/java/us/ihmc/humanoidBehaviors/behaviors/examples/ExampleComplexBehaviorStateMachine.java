@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -10,11 +11,9 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
 {
@@ -40,7 +39,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
 
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
       coactiveBehaviorsNetworkManager = communicationBridge;
-      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
+      //      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
@@ -51,118 +50,74 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, communicationBridge, atlasPrimitiveActions);
 
-      setupStateMachine();
-
-      statemachine.getStateYoVariable().addVariableChangedListener(new VariableChangedListener()
-      {
-
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
-         }
-      });
+      // FIXME
+      //      statemachine.getStateYoVariable().addVariableChangedListener(new VariableChangedListener()
+      //      {
+      //
+      //         @Override
+      //         public void notifyOfVariableChange(YoVariable<?> v)
+      //         {
+      //            System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
+      //         }
+      //      });
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Starting Example Behavior");
       sendPacket(p1);
       super.onBehaviorEntered();
    }
 
-   private void setupStateMachine()
+   @Override
+   public void onBehaviorExited()
    {
+      System.out.println("IM ALL DONE");
+   }
 
+   @Override
+   protected ExampleStates configureStateMachineAndReturnInitialKey(StateMachineFactory<ExampleStates, BehaviorAction> factory)
+   {
       //TODO setup search for ball behavior
 
-      BehaviorAction<ExampleStates> enableLidar = new BehaviorAction<ExampleStates>(ExampleStates.ENABLE_LIDAR, atlasPrimitiveActions.enableLidarBehavior)
+      BehaviorAction enableLidar = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior) // ExampleStates.ENABLE_LIDAR
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Enabling Lidar");
-            sendPacket(p1);
-            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
+            sendPacket(MessageTools.createTextToSpeechPacket("Enabling Lidar"));
+            // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
          }
       };
 
-      BehaviorAction<ExampleStates> resetRobot = new BehaviorAction<ExampleStates>(ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE, resetRobotBehavior)
+      BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior) // ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Resetting Robot");
-            sendPacket(p1);
+            sendPacket(MessageTools.createTextToSpeechPacket("Resetting Robot"));
             super.setBehaviorInput();
          }
       };
 
-      BehaviorAction<ExampleStates> setupRobot = new BehaviorAction<ExampleStates>(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE,
-            simpleArmMotionBehavior)
+      BehaviorAction setupRobot = new BehaviorAction(simpleArmMotionBehavior) // ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
-            sendPacket(p1);
+            sendPacket(MessageTools.createTextToSpeechPacket("Setting Up Robot Pose"));
             super.setBehaviorInput();
          }
       };
-      //      BehaviorAction<ExampleStates> setupRobot = new BehaviorAction<ExampleStates>(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE,
-      //            atlasPrimitiveActions.rightArmTrajectoryBehavior, atlasPrimitiveActions.leftHandTrajectoryBehavior,
-      //            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
-      //      {
-      //         @Override
-      //         protected void setBehaviorInput()
-      //         {
-      //
-      //            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
-      //            sendPacket(p1);
-      //
-      //            double[] armConfig = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242,
-      //                  0.6123343067479899, 0.12524505635696856};
-      //
-      //            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-      //            armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
-      //            armTrajectoryMessage.robotSide = RobotSide.RIGHT;
-      //
-      //            for (int i = 0; i < armConfig.length; i++)
-      //            {
-      //               TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
-      //               trajectoryPoint.position = armConfig[i];
-      //               trajectoryPoint.time = 1.0;
-      //               OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-      //               jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-      //               armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
-      //            }
-      //
-      //            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(armTrajectoryMessage);
-      //
-      //            FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), .5, .5, 1);
-      //            point1.changeFrame(ReferenceFrame.getWorldFrame());
-      //            FrameOrientation orient = new FrameOrientation(ReferenceFrame.getWorldFrame(),1.5708, 1.5708, -3.1415);
-      //            orient.changeFrame(ReferenceFrame.getWorldFrame());
-      //
-      //            FramePose pose = new FramePose(point1, orient);
-      //            
-      //            HandTrajectoryMessage handmessage = new HandTrajectoryMessage(RobotSide.LEFT, 2, pose.getFramePointCopy().getPoint(),pose.getFrameOrientationCopy().getQuaternion());
-      //            
-      //            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(handmessage);
-      //
-      //            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE));
-      //         }
-      //      };
 
-      BehaviorAction<ExampleStates> wholeBodyExample = new BehaviorAction<ExampleStates>(ExampleStates.WHOLEBODY_EXAMPLE,
-            atlasPrimitiveActions.wholeBodyBehavior)
+      BehaviorAction wholeBodyExample = new BehaviorAction(atlasPrimitiveActions.wholeBodyBehavior) // ExampleStates.WHOLEBODY_EXAMPLE
       {
          @Override
          protected void setBehaviorInput()
          {
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Doing Whole Body Behavior");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Doing Whole Body Behavior");
             sendPacket(p1);
             FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
@@ -175,40 +130,21 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
 
             FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
-
          }
       };
 
-      BehaviorAction<ExampleStates> getLidar = new BehaviorAction<ExampleStates>(ExampleStates.GET_LIDAR, getLidarScanExampleBehavior);
-      BehaviorAction<ExampleStates> getVideo = new BehaviorAction<ExampleStates>(ExampleStates.GET_VIDEO, getVideoPacketExampleBehavior);
-      BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDATION, userValidationExampleBehavior);
+      BehaviorAction getLidar = new BehaviorAction(getLidarScanExampleBehavior); // ExampleStates.GET_LIDAR
+      BehaviorAction getVideo = new BehaviorAction(getVideoPacketExampleBehavior); // ExampleStates.GET_VIDEO
+      BehaviorAction getUserValidation = new BehaviorAction(userValidationExampleBehavior); // ExampleStates.GET_USER_VALIDATION
 
-      //setup the state machine
+      factory.addStateAndDoneTransition(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
+      factory.addStateAndDoneTransition(ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE, resetRobot, ExampleStates.ENABLE_LIDAR);
+      factory.addStateAndDoneTransition(ExampleStates.ENABLE_LIDAR, enableLidar, ExampleStates.GET_LIDAR);
+      factory.addStateAndDoneTransition(ExampleStates.GET_LIDAR, getLidar, ExampleStates.GET_VIDEO);
+      factory.addStateAndDoneTransition(ExampleStates.GET_VIDEO, getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
+      factory.addStateAndDoneTransition(ExampleStates.WHOLEBODY_EXAMPLE, wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
+      factory.addState(ExampleStates.GET_USER_VALIDATION, getUserValidation);
 
-      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
-
-      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.ENABLE_LIDAR);
-
-      statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
-      statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);
-      statemachine.addStateWithDoneTransition(getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
-      statemachine.addStateWithDoneTransition(wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
-      statemachine.addState(getUserValidation);
-      
-      
-      //set the starting state
-
-      statemachine.setStartState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
-
-
-
-
+      return ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE;
    }
-
-   @Override
-   public void onBehaviorExited()
-   {
-      System.out.println("IM ALL DONE");
-   }
-
 }

@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 
 public class JointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
 {
-   private double alphaPosition;
-   private double alphaVelocity;
+   private double positionBreakFrequency;
+   private double velocityBreakFrequency;
    private double maxPositionError;
    private double maxVelocity;
 
@@ -33,13 +33,13 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    }
 
    /**
-    * Resets the values for {@code alphaPosition} and {@code alphaVelocity} to {@link Double#NaN}
+    * Resets the values for {@code positionBreakFrequency} and {@code velocityBreakFrequency} to {@link Double#NaN}
     * notifying the {@link JointAccelerationIntegrationCalculator} to use its default values.
     */
    public void resetAlphas()
    {
-      alphaPosition = Double.NaN;
-      alphaVelocity = Double.NaN;
+      positionBreakFrequency = Double.NaN;
+      velocityBreakFrequency = Double.NaN;
    }
 
    /**
@@ -54,52 +54,32 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
 
    /**
     * Sets the parameters of this to the values of the parameters of other.
-    * 
+    *
     * @param other the other set of parameters. Not modified.
     */
    public void set(JointAccelerationIntegrationParametersReadOnly other)
    {
-      alphaPosition = other.getAlphaPosition();
-      alphaVelocity = other.getAlphaVelocity();
+      positionBreakFrequency = other.getPositionBreakFrequency();
+      velocityBreakFrequency = other.getVelocityBreakFrequency();
       maxPositionError = other.getMaxPositionError();
       maxVelocity = other.getMaxVelocity();
    }
 
    /**
-    * The two alpha parameters are used as leak ratios for each integration: <br>
-    * Desired velocity:<br>
-    * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
-    * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
-    * Desired position:<br>
-    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
-    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
-    * qDot<sub>des</sub><sup>t</sup>)
-    * </p>
+    * Sets the two break frequencies for the leak rates in the acceleration integration.
     * <p>
-    * Both leak ratios have to be &in; [0, 1].
+    * For the usage of these parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getPositionBreakFrequency()}<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityBreakFrequency()}
     * </p>
-    * <p>
-    * Decreasing the leak ratio &alpha;<sub>V</sub> used to compute the desired velocity appears to
-    * be equivalent to inserting damping to the joint. A low value will cause a loss of precision on
-    * the resulting q<sub>des</sub> such it does impair the tracking that high-level controller is
-    * performing. If not specified otherwise, &alpha;<sub>V</sub> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
-    * </p>
-    * <p>
-    * A high value for the leak ratio &alpha;<sub>P</sup> used to compute the desired position will
-    * cause the joint to never settle by having stick-slip behavior around the "true" desired
-    * position the high-level controller is trying to achieve. It can simply be downtuned until this
-    * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
-    * </p>
-    * 
-    * @param alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
-    * @param alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
+    *
+    * @param positionBreakFrequency the break frequency used to compute the desired position.
+    * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
     */
-   public void setAlphas(double alphaPosition, double alphaVelocity)
+   public void setBreakFrequencies(double positionBreakFrequency, double velocityBreakFrequency)
    {
-      this.alphaPosition = alphaPosition;
-      this.alphaVelocity = alphaVelocity;
+      this.positionBreakFrequency = positionBreakFrequency;
+      this.velocityBreakFrequency = velocityBreakFrequency;
    }
 
    /**
@@ -124,7 +104,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * {@code maxPositionError} =
     * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_POSITION_ERROR}.
     * </p>
-    * 
+    *
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
     *           position.
     * @param maxVelocity limits the maximum value of the desired joint velocity.
@@ -135,18 +115,64 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       this.maxVelocity = maxVelocity;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getAlphaPosition()
+   /**
+    * For the usage of this parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getPositionBreakFrequency()}
+    *
+    * @param positionBreakFrequency the break frequency used to compute the desired position.
+    */
+   public void setPositionBreakFrequency(double positionBreakFrequency)
    {
-      return alphaPosition;
+      this.positionBreakFrequency = positionBreakFrequency;
+   }
+
+   /**
+    * For the usage of this parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityBreakFrequency()}
+    *
+    * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
+    */
+   public void setVelocityBreakFrequency(double velocityBreakFrequency)
+   {
+      this.velocityBreakFrequency = velocityBreakFrequency;
+   }
+
+   /**
+    * Sets the safety parameter that limits the position error between the actual joint position
+    * and the integrated desired.
+    * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
+    *
+    * @param maxPositionError limits the gap between the desired joint position and the actual joint
+    *           position.
+    */
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError = maxPositionError;
+   }
+
+   /**
+    * Sets the safety parameter that limits the integrated velocity.
+    * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
+    *
+    * @param maxVelocity limits the maximum value of the desired joint velocity.
+    */
+   public void setMaxVelocity(double maxVelocity)
+   {
+      this.maxVelocity = maxVelocity;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getAlphaVelocity()
+   public double getPositionBreakFrequency()
    {
-      return alphaVelocity;
+      return positionBreakFrequency;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getVelocityBreakFrequency()
+   {
+      return velocityBreakFrequency;
    }
 
    /** {@inheritDoc} */

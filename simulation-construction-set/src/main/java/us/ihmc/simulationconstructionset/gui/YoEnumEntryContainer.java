@@ -33,6 +33,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    private JLabel label;
    private JComboBox<String> comboBox;
 
+   private boolean updating = false;
 
    protected YoEnumEntryContainer(String[] enumValues)
    {
@@ -53,7 +54,11 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
          if (variableInThisBox != null)
          {
             if (comboBox.getSelectedIndex() != getIndexOf(variableInThisBox.getOrdinal()))
+            {
+               updating = true;
                comboBox.setSelectedIndex(getIndexOf(variableInThisBox.getOrdinal()));
+               updating = false;
+            }
          }
       }
    }
@@ -188,11 +193,13 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    @Override
    public void actionPerformed(ActionEvent e)
    {
-      int selectedIndex = comboBox.getSelectedIndex();
-      int ordinal = getOrdinalOf(selectedIndex);
-      variableInThisBox.set(ordinal, true);
-      YoEntryBox.informVariableChangedListeners(getVariable());
-
+      if(!updating)
+      {
+         int selectedIndex = comboBox.getSelectedIndex();
+         int ordinal = getOrdinalOf(selectedIndex);
+         variableInThisBox.set(ordinal, true);
+         YoEntryBox.informVariableChangedListeners(getVariable());
+      }
       // System.out.println("YoEnumEntryContainer: actionPerformed ActionEvent e has source: "+e.getSource());
 //      System.out.println("YoEnumEntryContainer: Hey, I haz an actionPerformed!");
 

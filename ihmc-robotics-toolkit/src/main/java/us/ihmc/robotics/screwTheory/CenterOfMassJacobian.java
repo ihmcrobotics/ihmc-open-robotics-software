@@ -198,7 +198,7 @@ public class CenterOfMassJacobian
 
    private void setColumn(Twist twist, FramePoint3D comPositionScaledByMass, double subTreeMass, int column)
    {
-      tempVector.set(comPositionScaledByMass.getPoint());
+      tempVector.set(comPositionScaledByMass);
       tempVector.cross(twist.getAngularPart(), tempVector);
       tempJacobianColumn.set(tempVector);
       tempVector.set(twist.getLinearPart());

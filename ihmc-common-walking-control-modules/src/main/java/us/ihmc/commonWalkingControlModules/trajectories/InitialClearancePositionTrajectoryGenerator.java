@@ -8,6 +8,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -214,7 +216,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialPosition.set(x, y, z);
    }
 
-   public void setInitialPosition(FramePoint3D initialPosition)
+   public void setInitialPosition(FramePoint3DReadOnly initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }
@@ -224,18 +226,18 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.finalPosition.set(x, y, z);
    }
 
-   public void setFinalPosition(FramePoint3D finalPosition)
+   public void setFinalPosition(FramePoint3DReadOnly finalPosition)
    {
       this.finalPosition.set(finalPosition);
    }
 
    private final Vector3D tempVector = new Vector3D();
 
-   public void setInitialClearance(FrameVector3D initialDirection, double leaveDistance)
+   public void setInitialClearance(FrameVector3DReadOnly initialDirection, double leaveDistance)
    {
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
-      this.initialDirection.get(tempVector);
+      tempVector.set(this.initialDirection);
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
@@ -318,7 +320,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       {
          double t = (double) i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
-         currentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -342,17 +344,17 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelState</Variables>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelControllerName</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,hl_l_leg_knyMode,requestStop,ll_back_bkx_a_k_f_p,ll_back_bkx_a_ff_qd,alphaQD,jointPositionAlpha,jointVelocityAlpha,hl_r_leg_kny_k_q_p,hl_r_leg_kny_k_qd_p,hl_r_leg_knyMode,pelvisAlphaPosVel,pelvisAlphaAngleVel,headPelvisAlphaAngleVel,chestPelvisAlphaAngleVel</Entry Boxes>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelControllerName,transitionToFullControl,hl_l_leg_knyMode,requestStop,ll_back_bkx_a_k_f_p,ll_back_bkx_a_ff_qd,alphaQD,jointPositionAlpha,jointVelocityAlpha,hl_r_leg_kny_k_q_p,hl_r_leg_kny_k_qd_p,hl_r_leg_knyMode,pelvisAlphaPosVel,pelvisAlphaAngleVel,headPelvisAlphaAngleVel,chestPelvisAlphaAngleVel</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

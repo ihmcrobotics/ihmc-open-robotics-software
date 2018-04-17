@@ -1,24 +1,24 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurningOverheadPath;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class TurnInPlaceFootstepGenerator extends AbstractSimpleParametersFootstepGenerator
 {
    private TurningOverheadPath footstepPath;
-   private FrameOrientation2d endOrientation;
+   private FrameOrientation2D endOrientation;
 
-   public TurnInPlaceFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2d pathYaw, PathTypeStepParameters pathType)
+   public TurnInPlaceFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames, pathType);
       this.endOrientation = pathYaw;
    }
 
-   protected void initialize(FramePose2d startPose)
+   protected void initialize(FramePose2D startPose)
    {
       setFootstepPath(new TurningOverheadPath(startPose, endOrientation));
       footstepCounter = new FootstepCounterForSingleTurnPath();
@@ -33,8 +33,7 @@ public class TurnInPlaceFootstepGenerator extends AbstractSimpleParametersFootst
    protected double getSignedInitialTurnDirection()
    {
       startPose.checkReferenceFrameMatch(endOrientation);
-      FrameOrientation2d startOrientation = new FrameOrientation2d();
-      startPose.getOrientationIncludingFrame(startOrientation);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(startPose.getOrientation());
       double deltaYaw = endOrientation.difference(startOrientation);
 
       return deltaYaw;

@@ -18,6 +18,7 @@ import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -141,7 +142,7 @@ public class FrictionConeAnalysis
          }
       }
 
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(contactPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints));
       PolygonArtifact polygonViz = new PolygonArtifact("SupportPolygon", true, Color.LIGHT_GRAY, supportPolygon);
       polygonViz.setLevel(1);
       graphicsListRegistry.registerArtifact("Contact State", polygonViz);
@@ -235,7 +236,7 @@ public class FrictionConeAnalysis
 
    public static List<Point2D> createCopGrid(List<Point2D> contactPoints, double gridResolution, boolean edgeOnly)
    {
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(contactPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints));
       ConvexPolygon2D shrunkPolygon = new ConvexPolygon2D(supportPolygon);
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       scaler.scaleConvexPolygon(supportPolygon, 0.9 * gridResolution, shrunkPolygon);
@@ -277,7 +278,7 @@ public class FrictionConeAnalysis
 
    private static final void moveCentroidToOrigin(List<Point2D> points)
    {
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D(points);
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
       Point2DReadOnly centroid = footPolygon.getCentroid();
       for (Point2D point : points)
       {

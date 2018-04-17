@@ -1,0 +1,45 @@
+#ifndef __controller_msgs__msg__HandTrajectoryMessage__idl__
+#define __controller_msgs__msg__HandTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./SE3TrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points.
+       * A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.
+       * To execute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HandTrajectoryMessage_")
+      struct HandTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which hand will execute the trajectory.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The position/orientation trajectory information.
+         */
+        controller_msgs::msg::dds::SE3TrajectoryMessage se3_trajectory;
+      };
+    };
+  };
+};
+
+#endif

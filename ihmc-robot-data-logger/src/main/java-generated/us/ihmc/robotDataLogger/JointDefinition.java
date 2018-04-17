@@ -1,101 +1,101 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
 
-/**
-* 
-* Definition of the class "JointDefinition" defined in Handshake.idl. 
-*
-* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Handshake.idl instead.
-*
-*/
-public class JointDefinition
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+public class JointDefinition extends Packet<JointDefinition> implements Settable<JointDefinition>, EpsilonComparable<JointDefinition>
 {
-    public JointDefinition()
-    {
-        	name_ = new StringBuilder(255); 
-        
-        
-    }
+   public java.lang.StringBuilder name_;
+   public us.ihmc.robotDataLogger.JointType type_;
 
-    public void set(JointDefinition other)
-    {
-        	name_.setLength(0);
-        	name_.append(other.name_);
-        	type_ = other.type_;
+   public JointDefinition()
+   {
+      name_ = new java.lang.StringBuilder(255);
+   }
 
-    }
+   public JointDefinition(JointDefinition other)
+   {
+      this();
+      set(other);
+   }
 
-        public void setName(String name)
-        {
-        	name_.setLength(0);
-        	name_.append(name);
-        }
-        
-        public String getNameAsString()
-        {
-        	return getName().toString();
-        }
+   public void set(JointDefinition other)
+   {
+      name_.setLength(0);
+      name_.append(other.name_);
 
-    public StringBuilder getName()
-    {
-        return name_;
-    }
+      type_ = other.type_;
 
-        
-    public void setType(us.ihmc.robotDataLogger.JointType type)
-    {
-        type_ = type;
-    }
+   }
 
-    public us.ihmc.robotDataLogger.JointType getType()
-    {
-        return type_;
-    }
+   public void setName(java.lang.String name)
+   {
+      name_.setLength(0);
+      name_.append(name);
+   }
 
-        
+   public java.lang.String getNameAsString()
+   {
+      return getName().toString();
+   }
+   public java.lang.StringBuilder getName()
+   {
+      return name_;
+   }
+
+   public void setType(us.ihmc.robotDataLogger.JointType type)
+   {
+      type_ = type;
+   }
+   public us.ihmc.robotDataLogger.JointType getType()
+   {
+      return type_;
+   }
 
 
+   @Override
+   public boolean epsilonEquals(JointDefinition other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon)) return false;
 
 
-    @Override
-    public boolean equals(Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof JointDefinition)) return false;
-        JointDefinition otherMyClass = (JointDefinition)other;
-        boolean returnedValue = true;
+      return true;
+   }
 
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
-                
-        returnedValue &= this.type_ == otherMyClass.type_;
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof JointDefinition)) return false;
 
-                
+      JointDefinition otherMyClass = (JointDefinition) other;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("JointDefinition {");
-        builder.append("name=");
-        builder.append(this.name_);
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-                builder.append(", ");
-        builder.append("type=");
-        builder.append(this.type_);
+      if(this.type_ != otherMyClass.type_) return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
 
-    private StringBuilder name_; 
-    private us.ihmc.robotDataLogger.JointType type_; 
+      return true;
+   }
 
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("JointDefinition {");
+      builder.append("name=");
+      builder.append(this.name_);      builder.append(", ");
+      builder.append("type=");
+      builder.append(this.type_);
+      builder.append("}");
+      return builder.toString();
+   }
 }

@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__SpineDesiredAccelerationsMessage__idl__
+#define __controller_msgs__msg__SpineDesiredAccelerationsMessage__idl__
+
+#include "controller_msgs/msg/./DesiredAccelerationsMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message gives the user the option to bypass IHMC feedback controllers for the spine joints by sending desired spine joint accelerations.
+       * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SpineDesiredAccelerationsMessage_")
+      struct SpineDesiredAccelerationsMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The desired joint acceleration information.
+         */
+        controller_msgs::msg::dds::DesiredAccelerationsMessage desired_accelerations;
+      };
+    };
+  };
+};
+
+#endif

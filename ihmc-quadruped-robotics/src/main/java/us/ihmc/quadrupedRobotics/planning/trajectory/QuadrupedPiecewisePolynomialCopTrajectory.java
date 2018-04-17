@@ -13,8 +13,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.*;
 
@@ -48,7 +48,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    private final YoBoolean trajectoryInitialized;
    private final TimeInterval trajectoryTimeInterval;
    private final FramePoint3D copPositionAtCurrentTime;
-   private final YoFramePoint yoCopPositionAtCurrentTime;
+   private final YoFramePoint3D yoCopPositionAtCurrentTime;
    private final QuadrantDependentList<FramePoint3D> solePositionAtCurrentTime;
    private final QuadrantDependentList<ContactState> contactStateAtCurrentTime;
    private final QuadrantDependentList<MutableDouble> contactPressureAtCurrentTime;
@@ -64,7 +64,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       trajectoryInitialized = new YoBoolean("copTrajectoryInitialized", registry);
       trajectoryTimeInterval = new TimeInterval();
       copPositionAtCurrentTime = new FramePoint3D();
-      yoCopPositionAtCurrentTime = new YoFramePoint("copPositionAtCurrentTime", ReferenceFrame.getWorldFrame(), registry);
+      yoCopPositionAtCurrentTime = new YoFramePoint3D("copPositionAtCurrentTime", ReferenceFrame.getWorldFrame(), registry);
       solePositionAtCurrentTime = new QuadrantDependentList<>();
       contactStateAtCurrentTime = new QuadrantDependentList<>();
       contactPressureAtCurrentTime = new QuadrantDependentList<>();
@@ -297,12 +297,12 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       }
 
       QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionAtCurrentTime, solePositionAtCurrentTime, contactPressureAtCurrentTime);
-      yoCopPositionAtCurrentTime.setAndMatchFrame(copPositionAtCurrentTime);
+      yoCopPositionAtCurrentTime.setMatchingFrame(copPositionAtCurrentTime);
    }
 
    public void getPosition(FramePoint3D copPositionAtCurrentTime)
    {
-      copPositionAtCurrentTime.setIncludingFrame(yoCopPositionAtCurrentTime.getFrameTuple());
+      copPositionAtCurrentTime.setIncludingFrame(yoCopPositionAtCurrentTime);
    }
 
    private boolean isEqualEndContactState(RobotEnd robotEnd, QuadrantDependentList<ContactState> contactStateA,

@@ -5,15 +5,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
 {
    private Vector3D radii = new Vector3D();
    private final AppearanceDefinition appearance;
 
-   public YoGraphicEllipsoid(String name, YoFramePoint framePoint, YoFrameOrientation orientation, AppearanceDefinition appearance, Vector3D radii)
+   public YoGraphicEllipsoid(String name, YoFramePoint3D framePoint, YoFrameYawPitchRoll orientation, AppearanceDefinition appearance, Vector3D radii)
    {
       super(name, framePoint, orientation, 1.0);
       this.appearance = appearance;

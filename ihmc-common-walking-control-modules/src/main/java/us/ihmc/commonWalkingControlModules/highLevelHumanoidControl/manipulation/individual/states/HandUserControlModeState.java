@@ -6,11 +6,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
 public class HandUserControlModeState extends HandControlState
 {
@@ -56,7 +56,7 @@ public class HandUserControlModeState extends HandControlState
    public boolean handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand command)
    {
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getDesiredAccelerations().getDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
 

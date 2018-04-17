@@ -1,0 +1,53 @@
+#ifndef __controller_msgs__msg__AtlasElectricMotorEnablePacket__idl__
+#define __controller_msgs__msg__AtlasElectricMotorEnablePacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet L_ARM_WRY =
+      0;
+
+      const octet L_ARM_WRX =
+      1;
+
+      const octet L_ARM_WRY2 =
+      2;
+
+      const octet R_ARM_WRY =
+      3;
+
+      const octet R_ARM_WRX =
+      4;
+
+      const octet R_ARM_WRY2 =
+      5;
+
+
+      /**
+       * Specifies a specific electric motor in the Atlas forearm to power on or off.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AtlasElectricMotorEnablePacket_")
+      struct AtlasElectricMotorEnablePacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The Enum value of the motor to enable
+         */
+        @defaultValue(value=255)
+        octet atlas_electric_motor_packet_enum_enable;
+        /**
+         * Boolean for enable state; true for enable, false for disable.
+         */
+        boolean enable;
+      };
+    };
+  };
+};
+
+#endif

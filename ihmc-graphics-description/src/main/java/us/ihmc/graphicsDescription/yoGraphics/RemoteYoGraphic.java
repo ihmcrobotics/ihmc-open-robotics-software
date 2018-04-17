@@ -1,6 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -12,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  * @author Alex Lesman
  *
  */
-public interface RemoteYoGraphic
+public interface RemoteYoGraphic extends DuplicatableYoGraphic
 {
    /*
     * WARNING: Changing the order here will break old logs. Only add new elements to the end of the list
@@ -35,7 +36,8 @@ public interface RemoteYoGraphic
       POLYGON_ARTIFACT,
       LINE_ARTIFACT,
       PLANAR_REGIONS_LIST_DGO,
-      POLYNOMIAL_3D_DGO
+      POLYNOMIAL_3D_DGO,
+      POLYGON_3D
    }
 
    public String getName();
@@ -47,4 +49,20 @@ public interface RemoteYoGraphic
    public double[] getConstants();
 
    public AppearanceDefinition getAppearance();
+   
+   default YoGraphic duplicateOntoRegistry(YoVariableRegistry targetRegistry)
+   {
+      YoVariable<?> originalVars[] = getVariables();
+
+      YoVariable<?> targetVars[] = new YoVariable[originalVars.length];
+
+      for (int i = 0; i < targetVars.length; i++)
+      {
+         targetVars[i] = getVariableInTargetRegistry(originalVars[i], targetRegistry);
+      }
+
+      return (YoGraphic) YoGraphicFactory.yoGraphicFromMessage(getRemoteGraphicType(), getName(), targetVars,
+                                            getConstants(), getAppearance());
+      
+   }
 }

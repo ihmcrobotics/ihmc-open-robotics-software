@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -46,7 +46,7 @@ public class YoFourPointSpline1DVisualizer
 
       for (int i = 0; i < 4; i++)
       {
-         YoFramePoint yoPoint = new YoFramePoint("point" + i, worldFrame, registry);
+         YoFramePoint3D yoPoint = new YoFramePoint3D("point" + i, worldFrame, registry);
          yoPoint.set(points[i].getX(), 0.0, points[i].getY());
 
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("pointViz" + i, yoPoint, pointVizScale, colors[i]);
@@ -62,7 +62,7 @@ public class YoFourPointSpline1DVisualizer
          double queryPoint = (1.0 - alpha) * x0 + alpha * x3;
          fourPointSpline1D.compute(queryPoint);
 
-         YoFramePoint resultPosition = new YoFramePoint("splineZ" + i, worldFrame, registry);
+         YoFramePoint3D resultPosition = new YoFramePoint3D("splineZ" + i, worldFrame, registry);
          resultPosition.set(queryPoint, 0.0, fourPointSpline1D.getY());
 
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("splineViz" + i, resultPosition, queryScale, YoAppearance.Black());

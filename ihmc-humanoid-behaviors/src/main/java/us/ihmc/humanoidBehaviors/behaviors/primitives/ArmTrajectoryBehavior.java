@@ -2,15 +2,16 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryBehavior extends AbstractBehavior
 {
@@ -58,9 +59,9 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       outgoingMessage = armTrajectoryMessage;
 
-      robotSide = armTrajectoryMessage.getRobotSide();
+      robotSide = RobotSide.fromByte(armTrajectoryMessage.getRobotSide());
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getTrajectoryTime());
+      trajectoryTime.set(HumanoidMessageTools.unpackTrajectoryTime(armTrajectoryMessage.getJointspaceTrajectory()));
 
       hasInputBeenSet.set(true);
    }
@@ -105,7 +106,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       if (outgoingMessage != null)
       {
          StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER);
+         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
          sendPacketToController(pausePacket);
       }
    }

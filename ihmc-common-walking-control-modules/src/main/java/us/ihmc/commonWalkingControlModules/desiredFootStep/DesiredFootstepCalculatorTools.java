@@ -27,7 +27,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempVector.set(tempFramePoint.getPoint());
+         tempVector.set(tempFramePoint);
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
             minZ = tempVector.getZ();
@@ -46,7 +46,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getSoleFrame());
-         tempVector.set(tempFramePoint.getPoint());
+         tempVector.set(tempFramePoint);
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
             minZ = tempVector.getZ();
@@ -66,7 +66,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempVector.set(tempFramePoint.getPoint());
+         tempVector.set(tempFramePoint);
          footToWorldRotation.transform(tempVector);
 
          if (tempVector.getZ() < minZ)
@@ -90,7 +90,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempVector.set(tempFramePoint.getPoint()); // foot point w.r.t. ankle in foot frame
+         tempVector.set(tempFramePoint); // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector); // foot point w.r.t. ankle in world frame
          worldToDesiredHeadingFrame.transform(tempVector); // foot point w.r.t. ankle in desired heading frame
          if (tempVector.getX() > maxX)

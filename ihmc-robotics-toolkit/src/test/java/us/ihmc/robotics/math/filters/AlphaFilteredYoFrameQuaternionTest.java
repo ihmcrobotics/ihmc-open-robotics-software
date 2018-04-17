@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -11,8 +12,9 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class AlphaFilteredYoFrameQuaternionTest
@@ -22,7 +24,8 @@ public class AlphaFilteredYoFrameQuaternionTest
 	@Test(timeout=300000)
    public void testInitialValue()
    {
-      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion();
+	   MutableDouble alpha = new MutableDouble();
+      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion(() -> alpha.doubleValue());
 
       // set measurement randomly
       Random random = new Random(12351235L);
@@ -31,8 +34,7 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       // call update once
       q.update();
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       // verify measurement equals filtered
       EuclidCoreTestTools.assertQuaternionEquals(qMeasured, qFiltered, 1e-12);
@@ -42,8 +44,9 @@ public class AlphaFilteredYoFrameQuaternionTest
 	@Test(timeout=300000)
    public void testAlpha1()
    {
-      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion();
-      q.setAlpha(1.0);
+      MutableDouble alpha = new MutableDouble();
+      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion(() -> alpha.doubleValue());
+      alpha.setValue(1.0);
 
       Random random = new Random(73464L);
 
@@ -56,8 +59,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       int nUpdates = 100;
       doRandomUpdates(q, random, nUpdates);
 
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qInitial, qFiltered, 1e-12);
    }
@@ -66,9 +68,10 @@ public class AlphaFilteredYoFrameQuaternionTest
 	@Test(timeout=300000)
    public void testAlpha0()
    {
-      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion();
-      q.setAlpha(0.0);
-
+      MutableDouble alpha = new MutableDouble();
+      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion(() -> alpha.doubleValue());
+      alpha.setValue(0.0);
+      
       Random random = new Random(12525123L);
 
       // update 100 times
@@ -80,8 +83,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       q.getUnfilteredQuaternion().set(qFinal);
       q.update();
 
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qFinal, qFiltered, 1e-12);
    }
@@ -90,9 +92,9 @@ public class AlphaFilteredYoFrameQuaternionTest
 	@Test(timeout=300000)
    public void testStepChange()
    {
-      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion();
-      double alpha = 0.5;
-      q.setAlpha(alpha);
+      MutableDouble alpha = new MutableDouble();
+      AlphaFilteredYoFrameQuaternion q = createAlphaFilteredYoFrameQuaternion(() -> alpha.doubleValue());
+      alpha.setValue(0.5);
 
       Random random = new Random(12525123L);
 
@@ -113,11 +115,11 @@ public class AlphaFilteredYoFrameQuaternionTest
       for (int i = 0; i < nUpdates; i++)
       {
          q.update();
-         q.get(qFiltered);
+         qFiltered.set(q);
          double newAngleDifference = getAngleDifference(qFiltered, qFinal);
          //         System.out.println(i + ": " + newAngleDifference);
          boolean sameQuaternion = newAngleDifference == 0.0;
-         assertTrue(sameQuaternion || newAngleDifference < (1.0 + epsilon) * alpha * angleDifference);
+         assertTrue(sameQuaternion || newAngleDifference < (1.0 + epsilon) * alpha.doubleValue() * angleDifference);
          angleDifference = newAngleDifference;
       }
    }
@@ -133,12 +135,11 @@ public class AlphaFilteredYoFrameQuaternionTest
       }
    }
 
-   private AlphaFilteredYoFrameQuaternion createAlphaFilteredYoFrameQuaternion()
+   private AlphaFilteredYoFrameQuaternion createAlphaFilteredYoFrameQuaternion(DoubleProvider alpha)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoFrameQuaternion unfilteredQuaternion = new YoFrameQuaternion("qMeasured", referenceFrame, registry);
-      double alpha = 0.0;
       AlphaFilteredYoFrameQuaternion q = new AlphaFilteredYoFrameQuaternion("qFiltered", "", unfilteredQuaternion, alpha, registry);
       return q;
    }

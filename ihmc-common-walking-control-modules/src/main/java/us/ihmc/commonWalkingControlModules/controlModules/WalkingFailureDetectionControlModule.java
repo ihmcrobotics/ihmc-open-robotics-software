@@ -1,27 +1,29 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class WalkingFailureDetectionControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FrameConvexPolygon2d combinedFootPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d combinedFootPolygonWithNextFootstep = new FrameConvexPolygon2d();
-   private final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<>();
-   private final FrameConvexPolygon2d nextFootstepPolygon = new FrameConvexPolygon2d();
-   private final SideDependentList<FrameConvexPolygon2d> footPolygonsInWorldFrame = new SideDependentList<>();
+   private final FrameConvexPolygon2D combinedFootPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D combinedFootPolygonWithNextFootstep = new FrameConvexPolygon2D();
+   private final SideDependentList<FrameConvexPolygon2D> footPolygons = new SideDependentList<>();
+   private final FrameConvexPolygon2D nextFootstepPolygon = new FrameConvexPolygon2D();
+   private final SideDependentList<FrameConvexPolygon2D> footPolygonsInWorldFrame = new SideDependentList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -30,22 +32,23 @@ public class WalkingFailureDetectionControlModule
    private final YoDouble icpDistanceFromFootPolygon;
    private final YoDouble icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
-   private final FrameVector2D fallingDirection = new FrameVector2D();
+   private final FrameVector2D fallingDirection2D = new FrameVector2D();
+   private final FrameVector3D fallingDirection3D = new FrameVector3D();
 
    public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d footPolygonInFootFrame = new FrameConvexPolygon2d(contactableFeet.get(robotSide).getContactPoints2d());
+         FrameConvexPolygon2D footPolygonInFootFrame = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2d()));
          footPolygons.put(robotSide, footPolygonInFootFrame);
 
-         FrameConvexPolygon2d footPolygonInWorldFrame = new FrameConvexPolygon2d();
+         FrameConvexPolygon2D footPolygonInWorldFrame = new FrameConvexPolygon2D();
          footPolygonsInWorldFrame.put(robotSide, footPolygonInWorldFrame);
       }
 
       // Just for allocating memory for the nextFootstepPolygon
-      nextFootstepPolygon.setIncludingFrameAndUpdate(footPolygons.get(RobotSide.LEFT));
+      nextFootstepPolygon.setIncludingFrame(footPolygons.get(RobotSide.LEFT));
 
       isUsingNextFootstep = new YoBoolean("isFallDetectionUsingNextFootstep", registry);
       isUsingNextFootstep.set(false);
@@ -67,16 +70,16 @@ public class WalkingFailureDetectionControlModule
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d footPolygonInWorldFrame = footPolygonsInWorldFrame.get(robotSide);
-         footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygons.get(robotSide));
+         FrameConvexPolygon2D footPolygonInWorldFrame = footPolygonsInWorldFrame.get(robotSide);
+         footPolygonInWorldFrame.setIncludingFrame(footPolygons.get(robotSide));
          footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
       }
 
-      combinedFootPolygon.setIncludingFrameAndUpdate(footPolygonsInWorldFrame.get(RobotSide.LEFT), footPolygonsInWorldFrame.get(RobotSide.RIGHT));
+      combinedFootPolygon.setIncludingFrame(footPolygonsInWorldFrame.get(RobotSide.LEFT), footPolygonsInWorldFrame.get(RobotSide.RIGHT));
 
       // If there is a nextFootstep, increase the polygon to include it.
       if (isUsingNextFootstep.getBooleanValue())
-         combinedFootPolygonWithNextFootstep.setIncludingFrameAndUpdate(combinedFootPolygon, nextFootstepPolygon);
+         combinedFootPolygonWithNextFootstep.setIncludingFrame(combinedFootPolygon, nextFootstepPolygon);
    }
 
    public void setNextFootstep(Footstep nextFootstep)
@@ -86,8 +89,7 @@ public class WalkingFailureDetectionControlModule
       if (isUsingNextFootstep.getBooleanValue())
       {
          ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
-         ConvexPolygon2D footPolygon = footPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
-         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
+         nextFootstepPolygon.setIncludingFrame(footstepSoleFrame, footPolygons.get(nextFootstep.getRobotSide()));
          nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }
    }
@@ -111,11 +113,11 @@ public class WalkingFailureDetectionControlModule
       if (isRobotFalling.getBooleanValue())
       {
          tempFallingDirection.set(capturePoint2d);
-         FramePoint2D footCenter = combinedFootPolygon.getCentroid();
+         FramePoint2DReadOnly footCenter = combinedFootPolygon.getCentroid();
          tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
-         footCenter.changeFrame(ReferenceFrame.getWorldFrame());
          tempFallingDirection.sub(footCenter);
-         fallingDirection.set(tempFallingDirection);
+         fallingDirection2D.set(tempFallingDirection);
+         fallingDirection3D.setIncludingFrame(fallingDirection2D, 0.0);
       }
    }
 
@@ -127,12 +129,17 @@ public class WalkingFailureDetectionControlModule
       return isRobotFalling.getBooleanValue();
    }
 
-   public FrameVector2D getFallingDirection()
+   public FrameVector2D getFallingDirection2D()
    {
-      return fallingDirection;
+      return fallingDirection2D;
+   }
+   
+   public FrameVector3D getFallingDirection3D()
+   {
+      return fallingDirection3D;
    }
 
-   public FrameConvexPolygon2d getCombinedFootPolygon()
+   public FrameConvexPolygon2D getCombinedFootPolygon()
    {
       return combinedFootPolygon;
    }

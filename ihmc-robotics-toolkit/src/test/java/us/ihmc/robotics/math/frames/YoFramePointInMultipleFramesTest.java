@@ -116,7 +116,7 @@ public class YoFramePointInMultipleFramesTest
       FramePoint3D framePoint = new FramePoint3D(worldFrame);
       framePoint.setToZero(worldFrame);
 
-      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
+      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames, 1e-10));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -137,7 +137,7 @@ public class YoFramePointInMultipleFramesTest
       yoFramePointInMultipleFrames.changeFrame(frameA);
       framePoint.changeFrame(frameA);
       
-      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
+      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames, 1e-10));
       
       try
       {
@@ -161,7 +161,7 @@ public class YoFramePointInMultipleFramesTest
       FramePoint3D framePoint = EuclidFrameRandomTools.nextFramePoint3D(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
       
       yoFramePointInMultipleFrames.setIncludingFrame(framePoint);
-      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
+      assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames, 1e-10));
       
       try
       {

@@ -1,5 +1,9 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -9,20 +13,16 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
@@ -83,14 +83,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final YoInteger pelvisBufferSize;
    
-   private final FramePose stateEstimatorInWorldFramePose = new FramePose(worldFrame);
-   private final YoFramePose yoStateEstimatorInWorldFramePose;
-   private final YoFramePose yoCorrectedPelvisPoseInWorldFrame;
-   private final FramePose iterativeClosestPointInWorldFramePose = new FramePose(worldFrame);
-   private final YoFramePose yoIterativeClosestPointPoseInWorldFrame;
+   private final FramePose3D stateEstimatorInWorldFramePose = new FramePose3D(worldFrame);
+   private final YoFramePoseUsingYawPitchRoll yoStateEstimatorInWorldFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoCorrectedPelvisPoseInWorldFrame;
+   private final FramePose3D iterativeClosestPointInWorldFramePose = new FramePose3D(worldFrame);
+   private final YoFramePoseUsingYawPitchRoll yoIterativeClosestPointPoseInWorldFrame;
    
    private final ReferenceFrame iterativeClosestPointReferenceFrame;
-   private final FramePose correctedPelvisPoseInWorldFrame = new FramePose(worldFrame);
+   private final FramePose3D correctedPelvisPoseInWorldFrame = new FramePose3D(worldFrame);
    
    private final YoBoolean hasOneIcpPacketEverBeenReceived;
    
@@ -156,9 +156,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame = outdatedPoseUpdater.getLocalizationReferenceFrameToBeUpdated();
       
       //used only for feedback in SCS
-      yoStateEstimatorInWorldFramePose = new YoFramePose("stateEstimatorInWorldFramePose", worldFrame, registry);
-      yoCorrectedPelvisPoseInWorldFrame = new YoFramePose("correctedPelvisPoseInWorldFrame", worldFrame, registry);
-      yoIterativeClosestPointPoseInWorldFrame = new YoFramePose("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
+      yoStateEstimatorInWorldFramePose = new YoFramePoseUsingYawPitchRoll("stateEstimatorInWorldFramePose", worldFrame, registry);
+      yoCorrectedPelvisPoseInWorldFrame = new YoFramePoseUsingYawPitchRoll("correctedPelvisPoseInWorldFrame", worldFrame, registry);
+      yoIterativeClosestPointPoseInWorldFrame = new YoFramePoseUsingYawPitchRoll("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
       
       totalErrorTranslation_X = new YoDouble("totalErrorTranslation_X", registry);
       totalErrorTranslation_Y = new YoDouble("totalErrorTranslation_Y", registry);
@@ -198,7 +198,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          
          offsetErrorInterpolator.interpolateError(correctedPelvisPoseInWorldFrame);
          /////for SCS feedback
-         stateEstimatorInWorldFramePose.setPose(stateEstimatorPelvisTransformInWorld);
+         stateEstimatorInWorldFramePose.set(stateEstimatorPelvisTransformInWorld);
          yoStateEstimatorInWorldFramePose.set(stateEstimatorInWorldFramePose);
          /////
          
@@ -211,14 +211,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private void updateCorrectedPelvis()
    {
       if(!hasOneIcpPacketEverBeenReceived.getBooleanValue())
-         correctedPelvisPoseInWorldFrame.setPose(stateEstimatorPelvisTransformInWorld);
+         correctedPelvisPoseInWorldFrame.set(stateEstimatorPelvisTransformInWorld);
       
-      correctedPelvisPoseInWorldFrame.getPose(correctedPelvisTransformInWorldFrame);
+      correctedPelvisPoseInWorldFrame.get(correctedPelvisTransformInWorldFrame);
       
       correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
-      iterativeClosestPointInWorldFramePose.getPosition(localizationTranslation);
+      localizationTranslation.set(iterativeClosestPointInWorldFramePose.getPosition());
       
-      iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(localizationOrientation);
+      localizationOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
       correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotationMatrix());
       
       errorBetweenCorrectedAndLocalizationTransform_Rotation.difference(correctedPelvisOrientation, localizationOrientation);
@@ -250,6 +250,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final RigidBodyTransform tempTransform = new RigidBodyTransform(); 
    private final Vector3D tempTranslation = new Vector3D();
    private final Quaternion tempRotation = new Quaternion();
+   private final TimeStampedTransform3D timeStampedExternalPose = new TimeStampedTransform3D();
    /**
     * pulls the corrected pose from the buffer, check that the nonprocessed buffer has
     * corresponding pelvis poses and calculates the total error
@@ -259,7 +260,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
       if (enableProcessNewPackets.getBooleanValue())
       {
-         TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
+         timeStampedExternalPose.setTransform3D(newPacket.getPose());
+         timeStampedExternalPose.setTimeStamp(newPacket.getTimestamp());
 
          if (outdatedPoseUpdater.stateEstimatorTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
          {
@@ -306,7 +308,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame.update();
       iterativeClosestPointInWorldFramePose.setToZero(iterativeClosestPointReferenceFrame);
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
-      iterativeClosestPointInWorldFramePose.getPose(localizationTransformInWorld);
+      iterativeClosestPointInWorldFramePose.get(localizationTransformInWorld);
 
       //for feedback in the UI
       outdatedPoseUpdater.getTotalErrorTransform(totalErrorBetweenPelvisAndLocalizationTransform);
@@ -338,7 +340,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void requestLocalizationReset()
    {
-      pelvisPoseCorrectionCommunicator.sendLocalizationResetRequest(new LocalizationPacket(true, true));
+      pelvisPoseCorrectionCommunicator.sendLocalizationResetRequest(HumanoidMessageTools.createLocalizationPacket(true, true));
       hasMapBeenReset = true;
    }
 
@@ -362,7 +364,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteResidualError, (float) absoluteTotalError, hasMapBeenReset);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = HumanoidMessageTools.createPelvisPoseErrorPacket((float) absoluteResidualError, (float) absoluteTotalError, hasMapBeenReset);
       hasMapBeenReset = false;
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }

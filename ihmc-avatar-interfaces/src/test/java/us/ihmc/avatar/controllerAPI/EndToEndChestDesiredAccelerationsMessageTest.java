@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -16,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynami
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -34,8 +35,6 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test(timeout = 90000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -58,10 +57,14 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       RigidBody chest = fullRobotModel.getChest();
       OneDoFJoint[] spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
       double[] chestDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, spineJoints.length, 0.1);
-      SpineDesiredAccelerationsMessage desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
+      SpineDesiredAccelerationsMessage desiredAccelerationsMessage = HumanoidMessageTools.createSpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
+      RigidBodyControlMode defaultControlState = getRobotModel().getWalkingControllerParameters().getDefaultControlModesForRigidBodies().get(chest.getName());
+      if (defaultControlState == null)
+         defaultControlState = RigidBodyControlMode.JOINTSPACE;
+
+      assertEquals(defaultControlState, findControllerState(scs));
 
       drcSimulationTestHelper.send(desiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
@@ -76,7 +79,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
+      assertEquals(defaultControlState, findControllerState(scs));
    }
 
    @SuppressWarnings("unchecked")

@@ -1,19 +1,19 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 /**
  * @author Nicolas EYSSETTE
  * 
- * The aim of this class is to express the outdated localization transform in the updated stateEstimator reference.
+ * The aim of this class is to express the outdated localization transform in the updated estimator reference.
  * It will compare the outdated transform to the updated transform at the same timeStamp in the past,
  * and express the result in the up to date referenceFrame in the present.
  *
@@ -31,7 +31,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
    // upToDate in the past
    private final TimeStampedTransform3D stateEstimatorTimeStampedTransformInPast;
-   private final FramePose stateEstimatorPoseInThePast;
+   private final FramePose3D stateEstimatorPoseInThePast;
    private final PoseReferenceFrame stateEstimatorReferenceFrameInThePast;
    private final FramePoint3D stateEstimatorPositionInThePastInWorldFrame;
 
@@ -40,7 +40,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final ReferenceFrame localizationReferenceFrameInPresent_Rotation;
 
    // outdated in the past
-   private final FramePose localizationPoseInThePast;
+   private final FramePose3D localizationPoseInThePast;
    private final PoseReferenceFrame localizationReferenceFrameInThePast;
    private final RigidBodyTransform localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Translation = new RigidBodyTransform();
    private final RigidBodyTransform localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation = new RigidBodyTransform();
@@ -62,8 +62,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
       stateEstimatorTimeStampedTransformBuffer = new TimeStampedTransformBuffer(stateEstimatorBufferSize);
       stateEstimatorTimeStampedTransformInPast = new TimeStampedTransform3D();
-      stateEstimatorPoseInThePast = new FramePose(worldFrame);
-      localizationPoseInThePast = new FramePose(worldFrame);
+      stateEstimatorPoseInThePast = new FramePose3D(worldFrame);
+      localizationPoseInThePast = new FramePose3D(worldFrame);
 
       stateEstimatorReferenceFrameInThePast = new PoseReferenceFrame("upToDateReferenceFrameInThePast", stateEstimatorPoseInThePast);
       stateEstimatorPositionInThePastInWorldFrame = new FramePoint3D(stateEstimatorReferenceFrameInThePast);
@@ -141,13 +141,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
     */
    public void updateLocalizationTransform(TimeStampedTransform3D localizationTimeStampedTransformInWorld)
    {
-      //update the stateEstimator reference frame in the past
+      //update the estimator reference frame in the past
       stateEstimatorTimeStampedTransformBuffer.findTransform(localizationTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
-      stateEstimatorPoseInThePast.setPoseIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
+      stateEstimatorPoseInThePast.setIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
       stateEstimatorReferenceFrameInThePast.setPoseAndUpdate(stateEstimatorPoseInThePast);
 
       //update the localization Pose
-      localizationPoseInThePast.setPoseIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
+      localizationPoseInThePast.setIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
       localizationReferenceFrameInThePast.setPoseAndUpdate(localizationPoseInThePast);
 
       stateEstimatorPositionInThePastInWorldFrame.setToZero(stateEstimatorReferenceFrameInThePast);
@@ -157,12 +157,12 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       localizationPositionInThePastInWorldFrame.changeFrame(worldFrame);
 
       translationOffsetFrameVector.sub(localizationPositionInThePastInWorldFrame, stateEstimatorPositionInThePastInWorldFrame);
-      translationOffsetFrameVector.get(translationOffsetVector);
+      translationOffsetVector.set(translationOffsetFrameVector);
 
       localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Translation.setTranslationAndIdentityRotation(translationOffsetVector);
 
       localizationPoseInThePast.changeFrame(stateEstimatorReferenceFrameInThePast);
-      localizationPoseInThePast.getPose(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
+      localizationPoseInThePast.get(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
       localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.setTranslationToZero();
 
       totalErrorTransform.set(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);

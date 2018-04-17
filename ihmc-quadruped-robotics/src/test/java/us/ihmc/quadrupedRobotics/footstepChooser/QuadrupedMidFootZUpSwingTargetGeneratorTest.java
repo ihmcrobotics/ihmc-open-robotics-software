@@ -21,8 +21,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
@@ -32,11 +32,11 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -75,7 +75,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
    private YoEnum<RobotQuadrant> swingLeg = new YoEnum<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
 
-   private final YoFrameVector desiredVelocity = new YoFrameVector("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredYawRate = new YoDouble("desiredYawRate", registry);
 
    /** Foot Swing **/
@@ -85,22 +85,22 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private final YoDouble desiredSwingTime = new YoDouble("desiredSwingTime", registry);
    private final YoDouble swingHeight = new YoDouble("swingHeight", registry);
 
-   private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
+   private final QuadrantDependentList<YoFramePoint3D> yoFootPositions = new QuadrantDependentList< YoFramePoint3D>();
    private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
 
-   private final YoFramePoint swingTarget = new YoFramePoint("swingTarget", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector finalDesiredVelocity = new YoFrameVector("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D swingTarget = new YoFramePoint3D("swingTarget", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D finalDesiredVelocity = new YoFrameVector3D("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition targetViz = new YoGraphicPosition("swingTarget", swingTarget, 0.01, YoAppearance.Red());
 
-   private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centroid = new YoFramePoint3D("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint3D temporaryCentroid = new FramePoint3D();
    private final YoGraphicPosition centroidViz = new YoGraphicPosition("centroidViz", centroid, 0.01, YoAppearance.BurlyWood());
    private YoGraphicLineSegment nominalYawGraphic;
-   private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameLineSegment2D nominalYawLineSegment = new YoFrameLineSegment2D("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
 
    private final YoDouble nominalYaw = new YoDouble("nominalYaw", registry);
-   YoFramePoint nominalYawEndpoint = new YoFramePoint("nominalYawEndpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint3D nominalYawEndpoint = new YoFramePoint3D("nominalYawEndpoint", ReferenceFrame.getWorldFrame(), registry);
 
    private YoGraphicReferenceFrame leftMidZUpFrameViz;
    private YoGraphicReferenceFrame rightMidZUpFrameViz;
@@ -109,8 +109,8 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private MidFootZUpSwingTargetGenerator swingTargetGenerator;
 
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
-   private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
-   private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2D currentTriplePolygon = new YoFrameConvexPolygon2D("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    private YoDouble robotTimestamp;
 
@@ -121,7 +121,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private double simulateDuration = stepDuration * numberOfSteps;
    private double minimumDistanceFromSameSideFoot;
 
-   private final QuadrantDependentList<YoFramePoint> yoFootPositionsBeforeStep = new QuadrantDependentList<YoFramePoint>();
+   private final QuadrantDependentList<YoFramePoint3D> yoFootPositionsBeforeStep = new QuadrantDependentList<YoFramePoint3D>();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -189,7 +189,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
             System.out.println(footDisplacementY);
          }
 
-         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()));
 
          blockingSimulationRunner.simulateNTicksAndBlock(1);
       }
@@ -244,7 +244,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
             System.out.println(footDisplacementY);
          }
 
-         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()));
 
          blockingSimulationRunner.simulateNTicksAndBlock(1);
       }
@@ -299,7 +299,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
             System.out.println(footDisplacementY);
          }
 
-         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()));
 
          blockingSimulationRunner.simulateNTicksAndBlock(1);
       }
@@ -354,7 +354,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
             System.out.println(footDisplacementY);
          }
 
-         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()).getFramePointCopy());
+         yoFootPositionsBeforeStep.get(swingLeg.getEnumValue()).set(yoFootPositions.get(swingLeg.getEnumValue()));
 
          blockingSimulationRunner.simulateNTicksAndBlock(1);
       }
@@ -399,8 +399,8 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
-         YoFramePoint footPositionBeforeSwing = new YoFramePoint(prefix + "footPositionBeforeSwing", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footPosition = new YoFramePoint3D(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footPositionBeforeSwing = new YoFramePoint3D(prefix + "footPositionBeforeSwing", ReferenceFrame.getWorldFrame(), registry);
 
          FramePoint3D initialFootPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          if(robotQuadrant.isQuadrantInFront())
@@ -477,7 +477,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          AppearanceDefinition yoAppearance = this.getYoAppearance(robotQuadrant);
-         YoFramePoint footPosition = yoFootPositions.get(robotQuadrant);
+         YoFramePoint3D footPosition = yoFootPositions.get(robotQuadrant);
          YoGraphicPosition footPositionGraphic = new YoGraphicPosition(prefix + "footPositionViz", footPosition, 0.02, yoAppearance,
                GraphicType.BALL_WITH_CROSS);
          footPositionGraphics.set(robotQuadrant, footPositionGraphic);
@@ -541,7 +541,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    {
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant).getFrameTuple());
+         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant));
       }
 
       if (!cartesianTrajectoryGenerator.isDone())
@@ -558,23 +558,23 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          robotQuadrant = robotQuadrant.getNextRegularGaitSwingQuadrant();
-         nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredYawRate.getDoubleValue());
+         nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredYawRate.getDoubleValue());
          swingLeg.set(robotQuadrant);
 
-         FramePoint3D initialPosition = new FramePoint3D(yoFootPositions.get(robotQuadrant).getFramePointCopy());
+         FramePoint3D initialPosition = new FramePoint3D(yoFootPositions.get(robotQuadrant));
          FramePoint3D desiredFootPosition = new FramePoint3D();
 
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
-         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity.getFrameTuple());
+         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredFootPosition, desiredYawRate.getDoubleValue());
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity);
          cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }
 
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         YoFramePoint yoFootPosition = yoFootPositions.get(robotQuadrant);
-         FramePoint3D footPosition = yoFootPosition.getFramePointCopy();
+         YoFramePoint3D yoFootPosition = yoFootPositions.get(robotQuadrant);
+         FramePoint3D footPosition = new FramePoint3D(yoFootPosition);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footPosition);
       }
@@ -589,9 +589,9 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
       FramePoint2D endpointTwoD = new FramePoint2D();
       endpointTwoD.setIncludingFrame(endPoint);
-      nominalYawLineSegment.set(centroid.getFramePoint2dCopy(), endpointTwoD);
+      nominalYawLineSegment.set(new FramePoint2D(centroid), endpointTwoD);
 
-      rootJoint.setPosition(temporaryCentroid.getPoint());
+      rootJoint.setPosition(temporaryCentroid);
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
 
       if(simulationTestingParameters.getCreateGUI())
@@ -607,7 +607,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       rightMidZUpFrameViz.update();
    }
 
-   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2D yoFramePolygon)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for(RobotQuadrant quadrant : RobotQuadrant.values)
@@ -619,6 +619,6 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          }
       }
       polygon.update();
-      yoFramePolygon.setConvexPolygon2d(polygon);
+      yoFramePolygon.set(polygon);
    }
 }

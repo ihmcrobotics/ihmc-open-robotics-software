@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,15 +19,14 @@ import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -35,7 +36,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 {
    private static final ReferenceFrame WORLD_FRAME = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry("rotatablePlaneTerrainProfile");
-   private final FramePose planePose = new FramePose(WORLD_FRAME);
+   private final FramePose3D planePose = new FramePose3D(WORLD_FRAME);
    private final PoseReferenceFrame planeFrame = new PoseReferenceFrame("planeFrame", planePose);
    private final FramePlane3d plane = new FramePlane3d(planeFrame);
    private final FramePlane3d previousPlane = new FramePlane3d(WORLD_FRAME);
@@ -47,14 +48,14 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    private final YoDouble filteredDesiredGroundPitchAlpha = new YoDouble("filteredDesiredGroundOrientationAlpha", registry);
    private final YoDouble filteredDesiredGroundRollAlpha = new YoDouble("filteredDesiredGroundRollAlpha", registry);
    
-   private final YoFrameOrientation desiredGroundOrientation = new YoFrameOrientation("desiredGroundOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameYawPitchRoll desiredGroundOrientation = new YoFrameYawPitchRoll("desiredGroundOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final AlphaFilteredWrappingYoVariable filteredDesiredGroundYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundYaw", "", registry, desiredGroundOrientation.getYaw(), filteredDesiredGroundYawAlpha, -Math.PI, Math.PI);
    private final AlphaFilteredWrappingYoVariable filteredDesiredGroundPitch = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundPitch", "", registry, desiredGroundOrientation.getPitch(), filteredDesiredGroundPitchAlpha, -Math.PI, Math.PI);
    private final AlphaFilteredWrappingYoVariable filteredDesiredGroundRoll = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundRoll", "", registry, desiredGroundOrientation.getRoll(), filteredDesiredGroundRollAlpha, -Math.PI, Math.PI);
-   private final YoFrameOrientation filteredDesiredGroundOrientation = new YoFrameOrientation(filteredDesiredGroundYaw, filteredDesiredGroundPitch, filteredDesiredGroundRoll, ReferenceFrame.getWorldFrame());
+   private final YoFrameYawPitchRoll filteredDesiredGroundOrientation = new YoFrameYawPitchRoll(filteredDesiredGroundYaw, filteredDesiredGroundPitch, filteredDesiredGroundRoll, ReferenceFrame.getWorldFrame());
 
-   private YoFramePoint desiredGroundPosition = new YoFramePoint("desiredGroundPosition", WORLD_FRAME, registry);
-   private final YoFramePose yoPlanePose = new YoFramePose(desiredGroundPosition, filteredDesiredGroundOrientation);
+   private YoFramePoint3D desiredGroundPosition = new YoFramePoint3D("desiredGroundPosition", WORLD_FRAME, registry);
+   private final YoFramePoseUsingYawPitchRoll yoPlanePose = new YoFramePoseUsingYawPitchRoll(desiredGroundPosition, filteredDesiredGroundOrientation);
    private ArrayList<GroundContactPoint> groundContactPoints;
    
    public RotatablePlaneTerrainProfile(Point3D center, Robot robot, YoGraphicsListRegistry graphicsRegistry, double dt)
@@ -79,7 +80,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          }
       });
 
-      YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("floorGraphicPolygon", "", planeFrame, 4, registry);
+      YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D("floorGraphicPolygon", "", planeFrame, 4, registry);
       
       FramePoint3D p0 = new FramePoint3D(WORLD_FRAME, 1.0, 1.0, 0.0);
       FramePoint3D p1 = new FramePoint3D(WORLD_FRAME, -1.0, 1.0, 0.0);
@@ -87,7 +88,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       FramePoint3D p3 = new FramePoint3D(WORLD_FRAME, 1.0, -1.0, 0.0);
       FramePoint3D[] framePoints = new FramePoint3D[]{p0, p1, p2, p3};
       
-      yoFrameConvexPolygon2d.setConvexPolygon2d(framePoints);
+      yoFrameConvexPolygon2d.set(FrameVertex3DSupplier.asFrameVertex3DSupplier(framePoints));
       
       floorGraphic = new YoGraphicPolygon("floorGraphic", yoFrameConvexPolygon2d, yoPlanePose, 3.0, YoAppearance.DimGrey());
       graphicsRegistry.registerYoGraphic("ground", floorGraphic);
@@ -128,7 +129,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          normalVector.setToNaN(plane.getReferenceFrame());
          plane.getNormal(normalVector);
          normalVector.changeFrame(WORLD_FRAME);
-         normalVector.get(normalToPack);
+         normalToPack.set(normalVector);
          
          xyPoint.setToNaN(planeFrame);
          xyPoint.setIncludingFrame(testPoint);
@@ -136,7 +137,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          
          testPoint.changeFrame(WORLD_FRAME);
          testPoint.setZ(zHeight);
-         testPoint.get(intersectionToPack);
+         intersectionToPack.set(testPoint);
       }
       
       return onOrBelow;
@@ -170,7 +171,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       v1.changeFrame(WORLD_FRAME);
       previousPlane.getNormal(v2);
       
-      v3.add(v1.getVector(), v2.getVector());
+      v3.add(v1, v2);
       v3.scale(-0.5);
 //      
       v3.scale(currentZ - prevZ);
@@ -232,7 +233,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       {
          testPoint.setToNaN(WORLD_FRAME);
          GroundContactPoint groundContactPoint = groundContactPoints.get(i);
-         groundContactPoint.getYoPosition().getFrameTuple(testPoint);
+         testPoint.set(groundContactPoint.getYoPosition());
 
          testPoint.changeFrame(planeFrame);
          if(plane.isOnOrBelow(testPoint))
@@ -260,11 +261,11 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       normalVector.changeFrame(plane.getReferenceFrame());
       plane.getNormal(normalVector);
       normalVector.changeFrame(WORLD_FRAME);
-      previousPlane.setNormal(normalVector.getVector());
+      previousPlane.setNormal(normalVector);
       
       testPoint.changeFrame(plane.getReferenceFrame());
       plane.getPoint(testPoint);
       testPoint.changeFrame(WORLD_FRAME);
-      previousPlane.setPoint(testPoint.getPoint());
+      previousPlane.setPoint(testPoint);
    }
 }

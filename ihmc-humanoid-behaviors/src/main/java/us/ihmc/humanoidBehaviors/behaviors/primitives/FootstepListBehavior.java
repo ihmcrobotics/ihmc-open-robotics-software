@@ -1,7 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -13,11 +18,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,7 +31,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private static final boolean DEBUG = false;
 
    private FootstepDataListMessage outgoingFootstepDataList;
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
+   private final ConcurrentListeningQueue<FootstepStatusMessage> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
@@ -48,8 +50,8 @@ public class FootstepListBehavior extends AbstractBehavior
    public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
-      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>(40);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       numberOfFootsteps.set(-1);
@@ -62,14 +64,14 @@ public class FootstepListBehavior extends AbstractBehavior
    public void set(FootstepDataListMessage footStepList)
    {
       outgoingFootstepDataList = footStepList;
-      numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      numberOfFootsteps.set(outgoingFootstepDataList.getFootstepDataList().size());
       packetHasBeenSent.set(false);
    }
 
 
    public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime,transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -79,8 +81,8 @@ public class FootstepListBehavior extends AbstractBehavior
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
-         footstepDataList.add(footstepData);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstepSide, position, orientation);
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
       set(footstepDataList);
    }
@@ -106,10 +108,10 @@ public class FootstepListBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingFootstepDataList.setDestination(PacketDestination.UI);
+         outgoingFootstepDataList.setDestination(PacketDestination.UI.ordinal());
          sendPacket(outgoingFootstepDataList);
 
-         outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER);
+         outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER.ordinal());
          sendPacketToController(outgoingFootstepDataList);
          packetHasBeenSent.set(true);
       }
@@ -119,7 +121,7 @@ public class FootstepListBehavior extends AbstractBehavior
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus newestFootstepStatus = footstepStatusQueue.poll();
+         FootstepStatusMessage newestFootstepStatus = footstepStatusQueue.poll();
          if (newestFootstepStatus != null)
          {
             int currentStepIndex = newestFootstepStatus.getFootstepIndex();
@@ -152,7 +154,7 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingStatusMessage newestPacket = walkingStatusQueue.poll();
          if (newestPacket != null)
          {
-            switch (newestPacket.getWalkingStatus())
+            switch (WalkingStatus.fromByte(newestPacket.getWalkingStatus()))
             {
             case COMPLETED:
                isRobotDoneWalking.set(true);
@@ -203,7 +205,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorAborted()
    {
-      sendPacketToController(new PauseWalkingMessage(true));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       isStopped.set(true);
    }
@@ -211,7 +213,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      sendPacketToController(new PauseWalkingMessage(true));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
@@ -220,7 +222,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorResumed()
    {
-      sendPacketToController(new PauseWalkingMessage(false));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
       isRobotDoneWalking.set(false);
@@ -266,22 +268,27 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
-      footstepDataList.addAll(footStepList.getDataList());
+      List<FootstepDataMessage> dataList = footStepList.getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
-      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(firstStepData.getRobotSide().getOppositeSide()).getBodyFixedFrame()
+      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(RobotSide.fromByte(firstStepData.getRobotSide()).getOppositeSide()).getBodyFixedFrame()
             .getTransformToWorldFrame();
       firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
 
       previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
-      firstStepData.getLocation(nextFootStepLocation);
+      nextFootStepLocation.set(firstStepData.getLocation());
 
       while (!footstepDataList.isEmpty())
       {
          footStepLengths.add(previousFootStepLocation.distance(nextFootStepLocation));
          previousFootStepLocation.set(nextFootStepLocation);
-         footstepDataList.remove(footstepDataList.size() - 1).getLocation(nextFootStepLocation);
+         nextFootStepLocation.set(footstepDataList.remove(footstepDataList.size() - 1).getLocation());
       }
 
       double lastStepLength = previousFootStepLocation.distance(nextFootStepLocation);

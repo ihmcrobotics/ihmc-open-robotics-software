@@ -14,6 +14,7 @@ public class LoadParametersGenerator implements LoadParametersConstructor
    private final SimulationConstructionSet scs;
    private ParameterFileChooser fileChooser;
 
+   
    public LoadParametersGenerator(SimulationConstructionSet scs)
    {
       this.scs = scs;
@@ -23,8 +24,9 @@ public class LoadParametersGenerator implements LoadParametersConstructor
    @Override
    public void constructDialog()
    {
-
-      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), false))
+      
+      
+      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), scs.getDefaultParameterFile(), false))
       {
          try
          {

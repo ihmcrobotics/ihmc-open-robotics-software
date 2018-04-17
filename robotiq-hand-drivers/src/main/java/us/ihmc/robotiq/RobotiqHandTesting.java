@@ -12,9 +12,10 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.ManualHandControlPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 
@@ -99,7 +100,6 @@ public class RobotiqHandTesting
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				// TODO Auto-generated method stub
 				JSlider slider = (JSlider) e.getSource();
 				System.out.println(slider.getValue());
 			}
@@ -110,7 +110,6 @@ public class RobotiqHandTesting
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				// TODO Auto-generated method stub
 				JSlider slider = (JSlider) e.getSource();
 				System.out.println(slider.getValue());
 			}
@@ -126,7 +125,7 @@ public class RobotiqHandTesting
 			{
 				JSlider slider = finger1Panel.getSlider();
 				System.out.println(slider.getValue());
-				ManualHandControlPacket packet = new ManualHandControlPacket(RobotSide.LEFT, finger1Panel.getSlider().getValue(), finger2Panel.getSlider().getValue(), finger3Panel.getSlider().getValue(), 0, 1);
+				ManualHandControlPacket packet = HumanoidMessageTools.createManualHandControlPacket(RobotSide.LEFT, finger1Panel.getSlider().getValue(), finger2Panel.getSlider().getValue(), finger3Panel.getSlider().getValue(), 0, 1);
 				manager.sendHandCommand(packet);
 			}
 		});
@@ -138,7 +137,6 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -150,7 +148,6 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -162,7 +159,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				manager.sendHandCommand(new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CALIBRATE));
+				manager.sendHandCommand(HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CALIBRATE));
 			}
 		});
 		
@@ -171,7 +168,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				manager.sendHandCommand(new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.RESET));
+				manager.sendHandCommand(HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.RESET));
 			}
 		});
 	}

@@ -18,15 +18,11 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -40,6 +36,12 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -119,8 +121,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          if (imuProcessedOutputs.size() != 2)
             throw new RuntimeException("Cannot create FusedIMUSensor.");
-         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT,
-               stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz(), registry);
+         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT, registry);
          imusToUse.add(fusedIMUSensor);
       }
       else
@@ -129,11 +130,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToUse.addAll(imuProcessedOutputs);
       }
 
-      boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
-      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
-      imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
-      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, estimatorDT, registry);
-      imuYawDriftEstimator.configureModuleParameters(stateEstimatorParameters);
+      BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement", registry, stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
+      
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, cancelGravityFromAccelerationMeasurement,
+                                                        estimatorDT, stateEstimatorParameters, registry);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, stateEstimatorParameters, registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
@@ -146,10 +147,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, cancelGravityFromAccelerationMeasurement, footSwitches,
             estimatorCenterOfMassDataHolderToUpdate,
-            centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
-            stateEstimatorParameters, yoGraphicsListRegistry, registry);
+            centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, stateEstimatorParameters,
+            yoGraphicsListRegistry, registry);
 
 
       if (yoGraphicsListRegistry != null)

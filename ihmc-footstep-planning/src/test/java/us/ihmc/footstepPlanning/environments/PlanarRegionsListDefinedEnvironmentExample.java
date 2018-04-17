@@ -13,10 +13,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -44,8 +44,8 @@ public class PlanarRegionsListDefinedEnvironmentExample
          for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
          {
             PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-            YoFramePoint planarRegionPointInWorld = new YoFramePoint("PlanarRegionPoint" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
-            YoFrameVector surfaceNormal = new YoFrameVector("NormalVector" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
+            YoFramePoint3D planarRegionPointInWorld = new YoFramePoint3D("PlanarRegionPoint" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
+            YoFrameVector3D surfaceNormal = new YoFrameVector3D("NormalVector" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
 
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Point3D translation = new Point3D();
@@ -55,7 +55,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
 
             Vector3D normal = new Vector3D();
             terrainObject3D.getHeightMapIfAvailable().heightAndNormalAt(translation.getX(), translation.getY(), translation.getZ(), normal);
-            surfaceNormal.setVector(normal);
+            surfaceNormal.set(normal);
 
             YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal,
                   YoAppearance.Aqua());

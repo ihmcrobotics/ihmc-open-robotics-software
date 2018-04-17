@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="221.0" prefWidth="1197.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController">
+   <children>
+      <HBox layoutX="14.0" layoutY="14.0" spacing="15.0">
+         <children>
+            <VBox spacing="5.0">
+               <children>
+                  <ToggleButton fx:id="enablePolygonizerButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Polygonizer" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
+                  <ToggleButton fx:id="enableIntersectionCalculatorButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Find Intersections" />
+                  <ToggleButton fx:id="hideRegionNodes" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Hide region nodes" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
+               </children>
+            </VBox>
+            <GridPane hgap="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;" vgap="5.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Spinner fx:id="concaveHullThresholdSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" />
+                  <Spinner fx:id="minRegionSizePolygonizerSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Spinner fx:id="peakAngleThresholdSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="3" />
+                  <Spinner fx:id="minEdgeLengthSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <Spinner fx:id="depthThresholdSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Spinner fx:id="shallowAngleThresholdSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label maxWidth="1.7976931348623157E308" text="Concave hull threshold (cm)">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Directly related to the apparent sharpness of the concave hull." wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Min region size" GridPane.rowIndex="1">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Min size required for a planar region to be polygonized." wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Shallow angle (deg)" GridPane.rowIndex="2">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Filter parameter to remove shallow angles from the concave hull" wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Peak angle (deg)" GridPane.columnIndex="2">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Filter parameter to remove peaks from the concave hull" wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Min edge length (cm)" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Filter parameter to remove short edges from the concave hull" wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Depth threshold (cm)" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Threshold used for decomposing the concave hull into convex polygons. Describes the maximum depth of a concavity before the concave hull gets split in 2." wrapText="true" />
+                     </tooltip>
+                  </Label>
+               </children>
+            </GridPane>
+            <GridPane hgap="5.0" style="-fx-padding: 3; -fx-border-width: 2; -fx-border-color: lightblue; -fx-border-radius: 5;" vgap="5.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Spinner fx:id="maxDistanceToRegionSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" />
+                  <Spinner fx:id="minRegionSizeIntersectionSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Spinner fx:id="minIntersectionLengthSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <HBox spacing="5.0" GridPane.columnIndex="2">
+                     <children>
+                        <Label text="Min region angle diff. (deg)">
+                           <tooltip>
+                              <Tooltip prefWidth="200.0" text="Min angle between the normals of the 2 intersecting to compute the intersection" wrapText="true" />
+                           </tooltip>
+                        </Label>
+                        <Spinner fx:id="minRegionAngleDifferenceSpinner" editable="true" prefWidth="100.0" />
+                     </children>
+                  </HBox>
+                  <Label maxWidth="1.7976931348623157E308" text="Max distance to region (cm)">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Max distance that the intersection can be away from the two intersecting regions." wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Min region size" GridPane.rowIndex="1">
+                     <tooltip>
+                        <Tooltip prefWidth="200.0" text="Minimum size required for the 2 intersecting regions to compute the intersection." wrapText="true" />
+                     </tooltip>
+                  </Label>
+                  <Label maxWidth="1.7976931348623157E308" text="Min intersection length (cm)" GridPane.rowIndex="2" />
+                  <ToggleButton fx:id="addIntersectionsToRegionsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Add intersections to regions" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+               </children>
+            </GridPane>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

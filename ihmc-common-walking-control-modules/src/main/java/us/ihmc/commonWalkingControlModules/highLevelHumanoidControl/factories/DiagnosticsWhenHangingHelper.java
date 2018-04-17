@@ -1,22 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+
+import java.util.ArrayList;
 
 public class DiagnosticsWhenHangingHelper
 {
@@ -26,8 +22,8 @@ public class DiagnosticsWhenHangingHelper
    private final boolean isSpineJoint;
 
    private final CenterOfMassCalculator centerOfMassCalculator;
-   private final YoFramePoint belowJointCoMInZUpFrame;
-   private final YoFrameVector yoJointAxis, yoJointToCenterOfMass, yoForceVector;
+   private final YoFramePoint3D belowJointCoMInZUpFrame;
+   private final YoFrameVector3D yoJointAxis, yoJointToCenterOfMass, yoForceVector;
 
    private final FramePoint3D centerOfMassPosition;
    private final FrameVector3D jointAxis = new FrameVector3D();
@@ -52,12 +48,12 @@ public class DiagnosticsWhenHangingHelper
       this.isSpineJoint = isSpineJoint;
       centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY, isSpineJoint, topLegJointsIfSpine);
 
-      belowJointCoMInZUpFrame = new YoFramePoint(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
+      belowJointCoMInZUpFrame = new YoFramePoint3D(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
       centerOfMassPosition = new FramePoint3D(centerOfMassCalculator.getDesiredFrame());
 
-      yoJointAxis = new YoFrameVector(parentJoint.getName() + "JointAxis", ReferenceFrame.getWorldFrame(), registry);
-      yoJointToCenterOfMass = new YoFrameVector(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
-      yoForceVector = new YoFrameVector(parentJoint.getName() + "ForceVector", ReferenceFrame.getWorldFrame(), registry);
+      yoJointAxis = new YoFrameVector3D(parentJoint.getName() + "JointAxis", ReferenceFrame.getWorldFrame(), registry);
+      yoJointToCenterOfMass = new YoFrameVector3D(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
+      yoForceVector = new YoFrameVector3D(parentJoint.getName() + "ForceVector", ReferenceFrame.getWorldFrame(), registry);
 
       estimatedTorque = new YoDouble("tau_est_" + parentJoint.getName(), registry);
       torqueOffset = new YoDouble("tau_off_" + parentJoint.getName(), registry);

@@ -3,6 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
@@ -15,10 +16,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGraphic
 {
@@ -65,7 +65,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
          setArrowColor(new YoAppearanceRGBColor(new Color((int) constants[1]), constants[2]));
    }
 
-   public YoGraphicCoordinateSystem(String name, YoFramePoint framePoint, YoFrameOrientation orientation, double scale)
+   public YoGraphicCoordinateSystem(String name, YoFramePoint3D framePoint, YoFrameYawPitchRoll orientation, double scale)
    {
       super(name);
 
@@ -90,23 +90,23 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public YoGraphicCoordinateSystem(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition arrowColor)
    {
-      this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameOrientation(namePrefix,
+      this(namePrefix + nameSuffix, new YoFramePoint3D(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameYawPitchRoll(namePrefix,
             nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
       setArrowColor(arrowColor);
    }
 
-   public YoGraphicCoordinateSystem(String name, YoFramePoint framePoint, YoFrameOrientation orientation, double scale, AppearanceDefinition arrowColor)
+   public YoGraphicCoordinateSystem(String name, YoFramePoint3D framePoint, YoFrameYawPitchRoll orientation, double scale, AppearanceDefinition arrowColor)
    {
       this(name, framePoint, orientation, scale);
       setArrowColor(arrowColor);
    }
 
-   public YoGraphicCoordinateSystem(String name, YoFramePose yoFramePose, double scale)
+   public YoGraphicCoordinateSystem(String name, YoFramePoseUsingYawPitchRoll yoFramePose, double scale)
    {
       this(name, yoFramePose.getPosition(), yoFramePose.getOrientation(), scale);
    }
    
-   public YoGraphicCoordinateSystem(String name, YoFramePose yoFramePose, double scale, AppearanceDefinition arrowColor)
+   public YoGraphicCoordinateSystem(String name, YoFramePoseUsingYawPitchRoll yoFramePose, double scale, AppearanceDefinition arrowColor)
    {
       this(name, yoFramePose.getPosition(), yoFramePose.getOrientation(), scale, arrowColor);
    }
@@ -190,9 +190,9 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       this.roll.set(roll);
    }
 
-   public void setPose(FramePose pose)
+   public void setPose(FramePose3D pose)
    {
-      pose.getOrientation(tempYawPitchRoll);
+      pose.getOrientationYawPitchRoll(tempYawPitchRoll);
       setYawPitchRoll(tempYawPitchRoll);
 
       x.set(pose.getX());

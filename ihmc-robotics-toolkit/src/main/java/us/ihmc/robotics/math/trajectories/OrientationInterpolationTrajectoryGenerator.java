@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
+import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class OrientationInterpolationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
@@ -23,8 +23,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final YoFrameQuaternion finalOrientation;
    
    private final YoFrameQuaternion desiredOrientation;
-   private final YoFrameVector desiredAngularVelocity;
-   private final YoFrameVector desiredAngularAcceleration;
+   private final YoFrameVector3D desiredAngularVelocity;
+   private final YoFrameVector3D desiredAngularAcceleration;
 
    private final DoubleProvider trajectoryTimeProvider;
    private final OrientationProvider initialOrientationProvider;
@@ -51,8 +51,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       this.continuouslyUpdateFinalOrientation = new YoBoolean(namePrefix + "ContinuouslyUpdate", registry);
       
       this.desiredOrientation = new YoFrameQuaternion(namePrefix + "desiredOrientation", referenceFrame, registry);
-      this.desiredAngularVelocity = new YoFrameVector(namePrefix + "desiredAngularVelocity", referenceFrame, registry);
-      this.desiredAngularAcceleration = new YoFrameVector(namePrefix + "desiredAngularAcceleration", referenceFrame, registry);
+      this.desiredAngularVelocity = new YoFrameVector3D(namePrefix + "desiredAngularVelocity", referenceFrame, registry);
+      this.desiredAngularAcceleration = new YoFrameVector3D(namePrefix + "desiredAngularAcceleration", referenceFrame, registry);
 
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       this.initialOrientationProvider = initialOrientationProvider;
@@ -90,7 +90,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       initialOrientationProvider.getOrientation(tempInitialOrientation);      
       tempInitialOrientation.changeFrame(initialOrientation.getReferenceFrame());
       initialOrientation.set(tempInitialOrientation);
-      initialOrientation.checkQuaternionIsUnitMagnitude();
+      initialOrientation.checkIfUnitary();
    }
 
    private void updateFinalOrientation()
@@ -98,7 +98,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       finalOrientationProvider.getOrientation(tempFinalOrientation);
       tempFinalOrientation.changeFrame(finalOrientation.getReferenceFrame());
       finalOrientation.set(tempFinalOrientation);
-      finalOrientation.checkQuaternionIsUnitMagnitude();
+      finalOrientation.checkIfUnitary();
    }
 
    public void compute(double time)
@@ -125,17 +125,17 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(desiredOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      desiredAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredAngularVelocity);
    }
 
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAngularAcceleration);
    }
 
    public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)

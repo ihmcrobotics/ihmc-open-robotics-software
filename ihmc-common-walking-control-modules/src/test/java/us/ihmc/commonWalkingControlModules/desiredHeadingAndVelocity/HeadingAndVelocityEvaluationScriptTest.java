@@ -18,9 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.MemoryTools;
@@ -63,9 +63,9 @@ public class HeadingAndVelocityEvaluationScriptTest
 
       double time = 0.0;
 
-      YoFramePoint position = new YoFramePoint("position", "", ReferenceFrame.getWorldFrame(), parentRegistry);
-      YoFrameVector velocity = new YoFrameVector("velocity", "", ReferenceFrame.getWorldFrame(), parentRegistry);
-      YoFrameVector heading = new YoFrameVector("heading", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      YoFramePoint3D position = new YoFramePoint3D("position", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      YoFrameVector3D velocity = new YoFrameVector3D("velocity", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      YoFrameVector3D heading = new YoFrameVector3D("heading", "", ReferenceFrame.getWorldFrame(), parentRegistry);
 
       YoGraphicVector velocityVector = new YoGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
       YoGraphicVector headingVector = new YoGraphicVector("heading", position, heading, YoAppearance.Blue());

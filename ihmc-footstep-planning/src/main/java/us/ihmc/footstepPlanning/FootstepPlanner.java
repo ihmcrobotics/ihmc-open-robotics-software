@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -12,13 +12,13 @@ public interface FootstepPlanner
     * @param stanceFootPose      Pose of the sole frame of the initial stance foot
     * @param side                RobotSide of the initial stance foot
     */
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side);
+   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side);
    
    /**
     * Sets the initial foot poses at the start of the plan. The planner will determine the
     * best first step side.
     */
-   public default void setFootPoses(SideDependentList<FramePose> footPoses)
+   public default void setFootPoses(SideDependentList<FramePose3D> footPoses)
    {
       setFootPoses(footPoses, null);
    }
@@ -28,7 +28,7 @@ public interface FootstepPlanner
     * if it is required that the first step is taken with a specific robot side. If the initial
     * side is set to null the planner will determine the best first step side.
     */
-   public default void setFootPoses(SideDependentList<FramePose> footPoses, RobotSide initialSanceSide)
+   public default void setFootPoses(SideDependentList<FramePose3D> footPoses, RobotSide initialSanceSide)
    {
       setInitialStanceFoot(footPoses.get(initialSanceSide), initialSanceSide);
    }

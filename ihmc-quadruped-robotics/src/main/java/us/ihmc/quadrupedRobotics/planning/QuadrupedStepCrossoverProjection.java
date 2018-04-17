@@ -4,18 +4,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedStepCrossoverProjection
 {
-   private final double minimumClearance;
-   private final double maximumStride;
+   private final DoubleParameter minimumStepClearanceParameter;
+   private final DoubleParameter maximumStepStrideParameter;
+
    private final FramePoint3D goalPosition;
    private final ReferenceFrame bodyZUpFrame;
 
-   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, double minimumClearance, double maximumStride)
+   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, YoVariableRegistry registry)
    {
-      this.minimumClearance = minimumClearance;
-      this.maximumStride = maximumStride;
+      minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, 0.075);
+      maximumStepStrideParameter = new DoubleParameter("maximumStepStride", registry, 1.0);
       this.goalPosition = new FramePoint3D();
       this.bodyZUpFrame = bodyZUpFrame;
    }
@@ -38,14 +41,14 @@ public class QuadrupedStepCrossoverProjection
       double xStride = goalPosition.getX() - acrossBodySolePosition.getX();
       double yStride = goalPosition.getY() - acrossBodySolePosition.getY();
 
-      if (xStride > maximumStride)
-         xStride = maximumStride;
-      if (xStride < -maximumStride)
-         xStride = -maximumStride;
-      if (stepQuadrant.getSide().negateIfRightSide(yStride) > maximumStride)
-         yStride = stepQuadrant.getSide().negateIfRightSide(maximumStride);
-      if (stepQuadrant.getSide().negateIfRightSide(yStride) < minimumClearance)
-         yStride = stepQuadrant.getSide().negateIfRightSide(minimumClearance);
+      if (xStride > maximumStepStrideParameter.getValue())
+         xStride = maximumStepStrideParameter.getValue();
+      if (xStride < -maximumStepStrideParameter.getValue())
+         xStride = -maximumStepStrideParameter.getValue();
+      if (stepQuadrant.getSide().negateIfRightSide(yStride) > maximumStepStrideParameter.getValue())
+         yStride = stepQuadrant.getSide().negateIfRightSide(maximumStepStrideParameter.getValue());
+      if (stepQuadrant.getSide().negateIfRightSide(yStride) < minimumStepClearanceParameter.getValue())
+         yStride = stepQuadrant.getSide().negateIfRightSide(minimumStepClearanceParameter.getValue());
 
       goalPosition.setX(acrossBodySolePosition.getX() + xStride);
       goalPosition.setY(acrossBodySolePosition.getY() + yStride);

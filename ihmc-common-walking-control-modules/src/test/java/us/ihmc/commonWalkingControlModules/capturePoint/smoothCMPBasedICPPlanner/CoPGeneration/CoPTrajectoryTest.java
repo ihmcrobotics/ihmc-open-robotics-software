@@ -5,8 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

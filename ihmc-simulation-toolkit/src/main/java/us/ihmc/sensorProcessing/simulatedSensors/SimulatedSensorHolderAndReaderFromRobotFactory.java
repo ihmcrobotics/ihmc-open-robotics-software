@@ -6,20 +6,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.LatencyVectorCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.OrientationLatencyCorruptor;
-import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -33,7 +29,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SensorReaderFactory");
    private final Robot robot;
-   private final double estimateDT;
 
    private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
@@ -41,14 +36,11 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
-   private final SensorNoiseParameters sensorNoiseParameters;
 
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorProcessingConfiguration sensorProcessingConfiguration)
    {
       this.robot = robot;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
-      this.sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
-      this.estimateDT = sensorProcessingConfiguration.getEstimatorDT();
 
       robot.getIMUMounts(imuMounts);
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
@@ -56,7 +48,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    @Override
    public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
-         ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
+                     JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -69,13 +62,15 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          throw new RuntimeException("Not FloatingJoint rootjoint found");
 
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
-      StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators);
+      StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap,
+                                                                                                                                                            imuMounts,
+                                                                                                                                                            groundContactPointBasedWrenchCalculators);
 
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
+                                                                               robot.getYoTime(), registry);
 
       createAndAddOrientationSensors(imuDefinitions, registry);
       createAndAddAngularVelocitySensors(imuDefinitions, registry);
@@ -88,7 +83,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoVariableRegistry registry)
    {
-      for(Entry<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionEntry : forceSensorDefinitions2.entrySet())
+      for (Entry<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionEntry : forceSensorDefinitions2.entrySet())
       {
          WrenchCalculatorInterface groundContactPointBasedWrenchCalculator = forceSensorDefinitionEntry.getKey();
          simulatedSensorHolderAndReader.addForceTorqueSensorPort(forceSensorDefinitionEntry.getValue(), groundContactPointBasedWrenchCalculator);
@@ -104,41 +99,13 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
 
-      long seed = 18735L;
-
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
-         SimulatedOneDoFJointPositionSensor positionSensor = new SimulatedOneDoFJointPositionSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
-         SimulatedOneDoFJointVelocitySensor velocitySensor = new SimulatedOneDoFJointVelocitySensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
-         SimulatedOneDoFJointTorqueSensor torqueSensor = new SimulatedOneDoFJointTorqueSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
-
-         //         if (oneDegreeOfFreedomJoint.getName().contains("bky"))
-         //         {
-         //            SignalCorruptor<MutableDouble> backVelocityLatencyCorruptor = new LatencyDoubleCorruptor("backLatency", 100, registry);
-         //
-         //            velocitySensor.addSignalCorruptor(backVelocityLatencyCorruptor );
-         //         }
-
-         if (sensorNoiseParameters != null)
-         {
-            GaussianDoubleCorruptor jointPositionCorruptor = new GaussianDoubleCorruptor(seed, "posNoise" + oneDegreeOfFreedomJoint.getName(), registry);
-            double positionMeasurementStandardDeviation = sensorNoiseParameters.getJointPositionMeasurementStandardDeviation();
-            jointPositionCorruptor.setStandardDeviation(positionMeasurementStandardDeviation);
-            positionSensor.addSignalCorruptor(jointPositionCorruptor);
-            seed = seed + 10;
-
-            GaussianDoubleCorruptor jointVelocityCorruptor = new GaussianDoubleCorruptor(17735L, "velNoise" + oneDegreeOfFreedomJoint.getName(), registry);
-            double velocityMeasurementStandardDeviation = sensorNoiseParameters.getJointVelocityMeasurementStandardDeviation();
-            jointVelocityCorruptor.setStandardDeviation(velocityMeasurementStandardDeviation);
-            velocitySensor.addSignalCorruptor(jointVelocityCorruptor);
-            seed = seed + 10;
-         }
-
-         simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, positionSensor);
-         simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, velocitySensor);
-         simulatedSensorHolderAndReader.addJointTorqueSensorPort(oneDoFJoint, torqueSensor);
+         simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQYoVariable());
+         simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQDYoVariable());
+         simulatedSensorHolderAndReader.addJointTorqueSensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getTauYoVariable());
       }
    }
 
@@ -148,30 +115,19 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
       for (IMUMount imuMount : imuMounts)
       {
-         String sensorName = imuMount.getName() + "Orientation";
          IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
 
-         SimulatedOrientationSensorFromRobot orientationSensor = new SimulatedOrientationSensorFromRobot(sensorName, imuMount, registry);
-
-         if (sensorNoiseParameters != null)
+         simulatedSensorHolderAndReader.addOrientationSensorPort(imuDefinition, new QuaternionProvider()
          {
-            double yawDriftAcceleration = sensorNoiseParameters.getIMUYawDriftAcceleration();
-            OrientationConstantAcceleratingYawDriftCorruptor yawDriftCorruptor = new OrientationConstantAcceleratingYawDriftCorruptor(sensorName, estimateDT, registry);
-            yawDriftCorruptor.setYawDriftAcceleration(yawDriftAcceleration);
-            orientationSensor.addSignalCorruptor(yawDriftCorruptor);
+            private final Quaternion orientation = new Quaternion();
 
-            double orientationMeasurementStandardDeviation = sensorNoiseParameters.getOrientationMeasurementStandardDeviation();
-            GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
-            orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-            orientationSensor.addSignalCorruptor(orientationCorruptor);
-
-            double orientationMeasurementLatency = sensorNoiseParameters.getOrientationMeasurementLatency();
-            int latencyTicks = (int) Math.round(orientationMeasurementLatency / estimateDT);
-            OrientationLatencyCorruptor orientationLatencyCorruptor = new OrientationLatencyCorruptor(sensorName, latencyTicks, registry);
-            orientationSensor.addSignalCorruptor(orientationLatencyCorruptor);
-         }
-
-         simulatedSensorHolderAndReader.addOrientationSensorPort(imuDefinition, orientationSensor);
+            @Override
+            public QuaternionReadOnly getValue()
+            {
+               imuMount.getOrientation(orientation);
+               return orientation;
+            }
+         });
       }
    }
 
@@ -181,37 +137,19 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
       for (IMUMount imuMount : imuMounts)
       {
-         String sensorName = imuMount.getName() + "AngularVelocity";
          IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
 
-         SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = new SimulatedAngularVelocitySensorFromRobot(sensorName, imuMount, registry);
-
-         if (sensorNoiseParameters != null)
+         simulatedSensorHolderAndReader.addAngularVelocitySensorPort(imuDefinition, new Vector3DProvider()
          {
-            GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, sensorName, registry);
-            double angularVelocityMeasurementStandardDeviation = sensorNoiseParameters.getAngularVelocityMeasurementStandardDeviation();
+            private final Vector3D angularVelocity = new Vector3D();
 
-            angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
-            angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
-
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, estimateDT, registry);
-
-            Vector3D initialAngularVelocityBias = new Vector3D();
-            sensorNoiseParameters.getInitialAngularVelocityBias(initialAngularVelocityBias);
-            biasVectorCorruptor.setBias(initialAngularVelocityBias);
-
-            double angularVelocityBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation();
-            biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-            angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
-
-
-            double getAngularVelocityMeasurementLatency = sensorNoiseParameters.getAngularVelocityMeasurementLatency();
-            int latencyTicks = (int) Math.round(getAngularVelocityMeasurementLatency / estimateDT);
-            LatencyVectorCorruptor angularVelocityLatencyCorruptor = new LatencyVectorCorruptor(sensorName, latencyTicks, registry);
-            angularVelocitySensor.addSignalCorruptor(angularVelocityLatencyCorruptor);
-         }
-
-         simulatedSensorHolderAndReader.addAngularVelocitySensorPort(imuDefinition, angularVelocitySensor);
+            @Override
+            public Vector3DReadOnly getValue()
+            {
+               imuMount.getAngularVelocityInBody(angularVelocity);
+               return angularVelocity;
+            }
+         });
       }
    }
 
@@ -221,30 +159,19 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
       for (IMUMount imuMount : imuMounts)
       {
-         String sensorName = imuMount.getName() + "LinearAcceleration";
          IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
 
-         SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = new SimulatedLinearAccelerationSensorFromRobot(sensorName, imuMount, registry);
-
-         if (sensorNoiseParameters != null)
+         simulatedSensorHolderAndReader.addLinearAccelerationSensorPort(imuDefinition, new Vector3DProvider()
          {
-            GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1237L, sensorName, registry);
-            double linearAccelerationMeasurementStandardDeviation = sensorNoiseParameters.getLinearAccelerationMeasurementStandardDeviation();
-            linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
-            linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
+            private final Vector3D linearAcceleration = new Vector3D();
 
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, estimateDT, registry);
-
-            Vector3D initialLinearAccelerationBias = new Vector3D();
-            sensorNoiseParameters.getInitialLinearVelocityBias(initialLinearAccelerationBias);
-            biasVectorCorruptor.setBias(initialLinearAccelerationBias);
-
-            double linearAccelerationBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getLinearAccelerationBiasProcessNoiseStandardDeviation();
-            biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
-            linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
-         }
-
-         simulatedSensorHolderAndReader.addLinearAccelerationSensorPort(imuDefinition, linearAccelerationSensor);
+            @Override
+            public Vector3DReadOnly getValue()
+            {
+               imuMount.getLinearAccelerationInBody(linearAcceleration);
+               return linearAcceleration;
+            }
+         });
       }
    }
 

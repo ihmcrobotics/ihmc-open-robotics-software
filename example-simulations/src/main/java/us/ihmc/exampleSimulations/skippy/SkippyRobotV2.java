@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -262,7 +263,7 @@ public class SkippyRobotV2 extends Robot
       scsRootJoint.getVelocity(linearVelocity);
       linearVelocity.changeFrame(rootBodyFrame);
       scsRootJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-      Twist rootJointTwist = new Twist(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity.getVector(), angularVelocity.getVector());
+      Twist rootJointTwist = new Twist(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
       rootJoint.setJointTwist(rootJointTwist);
 
       // update all the frames
@@ -299,7 +300,7 @@ public class SkippyRobotV2 extends Robot
       return footContactPoint.isInContact();
    }
 
-   public void computeFootContactForce(Vector3D actualReaction)
+   public void computeFootContactForce(Vector3DBasics actualReaction)
    {
       footContactPoint.getForce(actualReaction);
    }

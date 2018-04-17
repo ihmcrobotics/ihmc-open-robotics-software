@@ -9,17 +9,19 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,8 +29,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -51,15 +52,14 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final double swingStartTimeEpsilon = 0.016;
+   private static final double swingStartTimeEpsilon = 0.01;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
       CommonAvatarEnvironmentInterface environment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -81,14 +81,14 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double finalTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
-      footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
-      footstepMessage1.setExecutionMode(ExecutionMode.OVERRIDE);
-      footstepMessage1.setUniqueId(1);
+      footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
+      footstepMessage1.getQueueingProperties().setMessageId(1);
 
       FootstepDataListMessage footstepMessage2 = new FootstepDataListMessage();
-      footstepMessage2.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
-      footstepMessage2.setExecutionMode(ExecutionMode.QUEUE, 1);
-      footstepMessage2.setUniqueId(2);
+      footstepMessage2.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
+      footstepMessage2.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      footstepMessage2.getQueueingProperties().setPreviousMessageId((long) 1);
+      footstepMessage2.getQueueingProperties().setMessageId(2);
 
       double takeOffTime = 0.0;
       double previousSwingTime = 0.0;
@@ -101,7 +101,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
          Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
+         footstepData.setSwingHeight(0.04);
          double transferTime = defaultTransferTime + random.nextDouble() * 0.5;
          double swingTime = defaultSwingTime + random.nextDouble() * 0.5 - 0.2;
          double touchdownTime = transferTime * random.nextDouble() * 0.3;
@@ -134,11 +135,11 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
          if(stepIndex < 10)
          {
-            footstepMessage1.add(footstepData);
+            footstepMessage1.getFootstepDataList().add().set(footstepData);
          }
          else
          {
-            footstepMessage2.add(footstepData);
+            footstepMessage2.getFootstepDataList().add().set(footstepData);
          }
       }
 
@@ -210,32 +211,32 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
             assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
 
-            if (stepCount > footstepMessage1.size() + footstepMessage2.size() - 2)
+            if (stepCount > footstepMessage1.getFootstepDataList().size() + footstepMessage2.getFootstepDataList().size() - 2)
             {
                isDone = true;
                return;
             }
 
-            if(stepCount < footstepMessage1.size())
+            if(stepCount < footstepMessage1.getFootstepDataList().size())
             {
-               double swingTime = footstepMessage1.get(stepCount).getSwingDuration();
+               double swingTime = footstepMessage1.getFootstepDataList().get(stepCount).getSwingDuration();
 
                double transferTime = Double.NaN;
-               if(stepCount == footstepMessage1.size() - 1)
+               if(stepCount == footstepMessage1.getFootstepDataList().size() - 1)
                {
-                  transferTime = footstepMessage2.get(0).getTransferDuration();
+                  transferTime = footstepMessage2.getFootstepDataList().get(0).getTransferDuration();
                }
                else
                {
-                  transferTime = footstepMessage1.get(stepCount + 1).getTransferDuration();
+                  transferTime = footstepMessage1.getFootstepDataList().get(stepCount + 1).getTransferDuration();
                }
 
                expectedStartTimeOfNextStep += swingTime + transferTime;
             }
             else
             {
-               double swingTime = footstepMessage2.get(stepCount - footstepMessage1.size()).getSwingDuration();
-               double transferTime = footstepMessage2.get(stepCount + 1 - footstepMessage1.size()).getTransferDuration();
+               double swingTime = footstepMessage2.getFootstepDataList().get(stepCount - footstepMessage1.getFootstepDataList().size()).getSwingDuration();
+               double transferTime = footstepMessage2.getFootstepDataList().get(stepCount + 1 - footstepMessage1.getFootstepDataList().size()).getTransferDuration();
                expectedStartTimeOfNextStep += swingTime + transferTime;
             }
 
@@ -266,8 +267,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       scs.setCameraFix(1.5, 0.0, 0.8);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
-      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.3, 0.1);
+      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       double minimumTransferTime = getRobotModel().getWalkingControllerParameters().getMinimumTransferTime();
 
       // add very fast footstep:
@@ -276,9 +277,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
          Point3D location = new Point3D(0.0, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
          footstepData.setTransferDuration(minimumTransferTime / 2.0);
-         footsteps.add(footstepData);
+         footsteps.getFootstepDataList().add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);
@@ -304,7 +305,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    @SuppressWarnings("unchecked")
    private static WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
    {
-      return (WalkingStateEnum) getYoVariable(scs, "WalkingState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
+      return (WalkingStateEnum) getYoVariable(scs, "WalkingCurrentState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
    }
 
    private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)

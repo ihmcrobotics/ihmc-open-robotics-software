@@ -4,12 +4,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterface
 {
@@ -19,8 +20,9 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    private final YoBoolean inContact;
 
    public WrenchAndContactSensorFusedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, ContactSensor contactSensor,
-         double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
-         YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
+                                                double robotTotalWeight, ContactablePlaneBody contactablePlaneBody, DoubleProvider contactThresholdForce,
+                                                DoubleProvider secondContactThresholdForce, DoubleProvider copThresholdFraction,
+                                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
@@ -29,8 +31,9 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
          throw new RuntimeException("The force sensor and the contact sensor are not on the same link.");
       }
 
-      this.wrenchBasedFootSwitch = new WrenchBasedFootSwitch(namePrefix + "WrenchBasedFootSwitch", forceSensorData, footSwitchCoPThresholdFraction,
-            robotTotalWeight, contactablePlaneBody, yoGraphicsListRegistry, contactThresholdForce, registry);
+      this.wrenchBasedFootSwitch = new WrenchBasedFootSwitch(namePrefix + "WrenchBasedFootSwitch", forceSensorData, robotTotalWeight, contactablePlaneBody,
+                                                             contactThresholdForce, secondContactThresholdForce, copThresholdFraction, yoGraphicsListRegistry,
+                                                             registry);
 
       this.contactSensor = contactSensor;
 

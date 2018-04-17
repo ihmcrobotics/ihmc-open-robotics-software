@@ -719,6 +719,11 @@ public class YoFunctionGenerator
       System.out.println("KRateForExponentialChirp=" + yoFunctionGenerator.getKRateForExponentialChirp());
    }
 
+   public void setAlphaForSmoothing(double alpha)
+   {
+      this.alphaFilter.set(alpha);
+   }
+
    public static void main(String[] args)
    {
       YoFunctionGenerator yoFunctionGenerator = new YoFunctionGenerator("test", null);

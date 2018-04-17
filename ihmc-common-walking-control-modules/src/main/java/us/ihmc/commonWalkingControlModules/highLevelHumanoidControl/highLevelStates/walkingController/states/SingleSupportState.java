@@ -1,23 +1,23 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class SingleSupportState extends WalkingState
 {
    protected final RobotSide swingSide;
    protected final RobotSide supportSide;
-   
+
    private final YoBoolean hasMinimumTimePassed = new YoBoolean("hasMinimumTimePassed", registry);
    protected final YoDouble minimumSwingFraction = new YoDouble("minimumSwingFraction", registry);
 
@@ -27,12 +27,13 @@ public abstract class SingleSupportState extends WalkingState
 
    protected final BalanceManager balanceManager;
 
-   public SingleSupportState(RobotSide supportSide, WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory, YoVariableRegistry parentRegistry)
+   public SingleSupportState(WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
+                             HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                             YoVariableRegistry parentRegistry)
    {
       super(singleSupportStateEnum, parentRegistry);
 
-      this.supportSide = supportSide;
+      this.supportSide = singleSupportStateEnum.getSupportSide();
       swingSide = supportSide.getOppositeSide();
 
       minimumSwingFraction.set(0.5);
@@ -49,20 +50,21 @@ public abstract class SingleSupportState extends WalkingState
       return swingSide;
    }
 
+   @Override
    public RobotSide getSupportSide()
    {
       return supportSide;
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      hasMinimumTimePassed.set(hasMinimumTimePassed());
+      hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
       if (!hasMinimumTimePassed.getBooleanValue())
          return false;
@@ -70,10 +72,10 @@ public abstract class SingleSupportState extends WalkingState
       return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
    }
 
-   protected abstract boolean hasMinimumTimePassed();
+   protected abstract boolean hasMinimumTimePassed(double timeInState);
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
@@ -81,7 +83,7 @@ public abstract class SingleSupportState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       balanceManager.resetPushRecovery();
       resetLoadedLegIntegrators(swingSide);

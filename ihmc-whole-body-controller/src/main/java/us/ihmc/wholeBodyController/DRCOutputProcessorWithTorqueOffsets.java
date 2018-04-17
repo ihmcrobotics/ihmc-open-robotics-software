@@ -6,7 +6,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -78,7 +78,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
 
    @Override
    public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel,
-                                               LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput,
+                                               JointDesiredOutputList lowLevelControllerCoreOutput,
                                                RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       if (drcOutputWriter != null)

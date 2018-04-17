@@ -9,6 +9,9 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class BlockingSimulationRunner
 {
@@ -19,6 +22,9 @@ public class BlockingSimulationRunner
    private final boolean destroySimulationIfOverrunMaxTime;
 
    private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+   private final AtomicBoolean hasICPBeenInvalid = new AtomicBoolean(false);
+
+   private boolean checkICPPosition = false;
 
    public BlockingSimulationRunner(SimulationConstructionSet scs, double maximumClockRunTimeInSeconds)
    {
@@ -31,6 +37,11 @@ public class BlockingSimulationRunner
 
       this.maximumClockRunTimeInSeconds = maximumClockRunTimeInSeconds;
       this.destroySimulationIfOverrunMaxTime = destroySimulationaIfOverrunMaxTime;
+   }
+
+   public void setCheckDesiredICPPosition(boolean checkICPPosition)
+   {
+      this.checkICPPosition = checkICPPosition;
    }
 
    public void simulateNTicksAndBlock(int numberOfTicks) throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -47,6 +58,8 @@ public class BlockingSimulationRunner
 //    waitForSimulationToStart();
       waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, destroySimulationIfOverrunMaxTime);
       checkIfControllerHasFailed();
+      if (checkICPPosition)
+         checkIfICPHasBeenInvalid();
    }
 
    public boolean simulateNTicksAndBlockAndCatchExceptions(int numberOfTicks) throws SimulationExceededMaximumTimeException
@@ -81,6 +94,8 @@ public class BlockingSimulationRunner
 //    waitForSimulationToStart();
       waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, destroySimulationIfOverrunMaxTime);
       checkIfControllerHasFailed();
+      if (checkICPPosition)
+         checkIfICPHasBeenInvalid();
 
       double endTime = scs.getTime();
       double elapsedTime = endTime - startTime;
@@ -219,6 +234,14 @@ public class BlockingSimulationRunner
          throw new ControllerFailureException("Controller failure has been detected.");
    }
 
+   private void checkIfICPHasBeenInvalid() throws ControllerFailureException
+   {
+      if (hasICPBeenInvalid.get())
+      {
+         throw new ControllerFailureException("The desired ICP position has been invalid.");
+      }
+   }
+
    public ControllerFailureListener createControllerFailureListener()
    {
       ControllerFailureListener controllerFailureListener = new ControllerFailureListener()
@@ -232,6 +255,31 @@ public class BlockingSimulationRunner
       };
 
       return controllerFailureListener;
+   }
+
+   public void createValidDesiredICPListener()
+   {
+      YoDouble desiredICPX = (YoDouble) scs.getVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) scs.getVariable("desiredICPY");
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (!Double.isFinite(v.getValueAsDouble()))
+               hasICPBeenInvalid.set(true);
+         }
+      });
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (!Double.isFinite(v.getValueAsDouble()))
+               hasICPBeenInvalid.set(true);
+         }
+      });
    }
 
    public static class SimulationExceededMaximumTimeException extends Exception

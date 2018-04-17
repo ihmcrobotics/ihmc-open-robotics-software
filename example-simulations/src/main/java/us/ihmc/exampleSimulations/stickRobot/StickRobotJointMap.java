@@ -1,15 +1,17 @@
 package us.ihmc.exampleSimulations.stickRobot;
 
+import static us.ihmc.exampleSimulations.stickRobot.StickRobotOrderedJointMap.jointNames;
+
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import static us.ihmc.exampleSimulations.stickRobot.StickRobotOrderedJointMap.jointNames;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -204,6 +206,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
+      return getSoleToParentFrameTransform(robotSide);
+   }
+
+   @Override
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
+   {
       return StickRobotPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
@@ -255,15 +263,21 @@ public class StickRobotJointMap implements DRCRobotJointMap
       return headName;
    }
    
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
    }
 
    @Override
+   public String getFootName(RobotSide robotSide)
+   {
+      return null;
+   }
+
+   @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
@@ -283,13 +297,7 @@ public class StickRobotJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
-   {
-      return RobotSide.values;
-   }
-
-   @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotSide getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -348,14 +356,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public String getArmJointName(RobotSide robotSide, ArmJointName armJointName)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -374,14 +380,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public String[] getPositionControlledJointsForSimulation()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelState</Variables>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.SwitchableRobotController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelControllerName</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,transitionToFullControl,alphaQD,requestStop,joint_r_leg_hpyMode,joint_r_leg_hpyOffset,joint_r_leg_hpyFreq,joint_r_leg_hpyAmp,hl_kp_r_leg_lhy,hl_kd_r_leg_lhy,hl_q_d_r_leg_lhy</Entry Boxes>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelControllerName,transitionToFullControl,alphaQD,requestStop,joint_r_leg_hpyMode,joint_r_leg_hpyOffset,joint_r_leg_hpyFreq,joint_r_leg_hpyAmp,hl_kp_r_leg_lhy,hl_kd_r_leg_lhy,hl_q_d_r_leg_lhy</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

@@ -3,21 +3,23 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
  * Created by agrabertilton on 1/28/15.
@@ -80,7 +82,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
            double height, Vector3D planeNormal)
    {
       return convexHullFootstepSnapper.generateFootstepWithoutHeightMap(desiredSolePosition, foot, soleFrame, robotSide, height, planeNormal);
@@ -91,13 +93,13 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
-      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
+      FramePose2D footPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
 
       return generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -114,26 +116,26 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
+      FootstepDataMessage originalFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep);
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
-      originalFootstep.setOrientation(orientation.getQuaternion());
+      originalFootstep.getLocation().set(position);
+      originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null){
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints2d().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       footstep.setFootstepType(type);
-      FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
+      FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
-      footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
+      footstep.setTrajectoryType(TrajectoryType.fromByte(originalFootstep.getTrajectoryType()));
 
       return type;
    }
@@ -145,7 +147,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       if (footstepFound != Footstep.FootstepType.BAD_FOOTSTEP)
       {
-         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints() != null){
+         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d().size() > 0){
             throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
          }
          return footstepFound;
@@ -187,8 +189,8 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       boolean isOriginalPosition = true;
-      FramePose2d desiredSolePosition = new FramePose2d(ReferenceFrame.getWorldFrame(), originalPosition, originalYaw);
-      FramePose2d newDesiredSolePosition = new FramePose2d(desiredSolePosition);
+      FramePose2D desiredSolePosition = new FramePose2D(ReferenceFrame.getWorldFrame(), originalPosition, originalYaw);
+      FramePose2D newDesiredSolePosition = new FramePose2D(desiredSolePosition);
       for (int i = 0; i < angleOffsets.length; i++)
       {
          for (Point2D point2d : possiblePositions)
@@ -205,7 +207,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
             if (footstepFound!= Footstep.FootstepType.BAD_FOOTSTEP)
             {
-               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints() != null){
+               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d() != null){
                   throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
                }
                return footstepFound;
@@ -214,8 +216,8 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
 
-      footstep.location = originalFootstepFound.location;
-      footstep.setOrientation(originalFootstepFound.getOrientation());
+      footstep.getLocation().set(originalFootstepFound.getLocation());
+      footstep.getOrientation().set(originalFootstepFound.getOrientation());
       return Footstep.FootstepType.BAD_FOOTSTEP;
    }
 }

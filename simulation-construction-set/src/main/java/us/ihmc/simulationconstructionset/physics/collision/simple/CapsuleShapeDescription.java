@@ -2,9 +2,11 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -19,7 +21,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    private RigidBodyTransform transform = new RigidBodyTransform();
    private RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public CapsuleShapeDescription(double radius, LineSegment3D lineSegment)
+   public CapsuleShapeDescription(double radius, LineSegment3DReadOnly lineSegment)
    {
       this.radius = radius;
       this.lineSegmentInShapeFrame.set(lineSegment);
@@ -103,8 +105,8 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
 
    private void updateBoundingBox()
    {
-      Point3D firstEndpoint = lineSegment.getFirstEndpoint();
-      Point3D secondEndpoint = lineSegment.getSecondEndpoint();
+      Point3DBasics firstEndpoint = lineSegment.getFirstEndpoint();
+      Point3DBasics secondEndpoint = lineSegment.getSecondEndpoint();
 
       double xMin, yMin, zMin, xMax, yMax, zMax;
 
@@ -154,7 +156,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    private final Point3D tempPointForRollingShapeFrame = new Point3D();
    private final Vector3D tempVectorForRollingWorldFrame = new Vector3D();
    private final Vector3D tempVectorForRollingShapeFrame = new Vector3D();
-   private final Vector3D tempVectorTwoForRollingShapeFrame = new Vector3D();
+//   private final Vector3D tempVectorTwoForRollingShapeFrame = new Vector3D();
 //   private final LineSegment3d tempLineSegmentForRollingWorldFrame = new LineSegment3d();
 
    @Override

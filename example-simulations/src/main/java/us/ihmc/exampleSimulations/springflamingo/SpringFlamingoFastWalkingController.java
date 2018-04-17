@@ -5,18 +5,18 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: SpringFlamingoController</p>
@@ -42,7 +42,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
    private final double LPF_DOWN_TAU = (1.0 - 10.0 * CONTROL_DT);
 
-   private StateMachine leftStateMachine, rightStateMachine;
+   private StateMachine<WalkingState, State> leftStateMachine, rightStateMachine;
 
    // Control Parameters:
    private final YoDouble v_nom = new YoDouble("v_nom", "Desired walking velocity.", registry);
@@ -374,8 +374,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
       Container contentPane = jFrame.getContentPane();
 
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-      StateMachinesJPanel leftStateMachinePanel = new StateMachinesJPanel(leftStateMachine, true);
-      StateMachinesJPanel rightStateMachinePanel = new StateMachinesJPanel(rightStateMachine, true);
+      StateMachinesJPanel<WalkingState> leftStateMachinePanel = new StateMachinesJPanel<>(leftStateMachine, true);
+      StateMachinesJPanel<WalkingState> rightStateMachinePanel = new StateMachinesJPanel<>(rightStateMachine, true);
 
       jFrame.getContentPane().add(leftStateMachinePanel);
       jFrame.getContentPane().add(rightStateMachinePanel);
@@ -386,8 +386,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
       jFrame.setVisible(true);
 
       // Doing the following will cause redraw when the state changes, but not during replay or rewind:
-      leftStateMachine.attachStateChangedListener(leftStateMachinePanel);
-      rightStateMachine.attachStateChangedListener(rightStateMachinePanel);
+      leftStateMachine.addStateChangedListener(leftStateMachinePanel);
+      rightStateMachine.addStateChangedListener(rightStateMachinePanel);
 
       // Doing this will cause redraw every specified miliseconds:
 //      leftStateMachinePanel.createUpdaterThread(250);
@@ -608,7 +608,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
        *  Subtract swing hip torque from the stance leg so less disturbance
        *  on the body
        */
-      if ((leftStateMachine.getCurrentStateEnum() == WalkingState.SWING))    // || (leftStateMachine.getCurrentStateEnum() == States.STRAIGHTEN))
+      if ((leftStateMachine.getCurrentStateKey() == WalkingState.SWING))    // || (leftStateMachine.getCurrentStateEnum() == States.STRAIGHTEN))
       {
          single_support_vtp(RobotSide.RIGHT, 0.0, act_lh.getDoubleValue(), ff_hip, ff_knee, ff_ankle);
 
@@ -625,7 +625,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          act_ra.set(act_ra.getDoubleValue() + couple_tau_percent.getDoubleValue() * ff_ankle.getDoubleValue());
       }
 
-      if ((rightStateMachine.getCurrentStateEnum() == WalkingState.SWING))    // || (rightStateMachine.getCurrentStateEnum() ==  States.STRAIGHTEN))
+      if ((rightStateMachine.getCurrentStateKey() == WalkingState.SWING))    // || (rightStateMachine.getCurrentStateEnum() ==  States.STRAIGHTEN))
       {
          single_support_vtp(RobotSide.LEFT, 0.0, act_rh.getDoubleValue(), ff_hip, ff_knee, ff_ankle);
 
@@ -659,8 +659,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
 // T  ransition Conditions:
 
-      leftStateMachine.checkTransitionConditions();
-      rightStateMachine.checkTransitionConditions();
+      leftStateMachine.doTransitions();
+      rightStateMachine.doTransitions();
 
       // Torques at the joints:
 
@@ -809,98 +809,58 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private void setupStateMachines()
    {
       // Create the state machines:
-      leftStateMachine = new StateMachine("leftState", "leftSwitchTime", WalkingState.class, robot.t, registry);
-      rightStateMachine = new StateMachine("rightState", "rightSwitchTime", WalkingState.class, robot.t, registry);
-
-      // Create the states:
-
-      State leftBalanceState = new BalanceState(WalkingState.BALANCE, RobotSide.LEFT);
-      State rightBalanceState = new BalanceState(WalkingState.BALANCE, RobotSide.RIGHT);
-
-      State leftSupportState = new SupportState(WalkingState.SUPPORT, RobotSide.LEFT);
-      State rightSupportState = new SupportState(WalkingState.SUPPORT, RobotSide.RIGHT);
-
-      State leftSwingState = new SwingState(WalkingState.SWING, RobotSide.LEFT);
-      State rightSwingState = new SwingState(WalkingState.SWING, RobotSide.RIGHT);
-
-//    State leftStraightenState = new StraightenState(States.STRAIGHTEN, RobotSide.LEFT);
-//    State rightStraightenState = new StraightenState(States.STRAIGHTEN, RobotSide.RIGHT);
-
-      State leftToeOffState = new ToeOffState(WalkingState.TOE_OFF, RobotSide.LEFT);
-      State rightToeOffState = new ToeOffState(WalkingState.TOE_OFF, RobotSide.RIGHT);
+      StateMachineFactory<WalkingState, State> leftFactory = new StateMachineFactory<>(WalkingState.class);
+      StateMachineFactory<WalkingState, State> rightFactory = new StateMachineFactory<>(WalkingState.class);
+      leftFactory.setNamePrefix("leftState").setRegistry(registry).buildYoClock(robot.t);
+      rightFactory.setNamePrefix("rightState").setRegistry(registry).buildYoClock(robot.t);
 
       // Create the transition conditions.
-
       ReadyToStartWalkingCondition readyToStartWalkingLeftSupport = new ReadyToStartWalkingCondition(RobotSide.LEFT);
+      leftFactory.addTransition(WalkingState.BALANCE, WalkingState.SUPPORT, readyToStartWalkingLeftSupport);
+      rightFactory.addTransition(WalkingState.BALANCE, WalkingState.SWING, readyToStartWalkingLeftSupport);
+
       ReadyToStartWalkingCondition readyToStartWalkingRightSupport = new ReadyToStartWalkingCondition(RobotSide.RIGHT);
+      rightFactory.addTransition(WalkingState.BALANCE, WalkingState.SUPPORT, readyToStartWalkingRightSupport);
+      leftFactory.addTransition(WalkingState.BALANCE, WalkingState.SWING, readyToStartWalkingRightSupport);
 
-      SupportToToeOffCondition leftSupportToToeOffCondition = new SupportToToeOffCondition(RobotSide.LEFT);
-      SupportToToeOffCondition rightSupportToToeOffCondition = new SupportToToeOffCondition(RobotSide.RIGHT);
-
-      ToeOffToSwingCondition leftToeOffToSwingCondition = new ToeOffToSwingCondition(RobotSide.LEFT);
-      ToeOffToSwingCondition rightToeOffToSwingCondition = new ToeOffToSwingCondition(RobotSide.RIGHT);
-
-      SwingToSupportCondition leftSwingToSupportCondition = new SwingToSupportCondition(RobotSide.LEFT);
-      SwingToSupportCondition rightSwingToSupportCondition = new SwingToSupportCondition(RobotSide.RIGHT);
-
-      // Create the transitions
       // Left State Machine:
-      StateTransition startWalkingLeftSupport = new StateTransition(WalkingState.SUPPORT, readyToStartWalkingLeftSupport);
-      StateTransition startWalkingLeftSwing = new StateTransition(WalkingState.SWING, readyToStartWalkingRightSupport);
-
-      StateTransition leftSupportToToeOffTransition = new StateTransition(WalkingState.TOE_OFF, leftSupportToToeOffCondition);
-      StateTransition leftToeOffToSwingTransition = new StateTransition(WalkingState.SWING, leftToeOffToSwingCondition);
-      StateTransition leftSwingToSupportTransition = new StateTransition(WalkingState.SUPPORT, leftSwingToSupportCondition);
-
-      leftBalanceState.addStateTransition(startWalkingLeftSupport);
-      leftBalanceState.addStateTransition(startWalkingLeftSwing);
-      leftSupportState.addStateTransition(leftSupportToToeOffTransition);
-      leftToeOffState.addStateTransition(leftToeOffToSwingTransition);
-      leftSwingState.addStateTransition(leftSwingToSupportTransition);
+      leftFactory.addTransition(WalkingState.SUPPORT, WalkingState.TOE_OFF, new SupportToToeOffCondition(RobotSide.LEFT));
+      leftFactory.addTransition(WalkingState.TOE_OFF, WalkingState.SWING, new ToeOffToSwingCondition(RobotSide.LEFT));
+      leftFactory.addTransition(WalkingState.SWING, WalkingState.SUPPORT, new SwingToSupportCondition(RobotSide.LEFT));
 
       // Right State Machine:
-      StateTransition startWalkingRightSupport = new StateTransition(WalkingState.SUPPORT, readyToStartWalkingRightSupport);
-      StateTransition startWalkingRightSwing = new StateTransition(WalkingState.SWING, readyToStartWalkingLeftSupport);
-
-      StateTransition rightSupportToToeOffTransition = new StateTransition(WalkingState.TOE_OFF, rightSupportToToeOffCondition);
-      StateTransition rightToeOffToSwingTransition = new StateTransition(WalkingState.SWING, rightToeOffToSwingCondition);
-      StateTransition rightSwingToSupportTransition = new StateTransition(WalkingState.SUPPORT, rightSwingToSupportCondition);
-
-      rightBalanceState.addStateTransition(startWalkingRightSupport);
-      rightBalanceState.addStateTransition(startWalkingRightSwing);
-      rightSupportState.addStateTransition(rightSupportToToeOffTransition);
-      rightToeOffState.addStateTransition(rightToeOffToSwingTransition);
-      rightSwingState.addStateTransition(rightSwingToSupportTransition);
+      rightFactory.addTransition(WalkingState.SUPPORT, WalkingState.TOE_OFF, new SupportToToeOffCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(WalkingState.TOE_OFF, WalkingState.SWING, new ToeOffToSwingCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(WalkingState.SWING, WalkingState.SUPPORT, new SwingToSupportCondition(RobotSide.RIGHT));
 
       // Add the states to the state machines
-      leftStateMachine.addState(leftBalanceState);
-      leftStateMachine.addState(leftSupportState);
-      leftStateMachine.addState(leftSwingState);
+      leftFactory.addState(WalkingState.BALANCE, new BalanceState(RobotSide.LEFT));
+      leftFactory.addState(WalkingState.SUPPORT, new SupportState(RobotSide.LEFT));
+      leftFactory.addState(WalkingState.SWING, new SwingState(RobotSide.LEFT));
+//    leftFactory.addState(WalkingState.STRAIGHTEN, new StraightenState(RobotSide.LEFT));
+      leftFactory.addState(WalkingState.TOE_OFF, new ToeOffState(RobotSide.LEFT));
 
-//    leftStateMachine.addState(leftStraightenState);
-      leftStateMachine.addState(leftToeOffState);
+      rightFactory.addState(WalkingState.BALANCE, new BalanceState(RobotSide.RIGHT));
+      rightFactory.addState(WalkingState.SUPPORT, new SupportState(RobotSide.RIGHT));
+      rightFactory.addState(WalkingState.SWING, new SwingState(RobotSide.RIGHT));
+//    rightFactory.addState(WalkingState.STRAIGHTEN, new StraightenState(RobotSide.RIGHT));
+      rightFactory.addState(WalkingState.TOE_OFF, new ToeOffState(RobotSide.RIGHT));
 
-      rightStateMachine.addState(rightBalanceState);
-      rightStateMachine.addState(rightSupportState);
-      rightStateMachine.addState(rightSwingState);
-
-//    rightStateMachine.addState(rightStraightenState);
-      rightStateMachine.addState(rightToeOffState);
-
+      leftStateMachine = leftFactory.build(WalkingState.BALANCE); // TODO: Sylvain (03/12/2018 refactoring state machines) no clue what was the initial state.
+      rightStateMachine = rightFactory.build(WalkingState.BALANCE);
    }
 
-   private class BalanceState extends State
+   private class BalanceState implements State
    {
       private final RobotSide robotSide;
       private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
-      public BalanceState(WalkingState stateEnum, RobotSide robotSide)
+      public BalanceState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
          /* Use hip to servo pitch */
          bodyPitchTorque.get(robotSide).set(0.65 * (t_gain.getDoubleValue() * (t_d.getDoubleValue() - robot.q_pitch.getDoubleValue()) - t_damp.getDoubleValue() * robot.qd_pitch.getDoubleValue()));
@@ -919,11 +879,11 @@ public class SpringFlamingoFastWalkingController implements RobotController
          passiveTorqueAtAnkle.get(robotSide).set(passive_ankle_torques(robot.getAnkleAngle(robotSide), robot.getAnkleVelocity(robotSide)));
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 //       robot.qd_x.val = -0.2;
 
@@ -935,31 +895,30 @@ public class SpringFlamingoFastWalkingController implements RobotController
    private double getTimeInCurrentState(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
-         return leftStateMachine.timeInCurrentState();
+         return leftStateMachine.getTimeInCurrentState();
       else
-         return rightStateMachine.timeInCurrentState();
+         return rightStateMachine.getTimeInCurrentState();
    }
 
    private WalkingState getStateMachineState(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
-         return (WalkingState) leftStateMachine.getCurrentStateEnum();
+         return (WalkingState) leftStateMachine.getCurrentStateKey();
       else
-         return (WalkingState) rightStateMachine.getCurrentStateEnum();
+         return (WalkingState) rightStateMachine.getCurrentStateKey();
    }
 
-   private class SupportState extends State
+   private class SupportState implements State
    {
       private final RobotSide robotSide;
       private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
-      public SupportState(WalkingState stateEnum, RobotSide robotSide)
+      public SupportState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
          double timeInCurrentState = SpringFlamingoFastWalkingController.this.getTimeInCurrentState(robotSide);
 
@@ -989,7 +948,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          passiveTorqueAtAnkle.get(robotSide).set(passive_ankle_torques(robot.getAnkleAngle(robotSide), robot.getAnkleVelocity(robotSide)));
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          if (robotSide == RobotSide.RIGHT)
          {
@@ -1006,24 +965,23 @@ public class SpringFlamingoFastWalkingController implements RobotController
          }
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
 
-   private class ToeOffState extends State
+   private class ToeOffState implements State
    {
       private final RobotSide robotSide;
       private SideDependentList<YoDouble> bodyPitchTorque = new SideDependentList<YoDouble>(ft_left, ft_right);
 
-      public ToeOffState(WalkingState stateEnum, RobotSide robotSide)
+      public ToeOffState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
 //         double timeInCurrentState = getTimeInCurrentState(robotSide);
          double timeInOtherStateMachineState = SpringFlamingoFastWalkingController.this.getTimeInCurrentState(robotSide.getOppositeSide());
@@ -1078,7 +1036,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          activeTorqueAtAnkle.get(robotSide).set(activeTorqueAtAnkle.get(robotSide).getDoubleValue() + toe_off_ankle_torques(robot.getAnkleAngle(robotSide), robot.getAnkleVelocity(robotSide)));
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          if (robotSide == RobotSide.LEFT)
          {
@@ -1090,24 +1048,23 @@ public class SpringFlamingoFastWalkingController implements RobotController
          }
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
 
-   private class SwingState extends State
+   private class SwingState implements State
    {
       private final RobotSide robotSide;
       private final SideDependentList<YoDouble> swingFlags = new SideDependentList<YoDouble>(l_swing_flag, r_swing_flag);
 
-      public SwingState(WalkingState stateEnum, RobotSide robotSide)
+      public SwingState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
          double timeInCurrentState = SpringFlamingoFastWalkingController.this.getTimeInCurrentState(robotSide);
          YoDouble swingFlag = swingFlags.get(robotSide);
@@ -1247,7 +1204,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
             activeKneeTorque.set(-max_hip_torque.getDoubleValue());
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          hipDownTorques.get(robotSide).set(0.0);
          swingFlags.get(robotSide).set(0.0);
@@ -1258,26 +1215,24 @@ public class SpringFlamingoFastWalkingController implements RobotController
             swingExtraTime.set(0.0);
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
 
-   /*private class StraightenState extends State
+   /*private class StraightenState implements State
    {
       private final RobotSide robotSide;
 
-      public StraightenState(WalkingState stateEnum, RobotSide robotSide)
+      public StraightenState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double timeInCurrentState = getTimeInCurrentState(robotSide);
-         minjerk_equation(hip_d.getDoubleValue(), hip_hold.getDoubleValue(), 0.1, timeInCurrentState, desiredThighAngles.get(robotSide), desiredThighVelocities.get(robotSide),
+         minjerk_equation(hip_d.getDoubleValue(), hip_hold.getDoubleValue(), 0.1, timeInState, desiredThighAngles.get(robotSide), desiredThighVelocities.get(robotSide),
                           desiredThighAccelerations.get(robotSide));
 
          if (robot.getKneeAngle(robotSide) > -0.2)
@@ -1287,7 +1242,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          YoVariable kneeSetPoint = kneeSetPoints.get(robotSide);
          YoVariable kneeSetVelocity = kneeSetVelocities.get(robotSide);
 
-         minjerk_equation(-0.6, knee_d.getDoubleValue(), 0.2, timeInCurrentState, kneeSetPoint, kneeSetVelocity, desiredShinAccelerations.get(robotSide));
+         minjerk_equation(-0.6, knee_d.getDoubleValue(), 0.2, timeInState, kneeSetPoint, kneeSetVelocity, desiredShinAccelerations.get(robotSide));
          activeTorqueAtKnee.get(robotSide).set(swing_gain_knee.getDoubleValue() * (kneeSetPoint.getDoubleValue() - robot.getKneeAngle(robotSide))
                  + swing_damp_knee.getDoubleValue() * (kneeSetVelocity.getDoubleValue() - robot.getKneeVelocity(robotSide)) + knee_lock_torque.getDoubleValue());
 
@@ -1300,11 +1255,11 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
@@ -1325,7 +1280,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
                                            registry);
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          enoughTimePassed.set(robot.t.getDoubleValue() > 2.0);
          supportLegIsBack.set(false);
@@ -1363,14 +1318,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
-         double timeInState;
-         if (supportSide == RobotSide.LEFT)
-            timeInState = leftStateMachine.timeInCurrentState();
-         else
-            timeInState = rightStateMachine.timeInCurrentState();
-
          enoughTimePassed.set(timeInState > min_support_time.getDoubleValue());
 
          otherSideInSupport.set(getStateMachineState(supportSide.getOppositeSide()) == WalkingState.SUPPORT);
@@ -1406,14 +1355,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
                  "Check if the support leg for this transition is the reward leg", registry);
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
-         double timeInState;
-         if (supportSide == RobotSide.LEFT)
-            timeInState = leftStateMachine.timeInCurrentState();
-         else
-            timeInState = rightStateMachine.timeInCurrentState();
-
          enoughTimePassed.set(timeInState > doub_time.getDoubleValue());
 
          supportTransitionDistance.set(captureRatio.getDoubleValue() * vel.getDoubleValue() - supportTransitionGain.getDoubleValue() * (v_nom.getDoubleValue() - vel.getDoubleValue()));    // +  s_d2s.val ;
@@ -1427,14 +1370,14 @@ public class SpringFlamingoFastWalkingController implements RobotController
          {
             boolean condition1 = (x_rf.getDoubleValue() < supportTransitionDistance.getDoubleValue()) || (-x_lf.getDoubleValue() > s_d2s_trail.getDoubleValue());
             boolean condition2 = (gc_ltoe.getDoubleValue() < sw_force_thresh.getDoubleValue());
-            boolean condition3 = rightStateMachine.isCurrentState(WalkingState.SUPPORT);
+            boolean condition3 = rightStateMachine.getCurrentStateKey() == WalkingState.SUPPORT;
             supportLegIsBackAndUnloaded.set(condition1 && condition2 && condition3);
          }
          else
          {
             boolean condition1 = (x_lf.getDoubleValue() < supportTransitionDistance.getDoubleValue()) || (-x_rf.getDoubleValue() > s_d2s_trail.getDoubleValue());
             boolean condition2 = (gc_rtoe.getDoubleValue() < sw_force_thresh.getDoubleValue());
-            boolean condition3 = leftStateMachine.isCurrentState(WalkingState.SUPPORT);
+            boolean condition3 = leftStateMachine.getCurrentStateKey() == WalkingState.SUPPORT;
             supportLegIsBackAndUnloaded.set(condition1 && condition2 && condition3);
          }
 
@@ -1458,14 +1401,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
                  registry);
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
-         double timeInState;
-         if (supportSide == RobotSide.LEFT)
-            timeInState = leftStateMachine.timeInCurrentState();
-         else
-            timeInState = rightStateMachine.timeInCurrentState();
-
          enoughTimePassed.set(timeInState > tot_swing_time.getDoubleValue() + swingExtraTime.getDoubleValue());
 
          if (supportSide == RobotSide.LEFT)

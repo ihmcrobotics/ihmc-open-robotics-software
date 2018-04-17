@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
@@ -12,7 +13,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -233,7 +233,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscriber.pollMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationSubscriber.pollMessage().getDesiredHandConfiguration());
             
             if (DEBUG)
                PrintTools.debug(this, "Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);

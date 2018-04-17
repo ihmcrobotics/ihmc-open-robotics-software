@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerHelper;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 public class ICPOptimizationControllerHelperTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testTransformFromDynamicsFrame()
    {
       ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();

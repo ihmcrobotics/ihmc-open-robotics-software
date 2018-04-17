@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -37,7 +37,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
    private final Wrench endEffectorWrench = new Wrench();
    private final FrameVector3D errorVector = new FrameVector3D();
-   private final YoFramePoint targetPosition;
+   private final YoFramePoint3D targetPosition;
    private final FramePoint3D endEffectorPosition = new FramePoint3D();
    private final YoDouble kp;
 
@@ -55,7 +55,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       kp = new YoDouble("kpTaskspace", registry);
       kp.set(0.5);
 
-      targetPosition = new YoFramePoint("targetPosition", skippy.getRightShoulderFrame(), registry);
+      targetPosition = new YoFramePoint3D("targetPosition", skippy.getRightShoulderFrame(), registry);
       targetPosition.set(0.0, 0.1, 0.0);
 
    }
@@ -100,7 +100,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
       endEffectorPosition.setToZero(endEffectorFrame); //set(targetPosition.getFrameTuple());  //
 
-      errorVector.setIncludingFrame(targetPosition.getFrameTuple());
+      errorVector.setIncludingFrame(targetPosition);
       errorVector.sub(endEffectorPosition);
       errorVector.changeFrame(endEffectorFrame);
 
@@ -131,7 +131,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    {
       // --- NOT READY!!!
       computeComAndICP(com, comVelocity, icp, angularMomentum);
-      skippy.computeFootContactForce(actualGroundReaction.getVector());
+      skippy.computeFootContactForce(actualGroundReaction);
       footLocation.set(skippy.computeFootLocation());
       cmpFromIcpDynamics(icp, footLocation, desiredCMP);
       desiredGroundReaction.sub(com, desiredCMP);

@@ -1,21 +1,20 @@
 package us.ihmc.exampleSimulations.m2;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class M2ProcessedSensorsControllerWithStateTransitions implements SimulationDoneCriterion, RobotController
 {
@@ -191,29 +190,12 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
                                                                              rightHeelToBodyCenterInWorldY);
 
 
-   private StateMachine<States> leftStateMachine, rightStateMachine;
-   private SideDependentList<StateMachine<States>> stateMachines;
+   private StateMachine<States, State> leftStateMachine, rightStateMachine;
+   private SideDependentList<StateMachine<States, State>> stateMachines;
 
    private final PerfectSensorProcessing perfectSensorProcessing;
    private final PerfectProcessedOutputs processedOutputs;
    private final ProcessedSensors processedSensors;
-
-   StateTransitionCondition doneWithStateBooleanRight = new StateTransitionCondition()
-   {
-      public boolean checkCondition()
-      {
-         return doneWithStateRight.getBooleanValue();
-      }
-   };
-
-   StateTransitionCondition doneWithStateBooleanLeft = new StateTransitionCondition()
-   {
-      public boolean checkCondition()
-      {
-         return doneWithStateLeft.getBooleanValue();
-      }
-   };
-
 
    private enum States {SUPPORT, TOE_OFF, SWING, STRAIGHTEN}
 
@@ -363,62 +345,32 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
 
    private void setupStateMachines()
    {
-      // States and Actions:
-
-      State<States> leftSupportState = new SupportState(RobotSide.LEFT, States.SUPPORT);
-      State<States> leftToeOffState = new ToeOffState(RobotSide.LEFT, States.TOE_OFF);
-      State<States> leftSwingState = new SwingState(RobotSide.LEFT, States.SWING);
-      State<States> leftStraightenState = new StraightenState(RobotSide.LEFT, States.STRAIGHTEN);
-
-
-      State<States> rightSupportState = new SupportState(RobotSide.RIGHT, States.SUPPORT);
-      State<States> rightToeOffState = new ToeOffState(RobotSide.RIGHT, States.TOE_OFF);
-      State<States> rightSwingState = new SwingState(RobotSide.RIGHT, States.SWING);
-      State<States> rightStraightenState = new StraightenState(RobotSide.RIGHT, States.STRAIGHTEN);
-
-
       // Create the state machines:
-      leftStateMachine = new StateMachine<States>("left_state", "left_switch_time_state_machine", States.class, processedSensors.getTimeYoVariable(), registry);
-      rightStateMachine = new StateMachine<States>("right_state", "right_switch_time_state_machine", States.class, processedSensors.getTimeYoVariable(), registry);
-      stateMachines = new SideDependentList<StateMachine<States>>(leftStateMachine, rightStateMachine);
+      StateMachineFactory<States, State> leftFactory = new StateMachineFactory<>(States.class);
+      StateMachineFactory<States, State> rightFactory = new StateMachineFactory<>(States.class);
+      leftFactory.setNamePrefix("left_state").setRegistry(registry).buildYoClock(processedSensors.getTimeYoVariable());
+      rightFactory.setNamePrefix("right_state").setRegistry(registry).buildYoClock(processedSensors.getTimeYoVariable());
+      stateMachines = new SideDependentList<>(leftStateMachine, rightStateMachine);
 
       // left State Transitions:
-
-      StateTransition<States> leftSupportToToeOff = new StateTransition<States>(leftToeOffState.getStateEnum(), doneWithStateBooleanLeft);
-      leftSupportState.addStateTransition(leftSupportToToeOff);
-      StateTransition<States> leftToeOffToSwing = new StateTransition<States>(leftSwingState.getStateEnum(), doneWithStateBooleanLeft);
-      leftToeOffState.addStateTransition(leftToeOffToSwing);
-      StateTransition<States> leftSwingToStraighten = new StateTransition<States>(leftStraightenState.getStateEnum(), doneWithStateBooleanLeft);
-      leftSwingState.addStateTransition(leftSwingToStraighten);
-      StateTransition<States> leftStraightenToSupport = new StateTransition<States>(leftSupportState.getStateEnum(), doneWithStateBooleanLeft);
-      leftStraightenState.addStateTransition(leftStraightenToSupport);
+      leftFactory.addStateAndDoneTransition(States.SUPPORT, new SupportState(RobotSide.LEFT), States.TOE_OFF);
+      leftFactory.addStateAndDoneTransition(States.TOE_OFF, new ToeOffState(RobotSide.LEFT), States.SWING);
+      leftFactory.addStateAndDoneTransition(States.SWING, new SwingState(RobotSide.LEFT), States.STRAIGHTEN);
+      leftFactory.addStateAndDoneTransition(States.STRAIGHTEN, new StraightenState(RobotSide.LEFT), States.SUPPORT);
 
       // right State Transitions:
-      StateTransition<States> rightSupportToToeOff = new StateTransition<States>(rightToeOffState.getStateEnum(), doneWithStateBooleanRight);
-      rightSupportState.addStateTransition(rightSupportToToeOff);
-      StateTransition<States> rightToeOffToSwing = new StateTransition<States>(rightSwingState.getStateEnum(), doneWithStateBooleanRight);
-      rightToeOffState.addStateTransition(rightToeOffToSwing);
-      StateTransition<States> rightSwingToStraighten = new StateTransition<States>(rightStraightenState.getStateEnum(), doneWithStateBooleanRight);
-      rightSwingState.addStateTransition(rightSwingToStraighten);
-      StateTransition<States> rightStraightenToSupport = new StateTransition<States>(rightSupportState.getStateEnum(), doneWithStateBooleanRight);
-      rightStraightenState.addStateTransition(rightStraightenToSupport);
+      rightFactory.addStateAndDoneTransition(States.SUPPORT, new SupportState(RobotSide.RIGHT), States.TOE_OFF);
+      rightFactory.addStateAndDoneTransition(States.TOE_OFF, new ToeOffState(RobotSide.RIGHT), States.SWING);
+      rightFactory.addStateAndDoneTransition(States.SWING, new SwingState(RobotSide.RIGHT), States.STRAIGHTEN);
+      rightFactory.addStateAndDoneTransition(States.STRAIGHTEN, new StraightenState(RobotSide.RIGHT), States.SUPPORT);
 
       // Assemble the left State Machine:
-      leftStateMachine.addState(leftSupportState);
-      leftStateMachine.addState(leftToeOffState);
-      leftStateMachine.addState(leftSwingState);
-      leftStateMachine.addState(leftStraightenState);
+      leftStateMachine = leftFactory.build(States.SUPPORT);
 
       // Assemble the right State Machine:
-      rightStateMachine.addState(rightSupportState);
-      rightStateMachine.addState(rightToeOffState);
-      rightStateMachine.addState(rightSwingState);
-      rightStateMachine.addState(rightStraightenState);
+      rightStateMachine = rightFactory.build(States.SWING);
 
-      // Set the Initial States:
-
-      leftStateMachine.setCurrentState(States.SUPPORT);
-      rightStateMachine.setCurrentState(States.SWING);
+      stateMachines = new SideDependentList<>(leftStateMachine, rightStateMachine);
    }
 
    void balistic_walking_state_machine()
@@ -428,8 +380,8 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       leftStateMachine.doAction();
       rightStateMachine.doAction();
 
-      leftStateMachine.checkTransitionConditions();
-      rightStateMachine.checkTransitionConditions();
+      leftStateMachine.doTransitions();
+      rightStateMachine.doTransitions();
 
       defaultActionsOutOfStates();
    }
@@ -517,24 +469,25 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          return (0.0);
    }
 
+   @Override
    public boolean isSimulationDone()
    {
       return (processedSensors.getTime() > 0.5);
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
-   private class SupportState extends State<States>
+   private class SupportState implements State
    {
       protected RobotSide robotSide;
       protected double minusForRightSide = 1.0;
 
-      public SupportState(RobotSide robotSide, States stateEnum)
+      public SupportState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
 
          if (robotSide == RobotSide.RIGHT)
@@ -543,7 +496,8 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          }
       }
 
-      public void doAction()
+      @Override
+      public void doAction(double timeInState)
       {
          ankleRollError.get(robotSide).set(-minusForRightSide * flat_ankle_roll.getDoubleValue() - processedSensors.getJointPosition(robotSide, JointName.ANKLE_ROLL));
          ffAnkleRollSpeed.get(robotSide).set(yd_ankle_gain.getDoubleValue() * (ankleRollError.get(robotSide).getDoubleValue() - yd_gain.getDoubleValue() * bodyVelocityInBodyFrameY.getDoubleValue()));
@@ -585,19 +539,27 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
 
 
          if (heelForceIsLessThanThreshold(robotSide) && (robotIsMovingForward() && heelIsBehindBody(robotSide)) && footIsRearFoot(robotSide)
-                 && (stateMachines.get(robotSide).timeInCurrentState() > min_support_time.getDoubleValue()))
+                 && (timeInState > min_support_time.getDoubleValue()))
          {
             doneWithState.get(robotSide).set(true);
          }
       }
 
-      public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          doneWithState.get(robotSide).set(false);
       }
 
-      public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return doneWithState.get(robotSide).getBooleanValue();
       }
    }
 
@@ -626,14 +588,13 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    }
 
 
-   private class ToeOffState extends State<States>
+   private class ToeOffState implements State
    {
       protected RobotSide robotSide;
       protected double minusForRightSide = 1.0;
 
-      public ToeOffState(RobotSide robotSide, States stateEnum)
+      public ToeOffState(RobotSide robotSide)
       {
-         super(stateEnum);
          this.robotSide = robotSide;
 
          if (robotSide == RobotSide.RIGHT)
@@ -642,7 +603,8 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          }
       }
 
-      public void doAction()
+      @Override
+      public void doAction(double timeInState)
       {
          ankleRollError.get(robotSide).set(-minusForRightSide * flat_ankle_roll.getDoubleValue() - processedSensors.getJointPosition(robotSide, JointName.ANKLE_ROLL));
 
@@ -683,38 +645,45 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          activeAnkle.get(robotSide).set(push_gain.getDoubleValue() * (push_set.getDoubleValue() - processedSensors.getJointPosition(robotSide, JointName.ANKLE_PITCH))
                                           - push_damp.getDoubleValue() * processedSensors.getJointVelocity(robotSide, JointName.ANKLE_PITCH));
 
-         if ((stateMachines.get(robotSide.getOppositeSide()).getCurrentStateEnum() == States.SUPPORT)
+         if ((stateMachines.get(robotSide.getOppositeSide()).getCurrentStateKey() == States.SUPPORT)
                  && (footForceFiltered.get(robotSide).getDoubleValue() < force_thresh.getDoubleValue()))
          {
             doneWithState.get(robotSide).set(true);
          }
       }
 
-      public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          doneWithState.get(robotSide).set(false);
       }
 
-      public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return doneWithState.get(robotSide).getBooleanValue();
       }
    }
 
 
-   private class SwingState extends State<States>
+   private class SwingState implements State
    {
       private final RobotSide robotSide;
 
-      public SwingState(RobotSide robotSide, States stateEnum)
+      public SwingState(RobotSide robotSide)
       {
-         super(stateEnum);
-
          this.robotSide = robotSide;
       }
 
-      public void doAction()
+      @Override
+      public void doAction(double timeInState)
       {
-         ramp.get(robotSide).set((stateMachines.get(robotSide).timeInCurrentState()) / tran_time.getDoubleValue());
+         ramp.get(robotSide).set((timeInState) / tran_time.getDoubleValue());
          if (ramp.get(robotSide).getDoubleValue() > 1.0)
             ramp.get(robotSide).set(1.0);
 
@@ -782,40 +751,46 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
 
          ffHipPitch.get(robotSide.getOppositeSide()).set(ffHipPitch.get(robotSide.getOppositeSide()).getDoubleValue() - ffHipPitch.get(robotSide).getDoubleValue());
 
-         if (stateMachines.get(robotSide).timeInCurrentState() > swing_time.getDoubleValue())
+         if (timeInState > swing_time.getDoubleValue())
          {
             doneWithState.get(robotSide).set(true);
          }
 
       }
 
-      public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          doneWithState.get(robotSide).set(false);
       }
 
-      public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
       }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return doneWithState.get(robotSide).getBooleanValue();
+      }
    }
 
 
-   private class StraightenState extends State<States>
+   private class StraightenState implements State
    {
       private final RobotSide robotSide;
       protected double minusForRightSide = 1.0;
 
-      public StraightenState(RobotSide robotSide, States stateEnum)
+      public StraightenState(RobotSide robotSide)
       {
-         super(stateEnum);
-
          this.robotSide = robotSide;
          if (robotSide == RobotSide.RIGHT)
             minusForRightSide = -1.0;
       }
 
-      public void doAction()
+      @Override
+      public void doAction(double timeInState)
       {
          q_d_hipYaw.get(robotSide).set(-processedSensors.getRobotYawPitchOrRoll(RobotOrientation.YAW) + lateral_yaw_mul.getDoubleValue() * velocityHeadingInBodyFrame.getDoubleValue());
          ffHipYaw.get(robotSide).set(hip_k.getDoubleValue() / 10.0 * (q_d_hipYaw.get(robotSide).getDoubleValue() - processedSensors.getJointPosition(robotSide, JointName.HIP_YAW))
@@ -869,26 +844,36 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
 
       }
 
-      public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          doneWithState.get(robotSide).set(false);
       }
 
-      public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
       }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return doneWithState.get(robotSide).getBooleanValue();
+      }
    }
-   
+
+   @Override
    public String getName()
    {
       return this.name;
    }
-   
+
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

@@ -53,6 +53,10 @@ public class JaxbSDFLoader
    public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
            throws JAXBException, FileNotFoundException
    {
+      if (inputStream == null)
+      {
+         throw new RuntimeException("inputStream is null");
+      }
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();
       SDFRoot sdfRoot = (SDFRoot) um.unmarshal(inputStream);

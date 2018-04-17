@@ -54,7 +54,7 @@ public class MidFrameZUpFrame extends ReferenceFrame
 
 
       // Translation is average between the two feet:
-      parentToMidpointVector3d.add(originOneInParent.getPoint(), originTwoInParent.getPoint());
+      parentToMidpointVector3d.add(originOneInParent, originTwoInParent);
       parentToMidpointVector3d.scale(0.5);
 
       // Create the transform:

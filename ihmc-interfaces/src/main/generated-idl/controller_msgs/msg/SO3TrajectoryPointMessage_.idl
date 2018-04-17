@@ -1,0 +1,43 @@
+#ifndef __controller_msgs__msg__SO3TrajectoryPointMessage__idl__
+#define __controller_msgs__msg__SO3TrajectoryPointMessage__idl__
+
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This class is used to build trajectory messages in taskspace.
+       * It holds the necessary information for one trajectory point.
+       * Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational).
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SO3TrajectoryPointMessage_")
+      struct SO3TrajectoryPointMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+         */
+        double time;
+        /**
+         * Define the desired 3D orientation to be reached at this trajectory point.
+         */
+        geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * Define the desired 3D angular velocity to be reached at this trajectory point.
+         */
+        geometry_msgs::msg::dds::Vector3 angular_velocity;
+      };
+    };
+  };
+};
+
+#endif

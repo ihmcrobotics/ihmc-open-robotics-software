@@ -11,11 +11,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedPathPreview
@@ -34,13 +34,13 @@ public class QuadrupedPathPreview
    private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
    private final YoDouble inscribedCircleRadius = new YoDouble("inscribedCircleRadius", registry);
-   private final YoFramePoint[] circleCenters = new YoFramePoint[iterations]; //new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D[] circleCenters = new YoFramePoint3D[iterations]; //new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactOval[] inscribedCircles = new YoArtifactOval[iterations];//new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
 
-   private final YoFrameConvexPolygon2d[] commonSupportPolygons = new YoFrameConvexPolygon2d[iterations];
+   private final YoFrameConvexPolygon2D[] commonSupportPolygons = new YoFrameConvexPolygon2D[iterations];
    private final YoArtifactPolygon[] commonSupportArtifactPolygons = new YoArtifactPolygon[iterations];
 
-   private final YoFrameConvexPolygon2d[] tripleSupportPolygons = new YoFrameConvexPolygon2d[iterations * 2];
+   private final YoFrameConvexPolygon2D[] tripleSupportPolygons = new YoFrameConvexPolygon2D[iterations * 2];
    private final YoArtifactPolygon[] tripleSupportArtifactPolygons = new YoArtifactPolygon[iterations * 2];
 
    private final FramePoint3D footLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -57,7 +57,7 @@ public class QuadrupedPathPreview
       for (int i = 0; i < commonSupportPolygons.length; i++)
       {
          String polygonName = "commonTriangle" + i;
-         YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
+         YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
          commonSupportPolygons[i] = yoFrameConvexPolygon2d;
 
          float saturation = 0.5f;
@@ -67,7 +67,7 @@ public class QuadrupedPathPreview
 
          yoGraphicsListRegistry.registerArtifact(polygonName, commonSupportArtifactPolygons[i]);
 
-         circleCenters[i] = new YoFramePoint("circleCenter" + i, ReferenceFrame.getWorldFrame(), registry);
+         circleCenters[i] = new YoFramePoint3D("circleCenter" + i, ReferenceFrame.getWorldFrame(), registry);
          inscribedCircles[i] = new YoArtifactOval("inscribedCircle" + i, circleCenters[i], inscribedCircleRadius, Color.BLACK);
          yoGraphicsListRegistry.registerArtifact(polygonName, inscribedCircles[i]);
       }
@@ -75,7 +75,7 @@ public class QuadrupedPathPreview
       for (int i = 0; i < tripleSupportPolygons.length; i++)
       {
          String polygonName = "tripleSupport" + i;
-         YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
+         YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
          tripleSupportPolygons[i] = yoFrameConvexPolygon2d;
 
          float saturation = 0.5f;
@@ -116,7 +116,7 @@ public class QuadrupedPathPreview
          drawSupportPolygon(tempCommonSupportPolygon, commonSupportPolygons[i]);
 
          tempCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
-         YoFramePoint circleCenter = circleCenters[i];
+         YoFramePoint3D circleCenter = circleCenters[i];
          circleCenter.set(circleCenter2d, 0.0);
 
          updatedSupportPolygon.setFootstep(swingLeg, desiredPosition);
@@ -124,7 +124,7 @@ public class QuadrupedPathPreview
       }
    }
 
-   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoPolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2D yoPolygon)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -136,7 +136,7 @@ public class QuadrupedPathPreview
          }
       }
       polygon.update();
-      yoPolygon.setConvexPolygon2d(polygon);
+      yoPolygon.set(polygon);
    }
 
    private void updateFeetLocations()

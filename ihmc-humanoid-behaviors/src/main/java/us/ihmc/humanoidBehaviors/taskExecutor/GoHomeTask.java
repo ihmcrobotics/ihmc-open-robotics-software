@@ -1,22 +1,17 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 
-public class GoHomeTask<E extends Enum<E>> extends BehaviorAction<E>
+public class GoHomeTask extends BehaviorAction
 {
    private final GoHomeMessage goHomeMessage;
    private final GoHomeBehavior goHomeBehavior;
 
    public GoHomeTask(GoHomeMessage goHomeMessage, GoHomeBehavior goHomeBehavior)
    {
-      this(null, goHomeMessage, goHomeBehavior);
-   }
-   
-   public GoHomeTask(E stateEnum,GoHomeMessage goHomeMessage, GoHomeBehavior goHomeBehavior)
-   {
-      super(stateEnum,goHomeBehavior);
+      super(goHomeBehavior);
       this.goHomeBehavior = goHomeBehavior;
       this.goHomeMessage = goHomeMessage;
    }

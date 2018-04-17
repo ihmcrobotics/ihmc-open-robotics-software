@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 public class IntermediateDesiredJointDataHolder
 {
-   private final LowLevelOneDoFJointDesiredDataHolderList estimatorDataHolder;
-   private final LowLevelOneDoFJointDesiredDataHolderList controllerDataHolder;
+   private final JointDesiredOutputList estimatorDataHolder;
+   private final JointDesiredOutputList controllerDataHolder;
 
    private final JointDesiredOutput[] intermediateDesiredJointData;
 
-   public IntermediateDesiredJointDataHolder(LowLevelOneDoFJointDesiredDataHolderList estimatorDataHolder, LowLevelOneDoFJointDesiredDataHolderList controllerDataHolder)
+   public IntermediateDesiredJointDataHolder(JointDesiredOutputList estimatorDataHolder, JointDesiredOutputList controllerDataHolder)
    {
       this.estimatorDataHolder = estimatorDataHolder;
       this.controllerDataHolder = controllerDataHolder;

@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -34,8 +35,8 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -52,6 +53,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -67,7 +70,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
-   private LowLevelOutputWriter lowLevelOutputWriter;
+   private JointDesiredOutputWriter lowLevelOutputWriter;
 
    private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
    private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
@@ -111,7 +114,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (diagnosticParameters == null)
          diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      JointDesiredOutputList lowLevelOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters, lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
@@ -124,7 +127,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
       lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false); 
-      lowLevelOutputWriter.setLowLevelOneDoFJointDesiredDataHolderList(lowLevelOutput);
+      lowLevelOutputWriter.setJointDesiredOutputList(lowLevelOutput);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
@@ -140,7 +143,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = null;
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = null;
-      LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder = null;
+      JointDesiredOutputList estimatorDesiredJointDataHolder = null;
 
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
       CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
@@ -159,12 +162,20 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravitationalAcceleration;
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames);
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(humanoidReferenceFrames);
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      contactableBodiesFactory.disposeFactory();
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+
+      DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", simulationRegistry, stateEstimatorParameters.getContactThresholdForce());
+      DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", simulationRegistry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -176,11 +187,9 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
-         double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
-         double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
-
-         WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
-               footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, simulationRegistry);
+         WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, totalRobotWeight,
+                                                                                             bipedFeet.get(robotSide), contactThresholdForce, null,
+                                                                                             copThresholdFraction, null, simulationRegistry);
          footSwitchMap.put(rigidBody, wrenchBasedFootSwitchForEstimator);
       }
 

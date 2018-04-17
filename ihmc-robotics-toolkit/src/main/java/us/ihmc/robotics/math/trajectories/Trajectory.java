@@ -279,6 +279,11 @@ public class Trajectory
       setCoefficientVariables();
    }
 
+   public void setQuinticWithZeroTerminalVelocityAndAcceleration(double t0, double tFinal, double z0, double zFinal)
+   {
+      setQuintic(t0, tFinal, z0, 0.0, 0.0, zFinal, 0.0, 0.0);
+   }
+
    public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
       setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);

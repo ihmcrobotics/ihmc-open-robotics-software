@@ -3,13 +3,14 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -34,7 +35,7 @@ public class FootstepUtils
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
-      FramePose footFramePose = new FramePose(endEffector.getSoleFrame());
+      FramePose3D footFramePose = new FramePose3D(endEffector.getSoleFrame());
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
@@ -45,7 +46,7 @@ public class FootstepUtils
 
    public static Footstep generateStandingFootstep(RobotSide side, RigidBody foot, ReferenceFrame soleFrame)
    {
-      FramePose footFramePose = new FramePose(soleFrame);
+      FramePose3D footFramePose = new FramePose3D(soleFrame);
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
@@ -78,7 +79,7 @@ public class FootstepUtils
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null)
       {
-         ConvexPolygon2D contactPolygon = new ConvexPolygon2D(predictedContactPoints);
+         ConvexPolygon2D contactPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(predictedContactPoints));
          footstepCenter = new Point2D(contactPolygon.getCentroid());
       }
       else

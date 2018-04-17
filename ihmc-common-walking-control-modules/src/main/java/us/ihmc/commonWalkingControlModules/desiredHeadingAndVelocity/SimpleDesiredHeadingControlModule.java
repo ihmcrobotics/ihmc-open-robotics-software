@@ -1,18 +1,14 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule.DesiredHeadingFrame;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
-   private SimpleDesiredHeadingControlModuleVisualizer simpleDesiredHeadingControlModuleVisualizer;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble desiredHeadingFinal = new YoDouble("desiredHeadingFinal",
          "Yaw of the desired heading frame with respect to the world.", registry);
@@ -47,26 +43,11 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return maxHeadingDot.getDoubleValue();
    }
 
-   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      if (simpleDesiredHeadingControlModuleVisualizer != null)
-      {
-         throw new RuntimeException("Already setupVisualizer");
-      }
-
-      simpleDesiredHeadingControlModuleVisualizer = new SimpleDesiredHeadingControlModuleVisualizer(processedSensors, registry, yoGraphicsListRegistry);
-   }
-
    @Override
    public void updateDesiredHeadingFrame()
    {
       updateDesiredHeading();
       desiredHeadingFrame.setHeadingAngleAndUpdate(desiredHeading.getDoubleValue());
-
-      if (simpleDesiredHeadingControlModuleVisualizer != null)
-      {
-         simpleDesiredHeadingControlModuleVisualizer.updateDesiredHeading(desiredHeading.getDoubleValue(), desiredHeadingFinal.getDoubleValue());
-      }
    }
 
    @Override

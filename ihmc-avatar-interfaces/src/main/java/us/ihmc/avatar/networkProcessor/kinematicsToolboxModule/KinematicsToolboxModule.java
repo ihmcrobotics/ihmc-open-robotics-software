@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class KinematicsToolboxModule extends ToolboxModule
 {
@@ -50,7 +50,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       return supportedCommands();
    }
 
-   static List<Class<? extends Command<?, ?>>> supportedCommands()
+   public static List<Class<? extends Command<?, ?>>> supportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
@@ -65,14 +65,14 @@ public class KinematicsToolboxModule extends ToolboxModule
     * directed to the source the of the input messages.
     */
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   static List<Class<? extends SettablePacket<?>>> supportedStatus()
+   public static List<Class<? extends Packet<?>>> supportedStatus()
    {
-      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
+      List<Class<? extends Packet<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }

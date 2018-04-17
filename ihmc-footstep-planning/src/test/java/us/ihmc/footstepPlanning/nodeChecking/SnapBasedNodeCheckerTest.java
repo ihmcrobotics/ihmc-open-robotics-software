@@ -7,19 +7,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -30,7 +32,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class SnapBasedNodeCheckerTest
 {
@@ -42,6 +43,7 @@ public class SnapBasedNodeCheckerTest
    @Rule
    public TestName name = new TestName();
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwingingThroughObstacle0()
    {
@@ -68,8 +70,8 @@ public class SnapBasedNodeCheckerTest
          graphics.addCoordinateSystem(0.3);
          graphics.addPlanarRegionsList(planarRegions);
 
-         Point3D nodeA = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node0, parameters.getIdealFootstepWidth()));
-         Point3D nodeB = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node1, parameters.getIdealFootstepWidth()));
+         Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+         Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
          graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
@@ -83,7 +85,7 @@ public class SnapBasedNodeCheckerTest
                graphics.identity();
                graphics.translate(intersection.getFirstEndpoint());
                Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
-               Vector3D direction = intersection.getDirection(true);
+               Vector3DBasics direction = intersection.getDirection(true);
                double dotProduct = zAxis.dot(direction);
                Vector3D rotationAxis = new Vector3D();
                rotationAxis.cross(zAxis, direction);
@@ -118,6 +120,7 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwingingThroughObstacle1()
    {
@@ -147,8 +150,8 @@ public class SnapBasedNodeCheckerTest
          graphics.addCoordinateSystem(0.3);
          graphics.addPlanarRegionsList(planarRegions);
 
-         Point3D nodeA = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node0, parameters.getIdealFootstepWidth()));
-         Point3D nodeB = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node1, parameters.getIdealFootstepWidth()));
+         Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+         Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
          graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
@@ -160,7 +163,7 @@ public class SnapBasedNodeCheckerTest
                graphics.identity();
                graphics.translate(intersection.getFirstEndpoint());
                Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
-               Vector3D direction = intersection.getDirection(true);
+               Vector3DBasics direction = intersection.getDirection(true);
                double dotProduct = zAxis.dot(direction);
                Vector3D rotationAxis = new Vector3D();
                rotationAxis.cross(zAxis, direction);
@@ -194,7 +197,8 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testValidNode()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -209,7 +213,8 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node1));
    }
 
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStartNodeValid()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -223,7 +228,8 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node, null));
    }
 
-   @Test(timeout = 100, expected = RuntimeException.class)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testSameNodes()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -235,7 +241,8 @@ public class SnapBasedNodeCheckerTest
       checker.isNodeValid(node, node);
    }
 
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTooHighNode()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
@@ -276,7 +283,8 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node3));
    }
 
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTooSmallFoothold()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();

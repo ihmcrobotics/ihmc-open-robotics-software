@@ -123,7 +123,7 @@ public abstract class GeneralizedRigidBodyInertia
    public void setCenterOfMassOffset(FramePoint3D centerOfMassOffset)
    {
       expressedInframe.checkReferenceFrameMatch(centerOfMassOffset);
-      centerOfMassOffset.get(crossPart);
+      crossPart.set(centerOfMassOffset);
       crossPart.scale(-mass); // c = - m * comOffset
    }
 

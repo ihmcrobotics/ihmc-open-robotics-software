@@ -2,25 +2,25 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class EuclideanPositionController implements PositionController
 {
    private final YoVariableRegistry registry;
 
-   private final YoFrameVector positionError;
-   private final YoFrameVector positionErrorCumulated;
-   private final YoFrameVector velocityError;
+   private final YoFrameVector3D positionError;
+   private final YoFrameVector3D positionErrorCumulated;
+   private final YoFrameVector3D velocityError;
 
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
@@ -34,7 +34,7 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
    private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
-   private final YoFrameVector feedbackLinearAction;
+   private final YoFrameVector3D feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
 
    private final double dt;
@@ -58,15 +58,15 @@ public class EuclideanPositionController implements PositionController
 
       this.gains = gains;
 
-      positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
-      positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
-      velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
+      positionError = new YoFrameVector3D(prefix + "PositionError", bodyFrame, registry);
+      positionErrorCumulated = new YoFrameVector3D(prefix + "PositionErrorCumulated", bodyFrame, registry);
+      velocityError = new YoFrameVector3D(prefix + "LinearVelocityError", bodyFrame, registry);
 
       proportionalTerm = new FrameVector3D(bodyFrame);
       derivativeTerm = new FrameVector3D(bodyFrame);
       integralTerm = new FrameVector3D(bodyFrame);
 
-      feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
+      feedbackLinearAction = new YoFrameVector3D(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
                                                                      dt, feedbackLinearAction);
 
@@ -105,7 +105,7 @@ public class EuclideanPositionController implements PositionController
 
       feedbackLinearAction.set(output);
       rateLimitedFeedbackLinearAction.update();
-      rateLimitedFeedbackLinearAction.getFrameTuple(output);
+      output.set(rateLimitedFeedbackLinearAction);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
@@ -114,7 +114,7 @@ public class EuclideanPositionController implements PositionController
    /**
     * Computes linear portion of twist to pack
     */
-   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);
@@ -122,11 +122,11 @@ public class EuclideanPositionController implements PositionController
 
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
-      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredPosition.setIncludingFrame(desiredPose.getPosition());
       desiredTwist.getLinearPart(desiredVelocity);
       desiredTwist.getLinearPart(feedForwardLinearAction);
       compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
-      twistToPack.setLinearPart(actionFromPositionController.getVector());
+      twistToPack.setLinearPart(actionFromPositionController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
@@ -154,14 +154,14 @@ public class EuclideanPositionController implements PositionController
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
       double errorMagnitude = positionError.length();
-      positionError.getFrameTuple(proportionalTerm);
+      proportionalTerm.set(positionError);
       if (errorMagnitude > maximumError)
       {
          proportionalTerm.scale(maximumError / errorMagnitude);
       }
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(proportionalTerm.getVector());
+      tempGainMatrix.transform(proportionalTerm);
    }
 
    private void computeDerivativeTerm(FrameVector3D desiredVelocity, FrameVector3D currentVelocity)
@@ -181,7 +181,7 @@ public class EuclideanPositionController implements PositionController
 
       velocityError.set(derivativeTerm);
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(derivativeTerm.getVector());
+      tempGainMatrix.transform(derivativeTerm);
    }
 
    private void computeIntegralTerm()
@@ -203,9 +203,9 @@ public class EuclideanPositionController implements PositionController
          positionErrorCumulated.scale(gains.getMaximumIntegralError() / errorMagnitude);
       }
 
-      positionErrorCumulated.getFrameTuple(integralTerm);
+      integralTerm.set(positionErrorCumulated);
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(integralTerm.getVector());
+      tempGainMatrix.transform(integralTerm);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -240,7 +240,7 @@ public class EuclideanPositionController implements PositionController
 
    public void getPositionError(FrameVector3D positionErrorToPack)
    {
-      positionError.getFrameTuple(positionErrorToPack);
+      positionErrorToPack.set(positionError);
    }
 
    @Override

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ComVelocityPacket extends Packet<ComVelocityPacket>
 {
-   private final Vector3D velocity;
+   public Vector3D velocity;
 
    public ComVelocityPacket()
    {
@@ -21,6 +21,13 @@ public class ComVelocityPacket extends Packet<ComVelocityPacket>
    public ComVelocityPacket(double vx, double vy, double vz)
    {
       this.velocity = new Vector3D(vx, vy, vz);
+   }
+
+   @Override
+   public void set(ComVelocityPacket other)
+   {
+      velocity = new Vector3D(other.velocity);
+      setPacketInformation(other);
    }
 
    public void get(Vector3D velocity)

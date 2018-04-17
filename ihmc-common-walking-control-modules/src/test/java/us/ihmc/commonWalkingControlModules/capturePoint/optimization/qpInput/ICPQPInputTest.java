@@ -7,7 +7,6 @@ import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -36,7 +35,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testReshape()
    {
@@ -66,7 +65,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testReset()
    {

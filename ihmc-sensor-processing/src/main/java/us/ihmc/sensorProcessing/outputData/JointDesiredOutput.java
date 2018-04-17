@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-public class JointDesiredOutput implements JointDesiredOutputReadOnly
+public class JointDesiredOutput extends JointDesiredOutputReadOnly
 {
    private JointDesiredControlMode controlMode;
 
@@ -13,6 +13,10 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
    private double stiffness = Double.NaN;
    private double damping = Double.NaN;
    private double masterGain = Double.NaN;
+
+   private double velocityScaling = Double.NaN;
+   private double velocityIntegrationBreakFrequency = Double.NaN;
+   private double positionIntegrationBreakFrequency = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -31,6 +35,10 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
       stiffness = Double.NaN;
       damping = Double.NaN;
       masterGain = Double.NaN;
+
+      velocityScaling = Double.NaN;
+      velocityIntegrationBreakFrequency = Double.NaN;
+      positionIntegrationBreakFrequency = Double.NaN;
    }
 
    public void set(JointDesiredOutputReadOnly other)
@@ -44,6 +52,9 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
       stiffness = other.getStiffness();
       damping = other.getDamping();
       masterGain = other.getMasterGain();
+      velocityScaling = other.getVelocityScaling();
+      velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
+      positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
    }
 
    /**
@@ -70,6 +81,12 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
          damping = other.getDamping();
       if (!hasMasterGain())
          masterGain = other.getMasterGain();
+      if (!hasVelocityScaling())
+         velocityScaling = other.getVelocityScaling();
+      if (!hasVelocityIntegrationBreakFrequency())
+         velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
+      if (!hasPositionIntegrationBreakFrequency())
+         positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -178,18 +195,6 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
    }
 
    @Override
-   public String toString()
-   {
-      String ret = "controlMode = " + getControlMode() + "\n";
-      ret += "desiredTorque = " + getDesiredTorque() + "\n";
-      ret += "desiredPosition = " + getDesiredPosition() + "\n";
-      ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
-      ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
-      ret += "masterGain = " + getMasterGain() + "\n";
-      return ret;
-   }
-
-   @Override
    public boolean hasStiffness()
    {
       return !Double.isNaN(stiffness);
@@ -238,5 +243,56 @@ public class JointDesiredOutput implements JointDesiredOutputReadOnly
    public void setMasterGain(double masterGain)
    {
       this.masterGain = masterGain;
+   }
+
+   @Override
+   public boolean hasVelocityScaling()
+   {
+      return !Double.isNaN(velocityScaling);
+   }
+
+   @Override
+   public double getVelocityScaling()
+   {
+      return velocityScaling;
+   }
+
+   public void setVelocityScaling(double velocityScaling)
+   {
+      this.velocityScaling = velocityScaling;
+   }
+
+   @Override
+   public boolean hasVelocityIntegrationBreakFrequency()
+   {
+      return !Double.isNaN(velocityIntegrationBreakFrequency);
+   }
+
+   @Override
+   public double getVelocityIntegrationBreakFrequency()
+   {
+      return velocityIntegrationBreakFrequency;
+   }
+
+   public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
+   {
+      this.velocityIntegrationBreakFrequency = velocityIntegrationBreakFrequency;
+   }
+
+   @Override
+   public boolean hasPositionIntegrationBreakFrequency()
+   {
+      return !Double.isNaN(positionIntegrationBreakFrequency);
+   }
+
+   @Override
+   public double getPositionIntegrationBreakFrequency()
+   {
+      return positionIntegrationBreakFrequency;
+   }
+
+   public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
+   {
+      this.positionIntegrationBreakFrequency = positionIntegrationBreakFrequency;
    }
 }

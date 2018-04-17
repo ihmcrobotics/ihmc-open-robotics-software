@@ -28,7 +28,7 @@ public class WeightMatrix3DTest
 {
    private static final int ITERATIONS = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSettersGetters() throws Exception
    {
@@ -84,7 +84,7 @@ public class WeightMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testGetFullSelectionMatrixInFrame() throws Exception
    {
@@ -162,7 +162,7 @@ public class WeightMatrix3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testGetEfficientSelectionMatrixInFrame() throws Exception
    {

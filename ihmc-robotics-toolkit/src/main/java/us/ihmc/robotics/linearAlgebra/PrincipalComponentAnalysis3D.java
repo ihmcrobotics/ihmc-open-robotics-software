@@ -11,17 +11,25 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
- * Compute the singular value decomposition of a data matrix to find the three principal axes (called: principal axis, secondary axis, and third axis) and the associated variance.
- * <li> The principal axis is defined as the axis along which the provided data has the highest variance. </li>
- * <li> The secondary axis is defined as the axis orthogonal to the principal axis and along which the provided data has the maximum variance after the principal axis. </li>
- * <li> The third axis is defined as the axis orthogonal to the principal axis and to the secondary axis. It also along this axis that the provided data has the lowest variance. </li>
+ * Compute the singular value decomposition of a data matrix to find the three principal axes
+ * (called: principal axis, secondary axis, and third axis) and the associated variance.
+ * <li>The principal axis is defined as the axis along which the provided data has the highest
+ * variance.</li>
+ * <li>The secondary axis is defined as the axis orthogonal to the principal axis and along which
+ * the provided data has the maximum variance after the principal axis.</li>
+ * <li>The third axis is defined as the axis orthogonal to the principal axis and to the secondary
+ * axis. It also along this axis that the provided data has the lowest variance.</li>
  * <p>
- * These three axes are provided as unit vectors forming a direct coordinate system. Methods are provided to also obtain the variance and/or the standard variation along each of these axes.
+ * These three axes are provided as unit vectors forming a direct coordinate system. Methods are
+ * provided to also obtain the variance and/or the standard variation along each of these axes.
  * </p>
  * <p>
- * The algorithm is inspired from <a href="https://en.wikipedia.org/wiki/Principal_component_analysis"> Principal Component Analysis</a>.
+ * The algorithm is inspired from
+ * <a href="https://en.wikipedia.org/wiki/Principal_component_analysis"> Principal Component
+ * Analysis</a>.
  *
  */
 public class PrincipalComponentAnalysis3D
@@ -33,9 +41,15 @@ public class PrincipalComponentAnalysis3D
 
    /** Axis along which the data has the highest variance. It is a unit vector. */
    private final Vector3D principalAxis = new Vector3D();
-   /** Axis along which the data has the highest variance after the {@link #principalAxis}. It is orthogonal to the {@link #principalAxis}. It is a unit vector. */
+   /**
+    * Axis along which the data has the highest variance after the {@link #principalAxis}. It is
+    * orthogonal to the {@link #principalAxis}. It is a unit vector.
+    */
    private final Vector3D secondaryAxis = new Vector3D();
-   /** Axis along which the data has the lowest variance. It is orthogonal to the {@link #principalAxis} and {@link #secondaryAxis}. It is a unit vector. */
+   /**
+    * Axis along which the data has the lowest variance. It is orthogonal to the
+    * {@link #principalAxis} and {@link #secondaryAxis}. It is a unit vector.
+    */
    private final Vector3D thirdAxis = new Vector3D();
 
    private final Vector3D variance = new Vector3D();
@@ -55,14 +69,30 @@ public class PrincipalComponentAnalysis3D
       covarianceCalculator.clear();
    }
 
+   public void addAllDataPoints(List<? extends Tuple3DReadOnly> tuples)
+   {
+      covarianceCalculator.addAllDataPoints(tuples);
+   }
+
+   public void addAllDataPoint(DenseMatrix64F dataPoints)
+   {
+      covarianceCalculator.addAllDataPoint(dataPoints);
+   }
+
    public void addPoint(double x, double y, double z)
    {
       covarianceCalculator.addDataPoint(x, y, z);
    }
 
+   public void addDataPoint(Tuple3DReadOnly tuple)
+   {
+      covarianceCalculator.addDataPoint(tuple);
+   }
+
    /**
-    * This method clears the current data held by this and add all the points from the given point cloud.
-    * Use this method before {@link #compute()} to provide the point cloud to be analyzed.
+    * This method clears the current data held by this and add all the points from the given point
+    * cloud. Use this method before {@link #compute()} to provide the point cloud to be analyzed.
+    * 
     * @param pointCloud
     */
    public void setPointCloud(List<? extends Tuple3DBasics> pointCloud)
@@ -77,9 +107,11 @@ public class PrincipalComponentAnalysis3D
    }
 
    /**
-    * This method clears the current data held by this and add all the points from the given point cloud.
-    * Use this method before {@link #compute()} to provide the point cloud to be analyzed.
-    * @param pointCloud matrix holding the point cloud data. Its size has to be either n-by-3 or 3-by-n, where n is the number of points.
+    * This method clears the current data held by this and add all the points from the given point
+    * cloud. Use this method before {@link #compute()} to provide the point cloud to be analyzed.
+    * 
+    * @param pointCloud matrix holding the point cloud data. Its size has to be either n-by-3 or
+    *           3-by-n, where n is the number of points.
     */
    public void setPointCloud(DenseMatrix64F pointCloud)
    {
@@ -91,8 +123,9 @@ public class PrincipalComponentAnalysis3D
    }
 
    /**
-    * Performs the singular value decomposition to get the principal axes and the variance of the given dataset.
-    * The point cloud needs to be provided before being able to call {@link #compute()}.
+    * Performs the singular value decomposition to get the principal axes and the variance of the
+    * given dataset. The point cloud needs to be provided before being able to call
+    * {@link #compute()}.
     */
    public void compute()
    {
@@ -129,6 +162,7 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Pack the average of the provided point cloud.
+    * 
     * @param meanToPack
     */
    public void getMean(Point3D meanToPack)
@@ -137,7 +171,9 @@ public class PrincipalComponentAnalysis3D
    }
 
    /**
-    * Stores the three principal axes in the given Matrix3d such that it can be used as the rotation matrix describing the rotation from the principal frame to the parent coordinate system.
+    * Stores the three principal axes in the given Matrix3d such that it can be used as the rotation
+    * matrix describing the rotation from the principal frame to the parent coordinate system.
+    * 
     * @param rotationMatrixToPack
     */
    public void getPrincipalFrameRotationMatrix(RotationMatrix rotationMatrixToPack)
@@ -147,7 +183,9 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Pack the variance along each principal axis in the given Vector3d.
-    * @param principalVarianceToPack The variance is stored in the Vector3d as follows: x is the variance on the principal axis, y on the secondary axis, and z on the third axis.
+    * 
+    * @param principalVarianceToPack The variance is stored in the Vector3d as follows: x is the
+    *           variance on the principal axis, y on the secondary axis, and z on the third axis.
     */
    public void getVariance(Vector3D principalVarianceToPack)
    {
@@ -158,7 +196,10 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Pack the standard deviation along each principal axis in the Vector3d.
-    * @param principalStandardDeviationToPack The standard deviation is stored in the Vector3d as follows: x is the standard deviation on the principal axis, y on the secondary axis, and z on the third axis.
+    * 
+    * @param principalStandardDeviationToPack The standard deviation is stored in the Vector3d as
+    *           follows: x is the standard deviation on the principal axis, y on the secondary axis,
+    *           and z on the third axis.
     */
    public void getStandardDeviation(Vector3D principalStandardDeviationToPack)
    {
@@ -169,9 +210,13 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Pack the the three principal vectors in the three given vectors as follows:
-    * @param principalAxisToPack is set to the principal axis of unit length, it is the axis along which the variance is the greatest.
-    * @param secondaryAxisToPack is set to the secondary axis of unit length, it is the axis along which the variance is the greatest after the principal axis.
-    * @param thirdAxisToPack is set to the third axis of unit length, it is the axis along which the variance is the least.
+    * 
+    * @param principalAxisToPack is set to the principal axis of unit length, it is the axis along
+    *           which the variance is the greatest.
+    * @param secondaryAxisToPack is set to the secondary axis of unit length, it is the axis along
+    *           which the variance is the greatest after the principal axis.
+    * @param thirdAxisToPack is set to the third axis of unit length, it is the axis along which the
+    *           variance is the least.
     */
    public void getPrincipalVectors(Vector3D principalAxisToPack, Vector3D secondaryAxisToPack, Vector3D thirdAxisToPack)
    {
@@ -182,6 +227,7 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Get the axis along which the variance is the greatest.
+    * 
     * @param principalVectorToPack
     */
    public void getPrincipalVector(Vector3D principalVectorToPack)
@@ -191,6 +237,7 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Get the axis along which the variance is the greatest after the principal axis.
+    * 
     * @param secondaryVectorToPack
     */
    public void getSecondaryVector(Vector3D secondaryVectorToPack)
@@ -200,6 +247,7 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Get the axis along which the variance is the least.
+    * 
     * @param thirdVectorToPack
     */
    public void getThirdVector(Vector3D thirdVectorToPack)
@@ -209,9 +257,13 @@ public class PrincipalComponentAnalysis3D
 
    /**
     * Pack the the three principal vectors in the three given vectors as follows:
-    * @param principalVectorToPack is set to the principal axis scaled by the variance along this axis.
-    * @param secondaryVectorToPack is set to the secondary axis scaled by the variance along this axis.
-    * @param thirdVectorToPack is set to the third axis scaled by the third variance along this axis.
+    * 
+    * @param principalVectorToPack is set to the principal axis scaled by the variance along this
+    *           axis.
+    * @param secondaryVectorToPack is set to the secondary axis scaled by the variance along this
+    *           axis.
+    * @param thirdVectorToPack is set to the third axis scaled by the third variance along this
+    *           axis.
     */
    public void getScaledPrincipalVectors(Vector3D principalVectorToPack, Vector3D secondaryVectorToPack, Vector3D thirdVectorToPack)
    {

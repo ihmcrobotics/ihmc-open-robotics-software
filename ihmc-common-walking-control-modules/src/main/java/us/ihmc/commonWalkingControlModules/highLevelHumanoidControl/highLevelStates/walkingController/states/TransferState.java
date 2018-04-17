@@ -1,21 +1,21 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -42,7 +42,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
-   
+
    private final YoBoolean touchdownIsEnabled;
    private final YoBoolean isInTouchdown;
    private final YoDouble touchdownDuration;
@@ -51,13 +51,13 @@ public abstract class TransferState extends WalkingState
 
    private final Footstep nextFootstep = new Footstep();
 
-
-   public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
-         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
+                        WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                        HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+                        YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
-      this.transferToSide = transferToSide;
+      this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
@@ -80,23 +80,23 @@ public abstract class TransferState extends WalkingState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      boolean touchdownTimeElapsed = getTimeInCurrentState() > touchdownDuration.getDoubleValue();
+      boolean touchdownTimeElapsed = timeInState > touchdownDuration.getDoubleValue();
       boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
-      
-      if(isInTouchdown.getBooleanValue() && (touchdownTimeElapsed || icpErrorTooGreat))
+
+      if (isInTouchdown.getBooleanValue() && (touchdownTimeElapsed || icpErrorTooGreat))
       {
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
          updateICPPlan();
          isInTouchdown.set(false);
       }
-      
-      if(!isInTouchdown.getBooleanValue())
+
+      if (!isInTouchdown.getBooleanValue())
       {
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
       }
-      
+
       switchToToeOffIfPossible();
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
@@ -104,24 +104,24 @@ public abstract class TransferState extends WalkingState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      if(isInTouchdown.getBooleanValue())
+      if (isInTouchdown.getBooleanValue())
       {
          return false;
       }
-      
+
       //If we're using a precomputed icp trajectory we can't rely on the icp planner's state to dictate when to exit transfer.
       boolean transferTimeElapsedUnderPrecomputedICPPlan = false;
-      if(balanceManager.isPrecomputedICPPlannerActive())
+      if (balanceManager.isPrecomputedICPPlannerActive())
       {
-         transferTimeElapsedUnderPrecomputedICPPlan = getTimeInCurrentState() > (walkingMessageHandler.getNextTransferTime() + touchdownDuration.getDoubleValue());
+         transferTimeElapsedUnderPrecomputedICPPlan = timeInState > (walkingMessageHandler.getNextTransferTime() + touchdownDuration.getDoubleValue());
       }
-      
+
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
          balanceManager.getCapturePoint(capturePoint2d);
-         FrameConvexPolygon2d supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
+         FrameConvexPolygon2D supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
          boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
          if (!isICPInsideSupportPolygon)
@@ -129,7 +129,7 @@ public abstract class TransferState extends WalkingState
          else
             return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
       }
-      
+
       return false;
    }
 
@@ -160,12 +160,12 @@ public abstract class TransferState extends WalkingState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       adjustTouchdownDuration();
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
-      if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
+      if (supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
       {
          feetManager.initializeContactStatesForTouchdown(transferToSide);
          isInTouchdown.set(true);
@@ -177,9 +177,10 @@ public abstract class TransferState extends WalkingState
          updateICPPlan();
       }
    }
-   
+
    /**
-    * If we're using absolute timings and the swing was too long, we should reduce the touchdown duration
+    * If we're using absolute timings and the swing was too long, we should reduce the touchdown
+    * duration
     */
    private void adjustTouchdownDuration()
    {
@@ -194,16 +195,16 @@ public abstract class TransferState extends WalkingState
       double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
       double percentageToShrinkTouchdown = MathTools.clamp(adjustedTransferTime / stepTiming.getTransferTime(), 0.0, 1.0);
       double touchdownDuration = stepTiming.getTouchdownDuration();
-      
-      if(Double.isFinite(touchdownDuration))
+
+      if (Double.isFinite(touchdownDuration))
       {
          touchdownDuration = Math.max(0.0, touchdownDuration * percentageToShrinkTouchdown);
       }
-      
+
       stepTiming.setTimings(originalSwingTime, touchdownDuration, adjustedTransferTime);
       walkingMessageHandler.adjustTimings(0, stepTiming.getSwingTime(), touchdownDuration, stepTiming.getTransferTime());
    }
-   
+
    protected void updateICPPlan()
    {
       balanceManager.clearICPPlan();
@@ -229,11 +230,11 @@ public abstract class TransferState extends WalkingState
 
    public boolean isInitialTransfer()
    {
-      return getPreviousState().getStateEnum() == WalkingStateEnum.STANDING;
+      return getPreviousWalkingStateEnum() == WalkingStateEnum.STANDING;
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       feetManager.reset();
    }
