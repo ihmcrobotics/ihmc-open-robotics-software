@@ -114,7 +114,6 @@ public class QuadrupedSoleWaypointController implements QuadrupedController, Qua
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
       feetManager.compute();
-      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 

@@ -182,14 +182,6 @@ public class QuadrupedFootControlModule
       footStateMachine.doTransitions();
    }
 
-   public void getDesiredSoleForce(FrameVector3D soleForceCommandToPack)
-   {
-      // Pack sole force command result.
-      ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
-      soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
-      soleForceCommandToPack.changeFrame(originalFrame);
-   }
-
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
