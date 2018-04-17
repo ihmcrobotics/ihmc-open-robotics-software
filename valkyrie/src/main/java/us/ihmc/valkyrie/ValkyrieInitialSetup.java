@@ -100,7 +100,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       double height = Double.POSITIVE_INFINITY;
 
       if (contactPoints.size() == 0)
-         height = 1.0050100629487357;
+         height = -1.0050100629487357;
       else
       {
          for (GroundContactPoint gc : contactPoints)
