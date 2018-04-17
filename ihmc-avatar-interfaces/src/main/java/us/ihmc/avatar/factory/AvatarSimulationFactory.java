@@ -110,15 +110,13 @@ public class AvatarSimulationFactory
    {
       if (useShapeCollision)
       {
-         double coefficientOfRestitution = 0.2;
-         double coefficientOfFriction = 0.7;
-         CollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
+         double coefficientOfRestitution = 0.0;
+         double coefficientOfFriction = 0.9;
+         HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
                                                                                            simulationConstructionSet.getRootRegistry(),
                                                                                            new YoGraphicsListRegistry());
-         HybridImpulseSpringDamperCollisionHandler tempHandler = (HybridImpulseSpringDamperCollisionHandler) collisionHandler;
-         tempHandler.setKp(2000000);
-         tempHandler.setKd(200);
-         
+         collisionHandler.setKp(100000);
+         collisionHandler.setKd(100);
          CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
          simulationConstructionSet.initializeShapeCollision(collisionManager);
       }
