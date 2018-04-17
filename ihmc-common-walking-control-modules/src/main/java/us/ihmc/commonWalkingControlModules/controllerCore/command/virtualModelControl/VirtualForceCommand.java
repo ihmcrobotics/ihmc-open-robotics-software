@@ -279,7 +279,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    public void getDesiredLinearForce(PoseReferenceFrame controlFrameToPack, FrameVector3D desiredLinearForceToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredLinearForceToPack.set(controlFrameToPack, desiredLinearForce);
+      desiredLinearForceToPack.setIncludingFrame(controlFrameToPack, desiredLinearForce);
    }
 
    /**

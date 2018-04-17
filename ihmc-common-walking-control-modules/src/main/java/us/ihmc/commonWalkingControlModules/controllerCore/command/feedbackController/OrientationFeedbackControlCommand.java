@@ -8,6 +8,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -184,7 +186,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameQuaternion desiredOrientation)
+   public void set(FixedFrameQuaternionBasics desiredOrientation)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
 
@@ -204,7 +206,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity)
+   public void set(FixedFrameQuaternionBasics desiredOrientation, FixedFrameVector3DBasics desiredAngularVelocity)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
@@ -223,7 +225,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void setFeedForwardAction(FrameVector3D feedForwardAngularAction)
+   public void setFeedForwardAction(FixedFrameVector3DBasics feedForwardAngularAction)
    {
       feedForwardAngularAction.checkReferenceFrameMatch(worldFrame);
       feedForwardAngularActionInWorld.set(feedForwardAngularAction);
