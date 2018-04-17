@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandler
 {
@@ -51,17 +52,17 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean useAverageNewCollisionTouchdownPoints = true;
    private double maximumPenetrationToStart = 0.002;
 
-   private static final boolean divideByNumberContacting = true; //true; //false;
+   private static final boolean divideByNumberContacting = false; //true; //false;
 
-   private static final boolean resolveCollisionWithAnImpact = true;
+   private static final boolean resolveCollisionWithAnImpact = false;
    private static final boolean allowMicroCollisions = false;
 
    private static final boolean performSpringDamper = true;
    private static final boolean createNewContactPairs = true;
-   private static final boolean slipTowardEachOtherIfSlipping = true;
+   private static final boolean slipTowardEachOtherIfSlipping = false;
 
    private static final boolean allowRecyclingOfPointsInUse = true;
-   
+
    private static boolean useShuffleContactingPairs = false;
 
    private final Random random;
@@ -75,6 +76,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final Vector3D tempVectorForAveraging = new Vector3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
+
+   private final YoInteger numberOfContacts = new YoInteger("numberOfContacts", registry);
 
    public HybridImpulseSpringDamperCollisionHandler(double epsilon, double mu, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -123,15 +126,15 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
       parentRegistry.addChild(registry);
    }
-   
+
    public void setKp(double value)
    {
-      kpCollision.set(value); // Memo : 20000 is best for 10 kg.
+      kpCollision.set(value);
    }
-   
+
    public void setKd(double value)
    {
-      kdCollision.set(value);  // Memo : 5000 is best for 10 kg.
+      kdCollision.set(value);
    }
 
    @Override
@@ -145,7 +148,9 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    {
       int numberOfCollisions = shapesInContactList.size();
 
-      if(useShuffleContactingPairs)
+      numberOfContacts.set(numberOfCollisions);
+
+      if (useShuffleContactingPairs)
          Collections.shuffle(shapesInContactList, random);
 
       if (DEBUG)
@@ -236,7 +241,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          contactingExternalForcePointsVisualizer.update();
       }
    }
-   
+
    public void useShuffleContactingPairs(boolean value)
    {
       useShuffleContactingPairs = value;
@@ -1059,6 +1064,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       //      for (int j=0; j<10; j++)
       {
          this.maintenanceBeforeCollisionDetection();
+         detachNonContactingPairs(results);
 
          for (int i = 0; i < results.getNumberOfCollisions(); i++)
          {
@@ -1071,6 +1077,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    }
 
    private final ArrayList<ContactingExternalForcePoint> allContactingExternalForcePoints = new ArrayList<>();
+   private final ArrayList<String> linkNamesOfForcePoints = new ArrayList<>();
 
    @Override
    public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
@@ -1082,12 +1089,56 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          ContactingExternalForcePoint contactingExternalForcePoint = contactingExternalForcePoints.get(i);
          contactingExternalForcePoint.setIndex(index);
          allContactingExternalForcePoints.add(contactingExternalForcePoint);
+         linkNamesOfForcePoints.add(link.getName());
          index++;
       }
 
       if (visualize)
       {
          contactingExternalForcePointsVisualizer.addPoints(contactingExternalForcePoints);
+      }
+   }
+
+   private void detachNonContactingPairs(CollisionDetectionResult results)
+   {
+      ArrayList<String> linkNamesOfContacting = new ArrayList<>();
+
+      for (int i = 0; i < results.getNumberOfCollisions(); i++)
+      {
+         Contacts contact = results.getCollision(i);
+         CollisionShapeWithLink shapeA = (CollisionShapeWithLink) contact.getShapeA();
+         CollisionShapeWithLink shapeB = (CollisionShapeWithLink) contact.getShapeB();
+
+         if (!linkNamesOfContacting.contains(shapeA.getLink().getName()))
+            linkNamesOfContacting.add(shapeA.getLink().getName());
+         if (!linkNamesOfContacting.contains(shapeB.getLink().getName()))
+            linkNamesOfContacting.add(shapeB.getLink().getName());
+      }
+
+      for (int i = 0; i < allContactingExternalForcePoints.size(); i++)
+      {
+         ContactingExternalForcePoint contactingExternalForcePoint = allContactingExternalForcePoints.get(i);
+
+         boolean isContacting = false;
+         for (int j = 0; j < linkNamesOfContacting.size(); j++)
+         {
+            if (linkNamesOfContacting.get(j).equals(linkNamesOfForcePoints.get(i)))
+            {
+               isContacting = true;
+               break;
+            }
+         }
+
+         if (!isContacting)
+         {
+            boolean isPairedWhileNonContacting = contactingExternalForcePoint.getIndexOfContactingPair() != -1;
+            if (isPairedWhileNonContacting)
+            {
+               System.out.println("" + linkNamesOfForcePoints.get(i) + " is not contacting, but point is activated.");
+               allContactingExternalForcePoints.get(contactingExternalForcePoint.getIndexOfContactingPair()).setIndexOfContactingPair(-1);
+               contactingExternalForcePoint.setIndexOfContactingPair(-1);
+            }
+         }
       }
    }
 }
