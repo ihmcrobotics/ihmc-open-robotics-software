@@ -69,7 +69,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean hasMinimumTimePassed;
 
-   private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private final MovingReferenceFrame soleFrame;
@@ -104,7 +103,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
-      touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
+      touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity,
+                                                         registry);
 
       this.parameters = controllerToolbox.getFootControlModuleParameters();
 
@@ -162,7 +162,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       {
          Point3D touchdown = new Point3D();
          currentStepCommand.getGoalPosition(touchdown);
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + touchdown + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand.getTimeInterval());
+         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + touchdown + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
+               .getTimeInterval());
       }
    }
 
@@ -186,24 +187,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition.setMatchingFrame(desiredPosition);
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
 
-
       updateEndOfStateConditions(timeInState);
 
-      // Compute sole force.
-      if (touchdownTrigger.getBooleanValue())
-      {
-         double pressureLimit = parameters.getTouchdownPressureLimitParameter();
-         soleForceCommand.changeFrame(worldFrame);
-         soleForceCommand.set(0, 0, -pressureLimit);
-         soleForceCommand.changeFrame(soleFrame);
-         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
-
-      }
-      else
-      {
-         feedbackControlCommand.set(desiredPosition, desiredVelocity);
-         feedbackControlCommand.setGains(parameters.getSolePositionGains());
-      }
+      feedbackControlCommand.set(desiredPosition, desiredVelocity);
+      feedbackControlCommand.setGains(parameters.getSolePositionGains());
    }
 
    private boolean hasMinimumTimePassed(double timeInState)
@@ -312,19 +299,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
    @Override
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
-      if (touchdownTrigger.getBooleanValue())
-         return virtualForceCommand;
-      else
-         return null;
+      return null;
    }
 
    @Override
    public PointFeedbackControlCommand getFeedbackControlCommand()
    {
-      if (touchdownTrigger.getBooleanValue())
-         return null;
-      else
-         return feedbackControlCommand;
+      return feedbackControlCommand;
    }
 
    @Override
