@@ -225,10 +225,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       // Trigger support phase.
       if (currentTime >= touchDownTime)
       {
-
          triggerSupport = true;
       }
-
    }
 
    private void fillAndInitializeTrajectories()
@@ -288,6 +286,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       QuadrupedFootControlModule.FootEvent eventToReturn = null;
       if (triggerSupport)
          eventToReturn = QuadrupedFootControlModule.FootEvent.TIMEOUT;
+      if (touchdownTrigger.getBooleanValue())
+         eventToReturn = QuadrupedFootControlModule.FootEvent.LOADED;
 
       if (eventToReturn != null && stepTransitionCallback != null)
          stepTransitionCallback.onTouchDown(robotQuadrant);
