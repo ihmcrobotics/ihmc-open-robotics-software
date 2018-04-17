@@ -102,7 +102,6 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>(
          "positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
-   private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>(
          "simulatedElasticityParameters");
@@ -306,8 +305,7 @@ public class QuadrupedSimulationFactory
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
                                                                                        yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
-                                                                                       contactableFeet, contactablePlaneBodies, xGaitSettings.get(),
-                                                                                       footSwitches, gravity.get());
+                                                                                       contactableFeet, contactablePlaneBodies, footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -660,11 +658,6 @@ public class QuadrupedSimulationFactory
    public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
    {
       this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
-   }
-
-   public void setXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
-   {
-      this.xGaitSettings.set(xGaitSettings);
    }
 
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
