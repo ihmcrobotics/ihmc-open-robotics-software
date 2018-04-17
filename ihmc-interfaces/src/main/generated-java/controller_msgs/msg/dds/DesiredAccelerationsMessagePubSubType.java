@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "DesiredAccelerationsMessage" defined in
- * "DesiredAccelerationsMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from DesiredAccelerationsMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * DesiredAccelerationsMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "DesiredAccelerationsMessage" defined in "DesiredAccelerationsMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from DesiredAccelerationsMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit DesiredAccelerationsMessage_.idl instead.
+*
+*/
 public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DesiredAccelerationsMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DesiredAccelerationsMessage_";
@@ -18,8 +16,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DesiredAccelerationsMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DesiredAccelerationsMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,10 +42,10 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -65,10 +61,13 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getDesiredJointAccelerations().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,10 +76,9 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getDesiredJointAccelerations().size() <= 100)
-         cdr.write_type_e(data.getDesiredJointAccelerations());
-      else
-         throw new RuntimeException("desired_joint_accelerations field exceeds the maximum length");
+      if(data.getDesiredJointAccelerations().size() <= 100)
+      cdr.write_type_e(data.getDesiredJointAccelerations());else
+          throw new RuntimeException("desired_joint_accelerations field exceeds the maximum length");
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
@@ -88,9 +86,9 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    public static void read(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getDesiredJointAccelerations());
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);
+      	
+      cdr.read_type_e(data.getDesiredJointAccelerations());	
+      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -122,7 +120,6 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return new controller_msgs.msg.dds.DesiredAccelerationsMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -134,7 +131,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -144,7 +141,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.DesiredAccelerationsMessage src, controller_msgs.msg.dds.DesiredAccelerationsMessage dest)
    {
       staticCopy(src, dest);

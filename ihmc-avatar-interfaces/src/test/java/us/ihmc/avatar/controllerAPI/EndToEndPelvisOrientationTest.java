@@ -116,7 +116,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -137,7 +137,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation, zeroVector, scs, epsilon);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -173,7 +173,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       humanoidReferenceFrames.updateFrames();
       desiredAfterTrajectory.changeFrame(worldFrame);
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory, zeroVector, scs, epsilon);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -247,7 +247,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       SO3TrajectoryPointMessage waypoint = so3Trajectory.getTaskspaceTrajectoryPoints().get(numberOfPoints - 1);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -266,7 +266,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      double walkingTime = createWalkingMessage(4, footsteps, true);
+      double walkingTime = createCircularWalkingMessage(8, footsteps, true);
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime / 2.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
@@ -306,7 +306,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, scs, epsilon);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -316,6 +316,38 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       String managerName = PelvisOrientationManager.class.getSimpleName();
       YoVariable<?> variable = scs.getVariable(managerName, managerName + "CurrentState");
       return ((YoEnum<PelvisOrientationControlMode>) variable).getEnumValue();
+   }
+
+   private double createCircularWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)
+   {
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double swingDuration = walkingControllerParameters.getDefaultSwingTime();
+      double transferDuration = walkingControllerParameters.getDefaultTransferTime();
+      double stepWidth = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
+      RobotSide robotSide = RobotSide.LEFT;
+      ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
+      double time = walkingControllerParameters.getDefaultInitialTransferTime();
+      messageToPack.getFootstepDataList().clear();
+      messageToPack.setDefaultSwingDuration(swingDuration);
+      messageToPack.setDefaultTransferDuration(transferDuration);
+      for (int step = 0; step < steps; step++)
+      {
+         double yaw = Math.toRadians(25.0) * (step + 1);
+         if (squareUp && step == steps - 1)
+            yaw = Math.toRadians(25.0) * step;
+         FramePoint3D location = new FramePoint3D(midFootZUpGroundFrame);
+         location.setY(robotSide.negateIfRightSide(Math.cos(yaw) * stepWidth / 2.0));
+         location.setX(robotSide.negateIfRightSide(-Math.sin(yaw) * stepWidth / 2.0));
+         location.changeFrame(worldFrame);
+         FrameQuaternion orientation = new FrameQuaternion(midFootZUpGroundFrame);
+         orientation.appendYawRotation(yaw);
+         orientation.changeFrame(worldFrame);
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+         messageToPack.getFootstepDataList().add().set(footstep);
+         robotSide = robotSide.getOppositeSide();
+         time += swingDuration + transferDuration;
+      }
+      return time;
    }
 
    private double createWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)
@@ -385,7 +417,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       fullRobotModel = null;
       humanoidReferenceFrames = null;
       scs = null;

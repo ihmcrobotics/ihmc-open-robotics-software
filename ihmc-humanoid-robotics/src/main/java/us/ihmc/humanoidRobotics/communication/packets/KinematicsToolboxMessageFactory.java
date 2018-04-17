@@ -52,7 +52,7 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(true);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -84,7 +84,7 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(false);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -117,7 +117,7 @@ public class KinematicsToolboxMessageFactory
       selectionMatrix3D.setAxisSelection(holdX, holdY, holdZ);
 
       message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix3D));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -172,7 +172,7 @@ public class KinematicsToolboxMessageFactory
       rootJoint.getRotation(privilegedRootJointOrientation);
 
       MessageTools.packPrivilegedRobotConfiguration(message, privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }

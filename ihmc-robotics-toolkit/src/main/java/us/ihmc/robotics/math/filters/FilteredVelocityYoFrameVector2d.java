@@ -3,26 +3,26 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameTuple2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameTuple2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
-public class FilteredVelocityYoFrameVector2d extends YoFrameVector2d
+public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
 {
    private final FilteredVelocityYoVariable xDot, yDot;
 
    public static FilteredVelocityYoFrameVector2d createFilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-                                                                                       YoVariableRegistry registry, YoFrameTuple2d yoFrameVectorToDifferentiate)
+                                                                                       YoVariableRegistry registry, YoFrameTuple2D yoFrameVectorToDifferentiate)
    {
       return createFilteredVelocityYoFrameVector2d(namePrefix, nameSuffix, "", alpha, dt, registry, yoFrameVectorToDifferentiate);
    }
 
    public static FilteredVelocityYoFrameVector2d createFilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, String description, YoDouble alpha,
                                                                                        double dt, YoVariableRegistry registry,
-                                                                                       YoFrameTuple2d yoFrameVectorToDifferentiate)
+                                                                                       YoFrameTuple2D yoFrameVectorToDifferentiate)
    {
       FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, alpha,
                                                                        yoFrameVectorToDifferentiate.getYoX(), dt, registry);
@@ -56,7 +56,7 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2d
    }
 
    private FilteredVelocityYoFrameVector2d(FilteredVelocityYoVariable xDot, FilteredVelocityYoVariable yDot, YoDouble alpha, double dt,
-                                           YoVariableRegistry registry, YoFramePoint yoFramePointToDifferentiate)
+                                           YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
       super(xDot, yDot, yoFramePointToDifferentiate.getReferenceFrame());
 

@@ -305,7 +305,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       overallListOfSteps.addAll(listOfStepsBackward);
 
       FootstepDataListMessage footstepsListMessage = HumanoidMessageTools.createFootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
-      footstepsListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepsListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       walkingStatusManager.sendFootstepList(footstepsListMessage);
    }
 

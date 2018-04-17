@@ -15,6 +15,8 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
 
+import static org.junit.Assert.fail;
+
 public class GoalOrientedTestConductor implements SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
@@ -208,6 +210,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          stop();
          PrintTools.error(scsCrashedException);
+         fail();
       }
       
       //wait to see if scs threw any exceptions

@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -29,8 +29,8 @@ public class CenterOfPressureVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap<>();
-   private final YoFramePoint overallRawCoPPositionInWorld;
+   private final Map<RigidBody, YoFramePoint3D> footRawCoPPositionsInWorld = new HashMap<>();
+   private final YoFramePoint3D overallRawCoPPositionInWorld;
    private final FramePoint2D tempRawCoP2d = new FramePoint2D();
    private final FramePoint3D tempRawCoP = new FramePoint3D();
    private final Wrench tempWrench = new Wrench();
@@ -49,7 +49,7 @@ public class CenterOfPressureVisualizer
          String rigidBodyName = rigidBody.getName();
          rigidBodyName = WordUtils.capitalize(rigidBodyName);
 
-         YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
+         YoFramePoint3D rawCoPPositionInWorld = new YoFramePoint3D("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
          YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
@@ -59,7 +59,7 @@ public class CenterOfPressureVisualizer
          footList.add(rigidBody);
       }
 
-      overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
+      overallRawCoPPositionInWorld = new YoFramePoint3D("overallRawCoPPositionInWorld", worldFrame, registry);
       YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
       YoArtifactPosition overallRawCoPArtifact = overallRawCoPYoGraphic.createArtifact();
       overallRawCoPArtifact.setVisible(false);

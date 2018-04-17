@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

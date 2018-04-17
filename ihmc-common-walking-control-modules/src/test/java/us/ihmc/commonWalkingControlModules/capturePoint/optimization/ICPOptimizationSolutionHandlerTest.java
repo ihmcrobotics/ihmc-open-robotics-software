@@ -21,12 +21,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationSolutionHandlerTest
@@ -141,7 +140,7 @@ public class ICPOptimizationSolutionHandlerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testWithinDeadbandResolution() throws NoConvergenceException
+   public void testWithinDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -152,8 +151,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D foostepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D foostepPose = new FramePose3D();
       FramePoint2D foostepXYSolution = new FramePoint2D();
 
@@ -168,7 +167,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep,  solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -227,7 +226,7 @@ public class ICPOptimizationSolutionHandlerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testOutsideDeadbandResolution() throws NoConvergenceException
+   public void testOutsideDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -238,8 +237,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D foostepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
 
@@ -254,7 +253,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -322,8 +321,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
 
-      YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D footstepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
 
@@ -338,13 +337,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (NoConvergenceException e)
-      {
-      }
+      solver.compute(currentICPError, perfectCMP);
 
       solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();

@@ -76,11 +76,6 @@ public class SliderboardDataReciever implements Receiver
       return true;
    }
 
-   @Override
-   public void close()
-   {
-   }
-
    public void clearListeners()
    {
       listeners.forEachValue(new TObjectProcedure<List<SliderboardListener>>()
@@ -100,5 +95,18 @@ public class SliderboardDataReciever implements Receiver
       {
          listeners.get(sliderIndex).clear();
       }
+   }
+
+   public void removeListener(SliderboardListener sliderListener, int sliderIndex)
+   {
+      if (listeners.containsKey(sliderIndex))
+      {
+         listeners.get(sliderIndex).remove(sliderListener);
+      }
+   }
+
+   @Override
+   public void close()
+   {
    }
 }

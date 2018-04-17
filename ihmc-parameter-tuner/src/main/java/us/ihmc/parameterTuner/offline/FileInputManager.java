@@ -29,6 +29,8 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
    private List<GuiRegistry> localRegistries;
    private HashMap<String, GuiParameter> parameterMap = new HashMap<>();
 
+   private final List<GuiParameter> changedParameters = new ArrayList<>();
+
    public FileInputManager()
    {
       this(null);
@@ -82,12 +84,18 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
       changedParameters.stream().forEach(parameter -> {
          parameterMap.get(parameter.getUniqueName()).set(parameter);
       });
+
+      this.changedParameters.clear();
+      this.changedParameters.addAll(changedParameters);
    }
 
    @Override
    public List<GuiParameter> pollUpdatedParameters()
    {
-      return null;
+      List<GuiParameter> changedParameters = new ArrayList<>();
+      changedParameters.addAll(this.changedParameters);
+      this.changedParameters.clear();
+      return changedParameters;
    }
 
    @Override

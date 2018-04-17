@@ -13,8 +13,8 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -36,13 +36,13 @@ public class QuadrupedContactForceOptimization
    private final QuadrantDependentList<ContactState> contactState = new QuadrantDependentList<>();
 
    private final YoVariableRegistry registry;
-   private final YoFrameVector yoComTorqueCommand;
-   private final YoFrameVector yoComTorqueSolution;
-   private final YoFrameVector yoComForceCommand;
-   private final YoFrameVector yoComForceSolution;
-   private final QuadrantDependentList<YoFrameVector> yoContactForceCommand = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFramePoint> yoContactPosition = new QuadrantDependentList<>();
+   private final YoFrameVector3D yoComTorqueCommand;
+   private final YoFrameVector3D yoComTorqueSolution;
+   private final YoFrameVector3D yoComForceCommand;
+   private final YoFrameVector3D yoComForceSolution;
+   private final QuadrantDependentList<YoFrameVector3D> yoContactForceCommand = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFrameVector3D> yoContactForceSolution = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint3D> yoContactPosition = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoEnum<ContactState>> yoContactState = new QuadrantDependentList<>();
 
    private final DenseMatrix64F comWrenchCommandVector;
@@ -80,16 +80,16 @@ public class QuadrupedContactForceOptimization
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
 
-      yoComTorqueCommand = new YoFrameVector("ComTorqueCommand", worldFrame, registry);
-      yoComTorqueSolution = new YoFrameVector("ComTorqueSolution", worldFrame, registry);
-      yoComForceCommand = new YoFrameVector("ComForceCommand", worldFrame, registry);
-      yoComForceSolution = new YoFrameVector("ComForceSolution", worldFrame, registry);
+      yoComTorqueCommand = new YoFrameVector3D("ComTorqueCommand", worldFrame, registry);
+      yoComTorqueSolution = new YoFrameVector3D("ComTorqueSolution", worldFrame, registry);
+      yoComForceCommand = new YoFrameVector3D("ComForceCommand", worldFrame, registry);
+      yoComForceSolution = new YoFrameVector3D("ComForceSolution", worldFrame, registry);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseName();
-         yoContactForceCommand.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceCommand", worldFrame, registry));
-         yoContactForceSolution.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceSolution", worldFrame, registry));
-         yoContactPosition.set(robotQuadrant, new YoFramePoint(prefix + "ContactPosition", worldFrame, registry));
+         yoContactForceCommand.set(robotQuadrant, new YoFrameVector3D(prefix + "ContactForceCommand", worldFrame, registry));
+         yoContactForceSolution.set(robotQuadrant, new YoFrameVector3D(prefix + "ContactForceSolution", worldFrame, registry));
+         yoContactPosition.set(robotQuadrant, new YoFramePoint3D(prefix + "ContactPosition", worldFrame, registry));
          yoContactState.set(robotQuadrant, new YoEnum<>(prefix + "ContactState", registry, ContactState.class));
       }
 

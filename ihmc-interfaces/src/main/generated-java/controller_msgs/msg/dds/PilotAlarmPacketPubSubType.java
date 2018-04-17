@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "PilotAlarmPacket" defined in "PilotAlarmPacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PilotAlarmPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit PilotAlarmPacket_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "PilotAlarmPacket" defined in "PilotAlarmPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PilotAlarmPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PilotAlarmPacket_.idl instead.
+*
+*/
 public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PilotAlarmPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PilotAlarmPacket_";
@@ -48,6 +46,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -62,9 +61,13 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -82,10 +85,11 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    public static void read(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setBeepRate(cdr.read_type_6());
-
+      	
       data.setEnableTone(cdr.read_type_7());
+      	
 
    }
 
@@ -115,7 +119,6 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return new controller_msgs.msg.dds.PilotAlarmPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -127,7 +130,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -137,7 +140,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PilotAlarmPacket src, controller_msgs.msg.dds.PilotAlarmPacket dest)
    {
       staticCopy(src, dest);

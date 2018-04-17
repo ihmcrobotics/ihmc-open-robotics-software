@@ -1,14 +1,14 @@
 package us.ihmc.quadrupedRobotics.input.managers;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,8 +37,8 @@ public class QuadrupedStepTeleopManager
 
    private final AtomicBoolean xGaitRequested = new AtomicBoolean();
    private final AtomicBoolean standingRequested = new AtomicBoolean();
-   private final AtomicReference<QuadrupedForceControllerStatePacket> forceControlStatePacket = new AtomicReference<>();
-   private final AtomicReference<QuadrupedSteppingStatePacket> steppingStatePacket = new AtomicReference<>();
+   private final AtomicReference<QuadrupedControllerStateChangeMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicDouble desiredVelocityX = new AtomicDouble();
    private final AtomicDouble desiredVelocityY = new AtomicDouble();
    private final AtomicDouble desiredVelocityZ = new AtomicDouble();
@@ -49,8 +50,8 @@ public class QuadrupedStepTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
-      packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, forceControlStatePacket::set);
-      packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, steppingStatePacket::set);
+      packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
+      packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);
       packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp_));
 
       parentRegistry.addChild(registry);
@@ -69,8 +70,7 @@ public class QuadrupedStepTeleopManager
       }
       else if(standingRequested.getAndSet(false))
       {
-         QuadrupedSteppingEventPacket stopWalkingPacket = new QuadrupedSteppingEventPacket(QuadrupedSteppingRequestedEvent.REQUEST_STAND);
-         packetCommunicator.send(stopWalkingPacket);
+         requestStopWalking();
          walking.set(false);
       }
       else if (isInStepState() && walking.getBooleanValue())
@@ -89,8 +89,16 @@ public class QuadrupedStepTeleopManager
 
    public void requestSteppingState()
    {
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
-      packetCommunicator.send(eventPacket);
+      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      packetCommunicator.send(controllerMessage);
+   }
+
+   public void requestStopWalking()
+   {
+      QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
+      steppingMessage.setQuadrupedSteppingState(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
+      packetCommunicator.send(steppingMessage);
    }
 
    public void requestXGait()
@@ -100,10 +108,11 @@ public class QuadrupedStepTeleopManager
 
    private boolean isInStepState()
    {
-      QuadrupedForceControllerStatePacket forceControllerStatePacket = this.forceControlStatePacket.get();
-      QuadrupedSteppingStatePacket steppingStatePacket = this.steppingStatePacket.get();
-      return (forceControllerStatePacket != null && forceControllerStatePacket.get() == QuadrupedForceControllerEnum.STEPPING) && (steppingStatePacket != null
-            && steppingStatePacket.get() == QuadrupedSteppingStateEnum.STEP);
+      QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
+      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndControllerName() == QuadrupedControllerEnum.STEPPING.toByte()) &&
+            (steppingStateChangeMessage != null && steppingStateChangeMessage.getEndSteppingControllerName() == QuadrupedSteppingStateEnum.STEP.toByte());
    }
 
    public boolean isWalking()
@@ -119,8 +128,12 @@ public class QuadrupedStepTeleopManager
    private void sendSteps()
    {
       List<? extends QuadrupedTimedStep> steps = stepStream.getSteps();
-      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, true);
-      packetCommunicator.send(timedStepPacket);
+      List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
+      for (int i = 0; i < steps.size(); i++)
+         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
+
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
+      packetCommunicator.send(message);
    }
 
    public YoQuadrupedXGaitSettings getXGaitSettings()

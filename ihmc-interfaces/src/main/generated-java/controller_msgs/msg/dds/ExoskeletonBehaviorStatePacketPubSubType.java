@@ -1,16 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ExoskeletonBehaviorStatePacket" defined in
- * "ExoskeletonBehaviorStatePacket_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from ExoskeletonBehaviorStatePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ExoskeletonBehaviorStatePacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ExoskeletonBehaviorStatePacket" defined in "ExoskeletonBehaviorStatePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ExoskeletonBehaviorStatePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ExoskeletonBehaviorStatePacket_.idl instead.
+*
+*/
 public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ExoskeletonBehaviorStatePacket_";
@@ -19,8 +16,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -28,8 +24,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,6 +44,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -63,7 +59,10 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -79,8 +78,9 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    public static void read(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setExoskeletonBehaviorState(cdr.read_type_9());
+      	
 
    }
 
@@ -108,7 +108,6 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    {
       return new controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -120,7 +119,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -130,7 +129,7 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket src, controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket dest)
    {
       staticCopy(src, dest);

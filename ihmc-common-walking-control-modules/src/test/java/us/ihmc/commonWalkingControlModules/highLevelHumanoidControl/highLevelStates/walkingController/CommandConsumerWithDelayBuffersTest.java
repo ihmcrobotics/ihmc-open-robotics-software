@@ -438,7 +438,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
 
-      commandConsumer.flushCommands(TestCommand.class);
+      commandConsumer.clearCommands(TestCommand.class);
       
       assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());

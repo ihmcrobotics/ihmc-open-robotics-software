@@ -73,7 +73,7 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
                                 BoundingBoxesPacket boundingBoxesPacket = MessageTools.createBoundingBoxesPacket(packedBoxes, names);
 
                                 ObjectDetectorResultPacket resultPacket = MessageTools.createObjectDetectorResultPacket(heatMapPacket, boundingBoxesPacket);
-                                resultPacket.setDestination(PacketDestination.BEHAVIOR_MODULE);
+                                resultPacket.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
                                 detectionStatusClient.send(resultPacket);
                              });

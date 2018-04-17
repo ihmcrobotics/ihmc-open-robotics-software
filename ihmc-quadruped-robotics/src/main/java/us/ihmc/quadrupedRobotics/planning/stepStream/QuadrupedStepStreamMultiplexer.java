@@ -8,6 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements QuadrupedStepStream
 {
@@ -75,7 +76,7 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
    }
 
    @Override
-   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
+   public List<? extends QuadrupedTimedStep> getSteps()
    {
       QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
       if (stepStream != null)

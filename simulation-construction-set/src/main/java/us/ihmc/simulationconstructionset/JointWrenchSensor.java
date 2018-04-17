@@ -3,12 +3,12 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class JointWrenchSensor
 {
    private final String name;
-   private final YoFrameVector jointWrenchForce, jointWrenchTorque;
+   private final YoFrameVector3D jointWrenchForce, jointWrenchTorque;
    private final Vector3D offsetFromJoint = new Vector3D();
 
    // FIXME offsetFromJoint is probably the offsetToJoint.
@@ -16,8 +16,8 @@ public class JointWrenchSensor
    {
       this.name = name;
 
-      jointWrenchForce = new YoFrameVector(name + "_f", null, robot.getRobotsYoVariableRegistry());
-      jointWrenchTorque = new YoFrameVector(name + "_t", null, robot.getRobotsYoVariableRegistry());
+      jointWrenchForce = new YoFrameVector3D(name + "_f", null, robot.getRobotsYoVariableRegistry());
+      jointWrenchTorque = new YoFrameVector3D(name + "_t", null, robot.getRobotsYoVariableRegistry());
 
       this.offsetFromJoint.set(offsetFromJoint);
    }

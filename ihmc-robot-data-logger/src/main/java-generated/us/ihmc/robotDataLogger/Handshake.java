@@ -1,47 +1,35 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class Handshake extends Packet<Handshake> implements Settable<Handshake>, EpsilonComparable<Handshake>
 {
    public double dt_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> registries_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> variables_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> joints_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> graphicObjects_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> artifacts_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> enumTypes_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  registries_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  variables_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  joints_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_;
    public us.ihmc.robotDataLogger.Summary summary_;
 
    public Handshake()
    {
-
-      registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>(1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class,
-                                                                                                     new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
-
-      variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>(32767, us.ihmc.robotDataLogger.YoVariableDefinition.class,
-                                                                                                    new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
-
-      joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>(128, us.ihmc.robotDataLogger.JointDefinition.class,
-                                                                                            new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
-
-      graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>(2048,
-                                                                                                         us.ihmc.robotDataLogger.GraphicObjectMessage.class,
-                                                                                                         new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
-
-      artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>(2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class,
-                                                                                                    new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
-
-      enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>(1024, us.ihmc.robotDataLogger.EnumType.class,
-                                                                                        new us.ihmc.robotDataLogger.EnumTypePubSubType());
-
+      registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
+      variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
+      joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
+      graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
       summary_ = new us.ihmc.robotDataLogger.Summary();
+
    }
 
    public Handshake(Handshake other)
    {
+      this();
       set(other);
    }
 
@@ -58,142 +46,109 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(other.summary_, summary_);
    }
 
+   public void setDt(double dt)
+   {
+      dt_ = dt;
+   }
    public double getDt()
    {
       return dt_;
    }
 
-   public void setDt(double dt)
-   {
-      dt_ = dt;
-   }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> getRegistries()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistries()
    {
       return registries_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> getVariables()
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  getVariables()
    {
       return variables_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> getJoints()
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  getJoints()
    {
       return joints_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> getGraphicObjects()
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getGraphicObjects()
    {
       return graphicObjects_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> getArtifacts()
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getArtifacts()
    {
       return artifacts_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> getEnumTypes()
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  getEnumTypes()
    {
       return enumTypes_;
    }
+
 
    public us.ihmc.robotDataLogger.Summary getSummary()
    {
       return summary_;
    }
 
+
    @Override
    public boolean epsilonEquals(Handshake other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.dt_, other.dt_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.dt_, other.dt_, epsilon)) return false;
 
-      if (this.registries_.size() == other.registries_.size())
-      {
-         return false;
-      }
+      if (this.registries_.size() != other.registries_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.registries_.size(); i++)
-         {
-            if (!this.registries_.get(i).epsilonEquals(other.registries_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.registries_.get(i).epsilonEquals(other.registries_.get(i), epsilon)) return false; }
       }
 
-      if (this.variables_.size() == other.variables_.size())
-      {
-         return false;
-      }
+      if (this.variables_.size() != other.variables_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.variables_.size(); i++)
-         {
-            if (!this.variables_.get(i).epsilonEquals(other.variables_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.variables_.get(i).epsilonEquals(other.variables_.get(i), epsilon)) return false; }
       }
 
-      if (this.joints_.size() == other.joints_.size())
-      {
-         return false;
-      }
+      if (this.joints_.size() != other.joints_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.joints_.size(); i++)
-         {
-            if (!this.joints_.get(i).epsilonEquals(other.joints_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.joints_.get(i).epsilonEquals(other.joints_.get(i), epsilon)) return false; }
       }
 
-      if (this.graphicObjects_.size() == other.graphicObjects_.size())
-      {
-         return false;
-      }
+      if (this.graphicObjects_.size() != other.graphicObjects_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.graphicObjects_.size(); i++)
-         {
-            if (!this.graphicObjects_.get(i).epsilonEquals(other.graphicObjects_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.graphicObjects_.get(i).epsilonEquals(other.graphicObjects_.get(i), epsilon)) return false; }
       }
 
-      if (this.artifacts_.size() == other.artifacts_.size())
-      {
-         return false;
-      }
+      if (this.artifacts_.size() != other.artifacts_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.artifacts_.size(); i++)
-         {
-            if (!this.artifacts_.get(i).epsilonEquals(other.artifacts_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.artifacts_.get(i).epsilonEquals(other.artifacts_.get(i), epsilon)) return false; }
       }
 
-      if (this.enumTypes_.size() == other.enumTypes_.size())
-      {
-         return false;
-      }
+      if (this.enumTypes_.size() != other.enumTypes_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.enumTypes_.size(); i++)
-         {
-            if (!this.enumTypes_.get(i).epsilonEquals(other.enumTypes_.get(i), epsilon))
-               return false;
-         }
+         {  if (!this.enumTypes_.get(i).epsilonEquals(other.enumTypes_.get(i), epsilon)) return false; }
       }
 
-      if (!this.summary_.epsilonEquals(other.summary_, epsilon))
-         return false;
+      if (!this.summary_.epsilonEquals(other.summary_, epsilon)) return false;
 
       return true;
    }
@@ -201,38 +156,21 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof Handshake))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof Handshake)) return false;
 
       Handshake otherMyClass = (Handshake) other;
 
-      if (this.dt_ != otherMyClass.dt_)
-         return false;
+      if(this.dt_ != otherMyClass.dt_) return false;
 
-      if (!this.registries_.equals(otherMyClass.registries_))
-         return false;
-
-      if (!this.variables_.equals(otherMyClass.variables_))
-         return false;
-
-      if (!this.joints_.equals(otherMyClass.joints_))
-         return false;
-
-      if (!this.graphicObjects_.equals(otherMyClass.graphicObjects_))
-         return false;
-
-      if (!this.artifacts_.equals(otherMyClass.artifacts_))
-         return false;
-
-      if (!this.enumTypes_.equals(otherMyClass.enumTypes_))
-         return false;
-
-      if (!this.summary_.equals(otherMyClass.summary_))
-         return false;
+      if (!this.registries_.equals(otherMyClass.registries_)) return false;
+      if (!this.variables_.equals(otherMyClass.variables_)) return false;
+      if (!this.joints_.equals(otherMyClass.joints_)) return false;
+      if (!this.graphicObjects_.equals(otherMyClass.graphicObjects_)) return false;
+      if (!this.artifacts_.equals(otherMyClass.artifacts_)) return false;
+      if (!this.enumTypes_.equals(otherMyClass.enumTypes_)) return false;
+      if (!this.summary_.equals(otherMyClass.summary_)) return false;
 
       return true;
    }
@@ -244,36 +182,21 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
 
       builder.append("Handshake {");
       builder.append("dt=");
-      builder.append(this.dt_);
-
-      builder.append(", ");
+      builder.append(this.dt_);      builder.append(", ");
       builder.append("registries=");
-      builder.append(this.registries_);
-
-      builder.append(", ");
+      builder.append(this.registries_);      builder.append(", ");
       builder.append("variables=");
-      builder.append(this.variables_);
-
-      builder.append(", ");
+      builder.append(this.variables_);      builder.append(", ");
       builder.append("joints=");
-      builder.append(this.joints_);
-
-      builder.append(", ");
+      builder.append(this.joints_);      builder.append(", ");
       builder.append("graphicObjects=");
-      builder.append(this.graphicObjects_);
-
-      builder.append(", ");
+      builder.append(this.graphicObjects_);      builder.append(", ");
       builder.append("artifacts=");
-      builder.append(this.artifacts_);
-
-      builder.append(", ");
+      builder.append(this.artifacts_);      builder.append(", ");
       builder.append("enumTypes=");
-      builder.append(this.enumTypes_);
-
-      builder.append(", ");
+      builder.append(this.enumTypes_);      builder.append(", ");
       builder.append("summary=");
       builder.append(this.summary_);
-
       builder.append("}");
       return builder.toString();
    }

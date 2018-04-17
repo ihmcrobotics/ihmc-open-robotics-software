@@ -25,9 +25,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -39,9 +36,13 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -62,13 +63,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final WeightMatrix6D messageWeightMatrix = new WeightMatrix6D();
    private final YoLong messageAngularWeightFrame;
    private final YoLong messageLinearWeightFrame;
-   private final YoFrameVector messageAngularWeight;
-   private final YoFrameVector messageLinearWeight;
+   private final YoFrameVector3D messageAngularWeight;
+   private final YoFrameVector3D messageLinearWeight;
    private final WeightMatrix6D defaultWeightMatrix = new WeightMatrix6D();
    private Vector3DReadOnly defaultAngularWeight = null;
    private Vector3DReadOnly defaultLinearWeight = null;
-   private final YoFrameVector currentAngularWeight;
-   private final YoFrameVector currentLinearWeight;
+   private final YoFrameVector3D currentAngularWeight;
+   private final YoFrameVector3D currentLinearWeight;
 
    private final YoBoolean trackingOrientation;
    private final YoBoolean trackingPosition;
@@ -106,14 +107,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FramePose3D controlFramePose = new FramePose3D();
 
    private final FramePoint3D controlPoint = new FramePoint3D();
-   private final YoFramePoint yoControlPoint;
+   private final YoFramePoint3D yoControlPoint;
    private final FrameQuaternion controlOrientation = new FrameQuaternion();
-   private final YoFrameOrientation yoControlOrientation;
+   private final YoFrameYawPitchRoll yoControlOrientation;
    private final FramePoint3D desiredPoint = new FramePoint3D();
-   private final YoFramePoint yoDesiredPoint;
+   private final YoFramePoint3D yoDesiredPoint;
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
+
+   private final BooleanParameter useBaseFrameForControl = new BooleanParameter("UseBaseFrameForControl", registry, false);
 
    public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
@@ -142,17 +145,17 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       setControlFrame(defaultControlFrame);
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
-      messageAngularWeight = new YoFrameVector(prefix + "MessageAngularWeight", null, registry);
-      messageLinearWeight = new YoFrameVector(prefix + "MessageLinearWeight", null, registry);
+      messageAngularWeight = new YoFrameVector3D(prefix + "MessageAngularWeight", null, registry);
+      messageLinearWeight = new YoFrameVector3D(prefix + "MessageLinearWeight", null, registry);
       messageAngularWeightFrame = new YoLong(prefix + "MessageAngularReferenceFrame", registry);
       messageLinearWeightFrame = new YoLong(prefix + "MessageLinearReferenceFrame", registry);
 
-      currentAngularWeight = new YoFrameVector(prefix + "CurrentAngularWeight", null, registry);
-      currentLinearWeight = new YoFrameVector(prefix + "CurrentLinearWeight", null, registry);
+      currentAngularWeight = new YoFrameVector3D(prefix + "CurrentAngularWeight", null, registry);
+      currentLinearWeight = new YoFrameVector3D(prefix + "CurrentLinearWeight", null, registry);
 
-      yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
-      yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);
-      yoDesiredPoint = new YoFramePoint(prefix + "DesiredPoint", worldFrame, registry);
+      yoControlPoint = new YoFramePoint3D(prefix + "ControlPoint", worldFrame, registry);
+      yoControlOrientation = new YoFrameYawPitchRoll(prefix + "ControlOrientation", worldFrame, registry);
+      yoDesiredPoint = new YoFramePoint3D(prefix + "DesiredPoint", worldFrame, registry);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
@@ -248,8 +251,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (positionGains != null)
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
-      // GW: commenting this out for now since it breaks some tests:
-//      spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
+      // This will improve the tracking with respect to moving trajectory frames.
+      if (useBaseFrameForControl.getValue())
+      {
+         spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
+      }
+      else
+      {
+         spatialFeedbackControlCommand.resetControlBaseFrame();
+      }
 
       // Update the QP weight and selection YoVariables:
       if (defaultLinearWeight != null)

@@ -7,21 +7,21 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class YoQuadrupedSupportPolygon
 {
    private final String namePrefix;
    
    private final QuadrantDependentList<YoBoolean> containsStorage = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFramePoint> yoFootsteps = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint3D> yoFootsteps = new QuadrantDependentList<>();
    
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    
@@ -32,7 +32,7 @@ public class YoQuadrupedSupportPolygon
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          containsStorage.set(robotQuadrant, new YoBoolean(namePrefix + "Contains" + robotQuadrant.getPascalCaseName(), yoVariableRegistry));
-         yoFootsteps.set(robotQuadrant, new YoFramePoint(namePrefix + "Footstep" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), yoVariableRegistry));
+         yoFootsteps.set(robotQuadrant, new YoFramePoint3D(namePrefix + "Footstep" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), yoVariableRegistry));
       }
    }
    
@@ -291,7 +291,7 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.isValidTrotPolygon();
    }
    
-   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
+   public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2D yoFrameConvexPolygon2d)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.packYoFrameConvexPolygon2d(yoFrameConvexPolygon2d);
@@ -410,7 +410,7 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getCentroid2d(centroidToPack2d);
    }
    
-   public void getCentroid2d(YoFramePoint2d centroidToPack)
+   public void getCentroid2d(YoFramePoint2D centroidToPack)
    {
       getCentroid(tempCentroid);
       centroidToPack.set(tempCentroid);
@@ -424,25 +424,25 @@ public class YoQuadrupedSupportPolygon
 
    private final FramePoint3D tempCentroid = new FramePoint3D();
 
-   public void getCentroid(YoFramePoint centroidToPack)
+   public void getCentroid(YoFramePoint3D centroidToPack)
    {
       getCentroid(tempCentroid);
       centroidToPack.set(tempCentroid);
    }
 
-   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2D pointToSnap)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap);
    }
 
-   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint3D pointToSnap)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap);
    }
 
-   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
+   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint3D pointToSnap, YoFramePoint3D innerPoint)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.snapPointToEdgeTowardsInnerPointIfOutside(pointToSnap,  innerPoint);

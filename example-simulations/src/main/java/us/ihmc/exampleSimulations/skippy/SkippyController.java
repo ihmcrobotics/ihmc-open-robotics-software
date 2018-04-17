@@ -22,8 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -37,6 +35,8 @@ import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SkippyController implements RobotController
 {
@@ -86,50 +86,50 @@ public class SkippyController implements RobotController
    private final YoDouble alphaAngularVelocity;
    private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
-   private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D bodyLocation = new YoFramePoint3D("body", ReferenceFrame.getWorldFrame(), registry);
 
    private final ExternalForcePoint forceToCOM;
-   private final YoFramePoint com = new YoFramePoint("com", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector comVelocity = new YoFrameVector("comVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector comAcceleration = new YoFrameVector("comAcceleration", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector desiredReactionForce = new YoFrameVector("desiredReactionForce", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector reactionForce = new YoFrameVector("reactionForce", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector reactionUnitVector = new YoFrameVector("reactionUnitVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector surfaceNormal = new YoFrameVector("surfaceNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector lastAngularMomentum = new YoFrameVector("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector lastLinearMomentum = new YoFrameVector("lastLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector rateOfChangeOfLinearMomentum = new YoFrameVector("rateOfChangeOfLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector rateOfChangeOfAngularMomentum = new YoFrameVector("rateOfChangeOfAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D com = new YoFramePoint3D("com", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comVelocity = new YoFrameVector3D("comVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comAcceleration = new YoFrameVector3D("comAcceleration", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D desiredReactionForce = new YoFrameVector3D("desiredReactionForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D reactionForce = new YoFrameVector3D("reactionForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D reactionUnitVector = new YoFrameVector3D("reactionUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D surfaceNormal = new YoFrameVector3D("surfaceNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D angularMomentum = new YoFrameVector3D("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D lastAngularMomentum = new YoFrameVector3D("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D linearMomentum = new YoFrameVector3D("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D lastLinearMomentum = new YoFrameVector3D("lastLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D rateOfChangeOfLinearMomentum = new YoFrameVector3D("rateOfChangeOfLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D rateOfChangeOfAngularMomentum = new YoFrameVector3D("rateOfChangeOfAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
 
-   private final YoFrameVector icpToFootError = new YoFrameVector("icpToFootError", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector comToFootError = new YoFrameVector("comToFootError", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D icpToFootError = new YoFrameVector3D("icpToFootError", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comToFootError = new YoFrameVector3D("comToFootError", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble w0 = new YoDouble("fixedW0", registry);
 
-   private final YoFrameVector tauShoulderFromReaction = new YoFrameVector("tauShoulderJoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector tauHipFromReaction = new YoFrameVector("tauHipJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D tauShoulderFromReaction = new YoFrameVector3D("tauShoulderJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D tauHipFromReaction = new YoFrameVector3D("tauHipJoint", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble q_d_hip = new YoDouble("q_d_hip", registry);
    private final YoDouble q_d_shoulder = new YoDouble("q_d_shoulder", registry);
 
-   private final YoFramePoint hipJointPosition = new YoFramePoint("hipJointPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector hipJointUnitVector = new YoFrameVector("hipJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector hipToFootPositionVector = new YoFrameVector("hipToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector hipToFootUnitVector = new YoFrameVector("hipToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint shoulderJointPosition = new YoFramePoint("shoulderJointPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector shoulderJointUnitVector = new YoFrameVector("shoulderJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector shoulderToFootPositionVector = new YoFrameVector("shoulderToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector shoulderToFootUnitVector = new YoFrameVector("shoulderToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector cmpToComPositionVector = new YoFrameVector("cmpToComPositionVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector footToComPositionVector = new YoFrameVector("footToComPositionVector", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector footToCoMInBodyFrame;
-   private final YoFramePoint icp = new YoFramePoint("icp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint icpVelocity = new YoFramePoint("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint cmpFromDefinition = new YoFramePoint("cmpFromDefinition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint cmpFromIcp = new YoFramePoint("cmpFromIcp", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint cmpFromParameterizedReaction = new YoFramePoint("cmpFromParametrizedReaction", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint footLocation = new YoFramePoint("footLocation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D hipJointPosition = new YoFramePoint3D("hipJointPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D hipJointUnitVector = new YoFrameVector3D("hipJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D hipToFootPositionVector = new YoFrameVector3D("hipToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D hipToFootUnitVector = new YoFrameVector3D("hipToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D shoulderJointPosition = new YoFramePoint3D("shoulderJointPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D shoulderJointUnitVector = new YoFrameVector3D("shoulderJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D shoulderToFootPositionVector = new YoFrameVector3D("shoulderToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D shoulderToFootUnitVector = new YoFrameVector3D("shoulderToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D cmpToComPositionVector = new YoFrameVector3D("cmpToComPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D footToComPositionVector = new YoFrameVector3D("footToComPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D footToCoMInBodyFrame;
+   private final YoFramePoint3D icp = new YoFramePoint3D("icp", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D icpVelocity = new YoFramePoint3D("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D cmpFromDefinition = new YoFramePoint3D("cmpFromDefinition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D cmpFromIcp = new YoFramePoint3D("cmpFromIcp", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D cmpFromParameterizedReaction = new YoFramePoint3D("cmpFromParametrizedReaction", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D footLocation = new YoFramePoint3D("footLocation", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoDouble robotWeight = new YoDouble("robotWeight", registry);
@@ -190,7 +190,7 @@ public class SkippyController implements RobotController
       robotMass.set(robot.getMass());
       robotWeight.set(robotMass.getDoubleValue() * Math.abs(robot.getGravityZ()));
 
-      footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
+      footToCoMInBodyFrame = new YoFrameVector3D("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
       forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
       k1 = new YoDouble("k1", registry);
@@ -468,8 +468,8 @@ public class SkippyController implements RobotController
    /**
     * Torque on joint from reaction on foot
     */
-   public void tauOnJointFromReactionOnCmp(YoFrameVector jointUnitVector, YoFrameVector jointToFootPositionVector, YoFrameVector footReaction,
-                                           YoFrameVector tauOnJointToPack, YoDouble tauOnJointAxisToPack)
+   public void tauOnJointFromReactionOnCmp(YoFrameVector3D jointUnitVector, YoFrameVector3D jointToFootPositionVector, YoFrameVector3D footReaction,
+                                           YoFrameVector3D tauOnJointToPack, YoDouble tauOnJointAxisToPack)
    {
       tauOnJointToPack.cross(jointToFootPositionVector, footReaction);
       /*
@@ -563,7 +563,7 @@ public class SkippyController implements RobotController
     * 
     * @param cmpFrom TODO
     */
-   public void positionVectorFomCmpToCom(YoFramePoint cmpFrom)
+   public void positionVectorFomCmpToCom(YoFramePoint3D cmpFrom)
    {
       cmpToComPositionVector.set(com);
       cmpToComPositionVector.sub(cmpFrom);
@@ -573,7 +573,7 @@ public class SkippyController implements RobotController
    /**
     * Foot to CoM position vector
     */
-   public void positionVectorFomFootToCom(YoFramePoint actualFootPosition)
+   public void positionVectorFomFootToCom(YoFramePoint3D actualFootPosition)
    {
       Vector3D tempFootToComPositionVector = new Vector3D();
       Point3D footLocationInWorld = new Point3D();

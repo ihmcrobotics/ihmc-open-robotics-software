@@ -16,7 +16,7 @@ public class SliderboardDemo
          return;
       }
 
-      for (int slider = 0; slider < 8; slider++)
+      for (int slider = 1; slider < 9; slider++)
       {
          int sliderIndex = slider;
          sliderboard.addListener(value -> PrintTools.info("Slider " + sliderIndex + " moved to: " + value), slider);
@@ -25,11 +25,10 @@ public class SliderboardDemo
       Random random = new Random();
       for (int i = 0; i < 10; i++)
       {
-         sliderboard.setSliderValue(random.nextDouble(), random.nextInt(8));
+         int sliderIndex = random.nextInt(8) + 1;
+         sliderboard.setSliderValue(random.nextDouble(), sliderIndex);
          ThreadTools.sleep(100);
       }
-
-      ThreadTools.sleep(10000);
 
       sliderboard.close();
    }

@@ -6,6 +6,8 @@ import java.util.Random;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -87,6 +89,22 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
+   public void setToOrientationTrajectory(SO3TrajectoryControllerCommand orientationTrajectory)
+   {
+      trajectoryPointList.setToOrientationTrajectoryIncludingFrame(orientationTrajectory.getTrajectoryPointList());
+
+      setQueueableCommandVariables(orientationTrajectory);
+
+      selectionMatrix.setAngularPart(orientationTrajectory.getSelectionMatrix());
+      selectionMatrix.clearLinearSelection();
+      weightMatrix.setAngularPart(orientationTrajectory.getWeightMatrix());
+      weightMatrix.clearLinearWeights();
+
+      trajectoryFrame = orientationTrajectory.getTrajectoryFrame();
+      useCustomControlFrame = orientationTrajectory.useCustomControlFrame();
+      orientationTrajectory.getControlFramePose(controlFramePoseInBodyFrame);
+   }
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
@@ -106,6 +124,25 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrix().getWeightFrameId());
       ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
+   }
+
+   public void setToOrientationTrajectory(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage orientationMessage)
+   {
+      FrameInformation frameInformation = orientationMessage.getFrameInformation();
+      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+      this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
+
+      clear(dataFrame);
+      setToOrientationTrajectory(orientationMessage);
+
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(orientationMessage.getSelectionMatrix().getSelectionFrameId());
+      selectionMatrix.clearLinearSelection();
+      selectionMatrix.setSelectionFrames(angularSelectionFrame, null);
+
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(orientationMessage.getWeightMatrix().getWeightFrameId());
+      weightMatrix.setWeightFrames(angularWeightFrame, null);
    }
 
    @Override
@@ -130,6 +167,31 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
+   }
+
+   public void setToOrientationTrajectory(SO3TrajectoryMessage orientationMessage)
+   {
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(orientationMessage.getFrameInformation(), trajectoryPointList.getReferenceFrame());
+      List<SO3TrajectoryPointMessage> trajectoryPointMessages = orientationMessage.getTaskspaceTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         SO3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
+         trajectoryPointList.addOrientationTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getOrientation(),
+                                                           se3TrajectoryPointMessage.getAngularVelocity());
+      }
+      setQueueableCommandVariables(orientationMessage.getQueueingProperties());
+      selectionMatrix.resetSelection();
+      selectionMatrix.setAngularAxisSelection(orientationMessage.getSelectionMatrix().getXSelected(), orientationMessage.getSelectionMatrix().getYSelected(),
+                                              orientationMessage.getSelectionMatrix().getZSelected());
+      selectionMatrix.clearLinearSelection();
+      weightMatrix.clear();
+      weightMatrix.setAngularWeights(orientationMessage.getWeightMatrix().getXWeight(), orientationMessage.getWeightMatrix().getYWeight(),
+                                     orientationMessage.getWeightMatrix().getZWeight());
+      weightMatrix.clearLinearWeights();
+      useCustomControlFrame = orientationMessage.getUseCustomControlFrame();
+      orientationMessage.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)

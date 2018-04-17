@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 
 public class WrenchSensorValidityChecker implements DiagnosticUpdatable
@@ -11,7 +11,7 @@ public class WrenchSensorValidityChecker implements DiagnosticUpdatable
    private final YoFrameTupleValidityChecker forceChecker;
    private final YoFrameTupleValidityChecker torqueChecker;
 
-   public WrenchSensorValidityChecker(ForceSensorDefinition forceSensorDefinition, YoFrameVector forceMeasurement, YoFrameVector torqueMeasurement, YoVariableRegistry parentRegistry)
+   public WrenchSensorValidityChecker(ForceSensorDefinition forceSensorDefinition, YoFrameVector3D forceMeasurement, YoFrameVector3D torqueMeasurement, YoVariableRegistry parentRegistry)
    {
       String wrenchSensorName = forceSensorDefinition.getSensorName();
       registry = new YoVariableRegistry(wrenchSensorName + "WrenchSensorValidityChecker");
@@ -61,7 +61,7 @@ public class WrenchSensorValidityChecker implements DiagnosticUpdatable
       return forceChecker.isInputAlive() && torqueChecker.isInputAlive();
    }
 
-   private void verifyYoVariableNames(String wrenchSensorName, YoFrameVector forceMeasurement, YoFrameVector torqueMeasurement)
+   private void verifyYoVariableNames(String wrenchSensorName, YoFrameVector3D forceMeasurement, YoFrameVector3D torqueMeasurement)
    {
       if (!forceMeasurement.getYoX().getName().contains(wrenchSensorName))
          throw new RuntimeException("The force variable: " + forceMeasurement.getYoX().getName() + " may not belong to the wrench sensor: " + wrenchSensorName);

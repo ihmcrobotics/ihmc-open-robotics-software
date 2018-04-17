@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
@@ -16,9 +17,13 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    private final NumericSpinner<T> max = createSpinner();
    private final NumericSlider<T> slider = createSlider();
 
+   private final String parameterName;
+   private boolean haveSliderBoundsBeenInvalid = false;
+
    public NumericTuner(GuiParameter parameter)
    {
       setupNode();
+      parameterName = parameter.getName();
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
@@ -32,7 +37,7 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          Platform.runLater(() -> parameter.setMax(max.getValueAsText()));
       });
 
-      // Use the slider value when it gets clicked or dragged and released.
+      // Use the slider value when it gets clicked or dragged and released. Otherwise unwanted rounding will happen.
       slider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
          if (!newValue && oldValue)
          {
@@ -101,29 +106,30 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    {
       if (slider.isDisabled())
       {
-         PrintTools.warn("Slider bounds not valid.");
+         if (!haveSliderBoundsBeenInvalid)
+         {
+            PrintTools.warn("Slider bounds not valid for " + parameterName + ".");
+         }
+         haveSliderBoundsBeenInvalid = true;
          return;
       }
+      haveSliderBoundsBeenInvalid = false;
 
-      double min = slider.doDouble(this.min.getValue());
-      double max = slider.doDouble(this.max.getValue());
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
       double newValue = min + percent * (max - min);
 
-      value.setValue(slider.toNumber(slider.roundToPrecision(newValue)));
+      double rounded = slider.roundToPrecision(newValue);
+      rounded = MathTools.clamp(rounded, min, max);
+      value.setValue(slider.toNumber(rounded));
    }
 
    @Override
    public double getValuePercent()
    {
-      if (slider.isDisabled())
-      {
-         PrintTools.warn("Slider bounds not valid.");
-         return 0.0;
-      }
-
-      double min = slider.doDouble(this.min.getValue());
-      double max = slider.doDouble(this.max.getValue());
-      double value = slider.doDouble(this.value.getValue());
-      return (value - min) / (max - min);
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double value = slider.toDouble(this.value.getValue());
+      return MathTools.clamp((value - min) / (max - min), 0.0, 1.0);
    }
 }

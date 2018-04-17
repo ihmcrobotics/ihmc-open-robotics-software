@@ -24,12 +24,12 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * This class can detect if the foot is on partial support. The idea is to keep track of where the
@@ -63,9 +63,9 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final AlphaFilteredYoFramePoint copFiltered;
    private final FrameLineSegment2D lineSegmentOfRotation = new FrameLineSegment2D();
 
-   private final YoFrameLineSegment2d yoLineOfRotation;
-   private final YoFramePoint yoPlanePoint;
-   private final YoFrameVector yoPlaneNormal;
+   private final YoFrameLineSegment2D yoLineOfRotation;
+   private final YoFramePoint3D yoPlanePoint;
+   private final YoFrameVector3D yoPlaneNormal;
 
    private final YoDouble angleFootGround;
    private final YoDouble angleTreshold;
@@ -93,20 +93,20 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          String caption = "";
 
          caption = namePrefix + "PlanePoint";
-         yoPlanePoint = new YoFramePoint(caption, worldFrame, registry);
+         yoPlanePoint = new YoFramePoint3D(caption, worldFrame, registry);
          YoGraphicPosition planePointViz = new YoGraphicPosition(caption, yoPlanePoint, 0.005, YoAppearance.Blue(), GraphicType.SOLID_BALL);
          YoArtifactPosition planePointArtifact = planePointViz.createArtifact();
          planePointArtifact.setVisible(VISUALIZE);
          yoGraphicsListRegistry.registerArtifact(listName, planePointArtifact);
 
          caption = namePrefix + "PlaneNormal";
-         yoPlaneNormal = new YoFrameVector(caption, worldFrame, registry);
+         yoPlaneNormal = new YoFrameVector3D(caption, worldFrame, registry);
          YoGraphicVector planeNormalViz = new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, YoAppearance.Blue());
          planeNormalViz.setVisible(VISUALIZE);
          yoGraphicsListRegistry.registerYoGraphic(listName, planeNormalViz);
 
          caption = namePrefix + "LineOfRotationGeometric";
-         yoLineOfRotation = new YoFrameLineSegment2d(caption, "", "", worldFrame, registry);
+         yoLineOfRotation = new YoFrameLineSegment2D(caption, "", worldFrame, registry);
          YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(caption, yoLineOfRotation, Color.GREEN, 0.01, 0.01);
          lineOfRotationArtifact.setVisible(VISUALIZE);
          yoGraphicsListRegistry.registerArtifact(listName, lineOfRotationArtifact);

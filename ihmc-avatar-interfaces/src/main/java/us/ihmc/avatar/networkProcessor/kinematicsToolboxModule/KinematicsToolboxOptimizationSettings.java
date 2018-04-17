@@ -57,13 +57,6 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
 
    /** @inheritDoc */
    @Override
-   public double getRhoRateHighWeight()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
    public Vector2D getCoPWeight()
    {
       return null;
@@ -72,13 +65,6 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    /** @inheritDoc */
    @Override
    public Vector2D getCoPRateDefaultWeight()
-   {
-      return null;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector2D getCoPRateHighWeight()
    {
       return null;
    }
@@ -104,13 +90,7 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
       return 0;
    }
 
-   /** @inheritDoc */
    @Override
-   public int getRhoSize()
-   {
-      return 0;
-   }
-
    public boolean getDeactivateRhoWhenNotInContact()
    {
       return true;

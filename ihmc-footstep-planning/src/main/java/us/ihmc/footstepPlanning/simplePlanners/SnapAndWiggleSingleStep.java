@@ -18,6 +18,8 @@ public class SnapAndWiggleSingleStep
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private PlanarRegionsList planarRegionsList;
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -81,7 +83,8 @@ public class SnapAndWiggleSingleStep
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
          footPolygonInRegion.set(footStepPolygon);
          footPolygonInRegion.applyTransform(soleToRegion, false);
-         ConvexPolygon2D foothold = ConvexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion);
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         convexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion, foothold);
          soleToRegion.invert();
          foothold.applyTransform(soleToRegion, false);
          return foothold;

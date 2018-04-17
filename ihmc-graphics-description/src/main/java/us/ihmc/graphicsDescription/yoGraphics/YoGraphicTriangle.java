@@ -13,17 +13,17 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
-   private final YoFramePoint pointOne;
-   private final YoFramePoint pointTwo;
-   private final YoFramePoint pointThree;
+   private final YoFramePoint3D pointOne;
+   private final YoFramePoint3D pointTwo;
+   private final YoFramePoint3D pointThree;
 
    private final Graphics3DObject graphics3dObject;
    private final Graphics3DAddMeshDataInstruction instruction;
@@ -34,11 +34,11 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
 
    public YoGraphicTriangle(String name, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
-      this(name, new YoFramePoint(name + "0", ReferenceFrame.getWorldFrame(), registry), new YoFramePoint(name + "1", ReferenceFrame.getWorldFrame(), registry),
-            new YoFramePoint(name + "2", ReferenceFrame.getWorldFrame(), registry), appearance);
+      this(name, new YoFramePoint3D(name + "0", ReferenceFrame.getWorldFrame(), registry), new YoFramePoint3D(name + "1", ReferenceFrame.getWorldFrame(), registry),
+            new YoFramePoint3D(name + "2", ReferenceFrame.getWorldFrame(), registry), appearance);
    }
 
-   public YoGraphicTriangle(String name, YoFramePoint pointOne, YoFramePoint pointTwo, YoFramePoint pointThree, AppearanceDefinition appearance)
+   public YoGraphicTriangle(String name, YoFramePoint3D pointOne, YoFramePoint3D pointTwo, YoFramePoint3D pointThree, AppearanceDefinition appearance)
    {
       super(name);
 
@@ -70,8 +70,8 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
    public YoGraphicTriangle(String name, YoDouble pointOneX, YoDouble pointOneY, YoDouble pointOneZ, YoDouble pointTwoX, YoDouble pointTwoY, YoDouble pointTwoZ,
          YoDouble pointThreeX, YoDouble pointThreeY, YoDouble pointThreeZ, AppearanceDefinition appearance)
    {
-      this(name, new YoFramePoint(pointOneX, pointOneY, pointOneZ, ReferenceFrame.getWorldFrame()), new YoFramePoint(pointTwoX, pointTwoY, pointTwoZ, ReferenceFrame.getWorldFrame()),
-            new YoFramePoint(pointThreeX, pointThreeY, pointThreeZ, ReferenceFrame.getWorldFrame()), appearance);
+      this(name, new YoFramePoint3D(pointOneX, pointOneY, pointOneZ, ReferenceFrame.getWorldFrame()), new YoFramePoint3D(pointTwoX, pointTwoY, pointTwoZ, ReferenceFrame.getWorldFrame()),
+            new YoFramePoint3D(pointThreeX, pointThreeY, pointThreeZ, ReferenceFrame.getWorldFrame()), appearance);
    }
 
    public Artifact createArtifact()

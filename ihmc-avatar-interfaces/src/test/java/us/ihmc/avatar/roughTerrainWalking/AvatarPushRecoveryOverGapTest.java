@@ -3,6 +3,7 @@ package us.ihmc.avatar.roughTerrainWalking;
 import static junit.framework.TestCase.assertTrue;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -106,6 +107,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       swingTime = walkingControllerParameters.getDefaultSwingTime();
       transferTime = walkingControllerParameters.getDefaultTransferTime();
+
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
       drcSimulationTestHelper.send(footsteps);
