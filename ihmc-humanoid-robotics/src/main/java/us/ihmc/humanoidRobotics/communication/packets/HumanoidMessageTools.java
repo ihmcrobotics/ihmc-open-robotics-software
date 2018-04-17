@@ -1105,7 +1105,7 @@ public class HumanoidMessageTools
    public static HandJointAnglePacket createHandJointAnglePacket(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
    {
       HandJointAnglePacket message = new HandJointAnglePacket();
-      message.setRobotSide(robotSide.toByte());
+      message.setRobotSide(robotSide == null ? -1 : robotSide.toByte());
       message.getJointAngles().add(jointAngles);
       message.setConnected(connected);
       message.setCalibrated(calibrated);
