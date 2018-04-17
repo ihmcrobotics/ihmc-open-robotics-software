@@ -67,6 +67,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
+   private final YoBoolean hasMinimumTimePassed;
 
    private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
@@ -99,6 +100,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
+      hasMinimumTimePassed = new YoBoolean(namePrefix + "HasMinimumTimePassed", registry);
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
@@ -207,11 +209,16 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
    }
 
+   private boolean hasMinimumTimePassed(double timeInState)
+   {
+      return timeInState / swingDuration.getDoubleValue() > 0.5;
+   }
+
    private void updateEndOfStateConditions(double timeInState)
    {
       // Detect early touch-down.
-      double normalizedTimeInSwing = timeInState / currentStepCommand.getTimeInterval().getDuration();
-      if (normalizedTimeInSwing > 0.5)
+      hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
+      if (hasMinimumTimePassed.getBooleanValue())
       {
          touchdownTrigger.update(footSwitch.hasFootHitGround());
       }
