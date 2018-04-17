@@ -36,6 +36,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -114,6 +115,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
+
+   private final BooleanParameter useBaseFrameForControl = new BooleanParameter("UseBaseFrameForControl", registry, false);
 
    public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
@@ -248,8 +251,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (positionGains != null)
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
-      // GW: commenting this out for now since it breaks some tests:
-//      spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
+      // This will improve the tracking with respect to moving trajectory frames.
+      if (useBaseFrameForControl.getValue())
+      {
+         spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
+      }
+      else
+      {
+         spatialFeedbackControlCommand.resetControlBaseFrame();
+      }
 
       // Update the QP weight and selection YoVariables:
       if (defaultLinearWeight != null)
