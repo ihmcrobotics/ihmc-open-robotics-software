@@ -38,7 +38,11 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.*;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
@@ -241,8 +245,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
             jointStateHandles.put(joint, createJointStateHandle(joint));
          }
       }
-
-      effortJointHandles.values().forEach(h -> PrintTools.error(h.getName()));
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
       for (String imu : readIMUs)
