@@ -193,12 +193,18 @@ public class QuadrupedBodyOrientationManager
       }
       else
       {
+         desiredBodyOrientation.changeFrame(worldFrame);
          absoluteBodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
          absoluteBodyOrientationTrajectory.getAngularData(desiredAbsoluteYawOrientation, desiredAbsoluteYawVelocity, desiredAbsoluteYawAcceleration);
-         double bodyOrientationYaw = desiredAbsoluteYawOrientation.getYaw();
-         double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
+
+         double originalBodyYaw = desiredBodyOrientation.getYaw();
+         double newBodyYaw = desiredAbsoluteYawOrientation.getYaw();
+         double bodyPitchCorrection = groundPlaneEstimator.getPitch(newBodyYaw) - groundPlaneEstimator.getPitch(originalBodyYaw);
+
+         double bodyOrientationPitch = desiredBodyOrientation.getPitch() + bodyPitchCorrection;
          double bodyOrientationRoll = desiredBodyOrientation.getRoll();
-         desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
+
+         desiredBodyOrientation.setYawPitchRoll(newBodyYaw, bodyOrientationPitch, bodyOrientationRoll);
          desiredBodyAngularVelocity.setZ(desiredAbsoluteYawVelocity.getZ());
          desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
       }
