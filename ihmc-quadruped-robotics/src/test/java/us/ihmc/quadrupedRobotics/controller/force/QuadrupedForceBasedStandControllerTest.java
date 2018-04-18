@@ -15,8 +15,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -29,8 +28,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
    @Before
@@ -46,7 +44,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = null;
       variables = null;
       stepTeleopManager = null;
-      poseTeleopManager = null;
       pusher = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -232,7 +229,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
@@ -252,8 +248,9 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private void testMovingCoM(double comPositionZ, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
                               double orientationDelta)
    {
-      poseTeleopManager.setDesiredCoMHeight(comPositionZ);
-      poseTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.25);
+      stepTeleopManager.setDesiredCoMHeight(comPositionZ);
+      stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
