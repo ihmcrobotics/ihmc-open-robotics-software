@@ -24,51 +24,12 @@ public enum ValkyrieHandJointName implements HandJointName
    PinkyPitch2,
    PinkyPitch3;
 
-   public static final ValkyrieHandJointName[] values = ValkyrieHandJointName.values();
-   public static final ValkyrieHandJointName[] controllableJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2, IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
-   public static final ValkyrieHandJointName[] passiveJoints = {ThumbPitch3, IndexFingerPitch2, IndexFingerPitch3, MiddleFingerPitch2, MiddleFingerPitch3,
-         PinkyPitch2, PinkyPitch3};
+   public static final ValkyrieHandJointName[] values = values();
 
    @Override
    public String getJointName(RobotSide robotSide)
    {
       return getCamelCaseJointName(robotSide);
-   }
-
-   public String getMotorJointName(RobotSide robotSide)
-   {
-      switch (this)
-      {
-      case ThumbRoll:
-         return "ThumbMotorRoll";
-      case ThumbPitch1:
-         return "ThumbMotorPitch1";
-      case ThumbPitch2:
-         return "ThumbMotorPitch2";
-      case ThumbPitch3:
-         return null;
-      case IndexFingerPitch1:
-         return "IndexFingerMotorPitch1";
-      case IndexFingerPitch2:
-         return null;
-      case IndexFingerPitch3:
-         return null;
-      case MiddleFingerPitch1:
-         return "MiddleFingerMotorPitch1";
-      case MiddleFingerPitch2:
-         return null;
-      case MiddleFingerPitch3:
-         return null;
-      case PinkyPitch1:
-         return "PinkyMotorPitch1";
-      case PinkyPitch2:
-         return null;
-      case PinkyPitch3:
-         return null;
-
-      default:
-         return null;
-      }
    }
 
    public String getCamelCaseJointName(RobotSide side)

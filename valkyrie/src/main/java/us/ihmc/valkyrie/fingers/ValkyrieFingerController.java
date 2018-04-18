@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -47,16 +48,20 @@ public class ValkyrieFingerController implements RobotController
       gains.setMaximumIntegralError(0.5);
 
       Map<String, YoEffortJointHandleHolder> jointHandleMap = jointHandles.stream().collect(Collectors.toMap(h -> h.getName(), h -> h));
+      PrintTools.error(jointHandleMap.toString());
+      System.out.println();
+      System.out.println();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          HandDesiredConfigurationMessageSubscriber subscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
          subscribers.put(robotSide, subscriber);
 
-         EnumMap<ValkyrieHandJointName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(ValkyrieHandJointName.class);
-         for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
+         EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(ValkyrieFingerMotorName.class);
+         for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
             jointHandleEnumMap.put(jointEnum, jointHandleMap.get(jointEnum.getJointName(robotSide)));
 
+         PrintTools.error(jointHandleEnumMap.toString());
          ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, gains, trajectoryTime, thumbCloseDelay, fingerOpenDelay, jointHandleEnumMap, registry);
          fingerSetControllers.put(robotSide, controller);
       }

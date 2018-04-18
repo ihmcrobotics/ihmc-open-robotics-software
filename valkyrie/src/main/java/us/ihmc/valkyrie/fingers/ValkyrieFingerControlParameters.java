@@ -7,8 +7,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ValkyrieFingerControlParameters
 {
-   private static final SideDependentList<EnumMap<ValkyrieHandJointName, Double>> openDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private static final SideDependentList<EnumMap<ValkyrieHandJointName, Double>> closedDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private static final SideDependentList<EnumMap<ValkyrieFingerMotorName, Double>> openDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
+   private static final SideDependentList<EnumMap<ValkyrieFingerMotorName, Double>> closedDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
 
    static
    {
@@ -20,14 +20,14 @@ public class ValkyrieFingerControlParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<ValkyrieHandJointName, Double> openDesiredDefinition = openDesiredDefinitions.get(robotSide);
+         EnumMap<ValkyrieFingerMotorName, Double> openDesiredDefinition = openDesiredDefinitions.get(robotSide);
 
-         openDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, 0.0);
-         openDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch1, 0.0);
-         openDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch2, 0.0);
-         openDesiredDefinition.put(ValkyrieHandJointName.IndexFingerPitch1, 0.0);
-         openDesiredDefinition.put(ValkyrieHandJointName.MiddleFingerPitch1, 0.0);
-         openDesiredDefinition.put(ValkyrieHandJointName.PinkyPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorRoll, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch2, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.IndexFingerMotorPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.MiddleFingerMotorPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieFingerMotorName.PinkyMotorPitch1, 0.0);
       }
    }
 
@@ -35,23 +35,23 @@ public class ValkyrieFingerControlParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<ValkyrieHandJointName, Double> closedDesiredDefinition = closedDesiredDefinitions.get(robotSide);
+         EnumMap<ValkyrieFingerMotorName, Double> closedDesiredDefinition = closedDesiredDefinitions.get(robotSide);
 
-         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, robotSide.negateIfLeftSide(0.0));
-         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch1, robotSide.negateIfLeftSide(0.9));
-         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch2, robotSide.negateIfLeftSide(0.9));
-         closedDesiredDefinition.put(ValkyrieHandJointName.IndexFingerPitch1, robotSide.negateIfLeftSide(1.9));
-         closedDesiredDefinition.put(ValkyrieHandJointName.MiddleFingerPitch1, robotSide.negateIfLeftSide(1.9));
-         closedDesiredDefinition.put(ValkyrieHandJointName.PinkyPitch1, robotSide.negateIfLeftSide(1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorRoll, robotSide.negateIfLeftSide(0.0));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch1, robotSide.negateIfLeftSide(0.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.ThumbMotorPitch2, robotSide.negateIfLeftSide(0.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.IndexFingerMotorPitch1, robotSide.negateIfLeftSide(1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.MiddleFingerMotorPitch1, robotSide.negateIfLeftSide(1.9));
+         closedDesiredDefinition.put(ValkyrieFingerMotorName.PinkyMotorPitch1, robotSide.negateIfLeftSide(1.9));
       }
    }
 
-   public static EnumMap<ValkyrieHandJointName, Double> getOpenDesiredDefinition(RobotSide robotSide)
+   public static EnumMap<ValkyrieFingerMotorName, Double> getOpenDesiredDefinition(RobotSide robotSide)
    {
       return openDesiredDefinitions.get(robotSide);
    }
 
-   public static EnumMap<ValkyrieHandJointName, Double> getClosedDesiredDefinition(RobotSide robotSide)
+   public static EnumMap<ValkyrieFingerMotorName, Double> getClosedDesiredDefinition(RobotSide robotSide)
    {
       return closedDesiredDefinitions.get(robotSide);
    }
