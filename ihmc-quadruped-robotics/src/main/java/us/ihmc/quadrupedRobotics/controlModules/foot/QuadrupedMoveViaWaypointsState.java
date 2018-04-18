@@ -27,7 +27,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    // Feedback controller
    private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame soleFrame;
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
 
    private final QuadrupedFootControlModuleParameters parameters;
@@ -52,7 +51,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       this.controllerToolbox = controllerToolbox;
 
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
-      this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
+      ReferenceFrame soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       robotTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
@@ -101,34 +100,18 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
 
-      if (currentTrajectoryTime > trajectoryPointList.getTrajectoryTime())
-      {
-         soleForceCommand.setToZero();
+      quadrupedWaypointsPositionTrajectoryGenerator.compute(currentTrajectoryTime);
+      quadrupedWaypointsPositionTrajectoryGenerator.getPosition(desiredFootPosition);
+      desiredFootVelocity.setToZero();
 
-         if (waypointCallback != null)
-            waypointCallback.isDoneMoving(true);
+      desiredFootPosition.changeFrame(worldFrame);
+      desiredFootVelocity.changeFrame(worldFrame);
+      feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
+      feedbackControlCommand.setFeedForwardAction(initialSoleForces);
+      feedbackControlCommand.setGains(parameters.getSolePositionGains());
 
-         desiredFootPosition.setToZero(soleFrame);
-         desiredFootPosition.changeFrame(worldFrame);
-         desiredFootVelocity.setToZero(worldFrame);
-
-         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
-      }
-      else
-      {
-         quadrupedWaypointsPositionTrajectoryGenerator.compute(currentTrajectoryTime);
-         quadrupedWaypointsPositionTrajectoryGenerator.getPosition(desiredFootPosition);
-         desiredFootVelocity.setToZero();
-
-         desiredFootPosition.changeFrame(worldFrame);
-         desiredFootVelocity.changeFrame(worldFrame);
-         feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
-         feedbackControlCommand.setFeedForwardAction(initialSoleForces);
-         feedbackControlCommand.setGains(parameters.getSolePositionGains());
-
-         if (waypointCallback != null)
-            waypointCallback.isDoneMoving(false);
-      }
+      if (waypointCallback != null)
+         waypointCallback.isDoneMoving(false);
    }
 
    @Override
@@ -141,9 +124,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    @Override
    public void onExit()
    {
-      soleForceCommand.setToZero();
    }
-
 
    private void createSoleWaypointTrajectory()
    {

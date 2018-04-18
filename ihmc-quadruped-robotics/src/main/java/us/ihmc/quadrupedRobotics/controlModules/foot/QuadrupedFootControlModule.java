@@ -32,7 +32,7 @@ public class QuadrupedFootControlModule
    // foot state machine
    public enum FootEvent
    {
-      TIMEOUT
+      TIMEOUT, LOADED
    }
 
    public enum QuadrupedFootRequest
@@ -72,6 +72,10 @@ public class QuadrupedFootControlModule
       factory.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
       factory.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
       factory.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.HOLD);
+
+      factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.HOLD, QuadrupedFootStates.SUPPORT);
+      factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
+      factory.addTransition(FootEvent.LOADED, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT);
 
       factory.addTransition(QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
       factory.addTransition(QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT);
@@ -176,14 +180,6 @@ public class QuadrupedFootControlModule
       // Inverting the ordering will break some tests, such as QuadrupedXGaitFlatGroundTrotTest.testTrottingInAForwardLeftCircle().
       footStateMachine.doAction();
       footStateMachine.doTransitions();
-   }
-
-   public void getDesiredSoleForce(FrameVector3D soleForceCommandToPack)
-   {
-      // Pack sole force command result.
-      ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
-      soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
-      soleForceCommandToPack.changeFrame(originalFrame);
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
