@@ -18,6 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -30,7 +31,9 @@ public class QuadrupedBodyOrientationManager
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
 
-   private final MultipleWaypointsOrientationTrajectoryGenerator bodyOrientationTrajectory;
+   private final YoBoolean useAbsoluteBodyOrientationTrajectory = new YoBoolean("useBaseBodyOrientationTrajectory", registry);
+   private final MultipleWaypointsOrientationTrajectoryGenerator offsetBodyOrientationTrajectory;
+   private final MultipleWaypointsOrientationTrajectoryGenerator absoluteBodyOrientationTrajectory;
 
    private final GroundPlaneEstimator groundPlaneEstimator;
 
@@ -43,6 +46,10 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredBodyAngularVelocity;
    private final FrameVector3D desiredBodyAngularAcceleration;
 
+   private final FrameQuaternion desiredAbsoluteYawOrientation = new FrameQuaternion();
+   private final FrameVector3D desiredAbsoluteYawVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
+
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;
@@ -52,7 +59,6 @@ public class QuadrupedBodyOrientationManager
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
@@ -66,14 +72,14 @@ public class QuadrupedBodyOrientationManager
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
       yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
 
-
       feedbackControlCommand.setGains(bodyOrientationDefaultGains);
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
       feedbackControlCommand.setGainsFrame(bodyFrame);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
-      bodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("bodyTrajectory", worldFrame, registry);
+      offsetBodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("offsetBodyOrientationTrajectory", worldFrame, registry);
+      absoluteBodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("baseBodyOrientationTrajectory", worldFrame, registry);
 
       desiredBodyOrientation = new FrameQuaternion();
       desiredBodyOrientationOffset = new FrameQuaternion();
@@ -93,8 +99,10 @@ public class QuadrupedBodyOrientationManager
 
       double currentTime = robotTimestamp.getDoubleValue();
 
-      bodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
-      bodyOrientationTrajectory.initialize();
+      offsetBodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
+      offsetBodyOrientationTrajectory.initialize();
+
+      useAbsoluteBodyOrientationTrajectory.set(false);
    }
 
    public void handleBodyOrientationCommand(QuadrupedBodyOrientationCommand command)
@@ -104,22 +112,39 @@ public class QuadrupedBodyOrientationManager
       SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
       so3Trajectory.getTrajectoryPointList().addTimeOffset(timeShift);
 
-      if (so3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
+      if(command.isAnOffsetOrientation())
       {
-         bodyOrientationTrajectory.getOrientation(desiredBodyOrientation);
-         desiredBodyOrientation.changeFrame(worldFrame);
-         desiredBodyAngularVelocity.setToZero(worldFrame);
-
-         bodyOrientationTrajectory.clear();
-         bodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
+         handleOrientationTrajectory(so3Trajectory, offsetBodyOrientationTrajectory);
+         useAbsoluteBodyOrientationTrajectory.set(false);
       }
       else
       {
-         bodyOrientationTrajectory.clear();
+         handleOrientationTrajectory(so3Trajectory, absoluteBodyOrientationTrajectory);
+         useAbsoluteBodyOrientationTrajectory.set(true);
+      }
+   }
+
+   private void handleOrientationTrajectory(SO3TrajectoryControllerCommand so3Trajectory, MultipleWaypointsOrientationTrajectoryGenerator trajectoryToSet)
+   {
+      double currentTime = robotTimestamp.getDoubleValue();
+
+      if (so3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
+      {
+         trajectoryToSet.getOrientation(desiredBodyOrientation);
+         trajectoryToSet.getAngularVelocity(desiredBodyAngularVelocity);
+         desiredBodyOrientation.changeFrame(worldFrame);
+         desiredBodyAngularVelocity.changeFrame(worldFrame);
+
+         trajectoryToSet.clear();
+         trajectoryToSet.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
+      }
+      else
+      {
+         trajectoryToSet.clear();
       }
 
-      bodyOrientationTrajectory.appendWaypoints(so3Trajectory.getTrajectoryPointList());
-      bodyOrientationTrajectory.initialize();
+      trajectoryToSet.appendWaypoints(so3Trajectory.getTrajectoryPointList());
+      trajectoryToSet.initialize();
    }
 
    public void setDesiredFrameToHoldPosition(ReferenceFrame desiredFrameToHold)
@@ -129,13 +154,14 @@ public class QuadrupedBodyOrientationManager
 
    public void compute()
    {
-      bodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
+      offsetBodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
 
       desiredBodyOrientation.setToZero(desiredFrameToHold);
       desiredBodyOrientation.changeFrame(worldFrame);
 
-      bodyOrientationTrajectory.getAngularData(desiredBodyOrientationOffset, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
+      offsetBodyOrientationTrajectory.getAngularData(desiredBodyOrientationOffset, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
       desiredBodyOrientation.append(desiredBodyOrientationOffset);
+      handleAbsoluteYawOrientationCommand();
 
       double bodyOrientationYaw = desiredBodyOrientation.getYaw();
       double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
@@ -153,7 +179,31 @@ public class QuadrupedBodyOrientationManager
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
    }
 
-
+   private void handleAbsoluteYawOrientationCommand()
+   {
+      if(!useAbsoluteBodyOrientationTrajectory.getBooleanValue())
+      {
+         return;
+      }
+      else if (absoluteBodyOrientationTrajectory.isDone())
+      {
+         useAbsoluteBodyOrientationTrajectory.set(false);
+         absoluteBodyOrientationTrajectory.clear();
+         return;
+      }
+      else
+      {
+         absoluteBodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
+         absoluteBodyOrientationTrajectory.getAngularData(desiredAbsoluteYawOrientation, desiredAbsoluteYawVelocity, desiredAbsoluteYawAcceleration);
+         double bodyOrientationYaw = desiredAbsoluteYawOrientation.getYaw();
+         double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
+         double bodyOrientationRoll = desiredBodyOrientation.getRoll();
+         desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
+         desiredBodyAngularVelocity.setZ(desiredAbsoluteYawVelocity.getZ());
+         desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
+      }
+   }
+   
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
