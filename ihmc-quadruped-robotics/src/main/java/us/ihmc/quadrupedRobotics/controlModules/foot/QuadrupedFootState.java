@@ -10,19 +10,16 @@ import us.ihmc.robotics.stateMachine.extra.EventState;
 
 public abstract class QuadrupedFootState implements EventState
 {
-   protected final FrameVector3D soleForceCommand = new FrameVector3D();
-
    protected QuadrupedStepTransitionCallback stepTransitionCallback = null;
    protected QuadrupedWaypointCallback waypointCallback = null;
 
-   public abstract VirtualModelControlCommand<?> getVirtualModelControlCommand();
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
    public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
-
-   public FrameVector3DReadOnly getSoleForceCommand()
-   {
-      return soleForceCommand;
-   }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
    {
