@@ -240,7 +240,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                }
             }
 
-            for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
+            for (int sensorNumber = 0; sensorNumber < Math.min(imuDefinitions.length, robotConfigurationData.getImuSensorData().size()); sensorNumber++)
             {
                RosImuPublisher rosImuPublisher = this.imuPublishers[sensorNumber];
                IMUPacket imuPacket = robotConfigurationData.getImuSensorData().get(sensorNumber);
