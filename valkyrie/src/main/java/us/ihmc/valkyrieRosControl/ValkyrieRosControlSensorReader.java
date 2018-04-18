@@ -1,6 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -56,7 +57,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       this.timestampProvider = timestampProvider;
-      this.yoEffortJointHandleHolders = yoEffortJointHandleHolders;
+      // Remove the handles that do not have a joint associated. This is useful to remove the finger motors.
+      this.yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h ->  h.getOneDoFJoint() != null).collect(Collectors.toList());
       this.yoPositionJointHandleHolders = yoPositionJointHandleHolders;
       this.yoJointStateHandleHolders = yoJointStateHandleHolders;
       this.yoIMUHandleHolders = yoIMUHandleHolders;
@@ -86,9 +88,11 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoEffortJointHandleHolder yoEffortJointHandleHolder = yoEffortJointHandleHolders.get(i);
          yoEffortJointHandleHolder.update();
 
-         sensorProcessing.setJointPositionSensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getQ());
-         sensorProcessing.setJointVelocitySensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getQd());
-         sensorProcessing.setJointTauSensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getTauMeasured());
+         OneDoFJoint joint = yoEffortJointHandleHolder.getOneDoFJoint();
+
+         sensorProcessing.setJointPositionSensorValue(joint, yoEffortJointHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(joint, yoEffortJointHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(joint, yoEffortJointHandleHolder.getTauMeasured());
       }
 
       for (int i = 0; i < yoPositionJointHandleHolders.size(); i++)
@@ -96,9 +100,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoPositionJointHandleHolder yoPositionJointHandleHolder = yoPositionJointHandleHolders.get(i);
          yoPositionJointHandleHolder.update();
 
-         sensorProcessing.setJointPositionSensorValue(yoPositionJointHandleHolder.getOneDoFJoint(), yoPositionJointHandleHolder.getQ());
-         sensorProcessing.setJointVelocitySensorValue(yoPositionJointHandleHolder.getOneDoFJoint(), yoPositionJointHandleHolder.getQd());
-         sensorProcessing.setJointTauSensorValue(yoPositionJointHandleHolder.getOneDoFJoint(),
+         OneDoFJoint joint = yoPositionJointHandleHolder.getOneDoFJoint();
+         sensorProcessing.setJointPositionSensorValue(joint, yoPositionJointHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(joint, yoPositionJointHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(joint,
                0.0); // TODO: Should be NaN eventually as the position control joints won't be able to return a measured torque
       }
       
@@ -107,9 +112,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          YoJointStateHandleHolder yoJointStateHandleHolder = yoJointStateHandleHolders.get(i);
          yoJointStateHandleHolder.update();
 
-         sensorProcessing.setJointPositionSensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getQ());
-         sensorProcessing.setJointVelocitySensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getQd());
-         sensorProcessing.setJointTauSensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getTauMeasured());
+         OneDoFJoint joint = yoJointStateHandleHolder.getOneDoFJoint();
+         sensorProcessing.setJointPositionSensorValue(joint, yoJointStateHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(joint, yoJointStateHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(joint, yoJointStateHandleHolder.getTauMeasured());
       }
 
       for (int i = 0; i < yoIMUHandleHolders.size(); i++)

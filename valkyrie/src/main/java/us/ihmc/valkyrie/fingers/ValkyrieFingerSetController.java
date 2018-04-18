@@ -10,7 +10,6 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -25,8 +24,6 @@ public class ValkyrieFingerSetController implements RobotController
 {
    private static final double MIN_ACTUATOR_POSITION = 0.0;
    private static final double MAX_ACTUATOR_POSITION = 3.6;
-
-   private final ValkyrieHandJointName[] controlledJoints = ValkyrieHandJointName.controllableJoints;
 
    enum GraspState
    {
@@ -45,15 +42,15 @@ public class ValkyrieFingerSetController implements RobotController
    private final YoDouble thumbCloseDelay;
    private final YoDouble fingerOpenDelay;
 
-   private final Map<ValkyrieHandJointName, YoDouble> initialDesiredAngles = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, YoDouble> finalDesiredAngles = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, YoDouble> closedAngles = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, YoDouble> openedAngles = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieHandJointName.class);
-   private final Map<ValkyrieHandJointName, PIDController> pidControllers = new EnumMap<>(ValkyrieHandJointName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> initialDesiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> finalDesiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> closedAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> openedAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, PIDController> pidControllers = new EnumMap<>(ValkyrieFingerMotorName.class);
 
-   private final EnumMap<ValkyrieHandJointName, YoEffortJointHandleHolder> jointHandles;
+   private final EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles;
 
    private final StateMachine<GraspState, State> stateMachine;
    private final YoEnum<GraspState> requestedState;
@@ -70,7 +67,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, double controlDT, YoPIDGains gains, YoDouble trajectoryTime,
                                       YoDouble thumbCloseDelay, YoDouble fingerOpenDelay,
-                                      EnumMap<ValkyrieHandJointName, YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
+                                      EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.controlDT = controlDT;
@@ -98,7 +95,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    private void mapJointsAndVariables(YoPIDGains gains)
    {
-      for (ValkyrieHandJointName jointEnum : controlledJoints)
+      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
          String jointName = jointEnum.getJointName(robotSide);
          YoDouble initialDesiredAngle = new YoDouble(jointName + "InitialAngle", registry);
@@ -156,12 +153,12 @@ public class ValkyrieFingerSetController implements RobotController
          fingerPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
          thumbPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
 
-         for (ValkyrieHandJointName jointEnum : controlledJoints)
+         for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
          {
             double qInitial;
             YoDouble desiredAngle = desiredAngles.get(jointEnum);
             if (desiredAngle.isNaN())
-               qInitial = jointHandles.get(jointEnum).getOneDoFJoint().getQ();
+               qInitial = jointHandles.get(jointEnum).getQ();
             else
                qInitial = desiredAngle.getDoubleValue();
             initialDesiredAngles.get(jointEnum).set(qInitial);
@@ -191,12 +188,12 @@ public class ValkyrieFingerSetController implements RobotController
          fingerPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
          thumbPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
 
-         for (ValkyrieHandJointName jointEnum : controlledJoints)
+         for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
          {
             double qInitial;
             YoDouble desiredAngle = desiredAngles.get(jointEnum);
             if (desiredAngle.isNaN())
-               qInitial = jointHandles.get(jointEnum).getOneDoFJoint().getQ();
+               qInitial = jointHandles.get(jointEnum).getQ();
             else
                qInitial = desiredAngle.getDoubleValue();
             initialDesiredAngles.get(jointEnum).set(qInitial);
@@ -263,7 +260,7 @@ public class ValkyrieFingerSetController implements RobotController
             thumbAlphaDot = thumbPolynomial.getVelocity();
          }
 
-         for (ValkyrieHandJointName jointEnum : controlledJoints)
+         for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
          {
             if (jointEnum.getFingerName() == FingerName.THUMB)
             {
@@ -303,15 +300,14 @@ public class ValkyrieFingerSetController implements RobotController
    {
       stateMachine.doActionAndTransition();
 
-      for (ValkyrieHandJointName jointEnum : controlledJoints)
+      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
          PIDController pidController = pidControllers.get(jointEnum);
          YoEffortJointHandleHolder handle = jointHandles.get(jointEnum);
-         OneDoFJoint joint = handle.getOneDoFJoint();
 
-         double q = joint.getQ();
+         double q = handle.getQ();
          double q_d = desiredAngles.get(jointEnum).getDoubleValue();
-         double qd = joint.getQd();
+         double qd = handle.getQd();
          double qd_d = desiredVelocities.get(jointEnum).getDoubleValue();
 
          if (flipErrorSign)

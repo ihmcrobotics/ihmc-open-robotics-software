@@ -8,6 +8,7 @@ import com.esotericsoftware.minlog.Log;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -26,6 +27,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerMotorName;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -111,6 +113,15 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
                YoJointStateHandleHolder holder = new YoJointStateHandleHolder(jointStateHandles.get(joint.getName()), oneDoFJoint, sensorReaderRegistry);
                yoJointStateHandleHolders.add(holder);
             }
+         }
+      }
+
+      // Need to add the finger motors still as they actually do not have a corresponding joint
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ValkyrieFingerMotorName motorName : ValkyrieFingerMotorName.values)
+         {
+            yoEffortJointHandleHolders.add(new YoEffortJointHandleHolder(effortJointHandles.get(motorName.getJointName(robotSide)), null, null, sensorReaderRegistry));
          }
       }
 
