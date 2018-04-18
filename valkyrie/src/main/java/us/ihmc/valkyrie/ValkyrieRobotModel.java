@@ -66,7 +66,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -83,7 +82,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieJointMap jointMap;
    private final ValkyrieContactPointParameters contactPointParameters;
    private final ValkyrieCalibrationParameters calibrationParameters;
-   private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
@@ -104,7 +102,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
    private final RobotDescription robotDescription;
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this(target,headless, "DEFAULT", simulationContactPoints);
    }
@@ -119,7 +117,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(target, headless, model, null);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap();
@@ -300,7 +298,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public RobotContactPointParameters getContactPointParameters()
+   public RobotContactPointParameters<RobotSide> getContactPointParameters()
    {
       return contactPointParameters;
    }
