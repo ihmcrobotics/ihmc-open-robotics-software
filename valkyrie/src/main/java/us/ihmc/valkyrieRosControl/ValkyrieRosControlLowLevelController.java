@@ -33,8 +33,10 @@ public class ValkyrieRosControlLowLevelController
 
    private final TimestampProvider timestampProvider;
 
-   private final ArrayList<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
+   private final List<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
+
+   private final List<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
 
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
@@ -47,7 +49,8 @@ public class ValkyrieRosControlLowLevelController
 
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
+                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
+                                               YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
@@ -76,6 +79,13 @@ public class ValkyrieRosControlLowLevelController
          effortJointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
       }
 
+      for (YoPositionJointHandleHolder positionJointHandleHolder : yoPositionJointHandleHolders)
+      {
+         ValkyrieRosControlPositionJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlPositionJointControlCommandCalculator(positionJointHandleHolder,
+                                                                                                                                                        registry);
+         positionControlCommandCalculators.add(controlCommandCalculator);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -95,10 +105,9 @@ public class ValkyrieRosControlLowLevelController
    public void updateCommandCalculators()
    {
       for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-      {
-         ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-         commandCalculator.computeAndUpdateJointTorque();
-      }
+         effortControlCommandCalculators.get(i).computeAndUpdateJointTorque();
+      for (int i = 0; i < positionControlCommandCalculators.size(); i++)
+         positionControlCommandCalculators.get(i).computeAndUpdateJointPosition();
    }
 
    private void writeTorqueOffsets()
