@@ -79,7 +79,6 @@ public class QuadrupedBalanceManager
 
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
-   private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    // footstep graphics
@@ -108,7 +107,6 @@ public class QuadrupedBalanceManager
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       double nominalHeight = physicalProperties.getNominalCoMHeight();
-      currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry);
@@ -118,7 +116,7 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
 
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
@@ -307,7 +305,7 @@ public class QuadrupedBalanceManager
             activeStep.getGoalPosition(tempPoint);
             tempPoint.changeFrame(worldFrame);
             tempPoint.add(instantaneousStepAdjustment);
-            crossoverProjection.project(tempPoint, currentSolePositions, robotQuadrant);
+            crossoverProjection.project(tempPoint, robotQuadrant);
             groundPlaneEstimator.projectZ(tempPoint);
             adjustedStep.setGoalPosition(tempPoint);
          }
