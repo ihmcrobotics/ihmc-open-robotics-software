@@ -12,7 +12,9 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
@@ -37,7 +39,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer);
+      YoVariableClient client = new YoVariableClient(scsVisualizer, new RemoteValkyrieVisualizerLogFilter());
       client.start();
    }
 
@@ -123,5 +125,14 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    public static void main(String[] args)
    {
       new RemoteValkyrieVisualizer();
+   }
+
+   private class RemoteValkyrieVisualizerLogFilter implements LogProducerDisplay.LogSessionFilter
+   {
+      @Override
+      public boolean shouldAddToDisplay(Announcement description)
+      {
+         return description.getHostNameAsString().startsWith("link");
+      }
    }
 }
