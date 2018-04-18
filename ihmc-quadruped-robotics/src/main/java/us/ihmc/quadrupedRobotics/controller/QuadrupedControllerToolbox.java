@@ -30,7 +30,6 @@ import java.util.List;
 public class QuadrupedControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -42,7 +41,6 @@ public class QuadrupedControllerToolbox
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
 
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
    private final FullQuadrupedRobotModel fullRobotModel;
 
    private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
@@ -81,7 +79,6 @@ public class QuadrupedControllerToolbox
 
       soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
 
-      taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, 1.0, registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
 
@@ -116,8 +113,6 @@ public class QuadrupedControllerToolbox
       comJacobian.compute();
 
       updateSupportPolygon();
-
-      taskSpaceEstimator.compute(taskSpaceEstimates);
 
       comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
 
@@ -175,11 +170,6 @@ public class QuadrupedControllerToolbox
    public QuadrupedFallDetector getFallDetector()
    {
       return fallDetector;
-   }
-
-   public QuadrupedTaskSpaceEstimates getTaskSpaceEstimates()
-   {
-      return taskSpaceEstimates;
    }
 
    public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
