@@ -80,13 +80,13 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
                                         packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
       packetCommunicator.connect();
 
-      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
-      packetCommunicator.send(controllerMessage);
+//      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+//      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
+//      packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      QuadrupedTestBehaviors.squareUp(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       List<QuadrupedTimedStepMessage> steps = getSteps(environment.getBaseBlockFrame());
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);

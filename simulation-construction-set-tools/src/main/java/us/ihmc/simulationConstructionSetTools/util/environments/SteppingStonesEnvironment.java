@@ -99,7 +99,7 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
 
    public Point3D getStartPosition()
    {
-      return new Point3D(0.5, 0.5, 0.25);
+      return new Point3D(0.5, 0.5, 0.4);
    }
 
    public double getStartYaw()
