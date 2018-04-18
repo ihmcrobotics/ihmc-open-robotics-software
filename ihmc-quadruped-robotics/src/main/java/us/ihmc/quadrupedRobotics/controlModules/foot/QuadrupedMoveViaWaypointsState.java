@@ -100,8 +100,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    @Override
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
-      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
-      return currentTrajectoryTime > trajectoryPointList.getTrajectoryTime() ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
+      return null;
    }
 
    @Override

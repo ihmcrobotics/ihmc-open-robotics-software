@@ -71,10 +71,8 @@ public class QuadrupedFreezeController implements QuadrupedController
    {
       controllerToolbox.update();
 
-      // Initialize sole position controller
-      feetManager.requestHoldAll();
+      feetManager.requestFullContact();
 
-      // Initialize force feedback
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint joint = joints.get(i);
