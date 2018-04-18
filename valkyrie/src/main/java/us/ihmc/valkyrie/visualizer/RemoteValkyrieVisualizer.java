@@ -2,7 +2,8 @@ package us.ihmc.valkyrie.visualizer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JComboBox;
 
@@ -10,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
@@ -48,28 +50,48 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.getVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
                                                                                 "requestedHighLevelControllerState");
 
-      final String[] enumValuesAsString = requestHighLevelControlMode.getEnumValuesAsString();
-      for (int i = 0; i < enumValuesAsString.length; i++)
-      {
-         enumValuesAsString[i] = enumValuesAsString[i].replaceAll("_", " _");
-         enumValuesAsString[i] = FormattingTools.underscoredToCamelCase(enumValuesAsString[i], true);
-      }
-      final String[] comboBoxValues = new String[enumValuesAsString.length + 1];
-      System.arraycopy(enumValuesAsString, 0, comboBoxValues, 1, enumValuesAsString.length);
+      HighLevelControllerName[] valuesToDisplay = {HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.CALIBRATION, HighLevelControllerName.STAND_TRANSITION_STATE};
+      Map<HighLevelControllerName, String> displayNames = new HashMap<>();
+      displayNames.put(HighLevelControllerName.STAND_TRANSITION_STATE, "Go Walking Val!");
+
+      final String[] comboBoxValues = new String[valuesToDisplay.length + 1];
       comboBoxValues[0] = "High-Level Control Mode";
-      System.out.println(Arrays.deepToString(enumValuesAsString));
+
+      Map<Integer, Integer> fromComboBoxIndexToEnumOrdinalMap = new HashMap<>();
+      fromComboBoxIndexToEnumOrdinalMap.put(0, -1);
+      Map<Integer, Integer> fromEnumOrdinalToComboBoxIndexMap = new HashMap<>();
+      fromEnumOrdinalToComboBoxIndexMap.put(-1, 0);
+      int comboBoxIndex = 1; // Leave the first for a default item
+      for (HighLevelControllerName valueToDisplay : valuesToDisplay)
+      {
+         if (displayNames.containsKey(valueToDisplay))
+         {
+            comboBoxValues[comboBoxIndex] = displayNames.get(valueToDisplay);
+         }
+         else
+         {
+            comboBoxValues[comboBoxIndex] = valueToDisplay.name();
+            comboBoxValues[comboBoxIndex] = comboBoxValues[comboBoxIndex].replaceAll("_", " _");
+            comboBoxValues[comboBoxIndex] = FormattingTools.underscoredToCamelCase(comboBoxValues[comboBoxIndex], true);
+         }
+
+         fromComboBoxIndexToEnumOrdinalMap.put(comboBoxIndex, valueToDisplay.ordinal());
+         fromEnumOrdinalToComboBoxIndexMap.put(valueToDisplay.ordinal(), comboBoxIndex);
+         comboBoxIndex++;
+      }
+
       final JComboBox<String> requestControlModeComboBox = new JComboBox<>(comboBoxValues);
-      requestControlModeComboBox.setSelectedIndex(requestHighLevelControlMode.getOrdinal() % enumValuesAsString.length);
+      requestControlModeComboBox.setSelectedIndex(0);
       requestControlModeComboBox.addActionListener(new ActionListener()
       {
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            int selectedIndex = requestControlModeComboBox.getSelectedIndex() - 1;
-            int ordinal = requestHighLevelControlMode.getOrdinal();
-            if (selectedIndex != ordinal)
+            int newOrdinal = fromComboBoxIndexToEnumOrdinalMap.get(requestControlModeComboBox.getSelectedIndex());
+            int currentOrdinal = requestHighLevelControlMode.getOrdinal();
+            if (newOrdinal != currentOrdinal)
             {
-               requestHighLevelControlMode.set(selectedIndex);
+               requestHighLevelControlMode.set(newOrdinal);
             }
          }
       });
@@ -79,10 +101,10 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            int selectedIndex = requestControlModeComboBox.getSelectedIndex();
-            int ordinal = requestHighLevelControlMode.getOrdinal() + 1;
-            if (selectedIndex != ordinal)
-               requestControlModeComboBox.setSelectedIndex(ordinal);
+            int currentIndex = requestControlModeComboBox.getSelectedIndex();
+            int newIndex = fromEnumOrdinalToComboBoxIndexMap.get(requestHighLevelControlMode.getOrdinal());
+            if (currentIndex != newIndex)
+               requestControlModeComboBox.setSelectedIndex(newIndex);
          }
       });
 
