@@ -53,7 +53,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       super(controllerState, highLevelControllerParameters, highLevelControllerToolbox);
       this.highLevelControlOutput = highLevelControlOutput;
 
-      OneDoFJoint[] controlledJoints = highLevelControllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
@@ -73,8 +73,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoVariableRegistry());
 
-      OneDoFJoint[] jointArray = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       
       StateMachineFactory<CalibrationStates, CalibrationState> factory = new StateMachineFactory<>(CalibrationStates.class);
