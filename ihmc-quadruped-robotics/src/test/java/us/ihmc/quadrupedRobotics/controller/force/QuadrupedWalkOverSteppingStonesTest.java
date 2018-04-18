@@ -7,13 +7,15 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.simulationConstructionSetTools.util.environments.SteppingStonesEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -30,7 +32,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -69,17 +71,17 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 
       PacketCommunicator packetCommunicator = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
-      AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
+      AtomicReference<QuadrupedControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
-                                        packet -> controllerState.set(QuadrupedForceControllerEnum.fromByte(packet.getEndControllerName())));
+                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndControllerName())));
 
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
                                         packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
       packetCommunicator.connect();
 
       QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
       packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
