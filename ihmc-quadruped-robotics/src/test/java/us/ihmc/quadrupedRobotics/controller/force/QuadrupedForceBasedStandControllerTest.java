@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -259,14 +260,13 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
                                                                                                                                   .getDoubleValue() + " < "
                        + translationDelta,
                  Math.abs(variables.getCurrentHeightInWorld().getDoubleValue() - variables.getHeightInWorldSetpoint().getDoubleValue()) < translationDelta);
-      assertTrue("Yaw did not meet goal : Math.abs(" + variables.getComPositionEstimateYaw().getDoubleValue() + " - " + bodyOrientationYaw + " < "
+      assertTrue("Yaw did not meet goal : Math.abs(" + variables.getBodyEstimateYaw() + " - " + bodyOrientationYaw + " < "
+                       + orientationDelta, Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateYaw(), bodyOrientationYaw)) < orientationDelta);
+      assertTrue("Pitch did not meet goal : Math.abs(" + variables.getBodyEstimatePitch() + " - " + bodyOrientationPitch + " < "
                        + orientationDelta,
-                 Math.abs(variables.getComPositionEstimateYaw().getDoubleValue() - bodyOrientationYaw) < orientationDelta);
-      assertTrue("Pitch did not meet goal : Math.abs(" + variables.getComPositionEstimatePitch().getDoubleValue() + " - " + bodyOrientationPitch + " < "
+                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimatePitch(), bodyOrientationPitch)) < orientationDelta);
+      assertTrue("Roll did not meet goal : Math.abs(" + variables.getBodyEstimateRoll() + " - " + bodyOrientationRoll + " < "
                        + orientationDelta,
-                 Math.abs(variables.getComPositionEstimatePitch().getDoubleValue() - bodyOrientationPitch) < orientationDelta);
-      assertTrue("Roll did not meet goal : Math.abs(" + variables.getComPositionEstimateRoll().getDoubleValue() + " - " + bodyOrientationRoll + " < "
-                       + orientationDelta,
-                 Math.abs(variables.getComPositionEstimateRoll().getDoubleValue() - bodyOrientationRoll) < orientationDelta);
+                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateRoll(), bodyOrientationRoll)) < orientationDelta);
    }
 }

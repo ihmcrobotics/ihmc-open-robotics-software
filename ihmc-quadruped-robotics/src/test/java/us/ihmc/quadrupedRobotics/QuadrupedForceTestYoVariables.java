@@ -1,13 +1,14 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
@@ -31,13 +32,17 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble comPositionEstimateX;
    private final YoDouble comPositionEstimateY;
    private final YoDouble currentHeightInWorld;
-   private final YoDouble comPositionEstimateYaw;
-   private final YoDouble comPositionEstimatePitch;
-   private final YoDouble comPositionEstimateRoll;
+
+   private final YoDouble bodyCurrentOrientationQx;
+   private final YoDouble bodyCurrentOrientationQy;
+   private final YoDouble bodyCurrentOrientationQz;
+   private final YoDouble bodyCurrentOrientationQs;
 
    private final YoDouble comPositionSetpointX;
    private final YoDouble comPositionSetpointY;
    private final YoDouble desiredHeightInWorld;
+
+   private final Quaternion bodyOrientation = new Quaternion();
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -63,9 +68,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timedStepGoalPositionY = (YoDouble) scs.getVariable("timedStepGoalPositionY");
       timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
 
-      comPositionEstimateYaw = (YoDouble) scs.getVariable("comPositionEstimateYaw");
-      comPositionEstimatePitch = (YoDouble) scs.getVariable("comPositionEstimatePitch");
-      comPositionEstimateRoll = (YoDouble) scs.getVariable("comPositionEstimateRoll");
+      bodyCurrentOrientationQx = (YoDouble) scs.getVariable("bodyCurrentOrientationQx");
+      bodyCurrentOrientationQy = (YoDouble) scs.getVariable("bodyCurrentOrientationQy");
+      bodyCurrentOrientationQz = (YoDouble) scs.getVariable("bodyCurrentOrientationQz");
+      bodyCurrentOrientationQs = (YoDouble) scs.getVariable("bodyCurrentOrientationQs");
 
       comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
       comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
@@ -147,19 +153,25 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return timedStepGoalPositionZ;
    }
 
-   public YoDouble getComPositionEstimateYaw()
+   public double getBodyEstimateYaw()
    {
-      return comPositionEstimateYaw;
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                          bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getYaw();
    }
 
-   public YoDouble getComPositionEstimatePitch()
+   public double getBodyEstimatePitch()
    {
-      return comPositionEstimatePitch;
+       bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                                 bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getPitch();
    }
 
-   public YoDouble getComPositionEstimateRoll()
+   public double getBodyEstimateRoll()
    {
-      return comPositionEstimateRoll;
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                          bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getRoll();
    }
 
    public YoDouble getComPositionSetpointX()
