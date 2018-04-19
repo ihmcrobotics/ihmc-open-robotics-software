@@ -39,6 +39,11 @@ public class FileSelectionDialog
 
    }
 
+   public static File loadFile()
+   {
+      return loadFile(null);
+   }
+   
    public static File loadFile(final String acceptedFileName)
    {
       final FileDialog fileDialog = new FileDialog((Frame) null, "Choose logging directory");
