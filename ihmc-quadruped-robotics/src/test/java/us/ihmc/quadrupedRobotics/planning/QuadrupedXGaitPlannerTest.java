@@ -5,9 +5,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedConstantVelocityBodyPathProvider;
+import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -21,10 +24,11 @@ import static org.junit.Assert.assertTrue;
 public class QuadrupedXGaitPlannerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @Test(timeout = 300000)
    public void testInitialForwardVelocityPlan()
    {
-      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner();
+      ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
+      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.25);
@@ -33,15 +37,15 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setEndDoubleSupportDuration(0);
       xGaitSettings.setEndPhaseShift(90);
 
-      Vector3D planarVelocity = new Vector3D(1.0, 0.0, 0.0);
       RobotQuadrant initialStepQuadrant = RobotQuadrant.HIND_RIGHT;
       FramePoint3D supportCentroidAtSoS = new FramePoint3D(ReferenceFrame.getWorldFrame());
       supportCentroidAtSoS.set(0, 0, 0);
       double timeAtSoS = 0.0;
-      double yawAtSoS = 0.0;
 
       QuadrupedPlanarFootstepPlan footstepPlan = new QuadrupedPlanarFootstepPlan(4);
-      xGaitPlanner.computeInitialPlan(footstepPlan, planarVelocity, initialStepQuadrant, supportCentroidAtSoS, timeAtSoS, yawAtSoS, xGaitSettings);
+      bodyPathProvider.initialPose.setToZero(ReferenceFrame.getWorldFrame());
+      bodyPathProvider.desiredForwardMotion = 1.0;
+      xGaitPlanner.computeInitialPlan(footstepPlan, initialStepQuadrant, timeAtSoS, xGaitSettings);
 
       ArrayList<QuadrupedTimedOrientedStep> nominalSteps = new ArrayList<>();
       for (int i = 0; i < 4; i++)
@@ -77,70 +81,90 @@ public class QuadrupedXGaitPlannerTest
       List<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
       for (int i = 0; i < 4; i++)
       {
-         assertTrue("planned step " + i  + " does not match nominal step", plannedSteps.get(i).epsilonEquals(nominalSteps.get(i), epsilon));
+         assertTrue("planned step " + i + " does not match nominal step", plannedSteps.get(i).epsilonEquals(nominalSteps.get(i), epsilon));
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
-   public void testOnlineForwardVelocityPlan()
-   {
-      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner();
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(1.0);
-      xGaitSettings.setStanceWidth(0.25);
-      xGaitSettings.setStepGroundClearance(0.1);
-      xGaitSettings.setStepDuration(0.25);
-      xGaitSettings.setEndDoubleSupportDuration(0);
-      xGaitSettings.setEndPhaseShift(90);
-
-      Vector3D planarVelocity = new Vector3D(1.0, 0.0, 0.0);
-      double currentTime = 0.125;
-      double currentYaw = 0.0;
-      double currentHeight = 0.0;
-      QuadrupedPlanarFootstepPlan footstepPlan = new QuadrupedPlanarFootstepPlan(4);
-
-      QuadrupedTimedOrientedStep currentHindStep = new QuadrupedTimedOrientedStep();
-      currentHindStep.setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
-      currentHindStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
-      currentHindStep.setGoalPosition(new Point3D(-0.25, -0.125, 0.0));
-      currentHindStep.getTimeInterval().setInterval(0.0, 0.25);
-      currentHindStep.setStepYaw(0.0);
-      currentHindStep.setGroundClearance(currentHeight);
-      footstepPlan.getCurrentSteps().set(RobotEnd.HIND, currentHindStep);
-
-      QuadrupedTimedOrientedStep currentFrontStep = new QuadrupedTimedOrientedStep();
-      currentFrontStep.setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
-      currentFrontStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
-      currentFrontStep.setGoalPosition(new Point3D(0.875, -0.125, 0.0));
-      currentFrontStep.getTimeInterval().setInterval(0.125, 0.375);
-      currentFrontStep.setStepYaw(0.0);
-      currentHindStep.setGroundClearance(currentHeight);
-      footstepPlan.getCurrentSteps().set(RobotEnd.FRONT, currentFrontStep);
-
-      xGaitPlanner.computeOnlinePlan(footstepPlan, planarVelocity, currentTime, currentYaw, currentHeight, xGaitSettings);
-
-      ArrayList<QuadrupedTimedStep> nominalSteps = new ArrayList<>();
-      for (int i = 0; i < 2; i++)
+      @ContinuousIntegrationTest(estimatedDuration = 0.0)
+      @Test(timeout=300000)
+      public void testOnlineForwardVelocityPlan()
       {
-         nominalSteps.add(new QuadrupedTimedStep());
+         ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
+         QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+         QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+         xGaitSettings.setStanceLength(1.0);
+         xGaitSettings.setStanceWidth(0.25);
+         xGaitSettings.setStepGroundClearance(0.1);
+         xGaitSettings.setStepDuration(0.25);
+         xGaitSettings.setEndDoubleSupportDuration(0);
+         xGaitSettings.setEndPhaseShift(90);
+
+         double currentTime = 0.125;
+         double currentYaw = 0.0;
+         double currentHeight = 0.0;
+         QuadrupedPlanarFootstepPlan footstepPlan = new QuadrupedPlanarFootstepPlan(4);
+
+         QuadrupedTimedOrientedStep currentHindStep = new QuadrupedTimedOrientedStep();
+         currentHindStep.setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
+         currentHindStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
+         currentHindStep.setGoalPosition(new Point3D(-0.25, -0.125, 0.0));
+         currentHindStep.getTimeInterval().setInterval(0.0, 0.25);
+         currentHindStep.setStepYaw(0.0);
+         currentHindStep.setGroundClearance(currentHeight);
+         footstepPlan.getCurrentSteps().set(RobotEnd.HIND, currentHindStep);
+
+         QuadrupedTimedOrientedStep currentFrontStep = new QuadrupedTimedOrientedStep();
+         currentFrontStep.setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
+         currentFrontStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
+         currentFrontStep.setGoalPosition(new Point3D(0.875, -0.125, 0.0));
+         currentFrontStep.getTimeInterval().setInterval(0.125, 0.375);
+         currentFrontStep.setStepYaw(0.0);
+         currentHindStep.setGroundClearance(currentHeight);
+         footstepPlan.getCurrentSteps().set(RobotEnd.FRONT, currentFrontStep);
+
+         bodyPathProvider.initialPose.setToZero(ReferenceFrame.getWorldFrame());
+         bodyPathProvider.desiredForwardMotion = 1.0;
+         xGaitPlanner.computeOnlinePlan(footstepPlan, currentTime, currentHeight, xGaitSettings);
+
+         ArrayList<QuadrupedTimedStep> nominalSteps = new ArrayList<>();
+         for (int i = 0; i < 2; i++)
+         {
+            nominalSteps.add(new QuadrupedTimedStep());
+         }
+
+         nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
+         nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
+         nominalSteps.get(0).setGoalPosition(new Point3D(0.0, 0.125, 0.0));
+         nominalSteps.get(0).getTimeInterval().setInterval(0.25, 0.5);
+
+         nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
+         nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
+         nominalSteps.get(1).setGoalPosition(new Point3D(1.125, 0.125, 0.0));
+         nominalSteps.get(1).getTimeInterval().setInterval(0.375, 0.625);
+
+         double epsilon = 0.00001;
+         List<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
+         for (int i = 0; i < 2; i++)
+         {
+            assertTrue("planned step " + i  + " does not match nominal step", plannedSteps.get(i).epsilonEquals(nominalSteps.get(i), epsilon));
+         }
       }
 
-      nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
-      nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(0).setGoalPosition(new Point3D(0.0, 0.125, 0.0));
-      nominalSteps.get(0).getTimeInterval().setInterval(0.25, 0.5);
+   private class ForwardMotionBodyPathProvider implements QuadrupedPlanarBodyPathProvider
+   {
+      double desiredForwardMotion;
+      FramePose2D initialPose = new FramePose2D();
 
-      nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
-      nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(1).setGoalPosition(new Point3D(1.125, 0.125, 0.0));
-      nominalSteps.get(1).getTimeInterval().setInterval(0.375, 0.625);
-
-      double epsilon = 0.00001;
-      List<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
-      for (int i = 0; i < 2; i++)
+      @Override
+      public void initialize()
       {
-         assertTrue("planned step " + i  + " does not match nominal step", plannedSteps.get(i).epsilonEquals(nominalSteps.get(i), epsilon));
+      }
+
+      @Override
+      public void getPlanarPose(double time, FramePose2D poseToPack)
+      {
+         double xDisplacement = desiredForwardMotion * time;
+         poseToPack.setX(initialPose.getX() + xDisplacement);
       }
    }
 }
