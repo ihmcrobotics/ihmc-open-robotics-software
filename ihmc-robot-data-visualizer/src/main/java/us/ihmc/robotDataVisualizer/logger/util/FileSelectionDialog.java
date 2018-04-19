@@ -38,4 +38,36 @@ public class FileSelectionDialog
       }
 
    }
+
+   public static File loadFile(final String acceptedFileName)
+   {
+      final FileDialog fileDialog = new FileDialog((Frame) null, "Choose logging directory");
+      fileDialog.setMode(FileDialog.LOAD);
+      
+      if(acceptedFileName != null)
+      {
+         fileDialog.setFilenameFilter(new FilenameFilter()
+         {
+            
+            @Override
+            public boolean accept(File dir, String name)
+            {
+               return (acceptedFileName.equals(name));
+            }
+         });        
+      }
+      
+      fileDialog.setVisible(true);         
+      String filename = fileDialog.getDirectory() + fileDialog.getFile();
+      fileDialog.dispose();
+      if(filename != null)
+      {
+         return new File(filename);
+      }
+      else
+      {
+         return null;
+      }
+      
+   }
 }
