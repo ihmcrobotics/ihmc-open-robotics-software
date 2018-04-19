@@ -165,11 +165,11 @@ public class QuadrupedBodyOrientationManager
          // trajectory hasn't been commanded, add current orientation as start point
          else
          {
-            tempQuaternion.setToZero(bodyFrame);
-            tempQuaternion.changeFrame(worldFrame);
+            desiredAbsoluteYawOrientation.setIncludingFrame(yoBodyOrientationSetpoint.getFrameOrientation());
+            desiredAbsoluteYawVelocity.setIncludingFrame(yoBodyAngularVelocitySetpoint);
 
-            desiredAbsoluteYawOrientation.setYawPitchRoll(tempQuaternion.getYaw(), 0.0, 0.0);
-            desiredAbsoluteYawVelocity.setToZero(worldFrame);
+            desiredAbsoluteYawOrientation.changeFrame(worldFrame);
+            desiredAbsoluteYawVelocity.changeFrame(worldFrame);
          }
 
          absoluteBodyOrientationTrajectory.clear();
