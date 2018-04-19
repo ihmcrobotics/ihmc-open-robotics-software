@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry;
 
    private final JointSettingsHelper jointSettingsHelper;
 
@@ -22,6 +22,13 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    HighLevelHumanoidControllerToolbox controllerToolbox)
    {
+      this("", stateEnum, parameters, controllerToolbox);
+   }
+
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
+                                   HighLevelHumanoidControllerToolbox controllerToolbox)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
       OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
