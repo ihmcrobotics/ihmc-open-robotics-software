@@ -52,7 +52,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.getVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
                                                                                 "requestedHighLevelControllerState");
 
-      HighLevelControllerName[] valuesToDisplay = {HighLevelControllerName.STAND_PREP_STATE, HighLevelControllerName.CALIBRATION, HighLevelControllerName.STAND_TRANSITION_STATE};
+      HighLevelControllerName[] valuesToDisplay = {HighLevelControllerName.CALIBRATION, HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.EXIT_WALKING};
       Map<HighLevelControllerName, String> displayNames = new HashMap<>();
       displayNames.put(HighLevelControllerName.STAND_TRANSITION_STATE, "Go Walking Val!");
 

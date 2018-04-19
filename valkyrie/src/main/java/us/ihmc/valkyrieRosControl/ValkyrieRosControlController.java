@@ -1,5 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.EXIT_WALKING;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
@@ -173,6 +174,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.useDefaultStandReadyControlState();
       controllerFactory.useDefaultStandTransitionControlState();
       controllerFactory.useDefaultWalkingControlState();
+      controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
@@ -198,7 +200,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING);
       controllerFactory.addControllerFailureTransition(STAND_TRANSITION_STATE, fallbackControllerState);
 
-      controllerFactory.addRequestableTransition(WALKING, STAND_PREP_STATE);
+      controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
+      controllerFactory.addFinishedTransition(EXIT_WALKING, STAND_PREP_STATE);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
