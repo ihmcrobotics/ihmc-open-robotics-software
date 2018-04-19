@@ -44,8 +44,6 @@ public class QuadrupedFallDetector
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final QuadrupedSupportPolygon supportPolygon;
 
-   private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
-
    // Yo Variables
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
@@ -59,10 +57,7 @@ public class QuadrupedFallDetector
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
       this.dcmPositionEstimator = dcmPositionEstimator;
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         solePositions.put(robotQuadrant, new FramePoint3D());
-
-      supportPolygon = new QuadrupedSupportPolygon(solePositions);
+      supportPolygon = new QuadrupedSupportPolygon();
 
       isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       isFallDetected.set(false);
@@ -101,7 +96,10 @@ public class QuadrupedFallDetector
       }
       isFallDetected.setWindowSize(fallDetectorGlitchFilterWindow.getValue());
       isFallDetected.update(isFallDetectedUnfiltered);
-      return isFallDetected.getBooleanValue();
+      if (isFallDetected.getBooleanValue())
+         return true;
+      else
+         return false;
    }
 
    private void updateEstimates()
@@ -113,7 +111,7 @@ public class QuadrupedFallDetector
       dcmPositionEstimate2D.set(dcmPositionEstimate);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         solePositions.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
+         supportPolygon.setFootstep(robotQuadrant, soleFrames.get(robotQuadrant));
    }
 
    private boolean detectPitchLimitFailure()

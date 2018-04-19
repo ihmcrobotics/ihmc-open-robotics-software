@@ -30,57 +30,28 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
-public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Serializable
+public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Serializable
 {
    private static final long serialVersionUID = 4247638266737494462L;
-   
+
    private final RecyclingQuadrantDependentList<FramePoint3D> footsteps = new RecyclingQuadrantDependentList<>(FramePoint3D.class);
-   
+
    private final FramePoint3D temporaryFramePoint = new FramePoint3D();
    private final FrameVector3D tempPlaneNormalInWorld = new FrameVector3D();
-   
-   private final FrameVector3D[] tempVectorsForInCirclePoint = new FrameVector3D[] {new FrameVector3D(), new FrameVector3D(), new FrameVector3D(), new FrameVector3D()};
+
+   private final FrameVector3D[] tempVectorsForInCirclePoint = new FrameVector3D[] {new FrameVector3D(), new FrameVector3D(), new FrameVector3D(),
+         new FrameVector3D()};
    private final FramePoint3D[] tempPointListForInCirclePoint = new FramePoint3D[4];
    private final FramePoint3D tempInCircleCenter = new FramePoint3D();
-   
+
    private final FramePoint3D tempIntersection = new FramePoint3D();
-   
+
    private final FrameVector3D[] tempVectorsForCommonSupportPolygon = new FrameVector3D[] {new FrameVector3D(), new FrameVector3D()};
    private final Point2D[] tempPointsForCornerCircle = new Point2D[] {new Point2D(), new Point2D(), new Point2D(), new Point2D()};
    private final Vector2D tempVectorForCornerCircle = new Vector2D();
-   
+
    private final FramePoint2D tempFramePoint2dOne = new FramePoint2D();
 
-   public QuadrupedSupportPolygon()
-   {
-      super();
-   }
-   
-   public QuadrupedSupportPolygon(QuadrantDependentList<FramePoint3D> footsteps)
-   {
-      super();
-
-      for (RobotQuadrant robotQuadrant : footsteps.quadrants())
-      {
-         setFootstep(robotQuadrant, footsteps.get(robotQuadrant));
-      }
-   }
-
-   /**
-    * Copies the support polygon with copies of all of the FramePoints.
-    * 
-    * @param polygon to copy
-    */
-   public QuadrupedSupportPolygon(QuadrupedSupportPolygon polygon) 
-   {
-      super(polygon);
-
-      for (RobotQuadrant robotQuadrant : polygon.getSupportingQuadrantsInOrder())
-      {
-         setFootstep(robotQuadrant, polygon.getFootstep(robotQuadrant));
-      }
-   }
-   
    void printOutPolygon(String string)
    {
       System.out.print(getClass().getSimpleName() + ": " + string);
@@ -95,7 +66,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public String toString()
    {
       String string = getClass().getSimpleName();
-      for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          string += "\n" + robotQuadrant + " " + getFootstep(robotQuadrant);
       }
@@ -137,42 +108,21 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          switch (getFirstNonSupportingQuadrant())
          {
          case FRONT_LEFT:
-            return new RobotQuadrant[][]
-            {
-               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
-               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
-               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT}
-            };
+            return new RobotQuadrant[][] {{RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
+                  {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT}};
          case FRONT_RIGHT:
-            return new RobotQuadrant[][]
-            {
-               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_RIGHT},
-               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
-               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
-            };
+            return new RobotQuadrant[][] {{RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_RIGHT}, {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
+                  {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}};
          case HIND_RIGHT:
-            return new RobotQuadrant[][]
-            {
-               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
-               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT},
-               {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
-            };
+            return new RobotQuadrant[][] {{RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT},
+                  {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}};
          case HIND_LEFT:
-            return new RobotQuadrant[][]
-            {
-               {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
-               {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
-               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT}
-            };
+            return new RobotQuadrant[][] {{RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
+                  {RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT}};
          }
       case 4:
-         return new RobotQuadrant[][]
-         {
-            {RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT},
-            {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
-            {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT},
-            {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
-         };
+         return new RobotQuadrant[][] {{RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT}, {RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_RIGHT},
+               {RobotQuadrant.HIND_RIGHT, RobotQuadrant.HIND_LEFT}, {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}};
       default:
          throw new RuntimeException();
       }
@@ -196,7 +146,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       else
          throw new EmptySupportPolygonException();
    }
-   
+
    public RobotQuadrant getFirstNonSupportingQuadrant()
    {
       if (!footsteps.containsQuadrant(RobotQuadrant.FRONT_LEFT))
@@ -210,7 +160,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       else
          throw new RuntimeException("Polygon is full");
    }
-   
+
    public RobotQuadrant getLastSupportingQuadrant()
    {
       if (footsteps.containsQuadrant(RobotQuadrant.HIND_LEFT))
@@ -238,7 +188,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       else
          throw new RuntimeException("Polygon is full");
    }
-   
+
    public RobotQuadrant getNextClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
    {
       RobotQuadrant prospectiveQuadrant = robotQuadrant;
@@ -248,10 +198,10 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          if (footsteps.containsQuadrant(prospectiveQuadrant))
             return prospectiveQuadrant;
       }
-      
+
       throw new EmptySupportPolygonException();
    }
-   
+
    public RobotQuadrant getNextCounterClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
    {
       RobotQuadrant prospectiveQuadrant = robotQuadrant;
@@ -261,20 +211,20 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          if (footsteps.containsQuadrant(prospectiveQuadrant))
             return prospectiveQuadrant;
       }
-      
+
       throw new EmptySupportPolygonException();
    }
-    
+
    public FramePoint3D getFootstep(RobotQuadrant robotQuadrant)
    {
       return footsteps.get(robotQuadrant);
    }
-   
+
    public FramePoint3D reviveFootstep(RobotQuadrant robotQuadrant)
-   {      
+   {
       return footsteps.add(robotQuadrant);
    }
-   
+
    public void set(QuadrupedSupportPolygon polygon)
    {
       super.set(polygon);
@@ -288,13 +238,18 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly footstep)
    {
       if (footstep == null)
-      {
-         footsteps.remove(robotQuadrant);
-      }
-      else
-      {
-         footsteps.add(robotQuadrant).setIncludingFrame(footstep);
-      }
+         return;
+
+      footsteps.add(robotQuadrant).setIncludingFrame(footstep);
+      updatePolygon();
+   }
+
+   public void setFootstep(RobotQuadrant robotQuadrant, ReferenceFrame footstepFrame)
+   {
+      if (footstepFrame == null)
+         return;
+
+      footsteps.add(robotQuadrant).setToZero(footstepFrame);
       updatePolygon();
    }
 
@@ -310,20 +265,19 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       updatePolygon();
    }
 
-   private void updatePolygon()
+   public void updatePolygon()
    {
       super.clear();
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
       {
-         addVertexMatchingFrame(getFootstep(supportingQuadrant));
+         super.addVertexMatchingFrame(getFootstep(supportingQuadrant));
       }
       super.update();
    }
 
-
    /**
     * Replaces the stored footstep with the passed in one.
-    * 
+    *
     * @param support polygon to pack
     * @param quadrant to replace
     * @param resulting footstep
@@ -353,7 +307,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       translate(translateBy.getX(), translateBy.getY(), translateBy.getZ());
    }
-   
+
    /**
     * Translates this polygon in X and Y.
     */
@@ -376,8 +330,8 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public void yawAboutCentroid(double yaw)
    {
       getCentroid(temporaryFramePoint);
-   
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          FramePoint3D footstep = getFootstep(quadrant);
          if (footstep != null)
@@ -403,7 +357,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       double minZ = Double.POSITIVE_INFINITY;
       RobotQuadrant lowest = null;
-   
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          double footZ = getFootstep(robotQuadrant).getZ();
@@ -413,7 +367,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
             lowest = robotQuadrant;
          }
       }
-   
+
       return lowest;
    }
 
@@ -426,7 +380,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       double maxZ = Double.NEGATIVE_INFINITY;
       RobotQuadrant highest = null;
-   
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          double footZ = getFootstep(robotQuadrant).getZ();
@@ -436,7 +390,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
             highest = robotQuadrant;
          }
       }
-   
+
       return highest;
    }
 
@@ -449,10 +403,10 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       double minDistance = Double.POSITIVE_INFINITY;
       RobotQuadrant closestQuadrant = null;
-      for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          double distance = getFootstep(robotQuadrant).distance(pointToCompare);
-         if(distance < minDistance)
+         if (distance < minDistance)
          {
             closestQuadrant = robotQuadrant;
             minDistance = distance;
@@ -469,39 +423,39 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       int size = getNumberOfVertices();
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if(getFootstep(robotQuadrant) != null)
+         if (getFootstep(robotQuadrant) != null)
          {
             centroidToPack.add(getFootstep(robotQuadrant));
          }
          else
          {
             FramePoint3D acrossBodyFootstep = getFootstep(robotQuadrant.getAcrossBodyQuadrant());
-            if(acrossBodyFootstep != null)
+            if (acrossBodyFootstep != null)
             {
                centroidToPack.add(acrossBodyFootstep);
                size++;
             }
          }
       }
-      
+
       centroidToPack.scale(1.0 / size);
    }
-   
+
    public void getCentroid(FramePoint3D centroidToPack)
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
-      
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          centroidToPack.add(getFootstep(robotQuadrant));
       }
-      
+
       centroidToPack.scale(1.0 / getNumberOfVertices());
    }
-   
+
    /**
     * gets the Centroid of the supplied quadrants and sets the z value to the average between the lowest foot in 
     * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
@@ -512,38 +466,38 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       double frontZ = Double.MAX_VALUE;
       double hindZ = Double.MAX_VALUE;
-      
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          FramePoint3D footstep = getFootstep(robotQuadrant);
          centroidToPack.add(footstep);
-         
+
          double currentFootZ = footstep.getZ();
-         if(robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
+         if (robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
          {
             frontZ = currentFootZ;
          }
-         else if(robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
+         else if (robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
          {
             hindZ = currentFootZ;
          }
       }
 
       centroidToPack.scale(1.0 / getNumberOfVertices());
-      
+
       double averageZ = 0.0;
-      if(hindZ < Double.MAX_VALUE)
+      if (hindZ < Double.MAX_VALUE)
       {
          averageZ += hindZ;
       }
-      if(frontZ < Double.MAX_VALUE)
+      if (frontZ < Double.MAX_VALUE)
       {
          averageZ += frontZ;
       }
       averageZ /= 2.0;
       centroidToPack.setZ(averageZ);
    }
-   
+
    /**
     * gets the weighted Centroid of support polyon and sets the z value to the average between the lowest foot in 
     * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
@@ -553,55 +507,56 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       getCentroidEqualWeightingEnds(centroidToPack);
-      
+
       double frontZ = Double.MAX_VALUE;
       double hindZ = Double.MAX_VALUE;
-      
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          FramePoint3D footstep = getFootstep(robotQuadrant);
          double currentFootZ = footstep.getZ();
-         if(robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
+         if (robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
          {
             frontZ = currentFootZ;
          }
-         else if(robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
+         else if (robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
          {
             hindZ = currentFootZ;
          }
       }
-      
+
       double averageZ = 0.0;
-      if(hindZ < Double.MAX_VALUE)
+      if (hindZ < Double.MAX_VALUE)
       {
          averageZ += hindZ;
       }
-      if(frontZ < Double.MAX_VALUE)
+      if (frontZ < Double.MAX_VALUE)
       {
          averageZ += frontZ;
       }
       averageZ /= 2.0;
       centroidToPack.setZ(averageZ);
    }
-   
+
    private final FramePoint3D tempFramePointForCentroids = new FramePoint3D();
+
    public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
       double nominalYaw = getNominalYaw();
-      
+
       getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
       framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
-   
+
    public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
       double nominalYaw = getNominalYaw();
-      
+
       getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
       framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
@@ -610,12 +565,12 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public void getCentroid2d(FramePoint2D centroidToPack2d)
    {
       centroidToPack2d.setToZero();
-      
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          centroidToPack2d.add(getFootstep(robotQuadrant).getX(), getFootstep(robotQuadrant).getY());
       }
-      
+
       centroidToPack2d.scale(1.0 / getNumberOfVertices());
    }
 
@@ -675,13 +630,11 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       return isPointInside(tempFramePoint2dOne);
    }
 
-
    public double signedDistance(FramePoint3D point)
    {
       tempFramePoint2dOne.set(point);
       return signedDistance(tempFramePoint2dOne);
    }
-
 
    /**
     * Get the radius of the largest circle that can be
@@ -693,7 +646,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       return getInCircle2d(tempInCircleCenter);
    }
-   
+
    /**
     * Get the radius and center point of the largest 
     * circle that can be drawn in the polygon.
@@ -704,14 +657,14 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public double getInCircle2d(FramePoint3D inCircleCenterToPack)
    {
       getInCirclePoint2d(inCircleCenterToPack);
-      
+
       double minimumRadius = Double.MAX_VALUE;
       double radius;
-      
+
       for (RobotQuadrant[] legPair : getLegPairs())
       {
          radius = GeometryTools.distanceFromPointToLine2d(inCircleCenterToPack, getFootstep(legPair[0]), getFootstep(legPair[1]));
-         
+
          if (radius < minimumRadius)
          {
             minimumRadius = radius;
@@ -720,7 +673,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
 
       return minimumRadius;
    }
-   
+
    /**
     * getInCirclePoint
     *
@@ -739,18 +692,18 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       {
          throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs. getNumberOfVertices() = " + getNumberOfVertices());
       }
-      
+
       int i = 0;
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          tempPointListForInCirclePoint[i++] = getFootstep(robotQuadrant);
       }
-      
+
       if (getNumberOfVertices() == 3)
       {
          tempPointListForInCirclePoint[3] = tempPointListForInCirclePoint[0];
       }
-      
+
       // get first two line segments
       tempVectorsForInCirclePoint[0].sub(tempPointListForInCirclePoint[0], tempPointListForInCirclePoint[1]);
       tempVectorsForInCirclePoint[0].normalize();
@@ -789,7 +742,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       double distanceToInCircleCenter = point.distanceXY(tempInCircleCenter);
       return (inCircleRadius - distanceToInCircleCenter);
    }
-   
+
    /**
     * Computes a nominal yaw angle. If triangle support, then the angle from the back to front support foot on the same side.
     * If a quad, then the average of the two front to back angles.
@@ -802,7 +755,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       {
          double deltaX = 0.0;
          double deltaY = 0.0;
-         
+
          if (footsteps.containsQuadrant(FRONT_LEFT) && footsteps.containsQuadrant(HIND_LEFT))
          {
             deltaX += getFootstep(FRONT_LEFT).getX() - getFootstep(HIND_LEFT).getX();
@@ -813,7 +766,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
             deltaX += getFootstep(FRONT_RIGHT).getX() - getFootstep(HIND_RIGHT).getX();
             deltaY += getFootstep(FRONT_RIGHT).getY() - getFootstep(HIND_RIGHT).getY();
          }
-         
+
          return Math.atan2(deltaY, deltaX);
       }
       else
@@ -851,25 +804,25 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          double deltaX = 0.0;
          double deltaY = 0.0;
          double deltaZ = 0.0;
-   
+
          if ((footsteps.containsQuadrant(RobotQuadrant.FRONT_LEFT) && footsteps.containsQuadrant(RobotQuadrant.HIND_LEFT)))
          {
             deltaX += getFootstep(RobotQuadrant.FRONT_LEFT).getX() - getFootstep(RobotQuadrant.HIND_LEFT).getX();
             deltaY += getFootstep(RobotQuadrant.FRONT_LEFT).getY() - getFootstep(RobotQuadrant.HIND_LEFT).getY();
             deltaZ += getFootstep(RobotQuadrant.FRONT_LEFT).getZ() - getFootstep(RobotQuadrant.HIND_LEFT).getZ();
          }
-   
+
          if (footsteps.containsQuadrant(RobotQuadrant.FRONT_RIGHT) && footsteps.containsQuadrant(RobotQuadrant.HIND_RIGHT))
          {
             deltaX += getFootstep(RobotQuadrant.FRONT_RIGHT).getX() - getFootstep(RobotQuadrant.HIND_RIGHT).getX();
             deltaY += getFootstep(RobotQuadrant.FRONT_RIGHT).getY() - getFootstep(RobotQuadrant.HIND_RIGHT).getY();
             deltaZ += getFootstep(RobotQuadrant.FRONT_RIGHT).getZ() - getFootstep(RobotQuadrant.HIND_RIGHT).getZ();
          }
-         
+
          double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
-         
+
          return -Math.asin(deltaZ / length);
       }
       else
@@ -890,25 +843,25 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          double deltaX = 0.0;
          double deltaY = 0.0;
          double deltaZ = 0.0;
-         
+
          if (containsFootstep(FRONT_LEFT) && containsFootstep(FRONT_RIGHT))
          {
             deltaX += getFootstep(FRONT_LEFT).getX() - getFootstep(FRONT_RIGHT).getX();
             deltaY += getFootstep(FRONT_LEFT).getY() - getFootstep(FRONT_RIGHT).getY();
             deltaZ += getFootstep(FRONT_LEFT).getZ() - getFootstep(FRONT_RIGHT).getZ();
          }
-   
+
          if (containsFootstep(HIND_LEFT) && containsFootstep(HIND_RIGHT))
          {
             deltaX = getFootstep(HIND_LEFT).getX() - getFootstep(HIND_RIGHT).getX();
             deltaY = getFootstep(HIND_LEFT).getY() - getFootstep(HIND_RIGHT).getY();
             deltaZ = getFootstep(HIND_LEFT).getZ() - getFootstep(HIND_RIGHT).getZ();
          }
-         
+
          double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
-         
+
          return Math.asin(deltaZ / length);
       }
       else
@@ -919,7 +872,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
 
    /**
     * Check if the polygons are same getNumberOfVertices and contain the same quadrants.
-    * 
+    *
     * @param polygonToCompare
     * @return contain same quadrants
     */
@@ -927,7 +880,7 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       if (getNumberOfVertices() != polygonToCompare.getNumberOfVertices())
          return false;
-      
+
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
          if (!polygonToCompare.containsFootstep(robotQuadrant))
@@ -935,11 +888,9 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
             return false;
          }
       }
-      
+
       return true;
    }
-   
-
 
    /**
     *  This method returns the common support polygon bewteen this and the supplied supportPolygon
@@ -954,7 +905,8 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
     * @return SupportPolygon That is common to both (can be null for opposite side swing legs)
     *        This should be the two matching feet and the intersection of the two tror lines
     */
-   public void getCommonTriangle2d(QuadrupedSupportPolygon polygonToCompare, QuadrupedSupportPolygon commonPolygonToPack, RobotQuadrant quadrantToAssignToIntersection)
+   public void getCommonTriangle2d(QuadrupedSupportPolygon polygonToCompare, QuadrupedSupportPolygon commonPolygonToPack,
+                                   RobotQuadrant quadrantToAssignToIntersection)
    {
       // verify both have exactly three legs
       if (getNumberOfVertices() != 3)
@@ -977,17 +929,18 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       // verify specified swing leg name is one of the swinging (same side) leg names
       if (quadrantToAssignToIntersection != thisSwingLeg && quadrantToAssignToIntersection != compareSwingLeg)
          throw new UndefinedOperationException("The specified intersection quadrant must be one of the swinging (same side) leg names");
-      
+
       FrameVector3D direction1 = tempVectorsForCommonSupportPolygon[0];
       direction1.sub(getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()), getFootstep(compareSwingLeg));
-      
+
       FrameVector3D direction2 = tempVectorsForCommonSupportPolygon[1];
       direction2.sub(polygonToCompare.getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()), polygonToCompare.getFootstep(thisSwingLeg));
-      
+
       commonPolygonToPack.clear();
       FramePoint3D intersection = commonPolygonToPack.reviveFootstep(quadrantToAssignToIntersection);
-      GeometryTools.getIntersectionBetweenTwoLines2d(getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2, intersection);
-      
+      GeometryTools
+            .getIntersectionBetweenTwoLines2d(getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2, intersection);
+
       commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
       commonPolygonToPack.setFootstep(compareSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()));
    }
@@ -1002,18 +955,19 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
       int numberOfEqual = 0;
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if (polygonToCompare.getFootstep(robotQuadrant) != null && getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
+         if (polygonToCompare.getFootstep(robotQuadrant) != null && getFootstep(robotQuadrant)
+               .epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
          {
             ++numberOfEqual;
          }
       }
-   
+
       return numberOfEqual;
    }
 
    /**
     * Returns the shrunken common triangle.
-    * 
+    *
     * @param nextSupportPolygon
     * @param shrunkenCommonPolygonToPack
     * @param tempCommonSupportPolygon Can be any non-null polygon.
@@ -1023,18 +977,18 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
     * @param hindDistance
     */
    public void getShrunkenCommonTriangle2d(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
-         QuadrupedSupportPolygon tempCommonSupportPolygon, RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance,
-         double hindDistance)
+                                           QuadrupedSupportPolygon tempCommonSupportPolygon, RobotQuadrant quadrantForIntersection, double frontDistance,
+                                           double sideDistance, double hindDistance)
    {
       getCommonTriangle2d(nextSupportPolygon, tempCommonSupportPolygon, quadrantForIntersection);
-      
+
       shrunkenCommonPolygonToPack.set(tempCommonSupportPolygon);
-      
+
       RobotQuadrant swingLeg = tempCommonSupportPolygon.getFirstNonSupportingQuadrant();
       RobotQuadrant swingLegSameSide = swingLeg.getSameSideQuadrant();
       RobotQuadrant nextEdgeQuadrant = tempCommonSupportPolygon.getNextClockwiseSupportingQuadrant(swingLegSameSide);
       RobotQuadrant previousEdgeQuadrant = tempCommonSupportPolygon.getNextCounterClockwiseSupportingQuadrant(swingLegSameSide);
-      
+
       RobotQuadrant frontEdgeQuadrant;
       RobotQuadrant sideEdgeQuadrant;
       RobotQuadrant hindEdgeQuadrant;
@@ -1050,17 +1004,17 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          sideEdgeQuadrant = nextEdgeQuadrant;
          hindEdgeQuadrant = swingLegSameSide;
       }
-      
+
       tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, frontEdgeQuadrant, frontDistance);
       tempCommonSupportPolygon.set(shrunkenCommonPolygonToPack);
       tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, sideEdgeQuadrant, sideDistance);
       tempCommonSupportPolygon.set(shrunkenCommonPolygonToPack);
       tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, hindEdgeQuadrant, hindDistance);
    }
-   
+
    /**
     * Shrinks all sides of the polygon.
-    * 
+    *
     * @param distance to shrink
     */
    public void shrinkPolygon2d(double distance)
@@ -1070,20 +1024,20 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          getShrunkenPolygon2d(this, robotQuadrant, distance);
       }
    }
-   
+
    /**
     * Shrinks one side of the polygon.
-    * 
+    *
     * @param distance to shrink
     */
    public void shrinkPolygon2d(RobotQuadrant robotQuadrant, double distance)
    {
       getShrunkenPolygon2d(this, robotQuadrant, distance);
    }
-   
+
    /**
     * Shrinks one side of the polygon.
-    * 
+    *
     * @param shrunkenPolygonToPack
     * @param sideToShrink side to shrink is the clockwise connected edge to the provided quadrant (ex. FRONT_LEFT -> TOP)
     * @param distance
@@ -1091,39 +1045,41 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    public void getShrunkenPolygon2d(QuadrupedSupportPolygon shrunkenPolygonToPack, RobotQuadrant sideToShrink, double distance)
    {
       shrunkenPolygonToPack.set(this);
-      
+
       if (getNumberOfVertices() >= 3)
       {
          RobotQuadrant nextEdgeQuadrant = getNextClockwiseSupportingQuadrant(sideToShrink);
          RobotQuadrant previousEdgeQuadrant = getNextCounterClockwiseSupportingQuadrant(sideToShrink);
-         
+
          FramePoint3D originalShrinkEdgeFoot = getFootstep(sideToShrink);
          FramePoint3D originalNextEdgeFoot = getFootstep(nextEdgeQuadrant);
          FramePoint3D originalPreviousEdgeFoot = getFootstep(previousEdgeQuadrant);
-         
+
          FramePoint3D shrunkenShrinkEdgeFoot = shrunkenPolygonToPack.getFootstep(sideToShrink);
          FramePoint3D shrunkenNextEdgeFoot = shrunkenPolygonToPack.getFootstep(nextEdgeQuadrant);
-         
+
          FrameVector3D shrinkDirection = tempPlaneNormalInWorld;
          shrinkDirection.sub(originalShrinkEdgeFoot, originalNextEdgeFoot);
          GeometryTools.getPerpendicularVector2d(shrinkDirection, shrinkDirection);
          shrinkDirection.normalize();
          shrinkDirection.scale(distance);
-         
+
          shrunkenShrinkEdgeFoot.add(shrinkDirection);
          shrunkenNextEdgeFoot.add(shrinkDirection);
-         
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot, shrunkenShrinkEdgeFoot);
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot, shrunkenNextEdgeFoot);
+
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot,
+                                                        shrunkenShrinkEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot,
+                                                        shrunkenNextEdgeFoot);
       }
       else if (getNumberOfVertices() == 2)
       {
          RobotQuadrant nextEdgeQuadrant = getNextClockwiseSupportingQuadrant(sideToShrink);
          RobotQuadrant shrinkQuadrant = getNextClockwiseSupportingQuadrant(nextEdgeQuadrant);
-         
+
          FramePoint3D shrinkFootstep = getFootstep(shrinkQuadrant);
          FramePoint3D shrinkTowardsFootstep = getFootstep(nextEdgeQuadrant);
-         
+
          FrameVector3D shrinkVector = tempVectorsForInCirclePoint[0];
          shrinkVector.sub(shrinkTowardsFootstep, shrinkFootstep);
          shrinkVector.normalize();
@@ -1135,9 +1091,6 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          throw new UndefinedOperationException("Can only shrink 2, 3 or 4 sided polygons");
       }
    }
-
-
-
 
    /**
     * getLeftTrotLeg: returns the left leg of the polyogn if the polygon is a ValidTrotPolygon.
@@ -1151,11 +1104,11 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          throw new RuntimeException("SupportPolygon is not a ValidTrotPolygon");
 
       RobotQuadrant firstLeg = getFirstSupportingQuadrant();
-      if(firstLeg.isQuadrantOnLeftSide())
+      if (firstLeg.isQuadrantOnLeftSide())
       {
          return firstLeg;
       }
-      
+
       return firstLeg.getDiagonalOppositeQuadrant();
    }
 
@@ -1171,20 +1124,21 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          throw new RuntimeException("SupportPolygon is not a ValidTrotPolygon");
 
       RobotQuadrant firstLeg = getFirstSupportingQuadrant();
-      if(firstLeg.isQuadrantOnRightSide())
+      if (firstLeg.isQuadrantOnRightSide())
       {
          return firstLeg;
       }
-      
+
       return firstLeg.getDiagonalOppositeQuadrant();
    }
-   
+
    /**
     * Gets distance from P1 to trotLine specified by front quadrant.
     */
    public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint3DReadOnly p1, FramePoint3DReadOnly p2)
    {
-      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
+      boolean intersectionExists = GeometryTools
+            .getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
 
       if (intersectionExists)
       {
@@ -1201,22 +1155,23 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    /**
     * Gets the center of a circle of radius in the corner of the triangle.
     * Returns true if the requested radius is greater than the in circle radius.
-    * 
+    *
     * This only works on triangles and must have getNumberOfVertices of 3.
-    * 
+    *
     * @param cornerToPutCircle
     * @param cornerCircleRadius
     * @param centerToPack
     * @return false if the center passed the centroid
     */
-   public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2D centerToPack)
+   public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius,
+                                                                                           FramePoint2D centerToPack)
    {
       if (getNumberOfVertices() == 3)
       {
          if (cornerCircleRadius <= getInCircleRadius2d())
          {
             getCenterOfCircleOfRadiusInCornerOfPolygon(cornerToPutCircle, cornerCircleRadius, centerToPack);
-            
+
             return true;
          }
          else
@@ -1229,12 +1184,12 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
          throw new UndefinedOperationException("Triangle getNumberOfVertices must be 3. getNumberOfVertices = " + getNumberOfVertices());
       }
    }
-   
+
    /**
     * Gets the center point of a circle of radius in the corner of a polygon.
-    * 
+    *
     * This polygon must have getNumberOfVertices of 3 or 4.
-    * 
+    *
     * @param cornerToPutCircle
     * @param radius
     * @param centerToPack
@@ -1249,33 +1204,33 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
             FramePoint3D cornerPoint = getFootstep(cornerToPutCircle);
             FramePoint3D pointA = getFootstep(getNextClockwiseSupportingQuadrant(cornerToPutCircle));
             FramePoint3D pointB = getFootstep(getNextCounterClockwiseSupportingQuadrant(cornerToPutCircle));
-   
+
             double cornerToA = cornerPoint.distance(pointA);
             double cornerToB = cornerPoint.distance(pointB);
             double aToB = pointA.distance(pointB);
-   
+
             double theta = EuclidGeometryTools.unknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
-            
+
             Point2D tempCorner = tempPointsForCornerCircle[0];
             Point2D tempA = tempPointsForCornerCircle[1];
             Point2D tempB = tempPointsForCornerCircle[2];
-            
+
             tempCorner.set(cornerPoint);
             tempA.set(pointA);
             tempB.set(pointB);
-   
+
             double bisectTheta = 0.5 * theta;
-   
+
             double radiusOffsetAlongBisector = cornerCircleRadius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
             Point2D adjacentBisector = tempPointsForCornerCircle[3];
             EuclidGeometryTools.triangleBisector2D(tempA, tempCorner, tempB, adjacentBisector);
-   
+
             Vector2D bisectorVector = tempVectorForCornerCircle;
             bisectorVector.set(adjacentBisector.getX() - cornerPoint.getX(), adjacentBisector.getY() - cornerPoint.getY());
             double scalar = radiusOffsetAlongBisector / bisectorVector.length();
-   
+
             bisectorVector.scale(scalar);
-   
+
             tempCorner.add(bisectorVector);
             centerToPack.set(tempCorner);
          }
@@ -1294,18 +1249,18 @@ public class QuadrupedSupportPolygon  extends FrameConvexPolygon2D implements Se
    {
       if (polyTwo == null)
          return false;
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          FramePoint3D thisFootstep = getFootstep(quadrant);
          FramePoint3D otherFootstep = polyTwo.getFootstep(quadrant);
-         
-         if(otherFootstep == null || !thisFootstep.epsilonEquals(otherFootstep, 0.005))
+
+         if (otherFootstep == null || !thisFootstep.epsilonEquals(otherFootstep, 0.005))
          {
             return false;
          }
       }
-   
+
       return super.epsilonEquals(polyTwo, 0.005);
    }
 }
