@@ -1,11 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
+import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedConstantVelocityBodyPathProvider;
+import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -28,21 +31,21 @@ public class QuadrupedXGaitStepStream
 
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final QuadrupedPlanarFootstepPlan footstepPlan;
-   private final QuadrupedConstantVelocityBodyPathProvider bodyPathProvider;
+   private final QuadrupedBodyPathMultiplexer bodyPathProvider;
    private final ReferenceFrame centroidFrame;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
-                                   YoVariableRegistry parentRegistry)
+                                   PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
    {
-      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, parentRegistry);
+      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, packetCommunicator, parentRegistry);
    }
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp,
-                                   YoVariableRegistry parentRegistry)
+                                   PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
-      this.bodyPathProvider = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, controlDT, timestamp, registry);
+      this.bodyPathProvider = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, packetCommunicator, registry);
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
       this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();

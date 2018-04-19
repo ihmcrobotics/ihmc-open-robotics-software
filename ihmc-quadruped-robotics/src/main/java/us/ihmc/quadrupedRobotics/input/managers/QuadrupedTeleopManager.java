@@ -60,7 +60,7 @@ public class QuadrupedTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, packetCommunicator, registry);
       desiredCoMHeight.set(initialCoMHeight);
 
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
