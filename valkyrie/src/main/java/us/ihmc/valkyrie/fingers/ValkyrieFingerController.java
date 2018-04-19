@@ -48,9 +48,6 @@ public class ValkyrieFingerController implements RobotController
       gains.setMaximumIntegralError(0.5);
 
       Map<String, YoEffortJointHandleHolder> jointHandleMap = jointHandles.stream().collect(Collectors.toMap(h -> h.getName(), h -> h));
-      PrintTools.error(jointHandleMap.toString());
-      System.out.println();
-      System.out.println();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -61,7 +58,6 @@ public class ValkyrieFingerController implements RobotController
          for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
             jointHandleEnumMap.put(jointEnum, jointHandleMap.get(jointEnum.getJointName(robotSide)));
 
-         PrintTools.error(jointHandleEnumMap.toString());
          ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, gains, trajectoryTime, thumbCloseDelay, fingerOpenDelay, jointHandleEnumMap, registry);
          fingerSetControllers.put(robotSide, controller);
       }
