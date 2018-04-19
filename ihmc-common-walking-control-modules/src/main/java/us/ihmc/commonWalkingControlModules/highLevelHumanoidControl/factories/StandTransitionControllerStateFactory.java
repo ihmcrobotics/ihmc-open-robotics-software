@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandTransitionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 import java.util.EnumMap;
 
 public class StandTransitionControllerStateFactory implements HighLevelControllerStateFactory
 {
-   private StandTransitionControllerState standTransitionControllerState;
+   private SmoothTransitionControllerState standTransitionControllerState;
 
    @Override
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
@@ -23,7 +23,8 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
          HighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
 
-         standTransitionControllerState = new  StandTransitionControllerState(standReadyControllerState, walkingControllerState,
+         standTransitionControllerState = new SmoothTransitionControllerState("toWalking", HighLevelControllerName.STAND_TRANSITION_STATE,
+                                                                              standReadyControllerState, walkingControllerState,
                                                                               controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                               controllerFactoryHelper.getHighLevelControllerParameters());
       }
