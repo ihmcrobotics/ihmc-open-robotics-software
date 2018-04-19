@@ -85,7 +85,7 @@ public class QuadrupedControllerToolbox
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
 
-      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), dcmPositionEstimator, supportPolygon, registry);
+      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
 
