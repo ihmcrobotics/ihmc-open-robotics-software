@@ -31,21 +31,21 @@ public class QuadrupedXGaitStepStream
 
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final QuadrupedPlanarFootstepPlan footstepPlan;
-   private final QuadrupedBodyPathMultiplexer bodyPathProvider;
+   private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final ReferenceFrame centroidFrame;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
-                                   PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
-      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, packetCommunicator, parentRegistry);
+      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, bodyPathProvider, parentRegistry);
    }
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp,
-                                   PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
-      this.bodyPathProvider = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, packetCommunicator, registry);
+      this.bodyPathProvider = bodyPathProvider;
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
       this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
@@ -94,11 +94,6 @@ public class QuadrupedXGaitStepStream
    private double getCurrentHeight()
    {
       return centroidFrame.getTransformToWorldFrame().getTranslationZ();
-   }
-
-   public void setDesiredPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
-   {
-      bodyPathProvider.setPlanarVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityYaw);
    }
 
    public List<? extends QuadrupedTimedStep> getSteps()

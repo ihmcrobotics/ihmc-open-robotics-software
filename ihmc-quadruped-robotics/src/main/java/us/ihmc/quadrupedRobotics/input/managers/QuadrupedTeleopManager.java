@@ -13,8 +13,8 @@ import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -53,6 +53,7 @@ public class QuadrupedTeleopManager
    private final ComPositionPacket comPositionPacket = new ComPositionPacket();
    private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
    private final QuadrupedReferenceFrames referenceFrames;
+   private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
 
    public QuadrupedTeleopManager(PacketCommunicator packetCommunicator, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                  double initialCoMHeight, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
@@ -60,7 +61,8 @@ public class QuadrupedTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, packetCommunicator, registry);
+      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, packetCommunicator, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, bodyPathMultiplexer, registry);
       desiredCoMHeight.set(initialCoMHeight);
 
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
@@ -73,7 +75,7 @@ public class QuadrupedTeleopManager
    public void update()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-      stepStream.setDesiredPlanarVelocity(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
+      bodyPathMultiplexer.setPlanarVelocityForJoystickPath(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
       referenceFrames.updateFrames();
 
       if (xGaitRequested.getAndSet(false) && !isInStepState())
@@ -198,5 +200,10 @@ public class QuadrupedTeleopManager
    public YoQuadrupedXGaitSettings getXGaitSettings()
    {
       return xGaitSettings;
+   }
+
+   public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
+   {
+      bodyPathMultiplexer.initialize();
    }
 }

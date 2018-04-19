@@ -100,4 +100,9 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    {
       return trajectory.isDone();
    }
+
+   public void setBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
+   {
+      this.bodyPathPlanMessage.set(bodyPathPlanMessage);
+   }
 }

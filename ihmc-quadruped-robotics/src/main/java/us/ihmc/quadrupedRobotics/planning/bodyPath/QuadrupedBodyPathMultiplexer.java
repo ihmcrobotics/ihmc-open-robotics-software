@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.bodyPath;
 
+import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -62,8 +63,13 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
       }
    }
 
-   public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
+   public void setPlanarVelocityForJoystickPath(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
    {
       joystickBasedPath.setPlanarVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityYaw);
+   }
+
+   public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
+   {
+      waypointBasedPath.setBodyPathPlanMessage(bodyPathPlanMessage);
    }
 }
