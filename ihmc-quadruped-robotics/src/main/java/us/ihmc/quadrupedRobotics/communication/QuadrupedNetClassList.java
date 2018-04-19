@@ -180,5 +180,9 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(IMUPacketPubSubType.class);
       registerPacketField(QuadrupedTimedStepMessagePubSubType.class);
       registerPacketField(PointPubSubType.class);
+
+      // planner messages
+      registerPacketClass(QuadrupedBodyPathPlanMessage.class);
+      registerPacketField(QuadrupedBodyPathPlanMessagePubSubType.class);
    }
 }
