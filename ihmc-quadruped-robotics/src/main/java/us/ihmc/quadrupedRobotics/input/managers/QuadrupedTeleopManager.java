@@ -52,11 +52,13 @@ public class QuadrupedTeleopManager
 
    private final ComPositionPacket comPositionPacket = new ComPositionPacket();
    private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
+   private final QuadrupedReferenceFrames referenceFrames;
 
    public QuadrupedTeleopManager(PacketCommunicator packetCommunicator, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                  double initialCoMHeight, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.packetCommunicator = packetCommunicator;
+      this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, registry);
       desiredCoMHeight.set(initialCoMHeight);
@@ -72,6 +74,7 @@ public class QuadrupedTeleopManager
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
       stepStream.setDesiredPlanarVelocity(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
+      referenceFrames.updateFrames();
 
       if (xGaitRequested.getAndSet(false) && !isInStepState())
       {
