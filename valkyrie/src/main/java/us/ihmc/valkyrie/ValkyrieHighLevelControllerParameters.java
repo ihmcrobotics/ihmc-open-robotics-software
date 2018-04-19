@@ -53,6 +53,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       case STAND_PREP_STATE:
       case STAND_READY:
       case STAND_TRANSITION_STATE:
+      case EXIT_WALKING:
       case CALIBRATION:
          return getDesiredJointBehaviorForHangingAround();
       default:
