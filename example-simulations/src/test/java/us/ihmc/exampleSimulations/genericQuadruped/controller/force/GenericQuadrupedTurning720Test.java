@@ -18,7 +18,7 @@ public class GenericQuadrupedTurning720Test extends QuadrupedXGaitTurning720Test
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
-      return new GenericQuadrupedTestFactory(true);
+      return new GenericQuadrupedTestFactory();
    }
 
    @Override
