@@ -40,7 +40,7 @@ public class ValkyrieStandPrepParameters implements WholeBodySetpointParameters,
       for (RobotSide robotSide : RobotSide.values)
       {
          setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
-         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), robotSide.negateIfRightSide(0.087));
          setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.6);
          setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.3);
          setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.65);
