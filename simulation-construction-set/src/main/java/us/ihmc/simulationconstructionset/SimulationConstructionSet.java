@@ -2100,7 +2100,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       HeightMap heightMap = null;
 
       // TODO: GroundProfile is just that of the first robot. Need to make it part of the sim or something...
-      if ((robots != null) && (robots.length > 0))
+      if (parameters.getUseAutoGroundGraphics() && (robots != null) && (robots.length > 0))
       {
          GroundContactModel groundContactModel = robots[0].getGroundContactModel();
          if (groundContactModel != null)

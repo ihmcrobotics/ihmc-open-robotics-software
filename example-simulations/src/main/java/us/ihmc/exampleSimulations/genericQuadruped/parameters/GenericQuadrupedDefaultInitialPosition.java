@@ -1,15 +1,23 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
-   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.5);
+   private final Point3D initialBodyPosition = new Point3D(0.0, 0.0, 0.32);
+   private final Quaternion intialBodyOrientation = new Quaternion();
 
    @Override
    public Point3D getInitialBodyPosition()
    {
-      return INITIAL_BODY_POSITION;
+      return initialBodyPosition;
+   }
+
+   @Override
+   public Quaternion getInitialBodyOrientation()
+   {
+      return intialBodyOrientation;
    }
 
    @Override
