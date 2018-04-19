@@ -34,7 +34,7 @@ public class QuadrupedCenterOfMassHeightManager
    private final MovingReferenceFrame bodyFrame;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    private final ReferenceFrame supportFrame;
    private final MultipleWaypointsPositionTrajectoryGenerator centerOfMassHeightTrajectory;
@@ -55,7 +55,6 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoDouble desiredVelocityInWorld;
    private final YoDouble currentVelocityInWorld;
 
-   private final QuadrupedPhysicalProperties physicalProperties;
 
    private final FramePoint3D nominalPosition;
    private final FrameVector3D nominalVelocity;
@@ -65,7 +64,7 @@ public class QuadrupedCenterOfMassHeightManager
    public QuadrupedCenterOfMassHeightManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                              YoVariableRegistry parentRegistry)
    {
-      this.physicalProperties = physicalProperties;
+      this.controllerToolbox = controllerToolbox;
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
@@ -73,8 +72,6 @@ public class QuadrupedCenterOfMassHeightManager
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       bodyFrame = referenceFrames.getBodyFrame();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
-      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
 
       PIDGains defaultComPositionGains = new PIDGains();
       defaultComPositionGains.setKp(50.0);
@@ -183,7 +180,7 @@ public class QuadrupedCenterOfMassHeightManager
       else
       {
          currentPosition.setToZero(centerOfMassFrame);
-         centerOfMassJacobian.getCenterOfMassVelocity(currentVelocity);
+         currentVelocity.setIncludingFrame(controllerToolbox.getCoMVelocityEstimate());
       }
 
       currentPosition.changeFrame(worldFrame);

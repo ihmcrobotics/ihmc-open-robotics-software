@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
@@ -54,7 +53,7 @@ public class QuadrupedStepTeleopMode
       parentRegistry.addChild(registry);
    }
 
-   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels)
    {
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
@@ -83,7 +82,7 @@ public class QuadrupedStepTeleopMode
       stepTeleopManager.update();
    }
 
-   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates, Event event)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, Event event)
    {
       if (event.getValue() < 0.5)
          return;

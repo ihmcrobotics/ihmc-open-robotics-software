@@ -7,16 +7,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -36,6 +35,7 @@ public class QuadrupedBodyOrientationManager
 
    private final GroundPlaneEstimator groundPlaneEstimator;
 
+   private final MovingReferenceFrame bodyFrame;
    private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
    private final YoFrameVector3D yoComTorqueFeedforwardSetpoint;
@@ -49,16 +49,18 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredAbsoluteYawVelocity = new FrameVector3D();
    private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
 
+   private final FrameQuaternion tempQuaternion = new FrameQuaternion();
+
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;
 
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
    private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
+      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
@@ -77,7 +79,6 @@ public class QuadrupedBodyOrientationManager
       feedbackControlCommand.setGainsFrame(bodyFrame);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
-      taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       offsetBodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("offsetBodyOrientationTrajectory", worldFrame, registry);
       absoluteBodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("baseBodyOrientationTrajectory", worldFrame, registry);
@@ -92,9 +93,9 @@ public class QuadrupedBodyOrientationManager
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FrameQuaternionReadOnly bodyOrientationEstimate)
+   public void initialize()
    {
-      desiredBodyOrientation.setIncludingFrame(bodyOrientationEstimate);
+      desiredBodyOrientation.setToZero(bodyFrame);
       desiredBodyAngularVelocity.setToZero();
       desiredBodyAngularAcceleration.setToZero();
 
@@ -164,20 +165,11 @@ public class QuadrupedBodyOrientationManager
          // trajectory hasn't been commanded, add current orientation as start point
          else
          {
-            FrameQuaternion bodyOrientation = taskSpaceEstimates.getBodyOrientation();
-            FrameVector3D bodyAngularVelocity = taskSpaceEstimates.getBodyAngularVelocity();
+            tempQuaternion.setToZero(bodyFrame);
+            tempQuaternion.changeFrame(worldFrame);
 
-            ReferenceFrame bodyOrientationFrame = bodyOrientation.getReferenceFrame();
-            ReferenceFrame bodyAngularVelocityFrame = bodyAngularVelocity.getReferenceFrame();
-
-            bodyOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-            bodyAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
-            desiredAbsoluteYawOrientation.setYawPitchRoll(bodyOrientation.getYaw(), 0.0, 0.0);
-            desiredAbsoluteYawVelocity.setZ(bodyAngularVelocity.getZ());
-
-            bodyOrientation.changeFrame(bodyOrientationFrame);
-            bodyAngularVelocity.changeFrame(bodyAngularVelocityFrame);
+            desiredAbsoluteYawOrientation.setYawPitchRoll(tempQuaternion.getYaw(), 0.0, 0.0);
+            desiredAbsoluteYawVelocity.setToZero(worldFrame);
          }
 
          absoluteBodyOrientationTrajectory.clear();

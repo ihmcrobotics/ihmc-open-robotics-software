@@ -31,8 +31,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final FrameVector3D initialSoleForces = new FrameVector3D();
-
    private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -72,19 +70,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       this.trajectoryPointList.set(trajectoryPointList);
    }
 
-   public void initialize(boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initialize()
    {
-      if (useInitialSoleForceAsFeedforwardTerm)
-      {
-         initialSoleForces.setIncludingFrame(controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant));
-         initialSoleForces.changeFrame(worldFrame);
-      }
-      else
-      {
-         initialSoleForces.setToZero(bodyFrame);
-         initialSoleForces.changeFrame(worldFrame);
-      }
-
       createSoleWaypointTrajectory();
       taskStartTime = robotTime.getDoubleValue();
    }
@@ -107,18 +94,13 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       desiredFootPosition.changeFrame(worldFrame);
       desiredFootVelocity.changeFrame(worldFrame);
       feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
-      feedbackControlCommand.setFeedForwardAction(initialSoleForces);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
-
-      if (waypointCallback != null)
-         waypointCallback.isDoneMoving(false);
    }
 
    @Override
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
-      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
-      return currentTrajectoryTime > trajectoryPointList.getTrajectoryTime() ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
+      return null;
    }
 
    @Override
