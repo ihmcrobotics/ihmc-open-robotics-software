@@ -70,7 +70,7 @@ public class QuadrupedMessageTools
          Quaternion orientation = new Quaternion(step.getStepYaw(), 0.0, 0.0);
          Vector3D velocity = new Vector3D(0.0, 0.0, yawVelocity);
 
-         SO3TrajectoryPointMessage orientationWaypoint = HumanoidMessageTools.createSO3TrajectoryPointMessage(step.getTimeInterval().getStartTime(), orientation, velocity);
+         SO3TrajectoryPointMessage orientationWaypoint = HumanoidMessageTools.createSO3TrajectoryPointMessage(step.getTimeInterval().getEndTime(), orientation, velocity);
          trajectoryMessage.getTaskspaceTrajectoryPoints().add().set(orientationWaypoint);
       }
       trajectoryMessage.getSelectionMatrix().setXSelected(false);
