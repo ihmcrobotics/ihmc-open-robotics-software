@@ -1,27 +1,93 @@
 package us.ihmc.quadrupedRobotics.planning.bodyPath;
 
-import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlanarBodyPathProvider
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoDouble bodyYaw = new YoDouble("bodyYaw", registry);
+   private final YoFrameYawPitchRoll bodyOrientation = new YoFrameYawPitchRoll("bodyOrientation", worldFrame, registry);;
+   private final FramePoint3D supportCentroid = new FramePoint3D();
+
    private final Vector3D planarVelocity = new Vector3D();
    private final FramePose2D initialPose = new FramePose2D();
+   private final ReferenceFrame bodyZUpFrame;
+   private final ReferenceFrame supportFrame;
+   private final YoDouble timestamp, previousTimestamp;
+   private final double controlDT;
 
-   public void setInitialPose(FramePose2D initialPose)
+   public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
-      this.initialPose.setIncludingFrame(initialPose);
+      this.bodyZUpFrame = referenceFrames.getBodyZUpFrame();
+      this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      this.controlDT = controlDT;
+      this.timestamp = timestamp;
+      this.previousTimestamp = new YoDouble("previousTimestamp", registry);
+
+      parentRegistry.addChild(registry);
    }
 
-   public void setPlanarVelocity(Vector3DReadOnly planarVelocity)
+   @Override
+   public void initialize()
    {
-      this.planarVelocity.set(planarVelocity);
+      previousTimestamp.set(timestamp.getDoubleValue());
+
+      bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
+      bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
+      initialPose.setYaw(bodyYaw.getDoubleValue());
+
+      setInitialPose();
+   }
+
+   private void setInitialPose()
+   {
+      supportCentroid.setToZero(supportFrame);
+      supportCentroid.changeFrame(worldFrame);
+
+      initialPose.setPosition(supportCentroid);
+      initialPose.setYaw(bodyYaw.getDoubleValue());
+   }
+
+   public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
+   {
+      this.planarVelocity.set(desiredVelocityX, desiredVelocityY, desiredVelocityYaw);
    }
 
    @Override
    public void getPlanarPose(double time, FramePose2D poseToPack)
+   {
+      // update body orientation
+      if(Double.isNaN(controlDT))
+      {
+         double effectiveDT = timestamp.getDoubleValue() - previousTimestamp.getDoubleValue();
+         previousTimestamp.set(timestamp.getDoubleValue());
+         updateBodyOrientation(effectiveDT);
+      }
+      else
+      {
+         updateBodyOrientation(controlDT);
+      }
+
+      setInitialPose();
+      extrapolatePose(time, poseToPack, initialPose, planarVelocity);
+   }
+
+   private void updateBodyOrientation(double dt)
+   {
+      bodyYaw.add(planarVelocity.getZ() * dt);
+      bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
+   }
+
+   private static void extrapolatePose(double time, FramePose2D poseToPack, FramePose2D initialPose, Vector3D planarVelocity)
    {
       double a0 = initialPose.getYaw();
       double x0 = initialPose.getX();
