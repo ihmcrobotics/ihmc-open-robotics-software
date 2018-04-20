@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
-   private final Point3D initialBodyPosition = new Point3D(0.0, 0.0, 0.32);
+   private final Point3D initialBodyPosition = new Point3D(0.0, 0.0, 0.48);
    private final Quaternion intialBodyOrientation = new Quaternion();
 
    @Override
