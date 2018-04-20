@@ -121,7 +121,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       {
          for (ValkyrieFingerMotorName motorName : ValkyrieFingerMotorName.values)
          {
-            yoEffortJointHandleHolders.add(new YoEffortJointHandleHolder(effortJointHandles.get(motorName.getJointName(robotSide)), null, null, sensorReaderRegistry));
+            EffortJointHandle handle = effortJointHandles.get(motorName.getJointName(robotSide));
+            if (handle != null)
+               yoEffortJointHandleHolders.add(new YoEffortJointHandleHolder(handle, null, null, sensorReaderRegistry));
          }
       }
 

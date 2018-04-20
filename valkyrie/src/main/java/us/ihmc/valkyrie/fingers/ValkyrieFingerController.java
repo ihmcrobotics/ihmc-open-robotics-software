@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -56,10 +55,18 @@ public class ValkyrieFingerController implements RobotController
 
          EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(ValkyrieFingerMotorName.class);
          for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
-            jointHandleEnumMap.put(jointEnum, jointHandleMap.get(jointEnum.getJointName(robotSide)));
+         {
+            YoEffortJointHandleHolder handle = jointHandleMap.get(jointEnum.getJointName(robotSide));
+            if (handle != null)
+               jointHandleEnumMap.put(jointEnum, handle);
+         }
 
-         ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, gains, trajectoryTime, thumbCloseDelay, fingerOpenDelay, jointHandleEnumMap, registry);
-         fingerSetControllers.put(robotSide, controller);
+         if (!jointHandleEnumMap.isEmpty())
+         {
+            ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, gains, trajectoryTime, thumbCloseDelay,
+                                                                                     fingerOpenDelay, jointHandleEnumMap, registry);
+            fingerSetControllers.put(robotSide, controller);
+         }
       }
       parentRegistry.addChild(registry);
    }
@@ -84,7 +91,9 @@ public class ValkyrieFingerController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         fingerSetControllers.get(robotSide).doControl();
+         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         if (controller != null)
+            controller.doControl();
       }
    }
 
@@ -95,15 +104,18 @@ public class ValkyrieFingerController implements RobotController
          if (subscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
             HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getDesiredHandConfiguration());
+            ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+            if (controller == null)
+               continue;
 
             switch (handDesiredConfiguration)
             {
             case OPEN:
-               fingerSetControllers.get(robotSide).requestState(GraspState.OPEN);
+               controller.requestState(GraspState.OPEN);
                break;
 
             case CLOSE:
-               fingerSetControllers.get(robotSide).requestState(GraspState.CLOSE);
+               controller.requestState(GraspState.CLOSE);
                break;
 
             default:
