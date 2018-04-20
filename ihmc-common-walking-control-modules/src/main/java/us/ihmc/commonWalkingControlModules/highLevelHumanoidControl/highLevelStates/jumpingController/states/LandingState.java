@@ -57,7 +57,7 @@ public class LandingState extends AbstractJumpState
    {
       double comHeightZ = centroidalMomentumManager.getEstimatedCoMPositionZ();
       double time = getTimeInCurrentState();
-      return (time > 0.4) && (comHeightZ > 0.38);
+      return (time > 0.4) && (comHeightZ > 0.35);
    }
 
    @Override
