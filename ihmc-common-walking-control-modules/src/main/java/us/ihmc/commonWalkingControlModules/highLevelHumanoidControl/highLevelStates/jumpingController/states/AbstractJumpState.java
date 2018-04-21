@@ -73,7 +73,7 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
 
    private void updateFinalPositionFromInitial()
    {
-      finalPosition.setX(0.15);
+      finalPosition.setX(initialPositionInState.getX());
       finalPosition.setY(initialPositionInState.getY());
       finalPosition.setZ(motionPlanner.getNominalHeight());
       motionPlanner.getNominalState(finalVelocity, finalGroundReactionForce);

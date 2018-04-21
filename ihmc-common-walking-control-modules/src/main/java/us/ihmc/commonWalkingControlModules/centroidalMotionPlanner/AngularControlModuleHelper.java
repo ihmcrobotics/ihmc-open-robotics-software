@@ -11,7 +11,7 @@ public class AngularControlModuleHelper
    private static final int index_bz = 2;
    private static final int index_az = 3;
 
-   private static final int defaultNumberOfNodes = LinearControlModuleHelper.defaultNumberOfNodes;
+   private static final int defaultNumberOfNodes = ControlModuleHelper.defaultNumberOfNodes;
 
    private final DenseMatrix64F[] zForceCoefficient;
    private final DenseMatrix64F zVelocityValues;

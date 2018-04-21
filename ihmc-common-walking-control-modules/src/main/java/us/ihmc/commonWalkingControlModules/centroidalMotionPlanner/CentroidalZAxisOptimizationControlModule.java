@@ -17,10 +17,10 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class CentroidalZAxisOptimizationControlModule
 {
+   private final String name;
    private final Axis axis = Axis.Z;
-
    // Planner runtime variables
-   private final LinearControlModuleHelper helper;
+   private final ControlModuleHelper helper;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -33,18 +33,15 @@ public class CentroidalZAxisOptimizationControlModule
 
    private final JavaQuadProgSolver qpSolver;
    private final DenseMatrix64F qpSolution;
-   private double minForce;
-   private double maxForce;
-   private double minForceRate;
-   private double maxForceRate;
    private final YoInteger numberOfQPIterations;
    private final YoInteger numberOfQPFailures;
    private final YoInteger numberOfPlansRequested;
 
    private DenseMatrix64F tempMatrixForComputation = new DenseMatrix64F(0, 1);
 
-   public CentroidalZAxisOptimizationControlModule(LinearControlModuleHelper helper, CentroidalMotionPlannerParameters parameters, YoVariableRegistry registry)
+   public CentroidalZAxisOptimizationControlModule(ControlModuleHelper helper, CentroidalMotionPlannerParameters parameters, YoVariableRegistry registry)
    {
+      this.name = getClass().getSimpleName();
       this.helper = helper;
 
       // Initialize the QP matrices
@@ -60,14 +57,10 @@ public class CentroidalZAxisOptimizationControlModule
       qpSolver = new JavaQuadProgSolver();
       //qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
       qpSolution = new DenseMatrix64F(0, 1);
-      minForce = -0.1;
-      maxForce = parameters.getRobotMass() * parameters.getGravityZ() * -2.0;
-      minForceRate = -0.2;
-      maxForceRate = 0.2;
 
-      this.numberOfQPFailures = new YoInteger(getClass().getSimpleName() + "NumberOfQPFailures", registry);
-      this.numberOfQPIterations = new YoInteger(getClass().getSimpleName() + "NumberOfQPIterations", registry);
-      this.numberOfPlansRequested = new YoInteger(getClass().getSimpleName() + "NumberOfPlansRequested", registry);
+      this.numberOfQPFailures = new YoInteger(name + "NumberOfQPFailures", registry);
+      this.numberOfQPIterations = new YoInteger(name + "NumberOfQPIterations", registry);
+      this.numberOfPlansRequested = new YoInteger(name + "NumberOfPlansRequested", registry);
       this.numberOfQPFailures.set(0);
       this.numberOfQPIterations.set(0);
       this.numberOfPlansRequested.set(0);

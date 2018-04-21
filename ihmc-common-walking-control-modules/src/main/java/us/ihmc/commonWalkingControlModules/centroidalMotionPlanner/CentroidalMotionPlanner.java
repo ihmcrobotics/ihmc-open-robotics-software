@@ -27,7 +27,7 @@ public class CentroidalMotionPlanner
    private final double deltaTMin;
 
    private final RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
-   private final LinearControlModuleHelper helper;
+   private final ControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
    private final CentroidalXYAxisOptimizationControlModule transversePlaneControlModule;
    private final ForceTrajectory forceTrajectory;
@@ -48,14 +48,14 @@ public class CentroidalMotionPlanner
       this.Iyy = parameters.getNominalIyy();
       this.Izz = parameters.getNominalIzz();
       this.deltaTMin = parameters.getDeltaTMin();
-      this.helper = new LinearControlModuleHelper(parameters);
+      this.helper = new ControlModuleHelper(parameters);
       this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters, registry);
       this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(helper, parameters);
-      this.forceTrajectory = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, LinearControlModuleHelper.forceCoefficients);
-      this.positionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, LinearControlModuleHelper.positionCoefficients);
+      this.forceTrajectory = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, ControlModuleHelper.forceCoefficients);
+      this.positionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, ControlModuleHelper.positionCoefficients);
 
-      this.yoNumberOfNodesSubmitted = new YoInteger(getClass().getSimpleName() + "", registry);
-      this.tempTrajectory = new FrameTrajectory3D(LinearControlModuleHelper.positionCoefficients, plannerFrame);
+      this.yoNumberOfNodesSubmitted = new YoInteger("NumberOfNodes", registry);
+      this.tempTrajectory = new FrameTrajectory3D(ControlModuleHelper.positionCoefficients, plannerFrame);
       reset();
    }
 

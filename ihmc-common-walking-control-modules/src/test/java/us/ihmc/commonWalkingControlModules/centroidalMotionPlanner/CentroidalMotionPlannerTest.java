@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import afu.org.checkerframework.common.reflection.qual.GetClass;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.RecycledLinkedListBuilder.RecycledLinkedListEntry;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commons.PrintTools;
@@ -16,6 +17,7 @@ public class CentroidalMotionPlannerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final CentroidalMotionPlannerParameters parameters = new CentroidalMotionPlannerParameters();
+   private static final String namePrefix = "CentroidalMotionPlannerTest";
    static
    {
       parameters.setRobotMass(1.0);

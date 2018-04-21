@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionNode;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlanner;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlannerParameters;
-import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.LinearControlModuleHelper;
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ControlModuleHelper;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.PositionTrajectory;
 import us.ihmc.commons.PrintTools;
@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class WholeBodyMotionPlanner
 {
-   public static final int numberOfForceCoefficients = LinearControlModuleHelper.forceCoefficients;
+   public static final int numberOfForceCoefficients = ControlModuleHelper.forceCoefficients;
    public static final int maxNumberOfSegments = 20;
 
    private final ReferenceFrame planningFrame = ReferenceFrame.getWorldFrame();
@@ -59,7 +59,7 @@ public class WholeBodyMotionPlanner
       this.gravityZ = parameters.getGravityZ();
       this.robotMass = parameters.getRobotMass();
       this.maxStandingHeight = 0.45;
-      this.minStandingHeight = 0.15;
+      this.minStandingHeight = 0.25;
       this.motionPlanner = new CentroidalMotionPlanner(parameters, registry);
       this.motionNode = new CentroidalMotionNode(planningFrame);
       this.initialPosition = new FramePoint3D(planningFrame);
@@ -208,13 +208,15 @@ public class WholeBodyMotionPlanner
    public void computeMotionPlan()
    {
       motionPlanner.compute();
+      //angularMotionPlanner.compute();
    }
+   
 
    public ForceTrajectory getGroundReactionForceProfile()
    {
       return motionPlanner.getForceProfile();
    }
-
+   
    public PositionTrajectory getPositionTrajectory()
    {
       return motionPlanner.getCoMTrajectory();
@@ -224,7 +226,7 @@ public class WholeBodyMotionPlanner
    {
       return motionPlanner.getNodeList();
    }
-
+   
    public void reset()
    {
       motionPlanner.reset();

@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
-import org.omg.CORBA._PolicyStub;
-
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
@@ -50,16 +47,24 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private final FrameVector3D linearVelocityMin;
 
    private final FrameVector3D torque;
-   private final VectorEnum<DependentVariableConstraintType> torqueConstraintType = new VectorEnum<>();
+   private final VectorEnum<EffortVariableConstraintType> torqueConstraintType = new VectorEnum<>();
    private final FrameVector3D torqueWeight;
+
+   private final FrameVector3D torqueRate;
+   private final VectorEnum<EffortVariableConstraintType> torqueRateConstraintType = new VectorEnum<>();
+   private final FrameVector3D torqueRateWeight;
 
    private final FrameVector3D angularVelocity;
    private final VectorEnum<DependentVariableConstraintType> angularVelocityConstraintType = new VectorEnum<>();
    private final FrameVector3D angularVelocityWeight;
+   private final FrameVector3D angularVelocityMax;
+   private final FrameVector3D angularVelocityMin;
 
-   private final FrameQuaternion orientation;
+   private final FrameVector3D orientation;
    private final VectorEnum<DependentVariableConstraintType> orientationConstraintType = new VectorEnum<>();
    private final FrameVector3D orientationWeight;
+   private final FrameVector3D orientationMax;
+   private final FrameVector3D orientationMin;
 
    /**
     * Default constructor. Initialized all variables to NaN so that they form part of the optimization
@@ -89,14 +94,21 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       forceRate = new FrameVector3D(referenceFrame);
       forceRateWeight = new FrameVector3D(referenceFrame);
 
-      orientation = new FrameQuaternion(referenceFrame);
+      orientation = new FrameVector3D(referenceFrame);
       orientationWeight = new FrameVector3D(referenceFrame);
+      orientationMax = new FrameVector3D(referenceFrame);
+      orientationMin = new FrameVector3D(referenceFrame);
 
       angularVelocity = new FrameVector3D(referenceFrame);
       angularVelocityWeight = new FrameVector3D(referenceFrame);
+      angularVelocityMax = new FrameVector3D(referenceFrame);
+      angularVelocityMin = new FrameVector3D(referenceFrame);
 
       torque = new FrameVector3D(referenceFrame);
       torqueWeight = new FrameVector3D(referenceFrame);
+
+      torqueRate = new FrameVector3D(referenceFrame);
+      torqueRateWeight = new FrameVector3D(referenceFrame);
 
       reset();
    }
@@ -128,14 +140,22 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       orientation.setToNaN();
       orientationWeight.setToNaN();
       orientationConstraintType.setXYZ(DependentVariableConstraintType.IGNORE);
+      orientationMax.setToNaN();
+      orientationMin.setToNaN();
 
       angularVelocity.setToNaN();
       angularVelocityWeight.setToNaN();
       angularVelocityConstraintType.setXYZ(DependentVariableConstraintType.IGNORE);
+      angularVelocityMax.setToNaN();
+      angularVelocityMin.setToNaN();
 
       torque.setToNaN();
       torqueWeight.setToNaN();
-      torqueConstraintType.setXYZ(DependentVariableConstraintType.IGNORE);
+      torqueConstraintType.setToNull();
+
+      torqueRate.setToNaN();
+      torqueRateWeight.setToNaN();
+      torqueRateConstraintType.setToNull();
    }
 
    public void setTime(double time)
@@ -253,7 +273,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setTorqueObjective(FrameVector3D torque, FrameVector3D torqueWeight)
    {
       setTorqueInternal(torque);
-      this.torqueConstraintType.setXYZ(DependentVariableConstraintType.OBJECTIVE);
+      this.torqueConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
       setTorqueWeightInternal(torqueWeight);
    }
 
@@ -272,15 +292,62 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setTorqueConstraint(FrameVector3D torque)
    {
       setTorqueInternal(torque);
-      this.torqueConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
+      this.torqueConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.torqueWeight.setToNaN();
    }
 
-   public void setTorque(FrameVector3D torque, VectorEnum<DependentVariableConstraintType> constraintType, FrameVector3D weights)
+   public void setTorque(FrameVector3D torque, VectorEnum<EffortVariableConstraintType> constraintType, FrameVector3D weights)
    {
       setTorqueInternal(torque);
       this.torqueConstraintType.set(constraintType);
       setTorqueWeightInternal(weights);
+   }
+
+   public void setTorqueRateObjective(FrameVector3D torqueRate, FrameVector3D torqueRateWeight)
+   {
+      setTorqueRateInternal(torqueRate);
+      this.torqueRateConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      setTorqueRateWeightInternal(torqueRateWeight);
+   }
+
+   public void setTorqueRateObjective(FrameVector3D torqueRate)
+   {
+      setTorqueRateInternal(torqueRate);
+      this.torqueRateConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      this.torqueRateWeight.setToNaN();
+   }
+
+   private void setTorqueRateWeightInternal(FrameVector3D torqueRateWeight)
+   {
+      this.torqueRateWeight.setIncludingFrame(torqueRateWeight);
+      this.torqueRateWeight.changeFrame(referenceFrame);
+   }
+
+   private void setTorqueRateInternal(FrameVector3D torqueRate)
+   {
+      this.torqueRate.setIncludingFrame(torqueRate);
+      this.changeReferenceFrame(referenceFrame);
+   }
+
+   public void setTorqueRateConstraint(FrameVector3D torque)
+   {
+      setTorqueRateInternal(torque);
+      this.torqueRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.torqueRateWeight.setToNaN();
+   }
+
+   public void setZeroTorqueRateConstraint()
+   {
+      torqueRate.setToZero();
+      this.torqueRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.torqueRateWeight.setToNaN();
+   }
+
+   public void setTorqueRate(FrameVector3D torqueRate, VectorEnum<EffortVariableConstraintType> constraintType, FrameVector3D torqueRateWeight)
+   {
+      setTorqueRateInternal(torqueRate);
+      this.torqueRateConstraintType.set(constraintType);
+      setTorqueRateWeightInternal(torqueRateWeight);
    }
 
    public void setPositionObjective(FramePoint3D desiredPosition, FrameVector3D positionWeight)
@@ -386,7 +453,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.positionMax.changeFrame(referenceFrame);
    }
 
-   public void setOrientationObjective(FrameQuaternion desiredOrienation, FrameVector3D orientationWeight)
+   public void setOrientationObjective(FrameVector3D desiredOrienation, FrameVector3D orientationWeight)
    {
       setOrientationInternal(desiredOrienation);
       this.orientationConstraintType.setXYZ(DependentVariableConstraintType.OBJECTIVE);
@@ -399,20 +466,20 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.orientationWeight.changeFrame(referenceFrame);
    }
 
-   private void setOrientationInternal(FrameQuaternion desiredOrienation)
+   private void setOrientationInternal(FrameVector3D desiredOrienation)
    {
       this.orientation.setIncludingFrame(desiredOrienation);
       this.orientation.changeFrame(referenceFrame);
    }
 
-   public void setOrientationConstraint(FrameQuaternion desiredOrienation)
+   public void setOrientationConstraint(FrameVector3D desiredOrienation)
    {
       setOrientationInternal(desiredOrienation);
       this.orientationConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.orientationWeight.setToNaN();
    }
 
-   public void setOrientation(FrameQuaternion desiredOrienation, VectorEnum<DependentVariableConstraintType> constraintType, FrameVector3D orientationWeight)
+   public void setOrientation(FrameVector3D desiredOrienation, VectorEnum<DependentVariableConstraintType> constraintType, FrameVector3D orientationWeight)
    {
       setOrientationInternal(desiredOrienation);
       this.orientationConstraintType.set(constraintType);
@@ -678,7 +745,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return linearVelocityConstraintType.getElement(axis);
    }
 
-   public double getOrientationValue(Axis axis)
+   public double getOrientation(Axis axis)
    {
       return orientation.getElement(axis.ordinal());
    }
@@ -688,14 +755,34 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return orientationWeight.getElement(axis.ordinal());
    }
 
+   public double getOrientationMax(Axis axis)
+   {
+      return orientationMax.getElement(axis.ordinal());
+   }
+
+   public double getOrientationMin(Axis axis)
+   {
+      return orientationMin.getElement(axis.ordinal());
+   }
+
    public DependentVariableConstraintType getOrientationConstraintType(Axis axis)
    {
       return orientationConstraintType.getElement(axis);
    }
 
-   public double getAngularVelocityValue(Axis axis)
+   public double getAngularVelocity(Axis axis)
    {
       return angularVelocity.getElement(axis.ordinal());
+   }
+
+   public double getAngularVelocityMax(Axis axis)
+   {
+      return angularVelocityMax.getElement(axis.ordinal());
+   }
+
+   public double getAngularVelocityMin(Axis axis)
+   {
+      return angularVelocityMin.getElement(axis.ordinal());
    }
 
    public double getAngularVelocityWeight(Axis axis)
@@ -708,7 +795,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return angularVelocityConstraintType.getElement(axis);
    }
 
-   public double getTorqueValue(Axis axis)
+   public double getTorque(Axis axis)
    {
       return torque.getElement(axis.ordinal());
    }
@@ -718,9 +805,24 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return torqueWeight.getElement(axis.ordinal());
    }
 
-   public DependentVariableConstraintType getTorqueConstraintType(Axis axis)
+   public EffortVariableConstraintType getTorqueConstraintType(Axis axis)
    {
       return torqueConstraintType.getElement(axis);
+   }
+
+   public double getTorqueRate(Axis axis)
+   {
+      return torqueRate.getElement(axis.ordinal());
+   }
+
+   public double getTorqueRateWeight(Axis axis)
+   {
+      return torqueRateWeight.getElement(axis.ordinal());
+   }
+
+   public EffortVariableConstraintType getTorqueRateConstraintType(Axis axis)
+   {
+      return torqueRateConstraintType.getElement(axis);
    }
 
    public double getForce(Axis axis)

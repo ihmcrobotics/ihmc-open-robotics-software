@@ -174,7 +174,7 @@ public class JumpHighLevelHumanoidController
       parameters.setRobotMass(controllerToolbox.getFullRobotModel().getTotalMass());
       parameters.setDeltaTMin(jumpControllerParameters.getMotionPlanningNodeTime());
       parameters.setForceRegularizationWeight(jumpControllerParameters.getForceRegularizationWeight());
-      parameters.setdForceRegularizationWeight(jumpControllerParameters.getForceRateRegularizationWeight());
+      parameters.setForceRateRegularizationWeight(jumpControllerParameters.getForceRateRegularizationWeight());
       parameters.setMaxForce(jumpControllerParameters.getMaxForce());
       parameters.setMinForce(jumpControllerParameters.getMinForce());
       parameters.setMaxForceRate(jumpControllerParameters.getMaxForceRate());

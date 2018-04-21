@@ -11,12 +11,19 @@ public class CentroidalMotionPlannerParameters
    private Vector3D maximumForceRate = new Vector3D();
    private Vector3D minimumForceRate = new Vector3D();
    private double robotMass;
-   private double forceRegulizationWeight;
-   private double dForceRegularizationWeight;
+   private double forceRegularizationWeight;
+   private double forceRateRegularizationWeight;
+   private double torqueRegularizationWeight;
+   private double torqueRateRegularizationWeight;
    private double nominalIxx;
    private double nominalIyy;
    private double nominalIzz;
    private double deltaTMin;
+
+   private double maxTorque;
+   private double minTorque;
+   private double maxTorqueRate;
+   private double minTorqueRate;
 
    public double getNominalIxx()
    {
@@ -100,22 +107,22 @@ public class CentroidalMotionPlannerParameters
 
    public double getForceRegulizationWeight()
    {
-      return forceRegulizationWeight;
+      return forceRegularizationWeight;
    }
 
    public void setForceRegularizationWeight(double forceRegulizationWeight)
    {
-      this.forceRegulizationWeight = forceRegulizationWeight;
+      this.forceRegularizationWeight = forceRegulizationWeight;
    }
 
-   public double getdForceRegularizationWeight()
+   public double getForceRateRegularizationWeight()
    {
-      return dForceRegularizationWeight;
+      return forceRateRegularizationWeight;
    }
 
-   public void setdForceRegularizationWeight(double dForceRegularizationWeight)
+   public void setForceRateRegularizationWeight(double dForceRegularizationWeight)
    {
-      this.dForceRegularizationWeight = dForceRegularizationWeight;
+      this.forceRateRegularizationWeight = dForceRegularizationWeight;
    }
 
    public void setGravity(Vector3D gravity)
@@ -181,5 +188,65 @@ public class CentroidalMotionPlannerParameters
    public double getDefaultMotionPlanningVelocityObjecitveWeight()
    {
       return 10.0;
+   }
+
+   public void setTorqueRegularizationWeight(double torqueRegularizationWeight)
+   {
+      this.torqueRegularizationWeight = torqueRegularizationWeight;
+   }
+
+   public double getTorqueRegularizationWeight()
+   {
+      return torqueRegularizationWeight;
+   }
+
+   public void setTorqueRateRegularizationWeight(double torqueRateRegularizationWeight)
+   {
+      this.torqueRateRegularizationWeight = torqueRateRegularizationWeight;
+   }
+
+   public double getTorqueRateRegularizationWeight()
+   {
+      return torqueRateRegularizationWeight;
+   }
+
+   public void setMaxTorque(double maxTorque)
+   {
+      this.maxTorque = maxTorque;
+   }
+
+   public double getMaxTorque()
+   {
+      return maxTorque;
+   }
+
+   public void setMinTorque(double minTorque)
+   {
+      this.minTorque = minTorque;
+   }
+
+   public double getMinTorque()
+   {
+      return minTorque;
+   }
+
+   public void setMaxTorqueRate(double maxTorqueRate)
+   {
+      this.maxTorqueRate = maxTorqueRate;
+   }
+
+   public double getMaxTorqueRate()
+   {
+      return maxTorqueRate;
+   }
+
+   public void setMinTorqueRate(double minTorqueRate)
+   {
+      this.minTorqueRate = minTorqueRate;
+   }
+
+   public double getMinTorqueRate()
+   {
+      return minTorqueRate;
    }
 }

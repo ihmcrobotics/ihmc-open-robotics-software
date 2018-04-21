@@ -3,19 +3,21 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import afu.org.checkerframework.checker.units.qual.A;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class LinearControlModuleHelper
+public class ControlModuleHelper
 {
    public static final int forceCoefficients = 4;
    public static final int velocityCoefficients = forceCoefficients + 1;
    public static final int positionCoefficients = velocityCoefficients + 1;
    static final int defaultNumberOfNodes = 100;
    static final int numberOfAxis = Axis.values.length;
+   private final int yawIndex = 3;
+   private final Axis yawAxis = Axis.Z;
 
    private final DenseMatrix64F deltaT = new DenseMatrix64F(defaultNumberOfNodes - 1, 1);
    private final DenseMatrix64F[] positionCoefficientMatrix = new DenseMatrix64F[numberOfAxis];
@@ -26,14 +28,30 @@ public class LinearControlModuleHelper
    private final DenseMatrix64F[] forceBias = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] forceRateCoefficientMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] forceRateBias = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F yawCoefficientMatrix;
+   private final DenseMatrix64F yawBias;
+   private final DenseMatrix64F yawRateCoefficientMatrix;
+   private final DenseMatrix64F yawRateBias;
+   private final DenseMatrix64F yawTorqueCoefficientMatrix;
+   private final DenseMatrix64F yawTorqueBias;
+   private final DenseMatrix64F yawTorqueRateCoefficientMatrix;
+   private final DenseMatrix64F yawTorqueRateBias;
 
    private final DenseMatrix64F[] optimizedPositionValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] optimizedVelocityValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] optimizedForceValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] optimizedForceRateValues = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F optimizedYawValues;
+   private final DenseMatrix64F optimizedYawRateValues;
+   private final DenseMatrix64F optimizedYawTorqueValues;
+   private final DenseMatrix64F optimizedYawTorqueRateValues;
+
    private final DenseMatrix64F[] decisionVariableValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableWeightMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableDesiredValueMatrix = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F yawDecisionVariableValues;
+   private final DenseMatrix64F yawDecisionVariableWeightMatrix;
+   private final DenseMatrix64F yawDecisionVariableDesiredValueMatrix;
    private final DenseMatrix64F[] H = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] f = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] Aeq = new DenseMatrix64F[numberOfAxis];
@@ -42,28 +60,45 @@ public class LinearControlModuleHelper
    private final DenseMatrix64F[] decisionVariableLowerBoundMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] Ain = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] bin = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F yawH;
+   private final DenseMatrix64F yawf;
+   private final DenseMatrix64F yawAeq;
+   private final DenseMatrix64F yawbeq;
+   private final DenseMatrix64F yawAin;
+   private final DenseMatrix64F yawbin;
+   private final DenseMatrix64F yawDecisionVariableUpperBoundMatrix;
+   private final DenseMatrix64F yawDecisionVariableLowerBoundMatrix;
 
    private final double forceRegularizationWeight;
    private final double forceRateRegularizationWeight;
+   private final double torqueRegularizationWeight;
+   private final double torqueRateRegularizationWeight;
 
    private int numberOfNodes;
-   private final int[] numberOfDecisionVariables = new int[numberOfAxis];
+   private final int[] numberOfDecisionVariables = new int[numberOfAxis + 1];
+   private final int[] decisionVariableIndex = new int[numberOfAxis + 1];
 
    private final Vector3D gravity = new Vector3D();
    private final double robotMass;
+   private final double Izz;
    private final Vector3D maxForce = new Vector3D();
    private final Vector3D minForce = new Vector3D();
    private final Vector3D maxForceRate = new Vector3D();
    private final Vector3D minForceRate = new Vector3D();
+   private final double maxTorque;
+   private final double minTorque;
+   private final double maxTorqueRate;
+   private final double minTorqueRate;
 
    private RecycledLinkedListBuilder<CentroidalMotionNode> nodeList;
 
-   public LinearControlModuleHelper(CentroidalMotionPlannerParameters parameters)
+   public ControlModuleHelper(CentroidalMotionPlannerParameters parameters)
    {
       this.robotMass = parameters.getRobotMass();
+      this.Izz = parameters.getNominalIzz();
+      int defaultNumberOfDecisionVariables = defaultNumberOfNodes * 2;
       for (int i = 0; i < numberOfAxis; i++)
       {
-         int defaultNumberOfDecisionVariables = defaultNumberOfNodes * 2;
          positionCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          positionBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          velocityCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
@@ -88,13 +123,42 @@ public class LinearControlModuleHelper
          Ain[i] = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
          bin[i] = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
       }
-      this.forceRegularizationWeight = parameters.getdForceRegularizationWeight();
-      this.forceRateRegularizationWeight = parameters.getdForceRegularizationWeight();
+      yawCoefficientMatrix = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
+      yawBias = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      yawRateCoefficientMatrix = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
+      yawRateBias = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      yawTorqueCoefficientMatrix = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
+      yawTorqueBias = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      yawTorqueRateCoefficientMatrix = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
+      yawTorqueRateBias = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      optimizedYawValues = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      optimizedYawRateValues = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      optimizedYawTorqueValues = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      optimizedYawTorqueRateValues = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      yawDecisionVariableValues = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+      yawDecisionVariableWeightMatrix = new DenseMatrix64F(defaultNumberOfDecisionVariables, defaultNumberOfDecisionVariables);
+      yawDecisionVariableDesiredValueMatrix = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+      yawH = new DenseMatrix64F(defaultNumberOfDecisionVariables, defaultNumberOfDecisionVariables);
+      yawf = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+      yawAeq = new DenseMatrix64F(defaultNumberOfNodes * 5, defaultNumberOfDecisionVariables);
+      yawbeq = new DenseMatrix64F(defaultNumberOfNodes * 5, 1);
+      yawDecisionVariableLowerBoundMatrix = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+      yawDecisionVariableUpperBoundMatrix = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+      yawAin = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
+      yawbin = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
+      this.forceRegularizationWeight = parameters.getForceRateRegularizationWeight();
+      this.forceRateRegularizationWeight = parameters.getForceRateRegularizationWeight();
+      this.torqueRegularizationWeight = parameters.getTorqueRegularizationWeight();
+      this.torqueRateRegularizationWeight = parameters.getTorqueRateRegularizationWeight();
       parameters.getGravity(this.gravity);
       parameters.getMaxForce(this.maxForce);
       parameters.getMinForce(this.minForce);
       parameters.getMaxForceRate(this.maxForceRate);
       parameters.getMinForceRate(this.minForceRate);
+      this.maxTorque = parameters.getMaxTorque();
+      this.minTorque = parameters.getMinTorque();
+      this.maxTorqueRate = parameters.getMaxTorqueRate();
+      this.minTorqueRate = parameters.getMinTorqueRate();
       reset();
    }
 
@@ -140,6 +204,30 @@ public class LinearControlModuleHelper
          Ain[i].reshape(0, numberOfDecisionVariables[i]);
          bin[i].reshape(0, 1);
       }
+      int numberOfYawDecisionVariables = numberOfDecisionVariables[yawIndex];
+      yawCoefficientMatrix.reshape(numberOfNodes, numberOfYawDecisionVariables);
+      yawBias.reshape(numberOfNodes, 1);
+      yawRateCoefficientMatrix.reshape(numberOfNodes, numberOfYawDecisionVariables);
+      yawRateBias.reshape(numberOfNodes, 1);
+      yawTorqueCoefficientMatrix.reshape(numberOfNodes, numberOfYawDecisionVariables);
+      yawTorqueBias.reshape(numberOfNodes, 1);
+      yawTorqueRateCoefficientMatrix.reshape(numberOfNodes, numberOfYawDecisionVariables);
+      yawTorqueRateBias.reshape(numberOfNodes, 1);
+      optimizedYawValues.reshape(0, 1);
+      optimizedYawRateValues.reshape(0, 1);
+      optimizedYawTorqueValues.reshape(0, 1);
+      optimizedYawTorqueRateValues.reshape(0, 1);
+      yawDecisionVariableValues.reshape(0, 1);
+      yawDecisionVariableWeightMatrix.reshape(numberOfYawDecisionVariables, numberOfYawDecisionVariables);
+      yawDecisionVariableDesiredValueMatrix.reshape(numberOfYawDecisionVariables, 1);
+      yawH.reshape(numberOfYawDecisionVariables, numberOfYawDecisionVariables);
+      yawf.reshape(numberOfYawDecisionVariables, 1);
+      yawAeq.reshape(0, numberOfYawDecisionVariables);
+      yawbeq.reshape(0, 1);
+      yawDecisionVariableLowerBoundMatrix.reshape(numberOfYawDecisionVariables, 1);
+      yawDecisionVariableUpperBoundMatrix.reshape(numberOfYawDecisionVariables, 1);
+      yawAin.reshape(0, numberOfYawDecisionVariables);
+      yawbin.reshape(0, 1);
    }
 
    private void setCoefficientsToZero()
@@ -157,6 +245,16 @@ public class LinearControlModuleHelper
          decisionVariableWeightMatrix[i].zero();
          decisionVariableDesiredValueMatrix[i].zero();
       }
+      yawCoefficientMatrix.zero();
+      yawBias.zero();
+      yawRateCoefficientMatrix.zero();
+      yawRateBias.zero();
+      yawTorqueCoefficientMatrix.zero();
+      yawTorqueBias.zero();
+      yawTorqueRateCoefficientMatrix.zero();
+      yawTorqueRateBias.zero();
+      yawDecisionVariableWeightMatrix.zero();
+      yawDecisionVariableDesiredValueMatrix.zero();
    }
 
    private void setOptimizationMatricesToZero()
@@ -172,9 +270,15 @@ public class LinearControlModuleHelper
          Ain[i].zero();
          bin[i].zero();
       }
+      yawH.zero();
+      yawf.zero();
+      yawAeq.zero();
+      yawbeq.zero();
+      yawDecisionVariableLowerBoundMatrix.zero();
+      yawDecisionVariableUpperBoundMatrix.zero();
+      yawAin.zero();
+      yawbin.zero();
    }
-
-   private final int[] decisionVariableIndex = new int[numberOfAxis];
 
    public void processNodeList(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
    {
@@ -182,7 +286,7 @@ public class LinearControlModuleHelper
       if (numberOfNodes < 2)
          throw new RuntimeException("Cannot run motion planning without atleast two nodes");
       determineNumberOfCoefficientVariables(nodeList);
-      getForceVelocityPositionCoefficientBiasMatrices(nodeList);
+      getCoefficientBiasMatrices(nodeList);
    }
 
    private void determineNumberOfCoefficientVariables(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
@@ -195,6 +299,7 @@ public class LinearControlModuleHelper
       {
          numberOfDecisionVariables[axis.ordinal()] = getNumberOfDecisionVariables(node, axis);
       }
+      numberOfDecisionVariables[yawIndex] = getNumberOfYawDecisionVariables(node);
 
       entry = entry.getNext();
       for (int i = 0; entry != null; i++, entry = entry.getNext())
@@ -208,6 +313,7 @@ public class LinearControlModuleHelper
             int axisOrdinal = axis.ordinal();
             numberOfDecisionVariables[axisOrdinal] += getNumberOfDecisionVariables(node, axis);
          }
+         numberOfDecisionVariables[yawIndex] += getNumberOfYawDecisionVariables(node);
       }
    }
 
@@ -227,6 +333,16 @@ public class LinearControlModuleHelper
       return numberOfEqualityConstraints;
    }
 
+   private int getNumberOfYawDecisionVariables(CentroidalMotionNode node)
+   {
+      int numberOfDecisionVariables = 0;
+      if (node.getTorqueConstraintType(Axis.Z) == EffortVariableConstraintType.OBJECTIVE)
+         numberOfDecisionVariables++;
+      if (node.getTorqueRateConstraintType(Axis.Z) == EffortVariableConstraintType.OBJECTIVE)
+         numberOfDecisionVariables++;
+      return numberOfDecisionVariables;
+   }
+
    private int getNumberOfDecisionVariables(CentroidalMotionNode node, Axis axis)
    {
       int numberOfDecisionVariables = 0;
@@ -237,7 +353,7 @@ public class LinearControlModuleHelper
       return numberOfDecisionVariables;
    }
 
-   private void getForceVelocityPositionCoefficientBiasMatrices(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
+   private void getCoefficientBiasMatrices(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
    {
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry;
       // Determine the position and velocity coefficient matrices given the decision variables
@@ -256,6 +372,14 @@ public class LinearControlModuleHelper
             throw new RuntimeException(getClass().getSimpleName() + ": Initial node must have specified velocity for axis " + Axis.values[i].toString());
          velocityBias[i].set(0, 0, v0);
       }
+      double theta0 = entry.element.getOrientation(yawAxis);
+      double w0 = entry.element.getAngularVelocity(yawAxis);
+      if (!Double.isFinite(theta0))
+         throw new RuntimeException(getClass().getSimpleName() + ": Initial node must have specified orientation for yaw ");
+      yawBias.set(0, 0, theta0);
+      if (!Double.isFinite(w0))
+         throw new RuntimeException(getClass().getSimpleName() + ": Initial node must have specified velocity for yaw ");
+      yawRateBias.set(0, 0, w0);
 
       entry = nodeList.getFirstEntry();
       CentroidalMotionNode node = entry.element;
@@ -309,7 +433,33 @@ public class LinearControlModuleHelper
          //                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
 
       }
+      {
+         double torqueValue = node.getTorque(yawAxis);
+         EffortVariableConstraintType torqueConstraintType = node.getTorqueConstraintType(yawAxis);
+         double torqueWeight = node.getTorqueWeight(yawAxis);
+         double yawRateCoefficientForInitialTorque = getVelocityCoefficientForInitialYawTorque(deltaT0);
+         double yawCoefficientForInitialTorque = getPositionCoefficientForInitialYawTorque(deltaT0);
 
+         setInitialMatrixCoefficientsFromNodeQuantity(rowIndex, yawIndex, yawCoefficientMatrix, yawBias, yawRateCoefficientMatrix, yawRateBias,
+                                                      yawTorqueCoefficientMatrix, yawTorqueBias, yawDecisionVariableWeightMatrix,
+                                                      yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                      yawDecisionVariableLowerBoundMatrix, torqueValue, maxTorque, minTorque, torqueConstraintType,
+                                                      torqueWeight, torqueRegularizationWeight, yawRateCoefficientForInitialTorque,
+                                                      yawCoefficientForInitialTorque);
+         double torqueRateValue = node.getTorqueRate(yawAxis);
+         EffortVariableConstraintType torqueRateConstraintType = node.getTorqueRateConstraintType(yawAxis);
+         double torqueRateWeight = node.getTorqueRateWeight(yawAxis);
+         double yawRateCoefficientForInitialTorqueRate = getVelocityCoefficientForInitialYawTorqueRate(deltaT0);
+         double yawCoefficientForInitialTorqueRate = getPositionCoefficientForInitialYawTorqueRate(deltaT0);
+
+         setInitialMatrixCoefficientsFromNodeQuantity(rowIndex, yawIndex, yawCoefficientMatrix, yawBias, yawRateCoefficientMatrix, yawRateBias,
+                                                      yawTorqueRateCoefficientMatrix, yawTorqueRateBias, yawDecisionVariableWeightMatrix,
+                                                      yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                      yawDecisionVariableLowerBoundMatrix, torqueRateValue, maxTorqueRate, minTorqueRate,
+                                                      torqueRateConstraintType, torqueRateWeight, torqueRateRegularizationWeight,
+                                                      yawRateCoefficientForInitialTorqueRate, yawCoefficientForInitialTorqueRate);
+
+      }
       rowIndex++;
       for (entry = entry.getNext(); entry.getNext() != null; entry = entry.getNext(), rowIndex++)
       {
@@ -331,6 +481,12 @@ public class LinearControlModuleHelper
             DenseMatrix64F axisDecisionVariableDesiredValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
             DenseMatrix64F axisDecisionVariableUpperBoundMatrix = decisionVariableUpperBoundMatrix[axisOrdinal];
             DenseMatrix64F axisDecisionVariableLowerBoundMatrix = decisionVariableLowerBoundMatrix[axisOrdinal];
+            DenseMatrix64F axisH = H[axisOrdinal];
+            DenseMatrix64F axisf = f[axisOrdinal];
+            DenseMatrix64F axisAeq = Aeq[axisOrdinal];
+            DenseMatrix64F axisbeq = beq[axisOrdinal];
+            DenseMatrix64F axisAin = Aeq[axisOrdinal];
+            DenseMatrix64F axisbin = beq[axisOrdinal];
 
             double forceValue = node.getForce(axis);
             EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -373,11 +529,57 @@ public class LinearControlModuleHelper
             addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTim1);
             addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTim1);
 
-            processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                              node.getPosition(axis), node.getPositionMax(axis), node.getPositionMin(axis), node.getPositionWeight(axis));
-            processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                              node.getLinearVelocity(axis), node.getLinearVelocityMax(axis), node.getLinearVelocityMin(axis),
-                              node.getLinearVelocityWeight(axis));
+            processConstraint(axisH, axisf, axisAeq, axisbeq, axisAin, axisbin, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix,
+                              axisPositionBiasMatrix, node.getPosition(axis), node.getPositionMax(axis), node.getPositionMin(axis),
+                              node.getPositionWeight(axis));
+            processConstraint(axisH, axisf, axisAeq, axisbeq, axisAin, axisbin, rowIndex, node.getLinearVelocityConstraintType(axis),
+                              axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, node.getLinearVelocity(axis), node.getLinearVelocityMax(axis),
+                              node.getLinearVelocityMin(axis), node.getLinearVelocityWeight(axis));
+         }
+         {
+            double torqueValue = node.getTorque(yawAxis);
+            EffortVariableConstraintType torqueConstraintType = node.getTorqueConstraintType(yawAxis);
+            double torqueWeight = node.getTorqueWeight(yawAxis);
+            double yawRateCoefficientForFinalTorque = getVelocityCoefficientForFinalYawTorque(deltaTim1);
+            double yawRateCoefficientForInitialTorque = getVelocityCoefficientForInitialYawTorque(deltaTi);
+            double yawCoefficientForFinalTorque = getPositionCoefficientForFinalYawTorque(deltaTim1);
+            double yawCoefficientForInitialTorque = getPositionCoefficientForInitialYawTorque(deltaTi);
+
+            setInitialFinalMatrixCoefficientsFromNodeQuanitity(rowIndex, yawIndex, yawCoefficientMatrix, yawBias, yawRateCoefficientMatrix, yawRateBias,
+                                                               yawTorqueCoefficientMatrix, yawTorqueBias, yawDecisionVariableWeightMatrix,
+                                                               yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                               yawDecisionVariableLowerBoundMatrix, torqueValue, maxTorque, minTorque, torqueConstraintType,
+                                                               torqueWeight, torqueRegularizationWeight, yawRateCoefficientForFinalTorque,
+                                                               yawRateCoefficientForInitialTorque, yawCoefficientForFinalTorque,
+                                                               yawCoefficientForInitialTorque);
+
+            double torqueRateValue = node.getTorqueRate(yawAxis);
+            EffortVariableConstraintType torqueRateConstraintType = node.getTorqueRateConstraintType(yawAxis);
+            double torqueRateWeight = node.getTorqueRateWeight(yawAxis);
+            double yawRateCoefficientForFinalTorqueRate = getVelocityCoefficientForFinalYawTorqueRate(deltaTim1);
+            double yawRateCoefficientForInitialTorqueRate = getVelocityCoefficientForInitialYawTorqueRate(deltaTi);
+            double yawCoefficientForFinalTorqueRate = getPositionCoefficientForFinalYawTorqueRate(deltaTim1);
+            double yawCoefficientForInitialTorqueRate = getPositionCoefficientForInitialYawTorqueRate(deltaTi);
+
+            setInitialFinalMatrixCoefficientsFromNodeQuanitity(rowIndex, yawIndex, yawCoefficientMatrix, yawBias, yawRateCoefficientMatrix, yawRateBias,
+                                                               yawTorqueRateCoefficientMatrix, yawTorqueRateBias, yawDecisionVariableWeightMatrix,
+                                                               yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                               yawDecisionVariableLowerBoundMatrix, torqueRateValue, maxTorqueRate, minTorqueRate,
+                                                               torqueRateConstraintType, torqueRateWeight, forceRateRegularizationWeight,
+                                                               yawRateCoefficientForFinalTorqueRate, yawRateCoefficientForInitialTorqueRate,
+                                                               yawCoefficientForFinalTorqueRate, yawCoefficientForInitialTorqueRate);
+            replaceInitialConditionPlaceholder(rowIndex, yawRateCoefficientMatrix);
+            replaceInitialConditionPlaceholder(rowIndex, yawRateBias);
+            replaceInitialConditionPlaceholder(rowIndex, yawCoefficientMatrix);
+            replaceInitialConditionPlaceholder(rowIndex, yawBias);
+            addVelocityContributionToPosition(rowIndex, yawCoefficientMatrix, yawRateCoefficientMatrix, deltaTim1);
+            addVelocityContributionToPosition(rowIndex, yawBias, yawRateBias, deltaTim1);
+
+            processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getOrientationConstraintType(yawAxis), yawCoefficientMatrix, yawBias,
+                              node.getOrientation(yawAxis), node.getOrientationMax(yawAxis), node.getPositionMin(yawAxis), node.getOrientationWeight(yawAxis));
+            processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getAngularVelocityConstraintType(yawAxis), yawRateCoefficientMatrix,
+                              yawRateBias, node.getAngularVelocity(yawAxis), node.getAngularVelocityMax(yawAxis), node.getAngularVelocityMin(yawAxis),
+                              node.getAngularVelocityWeight(yawAxis));
          }
       }
 
@@ -398,6 +600,12 @@ public class LinearControlModuleHelper
          DenseMatrix64F axisDecisionVariableDesiredValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
          DenseMatrix64F axisDecisionVariableUpperBoundMatrix = decisionVariableUpperBoundMatrix[axisOrdinal];
          DenseMatrix64F axisDecisionVariableLowerBoundMatrix = decisionVariableLowerBoundMatrix[axisOrdinal];
+         DenseMatrix64F axisH = H[axisOrdinal];
+         DenseMatrix64F axisf = f[axisOrdinal];
+         DenseMatrix64F axisAeq = Aeq[axisOrdinal];
+         DenseMatrix64F axisbeq = beq[axisOrdinal];
+         DenseMatrix64F axisAin = Aeq[axisOrdinal];
+         DenseMatrix64F axisbin = beq[axisOrdinal];
 
          double forceValue = node.getForce(axis);
          EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -429,13 +637,53 @@ public class LinearControlModuleHelper
          addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTF);
          addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTF);
 
-         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                           node.getPosition(axis), node.getPositionMax(axis), node.getPositionMin(axis), node.getPositionWeight(axis));
-         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                           node.getLinearVelocity(axis), node.getLinearVelocityMax(axis), node.getLinearVelocityMin(axis), node.getLinearVelocityWeight(axis));
+         processConstraint(axisH, axisf, axisAeq, axisbeq, axisAin, axisbin, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix,
+                           axisPositionBiasMatrix, node.getPosition(axis), node.getPositionMax(axis), node.getPositionMin(axis), node.getPositionWeight(axis));
+         processConstraint(axisH, axisf, axisAeq, axisbeq, axisAin, axisbin, rowIndex, node.getLinearVelocityConstraintType(axis),
+                           axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, node.getLinearVelocity(axis), node.getLinearVelocityMax(axis),
+                           node.getLinearVelocityMin(axis), node.getLinearVelocityWeight(axis));
 
          processForceWeights(axisOrdinal);
       }
+      {
+         double torqueValue = node.getTorque(yawAxis);
+         EffortVariableConstraintType torqueConstraintType = node.getTorqueConstraintType(yawAxis);
+         double torqueWeight = node.getTorqueWeight(yawAxis);
+         double yawRateCoefficientForFinalTorque = getVelocityCoefficientForFinalYawTorque(deltaTF);
+         double yawCoefficientForFinalTorque = getPositionCoefficientForFinalYawTorque(deltaTF);
+         setFinalMatrixCoefficientsFromNodeQuantity(rowIndex, yawIndex, yawRateCoefficientMatrix, yawRateBias, yawCoefficientMatrix, yawBias,
+                                                    yawTorqueCoefficientMatrix, yawTorqueBias, yawDecisionVariableWeightMatrix,
+                                                    yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                    yawDecisionVariableLowerBoundMatrix, torqueValue, maxTorque, minTorque, torqueConstraintType, torqueWeight,
+                                                    torqueRegularizationWeight, yawRateCoefficientForFinalTorque, yawCoefficientForFinalTorque);
+
+         double torqueRate = node.getTorqueRate(yawAxis);
+         EffortVariableConstraintType torqueRateConstraintType = node.getTorqueRateConstraintType(yawAxis);
+         double torqueRateWeight = node.getTorqueRateWeight(yawAxis);
+         double yawRateCoefficientForFinalTorqueRate = getVelocityCoefficientForFinalYawTorqueRate(deltaTF);
+         double yawCoefficientForFinalTorqueRate = getPositionCoefficientForFinalYawTorqueRate(deltaTF);
+         setFinalMatrixCoefficientsFromNodeQuantity(rowIndex, yawIndex, yawRateCoefficientMatrix, yawRateBias, yawCoefficientMatrix, yawBias,
+                                                    yawTorqueRateCoefficientMatrix, yawTorqueRateBias, yawDecisionVariableWeightMatrix,
+                                                    yawDecisionVariableDesiredValueMatrix, yawDecisionVariableUpperBoundMatrix,
+                                                    yawDecisionVariableLowerBoundMatrix, torqueRate, maxTorqueRate, minTorqueRate, torqueRateConstraintType,
+                                                    torqueRateWeight, torqueRateRegularizationWeight, yawRateCoefficientForFinalTorqueRate,
+                                                    yawCoefficientForFinalTorqueRate);
+         replaceInitialConditionPlaceholder(rowIndex, yawRateCoefficientMatrix);
+         replaceInitialConditionPlaceholder(rowIndex, yawRateBias);
+         replaceInitialConditionPlaceholder(rowIndex, yawCoefficientMatrix);
+         replaceInitialConditionPlaceholder(rowIndex, yawBias);
+         addVelocityContributionToPosition(rowIndex, yawCoefficientMatrix, yawRateCoefficientMatrix, deltaTF);
+         addVelocityContributionToPosition(rowIndex, yawBias, yawRateBias, deltaTF);
+
+         processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getOrientationConstraintType(yawAxis), yawCoefficientMatrix, yawBias,
+                           node.getOrientation(yawAxis), node.getOrientationMax(yawAxis), node.getOrientationMin(yawAxis), node.getOrientationWeight(yawAxis));
+         processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getAngularVelocityConstraintType(yawAxis), yawRateCoefficientMatrix,
+                           yawRateBias, node.getAngularVelocity(yawAxis), node.getAngularVelocityMax(yawAxis), node.getAngularVelocityMin(yawAxis),
+                           node.getAngularVelocityWeight(yawAxis));
+
+         processTorqueWeights();
+      }
+
    }
 
    private void processForceWeights(int axisOrdinal)
@@ -452,7 +700,22 @@ public class LinearControlModuleHelper
       CommonOps.addEquals(axisf, tempf);
    }
 
-   private void processConstraint(int axisOrdinal, int rowIndex, DependentVariableConstraintType constraintType, DenseMatrix64F coefficientMatrix,
+   private void processTorqueWeights()
+   {
+      DenseMatrix64F axisDecisionVariableWeightMatrix = yawDecisionVariableWeightMatrix;
+      DenseMatrix64F axisDecisionVariableValueMatrix = yawDecisionVariableDesiredValueMatrix;
+      DenseMatrix64F axisH = yawH;
+      DenseMatrix64F axisf = yawf;
+      CommonOps.addEquals(axisH, axisDecisionVariableWeightMatrix);
+      tempJ.set(axisDecisionVariableValueMatrix);
+      tempf.reshape(numberOfDecisionVariables[yawIndex], 1);
+      CommonOps.mult(axisDecisionVariableWeightMatrix, tempJ, tempf);
+      CommonOps.scale(-1.0, tempf);
+      CommonOps.addEquals(axisf, tempf);
+   }
+
+   private void processConstraint(DenseMatrix64F axisH, DenseMatrix64F axisf, DenseMatrix64F axisAeq, DenseMatrix64F axisbeq, DenseMatrix64F axisAin,
+                                  DenseMatrix64F axisbin, int rowIndex, DependentVariableConstraintType constraintType, DenseMatrix64F coefficientMatrix,
                                   DenseMatrix64F biasMatrix, double desiredValue, double upperBound, double lowerBound, double weight)
    {
       double bias1 = biasMatrix.get(rowIndex, 0);
@@ -463,14 +726,14 @@ public class LinearControlModuleHelper
          return;
       case OBJECTIVE:
          if (Double.isFinite(weight) && !MathTools.epsilonEquals(weight, 0.0, Epsilons.ONE_MILLIONTH))
-            addObjectiveCost(axisOrdinal, extractedJacobian, weight, desiredValue, bias1);
+            addObjectiveCost(axisH, axisf, extractedJacobian, weight, desiredValue, bias1);
          if (Double.isFinite(upperBound))
-            addLessThanConstraint(axisOrdinal, extractedJacobian, upperBound, bias1);
+            addLessThanConstraint(axisAin, axisbin, extractedJacobian, upperBound, bias1);
          if (Double.isFinite(lowerBound))
-            addGreaterThanConstraint(axisOrdinal, extractedJacobian, lowerBound, bias1);
+            addGreaterThanConstraint(axisAin, axisbin, extractedJacobian, lowerBound, bias1);
          return;
       case EQUALITY:
-         addEqualityConstraint(axisOrdinal, extractedJacobian, desiredValue, bias1);
+         addEqualityConstraint(axisAeq, axisbeq, extractedJacobian, desiredValue, bias1);
          return;
       default:
          throw new RuntimeException("Unhandled dependent variable constraint");
@@ -487,20 +750,20 @@ public class LinearControlModuleHelper
       CommonOps.extractRow(coefficientMatrix, coefficientMatrixRowIndex, extractedJacobian);
    }
 
-   private void addLessThanConstraint(int axisOrdinal, DenseMatrix64F jacobian, double upperBound, double bias)
+   private void addLessThanConstraint(DenseMatrix64F axisAin, DenseMatrix64F axisbin, DenseMatrix64F jacobian, double upperBound, double bias)
    {
-      insertIntoMatrix(Ain[axisOrdinal], bin[axisOrdinal], jacobian, upperBound - bias);
+      insertIntoMatrix(axisAin, axisbin, jacobian, upperBound - bias);
    }
 
-   private void addGreaterThanConstraint(int axisOrdinal, DenseMatrix64F jacobian, double lowerBound, double bias)
+   private void addGreaterThanConstraint(DenseMatrix64F axisAin, DenseMatrix64F axisbin, DenseMatrix64F jacobian, double lowerBound, double bias)
    {
       CommonOps.scale(-1.0, jacobian);
-      insertIntoMatrix(Ain[axisOrdinal], bin[axisOrdinal], jacobian, -lowerBound + bias);
+      insertIntoMatrix(axisAin, axisbin, jacobian, -lowerBound + bias);
    }
 
-   private void addEqualityConstraint(int axisOrdinal, DenseMatrix64F jacobian, double desiredValue, double bias)
+   private void addEqualityConstraint(DenseMatrix64F axisAeq, DenseMatrix64F axisbeq, DenseMatrix64F jacobian, double desiredValue, double bias)
    {
-      insertIntoMatrix(Aeq[axisOrdinal], beq[axisOrdinal], jacobian, desiredValue - bias);
+      insertIntoMatrix(axisAeq, axisbeq, jacobian, desiredValue - bias);
    }
 
    private void insertIntoMatrix(DenseMatrix64F A, DenseMatrix64F b, DenseMatrix64F jacobian, double value)
@@ -520,11 +783,8 @@ public class LinearControlModuleHelper
    private final DenseMatrix64F tempJ = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempf = new DenseMatrix64F(0, 1);
 
-   private void addObjectiveCost(int axisOrdinal, DenseMatrix64F jacobian, double weight, double desiredValue, double bias)
+   private void addObjectiveCost(DenseMatrix64F axisH, DenseMatrix64F axisf, DenseMatrix64F jacobian, double weight, double desiredValue, double bias)
    {
-      DenseMatrix64F axisH = H[axisOrdinal];
-      DenseMatrix64F axisf = f[axisOrdinal];
-
       tempJ.set(jacobian);
       tempJtW.reshape(jacobian.getNumCols(), jacobian.getNumRows());
       CommonOps.transpose(jacobian, tempJtW);
@@ -682,6 +942,86 @@ public class LinearControlModuleHelper
    {
       axisVelocityCoefficientMatrix.set(rowIndex, decisionVariableIndex, velocityCoefficient);
       axisPositionCoefficientMatrix.set(rowIndex, decisionVariableIndex, positionCoefficient);
+   }
+
+   private double getVelocityCoefficientForInitialYawTorque(double deltaT)
+   {
+      return getVelocityMultiplierForInitialYawTorque() * deltaT;
+   }
+
+   private double getVelocityCoefficientForFinalYawTorque(double deltaT)
+   {
+      return getVelocityMultiplierForFinalYawTorque() * deltaT;
+   }
+
+   private double getVelocityCoefficientForInitialYawTorqueRate(double deltaT)
+   {
+      return getVelocityMultiplierForInitialYawTorqueRate() * deltaT * deltaT;
+   }
+
+   private double getVelocityCoefficientForFinalYawTorqueRate(double deltaT)
+   {
+      return getVelocityMultiplierForFinalYawTorqueRate() * deltaT * deltaT;
+   }
+
+   private double getPositionCoefficientForInitialYawTorque(double deltaT)
+   {
+      return getPositionMultiplierForInitialYawTorque() * deltaT * deltaT;
+   }
+
+   private double getPositionCoefficientForFinalYawTorque(double deltaT)
+   {
+      return getPositionMultiplierForFinalYawTorque() * deltaT * deltaT;
+   }
+
+   private double getPositionCoefficientForInitialYawTorqueRate(double deltaT)
+   {
+      return getPositionMultiplierForInitialYawTorqueRate() * deltaT * deltaT * deltaT;
+   }
+
+   private double getPositionCoefficientForFinalYawTorqueRate(double deltaT)
+   {
+      return getPositionMultiplierForFinalYawTorqueRate() * deltaT * deltaT * deltaT;
+   }
+
+   private double getVelocityMultiplierForInitialYawTorque()
+   {
+      return 0.5 / Izz;
+   }
+
+   private double getVelocityMultiplierForFinalYawTorque()
+   {
+      return 0.5 / Izz;
+   }
+
+   private double getVelocityMultiplierForInitialYawTorqueRate()
+   {
+      return 1.0 / (12.0 * Izz);
+   }
+
+   private double getVelocityMultiplierForFinalYawTorqueRate()
+   {
+      return -1.0 / (12.0 * Izz);
+   }
+
+   private double getPositionMultiplierForInitialYawTorque()
+   {
+      return 0.35 / Izz;
+   }
+
+   private double getPositionMultiplierForFinalYawTorque()
+   {
+      return 0.15 / Izz;
+   }
+
+   private double getPositionMultiplierForInitialYawTorqueRate()
+   {
+      return 0.05 / Izz;
+   }
+
+   private double getPositionMultiplierForFinalYawTorqueRate()
+   {
+      return -2.0 / (60.0 * Izz);
    }
 
    private double getVelocityCoefficientForInitialForce(double deltaT)
@@ -879,7 +1219,7 @@ public class LinearControlModuleHelper
 
    public void processDecisionVariables()
    {
-      for(Axis axis : Axis.values)
+      for (Axis axis : Axis.values)
       {
          getOptimizedForceValues(axis);
          getOptimizedForceRateValues(axis);
@@ -907,7 +1247,7 @@ public class LinearControlModuleHelper
    {
       return optimizedVelocityValues;
    }
-   
+
    public int getNumberOfNodes()
    {
       return numberOfNodes;
@@ -932,7 +1272,7 @@ public class LinearControlModuleHelper
    {
       return bin[axis.ordinal()];
    }
-   
+
    private void compute(DenseMatrix64F result, DenseMatrix64F soln, DenseMatrix64F coefficients, DenseMatrix64F bias)
    {
       result.reshape(coefficients.getNumRows(), soln.getNumCols());
