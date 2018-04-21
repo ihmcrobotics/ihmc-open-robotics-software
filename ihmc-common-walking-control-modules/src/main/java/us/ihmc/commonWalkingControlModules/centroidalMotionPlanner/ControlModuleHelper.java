@@ -1307,4 +1307,54 @@ public class ControlModuleHelper
       compute(optimizedPositionValues[axisOrdinal], decisionVariableValues[axisOrdinal], positionCoefficientMatrix[axisOrdinal], positionBias[axisOrdinal]);
       return optimizedPositionValues[axisOrdinal];
    }
+
+   public DenseMatrix64F getYawObjectiveHMatrix()
+   {
+      return yawH;
+   }
+
+   public DenseMatrix64F getYawObjectivefMatrix()
+   {
+      return yawf;
+   }
+
+   public DenseMatrix64F getYawConstraintAeqMatrix()
+   {
+      return yawAeq;
+   }
+
+   public DenseMatrix64F getYawConstraintbeqMatrix()
+   {
+      return yawbeq;
+   }
+
+   public DenseMatrix64F getYawConstraintAinMatrix()
+   {
+      return yawAin;
+   }
+
+   public DenseMatrix64F getYawConstraintbinMatrix()
+   {
+      return yawbin;
+   }
+   
+   public DenseMatrix64F getYawDecisionVariableUpperBoundMatrix()
+   {
+      return yawDecisionVariableUpperBoundMatrix;
+   }
+
+   public DenseMatrix64F getYawDecisionVariableLowerBoundMatrix()
+   {
+      return yawDecisionVariableLowerBoundMatrix;
+   }
+
+   public void setYawDecisionVariableValues(DenseMatrix64F solution)
+   {
+      yawDecisionVariableValues.set(solution);
+   }
+
+   public int getNumberOfYawDecisionVariables()
+   {
+      return numberOfDecisionVariables[yawIndex];
+   }
 }
