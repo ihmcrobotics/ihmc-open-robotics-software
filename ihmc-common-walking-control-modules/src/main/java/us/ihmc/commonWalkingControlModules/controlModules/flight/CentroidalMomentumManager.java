@@ -283,5 +283,4 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    {
       return estimatedCoMVelocity.getZ();
    }
-
 }

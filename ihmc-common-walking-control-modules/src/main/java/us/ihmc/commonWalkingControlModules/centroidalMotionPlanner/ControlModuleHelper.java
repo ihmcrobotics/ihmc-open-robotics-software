@@ -1337,7 +1337,7 @@ public class ControlModuleHelper
    {
       return yawbin;
    }
-   
+
    public DenseMatrix64F getYawDecisionVariableUpperBoundMatrix()
    {
       return yawDecisionVariableUpperBoundMatrix;
@@ -1356,5 +1356,29 @@ public class ControlModuleHelper
    public int getNumberOfYawDecisionVariables()
    {
       return numberOfDecisionVariables[yawIndex];
+   }
+
+   public DenseMatrix64F getOptimizedYawTorqueValues()
+   {
+      compute(optimizedYawTorqueValues, yawDecisionVariableValues, yawTorqueCoefficientMatrix, yawTorqueBias);
+      return optimizedYawTorqueValues;
+   }
+
+   public DenseMatrix64F getOptimizedYawTorqueRateValues()
+   {
+      compute(optimizedYawTorqueRateValues, yawDecisionVariableValues, yawTorqueRateCoefficientMatrix, yawTorqueRateBias);
+      return optimizedYawTorqueRateValues;
+   }
+
+   public DenseMatrix64F getOptimizedYawValues()
+   {
+      compute(optimizedYawValues, yawDecisionVariableValues, yawCoefficientMatrix, yawBias);
+      return optimizedYawValues;
+   }
+
+   public DenseMatrix64F getOptimizedYawRateValues()
+   {
+      compute(optimizedYawRateValues, yawDecisionVariableValues, yawRateCoefficientMatrix, yawRateBias);
+      return optimizedYawRateValues;
    }
 }

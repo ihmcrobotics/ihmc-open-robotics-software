@@ -219,7 +219,7 @@ public class WholeBodyMotionPlanner
    
    public PositionTrajectory getPositionTrajectory()
    {
-      return motionPlanner.getCoMTrajectory();
+      return motionPlanner.getPositionTrajectory();
    }
 
    public List<CentroidalMotionNode> getPlannerNodes()
