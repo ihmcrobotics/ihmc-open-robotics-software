@@ -10,6 +10,11 @@ public class CentroidalMotionPlannerParameters
    private Vector3D minimumForce = new Vector3D();
    private Vector3D maximumForceRate = new Vector3D();
    private Vector3D minimumForceRate = new Vector3D();
+   private Vector3D positionLowerLimit = new Vector3D();
+   private Vector3D positionUpperLimit = new Vector3D();
+   private Vector3D jumpPositionUpperLimit = new Vector3D();
+   private Vector3D orientationLowerLimit = new Vector3D();
+   private Vector3D orientationUpperLimit = new Vector3D();
    private double robotMass;
    private double forceRegularizationWeight;
    private double forceRateRegularizationWeight;
@@ -180,12 +185,22 @@ public class CentroidalMotionPlannerParameters
       return 1e-14;
    }
 
-   public double getDefaultMotionPlanningPositionObjecitveWeight()
+   public double getDefaultMotionPlanningPositionObjectiveWeight()
    {
       return 10.0;
    }
 
-   public double getDefaultMotionPlanningVelocityObjecitveWeight()
+   public double getDefaultMotionPlanningVelocityObjectiveWeight()
+   {
+      return 10.0;
+   }
+
+   public double getDefaultMotionPlanningOrientationObjectiveWeight()
+   {
+      return 10.0;
+   }
+
+   public double getDefaultMotionPlanningAngularVelocityObjectiveWeight()
    {
       return 10.0;
    }
@@ -248,5 +263,30 @@ public class CentroidalMotionPlannerParameters
    public double getMinTorqueRate()
    {
       return minTorqueRate;
+   }
+
+   public Vector3DReadOnly getPositionUpperLimits()
+   {
+      return positionUpperLimit;
+   }
+
+   public Vector3DReadOnly getPositionLowerLimits()
+   {
+      return positionLowerLimit;
+   }
+
+   public Vector3DReadOnly getOrientationUpperLimits()
+   {
+      return orientationUpperLimit;
+   }
+
+   public Vector3DReadOnly getOrientationLowerLimits()
+   {
+      return orientationLowerLimit;
+   }
+
+   public Vector3DReadOnly getJumpPositionUpperLimits()
+   {
+      return jumpPositionUpperLimit;
    }
 }

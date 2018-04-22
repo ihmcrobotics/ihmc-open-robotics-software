@@ -270,6 +270,13 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       setForceRateWeightInternal(dForceRateWeight);
    }
 
+   public void setTorqueObjective(FrameVector3D torque)
+   {
+      setTorqueInternal(torque);
+      this.torqueConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      this.torqueWeight.setToNaN();
+   }
+
    public void setTorqueObjective(FrameVector3D torque, FrameVector3D torqueWeight)
    {
       setTorqueInternal(torque);
@@ -287,6 +294,13 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.torque.setIncludingFrame(torque);
       this.torque.changeFrame(referenceFrame);
+   }
+
+   public void setZeroTorqueConstraint()
+   {
+      this.torque.setToZero();
+      this.torqueConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.torqueWeight.setToNaN();
    }
 
    public void setTorqueConstraint(FrameVector3D torque)
@@ -453,11 +467,50 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.positionMax.changeFrame(referenceFrame);
    }
 
+   public void setOrientationObjective(FrameVector3D desiredOrienation, FrameVector3D orientationWeight, FrameVector3D maxOrientation,
+                                       FrameVector3D minOrientation)
+   {
+      setOrientationInternal(desiredOrienation);
+      this.orientationConstraintType.setXYZ(DependentVariableConstraintType.OBJECTIVE);
+      setOrientationWeightInternal(orientationWeight);
+      setOrientationMaxInternal(maxOrientation);
+      setOrientationMinInternal(minOrientation);
+   }
+
    public void setOrientationObjective(FrameVector3D desiredOrienation, FrameVector3D orientationWeight)
    {
       setOrientationInternal(desiredOrienation);
       this.orientationConstraintType.setXYZ(DependentVariableConstraintType.OBJECTIVE);
       setOrientationWeightInternal(orientationWeight);
+      this.orientationMax.setToNaN();
+      this.orientationMin.setToNaN();
+   }
+
+   public void setOrientationInequalitiesForObjective(FrameVector3D maxOrientation, FrameVector3D minOrientation)
+   {
+      setOrientationMaxInternal(maxOrientation);
+      setOrientationMinInternal(minOrientation);
+   }
+
+   public void setOrientationInequalities(FrameVector3D maxOrientation, FrameVector3D minOrientation)
+   {
+      this.orientation.setToNaN();
+      this.orientationConstraintType.setXYZ(DependentVariableConstraintType.OBJECTIVE);
+      this.orientationWeight.setToNaN();
+      setOrientationMaxInternal(maxOrientation);
+      setOrientationMinInternal(minOrientation);
+   }
+
+   private void setOrientationMinInternal(FrameVector3D minOrientation)
+   {
+      this.orientationMin.setIncludingFrame(minOrientation);
+      this.orientationMin.changeFrame(referenceFrame);
+   }
+
+   private void setOrientationMaxInternal(FrameVector3D maxOrientation)
+   {
+      this.orientationMax.setIncludingFrame(maxOrientation);
+      this.orientationMax.changeFrame(referenceFrame);
    }
 
    private void setOrientationWeightInternal(FrameVector3D orientationWeight)

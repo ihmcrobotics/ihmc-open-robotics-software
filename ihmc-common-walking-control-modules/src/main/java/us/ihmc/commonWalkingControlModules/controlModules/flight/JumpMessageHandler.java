@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.euclid.tuple2D.Point2D;
 
 public class JumpMessageHandler
 {
    private final List<ContactState> contactStateList;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
-   private final FramePoint2D tempPoint = new FramePoint2D();
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+   private final Point2D tempPoint = new Point2D();
 
    public JumpMessageHandler()
    {
@@ -48,7 +48,7 @@ public class JumpMessageHandler
       case TAKE_OFF:
          ContactState launchState = new ContactState(worldFrame);
          launchState.setDuration(0.4);
-         createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
+         createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          launchState.setSupportPolygon(tempPolygon);
          launchState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(launchState);
@@ -62,7 +62,7 @@ public class JumpMessageHandler
       case LANDING:
          ContactState landingState = new ContactState(worldFrame);
          landingState.setDuration(0.5);
-         createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
+         createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          landingState.setSupportPolygon(tempPolygon);
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(landingState);
@@ -71,13 +71,13 @@ public class JumpMessageHandler
       }
    }
 
-   private void createRectangle(ReferenceFrame referenceFrame, double centroidX, double centroidY, double lengthX, double lengthY,
-                                FrameConvexPolygon2d polygonToSet)
+   private void createRectangle(double centroidX, double centroidY, double lengthX, double lengthY,
+                                ConvexPolygon2D polygonToSet)
    {
       polygonToSet.clear();
       for (int i = 0; i < 4; i++)
       {
-         tempPoint.setIncludingFrame(referenceFrame, centroidX + Math.pow(-1.0, i) * lengthX * 0.5, centroidY + Math.pow(-1.0, (i / 2)) * lengthY * 0.5);
+         tempPoint.set(centroidX + Math.pow(-1.0, i) * lengthX * 0.5, centroidY + Math.pow(-1.0, (i / 2)) * lengthY * 0.5);
          polygonToSet.addVertex(tempPoint);
       }
       polygonToSet.update();

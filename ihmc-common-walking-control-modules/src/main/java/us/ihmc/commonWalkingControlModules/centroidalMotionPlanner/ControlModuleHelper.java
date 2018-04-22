@@ -576,7 +576,7 @@ public class ControlModuleHelper
             addVelocityContributionToPosition(rowIndex, yawBias, yawRateBias, deltaTim1);
 
             processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getOrientationConstraintType(yawAxis), yawCoefficientMatrix, yawBias,
-                              node.getOrientation(yawAxis), node.getOrientationMax(yawAxis), node.getPositionMin(yawAxis), node.getOrientationWeight(yawAxis));
+                              node.getOrientation(yawAxis), node.getOrientationMax(yawAxis), node.getOrientationMin(yawAxis), node.getOrientationWeight(yawAxis));
             processConstraint(yawH, yawf, yawAeq, yawbeq, yawAin, yawbin, rowIndex, node.getAngularVelocityConstraintType(yawAxis), yawRateCoefficientMatrix,
                               yawRateBias, node.getAngularVelocity(yawAxis), node.getAngularVelocityMax(yawAxis), node.getAngularVelocityMin(yawAxis),
                               node.getAngularVelocityWeight(yawAxis));

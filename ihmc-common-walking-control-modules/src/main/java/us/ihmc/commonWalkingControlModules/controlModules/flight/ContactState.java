@@ -1,13 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 public class ContactState
 {
    private ContactType state;
    private double duration;
-   private final FrameConvexPolygon2d supportPolygon;
+   private final FramePose3D pose;
+   private final ConvexPolygon2D supportPolygon;
 
    public ContactState()
    {
@@ -16,7 +20,8 @@ public class ContactState
 
    public ContactState(ReferenceFrame referenceFrame)
    {
-      this.supportPolygon = new FrameConvexPolygon2d(referenceFrame);
+      this.pose = new FramePose3D(referenceFrame);
+      this.supportPolygon = new ConvexPolygon2D();
       reset();
    }
 
@@ -32,12 +37,7 @@ public class ContactState
       this.state = stateToSet;
    }
 
-   public void setSupportPolygonIncludingFrame(FrameConvexPolygon2d supportPolygonToSet)
-   {
-      this.supportPolygon.setIncludingFrame(supportPolygonToSet);
-   }
-
-   public void setSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
+   public void setSupportPolygon(ConvexPolygon2D supportPolygonToSet)
    {
       this.supportPolygon.set(supportPolygonToSet);
    }
@@ -47,9 +47,9 @@ public class ContactState
       this.duration = duration;
    }
 
-   public void getSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
+   public void getSupportPolygon(ConvexPolygon2D supportPolygonToSet)
    {
-      supportPolygonToSet.setIncludingFrame(supportPolygon);
+      supportPolygonToSet.set(supportPolygon);
    }
 
    public ContactType getContactType()
@@ -60,5 +60,15 @@ public class ContactState
    public double getDuration()
    {
       return duration;
+   }
+
+   public void getCoMPosition(FramePoint3D comPosition)
+   {
+      comPosition.setIncludingFrame(pose.getPosition());
+   }
+   
+   public void getCoMOrientation(FrameQuaternion comOrientation)
+   {
+      comOrientation.setIncludingFrame(pose.getOrientation());
    }
 }
