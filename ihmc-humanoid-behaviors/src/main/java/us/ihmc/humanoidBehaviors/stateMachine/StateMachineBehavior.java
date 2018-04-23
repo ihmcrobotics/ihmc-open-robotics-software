@@ -8,7 +8,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBehavior
 {
-   private final BehaviorStateMachine<E> stateMachine;
+   private final Class<E> keyType;
+   private BehaviorStateMachine<E> stateMachine = null;
 
    public StateMachineBehavior(String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, CommunicationBridge outgoingCommunicationBridge)
    {
@@ -19,6 +20,11 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
                                CommunicationBridge outgoingCommunicationBridge)
    {
       super(namePrefix, outgoingCommunicationBridge);
+      this.keyType = keyType;
+   }
+
+   protected void setupStateMachine()
+   {
       StateMachineFactory<E, BehaviorAction> stateMachineFactory = new StateMachineFactory<>(keyType);
       E initialBehaviorKey = configureStateMachineAndReturnInitialKey(stateMachineFactory);
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(initialBehaviorKey));

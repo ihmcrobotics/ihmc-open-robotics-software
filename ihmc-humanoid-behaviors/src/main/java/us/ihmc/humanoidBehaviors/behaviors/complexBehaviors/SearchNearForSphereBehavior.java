@@ -55,8 +55,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
                                                                         coactiveElement.validAcknowledged);
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      ;
-
+      setupStateMachine();
    }
 
    @Override
