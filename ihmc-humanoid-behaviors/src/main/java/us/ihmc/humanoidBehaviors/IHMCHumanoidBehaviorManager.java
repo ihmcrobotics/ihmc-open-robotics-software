@@ -155,6 +155,7 @@ public class IHMCHumanoidBehaviorManager
                                     communicationBridge, yoGraphicsListRegistry, capturePointUpdatable, wholeBodyControllerParameters);
       }
 
+      dispatcher.finalizeStateMachine();
       behaviorPacketCommunicator.attachListener(BehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
