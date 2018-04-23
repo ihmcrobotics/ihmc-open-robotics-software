@@ -8,7 +8,7 @@ public interface QuadrupedPlanarBodyPathProvider
 
    /**
     * Packs the planar pose of the robot at the given time
-    * @param time relative to the start of the trajectory
+    * @param time absolute time based on robot timestamp
     * @param poseToPack
     */
    void getPlanarPose(double time, FramePose2D poseToPack);
