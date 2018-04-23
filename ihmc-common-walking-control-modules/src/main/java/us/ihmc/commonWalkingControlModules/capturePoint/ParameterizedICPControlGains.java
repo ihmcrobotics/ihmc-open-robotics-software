@@ -65,7 +65,7 @@ public class ParameterizedICPControlGains implements ICPControlGainsProvider
    }
 
    @Override
-   public DoubleProvider getFeedbackPartMaxRate()
+   public DoubleProvider getYoFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
    }
