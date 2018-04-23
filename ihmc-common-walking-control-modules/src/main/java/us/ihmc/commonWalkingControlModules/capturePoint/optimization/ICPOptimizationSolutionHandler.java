@@ -1,19 +1,24 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class ICPOptimizationSolutionHandler
@@ -22,7 +27,7 @@ public class ICPOptimizationSolutionHandler
 
    private final ICPControlPlane icpControlPlane;
 
-   private final YoBoolean useICPControlPolygons;
+   private final BooleanProvider useICPControlPolygons;
 
    private final YoDouble footstepDeadband;
    private final YoDouble footstepSolutionResolution;
@@ -62,7 +67,7 @@ public class ICPOptimizationSolutionHandler
       this(null, icpOptimizationParameters, useICPControlPolygons, false, yoNamePrefix, registry);
    }
 
-   public ICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, YoBoolean useICPControlPolygons,
+   public ICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, BooleanProvider useICPControlPolygons,
                                          boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
       this.useICPControlPolygons = useICPControlPolygons;
@@ -136,7 +141,7 @@ public class ICPOptimizationSolutionHandler
       solver.getFootstepSolutionLocation(0, locationSolutionOnPlane);
       footstepSolutionInControlPlane.set(locationSolutionOnPlane);
 
-      if (useICPControlPolygons.getBooleanValue())
+      if (useICPControlPolygons.getValue() && icpControlPlane != null)
          icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, locationSolutionOnPlane, locationSolution, referenceFootstepLocation.getZ());
       else
          locationSolution.set(locationSolutionOnPlane);
@@ -173,7 +178,7 @@ public class ICPOptimizationSolutionHandler
       solver.getFootstepSolutionLocation(0, locationSolutionOnPlane);
       footstepSolutionInControlPlane.set(locationSolutionOnPlane);
 
-      if (useICPControlPolygons.getBooleanValue())
+      if (useICPControlPolygons.getValue() && icpControlPlane != null)
          icpControlPlane.projectPointFromPlaneOntoPlanarRegion(worldFrame, locationSolutionOnPlane, locationSolution, activePlanarRegion);
       else
          locationSolution.set(locationSolutionOnPlane);
