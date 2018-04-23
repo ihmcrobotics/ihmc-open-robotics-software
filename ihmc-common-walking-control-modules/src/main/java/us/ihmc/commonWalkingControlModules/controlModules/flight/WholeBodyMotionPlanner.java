@@ -111,8 +111,8 @@ public class WholeBodyMotionPlanner
       {
          ContactState contactState = contactStateList.get(0);
          contactState.getCoMPosition(tempCentroid);
-         contactState.getCoMVelocity(tempLinearVelocity);
-         contactState.getGroundReactionForce(tempGroundReactionForce);
+         contactState.getCoMLinearVelocity(tempLinearVelocity);
+         contactState.getCoMGroundReaction(tempGroundReactionForce);
          contactState.getCoMOrientation(tempOrientation);
          tempOrientationVector.setIncludingFrame(tempOrientation.getReferenceFrame(), tempOrientation.getRoll(), tempOrientation.getPitch(),
                                                  tempOrientation.getYaw());
@@ -253,8 +253,8 @@ public class WholeBodyMotionPlanner
          motionNode.reset();
          motionNode.setTime(nodeTime);
          contactState.getCoMPosition(tempCentroid);
-         contactState.getCoMVelocity(tempLinearVelocity);
-         contactState.getGroundReactionForce(tempGroundReactionForce);
+         contactState.getCoMLinearVelocity(tempLinearVelocity);
+         contactState.getCoMGroundReaction(tempGroundReactionForce);
          contactState.getCoMOrientation(tempOrientation);
          tempOrientationVector.setIncludingFrame(tempOrientation.getReferenceFrame(), tempOrientation.getRoll(), tempOrientation.getPitch(),
                                                  tempOrientation.getYaw());
@@ -316,12 +316,6 @@ public class WholeBodyMotionPlanner
    public ReferenceFrame getPlanningFrame()
    {
       return planningFrame;
-   }
-
-   public void setFinalPosition(FramePoint3D positionToSet)
-   {
-      this.finalPosition.setIncludingFrame(positionToSet);
-      this.finalPosition.changeFrame(planningFrame);
    }
 
    public void getNominalState(FrameVector3D velocity, FrameVector3D groundReactionForce)
