@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,8 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    private final AtomicReference<QuadrupedBodyPathPlanMessage> bodyPathPlanMessage = new AtomicReference<>();
    private final YoDouble timestamp;
    private final MultipleWaypointsPositionTrajectoryGenerator trajectory = new MultipleWaypointsPositionTrajectoryGenerator("bodyPath", worldFrame, registry);
+   private final FramePoint3D trajectoryValue = new FramePoint3D(worldFrame);
+   private final YoFramePoint3D yoTrajectoryValue = new YoFramePoint3D("desiredPlanarPose", worldFrame, registry);
 
    private final ReferenceFrame supportFrame;
    private final FramePose3D supportPose = new FramePose3D();
@@ -70,7 +73,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
          }
       }
 
-      trajectory.clear();
+      trajectory.initialize();
    }
 
    private void appendCurrentPoseAsWaypoint()
@@ -81,14 +84,13 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
       trajectory.appendWaypoint(timestamp.getDoubleValue(), new Point3D(supportPose.getX(), supportPose.getY(), supportPose.getYaw()), new Vector3D());
    }
 
-   private final FramePoint3D trajectoryValue = new FramePoint3D();
-
    @Override
    public void getPlanarPose(double time, FramePose2D poseToPack)
    {
       trajectory.compute(time);
       trajectory.getPosition(trajectoryValue);
       poseToPack.setIncludingFrame(worldFrame, trajectoryValue.getX(), trajectoryValue.getY(), trajectoryValue.getZ());
+      yoTrajectoryValue.set(trajectoryValue);
    }
 
    public boolean bodyPathIsAvailable()
@@ -98,7 +100,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
 
    public boolean isDone()
    {
-      return trajectory.isDone();
+      return timestamp.getDoubleValue() > trajectory.getLastWaypointTime();
    }
 
    public void setBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)

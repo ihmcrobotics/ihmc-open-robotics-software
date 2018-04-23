@@ -28,7 +28,7 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
    @Override
    public void initialize()
    {
-      usingJoystickBasedPath.set(false);
+      usingJoystickBasedPath.set(true);
       joystickBasedPath.initialize();
    }
 

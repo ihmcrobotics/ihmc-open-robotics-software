@@ -92,8 +92,7 @@ public class QuadrupedXGaitPlanner
          step.getTimeInterval().setEndTime(thisStepEndTime);
 
          // compute xGait rectangle pose at end of step
-         double deltaTime = thisStepEndTime - timeAtSoS;
-         extrapolatePose(xGaitRectanglePose, deltaTime, 0.0);
+         extrapolatePose(xGaitRectanglePose, thisStepEndTime, 0.0);
 
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
          step.setStepYaw(xGaitRectanglePose.getYaw());
@@ -163,8 +162,8 @@ public class QuadrupedXGaitPlanner
          for (int i = 0; i < plannedSteps.size(); i++)
          {
             // compute xGait rectangle pose at end of step
-            double deltaTime = plannedSteps.get(i).getTimeInterval().getEndTime() - currentTime;
-            extrapolatePose(xGaitRectanglePose, deltaTime, currentHeight);
+            double time = plannedSteps.get(i).getTimeInterval().getEndTime();
+            extrapolatePose(xGaitRectanglePose, time, currentHeight);
             xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
             plannedSteps.get(i).setStepYaw(xGaitRectanglePose.getYaw());
 
@@ -181,8 +180,8 @@ public class QuadrupedXGaitPlanner
       // translate step goal positions based on latest step position
       {
          // compute xGait rectangle pose at end of step
-         double deltaTime = latestStep.getTimeInterval().getEndTime() - currentTime;
-         extrapolatePose(xGaitRectanglePose, deltaTime, currentHeight);
+         double time = latestStep.getTimeInterval().getEndTime();
+         extrapolatePose(xGaitRectanglePose, time, currentHeight);
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
 
          // compute step goal position
@@ -209,9 +208,9 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   private void extrapolatePose(FramePose3D finalPose, double deltaTime, double height)
+   private void extrapolatePose(FramePose3D finalPose, double time, double height)
    {
-      bodyPathProvider.getPlanarPose(deltaTime, bodyPathPose);
+      bodyPathProvider.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
       finalPose.setZ(height);
