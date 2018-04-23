@@ -341,19 +341,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    public String[] getNamesOfJointsUsingOutputEncoder()
    {
-//      ArrayList<String> jointNameList = new ArrayList<>();
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         for (ArmJointName armJoint : armJoints)
-//            jointNameList.add(getArmJointName(robotSide, armJoint));
-//         for (LegJointName legJoint : legJoints)
-//            jointNameList.add(getLegJointName(robotSide, legJoint));
-//      }
-//      for (SpineJointName spineJoint : spineJoints)
-//         jointNameList.add(getSpineJointName(spineJoint));
-
-//      String[] ret = jointNameList.toArray(new String[0]);
-
       String[] ret = new String[]
       {
 //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
@@ -362,6 +349,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 //            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
             getSpineJointName(SpineJointName.SPINE_PITCH),
             getSpineJointName(SpineJointName.SPINE_ROLL),
+            getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL),
+            getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),
+            getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL),
+            getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),
       };
       return ret;
    }
