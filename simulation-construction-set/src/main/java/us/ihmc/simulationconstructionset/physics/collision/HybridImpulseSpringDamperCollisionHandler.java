@@ -1133,8 +1133,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          {
             boolean isPairedWhileNonContacting = contactingExternalForcePoint.getIndexOfContactingPair() != -1;
             if (isPairedWhileNonContacting)
-            {
-               System.out.println("" + linkNamesOfForcePoints.get(i) + " is not contacting, but point is activated.");
+            {               
+               //System.out.println("" + linkNamesOfForcePoints.get(i) + " is not contacting, but point is activated.");
                allContactingExternalForcePoints.get(contactingExternalForcePoint.getIndexOfContactingPair()).setIndexOfContactingPair(-1);
                contactingExternalForcePoint.setIndexOfContactingPair(-1);
             }
