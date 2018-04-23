@@ -75,6 +75,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       searchForDoorBehavior = new SearchForDoorBehavior(communicationBridge);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      setupStateMachine();
    }
 
    @Override

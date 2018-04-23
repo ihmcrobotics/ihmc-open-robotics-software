@@ -89,6 +89,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       finalTransferTime.set(defaultFinalTransferTime);
 
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      setupStateMachine();
    }
 
    @Override

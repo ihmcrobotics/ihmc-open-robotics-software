@@ -29,6 +29,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
    {
       super(name, BasicStates.class, yoTime, outgoingCommunicationBridge);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
+      setupStateMachine();
    }
 
    @Override

@@ -69,6 +69,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
                                                                                    fullRobotModel, atlasPrimitiveActions);
       pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
       putBallInBucketBehavior = new PutBallInBucketBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
+      setupStateMachine();
    }
 
    @Override

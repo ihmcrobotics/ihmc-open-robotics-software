@@ -43,6 +43,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
                                                                         coactiveElement.validAcknowledged);
+      setupStateMachine();
    }
 
    @Override

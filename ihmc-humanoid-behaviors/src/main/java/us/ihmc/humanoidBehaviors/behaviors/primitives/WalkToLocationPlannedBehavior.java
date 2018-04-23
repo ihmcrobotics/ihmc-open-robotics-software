@@ -48,6 +48,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       planPathToLocationBehavior = new PlanPathToLocationBehavior(outgoingCommunicationBridge, yoTime);
+      setupStateMachine();
    }
 
    public void setTarget(FramePose3D targetPoseInWorld)

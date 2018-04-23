@@ -76,6 +76,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
+      setupStateMachine();
    }
 
    @Override
