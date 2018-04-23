@@ -1,18 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import java.util.List;
-
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.EndDependentList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.*;
 
 public class QuadrupedXGaitPlanner
 {
@@ -42,8 +38,8 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
-   public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
-         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
+                                  FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -62,9 +58,12 @@ public class QuadrupedXGaitPlanner
       // plan steps
       double lastStepStartTime = timeAtSoS;
       RobotQuadrant lastStepQuadrant = initialStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
-      for (int i = 0; i < plannedSteps.size(); i++)
+      PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
+      plannedSteps.clear();
+      for (int i = 0; i < plannedSteps.capacity(); i++)
       {
-         QuadrupedTimedStep step = plannedSteps.get(i);
+         plannedSteps.add();
+         QuadrupedTimedOrientedStep step = plannedSteps.get(plannedSteps.size() - 1);
 
          // compute step quadrant
          RobotQuadrant thisStepQuadrant = lastStepQuadrant.getNextRegularGaitSwingQuadrant();
@@ -93,6 +92,7 @@ public class QuadrupedXGaitPlanner
          double deltaTime = thisStepEndTime - timeAtSoS;
          extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
+         step.setStepYaw(xGaitRectanglePose.getYaw());
 
          // compute step goal position by sampling the corner position of the xGait rectangle at touch down
          RobotQuadrant robotQuadrant = step.getRobotQuadrant();
@@ -108,15 +108,17 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
+   public void computeOnlinePlan(QuadrupedPlanarFootstepPlan footstepPlan,
          Vector3D planarVelocity, double currentTime, double currentYaw, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
-      if (latestSteps.get(RobotEnd.HIND).getTimeInterval().getEndTime() > latestSteps.get(RobotEnd.FRONT).getTimeInterval().getEndTime())
-         latestStep = latestSteps.get(RobotEnd.HIND);
+      EndDependentList<QuadrupedTimedOrientedStep> currentSteps = footstepPlan.getCurrentSteps();
+
+      if (currentSteps.get(RobotEnd.HIND).getTimeInterval().getEndTime() > currentSteps.get(RobotEnd.FRONT).getTimeInterval().getEndTime())
+         latestStep = currentSteps.get(RobotEnd.HIND);
       else
-         latestStep = latestSteps.get(RobotEnd.FRONT);
+         latestStep = currentSteps.get(RobotEnd.FRONT);
 
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -129,14 +131,17 @@ public class QuadrupedXGaitPlanner
       xGaitRectanglePoseAtSoS.setPosition(0, 0, currentHeight);
       xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(currentYaw, 0, 0);
 
+      PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
+      plannedSteps.clear();
       // compute step quadrants and time intervals
       {
          RobotEnd thisStepEnd = latestStep.getRobotQuadrant().getOppositeEnd();
-         pastSteps.set(RobotEnd.FRONT, latestSteps.get(RobotEnd.FRONT));
-         pastSteps.set(RobotEnd.HIND, latestSteps.get(RobotEnd.HIND));
+         pastSteps.set(RobotEnd.FRONT, currentSteps.get(RobotEnd.FRONT));
+         pastSteps.set(RobotEnd.HIND, currentSteps.get(RobotEnd.HIND));
 
-         for (int i = 0; i < plannedSteps.size(); i++)
+         for (int i = 0; i < plannedSteps.capacity(); i++)
          {
+            plannedSteps.add();
             QuadrupedTimedStep thisStep = plannedSteps.get(i);
             QuadrupedTimedStep pastStepOnSameEnd = pastSteps.get(thisStepEnd);
             QuadrupedTimedStep pastStepOnOppositeEnd = pastSteps.get(thisStepEnd.getOppositeEnd());
@@ -159,6 +164,7 @@ public class QuadrupedXGaitPlanner
             double deltaTime = plannedSteps.get(i).getTimeInterval().getEndTime() - currentTime;
             extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
             xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
+            plannedSteps.get(i).setStepYaw(xGaitRectanglePose.getYaw());
 
             // compute step goal position by sampling the corner position of the xGait rectangle at touchdown
             RobotQuadrant stepQuadrant = plannedSteps.get(i).getRobotQuadrant();

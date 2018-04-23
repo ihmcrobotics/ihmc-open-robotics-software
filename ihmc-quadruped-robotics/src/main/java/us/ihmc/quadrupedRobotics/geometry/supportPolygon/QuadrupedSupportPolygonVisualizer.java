@@ -237,7 +237,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       inscribedCircleRadius.set(radius);
       
       FramePoint2D centerOfMiniCircle = new FramePoint2D();
-      if (supportPolygon.size() >= 3)
+      if (supportPolygon.getNumberOfVertices() >= 3)
       {
          supportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
 

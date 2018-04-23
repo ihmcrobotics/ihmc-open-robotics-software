@@ -1,18 +1,24 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedFallDetector
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public enum FallDetectionType
@@ -24,13 +30,17 @@ public class QuadrupedFallDetector
    private static final int DEFAULT_FALL_GLITCH_WINDOW = 1;
    private final DoubleParameter maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
    private final DoubleParameter maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
-   private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry,  0.15);
+   private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry, 0.15);
    private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
-   
+
    //Estimation Variables
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final FrameQuaternion bodyOrientation = new FrameQuaternion();
+
+   private final ReferenceFrame bodyFrame;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
+
    private final FramePoint3D dcmPositionEstimate;
+   private final FramePoint2D dcmPositionEstimate2D;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final QuadrupedSupportPolygon supportPolygon;
 
@@ -39,17 +49,22 @@ public class QuadrupedFallDetector
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 
-   public QuadrupedFallDetector(QuadrupedTaskSpaceEstimator taskSpaceEstimator,
-         DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
+   public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
+                                DivergentComponentOfMotionEstimator dcmPositionEstimator, YoVariableRegistry parentRegistry)
    {
+      this.bodyFrame = bodyFrame;
+      this.soleFrames = soleFrames;
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
-      this.isFallDetected.set(false);
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      dcmPositionEstimate = new FramePoint3D();
       this.dcmPositionEstimator = dcmPositionEstimator;
-      supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePositions());
+
+      supportPolygon = new QuadrupedSupportPolygon();
+
+      isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
+      isFallDetected.set(false);
+
+      dcmPositionEstimate = new FramePoint3D();
+      dcmPositionEstimate2D = new FramePoint2D();
+
       parentRegistry.addChild(registry);
    }
 
@@ -81,35 +96,39 @@ public class QuadrupedFallDetector
       }
       isFallDetected.setWindowSize(fallDetectorGlitchFilterWindow.getValue());
       isFallDetected.update(isFallDetectedUnfiltered);
-      return isFallDetected.getBooleanValue();
+      if (isFallDetected.getBooleanValue())
+         return true;
+      else
+         return false;
    }
 
    private void updateEstimates()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
-      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
-      for (RobotQuadrant quadrant : RobotQuadrant.values())
-      {
-         taskSpaceEstimates.getSolePosition(quadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         supportPolygon.setFootstep(quadrant, taskSpaceEstimates.getSolePosition(quadrant));
-      }
+      bodyOrientation.setToZero(bodyFrame);
+      bodyOrientation.changeFrame(worldFrame);
+
+      dcmPositionEstimator.getDCMPositionEstimate(dcmPositionEstimate);
+      dcmPositionEstimate2D.set(dcmPositionEstimate);
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         supportPolygon.setFootstep(robotQuadrant, soleFrames.get(robotQuadrant));
    }
 
    private boolean detectPitchLimitFailure()
    {
-      taskSpaceEstimates.getBodyOrientation().changeFrame(ReferenceFrame.getWorldFrame());
-      return Math.abs(taskSpaceEstimates.getBodyOrientation().getPitch()) > maxPitchInRad.getValue();
+      return Math.abs(bodyOrientation.getPitch()) > maxPitchInRad.getValue();
    }
 
    private boolean detectRollLimitFailure()
    {
-      taskSpaceEstimates.getBodyOrientation().changeFrame(ReferenceFrame.getWorldFrame());
-      return Math.abs(taskSpaceEstimates.getBodyOrientation().getRoll()) > maxRollInRad.getValue();
+      return Math.abs(bodyOrientation.getRoll()) > maxRollInRad.getValue();
    }
 
    private boolean detectDcmDistanceOutsideSupportPolygonLimitFailure()
    {
-      yoDcmDistanceOutsideSupportPolygon.set(supportPolygon.getDistanceOutside2d(dcmPositionEstimate));
-      return supportPolygon.getDistanceOutside2d(dcmPositionEstimate) > dcmOutsideSupportThreshold.getValue();
+      double distance = supportPolygon.distance(dcmPositionEstimate2D);
+
+      yoDcmDistanceOutsideSupportPolygon.set(distance);
+      return distance > dcmOutsideSupportThreshold.getValue();
    }
 }

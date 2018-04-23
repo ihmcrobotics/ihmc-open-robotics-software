@@ -235,7 +235,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).reset();
 
-            if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+            if (controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
             {
                runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
             }
@@ -299,7 +299,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       {
          steppingController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
       }
-      final QuadrupedController fallController = new QuadrupedFallController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
       EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
       factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
@@ -312,7 +311,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addState(QuadrupedControllerEnum.STAND_READY, freezeController);
       factory.addState(QuadrupedControllerEnum.FREEZE, freezeController);
       factory.addState(QuadrupedControllerEnum.STEPPING, steppingController);
-      factory.addState(QuadrupedControllerEnum.FALL, fallController);
+      factory.addState(QuadrupedControllerEnum.FALL, freezeController);
 
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.JOINT_INITIALIZATION, QuadrupedControllerEnum.DO_NOTHING);
