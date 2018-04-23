@@ -9,6 +9,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysica
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
@@ -70,6 +71,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private QuadrupedTeleopManager stepTeleopManager;
+   private YoGraphicsListRegistry graphicsListRegistry;
 
    public GenericQuadrupedTestFactory()
    {
@@ -168,7 +170,9 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
          packetCommunicator.connect();
-         stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, teleopRegistry);
+
+         graphicsListRegistry = new YoGraphicsListRegistry();
+         stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
@@ -184,6 +188,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       if(useNetworking.get())
       {
          goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, TEST_INPUT_UPDATE_FREQUENCY, sdfRobot.getRobotsYoVariableRegistry()));
+         goalOrientedTestConductor.getScs().addYoGraphicsListRegistry(graphicsListRegistry);
       }
 
       FactoryTools.disposeFactory(this);
