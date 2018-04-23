@@ -1,6 +1,11 @@
 package us.ihmc.quadrupedRobotics;
 
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType;
+import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import junit.framework.AssertionFailedError;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
@@ -9,6 +14,8 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
+
+import java.util.List;
 
 public class QuadrupedTestBehaviors
 {
@@ -108,5 +115,55 @@ public class QuadrupedTestBehaviors
 
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
+   }
+
+   public static void executeBodyPathPlan(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager, double positionDelta, double yawDelta, EuclideanTrajectoryPointMessage... points)
+   {
+      QuadrupedBodyPathPlanMessage bodyPathPlanMessage = new QuadrupedBodyPathPlanMessage();
+      bodyPathPlanMessage.setIsExpressedInAbsoluteTime(false);
+      Object<EuclideanTrajectoryPointMessage> bodyPathPoints = new Object<> (4, EuclideanTrajectoryPointMessage.class, new EuclideanTrajectoryPointMessagePubSubType());
+
+      for (int i = 0; i < points.length; i++)
+      {
+         EuclideanTrajectoryPointMessage point = points[i];
+         bodyPathPoints.add().set(point);
+         conductor.addWaypointGoal(createBodyPathWaypointGoal(variables, point, positionDelta, yawDelta));
+      }
+      bodyPathPlanMessage.body_path_points_ = bodyPathPoints;
+
+      double trajectoryEndTime = points[points.length - 1].getTime() + 0.05;
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, trajectoryEndTime));
+
+      stepTeleopManager.handleBodyPathPlanMessage(bodyPathPlanMessage);
+      stepTeleopManager.requestXGait();
+      conductor.simulate();
+
+      stepTeleopManager.requestStanding();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
+      conductor.simulate();
+   }
+
+   private static YoVariableTestGoal createBodyPathWaypointGoal(QuadrupedForceTestYoVariables variables, EuclideanTrajectoryPointMessage point, double positionDelta, double yawDelta)
+   {
+      double initialTime = variables.getYoTime().getDoubleValue();
+      double timeDelta = 0.1;
+
+      return new YoVariableTestGoal(variables.getYoTime())
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return Math.abs(variables.getRobotBodyX().getDoubleValue() - point.position_.getX()) < positionDelta
+                  && Math.abs(variables.getRobotBodyY().getDoubleValue() - point.position_.getY()) < positionDelta
+                  && Math.abs(variables.getRobotBodyYaw().getDoubleValue() - point.position_.getZ()) < yawDelta
+                  && Math.abs((variables.getYoTime().getDoubleValue() - initialTime) - point.getTime()) < timeDelta;
+         }
+
+         @Override
+         public String toString()
+         {
+            return "Body path waypoint: " + point;
+         }
+      };
    }
 }
