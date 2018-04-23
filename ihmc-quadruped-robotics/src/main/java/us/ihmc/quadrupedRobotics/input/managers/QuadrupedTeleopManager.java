@@ -205,5 +205,6 @@ public class QuadrupedTeleopManager
    public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
    {
       bodyPathMultiplexer.initialize();
+      bodyPathMultiplexer.handleBodyPathPlanMessage(bodyPathPlanMessage);
    }
 }

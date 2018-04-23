@@ -20,6 +20,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
    private final Vector3D planarVelocity = new Vector3D();
    private final FramePose2D initialPose = new FramePose2D();
+   private final YoDouble initialTime;
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame supportFrame;
    private final YoDouble timestamp, previousTimestamp;
@@ -32,6 +33,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       this.controlDT = controlDT;
       this.timestamp = timestamp;
       this.previousTimestamp = new YoDouble("previousTimestamp", registry);
+      this.initialTime = new YoDouble("initialTime", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -44,6 +46,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
       bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
       initialPose.setYaw(bodyYaw.getDoubleValue());
+      this.initialTime.set(timestamp.getDoubleValue());
 
       setInitialPose();
    }
@@ -78,7 +81,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       }
 
       setInitialPose();
-      extrapolatePose(time, poseToPack, initialPose, planarVelocity);
+      extrapolatePose(time - initialTime.getDoubleValue(), poseToPack, initialPose, planarVelocity);
    }
 
    private void updateBodyOrientation(double dt)
