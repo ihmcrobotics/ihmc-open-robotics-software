@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -124,7 +125,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final BooleanProvider useICPControlPolygons;
    private final boolean hasICPControlPoygons;
 
-   private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
+   private final ICPControlGainsReadOnly feedbackGains;
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -222,7 +223,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
       copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
       copFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
-      feedbackGains.set(icpOptimizationParameters.getICPFeedbackGains());
+      feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
       useSmartICPIntegrator = new BooleanParameter("useSmartICPIntegrator", registry, icpOptimizationParameters.useSmartICPIntegrator());
       thresholdForStuck = new DoubleParameter(yoNamePrefix + "ThresholdForStuck", registry, icpOptimizationParameters.getICPVelocityThresholdForStuck());
 
@@ -816,7 +817,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          feedbackCMPIntegral.add(tempVector2d);
 
          double length = feedbackCMPIntegral.length();
-         double maxLength = feedbackGains.getMaxInteralError();
+         double maxLength = feedbackGains.getMaxIntegralError();
          if (length > maxLength)
             feedbackCMPIntegral.scale(maxLength / length);
          if (Math.abs(feedbackGains.getKi()) < 1e-10)
