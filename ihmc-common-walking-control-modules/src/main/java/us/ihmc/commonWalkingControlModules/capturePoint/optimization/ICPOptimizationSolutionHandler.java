@@ -14,7 +14,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,8 +31,8 @@ public class ICPOptimizationSolutionHandler
 
    private final BooleanProvider useICPControlPolygons;
 
-   private final YoDouble footstepDeadband;
-   private final YoDouble footstepSolutionResolution;
+   private final DoubleProvider footstepDeadband;
+   private final DoubleProvider footstepSolutionResolution;
 
    private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2D footstepAdjustment;
@@ -92,8 +94,8 @@ public class ICPOptimizationSolutionHandler
          cmpFeedbackCostToGo = null;
       }
 
-      footstepDeadband = new YoDouble(yoNamePrefix + "FootstepDeadband", registry);
-      footstepSolutionResolution = new YoDouble(yoNamePrefix + "FootstepSolutionResolution", registry);
+      footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, icpOptimizationParameters.getAdjustmentDeadband());
+      footstepSolutionResolution = new DoubleParameter(yoNamePrefix + "FootstepSolutionResolution", registry, icpOptimizationParameters.getFootstepSolutionResolution());
 
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
@@ -101,9 +103,6 @@ public class ICPOptimizationSolutionHandler
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
       footstepSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);
-
-      footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
-      footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
    }
 
    public void setupVisualizers(ArtifactList artifactList)
@@ -150,7 +149,7 @@ public class ICPOptimizationSolutionHandler
       previousLocationSolution.set(footstepSolutionToPack.getPosition());
       clippedLocationSolution.set(locationSolution);
       boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation2D,
-                                                          deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
+                                                          deadbandFrame, footstepDeadband.getValue(), footstepSolutionResolution.getValue());
 
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
@@ -188,7 +187,7 @@ public class ICPOptimizationSolutionHandler
 
       clippedLocationSolution.set(locationSolution);
       boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation2D,
-                                                          deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
+                                                          deadbandFrame, footstepDeadband.getValue(), footstepSolutionResolution.getValue());
 
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
