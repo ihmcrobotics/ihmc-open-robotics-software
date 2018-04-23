@@ -256,7 +256,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
       boolean updateRateAutomatically = true;
-      solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
+      solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
+      solver.setMinimumFeedbackWeight(icpOptimizationParameters.getMinimumFeedbackWeight());
+      solver.setMinimumFootstepWeight(icpOptimizationParameters.getMinimumFootstepWeight());
       solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
       solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
 
