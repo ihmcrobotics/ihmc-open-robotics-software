@@ -1,16 +1,21 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedBodyPathPlanTest;
 
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedBodyPathPlanTest extends QuadrupedBodyPathPlanTest
 {
+   private static final boolean keepSCSUp = false;
+
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
-      return new GenericQuadrupedTestFactory();
+      return new GenericQuadrupedTestFactory(keepSCSUp);
    }
 
    @Test(timeout = 200000)

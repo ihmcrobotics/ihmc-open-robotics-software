@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -14,6 +15,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,34 +63,21 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
 
       EuclideanTrajectoryPointMessage point1 = new EuclideanTrajectoryPointMessage();
-      point1.setTime(2.0);
+      point1.setTime(3.0);
       point1.position_.set(0.5, 0.0, 0.0);
 
       EuclideanTrajectoryPointMessage point2 = new EuclideanTrajectoryPointMessage();
-      point2.setTime(4.0);
+      point2.setTime(6.0);
       point2.position_.set(0.5, 0.5, 0.0);
 
       EuclideanTrajectoryPointMessage point3 = new EuclideanTrajectoryPointMessage();
-      point3.setTime(6.0);
+      point3.setTime(9.0);
       point3.position_.set(0.0, 0.5, 0.0);
 
       EuclideanTrajectoryPointMessage point4 = new EuclideanTrajectoryPointMessage();
-      point4.setTime(8.0);
+      point4.setTime(12.0);
       point4.position_.set(0.0, 0.0, 0.0);
 
-      QuadrupedBodyPathPlanMessage bodyPathPlanMessage = new QuadrupedBodyPathPlanMessage();
-      bodyPathPlanMessage.setIsExpressedInAbsoluteTime(false);
-      Object<EuclideanTrajectoryPointMessage> bodyPathPoints = new Object<> (4, EuclideanTrajectoryPointMessage.class, new EuclideanTrajectoryPointMessagePubSubType());
-      bodyPathPoints.add().set(point1);
-      bodyPathPoints.add().set(point2);
-      bodyPathPoints.add().set(point3);
-      bodyPathPoints.add().set(point4);
-      bodyPathPlanMessage.body_path_points_ = bodyPathPoints;
-
-      stepTeleopManager.handleBodyPathPlanMessage(bodyPathPlanMessage);
-
-      conductor.addTimeLimit(variables.getYoTime(), 15.0);
-      conductor.simulate();
+      QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.15, 0.2, point1, point2, point3, point4);
    }
-
 }
