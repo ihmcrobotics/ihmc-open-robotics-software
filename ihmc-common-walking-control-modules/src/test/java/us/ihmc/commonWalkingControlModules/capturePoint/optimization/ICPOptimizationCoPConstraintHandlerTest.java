@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -56,8 +54,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -112,8 +111,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
@@ -211,8 +211,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -261,8 +262,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
@@ -398,137 +400,4 @@ public class ICPOptimizationCoPConstraintHandlerTest
       return bipedSupportPolygons;
    }
 
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
-   {
-      @Override
-      public double getForwardFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getLateralFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getFootstepRateWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getFeedbackForwardWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackLateralWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackRateWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public ICPControlGainsReadOnly getICPFeedbackGains()
-      {
-         ICPControlGains gains = new ICPControlGains();
-         gains.setKpParallelToMotion(3.0);
-         gains.setKpOrthogonalToMotion(2.5);
-
-         return gains;
-      }
-
-      @Override
-      public double getDynamicsObjectiveWeight()
-      {
-         return 500.0;
-      }
-
-      @Override
-      public double getDynamicsObjectiveDoubleSupportWeightModifier()
-      {
-         return 1.0;
-      }
-
-      @Override
-      public double getAngularMomentumMinimizationWeight()
-      {
-         return 50;
-      }
-
-      @Override
-      public boolean scaleStepRateWeightWithTime()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean scaleFeedbackWeightWithGain()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFeedbackRate()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean allowStepAdjustment()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useAngularMomentum()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFootstepRate()
-      {
-         return false;
-      }
-
-      @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
-
-      @Override
-      public double getMinimumTimeRemaining()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getAdjustmentDeadband()
-      {
-         return 0.03;
-      }
-
-      @Override
-      public double getSafeCoPDistanceToEdge()
-      {
-         return 0.0;
-      }
-   }
 }

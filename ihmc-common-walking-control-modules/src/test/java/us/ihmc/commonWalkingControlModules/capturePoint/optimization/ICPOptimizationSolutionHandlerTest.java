@@ -45,7 +45,9 @@ public class ICPOptimizationSolutionHandlerTest
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
       solutionHandler = new ICPOptimizationSolutionHandler(parameters, new YoBoolean("useICPControlPolygons", registry), "test", registry);
-      solver = new ICPOptimizationQPSolver(parameters, 4, false);
+      solver = new ICPOptimizationQPSolver(4, false);
+      solver.setMinimumFeedbackWeight(parameters.getMinimumFeedbackWeight());
+      solver.setMinimumFootstepWeight(parameters.getMinimumFootstepWeight());
    }
 
    private Footstep createFootsteps(double length, double width, int numberOfSteps)
