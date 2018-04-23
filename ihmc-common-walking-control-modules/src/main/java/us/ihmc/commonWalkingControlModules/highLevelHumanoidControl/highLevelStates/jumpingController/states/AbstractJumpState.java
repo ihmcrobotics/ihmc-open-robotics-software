@@ -63,9 +63,9 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
       List<ContactState> contactStateList = messageHandler.getContactStateList();
       if (getStateEnum() == JumpStateEnum.LANDING)
          initialGroundReactionForceInState.setToZero();
-      motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState);
-      updateFinalPositionFromInitial();
-      motionPlanner.setFinalState(finalPosition, finalVelocity, finalGroundReactionForce);
+      // motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState);
+      // updateFinalPositionFromInitial();
+      // motionPlanner.setFinalState(finalPosition, finalVelocity, finalGroundReactionForce);
       motionPlanner.processContactStatesAndGenerateMotionNodesForPlanning(contactStateList);
       motionPlanner.computeMotionPlan();
       doStateSpecificTransitionIntoAction();

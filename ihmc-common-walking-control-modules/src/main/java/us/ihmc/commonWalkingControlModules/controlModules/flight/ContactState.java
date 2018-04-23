@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class ContactState
@@ -11,6 +12,10 @@ public class ContactState
    private ContactType state;
    private double duration;
    private final FramePose3D pose;
+   private final FrameVector3D linearVelocity;
+   private final FrameVector3D angularVelocity;
+   private final FrameVector3D groundReactionForce;
+   private final FrameVector3D torque;
    private final ConvexPolygon2D supportPolygon;
 
    public ContactState()
@@ -62,13 +67,33 @@ public class ContactState
       return duration;
    }
 
-   public void getCoMPosition(FramePoint3D comPosition)
+   public void getCoMPosition(FramePoint3D position)
    {
-      comPosition.setIncludingFrame(pose.getPosition());
+      position.setIncludingFrame(pose.getPosition());
    }
-   
+
+   public void getCoMLinearVelocity(FrameVector3D linearVelocity)
+   {
+      linearVelocity.setIncludingFrame(this.linearVelocity);
+   }
+
+   public void getCoMGroundReaction(FrameVector3D groundReactionForce)
+   {
+      groundReactionForce.setIncludingFrame(this.groundReactionForce);
+   }
+
    public void getCoMOrientation(FrameQuaternion comOrientation)
    {
       comOrientation.setIncludingFrame(pose.getOrientation());
+   }
+
+   public void getCoMAngularVelcoity(FrameVector3D angularVelocity)
+   {
+      angularVelocity.setIncludingFrame(this.angularVelocity);
+   }
+
+   public void getCoMTorque(FrameVector3D torque)
+   {
+      torque.setIncludingFrame(this.torque);
    }
 }
