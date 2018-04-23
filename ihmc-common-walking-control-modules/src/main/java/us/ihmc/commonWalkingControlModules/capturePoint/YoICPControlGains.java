@@ -86,7 +86,7 @@ public class YoICPControlGains implements ICPControlGainsProvider
       return maxIntegralError;
    }
 
-   public YoDouble getFeedbackPartMaxRate()
+   public YoDouble getYoFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
    }

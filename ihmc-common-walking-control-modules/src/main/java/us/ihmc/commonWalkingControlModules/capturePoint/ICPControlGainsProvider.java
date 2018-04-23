@@ -15,6 +15,6 @@ public interface ICPControlGainsProvider
 
    DoubleProvider getYoMaxIntegralError();
 
-   DoubleProvider getFeedbackPartMaxRate();
+   DoubleProvider getYoFeedbackPartMaxRate();
 
 }
