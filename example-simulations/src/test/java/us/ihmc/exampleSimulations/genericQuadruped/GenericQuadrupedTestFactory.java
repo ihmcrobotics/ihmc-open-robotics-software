@@ -54,7 +54,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean SHOW_PLOTTER = true;
-   private static final boolean USE_TRACK_AND_DOLLY = true;
+   private static final boolean USE_TRACK_AND_DOLLY = false;
    private static final int TEST_INPUT_UPDATE_FREQUENCY = (int) (0.05 / SIMULATION_DT);
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
