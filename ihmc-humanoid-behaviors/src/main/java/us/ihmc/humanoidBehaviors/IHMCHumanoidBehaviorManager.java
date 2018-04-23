@@ -285,6 +285,7 @@ public class IHMCHumanoidBehaviorManager
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
             behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+      diagnosticBehavior.setCanArmsReachFarBehind(robotModelFactory.getRobotDescription().getName().contains("valkyrie"));
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, referenceFrames, walkingControllerParameters, yoTime);
