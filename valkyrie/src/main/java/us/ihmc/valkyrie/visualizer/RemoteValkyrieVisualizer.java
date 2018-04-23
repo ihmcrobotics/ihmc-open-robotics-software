@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
+   public static final boolean SETUP_SLIDER_BOARD = false;
 
    public RemoteValkyrieVisualizer()
    {
@@ -46,8 +47,11 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    @Override
    public void starting(final SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
-      // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
-      createSliderBoard(scs, registry);
+      if (SETUP_SLIDER_BOARD)
+      {
+         // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
+         createSliderBoard(scs, registry);
+      }
 
       final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.getVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
                                                                                 "requestedHighLevelControllerState");
