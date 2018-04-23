@@ -181,6 +181,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean initialized = false;
 
+   private final DoubleProvider minimumFeedbackWeight;
+   private final DoubleProvider minimumFootstepWeight;
+   private final BooleanProvider considerAngularMomentumInAdjustment;
+   private final BooleanProvider considerFeedbackInAdjustment;
+
    public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
                                     ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                     double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -257,10 +262,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       boolean updateRateAutomatically = true;
       solver = new ICPOptimizationQPSolver(totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
-      solver.setMinimumFeedbackWeight(icpOptimizationParameters.getMinimumFeedbackWeight());
-      solver.setMinimumFootstepWeight(icpOptimizationParameters.getMinimumFootstepWeight());
-      solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
-      solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
+
+      minimumFeedbackWeight = new DoubleParameter(yoNamePrefix + "MinimumFeedbackWeight", registry, icpOptimizationParameters.getMinimumFeedbackWeight());
+      minimumFootstepWeight = new DoubleParameter(yoNamePrefix + "MinimumFootstepWeight", registry, icpOptimizationParameters.getMinimumFootstepWeight());
+      considerAngularMomentumInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderAngularMomentumInAdjustment", registry, icpOptimizationParameters.considerAngularMomentumInAdjustment());
+      considerFeedbackInAdjustment = new BooleanParameter(yoNamePrefix + "ConsiderFeedbackInAdjustment", registry, icpOptimizationParameters.considerFeedbackInAdjustment());
 
       solutionHandler = new ICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPolygons, DEBUG, yoNamePrefix, registry);
 
@@ -511,13 +517,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
+      controllerTimer.startMeasurement();
+
       if (!initialized)
       {
          initialize();
          initialized = true;
       }
 
-      controllerTimer.startMeasurement();
+      solver.setMinimumFeedbackWeight(minimumFeedbackWeight.getValue());
+      solver.setMinimumFootstepWeight(minimumFootstepWeight.getValue());
+      solver.setConsiderAngularMomentumInAdjustment(considerAngularMomentumInAdjustment.getValue());
+      solver.setConsiderFeedbackInAdjustment(considerFeedbackInAdjustment.getValue());
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
