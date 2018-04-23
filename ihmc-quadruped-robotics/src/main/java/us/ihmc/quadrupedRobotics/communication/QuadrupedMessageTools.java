@@ -1,12 +1,13 @@
 package us.ihmc.quadrupedRobotics.communication;
 
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -51,6 +52,31 @@ public class QuadrupedMessageTools
       message.getQuadrupedStepMessage().setGroundClearance(step.getGroundClearance());
       message.getTimeInterval().setStartTime(step.getTimeInterval().getStartTime());
       message.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
+
+      return message;
+   }
+
+   public static QuadrupedBodyOrientationMessage createQuadrupedWorldFrameYawMessage(List<QuadrupedTimedOrientedStep> steps, double desiredYawVelocity)
+   {
+      QuadrupedBodyOrientationMessage message = new QuadrupedBodyOrientationMessage();
+      message.setIsAnOffsetOrientation(false);
+      message.setIsExpressedInAbsoluteTime(true);
+
+      SO3TrajectoryMessage trajectoryMessage = new SO3TrajectoryMessage();
+      for (int i = 0; i < steps.size(); i++)
+      {
+         QuadrupedTimedOrientedStep step = steps.get(i);
+         double yawVelocity = (i == steps.size() - 1) ? 0.0 : desiredYawVelocity;
+         Quaternion orientation = new Quaternion(step.getStepYaw(), 0.0, 0.0);
+         Vector3D velocity = new Vector3D(0.0, 0.0, yawVelocity);
+
+         SO3TrajectoryPointMessage orientationWaypoint = HumanoidMessageTools.createSO3TrajectoryPointMessage(step.getTimeInterval().getEndTime(), orientation, velocity);
+         trajectoryMessage.getTaskspaceTrajectoryPoints().add().set(orientationWaypoint);
+      }
+      trajectoryMessage.getSelectionMatrix().setXSelected(false);
+      trajectoryMessage.getSelectionMatrix().setYSelected(false);
+      trajectoryMessage.getSelectionMatrix().setZSelected(true);
+      message.getSo3Trajectory().set(trajectoryMessage);
 
       return message;
    }

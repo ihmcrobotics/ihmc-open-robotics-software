@@ -11,8 +11,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -22,8 +21,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
    
    public SimulationConstructionSet createSimulation() throws IOException
@@ -37,7 +35,6 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = testFactory.getStepTeleopManager();
-      poseTeleopManager = testFactory.getBodyPoseTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
       return conductor.getScs();
@@ -68,8 +65,8 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             double yaw = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
-            poseTeleopManager.setDesiredBodyOrientation(yaw, pitch, roll, 0.0);
-            poseTeleopManager.setDesiredCoMHeight(0.03 * Math.sin(variables.getYoTime().getDoubleValue()) + 0.55);
+            stepTeleopManager.setDesiredBodyOrientation(yaw, pitch, roll, 0.0);
+            stepTeleopManager.setDesiredCoMHeight(0.03 * Math.sin(variables.getYoTime().getDoubleValue()) + 0.55);
             double planarVelocityInputX = 0.2 * Math.sin(variables.getYoTime().getDoubleValue() + Math.PI) + 0.3;
             double planarVelocityInputY = 0.2 * Math.cos(variables.getYoTime().getDoubleValue() + Math.PI);
             double planarVelocityInputZ = 0.2 * Math.cos(variables.getYoTime().getDoubleValue());
