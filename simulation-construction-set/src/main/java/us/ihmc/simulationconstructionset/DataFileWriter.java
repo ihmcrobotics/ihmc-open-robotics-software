@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 import com.jmatio.io.MatFileIncrementalWriter;
@@ -19,10 +20,10 @@ import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLStructure;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileWriter
 {
@@ -30,7 +31,7 @@ public class DataFileWriter
    private static final boolean DEBUG = true;
 
    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
-   
+
    private final File outFile;
 
    public DataFileWriter(File file)    // String filename)
@@ -143,7 +144,7 @@ public class DataFileWriter
       {
          writeASCIIData(model, recordDT, dataBuffer, vars, compress);
       }
-      
+
    }
 
 
@@ -357,8 +358,8 @@ public class DataFileWriter
          dataOutputStream.writeFloat((float) value);
       }
    }
-   
-   
+
+
    public void writeMatlabBinaryData(double recordDT, DataBuffer dataBufferSortedByNamespace, ArrayList<YoVariable<?>> vars)
    {
       MatFileIncrementalWriter writer;
@@ -368,18 +369,18 @@ public class DataFileWriter
 
          int bufferLength = dataBufferSortedByNamespace.getBufferInOutLength();
          ArrayList<DataBufferEntry> entries = dataBufferSortedByNamespace.getEntries();
-         
+
          MLDouble dt = new MLDouble("DT", new double[][]{{recordDT}});
          writer.write(dt);
-         
+
 
          MLStructure mlRoot=null, mlNode;
          for (int i = 0; i < entries.size(); i++)
          {
             DataBufferEntry entry = entries.get(i);
             YoVariable<?> variable = entry.getVariable();
-            
-            ArrayList<String> subNames = variable.getNameSpace().getSubNames();
+
+            List<String> subNames = variable.getNameSpace().getSubNames();
             int subNameDepth= 0;
 
             if (vars.contains(variable))
@@ -391,16 +392,16 @@ public class DataFileWriter
                {
                   mlRoot = new MLStructure(rootName, new int[]{1,1});
                }
-               else 
+               else
                {
-                  if(!mlRoot.getName().equals(rootName)) 
+                  if(!mlRoot.getName().equals(rootName))
                   {
                           writer.write(mlRoot);
                           PrintTools.info(this, "MLStructure '"+ mlRoot.getName() + "' written", true);
                           mlRoot = new MLStructure(rootName, new int[]{1,1});
                   }
                }
-               
+
                //query/create node
                mlNode = mlRoot;
                while(subNameDepth < subNames.size())
@@ -421,7 +422,7 @@ public class DataFileWriter
                MLDouble outArray = new MLDouble(variable.getName(), new int[] { 1, bufferLength });
                for (int j = 0; j < bufferLength; j++)
                {
-                  ((MLDouble)outArray).set(data[j], j);
+                  outArray.set(data[j], j);
                }
 
                mlNode.setField(variable.getName(), outArray);
@@ -439,7 +440,7 @@ public class DataFileWriter
          e.printStackTrace();
       }
    }
-   
+
 
    private void writeBinaryData(String model, double recordDT, DataBuffer dataBuffer, ArrayList<YoVariable<?>> vars, boolean compress, Robot robot)
    {
