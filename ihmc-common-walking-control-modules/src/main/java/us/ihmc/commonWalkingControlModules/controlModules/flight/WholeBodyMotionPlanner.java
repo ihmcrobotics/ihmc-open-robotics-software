@@ -293,6 +293,16 @@ public class WholeBodyMotionPlanner
    {
       return motionPlanner.getPositionTrajectory();
    }
+   
+   public ForceTrajectory getGroundreactionTorqueProfile()
+   {
+      return motionPlanner.getTorqueProfile();
+   }
+   
+   public PositionTrajectory getOrientationTrajectory()
+   {
+      return motionPlanner.getOrientationTrajectory();
+   }
 
    public List<CentroidalMotionNode> getPlannerNodes()
    {

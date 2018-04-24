@@ -142,6 +142,11 @@ public class RigidBodyControlManager
       if (loadBearingControlState != null)
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
+   
+   public void setTaskspaceWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
+   {
+      taskspaceControlState.setWeights(angularWeight, linearWeight);
+   }
 
    public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains,
                         PID3DGainsReadOnly taskspacePositionGains)

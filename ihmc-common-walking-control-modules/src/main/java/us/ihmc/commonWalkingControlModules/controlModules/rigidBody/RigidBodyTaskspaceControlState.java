@@ -945,5 +945,4 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       return success;
    }
-
 }

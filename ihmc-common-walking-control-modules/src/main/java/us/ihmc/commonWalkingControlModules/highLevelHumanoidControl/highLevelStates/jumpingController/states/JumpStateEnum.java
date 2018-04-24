@@ -11,7 +11,7 @@ public enum JumpStateEnum
    /**
     * Generates the required momentum for the robot to take flight
     */
-   TAKE_OFF,
+   LAUNCH,
    /**
     * Aerial phase of the jump
     */

@@ -17,4 +17,5 @@ public abstract class JumpControllerParameters extends AbstractHighLevelControll
    public abstract Vector3DReadOnly getMinForceRate();
    public abstract Vector3DReadOnly getPositionErrorGain();
    public abstract Vector3DReadOnly getVelocityErrorGain();
+   public abstract double getNominalInertiaForTwistPlanning();
 }

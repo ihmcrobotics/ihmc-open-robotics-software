@@ -32,7 +32,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.LandingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.StandingState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.TakeOffState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.LaunchState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -172,6 +172,7 @@ public class JumpHighLevelHumanoidController
       parameters.setGravityY(0.0);
       parameters.setGravityZ(-controllerToolbox.getGravityZ());
       parameters.setRobotMass(controllerToolbox.getFullRobotModel().getTotalMass());
+      parameters.setNominalIzz(jumpControllerParameters.getNominalInertiaForTwistPlanning());
       parameters.setDeltaTMin(jumpControllerParameters.getMotionPlanningNodeTime());
       parameters.setForceRegularizationWeight(jumpControllerParameters.getForceRegularizationWeight());
       parameters.setForceRateRegularizationWeight(jumpControllerParameters.getForceRateRegularizationWeight());
@@ -188,10 +189,10 @@ public class JumpHighLevelHumanoidController
       StandingState standingState = new StandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, pelvisControlManager,
                                                       handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
       StandingToTakeOffCondition standingToTakeOffCondition = new StandingToTakeOffCondition(standingState);
-      standingState.addStateTransition(JumpStateEnum.TAKE_OFF, standingToTakeOffCondition);
+      standingState.addStateTransition(JumpStateEnum.LAUNCH, standingToTakeOffCondition);
       stateMachine.addState(standingState);
 
-      TakeOffState takeOffState = new TakeOffState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, pelvisControlManager,
+      LaunchState takeOffState = new LaunchState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, pelvisControlManager,
                                                    handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
       TakeOffToFlightCondition takeOffToFlightCondition = new TakeOffToFlightCondition(takeOffState, footSwitches);
       takeOffState.addStateTransition(JumpStateEnum.FLIGHT, takeOffToFlightCondition);

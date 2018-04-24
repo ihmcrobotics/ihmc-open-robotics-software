@@ -925,4 +925,14 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
             + getPrintLine(linearVelocity, linearVelocityWeight, linearVelocityConstraintType);
       return output;
    }
+   
+   public String toStringAngular()
+   {
+      String output = "Time: " + String.format("%.3f", getTime()) + "\nTorque: " + getPrintLine(torque, torqueWeight, torqueConstraintType) + "\nTorqueRate: "
+            + getPrintLine(torqueRate, torqueRateWeight, torqueRateConstraintType) + "\nOrientation: "
+            + getPrintLine(orientation, orientationWeight, orientationConstraintType) + ", Max: " + orientationMax.toString() + ", Min: " + orientationMin.toString() +"\nVelocity: "
+            + getPrintLine(angularVelocity, angularVelocityWeight, angularVelocityConstraintType);
+      return output;
+   }
+
 }

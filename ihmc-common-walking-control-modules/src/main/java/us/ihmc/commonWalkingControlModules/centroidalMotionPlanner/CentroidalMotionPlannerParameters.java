@@ -13,22 +13,22 @@ public class CentroidalMotionPlannerParameters
    private Vector3D positionLowerLimit = new Vector3D(-0.1, -0.1, 0.15);
    private Vector3D positionUpperLimit = new Vector3D(0.1, 0.1, 0.45);
    private Vector3D jumpPositionUpperLimit = new Vector3D(0.1, 0.1, 0.44);
-   private Vector3D orientationLowerLimit = new Vector3D(-0.1, -0.1, -0.1);
-   private Vector3D orientationUpperLimit = new Vector3D(0.1, 0.1, 0.1);
+   private Vector3D orientationLowerLimit = new Vector3D(-0.1, -0.1, -Math.PI / 16);
+   private Vector3D orientationUpperLimit = new Vector3D(0.1, 0.1, Math.PI / 16);
    private double robotMass;
    private double forceRegularizationWeight;
    private double forceRateRegularizationWeight;
-   private double torqueRegularizationWeight;
-   private double torqueRateRegularizationWeight;
+   private double torqueRegularizationWeight = 1e-2;
+   private double torqueRateRegularizationWeight = 1e-2;
    private double nominalIxx;
    private double nominalIyy;
    private double nominalIzz;
    private double deltaTMin;
 
-   private double maxTorque;
-   private double minTorque;
-   private double maxTorqueRate;
-   private double minTorqueRate;
+   private double maxTorque = 10.0;
+   private double minTorque = -10.0;
+   private double maxTorqueRate = 0.5;
+   private double minTorqueRate = -0.5;
 
    public double getNominalIxx()
    {

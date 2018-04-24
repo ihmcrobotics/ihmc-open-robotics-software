@@ -49,7 +49,7 @@ public class JumpMessageHandler
       {
       case STANDING:
          break;
-      case TAKE_OFF:
+      case LAUNCH:
          ContactState launchState = new ContactState(worldFrame);
          launchState.setDuration(0.4);
          launchState.setCoMOrientation(currentOrientation);

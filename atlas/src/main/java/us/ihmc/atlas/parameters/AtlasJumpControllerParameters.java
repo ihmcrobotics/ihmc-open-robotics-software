@@ -421,4 +421,10 @@ public class AtlasJumpControllerParameters extends JumpControllerParameters
    {
       return new Vector3D(20.0, 20.0, 28.28);
    }
+
+   @Override
+   public double getNominalInertiaForTwistPlanning()
+   {
+      return 0.1;
+   }
 }

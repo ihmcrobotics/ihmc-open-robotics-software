@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CentroidalMomentumManager implements JumpControlManagerInterface
 {
-   private final double angularWeight = 10.0;
+   private final double angularWeight = 30.0;
    private final double linearWeight = 2.0;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry;
@@ -47,6 +47,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final YoFrameVector yoDesiredGroundReactionForce;
    private final YoFrameVector yoPlannedGroundReactionForce;
    private final YoFramePoint yoPlannedCoMPosition;
+   private final YoDouble yoPlannedYawTorque;
    private final YoFrameVector yoPlannedCoMVelocity;
    private final YoFramePoint yoEstimatedCoMPosition;
    private final YoFrameVector yoEstimatedCoMVelocity;
@@ -57,9 +58,15 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
                                                                                   WholeBodyMotionPlanner.numberOfForceCoefficients);
    private final PositionTrajectory plannedCoMPositionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments,
                                                                                           WholeBodyMotionPlanner.numberOfForceCoefficients + 2);
+   private final ForceTrajectory groundTorqueProfile = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments,
+                                                                                  WholeBodyMotionPlanner.numberOfForceCoefficients);
+   private final PositionTrajectory plannedCoMOrientationTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments,
+                                                                                          WholeBodyMotionPlanner.numberOfForceCoefficients + 2);
+   
    private final FrameVector3D gravitationalForce = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredGroundReactionForce = new FrameVector3D();
    private final FrameVector3D plannedGroundReactionForce = new FrameVector3D();
+   private final FrameVector3D plannedGroundTorque = new FrameVector3D();
    private final FrameVector3D plannedCoMVelocity = new FrameVector3D();
    private final FramePoint3D plannedCoMPosition = new FramePoint3D();
    private final FramePoint3D finalCoMPositionForState = new FramePoint3D();
@@ -99,6 +106,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       yoPlannedGroundReactionForce = new YoFrameVector(namePrefix + "PlannedGroundReactionForce", controlFrame, registry);
       yoPlannedCoMPosition = new YoFramePoint(namePrefix + "PlannedCoMPosition", controlFrame, registry);
       yoPlannedCoMVelocity = new YoFrameVector(namePrefix + "PlannedCoMVelocity", controlFrame, registry);
+      yoPlannedYawTorque = new YoDouble(namePrefix + "PlannedYawTorque", registry);
       yoEstimatedCoMPosition = new YoFramePoint(namePrefix + "EstimatedCoMPosition", controlFrame, registry);
       yoEstimatedCoMVelocity = new YoFrameVector(namePrefix + "EstimatedCoMVelocity", controlFrame, registry);
       yoEstimatedAngularMomentum = new YoFrameVector(namePrefix + "EstimatedAngularMomentum", controlFrame, registry);
@@ -168,6 +176,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       yoPlannedGroundReactionForce.set(plannedGroundReactionForce);
       yoPlannedCoMPosition.set(plannedCoMPosition);
       yoPlannedCoMVelocity.set(plannedCoMVelocity);
+      yoPlannedYawTorque.set(plannedGroundTorque.getZ());
    }
 
    public void computeForZeroMomentumRateOfChange()
@@ -177,7 +186,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       desiredGroundReactionForce.scale(-1.0);
       desiredGroundReactionForce.changeFrame(controlFrame);
       desiredLinearMomentumRateOfChange.setToZero(controlFrame);
-      computeDesiredAngularMomentumRateOfChange();
+      computeDesiredAngularMomentumRateOfChangeFeedback();
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       updateYoVariables();
       setOptimizationWeights(angularWeight,linearWeight);
@@ -192,21 +201,38 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       desiredLinearMomentumRateOfChange.add(desiredGroundReactionForce, gravitationalForce);
       desiredLinearMomentumRateOfChange.changeFrame(controlFrame);
       desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, desiredLinearMomentumRateOfChange);
-      computeDesiredAngularMomentumRateOfChange();
+      computeDesiredAngularMomentumRateOfChangeFeedback();
+      computeDesiredYawTorque(time);
+      desiredAngularMomentumRateOfChange.addZ(plannedGroundTorque.getZ());
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       updateYoVariables();
       setOptimizationWeights(angularWeight, linearWeight);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
    }
+   
+   private void computeDesiredYawTorque(double time)
+   {
+      double trajectoryFinalTime = groundTorqueProfile.getFinalTime();
+      double clippedTime = time;
+      if (trajectoryFinalTime < time)
+      {
+         clippingTime.set(true);
+         clippedTime = trajectoryFinalTime;
+      }
+      else
+         clippingTime.set(false);
+      groundTorqueProfile.update(clippedTime, plannedGroundTorque);
+   }
 
-   private void computeDesiredAngularMomentumRateOfChange()
+   private void computeDesiredAngularMomentumRateOfChangeFeedback()
    {
       plannedAngularMomentum.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
       estimatedAngularMomentum.changeFrame(controlFrame);
       angularMomentumError.sub(plannedAngularMomentum, estimatedAngularMomentum);
       desiredAngularMomentumRateOfChange.setIncludingFrame(angularMomentumError);
       desiredAngularMomentumRateOfChange.scale(10.0);
+      desiredAngularMomentumRateOfChange.setZ(0.0);
       if (desiredAngularMomentumRateOfChange.containsNaN())
          desiredAngularMomentumRateOfChange.setToZero();
       clamp(desiredAngularMomentumRateOfChange, 5.0);
@@ -284,5 +310,15 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    public double getEstimatedCoMVelocityZ()
    {
       return estimatedCoMVelocity.getZ();
+   }
+
+   public void setGroundTorqueProfile(ForceTrajectory torqueTrajectory)
+   {
+      this.groundTorqueProfile.set(torqueTrajectory);
+   }
+
+   public void setCoMOrientationTrajectory(PositionTrajectory orientationTrajectory)
+   {
+      this.plannedCoMOrientationTrajectory.set(orientationTrajectory);
    }
 }

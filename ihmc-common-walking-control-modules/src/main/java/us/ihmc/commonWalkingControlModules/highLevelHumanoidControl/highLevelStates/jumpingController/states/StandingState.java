@@ -79,15 +79,15 @@ public class StandingState extends AbstractJumpState
       pelvisControlManager.setDesiredPelvisPosition(tempPoint);
       pelvisControlManager.getCurrentPelvisOrientation(worldFrame, tempOrientation);
       pelvisControlManager.setDesiredPelvisOrientation(tempOrientation);
-      headManager.holdInJointspace();
-      chestManager.holdInJointspace();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);
-         handManager.holdInJointspace();
+         handManager.holdInTaskspace();
          feetManager.makeFeetFullyConstrained(robotSide);
          feetManager.complyAndDamp(robotSide);
       }
+      headManager.holdInJointspace();
+      chestManager.holdInJointspace();
    }
 
    @Override

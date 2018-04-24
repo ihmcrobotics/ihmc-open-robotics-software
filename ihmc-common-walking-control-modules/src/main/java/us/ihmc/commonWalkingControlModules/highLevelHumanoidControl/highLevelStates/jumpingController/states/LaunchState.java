@@ -15,9 +15,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
-public class TakeOffState extends AbstractJumpState
+public class LaunchState extends AbstractJumpState
 {
-   private static final JumpStateEnum stateEnum = JumpStateEnum.TAKE_OFF;
+   private static final JumpStateEnum stateEnum = JumpStateEnum.LAUNCH;
 
    private final CentroidalMomentumManager centroidalMomentumManager;
    private final PelvisControlManager pelvisControlManager;
@@ -31,9 +31,11 @@ public class TakeOffState extends AbstractJumpState
    private double zGroundReactionThreshold = 10;
    private double heightThreshold = 0.35;
    private double velocityThreshold = 0.1;
-   private final Vector3D angularWeights = new Vector3D(10.0, 10.0, 10.0);
+   private final Vector3D pelvisAngularWeights = new Vector3D(10.0, 10.0, 10.0);
+   private final Vector3D chestAngularWeight = new Vector3D(10.0, 10.0, 1.0);
+   private final Vector3D chestLinearWeight = new Vector3D(10.0, 10.0, 10.0);
 
-   public TakeOffState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public LaunchState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                        CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisControlManager,
                        SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
                        Map<String, RigidBodyControlManager> bodyManagerMap, FullHumanoidRobotModel fullRobotModel)
@@ -60,7 +62,7 @@ public class TakeOffState extends AbstractJumpState
    {
       double timeInCurrentState = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
-      pelvisControlManager.maintainDesiredOrientationOnly(angularWeights);
+      pelvisControlManager.maintainDesiredOrientationOnly(pelvisAngularWeights);
       feetManager.compute();
       headManager.compute();
       chestManager.compute();
@@ -84,6 +86,8 @@ public class TakeOffState extends AbstractJumpState
    {
       centroidalMomentumManager.setGroundReactionForceProfile(motionPlanner.getGroundReactionForceProfile());
       centroidalMomentumManager.setCoMTrajectory(motionPlanner.getPositionTrajectory());
+      centroidalMomentumManager.setGroundTorqueProfile(motionPlanner.getGroundreactionTorqueProfile());
+      centroidalMomentumManager.setCoMOrientationTrajectory(motionPlanner.getOrientationTrajectory());
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);
@@ -91,6 +95,9 @@ public class TakeOffState extends AbstractJumpState
          feetManager.makeFeetFullyConstrained(robotSide);
          feetManager.complyAndDamp(robotSide);
       }
+      headManager.holdInJointspace();
+      chestManager.holdInTaskspace();
+      chestManager.setTaskspaceWeights(chestAngularWeight, chestLinearWeight);
    }
 
    @Override
