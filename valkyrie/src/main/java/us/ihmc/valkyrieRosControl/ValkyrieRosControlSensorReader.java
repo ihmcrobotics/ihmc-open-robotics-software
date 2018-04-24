@@ -36,6 +36,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final TimestampProvider timestampProvider;
 
    private final List<YoEffortJointHandleHolder> yoEffortJointHandleHolders;
+   private final List<YoEffortJointHandleHolder> yoFingerEffortMotorHandleHolders;
    private final List<YoPositionJointHandleHolder> yoPositionJointHandleHolders;
    private final List<YoJointStateHandleHolder> yoJointStateHandleHolders;
    private final List<YoIMUHandleHolder> yoIMUHandleHolders;
@@ -50,15 +51,22 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final ValkyrieRosControlLowLevelController lowlLevelController;
 
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-         SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
-         List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, List<YoJointStateHandleHolder> yoJointStateHandleHolders,
-         List<YoIMUHandleHolder> yoIMUHandleHolders, List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
+                                         SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
+                                         List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
+                                         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
+                                         List<YoJointStateHandleHolder> yoJointStateHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
+                                         List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
    {
 
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
+      ValkyrieRosControlFingerSensorConfiguration fingerSensorConfiguration = new ValkyrieRosControlFingerSensorConfiguration(yoEffortJointHandleHolders,
+                                                                                                                              yoPositionJointHandleHolders,
+                                                                                                                              yoJointStateHandleHolders,
+                                                                                                                              sensorProcessingConfiguration);
+      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerSensorConfiguration, registry);
       this.timestampProvider = timestampProvider;
       // Remove the handles that do not have a joint associated. This is useful to remove the finger motors.
-      this.yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h ->  h.getOneDoFJoint() != null).collect(Collectors.toList());
+      this.yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> h.getOneDoFJoint() != null).collect(Collectors.toList());
+      yoFingerEffortMotorHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> h.getOneDoFJoint() == null).collect(Collectors.toList());
       this.yoPositionJointHandleHolders = yoPositionJointHandleHolders;
       this.yoJointStateHandleHolders = yoJointStateHandleHolders;
       this.yoIMUHandleHolders = yoIMUHandleHolders;
@@ -83,6 +91,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    public void readSensors()
    {
+      // Update the finger motor handles separately
+      for (int i = 0; i < yoFingerEffortMotorHandleHolders.size(); i++)
+         yoFingerEffortMotorHandleHolders.get(i).update();
+
       for (int i = 0; i < yoEffortJointHandleHolders.size(); i++)
       {
          YoEffortJointHandleHolder yoEffortJointHandleHolder = yoEffortJointHandleHolders.get(i);
@@ -103,11 +115,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          OneDoFJoint joint = yoPositionJointHandleHolder.getOneDoFJoint();
          sensorProcessing.setJointPositionSensorValue(joint, yoPositionJointHandleHolder.getQ());
          sensorProcessing.setJointVelocitySensorValue(joint, yoPositionJointHandleHolder.getQd());
-         sensorProcessing.setJointTauSensorValue(joint,
-               0.0); // TODO: Should be NaN eventually as the position control joints won't be able to return a measured torque
+         sensorProcessing.setJointTauSensorValue(joint, 0.0); // TODO: Should be NaN eventually as the position control joints won't be able to return a measured torque
       }
-      
-      for(int i = 0; i < yoJointStateHandleHolders.size(); i++)
+
+      for (int i = 0; i < yoJointStateHandleHolders.size(); i++)
       {
          YoJointStateHandleHolder yoJointStateHandleHolder = yoJointStateHandleHolders.get(i);
          yoJointStateHandleHolder.update();
