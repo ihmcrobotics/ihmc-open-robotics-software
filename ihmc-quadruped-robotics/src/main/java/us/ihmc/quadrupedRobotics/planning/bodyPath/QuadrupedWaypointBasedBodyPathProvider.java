@@ -128,12 +128,12 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
             double t = startTime + dt * i;
             trajectory.compute(t);
             trajectory.getPosition(tempPoint);
-            tempPoint.setZ(0.05);
             double yaw = tempPoint.getZ();
+            tempPoint.setZ(0.02);
 
             visualizationStartPoints[i].set(tempPoint);
             visualizationDirections[i].set(Math.cos(yaw), Math.sin(yaw), 0.0);
-            visualizationDirections[i].scale(0.05);
+            visualizationDirections[i].scale(0.2);
          }
       }
    }
