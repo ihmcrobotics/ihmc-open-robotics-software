@@ -26,6 +26,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CentroidalMomentumManager implements JumpControlManagerInterface
 {
+   private final double angularWeight = 10.0;
+   private final double linearWeight = 2.0;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry;
 
@@ -152,7 +154,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       updateYoVariables();
-      setOptimizationWeights(50.0, 2.0);
+      setOptimizationWeights(angularWeight, linearWeight);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixForLinearControl();
    }
@@ -178,7 +180,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       computeDesiredAngularMomentumRateOfChange();
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       updateYoVariables();
-      setOptimizationWeights(50.0, 2.0);
+      setOptimizationWeights(angularWeight,linearWeight);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
    }
@@ -193,7 +195,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       computeDesiredAngularMomentumRateOfChange();
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       updateYoVariables();
-      setOptimizationWeights(50.0, 2.0);
+      setOptimizationWeights(angularWeight, linearWeight);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
    }

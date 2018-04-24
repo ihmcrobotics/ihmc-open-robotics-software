@@ -194,7 +194,6 @@ public class WholeBodyMotionPlanner
             }
             motionNode.setZeroTorqueConstraint();
             motionNode.setZeroTorqueRateConstraint();
-            motionNode.setOrientationInequalities(orientationUpperBound, orientationLowerBound);
          }
          else
          {
