@@ -213,15 +213,6 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Sets whether or not to use a warm start in the active set solver. This exploits that the active set doesn't change often.
-    * @return Whether or not to use a warm start in the solver
-    */
-   public boolean useWarmStartInSolver()
-   {
-      return false;
-   }
-
-   /**
     * Specifies whether or not to use the ICP control polygon for the CMP, rather than the actual support polygon.
     */
    public boolean getUseICPControlPolygons()
