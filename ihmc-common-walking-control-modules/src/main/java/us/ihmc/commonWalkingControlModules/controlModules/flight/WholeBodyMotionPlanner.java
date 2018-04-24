@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMot
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ControlModuleHelper;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.PositionTrajectory;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -126,7 +125,6 @@ public class WholeBodyMotionPlanner
          motionNode.setAngularVelocityConstraint(initialAngularVelocity);
          motionNode.setTorqueConstraint(initialTorque);
          motionNode.setZeroTorqueRateConstraint();
-         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
       for (int i = 0; i < contactStateList.size() - 1; i++)
@@ -175,7 +173,6 @@ public class WholeBodyMotionPlanner
             default:
                throw new RuntimeException("Unknown support state. Cannot populate motion planner nodes");
             }
-            PrintTools.debug(motionNode.toString());
             motionPlanner.submitNode(motionNode);
          }
          double finalNodeDuration = contactStateDuration - (numberOfNodesInState - 1) * plannerDT;
@@ -204,7 +201,6 @@ public class WholeBodyMotionPlanner
             motionNode.setTorqueRateObjective(nominalTorqueRate);
             motionNode.setOrientationInequalities(orientationUpperBound, orientationLowerBound);
          }
-         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
       {
@@ -251,7 +247,6 @@ public class WholeBodyMotionPlanner
             default:
                throw new RuntimeException("Unknown support state. Cannot populate motion planner nodes");
             }
-            PrintTools.debug(motionNode.toString());
             motionPlanner.submitNode(motionNode);
          }
          double finalNodeDuration = contactStateDuration - (numberOfNodesInState - 1) * plannerDT;
@@ -280,7 +275,6 @@ public class WholeBodyMotionPlanner
             motionNode.setOrientationObjective(finalOrientationVector, orientationWeight, orientationUpperBound, orientationLowerBound);
             motionNode.setAngularVelocityObjective(finalAngularVelocity, angularVelocityWeight);
          }
-         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
    }
