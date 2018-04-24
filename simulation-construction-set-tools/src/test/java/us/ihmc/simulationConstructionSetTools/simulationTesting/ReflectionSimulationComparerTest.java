@@ -59,12 +59,12 @@ public class ReflectionSimulationComparerTest
       assertFalse(simulationsAreTheSame);
 
       Collection<Field> differingFields = comparer.getDifferingFields();
-      
-      assertEquals(4, differingFields.size());
+
+      assertEquals(2, differingFields.size());
       for (Field field : differingFields)
       {
         String fieldName = field.getName();
-        assertTrue((fieldName.equals("hash")) || (fieldName.equals("nnuId")));
+        assertTrue(fieldName.equals("hash"));
       }
       
       comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
