@@ -20,7 +20,6 @@ public class QuadrupedXGaitPlanner
    private final FramePoint3D goalPositionAdjustment;
    private final QuadrantDependentList<FramePoint3D> xGaitRectangle;
    private final FramePose3D xGaitRectanglePose;
-   private final FramePose3D xGaitRectanglePoseAtSoS;
    private final PoseReferenceFrame xGaitRectangleFrame;
    private final EndDependentList<QuadrupedTimedStep> pastSteps;
 
@@ -33,7 +32,6 @@ public class QuadrupedXGaitPlanner
       goalPositionAdjustment = new FramePoint3D();
       xGaitRectangle = new QuadrantDependentList<>();
       xGaitRectanglePose = new FramePose3D(worldFrame);
-      xGaitRectanglePoseAtSoS = new FramePose3D(worldFrame);
       xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -130,7 +128,6 @@ public class QuadrupedXGaitPlanner
          xGaitRectangle.get(robotQuadrant).setY(robotQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth() / 2.0));
          xGaitRectangle.get(robotQuadrant).setZ(0);
       }
-      xGaitRectanglePoseAtSoS.setPosition(0, 0, currentHeight);
 
       PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = footstepPlan.getPlannedSteps();
       plannedSteps.clear();

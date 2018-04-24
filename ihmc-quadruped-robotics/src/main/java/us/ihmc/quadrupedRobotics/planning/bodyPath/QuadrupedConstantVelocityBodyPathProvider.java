@@ -45,17 +45,16 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
       bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
       bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
-      initialPose.setYaw(bodyYaw.getDoubleValue());
-      this.initialTime.set(timestamp.getDoubleValue());
+      initialPose.setOrientation(bodyYaw.getDoubleValue());
 
-      setInitialPose();
+      setInitialConditions();
    }
 
-   private void setInitialPose()
+   private void setInitialConditions()
    {
+      initialTime.set(timestamp.getDoubleValue());
       supportCentroid.setToZero(supportFrame);
       supportCentroid.changeFrame(worldFrame);
-
       initialPose.setPosition(supportCentroid);
       initialPose.setYaw(bodyYaw.getDoubleValue());
    }
@@ -80,7 +79,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          updateBodyOrientation(controlDT);
       }
 
-      setInitialPose();
+      setInitialConditions();
       extrapolatePose(time - initialTime.getDoubleValue(), poseToPack, initialPose, planarVelocity);
    }
 
