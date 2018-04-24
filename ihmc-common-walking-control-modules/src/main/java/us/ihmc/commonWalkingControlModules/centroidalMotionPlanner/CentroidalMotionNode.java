@@ -721,6 +721,10 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.torque.setIncludingFrame(other.torque);
       this.torqueWeight.setIncludingFrame(other.torqueWeight);
       this.torqueConstraintType.set(other.torqueConstraintType);
+      
+      this.torqueRate.setIncludingFrame(other.torqueRate);
+      this.torqueRateWeight.setIncludingFrame(other.torqueRateWeight);
+      this.torqueRateConstraintType.set(other.torqueRateConstraintType);
    }
 
    public EffortVariableConstraintType getXForceConstraintType()

@@ -25,9 +25,13 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
    protected FramePoint3D initialPositionInState = new FramePoint3D();
    protected FrameVector3D initialVelocityInState = new FrameVector3D();
    protected FrameVector3D initialGroundReactionForceInState = new FrameVector3D();
-   protected FramePoint3D finalPosition = new FramePoint3D();
+   protected FrameVector3D initialOrientationInState = new FrameVector3D();
+   protected FrameVector3D initialAngularVelocityInState = new FrameVector3D();
+   protected FrameVector3D initialTorqueInState = new FrameVector3D();
    protected FrameVector3D finalVelocity = new FrameVector3D();
    protected FrameVector3D finalGroundReactionForce = new FrameVector3D();
+   protected FrameVector3D finalAngularVelocity = new FrameVector3D();
+   protected FrameVector3D finalTorque = new FrameVector3D();
 
    private final Wrench tempWrench = new Wrench();
 
@@ -59,23 +63,19 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
          tempWrench.changeFrame(plannerFrame);
          initialGroundReactionForceInState.add(tempWrench.getLinearPart());
       }
+      controllerToolbox.getPelvisZUpFrame().getTransformToDesiredFrame(plannerFrame).getRotationEuler(initialOrientationInState);
+      initialOrientationInState.setX(0.0);
+      initialOrientationInState.setY(0.0);
+      initialAngularVelocityInState.setToZero(plannerFrame);
       messageHandler.createJumpSequenceForTesting(initialPositionInState, getStateEnum());
       List<ContactState> contactStateList = messageHandler.getContactStateList();
       if (getStateEnum() == JumpStateEnum.LANDING)
          initialGroundReactionForceInState.setToZero();
-      // motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState);
-      // updateFinalPositionFromInitial();
-      // motionPlanner.setFinalState(finalPosition, finalVelocity, finalGroundReactionForce);
+      motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState, initialOrientationInState, initialAngularVelocityInState, initialTorqueInState);
+      motionPlanner.getNominalState(finalVelocity, finalGroundReactionForce, finalAngularVelocity, finalTorque);
+      motionPlanner.setFinalState(finalVelocity, finalGroundReactionForce, finalAngularVelocity, finalTorque);
       motionPlanner.processContactStatesAndGenerateMotionNodesForPlanning(contactStateList);
       motionPlanner.computeMotionPlan();
       doStateSpecificTransitionIntoAction();
-   }
-
-   private void updateFinalPositionFromInitial()
-   {
-      finalPosition.setX(initialPositionInState.getX());
-      finalPosition.setY(initialPositionInState.getY());
-      finalPosition.setZ(motionPlanner.getNominalHeight());
-      motionPlanner.getNominalState(finalVelocity, finalGroundReactionForce);
    }
 }

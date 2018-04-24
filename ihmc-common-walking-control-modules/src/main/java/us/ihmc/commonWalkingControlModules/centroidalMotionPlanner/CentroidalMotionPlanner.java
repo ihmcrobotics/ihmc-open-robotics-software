@@ -132,8 +132,11 @@ public class CentroidalMotionPlanner
          return;
       mergeNodesWithinEpsilon(deltaTMin);
       helper.processNodeList(nodeList);
+      PrintTools.debug("Height Control Module: ");
       heightControlModule.compute();
+      PrintTools.debug("Twist Control Module: ");
       twistControlModule.compute();
+      PrintTools.debug("Transverse Control Module: ");
       transversePlaneControlModule.compute();
       helper.processDecisionVariables();
    }

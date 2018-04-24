@@ -459,6 +459,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
                if (!addConstraint())
                { // Constraints are linearly dependent
+                  PrintTools.debug("Constraints are linearly dependent");
                   CommonOps.fill(solutionToPack, Double.NaN);
                   CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
@@ -519,6 +520,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
             if (!addConstraint())
             { // Constraints are linearly dependent
+               PrintTools.debug("Constraints are linearly dependent");
                CommonOps.fill(solutionToPack, Double.NaN);
                CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
@@ -570,6 +572,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             {
                if (requireInequalityConstraintsSatisfied)
                { // the active set clearly wasn't satisfied, so the solution isn't valid.
+                  PrintTools.debug("Got invalid solution");
                   CommonOps.fill(solutionToPack, Double.NaN);
                   CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
@@ -624,8 +627,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
          // Step 2c: determine new S-pair and take step:
          if (!Double.isFinite(stepLength))
          { // case (i): no step in primal or dual space, QP is infeasible
-            CommonOps.fill(solutionToPack, Double.NaN);
             PrintTools.debug("Step size not found");
+            CommonOps.fill(solutionToPack, Double.NaN);
             CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
@@ -649,7 +652,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             currentStep = takeStepInPrimalAndDualSpace(solutionToPack, stepLength, fullStepLength, mostViolatedConstraintIndex);
          }
       }
-
+      PrintTools.debug("Too many iterations");
       CommonOps.fill(solutionToPack, Double.NaN);
       CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
       CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);

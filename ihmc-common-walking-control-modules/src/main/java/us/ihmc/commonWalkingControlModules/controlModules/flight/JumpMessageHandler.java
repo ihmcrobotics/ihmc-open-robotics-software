@@ -6,6 +6,8 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 
@@ -16,6 +18,8 @@ public class JumpMessageHandler
 
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final Point2D tempPoint = new Point2D();
+   private final FramePoint3D finalPosition = new FramePoint3D(worldFrame, 0.0, 0.0, 0.437);
+   private final FrameQuaternion finalOrientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 1.0 * Math.sin(Math.PI / 4), Math.cos(Math.PI / 4));
 
    public JumpMessageHandler()
    {
@@ -54,7 +58,7 @@ public class JumpMessageHandler
          contactStateList.add(launchState);
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
-         flightState.setDuration(0.15);
+         flightState.setDuration(0.20);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
          flightState.setContactType(ContactType.NO_SUPPORT);
@@ -63,6 +67,8 @@ public class JumpMessageHandler
          ContactState landingState = new ContactState(worldFrame);
          landingState.setDuration(0.5);
          createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
+         landingState.setCoMPosition(finalPosition);
+         landingState.setCoMOrientation(finalOrientation);
          landingState.setSupportPolygon(tempPolygon);
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(landingState);

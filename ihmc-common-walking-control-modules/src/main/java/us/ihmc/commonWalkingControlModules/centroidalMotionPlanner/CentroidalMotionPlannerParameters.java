@@ -10,11 +10,11 @@ public class CentroidalMotionPlannerParameters
    private Vector3D minimumForce = new Vector3D();
    private Vector3D maximumForceRate = new Vector3D();
    private Vector3D minimumForceRate = new Vector3D();
-   private Vector3D positionLowerLimit = new Vector3D();
-   private Vector3D positionUpperLimit = new Vector3D();
-   private Vector3D jumpPositionUpperLimit = new Vector3D();
-   private Vector3D orientationLowerLimit = new Vector3D();
-   private Vector3D orientationUpperLimit = new Vector3D();
+   private Vector3D positionLowerLimit = new Vector3D(-0.1, -0.1, -0.35);
+   private Vector3D positionUpperLimit = new Vector3D(0.1, 0.1, 0.5);
+   private Vector3D jumpPositionUpperLimit = new Vector3D(0.1, 0.1, 0.5);
+   private Vector3D orientationLowerLimit = new Vector3D(-0.1, -0.1, -0.1);
+   private Vector3D orientationUpperLimit = new Vector3D(0.1, 0.1, 0.1);
    private double robotMass;
    private double forceRegularizationWeight;
    private double forceRateRegularizationWeight;
