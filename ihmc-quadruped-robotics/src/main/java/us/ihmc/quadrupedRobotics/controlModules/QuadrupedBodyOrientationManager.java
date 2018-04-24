@@ -49,8 +49,6 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredAbsoluteYawVelocity = new FrameVector3D();
    private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
 
-   private final FrameQuaternion tempQuaternion = new FrameQuaternion();
-
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;

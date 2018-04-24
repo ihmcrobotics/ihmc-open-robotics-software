@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
@@ -38,9 +39,9 @@ public class QuadrupedStepTeleopMode
    private InputValueIntegrator comZ;
 
    public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                  QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+                                  QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, registry);
+      this.stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, registry);
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
