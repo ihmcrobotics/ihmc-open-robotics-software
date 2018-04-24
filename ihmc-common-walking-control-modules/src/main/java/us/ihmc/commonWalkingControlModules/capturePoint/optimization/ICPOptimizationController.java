@@ -557,7 +557,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleStepRateWeightWithTime();
       scaleFeedbackWeightWithGain();
 
-      submitSolverTaskConditions(omega0, includeFootsteps); // ARGH
+      submitSolverTaskConditions(omega0, includeFootsteps);
 
       qpSolverTimer.startMeasurement();
       boolean converged = solveQP();
@@ -565,7 +565,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       extractSolutionsFromSolver(converged, includeFootsteps);
 
-      modifyCMPFeedbackWeightUsingIntegral(); // TODO
+      modifyCMPFeedbackWeightUsingIntegral();
 
       controllerTimer.stopMeasurement();
    }
