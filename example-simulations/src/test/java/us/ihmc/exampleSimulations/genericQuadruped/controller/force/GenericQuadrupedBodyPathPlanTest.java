@@ -24,4 +24,11 @@ public class GenericQuadrupedBodyPathPlanTest extends QuadrupedBodyPathPlanTest
    {
       super.testSimpleBodyPathPlan();
    }
+
+   @Test(timeout = 200000)
+   @Override
+   public void testBodyPathAroundABox()
+   {
+      super.testBodyPathAroundABox();
+   }
 }
