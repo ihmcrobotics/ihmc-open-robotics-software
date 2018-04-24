@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotion
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,6 +33,7 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
    protected FrameVector3D finalGroundReactionForce = new FrameVector3D();
    protected FrameVector3D finalAngularVelocity = new FrameVector3D();
    protected FrameVector3D finalTorque = new FrameVector3D();
+   protected FrameQuaternion tempQuaternion = new FrameQuaternion();
 
    private final Wrench tempWrench = new Wrench();
 
@@ -67,7 +69,8 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
       initialOrientationInState.setX(0.0);
       initialOrientationInState.setY(0.0);
       initialAngularVelocityInState.setToZero(plannerFrame);
-      messageHandler.createJumpSequenceForTesting(initialPositionInState, getStateEnum());
+      tempQuaternion.setEuler(initialOrientationInState);
+      messageHandler.createJumpSequenceForTesting(initialPositionInState, tempQuaternion, getStateEnum());
       List<ContactState> contactStateList = messageHandler.getContactStateList();
       if (getStateEnum() == JumpStateEnum.LANDING)
          initialGroundReactionForceInState.setToZero();

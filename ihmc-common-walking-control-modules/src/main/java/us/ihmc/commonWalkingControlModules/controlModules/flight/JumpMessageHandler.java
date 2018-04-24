@@ -41,8 +41,8 @@ public class JumpMessageHandler
    {
       throw new RuntimeException("Unimplmented method");
    }
-   
-   public void createJumpSequenceForTesting(FramePoint3D currentPosition, JumpStateEnum currentState)
+
+   public void createJumpSequenceForTesting(FramePoint3D currentPosition, FrameQuaternion currentOrientation, JumpStateEnum currentState)
    {
       contactStateList.clear();
       switch (currentState)
@@ -52,6 +52,8 @@ public class JumpMessageHandler
       case TAKE_OFF:
          ContactState launchState = new ContactState(worldFrame);
          launchState.setDuration(0.4);
+         launchState.setCoMPosition(currentPosition);
+         launchState.setCoMOrientation(currentOrientation);
          createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          launchState.setSupportPolygon(tempPolygon);
          launchState.setContactType(ContactType.DOUBLE_SUPPORT);
@@ -59,6 +61,8 @@ public class JumpMessageHandler
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
          flightState.setDuration(0.20);
+         flightState.setCoMPosition(currentPosition);
+         flightState.setCoMOrientation(currentOrientation);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
          flightState.setContactType(ContactType.NO_SUPPORT);
@@ -73,12 +77,12 @@ public class JumpMessageHandler
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(landingState);
          break;
-      default: throw new RuntimeException("Unhandled jump state");
+      default:
+         throw new RuntimeException("Unhandled jump state");
       }
    }
 
-   private void createRectangle(double centroidX, double centroidY, double lengthX, double lengthY,
-                                ConvexPolygon2D polygonToSet)
+   private void createRectangle(double centroidX, double centroidY, double lengthX, double lengthY, ConvexPolygon2D polygonToSet)
    {
       polygonToSet.clear();
       for (int i = 0; i < 4; i++)

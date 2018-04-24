@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import afu.org.checkerframework.checker.units.qual.A;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
@@ -434,6 +433,7 @@ public class ControlModuleHelper
 
       }
       {
+         decisionVariableIndex[yawIndex] = 0;
          double torqueValue = node.getTorque(yawAxis);
          EffortVariableConstraintType torqueConstraintType = node.getTorqueConstraintType(yawAxis);
          double torqueWeight = node.getTorqueWeight(yawAxis);
@@ -485,8 +485,8 @@ public class ControlModuleHelper
             DenseMatrix64F axisf = f[axisOrdinal];
             DenseMatrix64F axisAeq = Aeq[axisOrdinal];
             DenseMatrix64F axisbeq = beq[axisOrdinal];
-            DenseMatrix64F axisAin = Aeq[axisOrdinal];
-            DenseMatrix64F axisbin = beq[axisOrdinal];
+            DenseMatrix64F axisAin = Ain[axisOrdinal];
+            DenseMatrix64F axisbin = bin[axisOrdinal];
 
             double forceValue = node.getForce(axis);
             EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -604,8 +604,8 @@ public class ControlModuleHelper
          DenseMatrix64F axisf = f[axisOrdinal];
          DenseMatrix64F axisAeq = Aeq[axisOrdinal];
          DenseMatrix64F axisbeq = beq[axisOrdinal];
-         DenseMatrix64F axisAin = Aeq[axisOrdinal];
-         DenseMatrix64F axisbin = beq[axisOrdinal];
+         DenseMatrix64F axisAin = Ain[axisOrdinal];
+         DenseMatrix64F axisbin = bin[axisOrdinal];
 
          double forceValue = node.getForce(axis);
          EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
