@@ -22,6 +22,7 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -48,6 +49,7 @@ public class ICPOptimizationSolutionHandlerTest
       solver = new ICPOptimizationQPSolver(4, false);
       solver.setMinimumFeedbackWeight(parameters.getMinimumFeedbackWeight());
       solver.setMinimumFootstepWeight(parameters.getMinimumFootstepWeight());
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    private Footstep createFootsteps(double length, double width, int numberOfSteps)
