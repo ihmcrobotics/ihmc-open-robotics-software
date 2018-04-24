@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.affinity.Affinity;
@@ -64,21 +65,6 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   private static final String[] allValkyrieJoints = {
-		   "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
-         "torsoYaw", "torsoPitch", "torsoRoll",
-         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
-         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
-         "leftForearmYaw", "leftWristRoll", "leftWristPitch", 
-         "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2",
-         "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2",
-         "leftIndexFingerPitch1", "leftIndexFingerPitch2", "leftIndexFingerPitch3", "leftMiddleFingerPitch1", "leftMiddleFingerPitch2", "leftMiddleFingerPitch3", "leftPinkyPitch1", "leftPinkyPitch2", "leftPinkyPitch3", "leftThumbRoll", "leftThumbPitch1", "leftThumbPitch2", "leftThumbPitch3",
-         "rightIndexFingerPitch1", "rightIndexFingerPitch2", "rightIndexFingerPitch3", "rightMiddleFingerPitch1", "rightMiddleFingerPitch2", "rightMiddleFingerPitch3", "rightPinkyPitch1", "rightPinkyPitch2", "rightPinkyPitch3", "rightThumbRoll", "rightThumbPitch1", "rightThumbPitch2", "rightThumbPitch3"
-         };
-
    private static final String[] torqueControlledJoints = {
          "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
@@ -94,6 +80,24 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private static final String[] positionControlledJoints = {
          "lowerNeckPitch", "neckYaw", "upperNeckPitch",
    };
+
+   private static final String[] allValkyrieJoints;
+   static
+   {
+      List<String> allJointsList = new ArrayList<>();
+      Arrays.stream(torqueControlledJoints).forEach(allJointsList::add);
+      Arrays.stream(positionControlledJoints).forEach(allJointsList::add);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String prefix = robotSide.getCamelCaseName();
+         allJointsList.addAll(Arrays.asList(prefix + "IndexFingerPitch1", prefix + "IndexFingerPitch2", prefix + "IndexFingerPitch3"));
+         allJointsList.addAll(Arrays.asList(prefix + "MiddleFingerPitch1", prefix + "MiddleFingerPitch2", prefix + "MiddleFingerPitch3"));
+         allJointsList.addAll(Arrays.asList(prefix + "PinkyPitch1", prefix + "PinkyPitch2", prefix + "PinkyPitch3"));
+         allJointsList.addAll(Arrays.asList(prefix + "ThumbRoll", prefix + "ThumbPitch1", prefix + "ThumbPitch2", prefix + "ThumbPitch3"));
+      }
+      allValkyrieJoints = allJointsList.toArray(new String[0]);
+   }
 
    public static final boolean USE_YOVARIABLE_DESIREDS = true;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
