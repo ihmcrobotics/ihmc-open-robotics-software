@@ -119,19 +119,14 @@ public class WholeBodyMotionPlanner
       {
          ContactState contactState = contactStateList.get(0);
          motionNode.setPositionConstraint(initialPosition);
-         PrintTools.debug("Initial pos: " + initialPosition.toString());
          motionNode.setLinearVelocityConstraint(initialLinearVelocity);
-         PrintTools.debug("Initial lvel: " + initialLinearVelocity.toString());
          motionNode.setForceConstraint(initialGroundReactionForce);
-         PrintTools.debug("Initial GR: " + initialGroundReactionForce.toString());
          motionNode.setZeroForceRateConstraint();
          motionNode.setOrientationConstraint(initialOrientationVector);
-         PrintTools.debug("Initial ori: " + initialOrientationVector.toString());
          motionNode.setAngularVelocityConstraint(initialAngularVelocity);
-         PrintTools.debug("Initial avel: " + initialAngularVelocity.toString());
          motionNode.setTorqueConstraint(initialTorque);
-         PrintTools.debug("Initial Tau: " + initialTorque.toString());
          motionNode.setZeroTorqueRateConstraint();
+         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
       for (int i = 0; i < contactStateList.size() - 1; i++)
@@ -140,7 +135,7 @@ public class WholeBodyMotionPlanner
          ContactType contactType = contactState.getContactType();
          ContactType nextContactType = contactStateList.get(i + 1).getContactType();
          contactState.getSupportPolygon(tempPolygon);
-         contactState.getCoMPosition(tempPosition);
+         tempPosition.setIncludingFrame(contactState.getReferenceFrame(), tempPolygon.getCentroid(), 0.0);
          positionUpperBound.setIncludingFrame(tempPosition);
          positionUpperBound.add(positionUpperBoundDelta);
          positionLowerBound.setIncludingFrame(tempPosition);
@@ -180,6 +175,7 @@ public class WholeBodyMotionPlanner
             default:
                throw new RuntimeException("Unknown support state. Cannot populate motion planner nodes");
             }
+            PrintTools.debug(motionNode.toString());
             motionPlanner.submitNode(motionNode);
          }
          double finalNodeDuration = contactStateDuration - (numberOfNodesInState - 1) * plannerDT;
@@ -190,7 +186,12 @@ public class WholeBodyMotionPlanner
          {
             motionNode.setZeroForceConstraint();
             motionNode.setZeroForceRateConstraint();
-            motionNode.setPositionInequalities(positionUpperBound, positionLowerBound);
+            if(nextContactType == ContactType.NO_SUPPORT)
+            {
+               positionJumpUpperBound.setIncludingFrame(tempPosition);
+               positionJumpUpperBound.add(positionJumpUpperBoundDelta);
+               motionNode.setPositionInequalities(positionJumpUpperBound, positionLowerBound);
+            }
             motionNode.setZeroTorqueConstraint();
             motionNode.setZeroTorqueRateConstraint();
             motionNode.setOrientationInequalities(orientationUpperBound, orientationLowerBound);
@@ -204,6 +205,7 @@ public class WholeBodyMotionPlanner
             motionNode.setTorqueRateObjective(nominalTorqueRate);
             motionNode.setOrientationInequalities(orientationUpperBound, orientationLowerBound);
          }
+         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
       {
@@ -211,10 +213,10 @@ public class WholeBodyMotionPlanner
          ContactType contactType = contactState.getContactType();
          double contactStateDuration = contactState.getDuration();
          contactState.getSupportPolygon(tempPolygon);
-         contactState.getCoMPosition(finalPosition);
-         positionUpperBound.setIncludingFrame(finalPosition);
+         tempPosition.setIncludingFrame(contactState.getReferenceFrame(), tempPolygon.getCentroid(), 0.0);
+         positionUpperBound.setIncludingFrame(tempPosition);
          positionUpperBound.add(positionUpperBoundDelta);
-         positionLowerBound.setIncludingFrame(finalPosition);
+         positionLowerBound.setIncludingFrame(tempPosition);
          positionLowerBound.add(positionLowerBoundDelta);
 
          contactState.getCoMOrientation(tempOrientation);
@@ -236,10 +238,8 @@ public class WholeBodyMotionPlanner
             case NO_SUPPORT:
                motionNode.setZeroForceConstraint();
                motionNode.setZeroForceRateConstraint();
-               motionNode.setPositionInequalities(positionUpperBound, positionLowerBound);
                motionNode.setZeroTorqueConstraint();
                motionNode.setZeroTorqueRateConstraint();
-               motionNode.setOrientationInequalities(orientationUpperBound, orientationLowerBound);
                break;
             case DOUBLE_SUPPORT:
                motionNode.setForceObjective(nominalForce);
@@ -252,18 +252,13 @@ public class WholeBodyMotionPlanner
             default:
                throw new RuntimeException("Unknown support state. Cannot populate motion planner nodes");
             }
+            PrintTools.debug(motionNode.toString());
             motionPlanner.submitNode(motionNode);
          }
          double finalNodeDuration = contactStateDuration - (numberOfNodesInState - 1) * plannerDT;
          nodeTime += finalNodeDuration;
          motionNode.reset();
          motionNode.setTime(nodeTime);
-         PrintTools.debug("Final pos: " + finalPosition.toString());
-         PrintTools.debug("Final lvel: " + finalLinearVelocity.toString());
-         PrintTools.debug("Final GR: " + finalGroundReactionForce.toString());
-         PrintTools.debug("Final ori: " + finalPosition.toString());
-         PrintTools.debug("Final avel: " + finalAngularVelocity.toString());
-         PrintTools.debug("Final Tau: " + finalTorque.toString());
          if (contactType == ContactType.NO_SUPPORT)
          {
             motionNode.setZeroForceConstraint();
@@ -279,13 +274,14 @@ public class WholeBodyMotionPlanner
          {
             motionNode.setForceConstraint(nominalForce);
             motionNode.setForceRateConstraint(nominalForceRate);
-            motionNode.setPositionObjective(finalPosition, positionWeight, positionUpperBoundDelta, positionLowerBoundDelta);
-            motionNode.setLinearVelocityObjective(finalLinearVelocity, linearVelocityWeight);
+            motionNode.setPositionConstraint(finalPosition); // , positionWeight, positionUpperBound, positionLowerBound);
+            motionNode.setLinearVelocityConstraint(finalLinearVelocity); //, linearVelocityWeight);
             motionNode.setTorqueConstraint(nominalTorque);
             motionNode.setTorqueRateConstraint(nominalTorqueRate);
             motionNode.setOrientationObjective(finalOrientationVector, orientationWeight, orientationUpperBound, orientationLowerBound);
             motionNode.setAngularVelocityObjective(finalAngularVelocity, angularVelocityWeight);
          }
+         PrintTools.debug(motionNode.toString());
          motionPlanner.submitNode(motionNode);
       }
    }
@@ -328,11 +324,6 @@ public class WholeBodyMotionPlanner
       torque.setToZero(planningFrame);
    }
 
-   public double getNominalHeight()
-   {
-      return 0.437;
-   }
-
    public void setInitialState(FramePoint3D initialPositionInState, FrameVector3D initialLinearVelocityInState, FrameVector3D initialGroundReactionForceInState,
                                FrameVector3D initialOrientationInState, FrameVector3D initialAngularVelocityInState, FrameVector3D initialTorqueInState)
    {
@@ -344,11 +335,13 @@ public class WholeBodyMotionPlanner
       this.initialTorque.setIncludingFrame(initialTorqueInState);
    }
 
-   public void setFinalState(FrameVector3D finalLinearVelocity, FrameVector3D finalGroundReactionForce, FrameVector3D finalAngularVelocity,
+   public void setFinalState(FramePoint3D finalPosition, FrameVector3D finalLinearVelocity, FrameVector3D finalGroundReactionForce, FrameVector3D finalOrientation, FrameVector3D finalAngularVelocity,
                              FrameVector3D finalTorque)
    {
+      this.finalPosition.setIncludingFrame(finalPosition);
       this.finalLinearVelocity.setIncludingFrame(finalLinearVelocity);
       this.finalGroundReactionForce.setIncludingFrame(finalGroundReactionForce);
+      this.finalOrientationVector.setIncludingFrame(finalOrientation);
       this.finalAngularVelocity.setIncludingFrame(finalAngularVelocity);
       this.finalTorque.setIncludingFrame(finalTorque);
    }

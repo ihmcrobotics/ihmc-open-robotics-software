@@ -63,16 +63,6 @@ public class ContactState
       return duration;
    }
 
-   public void getCoMPosition(FramePoint3D position)
-   {
-      position.setIncludingFrame(pose.getPosition());
-   }
-   
-   public void setCoMPosition(FramePoint3D positionToSet)
-   {
-      this.pose.setPosition(positionToSet);
-   }
-
    public void getCoMOrientation(FrameQuaternion comOrientation)
    {
       comOrientation.setIncludingFrame(pose.getOrientation());
@@ -81,5 +71,10 @@ public class ContactState
    public void setCoMOrientation(FrameQuaternion comOrientationToSet)
    {
       this.pose.setOrientation(comOrientationToSet);
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return pose.getReferenceFrame();
    }
 }

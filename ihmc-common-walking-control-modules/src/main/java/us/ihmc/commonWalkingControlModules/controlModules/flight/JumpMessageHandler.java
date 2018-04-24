@@ -52,7 +52,6 @@ public class JumpMessageHandler
       case TAKE_OFF:
          ContactState launchState = new ContactState(worldFrame);
          launchState.setDuration(0.4);
-         launchState.setCoMPosition(currentPosition);
          launchState.setCoMOrientation(currentOrientation);
          createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          launchState.setSupportPolygon(tempPolygon);
@@ -60,8 +59,7 @@ public class JumpMessageHandler
          contactStateList.add(launchState);
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
-         flightState.setDuration(0.20);
-         flightState.setCoMPosition(currentPosition);
+         flightState.setDuration(0.17);
          flightState.setCoMOrientation(currentOrientation);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
@@ -69,9 +67,8 @@ public class JumpMessageHandler
          contactStateList.add(flightState);
       case LANDING:
          ContactState landingState = new ContactState(worldFrame);
-         landingState.setDuration(0.5);
+         landingState.setDuration(0.4);
          createRectangle(currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
-         landingState.setCoMPosition(finalPosition);
          landingState.setCoMOrientation(finalOrientation);
          landingState.setSupportPolygon(tempPolygon);
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);

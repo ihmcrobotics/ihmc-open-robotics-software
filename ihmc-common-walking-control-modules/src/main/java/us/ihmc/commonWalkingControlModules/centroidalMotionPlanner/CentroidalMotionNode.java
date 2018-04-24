@@ -921,7 +921,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       String output = "Time: " + String.format("%.3f", getTime()) + "\nForce: " + getPrintLine(force, forceWeight, forceConstraintType) + "\nForceRate: "
             + getPrintLine(forceRate, forceRateWeight, forceRateConstraintType) + "\nPosition: "
-            + getPrintLine(position, positionWeight, positionConstraintType) + "\nVelocity: "
+            + getPrintLine(position, positionWeight, positionConstraintType) + ", Max: " + positionMax.toString() + ", Min: " + positionMin.toString() +"\nVelocity: "
             + getPrintLine(linearVelocity, linearVelocityWeight, linearVelocityConstraintType);
       return output;
    }

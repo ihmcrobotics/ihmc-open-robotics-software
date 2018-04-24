@@ -29,7 +29,7 @@ public class CentroidalMotionPlanner
    private final RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
    private final ControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
-   //private final CentroidalTwistOptimizationControlModule twistControlModule;
+   private final CentroidalTwistOptimizationControlModule twistControlModule;
    private final CentroidalXYAxisOptimizationControlModule transversePlaneControlModule;
    private final ForceTrajectory forceTrajectory;
    private final ForceTrajectory torqueTrajectory;
@@ -53,7 +53,7 @@ public class CentroidalMotionPlanner
       this.deltaTMin = parameters.getDeltaTMin();
       this.helper = new ControlModuleHelper(parameters);
       this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters, registry);
-      //this.twistControlModule = new CentroidalTwistOptimizationControlModule(helper, parameters, registry);
+      this.twistControlModule = new CentroidalTwistOptimizationControlModule(helper, parameters, registry);
       this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(helper, parameters);
       this.forceTrajectory = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, ControlModuleHelper.forceCoefficients);
       this.positionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, ControlModuleHelper.positionCoefficients);
@@ -78,7 +78,7 @@ public class CentroidalMotionPlanner
    {
       helper.reset();
       heightControlModule.reset();
-      //twistControlModule.reset();
+      twistControlModule.reset();
       transversePlaneControlModule.reset();
    }
 
@@ -98,7 +98,6 @@ public class CentroidalMotionPlanner
       double nodeTime = nodeToAdd.getTime();
       if (!Double.isFinite(nodeTime))
          return false;
-
       if (nodeList.getSize() == 0)
          nodeList.getOrCreateFirstEntry().element.set(nodeToAdd);
       else if (nodeList.getFirstEntry().element.getTime() > nodeTime)
@@ -135,7 +134,7 @@ public class CentroidalMotionPlanner
       PrintTools.debug("Height Control Module: ");
       heightControlModule.compute();
       PrintTools.debug("Twist Control Module: ");
-      //twistControlModule.compute();
+      twistControlModule.compute();
       PrintTools.debug("Transverse Control Module: ");
       transversePlaneControlModule.compute();
       helper.processDecisionVariables();

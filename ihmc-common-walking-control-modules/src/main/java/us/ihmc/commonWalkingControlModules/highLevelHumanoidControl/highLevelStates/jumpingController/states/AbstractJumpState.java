@@ -29,8 +29,10 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
    protected FrameVector3D initialOrientationInState = new FrameVector3D();
    protected FrameVector3D initialAngularVelocityInState = new FrameVector3D();
    protected FrameVector3D initialTorqueInState = new FrameVector3D();
+   protected FramePoint3D finalPosition = new FramePoint3D();
    protected FrameVector3D finalVelocity = new FrameVector3D();
    protected FrameVector3D finalGroundReactionForce = new FrameVector3D();
+   protected FrameVector3D finalOrientation = new FrameVector3D();
    protected FrameVector3D finalAngularVelocity = new FrameVector3D();
    protected FrameVector3D finalTorque = new FrameVector3D();
    protected FrameQuaternion tempQuaternion = new FrameQuaternion();
@@ -43,6 +45,7 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
       super(stateEnum);
       this.motionPlanner = motionPlanner;
       this.plannerFrame = motionPlanner.getPlanningFrame();
+      this.finalPosition.setIncludingFrame(plannerFrame, 0.0, 0.0, 0.437);
       this.messageHandler = messageHandler;
       this.controllerToolbox = controllerToolbox;
    }
@@ -76,7 +79,9 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
          initialGroundReactionForceInState.setToZero();
       motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState, initialOrientationInState, initialAngularVelocityInState, initialTorqueInState);
       motionPlanner.getNominalState(finalVelocity, finalGroundReactionForce, finalAngularVelocity, finalTorque);
-      motionPlanner.setFinalState(finalVelocity, finalGroundReactionForce, finalAngularVelocity, finalTorque);
+      finalPosition.setX(initialPositionInState.getX());
+      finalPosition.setY(initialPositionInState.getY());
+      motionPlanner.setFinalState(finalPosition, finalVelocity, finalGroundReactionForce, finalOrientation, finalAngularVelocity, finalTorque);
       motionPlanner.processContactStatesAndGenerateMotionNodesForPlanning(contactStateList);
       motionPlanner.computeMotionPlan();
       doStateSpecificTransitionIntoAction();
