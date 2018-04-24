@@ -41,7 +41,7 @@ public class ParameterLoaderHelper
          XmlParameterReader reader;
          try
          {
-            reader = new XmlParameterReader(debugLoading, parameterFile);
+            reader = new XmlParameterReader(debugLoading, registry.getName(), parameterFile);
             if (overwriteFile != null)
             {
                reader.overwrite(overwriteFile);
