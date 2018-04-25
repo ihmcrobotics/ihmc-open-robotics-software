@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Atlas specific message.
@@ -60,6 +61,12 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
 
    public static Supplier<AtlasElectricMotorAutoEnableFlagPacketPubSubType> getPubSubType()
+   {
+      return AtlasElectricMotorAutoEnableFlagPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return AtlasElectricMotorAutoEnableFlagPacketPubSubType::new;
    }

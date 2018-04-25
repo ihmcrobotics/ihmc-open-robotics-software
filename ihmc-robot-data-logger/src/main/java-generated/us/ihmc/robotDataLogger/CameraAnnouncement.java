@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class CameraAnnouncement extends Packet<CameraAnnouncement> implements Settable<CameraAnnouncement>, EpsilonComparable<CameraAnnouncement>
 {
@@ -73,6 +75,17 @@ public class CameraAnnouncement extends Packet<CameraAnnouncement> implements Se
       return identifier_;
    }
 
+
+   public static Supplier<CameraAnnouncementPubSubType> getPubSubType()
+   {
+      return CameraAnnouncementPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return CameraAnnouncementPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(CameraAnnouncement other, double epsilon)

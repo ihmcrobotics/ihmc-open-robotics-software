@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message part of the localization module
@@ -70,6 +71,12 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
 
 
    public static Supplier<LocalizationPointMapPacketPubSubType> getPubSubType()
+   {
+      return LocalizationPointMapPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return LocalizationPointMapPacketPubSubType::new;
    }

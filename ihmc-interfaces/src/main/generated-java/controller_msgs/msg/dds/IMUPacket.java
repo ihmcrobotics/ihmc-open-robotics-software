@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
@@ -87,6 +88,12 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
 
    public static Supplier<IMUPacketPubSubType> getPubSubType()
+   {
+      return IMUPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return IMUPacketPubSubType::new;
    }

@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class ModelFileDescription extends Packet<ModelFileDescription> implements Settable<ModelFileDescription>, EpsilonComparable<ModelFileDescription>
 {
@@ -118,6 +120,17 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
       return resourceZipSize_;
    }
 
+
+   public static Supplier<ModelFileDescriptionPubSubType> getPubSubType()
+   {
+      return ModelFileDescriptionPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return ModelFileDescriptionPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ModelFileDescription other, double epsilon)

@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implements Settable<GraphicObjectMessage>, EpsilonComparable<GraphicObjectMessage>
 {
@@ -102,6 +104,17 @@ public class GraphicObjectMessage extends Packet<GraphicObjectMessage> implement
       return listName_;
    }
 
+
+   public static Supplier<GraphicObjectMessagePubSubType> getPubSubType()
+   {
+      return GraphicObjectMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return GraphicObjectMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(GraphicObjectMessage other, double epsilon)

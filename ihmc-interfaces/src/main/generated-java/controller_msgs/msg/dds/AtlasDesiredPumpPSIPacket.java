@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Send a request to change the desired PSI of the Atlas hydraulic pump.
@@ -69,6 +70,12 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
 
    public static Supplier<AtlasDesiredPumpPSIPacketPubSubType> getPubSubType()
+   {
+      return AtlasDesiredPumpPSIPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return AtlasDesiredPumpPSIPacketPubSubType::new;
    }

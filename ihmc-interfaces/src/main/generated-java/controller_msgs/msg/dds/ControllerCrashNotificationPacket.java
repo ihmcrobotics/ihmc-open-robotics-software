@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
@@ -86,6 +87,12 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
 
    public static Supplier<ControllerCrashNotificationPacketPubSubType> getPubSubType()
+   {
+      return ControllerCrashNotificationPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ControllerCrashNotificationPacketPubSubType::new;
    }

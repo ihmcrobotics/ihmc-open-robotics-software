@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of IHMC Simulation Construction Set.
@@ -61,6 +62,12 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
 
 
    public static Supplier<SCSListenerPacketPubSubType> getPubSubType()
+   {
+      return SCSListenerPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return SCSListenerPacketPubSubType::new;
    }

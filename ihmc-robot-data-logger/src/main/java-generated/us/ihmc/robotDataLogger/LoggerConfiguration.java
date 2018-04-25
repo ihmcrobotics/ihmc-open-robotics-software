@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class LoggerConfiguration extends Packet<LoggerConfiguration> implements Settable<LoggerConfiguration>, EpsilonComparable<LoggerConfiguration>
 {
@@ -53,6 +55,17 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
       return publicBroadcast_;
    }
 
+
+   public static Supplier<LoggerConfigurationPubSubType> getPubSubType()
+   {
+      return LoggerConfigurationPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return LoggerConfigurationPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LoggerConfiguration other, double epsilon)

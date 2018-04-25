@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepListMessage> implements Settable<QuadrupedTimedStepListMessage>, EpsilonComparable<QuadrupedTimedStepListMessage>
 {
@@ -97,6 +98,12 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    public static Supplier<QuadrupedTimedStepListMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedTimedStepListMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return QuadrupedTimedStepListMessagePubSubType::new;
    }
