@@ -102,7 +102,6 @@ public class RigidBodyJointControlHelper
          }
          else
          {
-            PrintTools.debug("Clearing weights for " + joint.getName());
             defaultWeights.clear();
             hasWeights.set(false);
             return;

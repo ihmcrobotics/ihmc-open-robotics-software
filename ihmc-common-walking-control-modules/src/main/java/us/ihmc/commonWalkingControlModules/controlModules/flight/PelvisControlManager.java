@@ -49,6 +49,7 @@ public class PelvisControlManager implements JumpControlManagerInterface
 
       spatialFeedbackControlCommand.set(elevator, pelvis);
       spatialFeedbackControlCommand.setControlBaseFrame(elevatorFrame);
+      
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
    }
 

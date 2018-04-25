@@ -248,7 +248,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
       // GW: commenting this out for now since it breaks some tests: 
-      // AS: uncommenting this since commenting this prevents the trajectory from being tracked in a frame that is moving 
+      // AS: uncommenting this since commenting this prevents the trajectory from being tracked in a frame that is moving
       spatialFeedbackControlCommand.setControlBaseFrame(trajectoryFrame);
 
       // Update the QP weight and selection YoVariables:

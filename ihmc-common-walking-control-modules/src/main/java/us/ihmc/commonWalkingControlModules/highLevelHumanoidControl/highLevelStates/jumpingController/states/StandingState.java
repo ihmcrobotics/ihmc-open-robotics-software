@@ -87,7 +87,7 @@ public class StandingState extends AbstractJumpState
          feetManager.complyAndDamp(robotSide);
       }
       headManager.holdInJointspace();
-      chestManager.holdInJointspace();
+      chestManager.holdInTaskspace();
    }
 
    @Override

@@ -91,11 +91,11 @@ public class FlightState extends AbstractJumpState
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          handManager.holdInTaskspace();
-         feetManager.holdInJointspace(robotSide);
+         feetManager.holdInTaskspace(robotSide);
          feetManager.makeFeetFullyUnconstrained(robotSide);
       }
       headManager.holdInJointspace();
-      chestManager.holdInJointspace();
+      chestManager.holdInTaskspace();
    }
 
    @Override

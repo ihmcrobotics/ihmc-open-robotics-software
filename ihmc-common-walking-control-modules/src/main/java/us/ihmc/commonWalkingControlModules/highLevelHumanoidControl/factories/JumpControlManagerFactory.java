@@ -189,7 +189,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = jumpControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, trajectoryFrames,
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, baseBody, homeConfiguration, homePose, trajectoryFrames,
                                                                     controlFrame, baseFrame, contactableBody, defaultControlMode, yoTime, graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointGainMap, taskspaceOrientationGains, taskspacePositionGains);

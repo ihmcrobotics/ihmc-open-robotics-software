@@ -32,7 +32,7 @@ public class LaunchState extends AbstractJumpState
    private double heightThreshold = 0.35;
    private double velocityThreshold = 0.1;
    private final Vector3D pelvisAngularWeights = new Vector3D(10.0, 10.0, 10.0);
-   private final Vector3D chestAngularWeight = new Vector3D(10.0, 10.0, 1.0);
+   private final Vector3D chestAngularWeight = new Vector3D(10.0, 10.0, 0.0);
    private final Vector3D chestLinearWeight = new Vector3D(10.0, 10.0, 10.0);
 
    public LaunchState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -91,7 +91,7 @@ public class LaunchState extends AbstractJumpState
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);
-         handManager.holdInJointspace();
+         handManager.holdInTaskspace();
          feetManager.makeFeetFullyConstrained(robotSide);
          feetManager.complyAndDamp(robotSide);
       }
