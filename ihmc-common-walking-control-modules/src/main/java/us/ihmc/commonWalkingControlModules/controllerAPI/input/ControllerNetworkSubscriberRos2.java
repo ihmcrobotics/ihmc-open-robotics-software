@@ -3,19 +3,23 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
+import controller_msgs.msg.dds.MessageCollectionPubSubType;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeRos2Publisher;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * communicator and the controller API. It automatically creates all the {@link PacketConsumer} for
  * all the messages supported by the {@link CommandInputManager}. The status messages are send to
  * the network communicator on a separate thread to avoid any delay in the controller thread.
- * 
+ *
  * @author Sylvain
  *
  */
@@ -41,8 +45,12 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
    private final CommandInputManager controllerCommandInputManager;
    /** The output API that provides the status messages to send to the packet communicator. */
    private final StatusMessageOutputManager controllerStatusOutputManager;
-   /** Communicator from which commands are received and status messages can send to. */
-   private final PacketCommunicator packetCommunicator;
+   /** Topic name for communication */
+   private final String topicName;
+   /** ROS2 node for publishing and subscribing */
+   private final RealtimeRos2Node realtimeRos2Node;
+   /** Publishers for ROS2 */
+   private final HashMap<String, RealtimeRos2Publisher<Packet>> publishers;
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
    /** Used to filter messages coming in. */
@@ -65,20 +73,22 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Packet<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriberRos2(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-                                          PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+                                          PeriodicThreadScheduler scheduler, RealtimeRos2Node realtimeRos2Node)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.scheduler = scheduler;
-      this.packetCommunicator = packetCommunicator;
+      this.realtimeRos2Node = realtimeRos2Node;
+      publishers = new HashMap<>();
+      topicName = "/controller_network_subscriber";
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (packetCommunicator == null)
+      if (realtimeRos2Node == null)
       {
-         PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
+         PrintTools.error(this, "No ros2 node, " + getClass().getSimpleName() + " cannot be created.");
          return;
       }
 
@@ -92,41 +102,55 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
 
-   public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageHolderClass, int expectedMessageSize,
+   public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> messageType, int expectedMessageSize,
                                                                           MessageUnpacker<T> messageUnpacker)
    {
-      PacketConsumer<T> packetConsumer = new PacketConsumer<T>()
+      try
       {
-         private final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
-
-         @Override
-         public void receivedPacket(T multipleMessageHolder)
-         {
-            if (DEBUG)
-               PrintTools.debug(ControllerNetworkSubscriberRos2.this,
-                                "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
-
-            String errorMessage = messageValidator.get().validate(multipleMessageHolder);
-
-            if (errorMessage != null)
+         final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+         final T message = messageType.newInstance();
+         realtimeRos2Node.createCallbackSubscription(message.getPubSubTypePacket().get(), topicName, subscriber -> {
+            try
             {
-               reportInvalidMessage(multipleMessageHolderClass, errorMessage);
-               return;
-            }
+               subscriber.takeNextData(message, null);
+               if (DEBUG)
+                  PrintTools.debug(ControllerNetworkSubscriberRos2.this,
+                                   "Received message: " + messageType.getName() + ", " + message);
 
-            if (testMessageWithMessageFilter(multipleMessageHolder))
-            {
-               messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
+               String errorMessage = messageValidator.get().validate(message);
 
-               for (int i = 0; i < unpackedMessages.size(); i++)
+               if (errorMessage != null)
                {
-                  receivedMessage(unpackedMessages.get(i));
+                  reportInvalidMessage(message.getClass(), errorMessage);
+                  return;
                }
-               unpackedMessages.clear();
+
+               if (testMessageWithMessageFilter(message))
+               {
+                  messageUnpacker.unpackMessage(message, unpackedMessages);
+
+                  for (int i = 0; i < unpackedMessages.size(); i++)
+                  {
+                     receivedMessage(unpackedMessages.get(i));
+                  }
+                  unpackedMessages.clear();
+               }
             }
-         }
-      };
-      packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
+         });
+         publishers.put(message.getClass().getName(), realtimeRos2Node.createPublisher(message.getPubSubTypePacket().get(), topicName));
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    public void addMessageCollector(MessageIDExtractor messageIDExtractor)
@@ -134,10 +158,26 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
       messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
       createStatusMessageBuffer(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
-      packetCommunicator.attachListener(MessageCollection.class, message -> {
-         MessageCollectionNotification notification = messageCollector.startCollecting(message);
-         copyAndCommitStatusMessage(notification);
-      });
+      try
+      {
+         final MessageCollection message = new MessageCollection();
+         realtimeRos2Node.createCallbackSubscription(new MessageCollectionPubSubType(), topicName, subscriber -> {
+            try
+            {
+               subscriber.takeNextData(message, null);
+               MessageCollectionNotification notification = messageCollector.startCollecting(message);
+               copyAndCommitStatusMessage(notification);
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
+         });
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    public void addMessageFilter(MessageFilter newFilter)
@@ -181,8 +221,31 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
    {
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       {
-         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         packetCommunicator.attachListener(messageClass, this::receivedMessage);
+         try
+         {
+            Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
+            final T message = messageClass.newInstance();
+            realtimeRos2Node.createCallbackSubscription(message.getPubSubTypePacket().get(), topicName, subscriber -> {
+               try
+               {
+                  subscriber.takeNextData(message, null);
+                  receivedMessage(message);
+               }
+               catch (IOException e)
+               {
+                  e.printStackTrace();
+               }
+            });
+            publishers.put(messageClass.getName(), realtimeRos2Node.createPublisher(message.getPubSubTypePacket().get(), topicName));
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+         catch (InstantiationException | IllegalAccessException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 
@@ -227,14 +290,15 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
       if (!messageFilter.get().isMessageValid(messageToTest))
       {
          if (DEBUG)
-            PrintTools.error(ControllerNetworkSubscriberRos2.this, "Packet failed to validate filter! Filter class: "
-                  + messageFilter.get().getClass().getSimpleName() + ", rejected message: " + messageToTest.getClass().getSimpleName());
+            PrintTools.error(ControllerNetworkSubscriberRos2.this,
+                             "Packet failed to validate filter! Filter class: "
+                                   + messageFilter.get().getClass().getSimpleName() + ", rejected message: " + messageToTest.getClass().getSimpleName());
          return false;
       }
       return true;
    }
 
-   private void reportInvalidMessage(Class<? extends Packet<?>> messageClass, String errorMessage)
+   private void reportInvalidMessage(Class<? extends Packet> messageClass, String errorMessage)
    {
       ConcurrentRingBuffer<?> buffer = statusMessageClassToBufferMap.get(InvalidPacketNotificationPacket.class);
 
@@ -279,7 +343,7 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
             Packet<?> statusMessage;
             while ((statusMessage = buffer.read()) != null)
             {
-               packetCommunicator.send(statusMessage);
+               publishers.get(statusMessage.getClass().getName()).publish(statusMessage);
             }
             buffer.flush();
          }
@@ -296,10 +360,5 @@ public class ControllerNetworkSubscriberRos2 implements Runnable, CloseableAndDi
    public static interface MessageFilter
    {
       public boolean isMessageValid(Packet<?> message);
-   }
-
-   public static interface MessageValidator
-   {
-      String validate(Packet<?> message);
    }
 }
