@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is used to provides additional properties for cameras.
@@ -166,6 +167,12 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
 
    public static Supplier<IntrinsicParametersMessagePubSubType> getPubSubType()
+   {
+      return IntrinsicParametersMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return IntrinsicParametersMessagePubSubType::new;
    }

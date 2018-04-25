@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
@@ -225,6 +226,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
 
    public static Supplier<RobotConfigurationDataPubSubType> getPubSubType()
+   {
+      return RobotConfigurationDataPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return RobotConfigurationDataPubSubType::new;
    }

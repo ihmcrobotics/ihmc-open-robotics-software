@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class Video extends Packet<Video> implements Settable<Video>, EpsilonComparable<Video>
 {
@@ -33,6 +35,17 @@ public class Video extends Packet<Video> implements Settable<Video>, EpsilonComp
       return hasTimebase_;
    }
 
+
+   public static Supplier<VideoPubSubType> getPubSubType()
+   {
+      return VideoPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return VideoPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Video other, double epsilon)

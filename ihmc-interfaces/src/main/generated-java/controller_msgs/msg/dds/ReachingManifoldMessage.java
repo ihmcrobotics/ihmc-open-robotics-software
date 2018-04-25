@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
@@ -115,6 +116,12 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage> imp
 
 
    public static Supplier<ReachingManifoldMessagePubSubType> getPubSubType()
+   {
+      return ReachingManifoldMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ReachingManifoldMessagePubSubType::new;
    }

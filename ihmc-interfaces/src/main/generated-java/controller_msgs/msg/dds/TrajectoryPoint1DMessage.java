@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -116,6 +117,12 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
 
    public static Supplier<TrajectoryPoint1DMessagePubSubType> getPubSubType()
+   {
+      return TrajectoryPoint1DMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return TrajectoryPoint1DMessagePubSubType::new;
    }

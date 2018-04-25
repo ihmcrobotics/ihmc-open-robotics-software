@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC quadruped controller API.
@@ -107,6 +108,12 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
 
    public static Supplier<QuadrupedBodyHeightMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedBodyHeightMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return QuadrupedBodyHeightMessagePubSubType::new;
    }

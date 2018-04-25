@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class VariableChangeRequest extends Packet<VariableChangeRequest> implements Settable<VariableChangeRequest>, EpsilonComparable<VariableChangeRequest>
 {
@@ -45,6 +47,17 @@ public class VariableChangeRequest extends Packet<VariableChangeRequest> impleme
       return requestedValue_;
    }
 
+
+   public static Supplier<VariableChangeRequestPubSubType> getPubSubType()
+   {
+      return VariableChangeRequestPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return VariableChangeRequestPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(VariableChangeRequest other, double epsilon)

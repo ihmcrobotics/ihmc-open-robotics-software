@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message notifies the user that a previously sent message was rejected by the whole-body controller.
@@ -88,6 +89,12 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
 
    public static Supplier<InvalidPacketNotificationPacketPubSubType> getPubSubType()
+   {
+      return InvalidPacketNotificationPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return InvalidPacketNotificationPacketPubSubType::new;
    }

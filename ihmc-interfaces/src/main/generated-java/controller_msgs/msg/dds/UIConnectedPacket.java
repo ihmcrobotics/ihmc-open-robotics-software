@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
@@ -48,6 +49,12 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
 
    public static Supplier<UIConnectedPacketPubSubType> getPubSubType()
+   {
+      return UIConnectedPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return UIConnectedPacketPubSubType::new;
    }

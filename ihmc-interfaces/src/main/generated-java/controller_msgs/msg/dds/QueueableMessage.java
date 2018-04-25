@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -168,6 +169,12 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
 
    public static Supplier<QueueableMessagePubSubType> getPubSubType()
+   {
+      return QueueableMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return QueueableMessagePubSubType::new;
    }

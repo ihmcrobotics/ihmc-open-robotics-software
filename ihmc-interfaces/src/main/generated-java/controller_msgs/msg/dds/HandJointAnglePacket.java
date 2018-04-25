@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message used to report the current joint angles for the fingers of a hand.
@@ -96,6 +97,12 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
 
 
    public static Supplier<HandJointAnglePacketPubSubType> getPubSubType()
+   {
+      return HandJointAnglePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HandJointAnglePacketPubSubType::new;
    }

@@ -41,7 +41,7 @@ public class Ros2IntraProcessExample
    public static void subscribeUsingIntraProcessNode() throws IOException, InterruptedException
    {
       Ros2Node node = new Ros2Node(PubSubImplementation.INTRAPROCESS, "MockNetworkProcessor");
-      node.createSubscription(RobotConfigurationData.getPubSubType().get(), subscriber -> {
+      node.createSubscription(new RobotConfigurationDataPubSubType(), subscriber -> {
          RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
          try

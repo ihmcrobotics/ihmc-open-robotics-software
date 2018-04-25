@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
 {
@@ -94,6 +95,12 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
 
 
    public static Supplier<BoundingBoxesPacketPubSubType> getPubSubType()
+   {
+      return BoundingBoxesPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return BoundingBoxesPacketPubSubType::new;
    }

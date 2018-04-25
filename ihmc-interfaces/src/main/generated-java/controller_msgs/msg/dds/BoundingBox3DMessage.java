@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implements Settable<BoundingBox3DMessage>, EpsilonComparable<BoundingBox3DMessage>
 {
@@ -63,6 +64,12 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
 
 
    public static Supplier<BoundingBox3DMessagePubSubType> getPubSubType()
+   {
+      return BoundingBox3DMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return BoundingBox3DMessagePubSubType::new;
    }

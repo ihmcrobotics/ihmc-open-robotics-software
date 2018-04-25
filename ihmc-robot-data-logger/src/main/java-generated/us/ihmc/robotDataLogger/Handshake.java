@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class Handshake extends Packet<Handshake> implements Settable<Handshake>, EpsilonComparable<Handshake>
 {
@@ -97,6 +99,17 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       return summary_;
    }
 
+
+   public static Supplier<HandshakePubSubType> getPubSubType()
+   {
+      return HandshakePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return HandshakePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Handshake other, double epsilon)

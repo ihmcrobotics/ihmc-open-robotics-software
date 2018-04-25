@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -142,6 +143,12 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
 
    public static Supplier<WeightMatrix3DMessagePubSubType> getPubSubType()
+   {
+      return WeightMatrix3DMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return WeightMatrix3DMessagePubSubType::new;
    }

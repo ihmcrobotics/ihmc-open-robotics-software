@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message part of the localization module
@@ -80,6 +81,12 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket> i
 
 
    public static Supplier<LocalizationStatusPacketPubSubType> getPubSubType()
+   {
+      return LocalizationStatusPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return LocalizationStatusPacketPubSubType::new;
    }

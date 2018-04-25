@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -80,6 +81,12 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
 
 
    public static Supplier<SimpleCoactiveBehaviorDataPacketPubSubType> getPubSubType()
+   {
+      return SimpleCoactiveBehaviorDataPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return SimpleCoactiveBehaviorDataPacketPubSubType::new;
    }
