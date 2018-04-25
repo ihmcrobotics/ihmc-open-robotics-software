@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -13,6 +14,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -26,6 +30,7 @@ import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -41,6 +46,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -48,6 +54,8 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedSteppingState implements QuadrupedController, QuadrupedStepTransitionCallback
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
@@ -83,6 +91,9 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final QuadrupedSteppingStateChangeMessage quadrupedSteppingStateChangeMessage = new QuadrupedSteppingStateChangeMessage();
+
+   private final QuadrantDependentList<QuadrupedFootstepStatusMessage> footstepStatusMessages = new QuadrantDependentList<>();
+   private final YoInteger stepIndex = new YoInteger("currentStepIndex", registry);
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
@@ -128,6 +139,11 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       }
 
       this.stateMachine = buildStateMachine();
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         footstepStatusMessages.set(robotQuadrant, new QuadrupedFootstepStatusMessage());
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -182,18 +198,46 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    }
 
    @Override
-   public void onLiftOff(RobotQuadrant thisStepQuadrant)
+   public void onLiftOff(QuadrupedTimedStep step)
    {
+      RobotQuadrant quadrant = step.getRobotQuadrant();
+
       // update ground plane estimate
-      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
-      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(tempPoint);
+      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(quadrant));
+      groundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
       onLiftOffTriggered.set(true);
+
+      // report footstep status message
+      stepIndex.increment();
+      double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
+      QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(quadrant);
+
+      footstepStatusMessage.setFootstepQuadrant(quadrant.toByte());
+      footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
+      footstepStatusMessage.setSequenceId(stepIndex.getIntegerValue());
+      footstepStatusMessage.getDesiredStepInterval().setStartTime(step.getTimeInterval().getStartTime());
+      footstepStatusMessage.getDesiredStepInterval().setEndTime(step.getTimeInterval().getEndTime());
+      footstepStatusMessage.getActualStepInterval().setStartTime(currentTime);
+      footstepStatusMessage.getActualStepInterval().setEndTime(Double.NaN);
+      step.getGoalPosition(footstepStatusMessage.getDesiredTouchdownPositionInWorld());
+      statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
    }
 
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant)
    {
       onTouchDownTriggered.set(true);
+
+      // report footstep status message
+      QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
+      Vector3DReadOnly solePosition = controllerToolbox.getReferenceFrames().getSoleFrame(thisStepQuadrant).getTransformToWorldFrame()
+                                                       .getTranslationVector();
+      double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
+
+      footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
+      footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
+      footstepStatusMessage.getActualTouchdownPositionInWorld().set(solePosition);
+      statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
    }
 
    @Override
