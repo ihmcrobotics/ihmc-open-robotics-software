@@ -10,8 +10,16 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotion
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -28,6 +36,12 @@ public class FlightState extends AbstractJumpState
    private final double contactThreshold = 30.0;
    private final double footHeightThresholdForCollisionChecking = 0.005;
    private final YoBoolean isDone;
+   private final SO3TrajectoryControllerCommand plannedChestCommand = new SO3TrajectoryControllerCommand();
+   private final FrameQuaternion waypointOrientation = new FrameQuaternion();
+   private final FrameVector3D waypointAngularVelocity = new FrameVector3D();
+   private final WholeBodyMotionPlanner motionPlanner;
+   private final ReferenceFrame controlFrame;
+   private final DesiredAccelerationsCommand torsoPelvisAccelerationCommand;
 
    public FlightState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                       WholeBodyControlCoreToolbox controlCoreToolbox, CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisManager,
@@ -35,6 +49,7 @@ public class FlightState extends AbstractJumpState
                       YoVariableRegistry registry)
    {
       super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
+      this.motionPlanner = motionPlanner;
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
       this.feetManager = feetManager;
@@ -43,6 +58,11 @@ public class FlightState extends AbstractJumpState
       this.chestManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getChest().getName());
       this.headManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getHead().getName());
       isDone = new YoBoolean(getClass().getSimpleName() + "isDone", registry);
+      controlFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
+      waypointAngularVelocity.setReferenceFrame(controlFrame);
+      waypointOrientation.setReferenceFrame(controlFrame);
+      plannedChestCommand.setTrajectoryFrame(controlFrame);
+      torsoPelvisAccelerationCommand = new DesiredAccelerationsCommand();
    }
 
    @Override
@@ -94,15 +114,13 @@ public class FlightState extends AbstractJumpState
          feetManager.holdInTaskspace(robotSide);
          feetManager.makeFeetFullyUnconstrained(robotSide);
       }
-      headManager.holdInJointspace();
-      chestManager.holdInTaskspace();
+      headManager.holdInTaskspace();
    }
-
+   
    @Override
    public void doTransitionOutOfAction()
    {
       // TODO Auto-generated method stub
-
    }
 
 }

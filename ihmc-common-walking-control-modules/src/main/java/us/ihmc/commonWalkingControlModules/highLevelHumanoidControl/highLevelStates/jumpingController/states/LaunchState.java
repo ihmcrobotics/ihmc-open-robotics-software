@@ -61,7 +61,7 @@ public class LaunchState extends AbstractJumpState
    public void doAction()
    {
       double timeInCurrentState = getTimeInCurrentState();
-      centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
+      centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState, true);
       pelvisControlManager.maintainDesiredOrientationOnly(pelvisAngularWeights);
       feetManager.compute();
       headManager.compute();
