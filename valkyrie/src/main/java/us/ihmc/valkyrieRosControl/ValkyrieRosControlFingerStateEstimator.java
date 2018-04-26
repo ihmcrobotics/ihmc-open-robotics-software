@@ -252,17 +252,17 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
 
          scales.get(ThumbRoll).set(robotSide.negateIfLeftSide(1.0));
-         scales.get(ThumbPitch1).set(robotSide.negateIfLeftSide(1.00));
+         scales.get(ThumbPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
          scales.get(IndexFingerPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
          scales.get(MiddleFingerPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
          scales.get(PinkyPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
 
-         scales.get(ThumbPitch2).set(robotSide.negateIfLeftSide(0.60));
+         scales.get(ThumbPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
          scales.get(IndexFingerPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
          scales.get(MiddleFingerPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
          scales.get(PinkyPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
 
-         scales.get(ThumbPitch3).set(robotSide.negateIfLeftSide(0.30));
+         scales.get(ThumbPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
          scales.get(IndexFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
          scales.get(MiddleFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
          scales.get(PinkyPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
