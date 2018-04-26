@@ -50,6 +50,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final ValkyrieRosControlLowLevelController lowlLevelController;
 
+   private final ValkyrieRosControlFingerStateEstimator fingerStateEstimator;
+
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
                                          SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
                                          List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
@@ -58,11 +60,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
                                          List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
    {
 
-      ValkyrieRosControlFingerSensorConfiguration fingerSensorConfiguration = new ValkyrieRosControlFingerSensorConfiguration(yoEffortJointHandleHolders,
-                                                                                                                              yoPositionJointHandleHolders,
-                                                                                                                              yoJointStateHandleHolders,
-                                                                                                                              sensorProcessingConfiguration);
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerSensorConfiguration, registry);
+      fingerStateEstimator = new ValkyrieRosControlFingerStateEstimator(yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders,
+                                                                        timestampProvider, stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
+                                                                        registry);
+      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerStateEstimator, registry);
       this.timestampProvider = timestampProvider;
       // Remove the handles that do not have a joint associated. This is useful to remove the finger motors.
       this.yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> h.getOneDoFJoint() != null).collect(Collectors.toList());
@@ -73,8 +74,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       this.yoForceTorqueSensorHandles = yoForceTorqueSensorHandles;
 
       double estimatorDT = sensorProcessingConfiguration.getEstimatorDT();
-      lowlLevelController = new ValkyrieRosControlLowLevelController(timestampProvider, estimatorDT, yoEffortJointHandleHolders, yoPositionJointHandleHolders,
-                                                                     jointMap, registry);
+      lowlLevelController = new ValkyrieRosControlLowLevelController(timestampProvider, estimatorDT, fingerStateEstimator, yoEffortJointHandleHolders,
+                                                                     yoPositionJointHandleHolders, jointMap, registry);
    }
 
    @Override
@@ -153,6 +154,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       }
 
       long timestamp = timestampProvider.getTimestamp();
+      fingerStateEstimator.update();
       sensorProcessing.startComputation(timestamp, timestamp, -1);
    }
 
@@ -182,6 +184,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
+      fingerStateEstimator.attachControllerAPI(commandInputManager, statusOutputManager);
       lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
    }
 

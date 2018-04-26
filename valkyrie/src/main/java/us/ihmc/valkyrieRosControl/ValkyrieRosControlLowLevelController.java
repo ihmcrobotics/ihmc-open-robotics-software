@@ -48,6 +48,7 @@ public class ValkyrieRosControlLowLevelController
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+                                               ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
                                                YoVariableRegistry parentRegistry)
@@ -56,7 +57,7 @@ public class ValkyrieRosControlLowLevelController
 
       wakeUpTime.set(Double.NaN);
 
-      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
+      fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
 
       // Remove the finger joints to let the finger controller be the only controlling them
       yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
