@@ -24,6 +24,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -46,6 +47,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    private final double lowerBodyJointPositionFilterFrequencyHz;
    private final double jointOutputEncoderVelocityFilterFrequencyHz;
    private final double lowerBodyJointVelocityFilterFrequencyHz;
+   private final double fingerPositionFilterFrequencyHz;
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
@@ -89,12 +91,13 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      fingerPositionFilterFrequencyHz = runningOnRealRobot ? 2.5 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward.
       // I still don't quite get it. Sylvain
       orientationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.03;
       armJointVelocityBacklashSlopTime = 0.03;
@@ -166,6 +169,10 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       DoubleProvider armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(armJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
+      // Filter the finger joint position a lot as they're super noisy.
+      DoubleProvider fingerPositionAlphaFilter = sensorProcessing.createAlphaFilter("fingerPositionAlphaFilter", fingerPositionFilterFrequencyHz);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(fingerPositionAlphaFilter, false, JOINT_POSITION, createArrayWithFingerJointNames());
+
       //imu
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
@@ -181,6 +188,21 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          for (ArmJointName armJointName : jointMap.getArmJointNames())
          {
             nameList.add(jointMap.getArmJointName(robotSide, armJointName));
+         }
+      }
+
+      return nameList.toArray(new String[0]);
+   }
+
+   private String[] createArrayWithFingerJointNames()
+   {
+      List<String> nameList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+         {
+            nameList.add(jointName.getJointName(robotSide));
          }
       }
 
