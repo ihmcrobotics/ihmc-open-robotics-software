@@ -31,7 +31,7 @@ public class NeuralNetwork
       double[][] bias = config.getBias();
       double[][][] weights = config.getWeights();
       
-      //we already cretaed the input layer so start with an index of one
+      //we already created the input layer so start with an index of one
       for(int i = 1; i < numberOfNeuronsPerLayer.length; i++)
       {
          createLayer(numberOfNeuronsPerLayer[i], bias[i], weights[i], activationFunctions[i]);
