@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
@@ -28,6 +29,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final YoDouble timestamp;
    private final ReferenceFrame supportFrame;
+   private final YoBoolean footstepStatusHasBeenReceived = new YoBoolean("footstepStatusHasBeenReceived", registry);
 
    private final YoFramePoint2D startPoint = new YoFramePoint2D("startPoint", worldFrame, registry);
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
@@ -73,10 +75,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          footstepStatuses.get(quadrant).set(null);
       }
 
-      RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
-      startTime.set(timestamp.getDoubleValue());
-      startYaw.set(supportTransform.getRotationMatrix().getYaw());
-      startPoint.set(supportTransform.getTranslationVector());
+      recomputeInitialPose.set(false);
+      footstepStatusHasBeenReceived.set(false);
    }
 
    public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -87,7 +87,15 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    @Override
    public void getPlanarPose(double time, FramePose2D poseToPack)
    {
-      update();
+      if (recomputeInitialPose.getAndSet(false))
+      {
+         footstepStatusHasBeenReceived.set(true);
+         setStartConditionsFromFootstepStatus();
+      }
+      else if(!footstepStatusHasBeenReceived.getBooleanValue())
+      {
+         setStartConditionsFromCurrent();
+      }
 
       initialPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
       extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, planarVelocity);
@@ -125,15 +133,15 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       poseToPack.setYaw(a);
    }
 
-   public void update()
+   private void setStartConditionsFromCurrent()
    {
-      if(recomputeInitialPose.getAndSet(false))
-      {
-         recomputeInitialPose();
-      }
+      RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
+      startTime.set(timestamp.getDoubleValue());
+      startYaw.set(supportTransform.getRotationMatrix().getYaw());
+      startPoint.set(supportTransform.getTranslationVector());
    }
 
-   private void recomputeInitialPose()
+   private void setStartConditionsFromFootstepStatus()
    {
       QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStatusMessage();
       if (latestStatusMessage == null) return;
