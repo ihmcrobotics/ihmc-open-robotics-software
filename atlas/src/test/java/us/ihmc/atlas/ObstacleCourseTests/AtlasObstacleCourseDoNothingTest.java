@@ -16,10 +16,12 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothingTest
 {
+   private DRCRobotModel robotModel;
+
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
+      return robotModel;
    }
 
    @Override
@@ -28,11 +30,19 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.3)
    @Test(timeout = 100000)
-   public void testDoNothing1() throws SimulationExceededMaximumTimeException
+   public void testDoNothing() throws SimulationExceededMaximumTimeException
    {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      super.testDoNothing1();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.3)
+   @Test(timeout = 100000)
+   public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
       super.testDoNothing1();
    }
 }
