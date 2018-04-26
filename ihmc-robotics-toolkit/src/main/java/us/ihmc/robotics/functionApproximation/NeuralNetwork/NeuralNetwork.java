@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.ActivationFunction;
 import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.PassThrough;
+import us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetworkConfiguration;
 
 /**
  * Simple garbage free production neural network with no training ability. Train your Neural Network using an external library like TensorFlow and import the parameters. 
@@ -12,6 +13,30 @@ import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.P
 public class NeuralNetwork
 {
    private final ArrayList<Layer> layers = new ArrayList<>();
+   
+   public NeuralNetwork()
+   {
+   }
+
+   /**
+    * Construct a neural network using a NeuralNetworkConfiguration, this is useful if you want to save and load your NN parameters to a YAML file
+    * @param config the neural network configuration
+    */
+   public NeuralNetwork(NeuralNetworkConfiguration config)
+   {
+      int[] numberOfNeuronsPerLayer = config.getNumberOfNeuronsPerLayer();
+      createInputLayer(numberOfNeuronsPerLayer[0]);
+      
+      ActivationFunction[] activationFunctions = config.getActivationFunctions();
+      double[][] bias = config.getBias();
+      double[][][] weights = config.getWeights();
+      
+      //we already cretaed the input layer so start with an index of one
+      for(int i = 1; i < numberOfNeuronsPerLayer.length; i++)
+      {
+         createLayer(numberOfNeuronsPerLayer[i], bias[i], weights[i], activationFunctions[i]);
+      }
+   }
 
    /**
     * Creates the initial layer with zero bias and a PassThrough Activation function (the output = the input)
