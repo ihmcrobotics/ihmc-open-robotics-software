@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Use this message to request a new point cloud from the stereo camera.
@@ -48,6 +49,12 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
 
 
    public static Supplier<RequestStereoPointCloudMessagePubSubType> getPubSubType()
+   {
+      return RequestStereoPointCloudMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return RequestStereoPointCloudMessagePubSubType::new;
    }

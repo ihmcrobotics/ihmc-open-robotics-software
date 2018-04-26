@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
 {
@@ -64,6 +65,12 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
 
 
    public static Supplier<DetectedFacesPacketPubSubType> getPubSubType()
+   {
+      return DetectedFacesPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return DetectedFacesPacketPubSubType::new;
    }

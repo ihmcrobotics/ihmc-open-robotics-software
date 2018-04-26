@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -114,6 +115,12 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
 
    public static Supplier<PelvisHeightTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return PelvisHeightTrajectoryMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return PelvisHeightTrajectoryMessagePubSubType::new;
    }

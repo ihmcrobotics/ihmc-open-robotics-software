@@ -480,7 +480,7 @@ public class QuadrupedSimulationFactory
       setupJointElasticity();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
-      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
+      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
       {
          scs.setGroundVisible(false);
       }

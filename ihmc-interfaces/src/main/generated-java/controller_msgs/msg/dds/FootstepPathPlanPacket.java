@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * (Obsolete) This message is part of the old IHMC footstep planning module.
@@ -122,6 +123,12 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> imple
 
 
    public static Supplier<FootstepPathPlanPacketPubSubType> getPubSubType()
+   {
+      return FootstepPathPlanPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return FootstepPathPlanPacketPubSubType::new;
    }

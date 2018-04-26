@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * General purpose message normally used to report the solution of a whole-body trajectory planner.
@@ -102,6 +103,12 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
 
    public static Supplier<WholeBodyTrajectoryToolboxOutputStatusPubSubType> getPubSubType()
+   {
+      return WholeBodyTrajectoryToolboxOutputStatusPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return WholeBodyTrajectoryToolboxOutputStatusPubSubType::new;
    }

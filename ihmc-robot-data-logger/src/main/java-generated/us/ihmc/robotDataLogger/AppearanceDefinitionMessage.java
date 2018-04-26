@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class AppearanceDefinitionMessage extends Packet<AppearanceDefinitionMessage> implements Settable<AppearanceDefinitionMessage>, EpsilonComparable<AppearanceDefinitionMessage>
 {
@@ -69,6 +71,17 @@ public class AppearanceDefinitionMessage extends Packet<AppearanceDefinitionMess
       return transparency_;
    }
 
+
+   public static Supplier<AppearanceDefinitionMessagePubSubType> getPubSubType()
+   {
+      return AppearanceDefinitionMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return AppearanceDefinitionMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AppearanceDefinitionMessage other, double epsilon)

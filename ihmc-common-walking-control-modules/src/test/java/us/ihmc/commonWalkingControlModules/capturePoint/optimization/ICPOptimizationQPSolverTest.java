@@ -26,7 +26,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testStandingWithPerfectTrackingAndAngularMomentum()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
 
       solver.setCMPFeedbackConditions(10.0, true);
       solver.setFeedbackConditions(0.1, 3.0, 500.0);
@@ -53,7 +53,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testStandingUnconstrainedWithAndAngularMomentum()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
 
       solver.setCMPFeedbackConditions(1000.0, true);
       solver.setFeedbackConditions(0.1, 0.1, 3.0, 3.0, 100000.0);
@@ -83,7 +83,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testStandingUnconstrained()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
 
       solver.setFeedbackConditions(0.1, 3.0, 100000.0);
 
@@ -112,7 +112,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testStandingConstrained()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
@@ -154,7 +154,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testStandingConstrainedWithAngularMomentum()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
@@ -203,7 +203,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingUnconstrainedFeedbackPreferred()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -249,7 +249,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferred()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1000.0;
@@ -294,7 +294,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1000.0;
@@ -340,7 +340,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingUnconstrainedWithAdjustment()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1.0;
@@ -410,7 +410,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1.0;
@@ -481,7 +481,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSteppingCoPConstrainedWithAdjustment()
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -535,7 +535,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testCoPAndFootstepConstrainedWithAdjustment() throws Exception
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -631,7 +631,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testNoExceptions() throws Exception
    {
-         ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+         ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
 
          // feedback
          FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.2826586940121205, 0.2826586940121205);
@@ -687,7 +687,7 @@ public class ICPOptimizationQPSolverTest
    @Test(timeout = 30000)
    public void testSimpleNoExceptions() throws Exception
    {
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(10, false);
 
 
       // feedback

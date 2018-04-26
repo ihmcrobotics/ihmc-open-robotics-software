@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message used to configure the exploration for a RRT-based planner.
@@ -97,6 +98,12 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
 
    public static Supplier<RigidBodyExplorationConfigurationMessagePubSubType> getPubSubType()
+   {
+      return RigidBodyExplorationConfigurationMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return RigidBodyExplorationConfigurationMessagePubSubType::new;
    }

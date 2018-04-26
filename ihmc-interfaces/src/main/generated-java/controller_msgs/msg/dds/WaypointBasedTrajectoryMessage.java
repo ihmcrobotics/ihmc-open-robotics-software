@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Configure a constrained trajectory for a given end-effector.
@@ -129,6 +130,12 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
 
    public static Supplier<WaypointBasedTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return WaypointBasedTrajectoryMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return WaypointBasedTrajectoryMessagePubSubType::new;
    }

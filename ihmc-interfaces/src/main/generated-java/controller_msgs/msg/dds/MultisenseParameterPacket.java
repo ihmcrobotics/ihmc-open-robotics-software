@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket> implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
@@ -141,6 +142,12 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
 
    public static Supplier<MultisenseParameterPacketPubSubType> getPubSubType()
+   {
+      return MultisenseParameterPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return MultisenseParameterPacketPubSubType::new;
    }

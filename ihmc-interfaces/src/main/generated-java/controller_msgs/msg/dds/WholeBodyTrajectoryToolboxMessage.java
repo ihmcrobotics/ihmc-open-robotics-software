@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
@@ -86,6 +87,12 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
 
    public static Supplier<WholeBodyTrajectoryToolboxMessagePubSubType> getPubSubType()
+   {
+      return WholeBodyTrajectoryToolboxMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return WholeBodyTrajectoryToolboxMessagePubSubType::new;
    }

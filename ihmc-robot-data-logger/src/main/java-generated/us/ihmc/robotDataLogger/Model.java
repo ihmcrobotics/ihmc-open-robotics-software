@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class Model extends Packet<Model> implements Settable<Model>, EpsilonComparable<Model>
 {
@@ -124,6 +126,17 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
       return resourceDirectoriesList_;
    }
 
+
+   public static Supplier<ModelPubSubType> getPubSubType()
+   {
+      return ModelPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return ModelPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Model other, double epsilon)

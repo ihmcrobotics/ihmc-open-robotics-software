@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
 {
@@ -99,6 +100,12 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
 
    public static Supplier<HeatMapPacketPubSubType> getPubSubType()
+   {
+      return HeatMapPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HeatMapPacketPubSubType::new;
    }
