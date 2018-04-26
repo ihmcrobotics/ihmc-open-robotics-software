@@ -29,9 +29,17 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       super.testFlatGroundWalking(robotModel, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
-	@Ignore // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
+   @ContinuousIntegrationTest(estimatedDuration = 348.7)
+   @Test(timeout = 1700000)
+   public void testAtlasFlatGroundWalkingWithShapeCollision() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
+      super.testFlatGroundWalking(robotModel, true);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   @Ignore // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       try
@@ -43,7 +51,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }
-      catch(AssumptionViolatedException e)
+      catch (AssumptionViolatedException e)
       {
          System.out.println("Not Nightly Build, skipping AtlasFlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
       }

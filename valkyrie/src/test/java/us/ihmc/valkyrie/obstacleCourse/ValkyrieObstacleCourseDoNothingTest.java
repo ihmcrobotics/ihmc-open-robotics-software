@@ -12,7 +12,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothingTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, true);
+   private ValkyrieRobotModel robotModel;
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -26,11 +26,19 @@ public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNoth
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.3)
    @Test(timeout = 100000)
-   public void testDoNothing1() throws SimulationExceededMaximumTimeException
+   public void testDoNothingGroundContactPoints() throws SimulationExceededMaximumTimeException
    {
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      super.testDoNothing1();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 20.3)
+   @Test(timeout = 100000)
+   public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
+   {
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, true);
       super.testDoNothing1();
    }
 }
