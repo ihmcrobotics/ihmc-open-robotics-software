@@ -39,7 +39,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: "org.jmonkeyengine", name: "jme3-core", version: "3.2.0-171208"
    compile "org.boofcv:geo:0.19"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
@@ -50,7 +50,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
 }
