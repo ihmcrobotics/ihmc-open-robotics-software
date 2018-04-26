@@ -61,59 +61,40 @@ public class YoICPControlGains implements ICPControlGainsProvider
       feedbackPartMaxRate.set(maxRate);
    }
 
+   @Override
    public YoDouble getYoKpParallelToMotion()
    {
       return kpParallelToMotion;
    }
 
+   @Override
    public YoDouble getYoKpOrthogonalToMotion()
    {
       return kpOrthogonalToMotion;
    }
 
+   @Override
    public YoDouble getYoKi()
    {
       return ki;
    }
 
+   @Override
    public YoDouble getYoIntegralLeakRatio()
    {
       return integralLeakRatio;
    }
 
+   @Override
    public YoDouble getYoMaxIntegralError()
    {
       return maxIntegralError;
    }
 
-   public YoDouble getFeedbackPartMaxRate()
+   @Override
+   public YoDouble getYoFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
-   }
-
-   public double getKpParallelToMotion()
-   {
-      return kpParallelToMotion.getDoubleValue();
-   }
-
-   public double getKpOrthogonalToMotion()
-   {
-      return kpOrthogonalToMotion.getDoubleValue();
-   }
-
-   public double getKi()
-   {
-      return ki.getDoubleValue();
-   }
-
-   public double getIntegralLeakRatio()
-   {
-      return integralLeakRatio.getDoubleValue();
-   }
-
-   public double getMaxInteralError()
-   {
-      return maxIntegralError.getDoubleValue();
    }
 
    public void set(ICPControlGainsReadOnly icpControlGains)

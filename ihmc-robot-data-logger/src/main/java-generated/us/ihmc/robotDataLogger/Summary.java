@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class Summary extends Packet<Summary> implements Settable<Summary>, EpsilonComparable<Summary>
 {
@@ -62,6 +64,17 @@ public class Summary extends Packet<Summary> implements Settable<Summary>, Epsil
       return summarizedVariables_;
    }
 
+
+   public static Supplier<SummaryPubSubType> getPubSubType()
+   {
+      return SummaryPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return SummaryPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Summary other, double epsilon)

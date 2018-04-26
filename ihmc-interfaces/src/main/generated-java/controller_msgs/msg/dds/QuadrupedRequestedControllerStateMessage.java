@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC quadruped controller API.
@@ -75,6 +76,12 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
 
 
    public static Supplier<QuadrupedRequestedControllerStateMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedRequestedControllerStateMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return QuadrupedRequestedControllerStateMessagePubSubType::new;
    }

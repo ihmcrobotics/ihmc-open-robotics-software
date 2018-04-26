@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
@@ -101,6 +102,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    public static Supplier<KinematicsToolboxOutputStatusPubSubType> getPubSubType()
+   {
+      return KinematicsToolboxOutputStatusPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return KinematicsToolboxOutputStatusPubSubType::new;
    }

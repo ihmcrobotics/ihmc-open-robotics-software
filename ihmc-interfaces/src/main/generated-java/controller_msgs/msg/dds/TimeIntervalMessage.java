@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements Settable<TimeIntervalMessage>, EpsilonComparable<TimeIntervalMessage>
 {
@@ -69,6 +70,12 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
 
 
    public static Supplier<TimeIntervalMessagePubSubType> getPubSubType()
+   {
+      return TimeIntervalMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return TimeIntervalMessagePubSubType::new;
    }

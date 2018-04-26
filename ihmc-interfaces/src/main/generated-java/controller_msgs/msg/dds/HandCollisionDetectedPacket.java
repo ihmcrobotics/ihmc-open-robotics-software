@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message for the IHMC humanoid behavior module.
@@ -74,6 +75,12 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
 
 
    public static Supplier<HandCollisionDetectedPacketPubSubType> getPubSubType()
+   {
+      return HandCollisionDetectedPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HandCollisionDetectedPacketPubSubType::new;
    }

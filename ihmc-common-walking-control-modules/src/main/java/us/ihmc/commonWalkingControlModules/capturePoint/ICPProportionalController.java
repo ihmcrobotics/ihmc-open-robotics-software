@@ -56,7 +56,7 @@ public class ICPProportionalController
       captureKi = gains.getYoKi();
       captureKiBleedoff = gains.getYoIntegralLeakRatio();
 
-      feedbackPartMaxRate = gains.getFeedbackPartMaxRate();
+      feedbackPartMaxRate = gains.getYoFeedbackPartMaxRate();
       rateLimitFeedbackPart = feedbackPartMaxRate != null;
       if (rateLimitFeedbackPart)
          rateLimitedCMPOutput = new YoFramePoint2D("icpControlRateLimitedCMPOutput", "", worldFrame, registry);

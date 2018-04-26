@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -114,6 +115,12 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket> i
 
 
    public static Supplier<WalkToGoalBehaviorPacketPubSubType> getPubSubType()
+   {
+      return WalkToGoalBehaviorPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return WalkToGoalBehaviorPacketPubSubType::new;
    }

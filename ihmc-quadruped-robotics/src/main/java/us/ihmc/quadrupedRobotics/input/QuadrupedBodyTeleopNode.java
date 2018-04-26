@@ -48,6 +48,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private final QuadrupedReferenceFrames referenceFrames;
 
    private final QuadrupedStepTeleopMode stepTeleopMode;
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
    public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device,
                                   FullQuadrupedRobotModel fullRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
@@ -56,13 +57,13 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       this.device = device;
 
       this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.BEHAVIOR, DT);
-      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), new YoGraphicsListRegistry());
+      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, physicalProperties, defaultXGaitSettings, referenceFrames, registry);
+      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, physicalProperties, defaultXGaitSettings, referenceFrames, graphicsListRegistry, registry);
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)

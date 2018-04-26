@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Atlas specific message used to power cycle the hands.
@@ -62,6 +63,12 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket> implement
 
 
    public static Supplier<HandPowerCyclePacketPubSubType> getPubSubType()
+   {
+      return HandPowerCyclePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HandPowerCyclePacketPubSubType::new;
    }

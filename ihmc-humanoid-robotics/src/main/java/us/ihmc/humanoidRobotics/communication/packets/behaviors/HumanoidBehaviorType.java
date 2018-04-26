@@ -26,6 +26,7 @@ public enum HumanoidBehaviorType
    TEST_ICP_OPTIMIZATION,
    TEST_GC_GENERATION,
    TEST_SMOOTH_ICP_PLANNER,
+   @Deprecated
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
    FIRE_FIGHTING,   

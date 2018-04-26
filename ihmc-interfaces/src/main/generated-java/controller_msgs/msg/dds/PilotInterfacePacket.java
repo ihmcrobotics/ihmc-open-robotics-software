@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implements Settable<PilotInterfacePacket>, EpsilonComparable<PilotInterfacePacket>
 {
@@ -165,6 +166,12 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
 
    public static Supplier<PilotInterfacePacketPubSubType> getPubSubType()
+   {
+      return PilotInterfacePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return PilotInterfacePacketPubSubType::new;
    }
