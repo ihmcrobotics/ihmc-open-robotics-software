@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -57,26 +57,21 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final double controlDT;
 
-   /**
-    * FIXME: This is a hack. As of the 11/11/2017, Valkyrie only provides actuator space measurement and commands.
-    * This us unnecessary for the right hand, but for the left hand, the actuator and joint motions are opposite.
-    * Ideally, we should be using the transmission ratio used in {@link ValkyrieStateEstimatorParameters#configureSensorProcessing(us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing)},
-    * but hopefully the API with the robot will change, making this unnecessary.
-    */
-   private final boolean flipErrorSign;
+   private final ValkyrieRosControlFingerStateEstimator fingerStateEstimator;
+   private final YoPIDGains gains;
 
-   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, double controlDT, YoPIDGains gains, YoDouble trajectoryTime,
-                                      YoDouble thumbCloseDelay, YoDouble fingerOpenDelay,
+   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
+                                      YoPIDGains gains, YoDouble trajectoryTime, YoDouble thumbCloseDelay, YoDouble fingerOpenDelay,
                                       EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.controlDT = controlDT;
+      this.fingerStateEstimator = fingerStateEstimator;
+      this.gains = gains;
       this.trajectoryTime = trajectoryTime;
       this.thumbCloseDelay = thumbCloseDelay;
       this.fingerOpenDelay = fingerOpenDelay;
       this.jointHandles = jointHandles;
-
-      flipErrorSign = robotSide == RobotSide.LEFT;
 
       String sidePrefix = robotSide.getCamelCaseName();
       registry = new YoVariableRegistry(sidePrefix + name);
@@ -111,7 +106,7 @@ public class ValkyrieFingerSetController implements RobotController
          YoDouble desiredVelocity = new YoDouble("qd_d_" + jointName, registry);
          desiredVelocities.put(jointEnum, desiredVelocity);
 
-         PIDController pidController = new PIDController(gains, jointEnum.getPascalCaseJointName(robotSide), registry);
+         PIDController pidController = new PIDController(jointEnum.getPascalCaseJointName(robotSide), registry);
          pidControllers.put(jointEnum, pidController);
 
          YoDouble closedAngle = new YoDouble(jointName + "ClosedAngle", registry);
@@ -158,7 +153,7 @@ public class ValkyrieFingerSetController implements RobotController
             double qInitial;
             YoDouble desiredAngle = desiredAngles.get(jointEnum);
             if (desiredAngle.isNaN())
-               qInitial = jointHandles.get(jointEnum).getQ();
+               qInitial = fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1));
             else
                qInitial = desiredAngle.getDoubleValue();
             initialDesiredAngles.get(jointEnum).set(qInitial);
@@ -193,7 +188,7 @@ public class ValkyrieFingerSetController implements RobotController
             double qInitial;
             YoDouble desiredAngle = desiredAngles.get(jointEnum);
             if (desiredAngle.isNaN())
-               qInitial = jointHandles.get(jointEnum).getQ();
+               qInitial = fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1));
             else
                qInitial = desiredAngle.getDoubleValue();
             initialDesiredAngles.get(jointEnum).set(qInitial);
@@ -242,7 +237,7 @@ public class ValkyrieFingerSetController implements RobotController
 
          double thumbTime = timeInState - getThumbDelay();
          double thumbAlpha, thumbAlphaDot;
-         
+
          if (thumbTime <= 0.0)
          {
             thumbAlpha = 0.0;
@@ -303,19 +298,16 @@ public class ValkyrieFingerSetController implements RobotController
       for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
          PIDController pidController = pidControllers.get(jointEnum);
+         pidController.setGains(gains);
+         double fingerJointTransmissionScale = fingerStateEstimator.getFingerJointTransmissionScale(robotSide, jointEnum.getCorrespondingJointName(1));
+         pidController.setProportionalGain(gains.getKp() / fingerJointTransmissionScale);
+         pidController.setIntegralGain(gains.getKi() / fingerJointTransmissionScale);
          YoEffortJointHandleHolder handle = jointHandles.get(jointEnum);
 
-         double q = handle.getQ();
+         double q = fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1));
          double q_d = desiredAngles.get(jointEnum).getDoubleValue();
          double qd = handle.getQd();
          double qd_d = desiredVelocities.get(jointEnum).getDoubleValue();
-
-         if (flipErrorSign)
-         {
-            double q_err = -(q_d - q);
-            q_d = q + q_err;
-            qd_d = -qd_d;
-         }
 
          double tau = pidController.compute(q, q_d, qd, qd_d, controlDT);
 
@@ -330,6 +322,7 @@ public class ValkyrieFingerSetController implements RobotController
             pidController.resetIntegrator();
          }
          handle.setDesiredEffort(tau);
+         handle.getDesiredJointData().setDesiredTorque(tau);
       }
    }
 

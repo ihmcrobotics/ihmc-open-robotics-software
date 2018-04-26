@@ -23,20 +23,35 @@ import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.ThumbRoll;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.yaml.snakeyaml.Yaml;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerMotorName;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -46,28 +61,73 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
-public class ValkyrieRosControlFingerSensorConfiguration implements SensorProcessingConfiguration
+public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingConfiguration
 {
-   private static final String FINGER_TRANSMISSION_FILE = System.getProperty("user.home") + File.separator + "valkyrie/ValkyrieFingerJointTransmissionCoeffs.yaml";
+   private static final String FINGER_TRANSMISSION_FILE = System.getProperty("user.home") + File.separator
+         + "valkyrie/ValkyrieFingerJointTransmissionCoeffs.yaml";
 
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, Mean>> sideDependentFingerPositionMeans = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, YoBoolean>> sideDependentEncoderDeadMap = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, DoubleProvider>> sideDependentMotorBasedFingerJointPositions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder>> sideDependentFingerMotorHandles = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> sideDependentFingerJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
-   public ValkyrieRosControlFingerSensorConfiguration(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-                                                      List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
-                                                      List<YoJointStateHandleHolder> yoJointStateHandleHolders,
-                                                      SensorProcessingConfiguration sensorProcessingConfiguration)
+   private final YoBoolean forceMotorBasedPositionSwitch;
+   private final YoEnum<RobotSide> doZeroFingerCalibrationNow;
+
+   private final YoBoolean startFingerCalibration;
+   private final YoBoolean isCalibratingFingers;
+   private final TimestampProvider timestampProvider;
+   private final YoDouble fingerCalibrationStartTime;
+   private final YoDouble fingerCalibrationDuration;
+
+   public ValkyrieRosControlFingerStateEstimator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
+                                                 List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
+                                                 List<YoJointStateHandleHolder> yoJointStateHandleHolders, TimestampProvider timestampProvider,
+                                                 StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+                                                 SensorProcessingConfiguration sensorProcessingConfiguration, YoVariableRegistry registry)
    {
+      this.timestampProvider = timestampProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
+      List<OneDoFJoint> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
+
+      forceMotorBasedPositionSwitch = new YoBoolean("forceMotorBasedPositionSwitch", registry);
+      doZeroFingerCalibrationNow = new YoEnum<>("doZeroFingerCalibrationNow", registry, RobotSide.class, true);
+      doZeroFingerCalibrationNow.set(null);
+      startFingerCalibration = new YoBoolean("startFingerCalibration", registry);
+      isCalibratingFingers = new YoBoolean("isCalibratingFingers", registry);
+      fingerCalibrationStartTime = new YoDouble("fingerCalibrationStartTime", registry);
+      fingerCalibrationDuration = new YoDouble("fingerCalibrationDuration", registry);
+      fingerCalibrationDuration.set(1.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         EnumMap<ValkyrieHandJointName, Mean> fingerPositionMeans = sideDependentFingerPositionMeans.get(robotSide);
+         EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
+         EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
+         EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+
+         for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
+         {
+            String jointName = fingerJoint.getPascalCaseJointName(robotSide);
+            scales.put(fingerJoint, new YoDouble("scale" + jointName, registry));
+            biases.put(fingerJoint, new YoDouble("bias" + jointName, registry));
+            fingerPositionMeans.put(fingerJoint, new Mean());
+            encoderDeadMap.put(fingerJoint, new YoBoolean("is" + jointName + "EncoderDead", registry));
+            fingerJoints.put(fingerJoint, allJoints.stream().filter(j -> j.getName().equals(fingerJoint.getJointName(robotSide))).findFirst().get());
+         }
+
+         EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> fingerMotorHandles = sideDependentFingerMotorHandles.get(robotSide);
+
          for (ValkyrieFingerMotorName motor : ValkyrieFingerMotorName.values)
          {
-            YoEffortJointHandleHolder handle = yoEffortJointHandleHolders.stream().filter(h -> h.getName().equals(motor.getJointName(robotSide))).findFirst()
-                                                                         .get();
-            sideDependentFingerMotorHandles.get(robotSide).put(motor, handle);
+            fingerMotorHandles.put(motor, yoEffortJointHandleHolders.stream().filter(h -> h.getName().equals(motor.getJointName(robotSide))).findFirst().get());
          }
       }
    }
@@ -82,23 +142,6 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
    private void configureFingerProcessing(SensorProcessing sensorProcessing)
    {
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
-
-      SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-      SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
-         EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
-
-         for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
-         {
-            YoDouble scale = new YoDouble("scale" + fingerJoint.getPascalCaseJointName(robotSide), registry);
-            YoDouble bias = new YoDouble("bias" + fingerJoint.getPascalCaseJointName(robotSide), registry);
-            scales.put(fingerJoint, scale);
-            biases.put(fingerJoint, bias);
-         }
-      }
 
       boolean areCoeffsLoaded = loadCoeffsFromFile(FINGER_TRANSMISSION_FILE, sideDependentScales, sideDependentBiases);
 
@@ -123,15 +166,14 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
                String slaveJointName = slave.getCamelCaseJointName(robotSide);
                YoEffortJointHandleHolder motorHandle = motorHandles.get(motors[i]);
                DoubleProvider motorBasedPosition = sensorProcessing.computeJointPositionUsingCoupling(motorHandle::getQ, slaveJointName, scale, bias, true);
-               Predicate<DoubleProvider> backupTrigger = createFingerJointPositionSwitchTrigger(slaveJointName, registry);
+               sideDependentMotorBasedFingerJointPositions.get(robotSide).put(slave, motorBasedPosition);
+               Predicate<DoubleProvider> backupTrigger = createFingerJointPositionSwitchTrigger(robotSide, slave, registry);
                sensorProcessing.addJointPositionSensorSwitch(slaveJointName, motorBasedPosition, backupTrigger, false);
             }
          }
 
          ValkyrieFingerMotorName[] motors = {IndexFingerMotorPitch1, MiddleFingerMotorPitch1, PinkyMotorPitch1};
-         ValkyrieHandJointName[][] slaveJoints = {
-               {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1},
-               {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2},
+         ValkyrieHandJointName[][] slaveJoints = {{IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1}, {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2},
                {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3}};
 
          for (int fingerIndex = 0; fingerIndex < 3; fingerIndex++)
@@ -140,12 +182,13 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
 
             for (int i = 0; i < slaveJoints.length; i++)
             {
-               ValkyrieHandJointName slaveJoint = slaveJoints[i][fingerIndex];
-               YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
-               YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-               String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
+               ValkyrieHandJointName slave = slaveJoints[i][fingerIndex];
+               YoDouble scale = sideDependentScales.get(robotSide).get(slave);
+               YoDouble bias = sideDependentBiases.get(robotSide).get(slave);
+               String slaveJointName = slave.getCamelCaseJointName(robotSide);
                DoubleProvider motorBasedPosition = sensorProcessing.computeJointPositionUsingCoupling(motorHandle::getQ, slaveJointName, scale, bias, true);
-               Predicate<DoubleProvider> backupTrigger = createFingerJointPositionSwitchTrigger(slaveJointName, registry);
+               sideDependentMotorBasedFingerJointPositions.get(robotSide).put(slave, motorBasedPosition);
+               Predicate<DoubleProvider> backupTrigger = createFingerJointPositionSwitchTrigger(robotSide, slave, registry);
                sensorProcessing.addJointPositionSensorSwitch(slaveJointName, motorBasedPosition, backupTrigger, false);
             }
          }
@@ -199,50 +242,38 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
    private void loadDefaultCoeffs(SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentScales,
                                   SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases)
    {
+      double defaultScaleFingerPitch1 = 0.40;
+      double defaultScaleFingerPitch2 = 0.50;
+      double defaultScaleFingerPitch3 = 0.30;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
          EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
 
-         boolean isLeftSide = robotSide == RobotSide.LEFT;
+         scales.get(ThumbRoll).set(robotSide.negateIfLeftSide(1.0));
+         scales.get(ThumbPitch1).set(robotSide.negateIfLeftSide(1.00));
+         scales.get(IndexFingerPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
+         scales.get(MiddleFingerPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
+         scales.get(PinkyPitch1).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch1));
 
-         scales.get(ThumbRoll         ).set(isLeftSide ? -1.00 : 1.00);
-         scales.get(ThumbPitch1       ).set(isLeftSide ? -1.00 : 1.00);
-         scales.get(IndexFingerPitch1 ).set(isLeftSide ? -0.70 : 0.70);
-         scales.get(MiddleFingerPitch1).set(isLeftSide ? -0.70 : 0.70);
-         scales.get(PinkyPitch1       ).set(isLeftSide ? -0.70 : 0.70);
+         scales.get(ThumbPitch2).set(robotSide.negateIfLeftSide(0.60));
+         scales.get(IndexFingerPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
+         scales.get(MiddleFingerPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
+         scales.get(PinkyPitch2).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch2));
 
-         scales.get(ThumbPitch2       ).set(isLeftSide ? -0.60 : 0.60);
-         scales.get(IndexFingerPitch2 ).set(isLeftSide ? 0.60 : 0.60);
-         scales.get(MiddleFingerPitch2).set(isLeftSide ? 0.60 : 0.60);
-         scales.get(PinkyPitch2       ).set(isLeftSide ? 0.60 : 0.60);
+         scales.get(ThumbPitch3).set(robotSide.negateIfLeftSide(0.30));
+         scales.get(IndexFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
+         scales.get(MiddleFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
+         scales.get(PinkyPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
 
-         scales.get(ThumbPitch3       ).set(isLeftSide ? 0.30 : 0.30);
-         scales.get(IndexFingerPitch3 ).set(isLeftSide ? 0.30 : 0.30);
-         scales.get(MiddleFingerPitch3).set(isLeftSide ? 0.30 : 0.30);
-         scales.get(PinkyPitch3       ).set(isLeftSide ? 0.30 : 0.30);
-
-         biases.get(ThumbRoll         ).set(1.57); // TODO at the same I added these, the thumb roll did not work.
-         biases.get(ThumbPitch1       ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(IndexFingerPitch1 ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(MiddleFingerPitch1).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(PinkyPitch1       ).set(isLeftSide ? 0.00 : 0.00);
-
-         biases.get(ThumbPitch2       ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(IndexFingerPitch2 ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(MiddleFingerPitch2).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(PinkyPitch2       ).set(isLeftSide ? 0.00 : 0.00);
-
-         biases.get(ThumbPitch3       ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(IndexFingerPitch3 ).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(MiddleFingerPitch3).set(isLeftSide ? 0.00 : 0.00);
-         biases.get(PinkyPitch3       ).set(isLeftSide ? 0.00 : 0.00);
+         biases.get(ThumbRoll).set(1.57); // TODO at the same I added these, the thumb roll did not work.
       }
    }
 
-   private Predicate<DoubleProvider> createFingerJointPositionSwitchTrigger(String jointName, YoVariableRegistry registry)
+   private Predicate<DoubleProvider> createFingerJointPositionSwitchTrigger(RobotSide robotSide, ValkyrieHandJointName jointName, YoVariableRegistry registry)
    {
-      YoBoolean isFingerJointEncoderDead = new YoBoolean("is" + StringUtils.capitalize(jointName) + "EncoderDead", registry);
+      YoBoolean isFingerJointEncoderDead = sideDependentEncoderDeadMap.get(robotSide).get(jointName);
 
       return new Predicate<DoubleProvider>()
       {
@@ -252,7 +283,11 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
          @Override
          public boolean test(DoubleProvider encoderDataHolder)
          {
-            if (encoderDataHolder.getValue() == 0.0)
+            if (forceMotorBasedPositionSwitch.getValue())
+            {
+               deadCount = 100;
+            }
+            else if (encoderDataHolder.getValue() == 0.0)
             {
                if (deadCount < threshold)
                   deadCount++;
@@ -266,6 +301,152 @@ public class ValkyrieRosControlFingerSensorConfiguration implements SensorProces
             return isFingerJointEncoderDead.getValue();
          }
       };
+   }
+
+   public void update()
+   {
+      RobotSide sideToCalibrateNow = doZeroFingerCalibrationNow.getValue();
+      if (sideToCalibrateNow != null)
+      {
+         performZeroCalibrationNow(sideToCalibrateNow);
+         startFingerCalibration.set(false);
+         isCalibratingFingers.set(false);
+         fingerCalibrationStartTime.setToNaN();
+         doZeroFingerCalibrationNow.set(null);
+      }
+
+      performCalibrationUsingFingerJointEncoders();
+   }
+
+   private void performZeroCalibrationNow(RobotSide sideToCalibrateNow)
+   {
+      EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(sideToCalibrateNow);
+      EnumMap<ValkyrieHandJointName, DoubleProvider> motorBasedFingerJointPositions = sideDependentMotorBasedFingerJointPositions.get(sideToCalibrateNow);
+
+      for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+      {
+         double offset = motorBasedFingerJointPositions.get(jointName).getValue();
+         biases.get(jointName).sub(offset);
+      }
+
+      saveTransmissionCoeffsToFile(FINGER_TRANSMISSION_FILE);
+   }
+
+   private void performCalibrationUsingFingerJointEncoders()
+   {
+      double currentTime = Conversions.nanosecondsToSeconds(timestampProvider.getTimestamp());
+
+      if (startFingerCalibration.getValue())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
+            {
+               sideDependentFingerPositionMeans.get(robotSide).get(jointEnum).clear();
+            }
+         }
+
+         isCalibratingFingers.set(true);
+         fingerCalibrationStartTime.set(currentTime);
+         startFingerCalibration.set(false);
+      }
+
+      if (!isCalibratingFingers.getValue())
+         return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
+         EnumMap<ValkyrieHandJointName, Mean> fingerPositionMeans = sideDependentFingerPositionMeans.get(robotSide);
+         EnumMap<ValkyrieHandJointName, OneDoFJoint> fingerJoints = sideDependentFingerJoints.get(robotSide);
+
+         for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
+         {
+            if (encoderDeadMap.get(jointEnum).getBooleanValue())
+               continue;
+
+            fingerPositionMeans.get(jointEnum).increment(fingerJoints.get(jointEnum).getQ());
+         }
+      }
+
+      if (currentTime >= fingerCalibrationDuration.getValue() + fingerCalibrationStartTime.getValue())
+      {
+         isCalibratingFingers.set(false);
+         fingerCalibrationStartTime.setToNaN();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            EnumMap<ValkyrieHandJointName, YoBoolean> encoderDeadMap = sideDependentEncoderDeadMap.get(robotSide);
+            EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
+            EnumMap<ValkyrieHandJointName, DoubleProvider> motorBasedFingerJointPositions = sideDependentMotorBasedFingerJointPositions.get(robotSide);
+            EnumMap<ValkyrieHandJointName, Mean> fingerPositionMeans = sideDependentFingerPositionMeans.get(robotSide);
+
+            for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+            {
+               if (encoderDeadMap.get(jointName).getBooleanValue())
+                  continue;
+
+               Mean mean = fingerPositionMeans.get(jointName);
+               double offset = motorBasedFingerJointPositions.get(jointName).getValue() - mean.getResult();
+               biases.get(jointName).sub(offset);
+               mean.clear();
+            }
+         }
+
+         saveTransmissionCoeffsToFile(FINGER_TRANSMISSION_FILE);
+      }
+   }
+
+   private void saveTransmissionCoeffsToFile(String filePath)
+   {
+      Path transmissionFilePath = Paths.get(filePath);
+      try
+      {
+         Files.createDirectories(transmissionFilePath.getParent());
+         File file = transmissionFilePath.toFile();
+         Yaml yaml = new Yaml();
+         Map<String, Map<String, Double>> coeffs = new HashMap<>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+            {
+               Map<String, Double> jointCoeffs = new HashMap<>();
+               jointCoeffs.put("scale", sideDependentScales.get(robotSide).get(jointName).getDoubleValue());
+               jointCoeffs.put("bias", sideDependentBiases.get(robotSide).get(jointName).getDoubleValue());
+               coeffs.put(jointName.getJointName(robotSide), jointCoeffs);
+            }
+         }
+         FileWriter output = new FileWriter(file);
+         yaml.dump(coeffs, output);
+         output.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   {
+      statusOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, new StatusMessageListener<HighLevelStateChangeStatusMessage>()
+      {
+         @Override
+         public void receivedNewMessageStatus(HighLevelStateChangeStatusMessage statusMessage)
+         {
+            if (HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()) == HighLevelControllerName.CALIBRATION)
+               startFingerCalibration.set(true);
+         }
+      });
+   }
+
+   public double getMotorBasedFingerJointPosition(RobotSide robotSide, ValkyrieHandJointName jointName)
+   {
+      return sideDependentMotorBasedFingerJointPositions.get(robotSide).get(jointName).getValue();
+   }
+
+   public double getFingerJointTransmissionScale(RobotSide robotSide, ValkyrieHandJointName jointName)
+   {
+      return sideDependentScales.get(robotSide).get(jointName).getValue();
    }
 
    @Override
