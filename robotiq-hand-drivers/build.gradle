@@ -28,7 +28,7 @@ mainDependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.wimpi', name: 'jamod', version: '1.2'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
@@ -43,7 +43,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 applicationName = 'RobotiqControlThread'
