@@ -279,6 +279,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       {
          private final int threshold = 100;
          private int deadCount = 0;
+         private double lastValue = Double.NaN;
 
          @Override
          public boolean test(DoubleProvider encoderDataHolder)
@@ -287,7 +288,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
             {
                deadCount = 100;
             }
-            else if (encoderDataHolder.getValue() == 0.0)
+            else if (encoderDataHolder.getValue() == lastValue)
             {
                if (deadCount < threshold)
                   deadCount++;
@@ -297,6 +298,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
                deadCount = 0;
             }
 
+            lastValue = encoderDataHolder.getValue();
             isFingerJointEncoderDead.set(deadCount >= threshold);
             return isFingerJointEncoderDead.getValue();
          }
