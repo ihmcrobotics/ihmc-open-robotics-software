@@ -5,6 +5,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -18,10 +19,11 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
 
    private YoBoolean usingJoystickBasedPath = new YoBoolean("usingJoystickBasedPath", registry);
 
-   public QuadrupedBodyPathMultiplexer(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, PacketCommunicator packetCommunicator, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyPathMultiplexer(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                       PacketCommunicator packetCommunicator, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, packetCommunicator, timestamp, graphicsListRegistry, registry);
-      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, Double.NaN, timestamp, registry);
+      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, timestamp, packetCommunicator, registry);
 
       parentRegistry.addChild(registry);
    }

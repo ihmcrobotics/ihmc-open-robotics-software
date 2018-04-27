@@ -62,7 +62,7 @@ public class QuadrupedTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, packetCommunicator, graphicsListRegistry, registry);
+      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, defaultXGaitSettings, packetCommunicator, graphicsListRegistry, registry);
       this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, bodyPathMultiplexer, registry);
       desiredCoMHeight.set(initialCoMHeight);
 
