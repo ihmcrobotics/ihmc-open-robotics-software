@@ -3,6 +3,7 @@ package us.ihmc.robotics.functionApproximation.NeuralNetwork.importing;
 import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.ActivationFunction;
 import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.PassThrough;
 import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.Relu;
+import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.Sigmoid;
 
 public class NeuralNetworkConfiguration
 {
@@ -66,6 +67,9 @@ public class NeuralNetworkConfiguration
          {
          case "RELU":
             activationFunctions[i] = new Relu();
+            break;
+         case "SIGMOID":
+            activationFunctions[i] = new Sigmoid();
             break;
          default:
             activationFunctions[i] = new PassThrough();
