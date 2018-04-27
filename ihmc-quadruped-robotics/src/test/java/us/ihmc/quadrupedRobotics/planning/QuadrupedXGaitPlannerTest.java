@@ -45,7 +45,8 @@ public class QuadrupedXGaitPlannerTest
       QuadrupedPlanarFootstepPlan footstepPlan = new QuadrupedPlanarFootstepPlan(4);
       bodyPathProvider.initialPose.setToZero(ReferenceFrame.getWorldFrame());
       bodyPathProvider.desiredForwardMotion = 1.0;
-      xGaitPlanner.computeInitialPlan(footstepPlan, initialStepQuadrant, timeAtSoS, xGaitSettings);
+      double currentHeight = 0.0;
+      xGaitPlanner.computeInitialPlan(footstepPlan, initialStepQuadrant, timeAtSoS, currentHeight, xGaitSettings);
 
       ArrayList<QuadrupedTimedOrientedStep> nominalSteps = new ArrayList<>();
       for (int i = 0; i < 4; i++)

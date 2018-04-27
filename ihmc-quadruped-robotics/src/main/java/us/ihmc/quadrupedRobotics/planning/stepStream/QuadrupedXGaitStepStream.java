@@ -71,7 +71,7 @@ public class QuadrupedXGaitStepStream
       double initialTime = timestamp.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, getCurrentHeight(), xGaitSettings);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }
