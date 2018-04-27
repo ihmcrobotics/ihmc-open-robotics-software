@@ -1,13 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
-import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
-import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedConstantVelocityBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -22,7 +19,6 @@ public class QuadrupedXGaitStepStream
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter initialStepDelayParameter = new DoubleParameter("initialStepDelay", registry, 0.5);
    private final DoubleParameter minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, 0.075);
    private final YoDouble timestamp;
 
@@ -72,10 +68,10 @@ public class QuadrupedXGaitStepStream
    {
       // initialize step queue
       updateXGaitSettings();
-      double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.getValue();
+      double initialTime = timestamp.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, getCurrentHeight(), xGaitSettings);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }

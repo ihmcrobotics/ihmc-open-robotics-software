@@ -43,7 +43,7 @@ public class QuadrupedXGaitPlanner
       this.bodyPathProvider = bodyPathProvider;
    }
 
-   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       bodyPathProvider.initialize();
 
@@ -90,7 +90,7 @@ public class QuadrupedXGaitPlanner
          step.getTimeInterval().setEndTime(thisStepEndTime);
 
          // compute xGait rectangle pose at end of step
-         extrapolatePose(xGaitRectanglePose, thisStepEndTime, 0.0);
+         extrapolatePose(xGaitRectanglePose, thisStepEndTime, currentHeight);
 
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
          step.setStepYaw(xGaitRectanglePose.getYaw());

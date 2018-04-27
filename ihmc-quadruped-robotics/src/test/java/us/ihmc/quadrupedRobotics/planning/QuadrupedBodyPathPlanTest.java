@@ -129,17 +129,17 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       time += 4.0;
       EuclideanTrajectoryPointMessage point6 = new EuclideanTrajectoryPointMessage();
       point6.setTime(time);
-      point6.position_.set(2.75, 1.0, 0.1);
+      point6.position_.set(2.5, 1.0, 0.1);
 
       time += 3.0;
       EuclideanTrajectoryPointMessage point7 = new EuclideanTrajectoryPointMessage();
       point7.setTime(time);
-      point7.position_.set(3.0, 1.1, 0.0);
+      point7.position_.set(3.0, 1.0, 0.0);
 
       time += 4.0;
       EuclideanTrajectoryPointMessage point8 = new EuclideanTrajectoryPointMessage();
       point8.setTime(time);
-      point8.position_.set(4.0, 1.1, 0.0);
+      point8.position_.set(4.0, 1.05, 0.0);
 
       EuclideanTrajectoryPointMessage[] points = new EuclideanTrajectoryPointMessage[8];
       points[0] = point1;
