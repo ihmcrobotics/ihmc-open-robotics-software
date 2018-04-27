@@ -331,6 +331,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    //      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
    //   }
 
+   private boolean alreadyCreatedCommunicator = false;
+
    /**
     * Creates a default output PacketCommunicator for the network processor.
     * This PacketCommunicator is also set to be used as input for the controller.
@@ -338,11 +340,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
    {
-      // Don't do anything if the network processor has already been setup
-      if (CommunicationOptions.USE_KRYO && controllerPacketCommunicator != null)
+      // Apparently this can get called more than once so somebody put a check here.
+      // Had to modify it with two possible types of comms @dcalvert
+      if (alreadyCreatedCommunicator)
          return;
-      if (CommunicationOptions.USE_ROS2 && realtimeRos2Node != null)
-         return;
+      alreadyCreatedCommunicator = true;
 
       networkParameters.enableLocalControllerCommunicator(true);
 
