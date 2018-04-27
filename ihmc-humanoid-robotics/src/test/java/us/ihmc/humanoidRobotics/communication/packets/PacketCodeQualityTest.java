@@ -186,6 +186,8 @@ public class PacketCodeQualityTest
                String methodName = method.getName();
                if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && method.getReturnType() == Supplier.class)
                   continue;
+               if (methodName.equals("getPubSubTypePacket") && method.getParameterCount() == 0 && method.getReturnType() == Supplier.class)
+                  continue;
                if (methodName.equals("toString") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
                   continue;
                if (methodName.equals("validateMessage") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
