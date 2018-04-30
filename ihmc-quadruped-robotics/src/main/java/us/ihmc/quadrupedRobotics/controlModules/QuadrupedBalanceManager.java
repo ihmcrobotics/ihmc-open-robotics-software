@@ -57,7 +57,6 @@ public class QuadrupedBalanceManager
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
 
    private final YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D("instantaneousStepAdjustment", worldFrame, registry);
-   private final YoFrameVector3D accumulatedStepAdjustment = new YoFrameVector3D("accumulatedStepAdjustment", worldFrame, registry);
 
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
@@ -234,9 +233,6 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
-
-      // initialize timed contact sequence
-      accumulatedStepAdjustment.setToZero();
    }
 
    public void initializeForStanding()
@@ -272,12 +268,6 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.setDCMSetpoints(yoDesiredDCMPosition, yoDesiredDCMVelocity);
       momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
       momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredCMP);
-   }
-
-   public void completedStep()
-   {
-      accumulatedStepAdjustment.add(instantaneousStepAdjustment);
-      accumulatedStepAdjustment.setZ(0);
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps)
@@ -318,11 +308,6 @@ public class QuadrupedBalanceManager
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       momentumRateOfChangeModule.computeAchievedCMP(achievedLinearMomentumRate, yoAchievedCMP);
-   }
-
-   public FrameVector3DReadOnly getAccumulatedStepAdjustment()
-   {
-      return accumulatedStepAdjustment;
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()

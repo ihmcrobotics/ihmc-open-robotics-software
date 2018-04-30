@@ -58,7 +58,7 @@ public class QuadrupedStepController implements QuadrupedController
       feetManager.reset();
       feetManager.requestFullContact();
 
-      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
+      stepMessageHandler.process();
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -72,7 +72,7 @@ public class QuadrupedStepController implements QuadrupedController
    @Override
    public void doAction(double timeInState)
    {
-      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
+      stepMessageHandler.process();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());

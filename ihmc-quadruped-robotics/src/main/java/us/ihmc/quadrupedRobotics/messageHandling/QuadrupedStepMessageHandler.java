@@ -35,18 +35,14 @@ public class QuadrupedStepMessageHandler
    private final YoDouble robotTimestamp;
    private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
    private final YoPreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
-   private final YoPreallocatedList<YoQuadrupedTimedStep> adjustedStepSequence;
 
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public QuadrupedStepMessageHandler(YoDouble robotTimestamp, YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = robotTimestamp;
       this.receivedStepSequence = new YoPreallocatedList<>("receivedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
-      this.adjustedStepSequence = new YoPreallocatedList<>("adjustedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class));
@@ -62,13 +58,12 @@ public class QuadrupedStepMessageHandler
    /**
     * Consumes incoming footsteps and adjusts their position by the given vector
     */
-   public void process(FrameVector3DReadOnly stepAdjustment)
+   public void process()
    {
       TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
       if (haltFlag.getBooleanValue())
          pruneHaltedSteps();
 
-      updateAdjustedStepQueue(stepAdjustment);
       updateActiveSteps();
    }
 
@@ -98,7 +93,6 @@ public class QuadrupedStepMessageHandler
    public void clearSteps()
    {
       receivedStepSequence.clear();
-      adjustedStepSequence.clear();
       activeSteps.clear();
    }
 
@@ -157,23 +151,6 @@ public class QuadrupedStepMessageHandler
       haltFlag.set(false);
    }
 
-   private void updateAdjustedStepQueue(FrameVector3DReadOnly stepAdjustment)
-   {
-      adjustedStepSequence.clear();
-      for (int i = 0; i < receivedStepSequence.size(); i++)
-      {
-         adjustedStepSequence.add();
-         YoQuadrupedTimedStep receivedStep = receivedStepSequence.get(i);
-         YoQuadrupedTimedStep adjustedStep = adjustedStepSequence.get(i);
-         adjustedStep.set(receivedStep);
-
-         adjustedStep.getGoalPosition(tempPoint);
-         tempPoint.changeFrame(worldFrame);
-         tempPoint.add(stepAdjustment);
-         adjustedStep.setGoalPosition(tempPoint);
-      }
-   }
-
    public boolean isDoneWithStepSequence()
    {
       return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp
@@ -191,7 +168,7 @@ public class QuadrupedStepMessageHandler
 
    public YoPreallocatedList<YoQuadrupedTimedStep> getStepSequence()
    {
-      return adjustedStepSequence;
+      return receivedStepSequence;
    }
 
    public ArrayList<YoQuadrupedTimedStep> getActiveSteps()
@@ -203,15 +180,15 @@ public class QuadrupedStepMessageHandler
    {
       activeSteps.clear();
 
-      for (int i = 0; i < adjustedStepSequence.size(); i++)
+      for (int i = 0; i < receivedStepSequence.size(); i++)
       {
          double currentTime = robotTimestamp.getDoubleValue();
-         double startTime = adjustedStepSequence.get(i).getTimeInterval().getStartTime();
-         double endTime = adjustedStepSequence.get(i).getTimeInterval().getEndTime();
+         double startTime = receivedStepSequence.get(i).getTimeInterval().getStartTime();
+         double endTime = receivedStepSequence.get(i).getTimeInterval().getEndTime();
 
          if (MathTools.intervalContains(currentTime, startTime, endTime))
          {
-            activeSteps.add(adjustedStepSequence.get(i));
+            activeSteps.add(receivedStepSequence.get(i));
          }
       }
    }
@@ -220,6 +197,5 @@ public class QuadrupedStepMessageHandler
    {
       haltFlag.set(false);
       receivedStepSequence.clear();
-      adjustedStepSequence.clear();
    }
 }
