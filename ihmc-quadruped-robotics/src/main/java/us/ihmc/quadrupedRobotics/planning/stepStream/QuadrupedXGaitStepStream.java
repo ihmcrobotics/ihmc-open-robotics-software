@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -28,23 +29,21 @@ public class QuadrupedXGaitStepStream
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final QuadrupedPlanarFootstepPlan footstepPlan;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
-   private final ReferenceFrame centroidFrame;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper, YoVariableRegistry parentRegistry)
    {
-      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, bodyPathProvider, parentRegistry);
+      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, bodyPathProvider, snapper, parentRegistry);
    }
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, snapper);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
-      this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
       if (parentRegistry != null)
       {
@@ -71,7 +70,7 @@ public class QuadrupedXGaitStepStream
       double initialTime = timestamp.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, getCurrentHeight(), xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, xGaitSettings);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }
@@ -84,12 +83,7 @@ public class QuadrupedXGaitStepStream
       footstepPlan.updateCurrentSteps(timestamp.getDoubleValue());
 
       updateXGaitSettings();
-      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime, getCurrentHeight(), xGaitSettings);
-   }
-
-   private double getCurrentHeight()
-   {
-      return centroidFrame.getTransformToWorldFrame().getTranslationZ();
+      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime, xGaitSettings);
    }
 
    public List<? extends QuadrupedTimedStep> getSteps()
