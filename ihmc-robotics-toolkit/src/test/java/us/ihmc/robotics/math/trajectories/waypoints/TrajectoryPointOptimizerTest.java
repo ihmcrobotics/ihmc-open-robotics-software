@@ -193,7 +193,7 @@ public class TrajectoryPointOptimizerTest
       xd1.add(1.0);
 
       optimizer.setEndPoints(x0, xd0, x1, xd1);
-      optimizer.compute();
+      optimizer.compute(0);
 
       ArrayList<TDoubleArrayList> coefficients = new ArrayList<>();
       coefficients.add(new TDoubleArrayList(0));
