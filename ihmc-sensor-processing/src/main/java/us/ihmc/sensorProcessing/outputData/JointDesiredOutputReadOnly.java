@@ -128,6 +128,40 @@ public abstract class JointDesiredOutputReadOnly
     */
    public abstract double getPositionIntegrationBreakFrequency();
 
+   /**
+    * Returns true if a maximum position error was set for this joint.
+    *
+    * @see #getMaxPositionError()
+    */
+   public abstract boolean hasMaxPositionError();
+
+   /**
+    * Gets the maximum position error to consider in the low level control of this joint. How this
+    * value is used is specific to the joint low level control. In some cases it is used to limit
+    * the acceleration integration in other cases it might be used to determine a maximum position
+    * feedback for a joint PD controller.
+    *
+    * @return the maximum position error for the joint.
+    */
+   public abstract double getMaxPositionError();
+
+   /**
+    * Returns true if a maximum velocity error was set for this joint.
+    *
+    * @see #getMaxVelocityError()
+    */
+   public abstract boolean hasMaxVelocityError();
+
+   /**
+    * Gets the maximum velocity error to consider in the low level control of this joint. How this
+    * value is used is specific to the joint low level control. In some cases it is used to limit
+    * the acceleration integration in other cases it might be used to determine a maximum velocity
+    * feedback for a joint PD controller.
+    *
+    * @return the maximum velocity error for the joint.
+    */
+   public abstract double getMaxVelocityError();
+
    @Override
    public String toString()
    {
