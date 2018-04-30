@@ -25,9 +25,8 @@ public class TrajectoryPointOptimizerTest
    public void testEndPointSetters()
    {
       int dimensions = 3;
-      PolynomialOrder order = PolynomialOrder.ORDER3;
       YoVariableRegistry registry = new YoVariableRegistry("");
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order, registry);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, registry);
 
       TDoubleArrayList rightSize = new TDoubleArrayList(dimensions);
       TDoubleArrayList wrongSize = new TDoubleArrayList(dimensions-1);
@@ -44,8 +43,7 @@ public class TrajectoryPointOptimizerTest
    public void testWaypointSetters()
    {
       int dimensions = 1;
-      PolynomialOrder order = PolynomialOrder.ORDER3;
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
       ArrayList<TDoubleArrayList> waypoints = new ArrayList<>();
       TDoubleArrayList waypointA = new TDoubleArrayList();
@@ -72,9 +70,8 @@ public class TrajectoryPointOptimizerTest
    public void testYoVariables()
    {
       int dimensions = 3;
-      PolynomialOrder order = PolynomialOrder.ORDER3;
       YoVariableRegistry registry = new YoVariableRegistry("");
-      new TrajectoryPointOptimizer(dimensions, order, registry);
+      new TrajectoryPointOptimizer(dimensions, registry);
 
       YoDouble timeGain = (YoDouble) registry.getVariable("TimeGain");
       assertTrue(timeGain.getDoubleValue() != 0.0);
@@ -86,8 +83,7 @@ public class TrajectoryPointOptimizerTest
    public void testSimpleSymmetricProblem()
    {
       int dimensions = 1;
-      PolynomialOrder order = PolynomialOrder.ORDER3;
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
       TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
       TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
@@ -129,7 +125,7 @@ public class TrajectoryPointOptimizerTest
 
       ArrayList<TDoubleArrayList> coefficients = new ArrayList<>();
       for (int i = 0; i < waypoints.size() + 1; i++)
-         coefficients.add(new TDoubleArrayList(order.getCoefficients()));
+         coefficients.add(new TDoubleArrayList(TrajectoryPointOptimizer.coefficients));
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
       // computed by hand:
@@ -137,9 +133,9 @@ public class TrajectoryPointOptimizerTest
 
       TDoubleArrayList waypointTimes = new TDoubleArrayList(waypoints.size());
       optimizer.getWaypointTimes(waypointTimes);
-//      printResults(waypointTimes, coefficients);
+      printResults(waypointTimes, coefficients);
 
-      for (int i = 0; i < order.getCoefficients(); i++)
+      for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
       {
          assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
          assertEquals(coefficients.get(0).get(i), coefficients.get(1).get(i), epsilon);
@@ -155,8 +151,7 @@ public class TrajectoryPointOptimizerTest
    public void testSimpleProblem()
    {
       int dimensions = 1;
-      PolynomialOrder order = PolynomialOrder.ORDER3;
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
       TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
       TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
@@ -176,7 +171,7 @@ public class TrajectoryPointOptimizerTest
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
       double[] expected = new double[] {0.0, 0.0, 1.0, 1.0};
-      for (int i = 0; i < order.getCoefficients(); i++)
+      for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
          assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
    }
 
@@ -185,8 +180,7 @@ public class TrajectoryPointOptimizerTest
    public void testTrivialProblem()
    {
       int dimensions = 1;
-      PolynomialOrder order = PolynomialOrder.ORDER5;
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
       TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
       TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
@@ -205,8 +199,8 @@ public class TrajectoryPointOptimizerTest
       coefficients.add(new TDoubleArrayList(0));
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
-      double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
-      for (int i = 0; i < order.getCoefficients(); i++)
+      double[] expected = new double[] {0.0, 0.0, 1.0, 0.0};
+      for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
          assertEquals(expected[i], coefficients.get(0).get(i), epsilon);
    }
 
@@ -215,8 +209,7 @@ public class TrajectoryPointOptimizerTest
    public void testTimeDescent()
    {
       int dimensions = 2;
-      PolynomialOrder order = PolynomialOrder.ORDER5;
-      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
 
       TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
       TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
