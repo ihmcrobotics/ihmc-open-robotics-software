@@ -10,10 +10,13 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import geometry_msgs.msg.dds.PointStamped;
+import geometry_msgs.msg.dds.Vector3Stamped;
 import org.junit.Test;
 
 import com.esotericsoftware.minlog.Log;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -163,10 +166,10 @@ public class KryoObjectCommunicatorTest
       boolean connected = false;
       
       KryoObjectServer server = null;      
-      ObjectConsumer<Object> objectListener = new ObjectConsumer<Object>()
+      ObjectConsumer<Vector3Stamped> objectListener = new ObjectConsumer<Vector3Stamped>()
       {
          @Override
-         public void consumeObject(Object object)
+         public void consumeObject(Vector3Stamped object)
          {
             latch.countDown();
          }
@@ -174,8 +177,8 @@ public class KryoObjectCommunicatorTest
       
       do
       {
-    	  server = new KryoObjectServer(TCP_PORT, new NetClassList(Object.class));
-    	  server.attachListener(Object.class, objectListener);
+    	  server = new KryoObjectServer(TCP_PORT, new NetClassList(Vector3Stamped.class));
+    	  server.attachListener(Vector3Stamped.class, objectListener);
     	  server.setMaximumNumberOfConnections(5);
     	  try
     	  {
@@ -190,7 +193,7 @@ public class KryoObjectCommunicatorTest
       ArrayList<KryoObjectClient> clients = new ArrayList<KryoObjectClient>();
       for(int i = 0; i < 7; i++)
       {
-         KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT, new NetClassList(Object.class));
+         KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT, new NetClassList(Vector3Stamped.class));
          client.connect();
          client.sendTCP(new Object());
          clients.add(client);
@@ -216,7 +219,7 @@ public class KryoObjectCommunicatorTest
       
       System.gc();
       
-      KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT,  new NetClassList(Object.class));
+      KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT,  new NetClassList(Vector3Stamped.class));
       client.connect();
       assertTrue(client.isConnected());
       
@@ -321,7 +324,7 @@ public class KryoObjectCommunicatorTest
    }
 
    // Member classes need to be static in order for deserialization to work
-   private static class TypeA
+   private static class TypeA extends Packet<TypeA>
    {
       public String a;
       public int b;
@@ -338,9 +341,24 @@ public class KryoObjectCommunicatorTest
       {
          return other.a.equals(a) && other.b == b && other.c == c && other.testVector.equals(testVector);
       }
+
+      @Override
+      public boolean epsilonEquals(TypeA other, double epsilon)
+      {
+         return other.a.equals(a) && other.b == b && other.c == c && other.testVector.equals(testVector);
+      }
+
+      @Override
+      public void set(TypeA other)
+      {
+         this.a = other.a;
+         this.b = other.b;
+         this.c = other.c;
+         this.testVector = other.testVector;
+      }
    }
    
-   private static class TypeB
+   private static class TypeB extends Packet<TypeB>
    {
       public double a;
       public int b;
@@ -355,6 +373,20 @@ public class KryoObjectCommunicatorTest
       public boolean equals(TypeB other)
       {
          return other.a == a && other.b == b && other.c == c;
+      }
+
+      @Override
+      public boolean epsilonEquals(TypeB other, double epsilon)
+      {
+         return other.a == a && other.b == b && other.c == c;
+      }
+
+      @Override
+      public void set(TypeB other)
+      {
+         this.a = other.a;
+         this.b = other.b;
+         this.c = other.c;
       }
    }
 }
