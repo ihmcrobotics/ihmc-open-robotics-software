@@ -9,10 +9,10 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
  * The TrajectoryPointOptimizer computes an optimal (minimal integrated acceleration) trajectory.
@@ -49,14 +49,13 @@ public class TrajectoryPointOptimizer
    private static final double initialTimeGain = 0.001;
    private static final double costEpsilon = 0.01;
 
-   private final YoVariableRegistry registry;
+   public static final int coefficients = 4;
 
-   private final PolynomialOrder order;
+   private final YoVariableRegistry registry;
 
    private final YoInteger dimensions;
    private final YoInteger nWaypoints;
    private final YoInteger intervals;
-   private final YoInteger coefficients;
    private final YoInteger problemSize;
    private final YoInteger inversionSize;
    private final YoInteger constraints;
@@ -96,29 +95,28 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F tempCoeffs = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempLine = new DenseMatrix64F(1, 1);
 
-   public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(int dimensions, YoVariableRegistry parentRegistry)
    {
-      this("", dimensions, order, parentRegistry);
+      this("", dimensions, parentRegistry);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, dimensions, order);
+      this(namePrefix, dimensions);
       parentRegistry.addChild(registry);
    }
 
-   public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order)
+   public TrajectoryPointOptimizer(int dimensions)
    {
-      this("", dimensions, order);
+      this("", dimensions);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, PolynomialOrder order)
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.dimensions = new YoInteger(namePrefix + "Dimensions", registry);
       this.nWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
       this.intervals = new YoInteger(namePrefix + "NumberOfIntervals", registry);
-      this.coefficients = new YoInteger(namePrefix + "Coefficients", registry);
       this.problemSize = new YoInteger(namePrefix + "ProblemSize", registry);
       this.inversionSize = new YoInteger(namePrefix + "InversionSize", registry);
       this.constraints = new YoInteger(namePrefix + "Conditions", registry);
@@ -129,8 +127,6 @@ public class TrajectoryPointOptimizer
 
       dimensions = Math.max(dimensions, 0);
       this.dimensions.set(dimensions);
-      this.order = order;
-      coefficients.set(order.getCoefficients());
       timeGain.set(initialTimeGain);
 
       x0 = new TDoubleArrayList(dimensions);
@@ -151,7 +147,7 @@ public class TrajectoryPointOptimizer
          waypoints.add(new DenseMatrix64F(dimensions, 1));
       }
 
-      tempCoeffs.reshape(order.getCoefficients(), 1);
+      tempCoeffs.reshape(coefficients, 1);
    }
 
    /**
@@ -230,7 +226,7 @@ public class TrajectoryPointOptimizer
       intervalTimes.reshape(intervals, 1);
       CommonOps.fill(intervalTimes, 1.0 / intervals);
 
-      problemSize.set(dimensions.getIntegerValue() * coefficients.getIntegerValue() * intervals);
+      problemSize.set(dimensions.getIntegerValue() * coefficients * intervals);
       costs.reset();
       costs.add(solveMinAcceleration());
       iteration.set(0);
@@ -381,8 +377,8 @@ public class TrajectoryPointOptimizer
    private void buildConstraintMatrices()
    {
       int dimensions = this.dimensions.getIntegerValue();
-      int endpointConstraints = dimensions * order.getCoefficients();
-      int waypointConstraints = nWaypoints.getIntegerValue() * dimensions * (2 + order.getCoefficients() / 2 - 1);
+      int endpointConstraints = dimensions * coefficients;
+      int waypointConstraints = nWaypoints.getIntegerValue() * dimensions * (2 + coefficients / 2 - 1);
       constraints.set(endpointConstraints + waypointConstraints);
 
       int constraints = this.constraints.getIntegerValue();
@@ -401,97 +397,46 @@ public class TrajectoryPointOptimizer
       {
          int line = 0;
 
-         if (order.getPositionLine(0.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, 0);
-            bd.set(line, x0.get(d));
-            line++;
-         }
-         if (order.getVelocityLine(0.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, 0);
-            bd.set(line, xd0.get(d));
-            line++;
-         }
-         if (order.getAccelerationLine(0.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, 0);
-            bd.set(line, 0.0);
-            line++;
-         }
-         if (order.getJerkLine(0.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, 0);
-            bd.set(line, 0.0);
-            line++;
-         }
+         getPositionLine(0.0, AdLine);
+         CommonOps.insert(AdLine, Ad, line, 0);
+         bd.set(line, x0.get(d));
+         line++;
+         getVelocityLine(0.0, AdLine);
+         CommonOps.insert(AdLine, Ad, line, 0);
+         bd.set(line, xd0.get(d));
+         line++;
 
          double t = 0.0;
          for (int w = 0; w < nWaypoints.getIntegerValue(); w++)
          {
             t += intervalTimes.get(w);
-            int colOffset = w * order.getCoefficients();
+            int colOffset = w * coefficients;
             DenseMatrix64F waypoint = waypoints.get(w);
 
-            order.getPositionLine(t, AdLine);
+            getPositionLine(t, AdLine);
             CommonOps.insert(AdLine, Ad, line, colOffset);
             bd.set(line, waypoint.get(d));
             line++;
-            CommonOps.insert(AdLine, Ad, line, colOffset + order.getCoefficients());
+            CommonOps.insert(AdLine, Ad, line, colOffset + coefficients);
             bd.set(line, waypoint.get(d));
             line++;
 
-            if (order.getVelocityLine(t, AdLine))
-            {
-               CommonOps.insert(AdLine, Ad, line, colOffset);
-               CommonOps.scale(-1.0, AdLine);
-               CommonOps.insert(AdLine, Ad, line, colOffset + order.getCoefficients());
-               bd.set(line, 0.0);
-               line++;
-            }
-
-            if (order.getAccelerationLine(t, AdLine))
-            {
-               CommonOps.insert(AdLine, Ad, line, colOffset);
-               CommonOps.scale(-1.0, AdLine);
-               CommonOps.insert(AdLine, Ad, line, colOffset + order.getCoefficients());
-               bd.set(line, 0.0);
-               line++;
-            }
-
-            if (order.getJerkLine(t, AdLine))
-            {
-               CommonOps.insert(AdLine, Ad, line, colOffset);
-               CommonOps.scale(-1.0, AdLine);
-               CommonOps.insert(AdLine, Ad, line, colOffset + order.getCoefficients());
-               bd.set(line, 0.0);
-               line++;
-            }
-         }
-
-         if (order.getPositionLine(1.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
-            bd.set(line, x1.get(d));
-            line++;
-         }
-         if (order.getVelocityLine(1.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
-            bd.set(line, xd1.get(d));
-            line++;
-         }
-         if (order.getAccelerationLine(1.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
+            getVelocityLine(t, AdLine);
+            CommonOps.insert(AdLine, Ad, line, colOffset);
+            CommonOps.scale(-1.0, AdLine);
+            CommonOps.insert(AdLine, Ad, line, colOffset + coefficients);
             bd.set(line, 0.0);
             line++;
          }
-         if (order.getJerkLine(1.0, AdLine))
-         {
-            CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
-            bd.set(line, 0.0);
-         }
+
+         getPositionLine(1.0, AdLine);
+         CommonOps.insert(AdLine, Ad, line, subProblemSize - coefficients);
+         bd.set(line, x1.get(d));
+         line++;
+         getVelocityLine(1.0, AdLine);
+         CommonOps.insert(AdLine, Ad, line, subProblemSize - coefficients);
+         bd.set(line, xd1.get(d));
+         line++;
 
          int rowOffset = d * dimensionConstraints;
          int colOffset = d * subProblemSize;
@@ -512,10 +457,10 @@ public class TrajectoryPointOptimizer
          t0 = t1;
          t1 = t1 + intervalTimes.get(i);
 
-         order.getHBlock(t0, t1, hBlock);
+         getHBlock(t0, t1, hBlock);
          for (int d = 0; d < dimensions.getIntegerValue(); d++)
          {
-            int offset = (i + d * intervals.getIntegerValue()) * coefficients.getIntegerValue();
+            int offset = (i + d * intervals.getIntegerValue()) * coefficients;
             CommonOps.insert(hBlock, H, offset, offset);
          }
       }
@@ -579,8 +524,8 @@ public class TrajectoryPointOptimizer
 
       for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
-         int index = i * order.getCoefficients() + dimension * order.getCoefficients() * intervals.getIntegerValue();
-         CommonOps.extract(x, index, index + order.getCoefficients(), 0, 1, tempCoeffs, 0, 0);
+         int index = i * coefficients + dimension * coefficients * intervals.getIntegerValue();
+         CommonOps.extract(x, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          coefficientsToPack.get(i).reset();
          coefficientsToPack.get(i).add(tempCoeffs.getData());
       }
@@ -595,39 +540,54 @@ public class TrajectoryPointOptimizer
    public void getWaypointVelocity(TDoubleArrayList velocityToPack, int waypointIndex)
    {
       double waypointTime = getWaypointTime(waypointIndex);
-      if (!order.getVelocityLine(waypointTime, tempLine))
-         throw new RuntimeException("Waypoint velocity not available for this polynomial order");
+      getVelocityLine(waypointTime, tempLine);
 
       velocityToPack.reset();
       for (int d = 0; d < dimensions.getIntegerValue(); d++)
       {
-         int index = waypointIndex * order.getCoefficients() + d * order.getCoefficients() * intervals.getIntegerValue();
-         CommonOps.extract(x, index, index + order.getCoefficients(), 0, 1, tempCoeffs, 0, 0);
+         int index = waypointIndex * coefficients + d * coefficients * intervals.getIntegerValue();
+         CommonOps.extract(x, index, index + coefficients, 0, 1, tempCoeffs, 0, 0);
          velocityToPack.add(CommonOps.dot(tempCoeffs, tempLine));
       }
    }
 
-   /**
-    * Get the optimal acceleration at a given waypoint. This method will throw an exception
-    * if the order of the trajectory is too low to specify the waypoint accelerations (e.g.
-    * order 3).
-    *
-    * @param accelerationToPack     modified - the waypoint velocity is stored here
-    * @param waypointIndex          index of the waypoint of interest
-    */
-   public void getWaypointAcceleration(TDoubleArrayList accelerationToPack, int waypointIndex)
+   private static void getPositionLine(double t, DenseMatrix64F lineToPack)
    {
-      double waypointTime = getWaypointTime(waypointIndex);
-      if (!order.getAccelerationLine(waypointTime, tempLine))
-         throw new RuntimeException("Waypoint acceleration not available for this polynomial order");
+      lineToPack.reshape(1, coefficients);
+      lineToPack.set(0, 0, 1.0 * Math.pow(t, 3));
+      lineToPack.set(0, 1, 1.0 * Math.pow(t, 2));
+      lineToPack.set(0, 2, 1.0 * t);
+      lineToPack.set(0, 3, 1.0);
+   }
 
-      accelerationToPack.reset();
-      for (int d = 0; d < dimensions.getIntegerValue(); d++)
+   private static void getVelocityLine(double t, DenseMatrix64F lineToPack)
+   {
+      lineToPack.reshape(1, coefficients);
+      lineToPack.set(0, 0, 3.0 * Math.pow(t, 2));
+      lineToPack.set(0, 1, 2.0 * t);
+      lineToPack.set(0, 2, 1.0);
+      lineToPack.set(0, 3, 0.0);
+   }
+
+   private static void getHBlock(double t0, double t1, DenseMatrix64F hBlockToPack)
+   {
+      int blockSize = coefficients - 2;
+      hBlockToPack.reshape(blockSize, blockSize);
+      hBlockToPack.set(blockSize - 2, blockSize - 2, 12.0 * timeDifference(3, t0, t1));
+      hBlockToPack.set(blockSize - 1, blockSize - 2, 6.0 * timeDifference(2, t0, t1));
+      hBlockToPack.set(blockSize - 1, blockSize - 1, 4.0 * timeDifference(1, t0, t1));
+
+      for (int col = 1; col < blockSize; col++)
       {
-         int index = waypointIndex * order.getCoefficients() + d * order.getCoefficients() * intervals.getIntegerValue();
-         CommonOps.extract(x, index, index + order.getCoefficients(), 0, 1, tempCoeffs, 0, 0);
-         accelerationToPack.add(CommonOps.dot(tempCoeffs, tempLine));
+         for (int row = 0; row < col; row++)
+         {
+            hBlockToPack.set(row, col, hBlockToPack.get(col, row));
+         }
       }
    }
 
+   private static double timeDifference(int power, double t0, double t1)
+   {
+      return Math.pow(t1, power) - Math.pow(t0, power);
+   }
 }
