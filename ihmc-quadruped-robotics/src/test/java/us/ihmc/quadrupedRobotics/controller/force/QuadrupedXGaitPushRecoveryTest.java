@@ -43,7 +43,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         pusher = new PushRobotTestConductor(conductor.getScs(), "neck_root_yaw");
+         pusher = new PushRobotTestConductor(conductor.getScs(), "body");
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
@@ -65,13 +65,13 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
-   public void testWalkingForwardFastWithPush()
+   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      
-      stepTeleopManager.setDesiredVelocity(0.8, 0.0, 0.0);
+
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
