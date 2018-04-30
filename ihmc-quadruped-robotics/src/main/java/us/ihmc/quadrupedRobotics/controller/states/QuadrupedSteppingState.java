@@ -384,6 +384,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
+         stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment());
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

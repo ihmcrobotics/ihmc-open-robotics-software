@@ -314,4 +314,9 @@ public class QuadrupedBalanceManager
    {
       return momentumRateOfChangeModule.getMomentumRateCommand();
    }
+
+   public FrameVector3DReadOnly getStepAdjustment()
+   {
+      return instantaneousStepAdjustment;
+   }
 }

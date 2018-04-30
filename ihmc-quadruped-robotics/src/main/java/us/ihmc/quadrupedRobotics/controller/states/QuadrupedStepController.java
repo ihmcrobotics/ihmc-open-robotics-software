@@ -8,10 +8,8 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedStepController implements QuadrupedController
@@ -26,13 +24,11 @@ public class QuadrupedStepController implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    private final QuadrupedControllerToolbox controllerToolbox;
-   private final QuadrantDependentList<ContactState> contactStates;
 
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.contactStates = controllerToolbox.getContactStates();
       this.stepMessageHandler = stepMessageHandler;
 
       // feedback controllers
