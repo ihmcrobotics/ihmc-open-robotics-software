@@ -17,6 +17,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
@@ -49,6 +51,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
@@ -89,6 +92,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -233,13 +237,14 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       // report footstep status message
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
-      Vector3DReadOnly solePosition = controllerToolbox.getReferenceFrames().getSoleFrame(thisStepQuadrant).getTransformToWorldFrame()
-                                                       .getTranslationVector();
+      controllerToolbox.getReferenceFrames().getSoleFrame(thisStepQuadrant).getTransformToDesiredFrame(tempTransform, worldFrame);
+      tempTransform.getTranslation(tempVector);
+
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
 
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
       footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
-      footstepStatusMessage.getActualTouchdownPositionInWorld().set(solePosition);
+      footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempVector);
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
    }
 
