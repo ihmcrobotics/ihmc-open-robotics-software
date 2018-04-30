@@ -48,7 +48,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    public void testWalkingOverAggressiveRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
-      
       walkOverRamps(groundProfile, comHeightForRoughTerrain);
    }
 
@@ -68,6 +67,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
       stepTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
+      stepTeleopManager.setStepSnapper((x, y) -> groundProfile.heightAt(x, y, 0.0));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
