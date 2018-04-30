@@ -257,14 +257,14 @@ public class QuadrupedSimulationFactory
                if (CommunicationOptions.USE_KRYO)
                   packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
                if (CommunicationOptions.USE_ROS2)
-                  realtimeRos2Node = ROS2Tools.createReatimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+                  realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
             }
             else
             {
                if (CommunicationOptions.USE_KRYO)
                   packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
                if (CommunicationOptions.USE_ROS2)
-                  realtimeRos2Node = ROS2Tools.createReatimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+                  realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
             }
 
             if (CommunicationOptions.USE_KRYO)

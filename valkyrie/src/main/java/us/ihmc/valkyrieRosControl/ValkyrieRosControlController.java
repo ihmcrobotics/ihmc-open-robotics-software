@@ -288,7 +288,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
             PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList()) :
             null;
       RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createReatimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
+            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
             null;
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();

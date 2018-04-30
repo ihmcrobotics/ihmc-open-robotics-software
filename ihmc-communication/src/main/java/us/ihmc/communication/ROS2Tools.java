@@ -14,7 +14,7 @@ public class ROS2Tools
    public static ExceptionHandler RUNTIME_EXCEPTION = e -> { throw new RuntimeException(e); };
    public static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
-   public static RealtimeRos2Node createReatimeRos2Node(PubSubImplementation pubSubImplementation, String name, ExceptionHandler exceptionHandler)
+   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String name, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -26,6 +26,20 @@ public class ROS2Tools
          return null;
       }
    }
+
+   public static Ros2Node createRos2Node(PubSubImplementation pubSubImplementation, String name, ExceptionHandler exceptionHandler)
+   {
+      try
+      {
+         return new Ros2Node(pubSubImplementation, name, NAMESPACE);
+      }
+      catch (IOException e)
+      {
+         exceptionHandler.handleException(e);
+         return null;
+      }
+   }
+
 
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName,
                                                      NewMessageListener newMessageListener, ExceptionHandler exceptionHandler)

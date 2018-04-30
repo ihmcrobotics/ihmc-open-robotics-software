@@ -362,7 +362,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          }
       }
       if (CommunicationOptions.USE_ROS2)
-         realtimeRos2Node = ROS2Tools.createReatimeRos2Node(PubSubImplementation.INTRAPROCESS, this.getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+         realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, this.getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
    }
 
    /**

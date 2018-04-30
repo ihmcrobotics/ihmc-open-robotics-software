@@ -121,7 +121,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
             PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList()) :
             null;
       RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createReatimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
+            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
             null;
       PacketCommunicator controllerCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
@@ -234,7 +234,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                     new IHMCCommunicationKryoNetClassList()) :
             null;
       RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createReatimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
+            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
             null;
       PacketCommunicator packetCommunicatorClient = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT, new IHMCCommunicationKryoNetClassList());
