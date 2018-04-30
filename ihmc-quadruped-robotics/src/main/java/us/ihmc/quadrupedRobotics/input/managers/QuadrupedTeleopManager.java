@@ -15,6 +15,8 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundQuadrupedStepSnapper;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -63,8 +65,10 @@ public class QuadrupedTeleopManager
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, defaultXGaitSettings, packetCommunicator, graphicsListRegistry, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, bodyPathMultiplexer, registry);
       desiredCoMHeight.set(initialCoMHeight);
+
+      QuadrupedStepSnapper snapper = new PlanarGroundQuadrupedStepSnapper(referenceFrames, packetCommunicator);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, bodyPathMultiplexer, snapper, registry);
 
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);

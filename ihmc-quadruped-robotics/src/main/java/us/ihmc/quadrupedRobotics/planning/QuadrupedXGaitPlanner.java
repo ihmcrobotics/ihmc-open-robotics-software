@@ -6,7 +6,9 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -25,8 +27,9 @@ public class QuadrupedXGaitPlanner
 
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final FramePose2D bodyPathPose = new FramePose2D();
+   private QuadrupedStepSnapper snapper;
 
-   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider)
+   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper)
    {
       goalPosition = new FramePoint3D();
       goalPositionAdjustment = new FramePoint3D();
@@ -41,9 +44,10 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.FRONT, new QuadrupedTimedStep());
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
       this.bodyPathProvider = bodyPathProvider;
+      this.snapper = snapper;
    }
 
-   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       bodyPathProvider.initialize();
 
@@ -90,15 +94,16 @@ public class QuadrupedXGaitPlanner
          step.getTimeInterval().setEndTime(thisStepEndTime);
 
          // compute xGait rectangle pose at end of step
-         extrapolatePose(xGaitRectanglePose, thisStepEndTime, currentHeight);
+         extrapolatePose(xGaitRectanglePose, thisStepEndTime);
 
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
          step.setStepYaw(xGaitRectanglePose.getYaw());
 
          // compute step goal position by sampling the corner position of the xGait rectangle at touch down
          RobotQuadrant robotQuadrant = step.getRobotQuadrant();
-         goalPosition.setIncludingFrame(xGaitRectangle.get(robotQuadrant));
-         step.setGoalPosition(goalPosition);
+         this.goalPosition.setIncludingFrame(xGaitRectangle.get(robotQuadrant));
+         step.setGoalPosition(this.goalPosition);
+         snapStep(step);
 
          // compute step ground clearance
          step.setGroundClearance(xGaitSettings.getStepGroundClearance());
@@ -109,7 +114,7 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(QuadrupedPlanarFootstepPlan footstepPlan, double currentTime, double currentHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeOnlinePlan(QuadrupedPlanarFootstepPlan footstepPlan, double currentTime, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -160,7 +165,7 @@ public class QuadrupedXGaitPlanner
          {
             // compute xGait rectangle pose at end of step
             double time = plannedSteps.get(i).getTimeInterval().getEndTime();
-            extrapolatePose(xGaitRectanglePose, time, currentHeight);
+            extrapolatePose(xGaitRectanglePose, time);
             xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
             plannedSteps.get(i).setStepYaw(xGaitRectanglePose.getYaw());
 
@@ -178,7 +183,7 @@ public class QuadrupedXGaitPlanner
       {
          // compute xGait rectangle pose at end of step
          double time = latestStep.getTimeInterval().getEndTime();
-         extrapolatePose(xGaitRectanglePose, time, currentHeight);
+         extrapolatePose(xGaitRectanglePose, time);
          xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
 
          // compute step goal position
@@ -201,16 +206,23 @@ public class QuadrupedXGaitPlanner
             goalPosition.addX(goalPositionAdjustment.getX());
             goalPosition.addY(goalPositionAdjustment.getY());
             plannedSteps.get(i).setGoalPosition(goalPosition);
+            snapStep(plannedSteps.get(i));
          }
       }
    }
 
-   private void extrapolatePose(FramePose3D finalPose, double time, double height)
+   private void snapStep(QuadrupedTimedOrientedStep step)
+   {
+      Point3DBasics goalPosition = step.getGoalPosition();
+      double snappedHeight = snapper.snapStep(goalPosition.getX(), goalPosition.getY());
+      goalPosition.setZ(snappedHeight);
+   }
+
+   private void extrapolatePose(FramePose3D finalPose, double time)
    {
       bodyPathProvider.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
-      finalPose.setZ(height);
       finalPose.setOrientationYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
    }
 
