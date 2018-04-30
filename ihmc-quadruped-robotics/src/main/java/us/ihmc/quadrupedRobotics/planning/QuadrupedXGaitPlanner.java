@@ -27,9 +27,9 @@ public class QuadrupedXGaitPlanner
 
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final FramePose2D bodyPathPose = new FramePose2D();
-   private QuadrupedStepSnapper snapper;
+   private QuadrupedStepSnapper snapper = null;
 
-   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper)
+   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider)
    {
       goalPosition = new FramePoint3D();
       goalPositionAdjustment = new FramePoint3D();
@@ -44,7 +44,6 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.FRONT, new QuadrupedTimedStep());
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
       this.bodyPathProvider = bodyPathProvider;
-      this.snapper = snapper;
    }
 
    public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
@@ -213,9 +212,12 @@ public class QuadrupedXGaitPlanner
 
    private void snapStep(QuadrupedTimedOrientedStep step)
    {
-      Point3DBasics goalPosition = step.getGoalPosition();
-      double snappedHeight = snapper.snapStep(goalPosition.getX(), goalPosition.getY());
-      goalPosition.setZ(snappedHeight);
+      if(snapper != null)
+      {
+         Point3DBasics goalPosition = step.getGoalPosition();
+         double snappedHeight = snapper.snapStep(goalPosition.getX(), goalPosition.getY());
+         goalPosition.setZ(snappedHeight);
+      }
    }
 
    private void extrapolatePose(FramePose3D finalPose, double time)
@@ -252,5 +254,10 @@ public class QuadrupedXGaitPlanner
 
       thisStep.getTimeInterval().setStartTime(thisStepStartTime);
       thisStep.getTimeInterval().setEndTime(thisStepStartTime + thisStepDuration);
+   }
+
+   public void setStepSnapper(QuadrupedStepSnapper snapper)
+   {
+      this.snapper = snapper;
    }
 }

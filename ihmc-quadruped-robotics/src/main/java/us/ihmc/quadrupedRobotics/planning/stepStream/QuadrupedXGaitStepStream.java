@@ -30,19 +30,19 @@ public class QuadrupedXGaitStepStream
    private final QuadrupedPlanarFootstepPlan footstepPlan;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
 
-   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp,
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
-      this(xGaitSettings, referenceFrames, Double.NaN, timestamp, bodyPathProvider, snapper, parentRegistry);
+      this(xGaitSettings, Double.NaN, timestamp, bodyPathProvider, parentRegistry);
    }
 
-   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedStepSnapper snapper, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, double controlDT, YoDouble timestamp,
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, snapper);
+      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
 
       if (parentRegistry != null)
@@ -94,5 +94,10 @@ public class QuadrupedXGaitStepStream
    public QuadrupedPlanarFootstepPlan getFootstepPlan()
    {
       return footstepPlan;
+   }
+
+   public void setStepSnapper(QuadrupedStepSnapper snapper)
+   {
+      xGaitStepPlanner.setStepSnapper(snapper);
    }
 }

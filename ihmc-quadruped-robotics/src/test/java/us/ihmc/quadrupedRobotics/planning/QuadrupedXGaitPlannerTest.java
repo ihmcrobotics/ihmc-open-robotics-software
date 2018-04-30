@@ -29,8 +29,8 @@ public class QuadrupedXGaitPlannerTest
    public void testInitialForwardVelocityPlan()
    {
       ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
-      QuadrupedStepSnapper zeroHeightSupplier = (x, y) -> 0.0;
-      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, zeroHeightSupplier);
+      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+      xGaitPlanner.setStepSnapper((x, y) -> 0.0);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.25);
@@ -92,8 +92,8 @@ public class QuadrupedXGaitPlannerTest
       public void testOnlineForwardVelocityPlan()
       {
          ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
-         QuadrupedStepSnapper zeroHeightSupplier = (x, y) -> 0.0;
-         QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, zeroHeightSupplier);
+         QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+         xGaitPlanner.setStepSnapper((x, y) -> 0.0);
          QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
          xGaitSettings.setStanceLength(1.0);
          xGaitSettings.setStanceWidth(0.25);
