@@ -65,10 +65,10 @@ public class QuadrupedTeleopManager
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, defaultXGaitSettings, packetCommunicator, graphicsListRegistry, registry);
-      desiredCoMHeight.set(initialCoMHeight);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, registry);
 
-      QuadrupedStepSnapper snapper = new PlanarGroundQuadrupedStepSnapper(referenceFrames, packetCommunicator);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, bodyPathMultiplexer, snapper, registry);
+      desiredCoMHeight.set(initialCoMHeight);
+      stepStream.setStepSnapper(new PlanarGroundQuadrupedStepSnapper(referenceFrames, packetCommunicator));
 
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);
@@ -200,6 +200,11 @@ public class QuadrupedTeleopManager
          trajectoryPointMessage.setTime(desiredTime);
          packetCommunicator.send(offsetBodyOrientationMessage);
       }
+   }
+
+   public void setStepSnapper(QuadrupedStepSnapper stepSnapper)
+   {
+      stepStream.setStepSnapper(stepSnapper);
    }
 
    public YoQuadrupedXGaitSettings getXGaitSettings()
