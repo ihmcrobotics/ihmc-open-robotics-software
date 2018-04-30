@@ -18,6 +18,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,8 @@ public class QuadrupedStepMessageHandler
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrantDependentList<RecyclingArrayDeque<SoleTrajectoryCommand>> upcomingFootTrajectoryCommandList = new QuadrantDependentList<>();
+
+   private final YoInteger numberOfStepsToRecover = new YoInteger("numberOfStepsToRecover", registry);
 
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
@@ -46,6 +49,8 @@ public class QuadrupedStepMessageHandler
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class));
+
+      numberOfStepsToRecover.set(10);
 
       parentRegistry.addChild(registry);
    }
@@ -155,6 +160,19 @@ public class QuadrupedStepMessageHandler
    {
       return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp
             .getDoubleValue();
+   }
+
+   private final FramePoint3D tempStep = new FramePoint3D();
+
+   public void shiftPlanBasedOnStepAdjustment(FrameVector3DReadOnly stepAdjustment)
+   {
+      for (int i = 0; i < Math.min(numberOfStepsToRecover.getIntegerValue(), receivedStepSequence.size()); i++)
+      {
+         double multiplier = (numberOfStepsToRecover.getIntegerValue() - i) / numberOfStepsToRecover.getIntegerValue();
+         receivedStepSequence.get(i).getGoalPosition(tempStep);
+         tempStep.scaleAdd(multiplier, stepAdjustment, tempStep);
+         receivedStepSequence.get(i).setGoalPosition(tempStep);
+      }
    }
 
    public void halt()
