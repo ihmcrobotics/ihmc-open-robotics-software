@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -45,6 +46,7 @@ public class ContinuousStepGenerator implements Updatable
    public static final Color defaultLeftColor = new Color(0, 205, 102); // springgreen 2, from: http://cloford.com/resources/colours/500col.htm
    public static final Color defaultRightColor = new Color(205, 133, 0); // orange 3, from: http://cloford.com/resources/colours/500col.htm
    public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<Color>(defaultLeftColor, defaultRightColor);
+   private final static Vector2DReadOnly zero2D = new Vector2D();
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -70,8 +72,8 @@ public class ContinuousStepGenerator implements Updatable
    private final DoubleProvider stepTime = () -> swingTime.getDoubleValue() + transferTime.getDoubleValue();
 
    private FootPoseProvider footPoseProvider;
-   private DesiredVelocityProvider desiredVelocityProvider;
-   private DesiredTurningVelocityProvider desiredTurningVelocityProvider;
+   private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
+   private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
    private FootstepAdjustment footstepAdjustment;
 
