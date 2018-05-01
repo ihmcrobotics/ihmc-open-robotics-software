@@ -19,7 +19,6 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
-import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -44,7 +43,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class PositionOptimizedTrajectoryGenerator
 {
    public static final int dimensions = 3;
-   public static final PolynomialOrder order = PolynomialOrder.ORDER3;
    public static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
 
    private final String namePrefix;
@@ -53,7 +51,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final YoInteger maxIterations;
    private final RecyclingArrayList<TDoubleArrayList> coefficients;
    private final EnumMap<Axis, ArrayList<YoPolynomial>> trajectories = new EnumMap<>(Axis.class);
-   private final double[] tempCoeffs = new double[order.getCoefficients()];
+   private final double[] tempCoeffs = new double[TrajectoryPointOptimizer.coefficients];
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialVelocity = new FrameVector3D();
@@ -112,8 +110,8 @@ public class PositionOptimizedTrajectoryGenerator
          @Override
          public TDoubleArrayList newInstance()
          {
-            TDoubleArrayList ret = new TDoubleArrayList(order.getCoefficients());
-            for (int i = 0; i < order.getCoefficients(); i++)
+            TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
+            for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
                ret.add(0.0);
             return ret;
          }
@@ -132,7 +130,7 @@ public class PositionOptimizedTrajectoryGenerator
       });
 
       registry = new YoVariableRegistry(namePrefix + "Trajectory");
-      optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, order, registry);
+      optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, registry);
       this.maxIterations = new YoInteger(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
@@ -188,7 +186,7 @@ public class PositionOptimizedTrajectoryGenerator
    {
       int size = waypointTimes.size() + 1;
       for (Axis axis : Axis.values)
-         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.ordinal(), order.getCoefficients(), registry));
+         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.ordinal(), TrajectoryPointOptimizer.coefficients, registry));
       waypointTimes.add(new YoDouble(namePrefix + "WaypointTime" + size, registry));
       waypointPositions.add();
    }
@@ -339,7 +337,7 @@ public class PositionOptimizedTrajectoryGenerator
 
       trajectoryViz.showGraphic();
    }
-   
+
    /**
     * Attempt at improving the trajectory if iterative improvement is desired.
     * @return whether an optimization step was done or not.
@@ -351,7 +349,7 @@ public class PositionOptimizedTrajectoryGenerator
          hasConverged.set(optimizer.doFullTimeUpdate());
          updateVariablesFromOptimizer();
       }
-      
+
       return !hasConverged();
    }
 
