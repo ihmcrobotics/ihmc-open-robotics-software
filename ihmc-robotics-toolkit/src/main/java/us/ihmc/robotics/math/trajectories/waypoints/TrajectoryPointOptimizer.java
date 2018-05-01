@@ -9,6 +9,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -377,8 +378,14 @@ public class TrajectoryPointOptimizer
       CommonOps.insert(b, d, subProblemSize, 0);
 
       solutionToPack.reshape(size, 1);
-      if (solver.setA(E)) // TODO: if this does not work what then?
+      if (solver.setA(E))
+      {
          solver.solve(d, solutionToPack);
+      }
+      else
+      {
+         PrintTools.error("Trajectory optimizer failed to solve.");
+      }
       solutionToPack.reshape(subProblemSize, 1);
 
       d.reshape(subProblemSize, 1);
