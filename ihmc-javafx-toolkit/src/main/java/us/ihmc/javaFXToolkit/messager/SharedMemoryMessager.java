@@ -1,6 +1,5 @@
-package us.ihmc.robotEnvironmentAwareness.communication;
+package us.ihmc.javaFXToolkit.messager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,31 +7,41 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 
-public class REAMessagerSharedVariables implements REAMessager
+/**
+ * Implementation of {@code Messager} using shared memory.
+ * 
+ * @author Sylvain Bertrand
+ */
+public class SharedMemoryMessager implements Messager
 {
-   private final API messagerAPI;
+   private final MessagerAPI messagerAPI;
 
    private final AtomicBoolean isConnected = new AtomicBoolean(false);
    private final ConcurrentHashMap<Topic<?>, List<AtomicReference<Object>>> boundVariables = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<Topic<?>, List<REATopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
-   private final List<ConnectionStateListener> connectionStateListeners = new ArrayList<>();
+   private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
+   private final List<MessagerStateListener> connectionStateListeners = new ArrayList<>();
 
-   public REAMessagerSharedVariables(API messagerAPI)
+   /**
+    * Creates a new messager.
+    * 
+    * @param messagerAPI the API to use with this messager.
+    */
+   public SharedMemoryMessager(MessagerAPI messagerAPI)
    {
       this.messagerAPI = messagerAPI;
    }
 
+   /** {@inheritDoc} */
    @Override
-   public <T> void submitMessage(REAMessage<T> message)
+   public <T> void submitMessage(Message<T> message)
    {
-      if (!messagerAPI.containsTopic(message.getTopicId()))
+      if (!messagerAPI.containsTopic(message.getTopicID()))
          throw new RuntimeException("The message is not part of this messager's API.");
 
-      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicId());
+      Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
       if (!isConnected.get())
       {
@@ -44,11 +53,12 @@ public class REAMessagerSharedVariables implements REAMessager
       if (boundVariablesForTopic != null)
          boundVariablesForTopic.forEach(variable -> variable.set(message.getMessageContent()));
 
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(messageTopic);
       if (topicListeners != null)
          topicListeners.forEach(listener -> listener.receivedMessageForTopic(message.getMessageContent()));
    }
 
+   /** {@inheritDoc} */
    @Override
    @SuppressWarnings("unchecked")
    public <T> AtomicReference<T> createInput(Topic<T> topic, T defaultValue)
@@ -65,57 +75,61 @@ public class REAMessagerSharedVariables implements REAMessager
       return boundVariable;
    }
 
+   /** {@inheritDoc} */
    @Override
    @SuppressWarnings("unchecked")
-   public <T> void registerTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
-      List<REATopicListener<Object>> topicListeners = topicListenersMap.get(topic);
+      List<TopicListener<Object>> topicListeners = topicListenersMap.get(topic);
       if (topicListeners == null)
       {
          topicListeners = new ArrayList<>();
          topicListenersMap.put(topic, topicListeners);
       }
-      topicListeners.add((REATopicListener<Object>) listener);
+      topicListeners.add((TopicListener<Object>) listener);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void startMessager() throws IOException
+   public void startMessager()
    {
       isConnected.set(true);
-      connectionStateListeners.forEach(ConnectionStateListener::connected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(true));
    }
 
+   /** {@inheritDoc} */
    @Override
    public void closeMessager()
    {
       isConnected.set(false);
-      connectionStateListeners.forEach(ConnectionStateListener::disconnected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(false));
       boundVariables.clear();
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean isMessagerOpen()
    {
       return isConnected.get();
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void registerConnectionStateListener(ConnectionStateListener listener)
+   public void registerMessagerStateListener(MessagerStateListener listener)
    {
       connectionStateListeners.add(listener);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void notifyConnectionStateListeners()
+   public void notifyMessagerStateListeners()
    {
-      if (isMessagerOpen())
-         connectionStateListeners.forEach(ConnectionStateListener::connected);
-      else
-         connectionStateListeners.forEach(ConnectionStateListener::disconnected);
+      connectionStateListeners.forEach(listener -> listener.messagerStateChanged(isMessagerOpen()));
    }
 
+   /** {@inheritDoc} */
    @Override
-   public API getMessagerAPI()
+   public MessagerAPI getMessagerAPI()
    {
       return messagerAPI;
    }

@@ -1,26 +1,32 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalPositionEditModeEnabledTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalPositionTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ShowPlanarRegionsTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartPositionEditModeEnabledTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartPositionTopic;
+
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
-
-import java.io.IOException;
-
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public class FootstepPlannerUI
 {
    private static final boolean VERBOSE = true;
 
-   private final SimpleUIMessager messager = new SimpleUIMessager(FootstepPlannerUserInterfaceAPI.API);
+   private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(FootstepPlannerUserInterfaceAPI.API);
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -45,7 +51,7 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
 
-   public FootstepPlannerUI(Stage primaryStage) throws IOException
+   public FootstepPlannerUI(Stage primaryStage) throws Exception
    {
       this.primaryStage = primaryStage;
 

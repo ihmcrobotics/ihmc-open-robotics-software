@@ -6,7 +6,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 
 public class FootstepNodeCheckingUIController
@@ -25,7 +25,7 @@ public class FootstepNodeCheckingUIController
    @FXML
    private Spinner<Double> nodeCheckerFootYaw;
 
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
    private final Point3DProperty nodeCheckerFootPosition = new Point3DProperty(this, "nodeCheckerFootPosition", new Point3D());
    private final SimpleObjectProperty<Double> nodeCheckerFootYawProperty = new SimpleObjectProperty<>(this, "nodeCheckerFootYaw", 0.0);
 
@@ -67,7 +67,7 @@ public class FootstepNodeCheckingUIController
       return new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
