@@ -8,18 +8,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.ConnectionStateListener;
+import us.ihmc.communication.net.KryoObjectClient;
+import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.net.NetworkedObjectCommunicator;
+import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
-import us.ihmc.javaFXToolkit.messager.TopicListener;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 
 public class KryoMessager implements Messager
 {
+   public static final int BUFFER_SIZE = 2097152 * 20;
    private static final boolean DEBUG = false;
 
    private final MessagerAPI messagerAPI;
@@ -28,40 +32,35 @@ public class KryoMessager implements Messager
    private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> messagerStateListeners = new ArrayList<>();
 
-   private final PacketCommunicator packetCommunicator;
+   private final NetworkedObjectCommunicator objectCommunicator;
 
    public static Messager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
-      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, netClassList);
-      return new KryoMessager(messagerAPI, packetCommunicator);
+      NetworkedObjectCommunicator communicator = new KryoObjectServer(port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
+      return new KryoMessager(messagerAPI, communicator);
    }
 
    public static Messager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
    {
-      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
-      return new KryoMessager(messagerAPI, packetCommunicator);
+      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
+      objectCommunicator.setReconnectAutomatically(true);
+      return new KryoMessager(messagerAPI, objectCommunicator);
    }
 
    public static Messager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
-      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, netClassList);
-      return new KryoMessager(messagerAPI, packetCommunicator);
+      return new KryoMessager(messagerAPI, new IntraprocessObjectCommunicator(port.getPort(), netClassList));
    }
 
-   private KryoMessager(MessagerAPI messagerAPI, PacketCommunicator packetCommunicator)
+   private KryoMessager(MessagerAPI messagerAPI, NetworkedObjectCommunicator objectCommunicator)
    {
       this.messagerAPI = messagerAPI;
-      this.packetCommunicator = packetCommunicator;
-      this.packetCommunicator.attachListener(KryoMessage.class, this::receiveREAMessage);
+      this.objectCommunicator = objectCommunicator;
+      this.objectCommunicator.attachListener(Message.class, this::receiveREAMessage);
    }
 
-   private <T> void receiveREAMessage(KryoMessage<T> kryoMessage)
+   private <T> void receiveREAMessage(Message<T> message)
    {
-      if (kryoMessage == null)
-         return;
-
-      Message<T> message = kryoMessage.message;
-
       if (message == null)
          return;
 
@@ -90,7 +89,7 @@ public class KryoMessager implements Messager
 
       Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
-      if (!packetCommunicator.isConnected())
+      if (!objectCommunicator.isConnected())
       {
          PrintTools.warn(this, "This messager is closed, message's topic: " + messageTopic.getName());
          return;
@@ -100,7 +99,7 @@ public class KryoMessager implements Messager
          PrintTools.info("Submit message for topic: " + messageTopic.getName());
 
       // Variable update over network
-      packetCommunicator.send(new KryoMessage<>(message));
+      objectCommunicator.send(message);
    }
 
    @Override
@@ -135,34 +134,34 @@ public class KryoMessager implements Messager
    @Override
    public void startMessager() throws IOException
    {
-      packetCommunicator.connect();
+      objectCommunicator.connect();
    }
 
    @Override
-   public void closeMessager()
+   public void closeMessager() throws IOException
    {
       inputVariablesMap.clear();
-      packetCommunicator.closeConnection();
-      packetCommunicator.disconnect();
+      objectCommunicator.closeConnection();
+      objectCommunicator.disconnect();
    }
 
    @Override
    public boolean isMessagerOpen()
    {
-      return packetCommunicator.isConnected();
+      return objectCommunicator.isConnected();
    }
 
    @Override
    public void registerMessagerStateListener(MessagerStateListener listener)
    {
-      packetCommunicator.attachStateListener(new ConnectionStateListener()
+      objectCommunicator.attachStateListener(new ConnectionStateListener()
       {
          @Override
          public void disconnected()
          {
             listener.messagerStateChanged(false);
          }
-         
+
          @Override
          public void connected()
          {

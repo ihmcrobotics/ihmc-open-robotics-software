@@ -134,7 +134,15 @@ public class SimpleVisibilityGraphsUI
 
    public void stop()
    {
-      messager.closeMessager();
+      try
+      {
+         messager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
       planarRegionViewer.stop();
       startGoalEditor.stop();
       startGoalViewer.stop();

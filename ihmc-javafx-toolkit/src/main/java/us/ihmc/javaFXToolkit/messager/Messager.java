@@ -70,8 +70,9 @@ public interface Messager
 
    /**
     * Closes this messager, no message can be sent once a messager is closed.
+    * @throws Exception depends on the implementation of messager.
     */
-   void closeMessager();
+   void closeMessager() throws Exception;
 
    /**
     * Tests whether this messager is currently open, i.e. whether messages can be sent and received.

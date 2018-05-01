@@ -17,8 +17,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.javaFXToolkit.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -158,7 +158,7 @@ public class LIDARBasedREAModule
       }
    }
 
-   public void stop()
+   public void stop() throws Exception
    {
       PrintTools.info("REA Module is going down.");
       publicPacketCommunicator.closeConnection();

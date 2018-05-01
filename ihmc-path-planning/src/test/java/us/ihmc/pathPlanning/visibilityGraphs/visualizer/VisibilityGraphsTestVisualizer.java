@@ -47,7 +47,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
@@ -247,7 +246,14 @@ public class VisibilityGraphsTestVisualizer
       navigableRegionMeshViewer.stop();
       interRegionConnectionsViewer.stop();
       walkerCollisionsViewer.stop();
-      messager.closeMessager();
+      try
+      {
+         messager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
       startMapViewer.stop();
       goalMapViewer.stop();
       Platform.exit();
