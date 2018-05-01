@@ -17,6 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
@@ -72,7 +73,7 @@ public class FootstepNodeVisualization implements GraphVisualization
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       if (regions != null)
-         graphics3DObject.addPlanarRegionsList(regions);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       scs.addYoVariableRegistry(registry);

@@ -1,4 +1,4 @@
-package us.ihmc.graphicsDescription.yoGraphics;
+package us.ihmc.robotics.graphics;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -14,6 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 

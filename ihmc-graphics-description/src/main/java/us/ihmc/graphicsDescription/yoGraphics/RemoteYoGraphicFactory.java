@@ -55,9 +55,6 @@ public class RemoteYoGraphicFactory
       registerBuilder(YoArtifactOval.class, (name, vars, consts, appearance) -> yoArtifactOvalFromMessage(name, vars, consts, appearance));
       registerBuilder(YoArtifactLineSegment2d.class, (name, vars, consts, appearance) -> yoArtifactLineSegment2DFromMessage(name, vars, consts, appearance));
       registerBuilder(YoArtifactPolygon.class, (name, vars, consts, appearance) -> yoArtifactPolygonFromMessage(name, vars, consts, appearance));
-      registerBuilder(YoGraphicPlanarRegionsList.class,
-                      (name, vars, consts, appearance) -> yoGraphicPlanarRegionsListFromMessage(name, vars, consts, appearance));
-      registerBuilder(YoGraphicPolynomial3D.class, (name, vars, consts, appearance) -> yoGraphicPolynomial3DFromMessage(name, vars, consts, appearance));
    }
 
    public <T extends RemoteYoGraphic> void registerBuilder(Class<T> clazz, YoGraphicFromMessageBuilder<T> builder)
@@ -88,17 +85,6 @@ public class RemoteYoGraphicFactory
          throw new RuntimeException("Unhandled registrion ID: " + registrationID);
 
       return builder.yoGraphicFromMessage(name, vars, consts, appearance);
-   }
-
-   private static YoGraphicPolynomial3D yoGraphicPolynomial3DFromMessage(String name, YoVariable<?>[] vars, double[] consts, AppearanceDefinition appearance)
-   {
-      return YoGraphicPolynomial3D.createAsRemoteYoGraphic(name, vars, consts);
-   }
-
-   private static YoGraphicPlanarRegionsList yoGraphicPlanarRegionsListFromMessage(String name, YoVariable<?>[] vars, double[] consts,
-                                                                                   AppearanceDefinition appearance)
-   {
-      return YoGraphicPlanarRegionsList.createAsRemoteYoGraphic(name, vars, consts);
    }
 
    private static YoArtifactPolygon yoArtifactPolygonFromMessage(String name, YoVariable<?>[] vars, double[] consts, AppearanceDefinition appearance)
