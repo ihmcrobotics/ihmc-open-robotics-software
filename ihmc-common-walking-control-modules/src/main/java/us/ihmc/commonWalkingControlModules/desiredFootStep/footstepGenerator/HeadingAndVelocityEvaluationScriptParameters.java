@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
+package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 public class HeadingAndVelocityEvaluationScriptParameters
 {
