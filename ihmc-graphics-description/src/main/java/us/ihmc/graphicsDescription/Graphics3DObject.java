@@ -10,6 +10,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.geometry.Sphere3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -51,8 +52,6 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstr
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DObject
@@ -1089,61 +1088,23 @@ public class Graphics3DObject
       return addPolygon(convexPolygon2d, DEFAULT_APPEARANCE);
    }
 
-   /** Adds the PlanarRegionsList transforming from the current coordinate system.
-    *
-    * @param planarRegions
-    */
-   public void addPlanarRegionsList(PlanarRegionsList planarRegions)
+   public void addPolygons(RigidBodyTransform transform, List<? extends ConvexPolygon2DReadOnly> convexPolygon2D)
    {
-      addPlanarRegionsList(planarRegions, YoAppearance.Black());
+      addPolygons(transform, convexPolygon2D, YoAppearance.Black());
    }
 
-   /** Adds the PlanarRegionsList transforming from the current coordinate system.
-    * Uses the given appearances in order, one for each PlanarRegion. Then loops on the appearances.
-    *
-    * @param planarRegions
-    */
-   public void addPlanarRegionsList(PlanarRegionsList planarRegions, AppearanceDefinition... appearances)
+   public void addPolygons(RigidBodyTransform transform, List<? extends ConvexPolygon2DReadOnly> convexPolygon2D, AppearanceDefinition appearance)
    {
-      int numberOfPlanarRegions = planarRegions.getNumberOfPlanarRegions();
-      for (int i = 0; i < numberOfPlanarRegions; i++)
-      {
-         addPlanarRegion(planarRegions.getPlanarRegion(i), appearances[i % appearances.length]);
-      }
-   }
-
-   /**
-    * Adds a PlanarRegion transforming from the current coordinate system.
-    *
-    * @param planarRegion
-    */
-   public void addPlanarRegion(PlanarRegion planarRegion)
-   {
-      addPlanarRegion(planarRegion, YoAppearance.Black());
-   }
-
-   /**
-    * Adds a PlanarRegion transforming from the current coordinate system.
-    * Uses the given appearances in order, one for each Polygon in the PlanarRegion. Then loops on the appearances.
-    *
-    * @param planarRegion
-    */
-   public void addPlanarRegion(PlanarRegion planarRegion, AppearanceDefinition... appearances)
-   {
-      int numberOfConvexPolygons = planarRegion.getNumberOfConvexPolygons();
-
-      RigidBodyTransform transform = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transform);
-
       transform(transform);
 
-      for (int i = 0; i < numberOfConvexPolygons; i++)
+      for (int i = 0; i < convexPolygon2D.size(); i++)
       {
-         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
+         ConvexPolygon2DReadOnly convexPolygon = convexPolygon2D.get(i);
          MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.0001);
-         addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
+         addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearance));
       }
 
+      transform = new RigidBodyTransform(transform);
       transform.invert();
       transform(transform);
    }
