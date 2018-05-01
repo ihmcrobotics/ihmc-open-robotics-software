@@ -166,7 +166,7 @@ public class MessagerAPIFactory
       {
          for (Category root : roots)
          {
-            if (root.getName() == newRoot.getName() || root.getShortID() == newRoot.getShortID())
+            if (root.getName().equals(newRoot.getName()) || root.getShortID() == newRoot.getShortID())
                throw new RuntimeException("Roots must have unique name and ID.");
          }
          roots.add(newRoot);
