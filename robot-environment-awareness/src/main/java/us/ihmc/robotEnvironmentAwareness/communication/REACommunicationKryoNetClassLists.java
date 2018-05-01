@@ -57,8 +57,7 @@ public class REACommunicationKryoNetClassLists
    private static final NetClassList privateNetClassList = new NetClassList();
    static
    {
-      privateNetClassList.registerPacketClass(Packet.class);
-      privateNetClassList.registerPacketField(Message.class);
+      privateNetClassList.registerPacketClass(Message.class);
       privateNetClassList.registerPacketField(PacketDestination.class);
       privateNetClassList.registerPacketField(Boolean.class);
       privateNetClassList.registerPacketField(Double.class);
