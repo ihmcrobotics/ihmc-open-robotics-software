@@ -1,7 +1,9 @@
 package us.ihmc.javaFXToolkit.messager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.TIntObjectMap;
@@ -48,6 +50,32 @@ public class MessagerAPIFactory
       Category root = new Category(null, rootTheme);
       api = new MessagerAPI(root);
       return root;
+   }
+
+   /**
+    * Allows to combine multiple APIs together.
+    * <p>
+    * This effectively adds the root categories of the given APIs and adds them to the API being
+    * built.
+    * </p>
+    * <p>
+    * The root categories of each API must have unique names.
+    * </p>
+    * 
+    * @param apis the other APIs to be included to the API constructed by this factory.
+    */
+   public void includeMessagerAPIs(MessagerAPI... apis)
+   {
+      if (api == null)
+         throw new RuntimeException("Call MessageAPIFactory.createRootCategory(...) before calling this method.");
+
+      for (MessagerAPI messagerAPI : apis)
+      {
+         for (Category root : messagerAPI.roots)
+         {
+            api.addRoot(root);
+         }
+      }
    }
 
    /**
@@ -127,11 +155,21 @@ public class MessagerAPIFactory
    public static class MessagerAPI
    {
       /** The root category of this API to which all sub-categories and topics are attached. */
-      private final Category root;
+      private final List<Category> roots = new ArrayList<>();
 
       private MessagerAPI(Category root)
       {
-         this.root = root;
+         this.roots.add(root);
+      }
+
+      private void addRoot(Category newRoot)
+      {
+         for (Category root : roots)
+         {
+            if (root.getName() == newRoot.getName() || root.getShortID() == newRoot.getShortID())
+               throw new RuntimeException("Roots must have unique name and ID.");
+         }
+         roots.add(newRoot);
       }
 
       /**
@@ -142,10 +180,12 @@ public class MessagerAPIFactory
        */
       public <T> Topic<T> findTopic(TopicID topicID)
       {
-         if (topicID.getShortIDAtDepth(0) != root.getShortID())
-            throw new RuntimeException("The topic id does not belong to this API.");
-         else
-            return root.findTopic(topicID);
+         for (Category root : roots)
+         {
+            if (topicID.getShortIDAtDepth(0) == root.getShortID())
+               return root.findTopic(topicID);
+         }
+         throw new RuntimeException("The topic id does not belong to this API.");
       }
 
       /**
@@ -168,26 +208,18 @@ public class MessagerAPIFactory
        */
       public boolean containsTopic(TopicID topicID)
       {
-         if (topicID.getShortIDAtDepth(0) != root.getShortID())
-            return false;
-         else
-            return root.findTopic(topicID) != null;
-      }
-
-      /**
-       * Gets the root category of this API.
-       * 
-       * @return the root category.
-       */
-      public Category getRoot()
-      {
-         return root;
+         for (Category root : roots)
+         {
+            if (topicID.getShortIDAtDepth(0) == root.getShortID())
+               return root.findTopic(topicID) != null;
+         }
+         return false;
       }
 
       @Override
       public String toString()
       {
-         return "API of " + root.getName();
+         return "API of " + roots.get(0).getName();
       }
    }
 
