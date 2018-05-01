@@ -16,9 +16,9 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,7 +44,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    private static final Color ghostFootstepColor = Color.color(0.2, 0.2, 0.2, 0.2);
 
-   public NodeCheckerRenderer(REAMessager messager)
+   public NodeCheckerRenderer(Messager messager)
    {
       nodeCheckerEnabled = messager.createInput(EnableNodeChecking, false);
       planarRegionsReference = messager.createInput(PlanarRegionDataTopic);

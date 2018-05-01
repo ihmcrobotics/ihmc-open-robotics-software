@@ -16,12 +16,12 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class ClusterMeshViewer extends AnimationTimer
 {
@@ -43,12 +43,12 @@ public class ClusterMeshViewer extends AnimationTimer
 
    private final AtomicReference<List<NavigableRegion>> newRequestReference;
 
-   public ClusterMeshViewer(REAMessager messager)
+   public ClusterMeshViewer(Messager messager)
    {
       this(messager, null);
    }
 
-   public ClusterMeshViewer(REAMessager messager, ExecutorService executorService)
+   public ClusterMeshViewer(Messager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 

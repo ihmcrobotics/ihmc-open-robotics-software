@@ -7,7 +7,6 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.JavaFXTools;
@@ -34,19 +33,11 @@ public class LidarFrameViewer extends AnimationTimer
       root.setMouseTransparent(true);
 
       uiMessager.registerTopicListener(REAModuleAPI.LidarScanState, this::handleMessage);
-      uiMessager.registerModuleConnectionStateListener(new ConnectionStateListener()
-      {
-         @Override
-         public void disconnected()
-         {
-            stop();
-         }
-         
-         @Override
-         public void connected()
-         {
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+         if (isMessagerOpen)
             start();
-         }
+         else
+            stop();
       });
    }
 

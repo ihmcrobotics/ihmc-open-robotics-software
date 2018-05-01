@@ -9,9 +9,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -33,7 +33,7 @@ public class DatasetNavigationAccordionController
    @FXML
    private ListView<String> visualizerDataListView, testDataListView, inDevelopmentTestDataListView, customDataListView;
 
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
    private Window ownerWindow;
 
    public DatasetNavigationAccordionController() throws URISyntaxException
@@ -54,7 +54,7 @@ public class DatasetNavigationAccordionController
          throw new RuntimeException("Wrong path to the in development test data folder, please update me");
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }

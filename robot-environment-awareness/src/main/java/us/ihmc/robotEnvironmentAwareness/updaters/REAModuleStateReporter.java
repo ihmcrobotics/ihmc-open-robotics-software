@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
@@ -14,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegio
 
 public class REAModuleStateReporter
 {
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
    private final AtomicReference<Boolean> isLidarScanRequested;
    private final AtomicReference<Boolean> isBufferOcTreeRequested;
    private final AtomicReference<Boolean> isOcTreeRequested;
@@ -23,7 +23,7 @@ public class REAModuleStateReporter
    private final AtomicReference<Boolean> isPlanarRegionSegmentationRequested;
    private final AtomicReference<Boolean> arePlanarRegionsIntersectionsRequested;
 
-   public REAModuleStateReporter(REAMessager reaMessager, PacketCommunicator publicPacketCommunicator)
+   public REAModuleStateReporter(Messager reaMessager, PacketCommunicator publicPacketCommunicator)
    {
       this.reaMessager = reaMessager;
       isLidarScanRequested = reaMessager.createInput(REAModuleAPI.RequestLidarScan, false);
