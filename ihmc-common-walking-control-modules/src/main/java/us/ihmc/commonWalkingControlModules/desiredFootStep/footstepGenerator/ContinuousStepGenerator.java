@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -72,7 +71,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private FootPoseProvider footPoseProvider;
    private DesiredVelocityProvider desiredVelocityProvider;
-   private DesiredHeadingVelocityProvider desiredHeadingProvider;
+   private DesiredTurningVelocityProvider desiredTurningVelocityProvider;
    private FootstepMessenger footstepMessenger;
    private FootstepAdjustment footstepAdjustment;
 
@@ -181,7 +180,7 @@ public class ContinuousStepGenerator implements Updatable
 
          double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocity.getX(), maxStepLength.getValue());
          double yDisplacement = stepTime.getValue() * desiredVelocity.getY() + swingSide.negateIfRightSide(inPlaceWidth.getValue());
-         double headingDisplacement = stepTime.getValue() * desiredHeadingProvider.getHeadingVelocity();
+         double headingDisplacement = stepTime.getValue() * desiredTurningVelocityProvider.getTurningVelocity();
 
          if (swingSide == RobotSide.LEFT)
          {
@@ -250,9 +249,9 @@ public class ContinuousStepGenerator implements Updatable
       this.transferTime.set(transferTime);
    }
 
-   public void setDesiredHeadingProvider(DesiredHeadingVelocityProvider desiredHeadingProvider)
+   public void setDesiredTurningVelocityProvider(DesiredTurningVelocityProvider desiredTurningVelocityProvider)
    {
-      this.desiredHeadingProvider = desiredHeadingProvider;
+      this.desiredTurningVelocityProvider = desiredTurningVelocityProvider;
    }
 
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
@@ -262,9 +261,9 @@ public class ContinuousStepGenerator implements Updatable
 
    public void createYoComponentProviders()
    {
-      DoubleParameter desiredHeadingVelocity = new DoubleParameter("desiredHeadingVelocity", registry, 0.0);
+      DoubleParameter desiredTurningVelocity = new DoubleParameter("desiredTurningVelocity", registry, 0.0);
       YoFrameVector2D desiredVelocity = new YoFrameVector2D("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
-      setDesiredHeadingProvider(() -> desiredHeadingVelocity.getValue());
+      setDesiredTurningVelocityProvider(() -> desiredTurningVelocity.getValue());
       setDesiredVelocityProvider(() -> desiredVelocity);
    }
 
@@ -302,14 +301,7 @@ public class ContinuousStepGenerator implements Updatable
 
    public void createFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
    {
-      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, new StatusMessageListener<FootstepStatusMessage>()
-      {
-         @Override
-         public void receivedNewMessageStatus(FootstepStatusMessage statusMessage)
-         {
-            consumeFootstepStatus(statusMessage);
-         }
-      });
+      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
    }
 
    public void consumeFootstepStatus(FootstepStatusMessage statusMessage)

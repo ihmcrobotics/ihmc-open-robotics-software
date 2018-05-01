@@ -74,7 +74,7 @@ public class StepGeneratorJavaFXController
    private final SideDependentList<Color> footColors = new SideDependentList<Color>(Color.CRIMSON, Color.YELLOWGREEN);
 
    private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
-   private final DoubleProperty headingVelocityProperty = new SimpleDoubleProperty(this, "headingVelocityProperty", 0.0);
+   private final DoubleProperty turningVelocityProperty = new SimpleDoubleProperty(this, "turningVelocityProperty", 0.0);
    private final DoubleProperty forwardVelocityProperty = new SimpleDoubleProperty(this, "forwardVelocityProperty", 0.0);
    private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty", 0.0);
 
@@ -99,7 +99,6 @@ public class StepGeneratorJavaFXController
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
-   private final BooleanProvider isInSingleSupport = () -> isLeftFootInSupport.get() ^ isRightFootInSupport.get();
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
                                         PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
@@ -107,7 +106,7 @@ public class StepGeneratorJavaFXController
       this.packetCommunicator = packetCommunicator;
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
-      continuousStepGenerator.setDesiredHeadingProvider(() -> headingVelocityProperty.get());
+      continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocityProperty.get());
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
       inPlaceStepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
@@ -196,7 +195,7 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(ButtonRightBumperState, state -> stopWalking(state == ButtonState.RELEASED));
       messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
-      messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateHeadingVelocity);
+      messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateTurningVelocity);
 
       packetCommunicator.attachListener(WalkingControllerFailureStatusMessage.class, packet -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.FREEZE));
@@ -219,12 +218,12 @@ public class StepGeneratorJavaFXController
       lateralVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
-   private void updateHeadingVelocity(double alpha)
+   private void updateTurningVelocity(double alpha)
    {
       double minMaxVelocity = Math.PI / 4.0;
       if (forwardVelocityProperty.get() < -1.0e-10)
          alpha = -alpha;
-      headingVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
+      turningVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void startWalking(boolean confirm)
