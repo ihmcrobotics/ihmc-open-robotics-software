@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -20,11 +21,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -81,14 +84,14 @@ public class ContinuousStepGenerator implements Updatable
    private final RecyclingArrayListPubSub<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
    private final FootstepDataMessage firstFootstep = new FootstepDataMessage();
 
-   private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>();
+   private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    public ContinuousStepGenerator()
    {
-      this(null, null);
+      this(null);
    }
 
-   public ContinuousStepGenerator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ContinuousStepGenerator(YoVariableRegistry parentRegistry)
    {
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -98,38 +101,13 @@ public class ContinuousStepGenerator implements Updatable
       maxStepWidth.set(Double.POSITIVE_INFINITY);
       maxStepLength.set(Double.POSITIVE_INFINITY);
 
-      String graphicListName = "FootstepGenerator";
-
-      if (yoGraphicsListRegistry != null)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            List<FootstepVisualizer> visualizers = new ArrayList<>();
-
-            List<Point2D> footPolygon = FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25);
-
-            for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
-            {
-               String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
-               AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
-               visualizers.add(new FootstepVisualizer(name, graphicListName, robotSide, footPolygon, footstepColor, yoGraphicsListRegistry, registry));
-            }
-
-            footstepSideDependentVisualizers.put(robotSide, visualizers);
-         }
-      }
-      else
-      {
-         for (RobotSide robotSide : RobotSide.values)
-            footstepSideDependentVisualizers.put(robotSide, new ArrayList<>());
-      }
-
       setSupportFootBasedFootstepAdjustment(true);
    }
 
    private final FramePose2D footstepPose2D = new FramePose2D();
    private final FramePose2D nextFootstepPose2D = new FramePose2D();
    private final FramePose3D nextFootstepPose3D = new FramePose3D();
+   private final FramePose3D nextFootstepPose3DViz = new FramePose3D();
    private final FramePose3D currentSupportFootPose = new FramePose3D();
 
    private boolean updateFirstFootstep = true;
@@ -207,7 +185,9 @@ public class ContinuousStepGenerator implements Updatable
          if (vizualizerIndex < footstepVisualizers.size())
          {
             FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
-            footstepVisualizer.update(nextFootstepPose3D);
+            nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
+            nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
+            footstepVisualizer.update(nextFootstepPose3DViz);
          }
 
          FootstepDataMessage footstep = footsteps.add();
@@ -419,5 +399,45 @@ public class ContinuousStepGenerator implements Updatable
    public boolean isWalking()
    {
       return walk.getBooleanValue();
+   }
+
+   public void setupVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      setupVisualization(FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25), yoGraphicsListRegistry);
+   }
+
+   public void setupVisualization(List<? extends Point2DReadOnly> footPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      setupVisualization(footPolygon, footPolygon, yoGraphicsListRegistry);
+   }
+
+   public void setupVisualization(SideDependentList<? extends ContactableBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      List<Point2D> leftFoot = contactableFeet.get(RobotSide.LEFT).getContactPointsCopy().stream().map(Point2D::new).collect(Collectors.toList());
+      List<Point2D> rightFoot = contactableFeet.get(RobotSide.RIGHT).getContactPointsCopy().stream().map(Point2D::new).collect(Collectors.toList());
+      setupVisualization(leftFoot, rightFoot, yoGraphicsListRegistry);
+   }
+
+   public void setupVisualization(List<? extends Point2DReadOnly> leftFootPolygon, List<? extends Point2DReadOnly> rightFootPolygon,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      String graphicListName = "FootstepGenerator";
+
+      SideDependentList<List<? extends Point2DReadOnly>> footPolygons = new SideDependentList<>(leftFootPolygon, rightFootPolygon);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<FootstepVisualizer> visualizers = new ArrayList<>();
+
+         for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
+         {
+            String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
+            AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
+            visualizers.add(new FootstepVisualizer(name, graphicListName, robotSide, footPolygons.get(robotSide), footstepColor, yoGraphicsListRegistry,
+                                                   registry));
+         }
+
+         footstepSideDependentVisualizers.put(robotSide, visualizers);
+      }
    }
 }
