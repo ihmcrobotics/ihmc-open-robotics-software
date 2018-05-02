@@ -98,7 +98,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ContinuousStepGenerator implements Updatable
 {
    private static final int MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE = 3;
-   public static final Color defaultLeftColor = new Color(0, 205, 102); // springgreen 2, from: http://cloford.com/resources/colours/500col.htm
+   public static final Color defaultLeftColor = new Color(28, 134, 238); // dodgerblue 2, from: http://cloford.com/resources/colours/500col.htm
    public static final Color defaultRightColor = new Color(205, 133, 0); // orange 3, from: http://cloford.com/resources/colours/500col.htm
    public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<Color>(defaultLeftColor, defaultRightColor);
    private final static Vector2DReadOnly zero2D = new Vector2D();
