@@ -14,7 +14,6 @@ import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.Button
 import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickYAxis;
 import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.RightStickXAxis;
-import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +23,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
@@ -52,16 +47,12 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -99,12 +90,17 @@ public class StepGeneratorJavaFXController
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
+   private HumanoidRobotKickMessenger kickMessenger;
+   private HumanoidRobotPunchMessenger punchMessenger;
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
-                                        JavaFXRobotVisualizer javaFXRobotVisualizer)
+                                        JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
+                                        HumanoidRobotPunchMessenger punchMessenger)
    {
       this.packetCommunicator = packetCommunicator;
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
+      this.kickMessenger = kickMessenger;
+      this.punchMessenger = punchMessenger;
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
       continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocityProperty.get());
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
@@ -313,90 +309,34 @@ public class StepGeneratorJavaFXController
 
    private void sendArmHomeConfiguration(RobotSide... robotSides)
    {
-      for (RobotSide robotSide : robotSides)
-      {
-         double[] jointAngles = new double[7];
-         int index = 0;
-         jointAngles[index++] = robotSide.negateIfRightSide(0.785398); // ArmJointName.SHOULDER_YAW        
-         jointAngles[index++] = robotSide.negateIfRightSide(-0.52379); // ArmJointName.SHOULDER_ROLL       
-         jointAngles[index++] = 2.33708; // ArmJointName.ELBOW_PITCH         
-         jointAngles[index++] = robotSide.negateIfRightSide(2.35619); // ArmJointName.ELBOW_ROLL          
-         jointAngles[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
-         jointAngles[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
-         jointAngles[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
-         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 3.0, jointAngles);
-         packetCommunicator.send(message);
-      }
+      punchMessenger.sendArmHomeConfiguration(packetCommunicator, trajectoryDuration.get(), robotSides);
    }
 
    private void sendArmStraightConfiguration(RobotSide robotSide)
    {
-      double[] jointAngles0 = new double[7];
-      int index = 0;
-      jointAngles0[index++] = robotSide.negateIfRightSide(-0.2); // ArmJointName.SHOULDER_YAW        
-      jointAngles0[index++] = robotSide.negateIfRightSide(-0.17); // ArmJointName.SHOULDER_ROLL       
-      jointAngles0[index++] = 1.4; // ArmJointName.ELBOW_PITCH         
-      jointAngles0[index++] = robotSide.negateIfRightSide(1.8); // ArmJointName.ELBOW_ROLL          
-      jointAngles0[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
-      jointAngles0[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
-      jointAngles0[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
-
-      double[] jointAngles1 = new double[7];
-      index = 0;
-      jointAngles1[index++] = robotSide.negateIfRightSide(-1.2); // ArmJointName.SHOULDER_YAW        
-      jointAngles1[index++] = robotSide.negateIfRightSide(-0.0); // ArmJointName.SHOULDER_ROLL       
-      jointAngles1[index++] = 1.8; // ArmJointName.ELBOW_PITCH         
-      jointAngles1[index++] = robotSide.negateIfRightSide(0.6); // ArmJointName.ELBOW_ROLL          
-      jointAngles1[index++] = -0.337807; // ArmJointName.FIRST_WRIST_PITCH   
-      jointAngles1[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
-      jointAngles1[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
-      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration.get() / 2.0, jointAngles0);
-      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = message.getJointspaceTrajectory().getJointTrajectoryMessages();
-      for (int i = 0; i < jointTrajectoryMessages.size(); i++)
-      {
-         TrajectoryPoint1DMessage trajectoryPoint1DMessage = createTrajectoryPoint1DMessage(trajectoryDuration.get(), jointAngles1[i], 0.0);
-         jointTrajectoryMessages.get(i).getTrajectoryPoints().add().set(trajectoryPoint1DMessage);
-      }
-      packetCommunicator.send(message);
+      punchMessenger.sendArmStraightConfiguration(packetCommunicator, trajectoryDuration.get(), robotSide);
    }
 
    private void flamingoHomeStance(RobotSide robotSide)
    {
-      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
-      footPose.appendTranslation(0.0, robotSide.negateIfRightSide(inPlaceStepWidth), 0.15);
-      footPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration.get(), footPose);
-      packetCommunicator.send(message);
+      kickMessenger.sendFlamingoHomeStance(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
+                                           javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    private void putFootDown(RobotSide robotSide)
    {
       if (isFootInSupport.get(robotSide).get())
          return;
-
-      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
-      footPose.appendTranslation(0.0, robotSide.negateIfRightSide(inPlaceStepWidth), 0.0);
-      footPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration.get(), footPose);
-      packetCommunicator.send(message);
-
-      packetCommunicator.send(HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD));
+      kickMessenger.sendPutFootDown(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
+                                    javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    private void kick(RobotSide robotSide)
    {
       if (isFootInSupport.get(robotSide).get())
          return;
-
-      FramePose3D footPose = new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide.getOppositeSide()));
-      footPose.appendTranslation(0.60, robotSide.negateIfRightSide(inPlaceStepWidth), 0.35);
-      footPose.appendPitchRotation(-0.8);
-      footPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.33 * trajectoryDuration.get(), footPose);
-      packetCommunicator.send(message);
+      kickMessenger.sendKick(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
+                             javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    public void start()
