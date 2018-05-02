@@ -166,12 +166,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
          double controlDT = controllerToolbox.getControlDT();
          continuousStepGenerator = new ContinuousStepGenerator(registry);
-         continuousStepGenerator.createFootstepStatusListener(statusMessageOutputManager);
-         continuousStepGenerator.createYoComponentProviders();
-         continuousStepGenerator.createFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
+         continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
+         continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
          continuousStepGenerator.configureWith(walkingControllerParameters);
          continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
          continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
+         if (heightMapForFootstepZ != null)
+            continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapForFootstepZ);
 
          if (useHeadingAndVelocityScript)
          {
@@ -180,6 +181,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
             continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
             continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
             controllerToolbox.addUpdatable(script);
+         }
+         else
+         {
+            continuousStepGenerator.setYoComponentProviders();
          }
          controllerToolbox.addUpdatable(continuousStepGenerator);
       }
