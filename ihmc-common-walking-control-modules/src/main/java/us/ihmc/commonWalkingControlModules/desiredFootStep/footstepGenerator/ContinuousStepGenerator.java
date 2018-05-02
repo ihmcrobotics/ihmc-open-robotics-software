@@ -414,7 +414,8 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void notifyFootstepStarted()
    {
-      footsteps.remove(0);
+      if (!footsteps.isEmpty())
+         footsteps.remove(0);
    }
 
    /**
