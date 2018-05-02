@@ -21,8 +21,10 @@ public class AtlasJoystickBasedSteppingApplication extends Application
       PrintTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       PrintTools.info("-------------------------------------------------------------------");
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, robotTarget, false);
+      AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger();
 
-      ui = new JoystickBasedSteppingMainUI(primaryStage, atlasRobotModel, atlasRobotModel.getWalkingControllerParameters());
+      ui = new JoystickBasedSteppingMainUI(primaryStage, atlasRobotModel, atlasRobotModel.getWalkingControllerParameters(), atlasKickAndPunchMessenger,
+                                           atlasKickAndPunchMessenger);
    }
 
    @Override
