@@ -165,12 +165,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       {
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
          double controlDT = controllerToolbox.getControlDT();
-         continuousStepGenerator = new ContinuousStepGenerator(registry, yoGraphicsListRegistry);
+         continuousStepGenerator = new ContinuousStepGenerator(registry);
          continuousStepGenerator.createFootstepStatusListener(statusMessageOutputManager);
          continuousStepGenerator.createYoComponentProviders();
          continuousStepGenerator.createFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
          continuousStepGenerator.configureWith(walkingControllerParameters);
          continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
+         continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
 
          if (useHeadingAndVelocityScript)
          {
