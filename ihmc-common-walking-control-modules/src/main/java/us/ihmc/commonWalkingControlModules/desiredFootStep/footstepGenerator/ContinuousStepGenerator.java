@@ -173,9 +173,14 @@ public class ContinuousStepGenerator implements Updatable
             headingDisplacement = MathTools.clamp(headingDisplacement, -maxAngleTurnOutwards.getValue(), -maxAngleTurnInwards.getValue());
          }
 
+         double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(inPlaceWidth.getValue());
          nextFootstepPose2D.set(footstepPose2D);
-         nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
+         // Applying the translation before the rotation allows the rotation to be centered in between the feet.
+         // This ordering seems to provide the most natural footsteps.
+         nextFootstepPose2D.appendTranslation(0.0, halfInPlaceWidth);
          nextFootstepPose2D.appendRotation(headingDisplacement);
+         nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
+         nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D));
 
