@@ -8,6 +8,7 @@ import us.ihmc.robotics.functionApproximation.NeuralNetwork.activationFunction.S
 public class NeuralNetworkConfiguration
 {
    private String[] inputVariableNames;
+   private String[] outputVariableNames;
    private String[] activationFunctionsPerLayer;
    private int[] numberOfNeuronsPerLayer;
    private double[][] bias;
@@ -61,9 +62,9 @@ public class NeuralNetworkConfiguration
    public ActivationFunction[] getActivationFunctions()
    {
       ActivationFunction[] activationFunctions = new ActivationFunction[activationFunctionsPerLayer.length];
-      for(int i = 0; i < activationFunctionsPerLayer.length; i++)
+      for (int i = 0; i < activationFunctionsPerLayer.length; i++)
       {
-         switch(activationFunctionsPerLayer[i])
+         switch (activationFunctionsPerLayer[i])
          {
          case "RELU":
             activationFunctions[i] = new Relu();
@@ -87,5 +88,15 @@ public class NeuralNetworkConfiguration
    public void setInputVariableNames(String[] inputVariableNames)
    {
       this.inputVariableNames = inputVariableNames;
+   }
+
+   public String[] getOutputVariableNames()
+   {
+      return outputVariableNames;
+   }
+
+   public void setOutputVariableNames(String[] outputVariableNames)
+   {
+      this.outputVariableNames = outputVariableNames;
    }
 }
