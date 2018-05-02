@@ -116,7 +116,7 @@ public class AvatarSimulationFactory
                                                                                            simulationConstructionSet.getRootRegistry(),
                                                                                            new YoGraphicsListRegistry());
          collisionHandler.setKp(100000);
-         collisionHandler.setKd(100);
+         collisionHandler.setKd(500);
          CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
          simulationConstructionSet.initializeShapeCollision(collisionManager);
       }
