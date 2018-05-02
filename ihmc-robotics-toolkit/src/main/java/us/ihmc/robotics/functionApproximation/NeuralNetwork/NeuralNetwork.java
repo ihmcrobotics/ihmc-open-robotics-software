@@ -13,6 +13,8 @@ import us.ihmc.robotics.functionApproximation.NeuralNetwork.importing.NeuralNetw
 public class NeuralNetwork
 {
    private final ArrayList<Layer> layers = new ArrayList<>();
+   private String[] inputOrder;
+   private String[] outputOrder;
    
    public NeuralNetwork()
    {
@@ -36,6 +38,8 @@ public class NeuralNetwork
       {
          createLayer(numberOfNeuronsPerLayer[i], bias[i], weights[i], activationFunctions[i]);
       }
+      inputOrder = config.getInputVariableNames();
+      outputOrder = config.getOutputVariableNames();
    }
 
    /**
@@ -136,5 +140,15 @@ public class NeuralNetwork
       {
          output[i] = outputNeurons.get(i).getOutput();
       }
+   }
+
+   public String[] getInputOrder()
+   {
+      return inputOrder;
+   }
+
+   public String[] getOutputOrder()
+   {
+      return outputOrder;
    }
 }
