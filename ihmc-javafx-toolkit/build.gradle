@@ -29,7 +29,7 @@ mainDependencies {
    compile("org.fxyz3d:fxyz3d:0.1.1") {
       exclude group: 'java3d', module: 'vecmath'
    }
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.0"
    compile group: 'us.ihmc.thirdparty', name: 'jassimp', version: '4.0.0-ihmc2'
 }
 
