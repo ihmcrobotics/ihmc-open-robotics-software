@@ -42,7 +42,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
 }
 
 testDependencies {
@@ -50,5 +49,4 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication-test", version: "source"
 }
