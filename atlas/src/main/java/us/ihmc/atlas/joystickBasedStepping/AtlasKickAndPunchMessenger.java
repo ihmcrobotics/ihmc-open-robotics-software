@@ -3,21 +3,24 @@ package us.ihmc.atlas.joystickBasedStepping;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
+import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotLowLevelMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 
-public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger
+public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger, HumanoidRobotLowLevelMessenger
 {
    @Override
    public void sendArmHomeConfiguration(PacketCommunicator packetCommunicator, double trajectoryDuration, RobotSide... robotSides)
@@ -107,5 +110,21 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       packetCommunicator.send(message);
 
       packetCommunicator.send(HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD));
+   }
+
+   @Override
+   public void sendFreezeRequest(PacketCommunicator packetCommunicator)
+   {
+      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
+      message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.FREEZE.toByte());
+      packetCommunicator.send(message);
+   }
+
+   @Override
+   public void sendStandRequest(PacketCommunicator packetCommunicator)
+   {
+      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
+      message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
+      packetCommunicator.send(message);      
    }
 }
