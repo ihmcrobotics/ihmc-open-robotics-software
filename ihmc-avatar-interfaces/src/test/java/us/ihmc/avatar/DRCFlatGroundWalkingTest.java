@@ -115,7 +115,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
       YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.getVariable("userUpdateDesiredPelvisPose");
       YoBoolean userDoPelvisPose = (YoBoolean) scs.getVariable("userDoPelvisPose");
