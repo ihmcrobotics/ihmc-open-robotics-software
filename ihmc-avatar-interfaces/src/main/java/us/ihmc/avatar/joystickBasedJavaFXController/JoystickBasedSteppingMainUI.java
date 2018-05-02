@@ -50,7 +50,7 @@ public class JoystickBasedSteppingMainUI
 
    public JoystickBasedSteppingMainUI(Stage primaryStage, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
-                                      HumanoidRobotPunchMessenger punchMessenger)
+                                      HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -88,7 +88,8 @@ public class JoystickBasedSteppingMainUI
          }
       };
 
-      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(messager, walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer, kickMessenger, punchMessenger);
+      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(messager, walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer,
+                                                                        kickMessenger, punchMessenger, lowLevelMessenger);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
       messager.startMessager();

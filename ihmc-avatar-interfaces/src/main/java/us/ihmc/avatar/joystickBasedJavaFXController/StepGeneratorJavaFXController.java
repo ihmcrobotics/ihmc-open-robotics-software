@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -52,7 +51,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -90,12 +88,12 @@ public class StepGeneratorJavaFXController
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
-   private HumanoidRobotKickMessenger kickMessenger;
-   private HumanoidRobotPunchMessenger punchMessenger;
+   private final HumanoidRobotKickMessenger kickMessenger;
+   private final HumanoidRobotPunchMessenger punchMessenger;
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
-                                        HumanoidRobotPunchMessenger punchMessenger)
+                                        HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
    {
       this.packetCommunicator = packetCommunicator;
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
@@ -194,8 +192,10 @@ public class StepGeneratorJavaFXController
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateTurningVelocity);
 
       packetCommunicator.attachListener(WalkingControllerFailureStatusMessage.class, packet -> stopWalking(true));
-      messager.registerTopicListener(ButtonSelectState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.FREEZE));
-      messager.registerTopicListener(ButtonStartState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.STAND_PREP));
+      messager.registerTopicListener(ButtonSelectState, state -> stopWalking(true));
+      messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest(packetCommunicator));
+      messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
+      messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest(packetCommunicator));
       packetCommunicator.attachListener(CapturabilityBasedStatus.class, status -> {
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
          isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
@@ -247,14 +247,6 @@ public class StepGeneratorJavaFXController
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
       pauseWalkingMessage.setPause(true);
       packetCommunicator.send(pauseWalkingMessage);
-   }
-
-   public void sendLowLevelControlModeRequest(AtlasLowLevelControlMode mode)
-   {
-      stopWalking(true);
-      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-      message.setRequestedAtlasLowLevelControlMode(mode.toByte());
-      packetCommunicator.send(message);
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)
