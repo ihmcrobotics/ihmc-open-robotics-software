@@ -1,19 +1,19 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonLeftBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonRightBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonSelectState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonStartState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonXState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonYState;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonBState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonLeftBumperState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonRightBumperState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonSelectState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonStartState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonXState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonYState;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickXAxis;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickYAxis;
+import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.RightStickXAxis;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import java.util.ArrayList;
@@ -100,8 +100,8 @@ public class StepGeneratorJavaFXController
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
 
-   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
-                                        PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
+   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
+                                        JavaFXRobotVisualizer javaFXRobotVisualizer)
    {
       this.packetCommunicator = packetCommunicator;
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
@@ -271,7 +271,7 @@ public class StepGeneratorJavaFXController
          footstepNode.add(createFootstep(footstepDataMessage));
       }
       footstepsToVisualizeReference.set(footstepNode);
-//      footstepDataListMessage.setAreFootstepsAdjustable(true);
+      //      footstepDataListMessage.setAreFootstepsAdjustable(true);
       footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
    }
 

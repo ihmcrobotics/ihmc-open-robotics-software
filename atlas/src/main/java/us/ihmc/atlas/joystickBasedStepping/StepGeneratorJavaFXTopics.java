@@ -28,27 +28,8 @@ public class StepGeneratorJavaFXTopics
 
    static
    {
-      XBoxOneJavaFXController.addTopicsToAPI(apiFactory, Root);
+      apiFactory.includeMessagerAPIs(XBoxOneJavaFXController.XBoxOneControllerAPI);
    }
-
-   public static final Topic<ButtonState> ButtonAState = XBoxOneJavaFXController.ButtonAState;
-   public static final Topic<ButtonState> ButtonBState = XBoxOneJavaFXController.ButtonBState;
-   public static final Topic<ButtonState> ButtonXState = XBoxOneJavaFXController.ButtonXState;
-   public static final Topic<ButtonState> ButtonYState = XBoxOneJavaFXController.ButtonYState;
-   public static final Topic<ButtonState> ButtonLeftBumperState = XBoxOneJavaFXController.ButtonLeftBumperState;
-   public static final Topic<ButtonState> ButtonRightBumperState = XBoxOneJavaFXController.ButtonRightBumperState;
-   public static final Topic<ButtonState> ButtonSelectState = XBoxOneJavaFXController.ButtonSelectState;
-   public static final Topic<ButtonState> ButtonStartState = XBoxOneJavaFXController.ButtonStartState;
-   public static final Topic<ButtonState> ButtonXBoxState = XBoxOneJavaFXController.ButtonXBoxState;
-   public static final Topic<ButtonState> ButtonLeftStickState = XBoxOneJavaFXController.ButtonLeftStickState;
-   public static final Topic<ButtonState> ButtonRightStickState = XBoxOneJavaFXController.ButtonRightStickState;
-
-   public static final Topic<Double> LeftStickXAxis = XBoxOneJavaFXController.LeftStickXAxis;
-   public static final Topic<Double> LeftStickYAxis = XBoxOneJavaFXController.LeftStickYAxis;
-   public static final Topic<Double> RightStickXAxis = XBoxOneJavaFXController.RightStickXAxis;
-   public static final Topic<Double> RightStickYAxis = XBoxOneJavaFXController.RightStickYAxis;
-   public static final Topic<Double> LeftTriggerAxis = XBoxOneJavaFXController.LeftTriggerAxis;
-   public static final Topic<Double> RightTriggerAxis = XBoxOneJavaFXController.RightTriggerAxis;
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
