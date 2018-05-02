@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
 {
@@ -20,7 +21,7 @@ public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
 
       this.referenceFrame = referenceFrame;
    }
-   
+
    public YoGraphicReferenceFrame(String prefix, ReferenceFrame referenceFrame, YoVariableRegistry registry, double scale, AppearanceDefinition arrowColor)
    {
       super(prefix + referenceFrame.getName(), "", registry, scale, arrowColor);
@@ -28,9 +29,16 @@ public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
       this.referenceFrame = referenceFrame;
    }
 
+   YoGraphicReferenceFrame(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch, YoDouble roll, double[] constants)
+   {
+      super(name, x, y, z, yaw, pitch, roll, constants);
+      referenceFrame = null;
+   }
+
    @Override
    public void update()
    {
-      this.setToReferenceFrame(referenceFrame);
+      if (referenceFrame != null)
+         this.setToReferenceFrame(referenceFrame);
    }
 }
