@@ -195,6 +195,7 @@ public class ContinuousStepGenerator implements Updatable
       if (walk.getValue() != walkPreviousValue.getValue())
       {
          currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+         counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away. 
       }
 
       footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
@@ -279,7 +280,7 @@ public class ContinuousStepGenerator implements Updatable
 
       if (footstepMessenger != null)
       {
-         if (counter == numberOfTicksBeforeSubmittingFootsteps.getValue())
+         if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
          {
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
