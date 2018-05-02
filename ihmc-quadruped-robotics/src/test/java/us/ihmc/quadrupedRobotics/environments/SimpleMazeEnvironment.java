@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.planning;
+package us.ihmc.quadrupedRobotics.environments;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;

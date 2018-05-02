@@ -1,17 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.environments.SimpleMazeEnvironment;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.simulationConstructionSetTools.util.environments.SimpleBoxEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
@@ -89,7 +86,11 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.1, 0.2, point1, point2, point3, point4);
    }
 
-   public void testBodyPathAroundABox()
+   /**
+    * This test will need to be updated as footstep tracking improves, i.e. if this test breaks it could be because step tracking has improved.
+    * The last few points have been adjusted pretty heavily to compensate
+    */
+   public void testBodyPathAroundASimpleMaze()
    {
       setUpSimulation(new SimpleMazeEnvironment());
 
