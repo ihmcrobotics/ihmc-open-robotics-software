@@ -1,4 +1,4 @@
-package us.ihmc.atlas.joystickBasedStepping;
+package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

@@ -1,4 +1,4 @@
-package us.ihmc.atlas.joystickBasedStepping;
+package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.util.concurrent.atomic.AtomicReference;
 

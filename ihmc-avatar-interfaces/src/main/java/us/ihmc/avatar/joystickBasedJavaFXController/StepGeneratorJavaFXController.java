@@ -1,19 +1,19 @@
-package us.ihmc.atlas.joystickBasedStepping;
+package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonBState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonLeftBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonRightBumperState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonSelectState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonStartState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonXState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.ButtonYState;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickXAxis;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.LeftStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.XBoxOneJavaFXController.RightStickXAxis;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingHeight;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTransferDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonBState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonLeftBumperState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonRightBumperState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonSelectState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonStartState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonXState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonYState;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.LeftStickXAxis;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.LeftStickYAxis;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.RightStickXAxis;
 
 import java.util.ArrayList;
 import java.util.List;
