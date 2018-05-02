@@ -94,7 +94,7 @@ public class SimulationRunsSameWayTwiceVerifier
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
 
    {
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       if(walk != null)
       {
          walk.set(false);
