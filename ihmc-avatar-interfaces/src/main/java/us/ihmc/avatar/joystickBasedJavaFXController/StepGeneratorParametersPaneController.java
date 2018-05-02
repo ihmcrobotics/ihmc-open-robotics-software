@@ -1,9 +1,9 @@
-package us.ihmc.atlas.joystickBasedStepping;
+package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingHeight;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;

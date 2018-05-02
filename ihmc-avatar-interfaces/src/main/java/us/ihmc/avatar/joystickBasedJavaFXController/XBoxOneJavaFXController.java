@@ -1,4 +1,4 @@
-package us.ihmc.atlas.joystickBasedStepping;
+package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import net.java.games.input.Event;
 import us.ihmc.javaFXToolkit.messager.Messager;
