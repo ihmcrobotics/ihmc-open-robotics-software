@@ -7,7 +7,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -56,6 +55,7 @@ public class RemoteYoGraphicFactory
       registerBuilder(YoArtifactOval.class, (name, vars, consts, appearance) -> yoArtifactOvalFromMessage(name, vars, consts, appearance));
       registerBuilder(YoArtifactLineSegment2d.class, (name, vars, consts, appearance) -> yoArtifactLineSegment2DFromMessage(name, vars, consts, appearance));
       registerBuilder(YoArtifactPolygon.class, (name, vars, consts, appearance) -> yoArtifactPolygonFromMessage(name, vars, consts, appearance));
+      registerBuilder(YoGraphicReferenceFrame.class, (name, vars, consts, appearance) -> yoGraphicReferenceFrameFromMessage(name, vars, consts, appearance));
    }
 
    public <T extends RemoteYoGraphic> void registerBuilder(Class<T> clazz, YoGraphicFromMessageBuilder<T> builder)
@@ -75,7 +75,6 @@ public class RemoteYoGraphicFactory
    {
       if (!registrationIDs.containsKey(clazz))
          throw new RuntimeException("The class: " + clazz.getSimpleName() + " is not registered.");
-      PrintTools.info("YoGraphic " + clazz.getSimpleName() + " ID " + registrationIDs.get(clazz));
       return registrationIDs.get(clazz);
    }
 
@@ -155,6 +154,13 @@ public class RemoteYoGraphicFactory
    {
       return new YoGraphicCoordinateSystem(name, (YoDouble) vars[0], (YoDouble) vars[1], (YoDouble) vars[2], (YoDouble) vars[3], (YoDouble) vars[4],
                                            (YoDouble) vars[5], consts);
+   }
+
+   private static YoGraphicReferenceFrame yoGraphicReferenceFrameFromMessage(String name, YoVariable<?>[] vars, double[] consts,
+                                                                             AppearanceDefinition appearance)
+   {
+      return new YoGraphicReferenceFrame(name, (YoDouble) vars[0], (YoDouble) vars[1], (YoDouble) vars[2], (YoDouble) vars[3], (YoDouble) vars[4],
+                                         (YoDouble) vars[5], consts);
    }
 
    private static YoGraphicPosition yoGraphicPositionFromMessage(String name, YoVariable<?>[] vars, double[] consts, AppearanceDefinition appearance)
