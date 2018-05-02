@@ -290,7 +290,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       ContinuousStepGenerator stepGenerator = new ContinuousStepGenerator();
       stepGenerator.configureWith(walkingControllerParameters);
       stepGenerator.setDesiredVelocityProvider(() -> desiredVelocity);
-      stepGenerator.createFrameBasedFootPoseProvider(soleFrames);
+      stepGenerator.setFrameBasedFootPoseProvider(soleFrames);
       stepGenerator.setFootstepMessenger(output::setValue);
       stepGenerator.setNumberOfFootstepsToPlan(numberOfFootsteps);
       stepGenerator.startWalking();
