@@ -176,8 +176,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
          if (useHeadingAndVelocityScript)
          {
-            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(true, controlDT, controllerToolbox.getYoTime(),
-                                                                                               headingAndVelocityEvaluationScriptParameters, registry);
+            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT, controllerToolbox.getYoTime(), headingAndVelocityEvaluationScriptParameters,
+                                                                                               registry);
             continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
             continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
             controllerToolbox.addUpdatable(script);

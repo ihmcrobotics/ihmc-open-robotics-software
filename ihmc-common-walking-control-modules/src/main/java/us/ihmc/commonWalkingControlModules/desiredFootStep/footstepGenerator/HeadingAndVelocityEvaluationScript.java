@@ -20,6 +20,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
+/**
+ * Time-based script to generate desired forward, lateral, and turning velocities for the
+ * {@link ContinuousStepGenerator}.
+ * <p>
+ * This class was updated when re-implementing the continuous step generator. There is still quite
+ * some work to do here.
+ * </p>
+ */
 public class HeadingAndVelocityEvaluationScript implements Updatable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -70,8 +78,16 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final TaskExecutor taskExecutor = new TaskExecutor();
    private final List<EventTask> eventList;
 
-   public HeadingAndVelocityEvaluationScript(boolean cycleThroughAllEvents, double controlDT, DoubleProvider timeProvider,
-                                             HeadingAndVelocityEvaluationScriptParameters parameters, YoVariableRegistry parentRegistry)
+   /**
+    * Creates a new script.
+    * 
+    * @param controlDT the tick duration.
+    * @param timeProvider provider to obtain the current time.
+    * @param parameters script parameters.
+    * @param parentRegistry registry to attach this script {@code YoVariable}s
+    */
+   public HeadingAndVelocityEvaluationScript(double controlDT, DoubleProvider timeProvider, HeadingAndVelocityEvaluationScriptParameters parameters,
+                                             YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -92,10 +108,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       desiredTurningVelocityRateLimited = new RateLimitedYoVariable("scriptDesiredTurningVelocityRateLimited", registry, turningAcceleration,
                                                                     desiredTurningVelocity, controlDT);
 
-      if (cycleThroughAllEvents)
-         eventList = createCompleteEventList();
-      else
-         eventList = Arrays.asList(createGoToCruiseVelocity());
+      eventList = createCompleteEventList();
    }
 
    private List<EventTask> createCompleteEventList()
