@@ -27,7 +27,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "source"
 }
 

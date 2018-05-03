@@ -8,13 +8,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
 import us.ihmc.graphicsDescription.input.mouse.MouseListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public interface Graphics3DAdapter 

@@ -5,7 +5,7 @@ import java.awt.Color;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 
 public class SimpleCombinedTerrainObjectsEnvironment extends CombinedTerrainObject3D

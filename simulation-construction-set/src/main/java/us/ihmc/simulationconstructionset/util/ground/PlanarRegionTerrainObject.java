@@ -7,6 +7,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -115,7 +116,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private Graphics3DObject setupLinkGraphics()
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegion(planarRegion, YoAppearance.Gray());
+      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, YoAppearance.Gray());
       return graphics3DObject;
    }
 }

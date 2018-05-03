@@ -6,7 +6,7 @@ import org.ros.message.Time;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.utilities.ros.types.PointType;
 
 public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
