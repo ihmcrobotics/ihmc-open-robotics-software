@@ -81,24 +81,23 @@ public class ToeOffManager
    private final YoBoolean isRearAnklePitchHittingLimit = new YoBoolean("isRearAnklePitchHittingLimit", registry);
    private final YoBoolean isRearKneePitchHittingLimit = new YoBoolean("isRearKneePitchHittingLimit", registry);
 
-   private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt",
-         registry, isDesiredICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isCurrentICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isCurrentICPOKForToeOffFilt",
-         registry, isCurrentICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isDesiredECMPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredECMPOKForToeOffFilt",
-         registry, isDesiredECMPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt",
-         registry, isDesiredCoPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt", registry,
+                                                                                                   isDesiredICPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isCurrentICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isCurrentICPOKForToeOffFilt", registry,
+                                                                                                   isCurrentICPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredECMPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredECMPOKForToeOffFilt", registry,
+                                                                                                    isDesiredECMPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt", registry,
+                                                                                                   isDesiredCoPOKForToeOff, smallGlitchWindowSize);
 
-   private final GlitchFilteredYoBoolean isRearAnklePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearAnklePitchHittingLimitFilt",
-         registry, isRearAnklePitchHittingLimit, largeGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isRearKneePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearKneePitchHittingLimitFilt",
-                                                                                                        registry, isRearKneePitchHittingLimit, largeGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isRearAnklePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearAnklePitchHittingLimitFilt", registry,
+                                                                                                        isRearAnklePitchHittingLimit, largeGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isRearKneePitchHittingLimitFilt = new GlitchFilteredYoBoolean("isRearKneePitchHittingLimitFilt", registry,
+                                                                                                       isRearKneePitchHittingLimit, largeGlitchWindowSize);
 
    private final YoDouble minStepLengthForToeOff = new YoDouble("minStepLengthForToeOff", registry);
    private final YoDouble minStepHeightForToeOff = new YoDouble("minStepHeightForToeOff", registry);
    private final YoDouble extraCoMMaxHeightWithToes = new YoDouble("extraCoMMaxHeightWithToes", registry);
-
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint3D> contactStatePoints = new ArrayList<>();
@@ -128,14 +127,16 @@ public class ToeOffManager
    private final double footLength;
 
    public ToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffCalculator toeOffCalculator,
-         WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet, YoVariableRegistry parentRegistry)
+                        WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
+                        YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox.getFullRobotModel(), toeOffCalculator, walkingControllerParameters, feet, createFootContactStates(controllerToolbox), parentRegistry);
+      this(controllerToolbox.getFullRobotModel(), toeOffCalculator, walkingControllerParameters, feet, createFootContactStates(controllerToolbox),
+           parentRegistry);
    }
 
-   public ToeOffManager(FullHumanoidRobotModel fullRobotModel, ToeOffCalculator toeOffCalculator,
-         WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
-         SideDependentList<YoPlaneContactState> footContactStates, YoVariableRegistry parentRegistry)
+   public ToeOffManager(FullHumanoidRobotModel fullRobotModel, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
+                        SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
+                        YoVariableRegistry parentRegistry)
    {
       this.toeOffParameters = walkingControllerParameters.getToeOffParameters();
       this.doToeOffIfPossibleInDoubleSupport.set(toeOffParameters.doToeOffIfPossible());
@@ -159,8 +160,8 @@ public class ToeOffManager
       this.feet = feet;
 
       this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
-            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset() + walkingControllerParameters.getSteppingParameters()
+                                                                                                                                 .getFootForwardOffset();
 
       extraCoMMaxHeightWithToes.set(extraCoMHeightWithToes);
 
@@ -254,7 +255,8 @@ public class ToeOffManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusSingleSupport(FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP, FramePoint2D desiredICP, FramePoint2D currentICP)
+   public void updateToeOffStatusSingleSupport(FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP, FramePoint2D desiredICP,
+                                               FramePoint2D currentICP)
    {
       if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
       {
@@ -296,10 +298,11 @@ public class ToeOffManager
          toeContact = toeContacts.get(ToeContact.POINT);
       }
 
-      toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, nextFootSupportPolygon, null);
+      toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, nextFootSupportPolygon);
 
       ReferenceFrame soleFrame = nextFootstep.getSoleReferenceFrame();
-      double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), nextFootSupportPolygon, soleFrame, percentProximity);
+      double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), nextFootSupportPolygon, soleFrame,
+                                                   percentProximity);
       icpProximityForSSToeOff.set(requiredProximity);
 
       checkCoPLocation(desiredCoP);
@@ -336,7 +339,7 @@ public class ToeOffManager
     * @param currentICP current ICP based on the robot state.
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
-         FramePoint2D desiredICP, FramePoint2D currentICP)
+                                               FramePoint2D desiredICP, FramePoint2D currentICP)
    {
       nextFootstep = null;
       if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
@@ -364,6 +367,8 @@ public class ToeOffManager
 
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
       setPolygonFromNextFootstep(nextFootSupportPolygon);
+      leadingFootSupportPolygon.addVertices(nextFootSupportPolygon);
+      leadingFootSupportPolygon.update();
 
       double percentProximity = icpPercentOfStanceForDSToeOff.getDoubleValue();
 
@@ -379,10 +384,11 @@ public class ToeOffManager
          toeContact = toeContacts.get(ToeContact.POINT);
       }
 
-      toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, leadingFootSupportPolygon, nextFootSupportPolygon);
+      toeContact.updateToeSupportPolygon(exitCMP, desiredECMP, trailingLeg, leadingFootSupportPolygon);
 
       ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
-      double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), leadingFootSupportPolygon, soleFrame, percentProximity);
+      double requiredProximity = checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), leadingFootSupportPolygon, soleFrame,
+                                                   percentProximity);
       icpProximityForDSToeOff.set(requiredProximity);
 
       checkCoPLocation(desiredCoP);
@@ -472,7 +478,7 @@ public class ToeOffManager
    }
 
    private double checkICPLocations(RobotSide trailingLeg, FramePoint2D desiredICP, FramePoint2D currentICP, FramePoint2D toeOffPoint,
-         FrameConvexPolygon2D leadingFootSupportPolygon, ReferenceFrame nextSoleFrame, double percentProximity)
+                                    FrameConvexPolygon2D leadingFootSupportPolygon, ReferenceFrame nextSoleFrame, double percentProximity)
    {
       boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
       double requiredProximity;
@@ -481,10 +487,8 @@ public class ToeOffManager
          // compute stance length
          requiredProximity = computeRequiredICPProximity(trailingLeg, nextSoleFrame, toeOffPoint, percentProximity);
 
-         isDesiredICPOKForToeOff =
-               onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.distance(desiredICP) < requiredProximity;
-         isCurrentICPOKForToeOff =
-               onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.distance(currentICP) < requiredProximity;
+         isDesiredICPOKForToeOff = onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.distance(desiredICP) < requiredProximity;
+         isCurrentICPOKForToeOff = onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.distance(currentICP) < requiredProximity;
       }
       else
       {
@@ -506,7 +510,7 @@ public class ToeOffManager
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempLeadingFootPosition.setToZero(nextSoleFrame);
       tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
-//      tempTrailingFootPosition.setToZero(trailingFootFrame);
+      //      tempTrailingFootPosition.setToZero(trailingFootFrame);
       toeOffPoint.changeFrameAndProjectToXYPlane(trailingFootFrame);
 
       toLeadingFoot.setToZero(trailingFootFrame);
@@ -523,7 +527,8 @@ public class ToeOffManager
       isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit);
       isRearAnklePitchHittingLimitFilt.update();
 
-      if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+      if (!doToeOffWhenHittingAnkleLimit
+            .getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          return false;
 
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
@@ -536,7 +541,8 @@ public class ToeOffManager
       isRearKneePitchHittingLimit.set(kneePitch.getQ() > upperLimit);
       isRearKneePitchHittingLimitFilt.update();
 
-      if (!doToeOffWhenHittingKneeLimit.getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+      if (!doToeOffWhenHittingKneeLimit
+            .getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          return false;
 
       return isRearKneePitchHittingLimitFilt.getBooleanValue();
@@ -582,7 +588,8 @@ public class ToeOffManager
             return false;
       }
 
-      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
+      boolean isSideStepping =
+            Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
       if (isSideStepping && !DO_TOE_OFF_FOR_SIDE_STEPS)
          return false;
 
@@ -657,7 +664,6 @@ public class ToeOffManager
       return extraCoMMaxHeightWithToes.getDoubleValue();
    }
 
-
    private enum ToeContact
    {
       POINT, LINE
@@ -669,8 +675,8 @@ public class ToeOffManager
       protected final FramePoint2D toeOffPoint = new FramePoint2D();
       protected final FramePoint2D tmpPoint2d = new FramePoint2D();
 
-      public abstract void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide, FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
-                                                   FrameConvexPolygon2DReadOnly nextStepPolygon);
+      public abstract void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide,
+                                                   FrameConvexPolygon2DReadOnly leadingSupportPolygon);
 
       public abstract void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame);
 
@@ -711,27 +717,19 @@ public class ToeOffManager
    private class ToeLineContact extends AbstractToeContact
    {
       @Override
-      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide, FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
-                                          FrameConvexPolygon2DReadOnly nextStepPolygon)
+      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide,
+                                          FrameConvexPolygon2DReadOnly leadingSupportPolygon)
       {
          if (exitCMP == null)
             computeToeContacts(trailingSide);
          else
             computeToeContacts(exitCMP, desiredECMP, trailingSide);
 
-         onToesSupportPolygon.setIncludingFrame(leadingFootSupportPolygon);
-         if (nextStepPolygon != null)
-         {
-            for (int i = 0; i < nextStepPolygon.getNumberOfVertices(); i++)
-               onToesSupportPolygon.addVertex(nextStepPolygon.getVertex(i));
-         }
-
+         onToesSupportPolygon.setIncludingFrame(leadingSupportPolygon);
          onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
-         tmpPoint2d.setIncludingFrame(toeOffLine.getFirstEndpoint());
-         onToesSupportPolygon.addVertexMatchingFrame(tmpPoint2d, false);
-         tmpPoint2d.setIncludingFrame(toeOffLine.getSecondEndpoint());
-         onToesSupportPolygon.addVertexMatchingFrame(tmpPoint2d, false);
+         onToesSupportPolygon.addVertexMatchingFrame(toeOffLine.getFirstEndpoint(), false);
+         onToesSupportPolygon.addVertexMatchingFrame(toeOffLine.getSecondEndpoint(), false);
 
          onToesSupportPolygon.update();
 
@@ -797,17 +795,15 @@ public class ToeOffManager
    private class ToePointContact extends AbstractToeContact
    {
       @Override
-      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide, FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
-                                          FrameConvexPolygon2DReadOnly nextStepPolygon)
+      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2D desiredECMP, RobotSide trailingSide,
+                                          FrameConvexPolygon2DReadOnly leadingSupportPolygon)
       {
          if (exitCMP == null)
             computeToeContacts(trailingSide);
          else
             computeToeContacts(exitCMP, desiredECMP, trailingSide);
 
-         onToesSupportPolygon.setIncludingFrame(leadingFootSupportPolygon);
-         if (nextStepPolygon != null)
-            onToesSupportPolygon.addVertices(nextStepPolygon);
+         onToesSupportPolygon.setIncludingFrame(leadingSupportPolygon);
 
          onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
@@ -858,8 +854,6 @@ public class ToeOffManager
             computeToePointContact.set(true);
             return false;
          }
-
-
 
          // I don't care about the CoP location during transfer
          if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
