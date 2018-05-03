@@ -779,7 +779,7 @@ public class ToeOffManager
       @Override
       public boolean evaluateToeOffConditions(RobotSide trailingLeg)
       {
-         if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
             computeToeLineContact.set(true);
@@ -795,13 +795,6 @@ public class ToeOffManager
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getBooleanValue());
-            return false;
-         }
-
-         if (!isCurrentICPOKForToeOffFilt.getBooleanValue())
-         {
-            doLineToeOff.set(false);
-            computeToeLineContact.set(true);
             return false;
          }
 
@@ -828,7 +821,6 @@ public class ToeOffManager
             computeToeContacts(exitCMP, desiredECMP, trailingSide);
 
          onToesSupportPolygon.setIncludingFrame(leadingSupportPolygon);
-
          onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
          onToesSupportPolygon.addVertexMatchingFrame(toeOffPoint, false);
@@ -862,7 +854,7 @@ public class ToeOffManager
       @Override
       public boolean evaluateToeOffConditions(RobotSide trailingLeg)
       {
-         if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          {
             doPointToeOff.set(false);
             computeToePointContact.set(true);
@@ -878,13 +870,6 @@ public class ToeOffManager
          {
             doPointToeOff.set(true);
             computeToePointContact.set(updatePointContactDuringToeOff.getBooleanValue());
-            return false;
-         }
-
-         if (!isCurrentICPOKForToeOffFilt.getBooleanValue())
-         {
-            doPointToeOff.set(false);
-            computeToePointContact.set(true);
             return false;
          }
 
