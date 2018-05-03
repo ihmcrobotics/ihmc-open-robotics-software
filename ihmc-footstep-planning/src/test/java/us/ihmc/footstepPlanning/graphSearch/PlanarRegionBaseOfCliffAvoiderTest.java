@@ -29,6 +29,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
@@ -95,7 +96,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          staticLinkGraphics.addCoordinateSystem(1.0);
-         staticLinkGraphics.addPlanarRegionsList(planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
+         Graphics3DObjectTools.addPlanarRegionsList(staticLinkGraphics, planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
          scs.addStaticLinkGraphics(staticLinkGraphics);
          scs.startOnAThread();
          ThreadTools.sleepForever();

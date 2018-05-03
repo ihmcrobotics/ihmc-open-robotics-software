@@ -625,6 +625,11 @@ public class PlanarRegion
       return convexPolygons.size();
    }
 
+   public List<ConvexPolygon2D> getConvexPolygons()
+   {
+      return convexPolygons;
+   }
+
    /**
     * Returns the i<sup>th</sup> convex polygon representing a portion of this region. The polygon
     * is expressed in the region local coordinates.

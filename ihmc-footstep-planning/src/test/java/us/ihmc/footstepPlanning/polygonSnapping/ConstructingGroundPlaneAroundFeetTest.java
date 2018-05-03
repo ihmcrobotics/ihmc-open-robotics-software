@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -56,7 +57,7 @@ public class ConstructingGroundPlaneAroundFeetTest
          SimulationConstructionSet scs = new SimulationConstructionSet();
          Graphics3DObject graphics = new Graphics3DObject();
 
-         graphics.addPlanarRegionsList(planarRegionsList);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics, planarRegionsList);
          graphics.identity();
          graphics.translate(translation);
          graphics.addCoordinateSystem(0.2);

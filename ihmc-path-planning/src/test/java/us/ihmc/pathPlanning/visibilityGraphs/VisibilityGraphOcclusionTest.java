@@ -13,6 +13,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.List;
@@ -65,7 +66,7 @@ public class VisibilityGraphOcclusionTest
       SimulationConstructionSet scs = new SimulationConstructionSet();
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegionsList(planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
       scs.setGroundVisible(false);
 
       graphics3DObject.identity();
