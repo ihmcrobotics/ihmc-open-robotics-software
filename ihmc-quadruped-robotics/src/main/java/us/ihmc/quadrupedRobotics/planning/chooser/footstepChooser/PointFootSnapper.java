@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-public interface QuadrupedStepSnapper
+public interface PointFootSnapper
 {
    /**
     * Specifies the height of the terrain at the given world-frame xy position.

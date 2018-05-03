@@ -8,14 +8,14 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PlanarGroundQuadrupedStepSnapper implements QuadrupedStepSnapper
+public class PlanarGroundPointFootSnapper implements PointFootSnapper
 {
    private final AtomicReference<QuadrupedGroundPlaneMessage> groundPlaneMessage = new AtomicReference<>();
    private final Plane3D plane = new Plane3D();
 
    private final ReferenceFrame centroidFrame;
 
-   public PlanarGroundQuadrupedStepSnapper(QuadrupedReferenceFrames referenceFrames, PacketCommunicator packetCommunicator)
+   public PlanarGroundPointFootSnapper(QuadrupedReferenceFrames referenceFrames, PacketCommunicator packetCommunicator)
    {
       this.centroidFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       packetCommunicator.attachListener(QuadrupedGroundPlaneMessage.class, groundPlaneMessage::set);
