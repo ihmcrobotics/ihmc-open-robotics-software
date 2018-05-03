@@ -81,10 +81,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.image.DepthImage;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
-import us.ihmc.tools.image.DepthImage;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
