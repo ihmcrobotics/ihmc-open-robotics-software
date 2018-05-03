@@ -14,7 +14,7 @@ public class CinderBlockFieldPlanarRegionEnvironment extends PlanarRegionEnviron
    private static final double flatCinderBlockHeight = 0.08; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
    private static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
 
-   private static final double distanceToFirstCinderBlock = 0.5;
+   private static final double distanceToFirstCinderBlock = 0.75;
    private static final double gapBetweenCinderBlockSets = 1.0;
 
    public CinderBlockFieldPlanarRegionEnvironment()
