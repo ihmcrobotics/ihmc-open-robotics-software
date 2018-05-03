@@ -51,7 +51,8 @@ public class ToeOffManager
    private final YoBoolean doToeOffIfPossibleInDoubleSupport = new YoBoolean("doToeOffIfPossibleInDoubleSupport", registry);
    private final YoBoolean doToeOffIfPossibleInSingleSupport = new YoBoolean("doToeOffIfPossibleInSingleSupport", registry);
    private final YoBoolean doToeOffWhenHittingAnkleLimit = new YoBoolean("doToeOffWhenHittingAnkleLimit", registry);
-   private final YoBoolean doToeOffWhenHittingKneeLimit = new YoBoolean("doToeOffWhenHittingKneeLimit", registry);
+   private final YoBoolean doToeOffWhenHittingLeadingKneeUpperLimit = new YoBoolean("doToeOffWhenHittingLeadingKneeUpperLimit", registry);
+   private final YoBoolean doToeOffWhenHittingRearKneeLowerLimit = new YoBoolean("doToeOffWhenHittingRearKneeLowerLimit", registry);
    private final YoBoolean doPointToeOff = new YoBoolean("doPointToeOff", registry);
    private final YoBoolean doLineToeOff = new YoBoolean("doLineToeOff", registry);
 
@@ -64,6 +65,7 @@ public class ToeOffManager
 
    private final YoDouble ankleLowerLimitToTriggerToeOff = new YoDouble("ankleLowerLimitToTriggerToeOff", registry);
    private final YoDouble kneeUpperLimitToTriggerToeOff = new YoDouble("kneeUpperLimitToTriggerToeOff", registry);
+   private final YoDouble kneeLowerLimitToTriggerToeOff = new YoDouble("kneeLowerLimitToTriggerToeOff", registry);
    private final YoDouble icpPercentOfStanceForDSToeOff = new YoDouble("icpPercentOfStanceForDSToeOff", registry);
    private final YoDouble icpPercentOfStanceForSSToeOff = new YoDouble("icpPercentOfStanceForSSToeOff", registry);
    private final YoDouble icpProximityForDSToeOff = new YoDouble("icpProximityForDSToeOff", registry);
@@ -80,6 +82,7 @@ public class ToeOffManager
    private final YoBoolean needToSwitchToToeOffForJointLimit = new YoBoolean("needToSwitchToToeOffForJointLimit", registry);
    private final YoBoolean isRearAnklePitchHittingLimit = new YoBoolean("isRearAnklePitchHittingLimit", registry);
    private final YoBoolean isLeadingKneePitchHittingUpperLimit = new YoBoolean("isLeadingKneePitchHittingUpperLimit", registry);
+   private final YoBoolean isRearKneePitchHittingLowerLimit = new YoBoolean("isRearKneePitchHittingLowerLimit", registry);
 
    private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt", registry,
                                                                                                    isDesiredICPOKForToeOff, smallGlitchWindowSize);
@@ -94,6 +97,8 @@ public class ToeOffManager
                                                                                                         isRearAnklePitchHittingLimit, largeGlitchWindowSize);
    private final GlitchFilteredYoBoolean isLeadingKneePitchHittingUpperLimitFilt = new GlitchFilteredYoBoolean("isLeadingKneePitchHittingUpperLimitFilt", registry,
                                                                                                                isLeadingKneePitchHittingUpperLimit, largeGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isRearKneePitchHittingLowerLimitFilt = new GlitchFilteredYoBoolean("isRearKneePitchHittingLowerLimitFilt", registry,
+                                                                                                               isRearKneePitchHittingLowerLimit, largeGlitchWindowSize);
 
    private final YoDouble minStepLengthForToeOff = new YoDouble("minStepLengthForToeOff", registry);
    private final YoDouble minStepHeightForToeOff = new YoDouble("minStepHeightForToeOff", registry);
@@ -143,10 +148,12 @@ public class ToeOffManager
       this.doToeOffIfPossibleInSingleSupport.set(toeOffParameters.doToeOffIfPossibleInSingleSupport());
 
       this.doToeOffWhenHittingAnkleLimit.set(toeOffParameters.doToeOffWhenHittingAnkleLimit());
-      this.doToeOffWhenHittingKneeLimit.set(toeOffParameters.doToeOffWhenHittingKneeLimit());
+      this.doToeOffWhenHittingLeadingKneeUpperLimit.set(toeOffParameters.doToeOffWhenHittingKneeLimit());
+      this.doToeOffWhenHittingRearKneeLowerLimit.set(false); // TODO
 
       this.ankleLowerLimitToTriggerToeOff.set(toeOffParameters.getAnkleLowerLimitToTriggerToeOff());
       this.kneeUpperLimitToTriggerToeOff.set(toeOffParameters.getKneeUpperLimitToTriggerToeOff());
+      this.kneeLowerLimitToTriggerToeOff.set(0.0); // TODO
 
       this.icpPercentOfStanceForDSToeOff.set(toeOffParameters.getICPPercentOfStanceForDSToeOff());
       this.icpPercentOfStanceForSSToeOff.set(toeOffParameters.getICPPercentOfStanceForSSToeOff());
@@ -536,17 +543,30 @@ public class ToeOffManager
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
    }
 
-   private boolean checkKneeLimitForToeOff(RobotSide leadingLeg)
+   private boolean checkLeadingKneeUpperLimitForToeOff(RobotSide leadingLeg)
    {
       OneDoFJoint kneePitch = fullRobotModel.getLegJoint(leadingLeg, LegJointName.KNEE_PITCH);
       double upperLimit = Math.min(kneePitch.getJointLimitUpper() - 0.02, kneeUpperLimitToTriggerToeOff.getDoubleValue()); // todo extract variable
       isLeadingKneePitchHittingUpperLimit.set(kneePitch.getQ() > upperLimit);
       isLeadingKneePitchHittingUpperLimitFilt.update();
 
-      if (!doToeOffWhenHittingKneeLimit.getBooleanValue())
+      if (!doToeOffWhenHittingLeadingKneeUpperLimit.getBooleanValue())
          return false;
 
       return isLeadingKneePitchHittingUpperLimitFilt.getBooleanValue();
+   }
+
+   private boolean checkRearKneeLowerLimitForToeOff(RobotSide trailingLeg)
+   {
+      OneDoFJoint kneePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.KNEE_PITCH);
+      double lowerLimit = Math.max(kneePitch.getJointLimitLower() + 0.02, kneeLowerLimitToTriggerToeOff.getDoubleValue()); // todo extract variable
+      isRearKneePitchHittingLowerLimit.set(kneePitch.getQ() < lowerLimit);
+      isRearKneePitchHittingLowerLimitFilt.update();
+
+      if (!doToeOffWhenHittingRearKneeLowerLimit.getBooleanValue())
+         return false;
+
+      return isRearKneePitchHittingLowerLimitFilt.getBooleanValue();
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
@@ -772,9 +792,10 @@ public class ToeOffManager
          }
 
          boolean ankleAtLimit = checkAnkleLimitForToeOff(trailingLeg);
-         boolean kneeAtLimit = checkKneeLimitForToeOff(trailingLeg.getOppositeSide());
+         boolean leadingKneeAtLimit = checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
+         boolean trailingKneeAtLimit = checkRearKneeLowerLimitForToeOff(trailingLeg);
 
-         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || kneeAtLimit);
+         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
          if (needToSwitchToToeOffForJointLimit.getBooleanValue())
          {
             doLineToeOff.set(true);
@@ -854,8 +875,10 @@ public class ToeOffManager
          }
 
          boolean ankleAtLimit = checkAnkleLimitForToeOff(trailingLeg);
-         boolean kneeAtLimit = checkKneeLimitForToeOff(trailingLeg.getOppositeSide());
-         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || kneeAtLimit);
+         boolean leadingKneeAtLimit = checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
+         boolean trailingKneeAtLimit = checkRearKneeLowerLimitForToeOff(trailingLeg);
+
+         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
          if (needToSwitchToToeOffForJointLimit.getBooleanValue())
          {
             doPointToeOff.set(true);
