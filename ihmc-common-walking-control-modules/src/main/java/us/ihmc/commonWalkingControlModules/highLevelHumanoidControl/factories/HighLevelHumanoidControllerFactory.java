@@ -12,9 +12,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -99,6 +100,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final SideDependentList<String> footContactSensorNames;
    private final SideDependentList<String> wristSensorNames;
 
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+
    private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean createQueuedControllerCommandGenerator = false;
@@ -141,7 +144,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 
-   private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
+   private ContinuousStepGenerator continuousStepGenerator;
 
    public void createComponentBasedFootstepDataMessageGenerator()
    {
@@ -155,22 +158,35 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript, HeightMap heightMapForFootstepZ)
    {
-      if (footstepGenerator != null)
+      if (continuousStepGenerator != null)
          return;
 
       if (controllerToolbox != null)
       {
-         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
          double controlDT = controllerToolbox.getControlDT();
-         ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager,
-                                                                                                                       statusMessageOutputManager,
-                                                                                                                       walkingControllerParameters,
-                                                                                                                       headingAndVelocityEvaluationScriptParameters,
-                                                                                                                       referenceFrames, contactableFeet,
-                                                                                                                       controlDT, useHeadingAndVelocityScript,
-                                                                                                                       heightMapForFootstepZ, registry);
-         controllerToolbox.addUpdatable(footstepGenerator);
+         continuousStepGenerator = new ContinuousStepGenerator(registry);
+         continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
+         continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
+         continuousStepGenerator.configureWith(walkingControllerParameters);
+         continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
+         continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
+         if (heightMapForFootstepZ != null)
+            continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapForFootstepZ);
+
+         if (useHeadingAndVelocityScript)
+         {
+            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT, controllerToolbox.getYoTime(), headingAndVelocityEvaluationScriptParameters,
+                                                                                               registry);
+            continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
+            continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
+            controllerToolbox.addUpdatable(script);
+         }
+         else
+         {
+            continuousStepGenerator.setYoComponentProviders();
+         }
+         controllerToolbox.addUpdatable(continuousStepGenerator);
       }
       else
       {
@@ -334,6 +350,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                         JointDesiredOutputList lowLevelControllerOutput, InverseDynamicsJoint... jointsToIgnore)
    {
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
@@ -407,7 +424,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", registry, walkingControllerParameters.getContactThresholdForce());
       DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", registry, walkingControllerParameters.getCoPThresholdFraction());
-      DoubleProvider secondContactThresholdForce = new DoubleParameter("SecondContactThresholdForce", registry, walkingControllerParameters.getSecondContactThresholdForceIgnoringCoP());
+      DoubleProvider secondContactThresholdForce = new DoubleParameter("SecondContactThresholdForce", registry,
+                                                                       walkingControllerParameters.getSecondContactThresholdForceIgnoringCoP());
       DoubleProvider contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", registry, walkingControllerParameters.getContactThresholdHeight());
 
       for (RobotSide robotSide : RobotSide.values)
@@ -524,7 +542,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
                                                                                                 packetCommunicator, realtimeRos2Node);
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9,
+                                                                       MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollector(ControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);

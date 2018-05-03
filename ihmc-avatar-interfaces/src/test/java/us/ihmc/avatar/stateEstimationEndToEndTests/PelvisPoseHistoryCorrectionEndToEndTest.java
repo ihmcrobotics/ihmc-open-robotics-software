@@ -860,7 +860,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       AvatarSimulation avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
       avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
-      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walk");
+      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walkCSG");
       walk.set(true);
       return drcFlatGroundWalkingTrack;
    }

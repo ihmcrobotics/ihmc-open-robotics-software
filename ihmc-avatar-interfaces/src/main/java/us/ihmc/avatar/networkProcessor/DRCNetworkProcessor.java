@@ -62,6 +62,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupLidarScanLogger(params));
       tryToStartModule(() -> setupRemoteObjectDetectionFeedbackEndpoint(params));
+      tryToStartModule(() -> setupJoystickBasedContinuousSteppingModule(params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -385,6 +386,16 @@ public class DRCNetworkProcessor
          server.throwExceptionForUnregisteredPackets(false);
          PacketCommunicator reaCommunicator = PacketCommunicator.createCustomPacketCommunicator(server, REACommunicationKryoNetClassLists.getPublicNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
+         reaCommunicator.connect();
+      }
+   }
+
+   private void setupJoystickBasedContinuousSteppingModule(DRCNetworkModuleParameters parameters) throws IOException
+   {
+      if (parameters.isEnableJoystickBasedStepping())
+      {
+         PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.JOYSTICK_BASED_STEPPING, reaCommunicator);
          reaCommunicator.connect();
       }
    }
