@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -38,18 +39,16 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final YoFrameLineSegment2D motionLimitLine;
    private final YoFrameLineSegment2D adjustmentLineSegment;
 
-   private final DoubleProvider forwardLimit;
-   private final DoubleProvider backwardLimit;
+   private final DoubleProvider lengthLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
 
-   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
-                                                       String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, SteppingParameters steppingParameters, String yoNamePrefix,
+                                                       boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      forwardLimit = new DoubleParameter(yoNamePrefix + "ForwardReachabilityLimit", registry, icpOptimizationParameters.getForwardReachabilityLimit());
-      backwardLimit = new DoubleParameter(yoNamePrefix + "BackwardReachabilityLimit", registry, icpOptimizationParameters.getBackwardReachabilityLimit());
-      innerLimit = new DoubleParameter(yoNamePrefix + "LateralReachabilityInnerLimit", registry, icpOptimizationParameters.getLateralReachabilityInnerLimit());
-      outerLimit = new DoubleParameter(yoNamePrefix + "LateralReachabilityOuterLimit", registry, icpOptimizationParameters.getLateralReachabilityOuterLimit());
+      lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
+      innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
+      outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -120,8 +119,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       List<YoFramePoint2D> vertices = reachabilityVertices.get(supportSide);
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
-      double forwardLimit = this.forwardLimit.getValue();
-      double backwardLimit = this.backwardLimit.getValue();
+      double forwardLimit = lengthLimit.getValue();
+      double backwardLimit = -lengthLimit.getValue();
       double innerLimit = supportSide.negateIfLeftSide(this.innerLimit.getValue());
       double outerLimit = supportSide.negateIfLeftSide(this.outerLimit.getValue());
 

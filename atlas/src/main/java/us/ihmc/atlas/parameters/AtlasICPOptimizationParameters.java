@@ -173,27 +173,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getLateralReachabilityOuterLimit()
-   {
-      return runningOnRealRobot ? 0.5 : 0.85;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getLateralReachabilityInnerLimit()
-   {
-      return 0.18;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getForwardReachabilityLimit()
-   {
-      return runningOnRealRobot ? 0.65 : 0.9;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getBackwardReachabilityLimit()
    {
       return runningOnRealRobot ? -0.3 : -0.5;
