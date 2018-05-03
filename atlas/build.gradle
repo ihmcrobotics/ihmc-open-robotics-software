@@ -80,7 +80,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: "source"
 }
 
