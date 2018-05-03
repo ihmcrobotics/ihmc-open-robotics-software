@@ -3,11 +3,11 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.image.DepthImage;
+import us.ihmc.graphicsDescription.image.DepthImageCallback;
 import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.image.DepthImage;
-import us.ihmc.tools.image.DepthImageCallback;
 
 public class OffscreenBufferDepthImageServer   
 {
