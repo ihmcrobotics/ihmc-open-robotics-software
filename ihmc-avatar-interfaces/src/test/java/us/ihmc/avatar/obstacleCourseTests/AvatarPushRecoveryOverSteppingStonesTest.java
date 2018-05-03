@@ -138,6 +138,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       drcSimulationTestHelper.send(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
@@ -167,7 +169,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       Point3D center = new Point3D(-10.241987629532595, -0.8330256660954483, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      //drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       assertTrue(success);
 
