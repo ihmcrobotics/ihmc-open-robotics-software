@@ -91,7 +91,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -121,7 +121,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -158,7 +158,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -200,7 +200,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -237,7 +237,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
