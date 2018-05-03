@@ -341,7 +341,6 @@ public class ToeOffManager
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
                                                FramePoint2D desiredICP, FramePoint2D currentICP)
    {
-      nextFootstep = null;
       if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
       {
          doLineToeOff.set(false);
