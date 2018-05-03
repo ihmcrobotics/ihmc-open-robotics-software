@@ -3,7 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidarTestEnviroment;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestListener;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestParameters;
-import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestScan;
 
 public class JMELidar60FovTest extends LidarTestParameters implements LidarTestListener
 {
@@ -42,7 +42,7 @@ public class JMELidar60FovTest extends LidarTestParameters implements LidarTestL
       setLidarSweepEndAngle(30 * Math.PI / 180);
    }
 
-   public void notify(LidarScan gpuScan, LidarScan traceScan)
+   public void notify(LidarTestScan gpuScan, LidarTestScan traceScan)
    {
    }
 

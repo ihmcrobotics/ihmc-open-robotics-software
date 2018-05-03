@@ -99,7 +99,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -1554,24 +1553,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       JMEGPULidar gpuLidar = createGPULidar(pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
       gpuLidar.addGPULidarListener(listener);
-
-      return gpuLidar;
-   }
-
-   @Override
-   public JMEGPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
-   {
-      JMEGPULidar gpuLidar = createGPULidar(listener, lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(),
-            lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
-
-      return gpuLidar;
-   }
-
-   @Override
-   public JMEGPULidar createGPULidar(LidarScanParameters lidarScanParameters)
-   {
-      JMEGPULidar gpuLidar = createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(), lidarScanParameters.getFieldOfView(),
-            lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
 
       return gpuLidar;
    }

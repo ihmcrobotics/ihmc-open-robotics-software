@@ -25,7 +25,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {
@@ -258,18 +257,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
       return null;
    }
    
-   @Override
-   public GPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
-   {
-      return null;
-   }
-
-   @Override
-   public GPULidar createGPULidar(LidarScanParameters lidarScanParameters)
-   {
-      return null;
-   }
-	
 	@Override
 	public void play() {
 		

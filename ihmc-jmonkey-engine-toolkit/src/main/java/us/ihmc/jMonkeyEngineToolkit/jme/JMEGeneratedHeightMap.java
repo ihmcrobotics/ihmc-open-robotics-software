@@ -10,13 +10,13 @@ import com.jme3.scene.Node;
 import com.jme3.system.JmeSystem;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.SimpleLRUCache;
-import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEGeneratedHeightMap implements HeightMap
 {
@@ -43,12 +43,12 @@ public class JMEGeneratedHeightMap implements HeightMap
    private int lookups = 0;
    private int cacheHits = 0;
 
-   private final ThreadLocal<Ray3d> tempRay = new ThreadLocal<Ray3d>()
+   private final ThreadLocal<Line3D> tempRay = new ThreadLocal<Line3D>()
    {
       @Override
-      protected Ray3d initialValue()
+      protected Line3D initialValue()
       {
-         return new Ray3d(new Point3D(), new Vector3D(0.0, 0.0, -1.0));
+         return new Line3D(new Point3D(), new Vector3D(0.0, 0.0, -1.0));
       }
    };
 
@@ -111,7 +111,7 @@ public class JMEGeneratedHeightMap implements HeightMap
          return point;
       }
 
-      Ray3d ray = tempRay.get();
+      Line3D ray = tempRay.get();
       ray.getPoint().set(x, y, measurementHeight);
       jmeRayCollisionAdapter.setPickingGeometry(ray);
       Vector3D normal = new Vector3D();
