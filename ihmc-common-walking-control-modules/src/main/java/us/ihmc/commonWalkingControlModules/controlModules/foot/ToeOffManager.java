@@ -366,9 +366,11 @@ public class ToeOffManager
       }
 
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
-      setPolygonFromNextFootstep(nextFootSupportPolygon);
-      leadingFootSupportPolygon.addVertices(nextFootSupportPolygon);
-      leadingFootSupportPolygon.update();
+      if (setPolygonFromNextFootstep(nextFootSupportPolygon))
+      {
+         leadingFootSupportPolygon.addVertices(nextFootSupportPolygon);
+         leadingFootSupportPolygon.update();
+      }
 
       double percentProximity = icpPercentOfStanceForDSToeOff.getDoubleValue();
 
@@ -425,10 +427,10 @@ public class ToeOffManager
    /**
     * Sets the predicted support polygon of the leading support foot from the next footstep.
     */
-   private void setPolygonFromNextFootstep(FrameConvexPolygon2D polygonToPack)
+   private boolean setPolygonFromNextFootstep(FrameConvexPolygon2D polygonToPack)
    {
       if (nextFootstep == null)
-         throw new RuntimeException("The next footstep has not been set.");
+         return false;
 
       ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
       List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
@@ -445,6 +447,8 @@ public class ToeOffManager
          polygonToPack.setIncludingFrame(footstepSoleFrame, footPolygon);
       }
       polygonToPack.changeFrameAndProjectToXYPlane(worldFrame);
+
+      return true;
    }
 
    private void checkECMPLocation(FramePoint2D desiredECMP)
