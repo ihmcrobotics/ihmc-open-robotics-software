@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -15,8 +15,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar120FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidarSphere270FovTest;
-import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.lidar.LidarScanTest;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGPULidarTest implements LidarTestListener
@@ -105,15 +103,14 @@ public class JMEGPULidarTest implements LidarTestListener
          if (!scanPairs.isEmpty())
          {
             ScanPair pair = scanPairs.poll();
-            
-            LidarScanTest.assertLidarScanEquals(pair.gpuScan, pair.traceScan, 1e-7, (float) parameters.getGpuVsTraceTolerance());
+            assertTrue(pair.gpuScan.epsilonEquals(pair.traceScan, 1.0e-7, (float) parameters.getGpuVsTraceTolerance()));
             
             recordStatistics(pair.gpuScan, pair.traceScan);
          }
       }
    }
 
-   private void recordStatistics(LidarScan gpuScan, LidarScan traceScan)
+   private void recordStatistics(LidarTestScan gpuScan, LidarTestScan traceScan)
    {
       for (int i = 0; i < parameters.getScansPerSweep(); i++)
       {
@@ -122,7 +119,7 @@ public class JMEGPULidarTest implements LidarTestListener
       }
    }
 
-   public void notify(LidarScan gpuScan, LidarScan traceScan)
+   public void notify(LidarTestScan gpuScan, LidarTestScan traceScan)
    {
       scanPairs.add(new ScanPair(gpuScan, traceScan));
    }
@@ -134,10 +131,10 @@ public class JMEGPULidarTest implements LidarTestListener
 
    private class ScanPair
    {
-      private final LidarScan gpuScan;
-      private final LidarScan traceScan;
+      private final LidarTestScan gpuScan;
+      private final LidarTestScan traceScan;
 
-      public ScanPair(LidarScan gpuScan, LidarScan traceScan)
+      public ScanPair(LidarTestScan gpuScan, LidarTestScan traceScan)
       {
          this.gpuScan = gpuScan;
          this.traceScan = traceScan;

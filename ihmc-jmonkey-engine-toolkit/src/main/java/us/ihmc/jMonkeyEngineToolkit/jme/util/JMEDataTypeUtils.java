@@ -11,6 +11,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -25,7 +26,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.color.MutableColor;
-import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEDataTypeUtils
 {
@@ -185,14 +185,14 @@ public class JMEDataTypeUtils
       return ret;
    }
 
-   public static Ray ray3dToJMERay(Ray3d ray)
+   public static Ray ray3dToJMERay(Line3D ray)
    {
-      return new Ray(vecMathTuple3dToJMEVector3f(ray.getPoint()), vecMathTuple3dToJMEVector3f(ray.getVector()));
+      return new Ray(vecMathTuple3dToJMEVector3f(ray.getPoint()), vecMathTuple3dToJMEVector3f(ray.getDirection()));
    }
 
-   public static Ray3d jmeRayToRay3d(Ray ray)
+   public static Line3D jmeRayToRay3d(Ray ray)
    {
-      return new Ray3d(jmeVector3fToJ3DPoint3d(ray.getOrigin()), jmeVector3fToVecmathVector3d(ray.getDirection()));
+      return new Line3D(jmeVector3fToJ3DPoint3d(ray.getOrigin()), jmeVector3fToVecmathVector3d(ray.getDirection()));
    }
 
    public static Vector2f[] texCoord2fArrayToJMEVector2fArray(TexCoord2f[] texCoords)

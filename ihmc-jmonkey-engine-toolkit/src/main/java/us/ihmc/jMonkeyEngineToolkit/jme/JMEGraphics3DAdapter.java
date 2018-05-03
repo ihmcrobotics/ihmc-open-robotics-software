@@ -21,7 +21,6 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer.RenderType;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 
 /*
 * Pass-through class to avoid having to import JME on all projects
@@ -151,18 +150,6 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    public JMEGPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
       return jmeRenderer.createGPULidar(listener, pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
-   }
-
-   @Override
-   public JMEGPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
-   {
-      return jmeRenderer.createGPULidar(listener, lidarScanParameters);
-   }
-
-   @Override
-   public JMEGPULidar createGPULidar(LidarScanParameters lidarScanParameters)
-   {
-      return jmeRenderer.createGPULidar(lidarScanParameters);
    }
 
    @Override

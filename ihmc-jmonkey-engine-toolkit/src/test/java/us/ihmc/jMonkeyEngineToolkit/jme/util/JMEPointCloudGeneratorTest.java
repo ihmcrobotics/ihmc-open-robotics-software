@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestParameters;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestScan;
 
 public class JMEPointCloudGeneratorTest
 {
@@ -39,13 +39,18 @@ public class JMEPointCloudGeneratorTest
       
       float[] ranges = RandomNumbers.nextFloatArray(random, numPoints, 5.0f);
       
-      LidarScanParameters lidarScanParameters = new LidarScanParameters(numPoints, 2* Math.PI, 0, Double.POSITIVE_INFINITY);
+      LidarTestParameters lidarScanParameters = new LidarTestParameters();//numPoints, 2* Math.PI, 0, Double.POSITIVE_INFINITY);
+      lidarScanParameters.setScansPerSweep(numPoints);
+      lidarScanParameters.setLidarSweepStartAngle(-Math.PI);
+      lidarScanParameters.setLidarSweepEndAngle(Math.PI);
+      lidarScanParameters.setMinRange(0.0);
+      lidarScanParameters.setMaxRange(Double.POSITIVE_INFINITY);
       
       RigidBodyTransform startTransform = new RigidBodyTransform();
       RigidBodyTransform endTransform = new RigidBodyTransform();
       
       endTransform.setRotationRollAndZeroTranslation(Math.PI / 4);
-      LidarScan lidarScan = new LidarScan(lidarScanParameters, startTransform, endTransform, ranges, 1);
+      LidarTestScan lidarScan = new LidarTestScan(lidarScanParameters, startTransform, endTransform, ranges, 1);
       
       JMEPointCloudGenerator jmePointCloudGenerator = new JMEPointCloudGenerator(jmeGraphics3DAdapter.getRenderer().getAssetManager());
       

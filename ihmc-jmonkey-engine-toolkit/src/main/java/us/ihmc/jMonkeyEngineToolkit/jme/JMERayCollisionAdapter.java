@@ -8,12 +8,14 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMERayCollisionAdapter
 {
@@ -105,10 +107,10 @@ public class JMERayCollisionAdapter
       JMEDataTypeUtils.packJMEVector3fInVecMathTuple3d(vector3f, tuple3d);
    }
 
-   public void setPickingGeometry(Ray3d ray3d)
+   public void setPickingGeometry(Line3D ray3d)
    {
-      Point3D rayOrigin = ray3d.getPoint();
-      Vector3D rayDirection = ray3d.getVector();
+      Point3DBasics rayOrigin = ray3d.getPoint();
+      Vector3DBasics rayDirection = ray3d.getDirection();
 
       Vector3f rayOrigin3f = new Vector3f();
       Vector3f rayDirection3f = new Vector3f();
