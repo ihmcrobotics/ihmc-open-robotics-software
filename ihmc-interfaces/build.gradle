@@ -8,7 +8,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.0"
+      classpath "us.ihmc:ihmc-build:0.13.3"
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.7.3-alpha"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.6.11-alpha"
       classpath "org.ajoberstar:grgit:2.1.0"
