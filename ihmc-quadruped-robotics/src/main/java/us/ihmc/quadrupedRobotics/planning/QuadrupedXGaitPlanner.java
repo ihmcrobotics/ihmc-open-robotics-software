@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -22,7 +25,7 @@ public class QuadrupedXGaitPlanner
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final FramePose2D bodyPathPose = new FramePose2D();
-   private QuadrupedStepSnapper snapper = null;
+   private PointFootSnapper snapper = null;
 
    public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
@@ -221,7 +224,7 @@ public class QuadrupedXGaitPlanner
       thisStep.getTimeInterval().setEndTime(thisStepStartTime + thisStepDuration);
    }
 
-   public void setStepSnapper(QuadrupedStepSnapper snapper)
+   public void setStepSnapper(PointFootSnapper snapper)
    {
       this.snapper = snapper;
    }
