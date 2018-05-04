@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.optimization;
+package us.ihmc.simulationConstructionSetTools.optimization;
 
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;

@@ -26,6 +26,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
+   compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
 }
 
