@@ -64,6 +64,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
    @Override
    public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.0; // JCarff ToeOff
+      return 0.03; // JCarff ToeOff
    }
 }
