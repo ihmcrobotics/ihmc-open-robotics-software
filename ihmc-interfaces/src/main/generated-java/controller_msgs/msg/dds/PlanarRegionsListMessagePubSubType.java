@@ -42,7 +42,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -74,7 +74,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getPlanarRegions().size() <= 100)
+      if(data.getPlanarRegions().size() <= 1)
       cdr.write_type_e(data.getPlanarRegions());else
           throw new RuntimeException("planar_regions field exceeds the maximum length");
 

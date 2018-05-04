@@ -12,4 +12,4 @@ int32 region_id -1
 geometry_msgs/Point region_origin
 geometry_msgs/Vector3 region_normal
 Polygon2DMessage concave_hull
-Polygon2DMessage[] convex_polygons 
+Polygon2DMessage[<=1] convex_polygons

@@ -30,7 +30,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       concave_hull_ = new controller_msgs.msg.dds.Polygon2DMessage();
-      convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> (100, controller_msgs.msg.dds.Polygon2DMessage.class, new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
+      convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> (1, controller_msgs.msg.dds.Polygon2DMessage.class, new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
 
    }
 

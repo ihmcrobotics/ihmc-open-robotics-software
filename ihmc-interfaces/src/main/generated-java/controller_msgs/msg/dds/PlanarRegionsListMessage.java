@@ -20,7 +20,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
    public PlanarRegionsListMessage()
    {
-      planar_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> (100, controller_msgs.msg.dds.PlanarRegionMessage.class, new controller_msgs.msg.dds.PlanarRegionMessagePubSubType());
+      planar_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> (1, controller_msgs.msg.dds.PlanarRegionMessage.class, new controller_msgs.msg.dds.PlanarRegionMessagePubSubType());
 
    }
 
