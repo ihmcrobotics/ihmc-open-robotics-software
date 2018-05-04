@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.simulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.CommunicationOptions;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -15,7 +13,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
@@ -125,7 +122,6 @@ public class QuadrupedSimulationFactory
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private PacketCommunicator packetCommunicator;
-   private RealtimeRos2Node realtimeRos2Node;
    private GlobalDataProducer globalDataProducer;
    private RobotController headController;
    private QuadrupedControllerManager controllerManager;
@@ -254,21 +250,14 @@ public class QuadrupedSimulationFactory
          {
             if (useLocalCommunicator.get())
             {
-               if (CommunicationOptions.USE_KRYO)
-                  packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-               if (CommunicationOptions.USE_ROS2)
-                  realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+               packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
             }
             else
             {
-               if (CommunicationOptions.USE_KRYO)
-                  packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-               if (CommunicationOptions.USE_ROS2)
-                  realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+               packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
             }
 
-            if (CommunicationOptions.USE_KRYO)
-               packetCommunicator.connect();
+            packetCommunicator.connect();
          }
          catch (BindException bindException)
          {
@@ -360,7 +349,7 @@ public class QuadrupedSimulationFactory
    private void createControllerNetworkSubscriber()
    {
       if (useNetworking.get())
-         controllerManager.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("controllerNetworkSubscriber"), packetCommunicator, realtimeRos2Node);
+         controllerManager.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("controllerNetworkSubscriber"), packetCommunicator);
    }
 
    private void createGroundContactModel()

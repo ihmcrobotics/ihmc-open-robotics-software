@@ -55,7 +55,6 @@ public abstract class ToolboxModule
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
-   protected final RealtimeRos2Node realtimeRos2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
@@ -90,15 +89,10 @@ public abstract class ToolboxModule
       this.startYoVariableServer = startYoVariableServer;
       this.thisDesitination = toolboxDestination.ordinal();
       this.fullRobotModel = fullRobotModelToLog;
-      packetCommunicator = CommunicationOptions.USE_KRYO ?
-            PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList()) :
-            null;
-      realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, this.getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
-            null;
+      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator, realtimeRos2Node);
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
 
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
