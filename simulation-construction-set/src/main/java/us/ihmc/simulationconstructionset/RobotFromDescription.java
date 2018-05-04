@@ -3,9 +3,7 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
@@ -242,11 +240,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
       for (LidarSensorDescription lidarSensorDescription : lidarSensorDescriptions)
       {
-         String sensorName = lidarSensorDescription.getName();
-         RigidBodyTransform transform3d = lidarSensorDescription.getTransformToJoint();
-         LidarScanParameters lidarScanParameters = lidarSensorDescription.getLidarScanParameters();
-
-         LidarMount lidarMount = new LidarMount(transform3d, lidarScanParameters, sensorName);
+         LidarMount lidarMount = new LidarMount(lidarSensorDescription);
          joint.addLidarMount(lidarMount);
 
          //TODO: Should we really call addSensor here?

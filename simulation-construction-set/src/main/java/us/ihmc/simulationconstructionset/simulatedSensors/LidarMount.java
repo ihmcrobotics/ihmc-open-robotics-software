@@ -3,14 +3,14 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulatedSensor;
 
 public class LidarMount implements SimulatedSensor
 {
    
-   private final LidarScanParameters lidarScanParameters;
+   private final LidarSensorDescription description;
    protected RigidBodyTransform transformToHere = new RigidBodyTransform();
    private final RigidBodyTransform transformFromJoint;
    private GPULidar lidar;
@@ -18,11 +18,11 @@ public class LidarMount implements SimulatedSensor
 
    private Joint parentJoint;
    
-   public LidarMount(RigidBodyTransform transform3d, LidarScanParameters lidarScanParameters, String sensorName)
+   public LidarMount(LidarSensorDescription description)
    {
-      this.transformFromJoint = new RigidBodyTransform(transform3d);
-      this.lidarScanParameters = lidarScanParameters;
-      this.lidarName = sensorName;
+      this.description = description;
+      this.transformFromJoint = new RigidBodyTransform(description.getTransformToJoint());
+      this.lidarName = description.getName();
    }
 
    @Override
@@ -48,9 +48,9 @@ public class LidarMount implements SimulatedSensor
       this.lidar = lidar;
    }
 
-   public LidarScanParameters getLidarScanParameters()
+   public LidarSensorDescription getDescription()
    {
-      return lidarScanParameters;
+      return description;
    }
    
    @Override
