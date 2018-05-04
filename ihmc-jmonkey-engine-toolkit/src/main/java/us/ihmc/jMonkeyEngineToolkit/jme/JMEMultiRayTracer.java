@@ -9,7 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import com.jme3.app.Application;
 import com.jme3.scene.Node;
 
-import us.ihmc.robotics.geometry.Ray3d;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.tools.TimestampProvider;
 
 public class JMEMultiRayTracer
@@ -39,7 +39,7 @@ public class JMEMultiRayTracer
       this.childrenToIntersect = childrenToIntersect;
    }
 
-   public long scan(TimestampProvider timestampProvider, ArrayList<Ray3d> rays, double[] rawRayLengths)
+   public long scan(TimestampProvider timestampProvider, ArrayList<Line3D> rays, double[] rawRayLengths)
    {
       try
       {
@@ -87,7 +87,7 @@ public class JMEMultiRayTracer
          System.out.println("JMEMultiRayTracer: elapsed time outside of RenderThread has been " + (System.nanoTime() - time) * 1.0e-9 + " seconds.");
    }
 
-   public void reportDebugTimeToSetupPicking(final ArrayList<Ray3d> rays)
+   public void reportDebugTimeToSetupPicking(final ArrayList<Line3D> rays)
    {
       if (DEBUG)
          System.out.println("JMEMultiRayTracer: elapsed time setting up the scenegraph for picking " + (System.nanoTime() - time) * 1.0e-9 + " seconds.");
@@ -118,7 +118,7 @@ public class JMEMultiRayTracer
       });
    }
 
-   private double getPickDistance(Ray3d ray3d, Node rootNode)
+   private double getPickDistance(Line3D ray3d, Node rootNode)
    {
       rayCollisionAdapter.setPickingGeometry(ray3d);
       double pickDistance = rayCollisionAdapter.getPickDistance(rootNode);

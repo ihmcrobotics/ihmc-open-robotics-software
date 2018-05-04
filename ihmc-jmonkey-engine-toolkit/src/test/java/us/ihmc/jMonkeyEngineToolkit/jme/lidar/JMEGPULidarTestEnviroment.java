@@ -1,5 +1,7 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -14,12 +16,9 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
-import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.jMonkeyEngineToolkit.utils.lidar.Graphics3DLidarScan;
-import us.ihmc.robotics.lidar.LidarScan;
 
 public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
 {
@@ -33,10 +32,10 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
    private Graphics3DLidarScan traceLidarVisualization;
    private GPULidar gpuLidar;
    private RayTracingLidar rayTracingLidar;
-   private GPULidarScanBuffer gpuLidarScanBuffer;
+   private LinkedBlockingQueue<LidarTestScan> gpuLidarScanBuffer = new LinkedBlockingQueue<>();
    private LidarTestListener testListener;
-   private LidarScan gpuScan;
-   private LidarScan traceScan;
+   private LidarTestScan gpuScan;
+   private LidarTestScan traceScan;
 
    public void testAutomatically(LidarTestParameters params, LidarTestListener testListener)
    {
@@ -84,13 +83,10 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
       lidarNode = new Graphics3DNode("lidar", new Graphics3DObject());
       lidarNode.getGraphics3DObject().addModelFile("models/hokuyo.dae", YoAppearance.Black());
 
-      gpuLidarVisualization = new Graphics3DLidarScan(world, "gpuLidar", params.getScansPerSweep(), params.getMinRange(), params.getMaxRange(),
-              params.getShowScanRays(), params.getShowGpuPoints(), YoAppearance.Red());
-      traceLidarVisualization = new Graphics3DLidarScan(world, "traceLidar", params.getScansPerSweep(), params.getMinRange(), params.getMaxRange(), false,
-              params.getShowTracePoints(), YoAppearance.Blue());
+      gpuLidarVisualization = new Graphics3DLidarScan(world, "gpuLidar", params, YoAppearance.Red());
+      traceLidarVisualization = new Graphics3DLidarScan(world, "traceLidar", params, YoAppearance.Blue());
 
-      rayTracingLidar = new RayTracingLidar(world, params.getScansPerSweep(), params.getLidarSweepEndAngle() - params.getLidarSweepStartAngle(),
-              params.getMinRange(), params.getMaxRange(), 0);
+      rayTracingLidar = new RayTracingLidar(world, params, 0);
 //    rayTracingLidar.addCollisionNodes(sphereNode.getName());
       rayTracingLidar.addCollisionNodes(jmeSphereNode.getName());
       rayTracingLidar.addCollisionNodes(wallNode.getName());
@@ -115,9 +111,8 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
 
    private void startGpuLidar()
    {
-      gpuLidar = world.getGraphics3DAdapter().createGPULidar(params.getLidarScanParameters());
-      gpuLidarScanBuffer = new GPULidarScanBuffer(params.getLidarScanParameters());
-      gpuLidar.addGPULidarListener(gpuLidarScanBuffer);
+      gpuLidar = world.getGraphics3DAdapter().createGPULidar(params.getScansPerSweep(), params.getScanHeight(), params.getFieldOfView(), params.getMinRange(), params.getMaxRange());
+      gpuLidar.addGPULidarListener((scan, currentTransform, time) -> gpuLidarScanBuffer.add(new LidarTestScan(params, currentTransform, currentTransform, scan, 0)));
       gpuLidar.setTransformFromWorld(lidarNode.getTransform(), 0.0);
    }
 

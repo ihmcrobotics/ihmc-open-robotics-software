@@ -1,4 +1,4 @@
-package us.ihmc.jMonkeyEngineToolkit.utils.lidar;
+package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.Sphere3D;
@@ -11,7 +11,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
-import us.ihmc.robotics.lidar.LidarScan;
 
 public class Graphics3DLidarScan
 {
@@ -19,26 +18,17 @@ public class Graphics3DLidarScan
 
    private Graphics3DWorld world;
    private String lidarName;
-   private int scansPerSweep;
-   private double minRange;
-   private double maxRange;
+   private LidarTestParameters params;
    private AppearanceDefinition appearance;
-   private boolean showScanRays;
-   private boolean showScanPoints;
 
    private Graphics3DNode[] points;
    private Graphics3DNode[] rays;
 
-   public Graphics3DLidarScan(Graphics3DWorld world, String lidarName, int scansPerSweep, double minRange, double maxRange, boolean showScanRays,
-                             boolean showScanPoints, AppearanceDefinition appearance)
+   public Graphics3DLidarScan(Graphics3DWorld world, String lidarName, LidarTestParameters params, AppearanceDefinition appearance)
    {
       this.world = world;
       this.lidarName = lidarName;
-      this.scansPerSweep = scansPerSweep;
-      this.minRange = minRange;
-      this.maxRange = maxRange;
-      this.showScanRays = showScanRays;
-      this.showScanPoints = showScanPoints;
+      this.params = params;
       this.appearance = appearance;
 
       init();
@@ -46,26 +36,26 @@ public class Graphics3DLidarScan
 
    private void init()
    {
-      if (showScanPoints)
+      if (params.getShowTracePoints())
       {
          createPoints();
          world.addAllChildren(points);
       }
 
-      if (showScanRays)
+      if (params.getShowScanRays())
       {
          createRays();
          world.addAllChildren(rays);
       }
    }
 
-   public void update(LidarScan lidarScan)
+   public void update(LidarTestScan lidarScan)
    {
-      for (int i = 0; (i < lidarScan.size()) && (i < scansPerSweep); i++)
+      for (int i = 0; (i < lidarScan.size()) && (i < params.getScansPerSweep()); i++)
       {
-         if (showScanPoints)
+         if (params.getShowTracePoints())
          {
-            if ((lidarScan.getRange(i) < minRange) || (lidarScan.getRange(i) > maxRange))
+            if ((lidarScan.getRange(i) < params.getMinRange()) || (lidarScan.getRange(i) > params.getMaxRange()))
             {
                points[i].setTransform(new AffineTransform());
             }
@@ -76,7 +66,7 @@ public class Graphics3DLidarScan
                Point3D p = new Point3D(lidarScan.getRange(i) + (SPHERE_RADIUS * 1.1), 0.0, 0.0);
                RigidBodyTransform transform = new RigidBodyTransform();
                lidarScan.getInterpolatedTransform(i, transform);
-               transform.multiply(lidarScan.getSweepTransform(i));
+               transform.multiply(RayTracingLidar.getSweepTransform(params, i));
                transform.transform(p);
 
                pointTransform.setTranslation(new Vector3D32(p));
@@ -85,11 +75,11 @@ public class Graphics3DLidarScan
             }
          }
 
-         if (showScanRays)
+         if (params.getShowScanRays())
          {
             RigidBodyTransform rayTransform = new RigidBodyTransform();
             lidarScan.getInterpolatedTransform(i, rayTransform);
-            rayTransform.multiply(lidarScan.getSweepTransform(i));
+            rayTransform.multiply(RayTracingLidar.getSweepTransform(params, i));
             rays[i].setTransform(rayTransform);
          }
       }
@@ -97,6 +87,7 @@ public class Graphics3DLidarScan
 
    private void createPoints()
    {
+      int scansPerSweep = params.getScansPerSweep();
       points = new Graphics3DNode[scansPerSweep];
 
       for (int i = 0; i < scansPerSweep; i++)
@@ -108,6 +99,7 @@ public class Graphics3DLidarScan
 
    private void createRays()
    {
+      int scansPerSweep = params.getScansPerSweep();
       rays = new Graphics3DNode[scansPerSweep];
 
       for (int i = 0; i < scansPerSweep; i++)

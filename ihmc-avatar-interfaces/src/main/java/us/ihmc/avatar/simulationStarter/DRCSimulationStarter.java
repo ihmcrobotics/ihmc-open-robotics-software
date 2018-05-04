@@ -1,5 +1,13 @@
 package us.ihmc.avatar.simulationStarter;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
@@ -62,14 +70,6 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {

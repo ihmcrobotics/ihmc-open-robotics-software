@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.simulation;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -20,7 +21,6 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
-import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -41,7 +41,8 @@ public class SimpleLidarRobotController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("Messaging"), ExceptionHandling.CATCH_AND_REPORT);
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("Messaging"),
+                                                                                                                  ExceptionHandling.CATCH_AND_REPORT);
 
    private final YoBoolean spinLidar = new YoBoolean("spinLidar", registry);
    private final YoDouble desiredLidarVelocity = new YoDouble("desiredLidarVelocity", registry);
@@ -53,7 +54,7 @@ public class SimpleLidarRobotController implements RobotController
 
    private final LidarScanParameters lidarScanParameters;
    private final GPULidar gpuLidar;
-   private final GPULidarScanBuffer gpuLidarScanBuffer;
+   private final LinkedBlockingQueue<LidarScan> gpuLidarScanBuffer = new LinkedBlockingQueue<>();
    private final int vizualizeEveryNPoints = 5;
    private final BagOfBalls sweepViz;
 
@@ -62,7 +63,7 @@ public class SimpleLidarRobotController implements RobotController
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("region", 100, 150, registry);
 
    public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, PacketCommunicator packetCommunicator, Graphics3DAdapter graphics3dAdapter,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.dt = dt;
       this.packetCommunicator = packetCommunicator;
@@ -87,10 +88,14 @@ public class SimpleLidarRobotController implements RobotController
       });
 
       lidarScanParameters = lidarRobot.getLidarScanParameters();
-      gpuLidarScanBuffer = new GPULidarScanBuffer(lidarScanParameters);
-      gpuLidar = graphics3dAdapter.createGPULidar(gpuLidarScanBuffer, lidarScanParameters);
+      gpuLidar = graphics3dAdapter.createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(),
+                                                  lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
+      gpuLidar.addGPULidarListener((scan, currentTransform,
+                                    time) -> gpuLidarScanBuffer.add(new LidarScan(lidarScanParameters, new RigidBodyTransform(currentTransform),
+                                                                                  new RigidBodyTransform(currentTransform), scan)));
       if (LidarFastSimulation.VISUALIZE_GPU_LIDAR)
-         sweepViz = BagOfBalls.createRainbowBag(lidarScanParameters.getPointsPerSweep() / vizualizeEveryNPoints, 0.005, "SweepViz", registry, yoGraphicsListRegistry);
+         sweepViz = BagOfBalls.createRainbowBag(lidarScanParameters.getPointsPerSweep() / vizualizeEveryNPoints, 0.005, "SweepViz", registry,
+                                                yoGraphicsListRegistry);
       else
          sweepViz = null;
       yoGraphicPlanarRegionsList.hideGraphicObject();

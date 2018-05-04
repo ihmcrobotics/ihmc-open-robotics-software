@@ -15,7 +15,6 @@ import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
 import us.ihmc.graphicsDescription.input.mouse.MouseListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public interface Graphics3DAdapter 
 {
@@ -62,10 +61,6 @@ public interface Graphics3DAdapter
    public GPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange);
 
    public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange);
-   
-   public GPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters);
-   
-   public GPULidar createGPULidar(LidarScanParameters lidarScanParameters);
    
    public void play();
 

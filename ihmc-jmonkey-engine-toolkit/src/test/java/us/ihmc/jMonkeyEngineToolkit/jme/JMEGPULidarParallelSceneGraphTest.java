@@ -18,11 +18,10 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestParameters;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestScan;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarScanVisualizer;
 import us.ihmc.jMonkeyEngineToolkit.utils.FlatHeightMap;
-import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGPULidarParallelSceneGraphTest
@@ -38,7 +37,12 @@ public class JMEGPULidarParallelSceneGraphTest
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(getClass().getSimpleName(), new JMEGraphics3DAdapter(true));
       final JMERenderer renderer = world.getGraphics3DAdapter().getRenderer();
 
-      final LidarScanParameters scanParameters = new LidarScanParameters(720, Math.PI / 2, 0.2, 1e3);
+      LidarTestParameters scanParameters = new LidarTestParameters();//numPoints, 2* Math.PI, 0, Double.POSITIVE_INFINITY);
+      scanParameters.setScansPerSweep(720);
+      scanParameters.setLidarSweepStartAngle(-Math.PI / 4.0);
+      scanParameters.setLidarSweepEndAngle(Math.PI / 4.0);
+      scanParameters.setMinRange(0.2);
+      scanParameters.setMaxRange(1e3);
 
       final JMELidarScanVisualizer visualizer = new JMELidarScanVisualizer();
 
@@ -76,28 +80,28 @@ public class JMEGPULidarParallelSceneGraphTest
 
       world.addChild(lidarNode);
 
-      final JMEGPULidar gpuLidar = renderer.createGPULidar(scanParameters);
+      final JMEGPULidar gpuLidar = renderer.createGPULidar(scanParameters.getScansPerSweep(), scanParameters.getScanHeight(), scanParameters.getFieldOfView(), scanParameters.getMinRange(), scanParameters.getMaxRange());
       gpuLidar.setTransformFromWorld(lidarNode.getTransform(), 0.0);
       gpuLidar.addGPULidarListener(new GPULidarListener()
       {
          @Override
          public void scan(float[] scan, RigidBodyTransform currentTransform, double time)
          {
-            LidarScan lidarScan = new LidarScan(scanParameters, currentTransform, currentTransform, scan, 1);
+            LidarTestScan lidarScan = new LidarTestScan(scanParameters, currentTransform, currentTransform, scan, 1);
 
             visualizer.updateLidarNodeTransform(lidarNode.getTransform());
             visualizer.addPointCloud(lidarScan.getAllPoints3f());
 
             RigidBodyTransform newTransform = new RigidBodyTransform(currentTransform);
 
-            TransformTools.appendRotation(newTransform, Math.PI / 1e2, Axis.X);
+            newTransform.appendRollRotation(Math.PI / 1e2);
 
             renderer.enqueue(new Callable<Object>()
             {
                @Override
                public Object call() throws Exception
                {
-                  TransformTools.appendRotation(lidarNode.getTransform(), Math.PI / 1e2, Axis.X);
+                  lidarNode.getTransform().appendRollRotation(Math.PI / 1e2);
 
                   return null;
                }
