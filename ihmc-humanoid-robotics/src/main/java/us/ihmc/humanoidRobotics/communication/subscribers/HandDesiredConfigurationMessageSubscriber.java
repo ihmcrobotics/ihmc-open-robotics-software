@@ -2,8 +2,8 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandDesiredConfigurationMessageSubscriber implements PacketConsumer<HandDesiredConfigurationMessage>

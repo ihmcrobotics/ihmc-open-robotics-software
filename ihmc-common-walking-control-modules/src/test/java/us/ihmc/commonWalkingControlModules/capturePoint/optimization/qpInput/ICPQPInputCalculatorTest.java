@@ -40,7 +40,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -73,7 +73,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testAngularMomentumRateTask()
    {
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -98,7 +98,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -182,7 +182,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testFootstepRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -278,7 +278,7 @@ public class ICPQPInputCalculatorTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithFeedbackAndAngularMomentum()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -517,7 +517,7 @@ public class ICPQPInputCalculatorTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithFeedback()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -764,7 +764,7 @@ public class ICPQPInputCalculatorTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithAngularMomentum()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1008,7 +1008,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testComputeDynamicsTaskWithSeparateAdjustment()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1256,7 +1256,7 @@ public class ICPQPInputCalculatorTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1306,7 +1306,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1363,7 +1363,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitAngularMomentumRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1400,7 +1400,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1485,7 +1485,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackAndAngularMomentumTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1536,7 +1536,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackAndDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1607,7 +1607,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1679,7 +1679,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepAndDynamicsTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -1782,7 +1782,7 @@ public class ICPQPInputCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSubmitFeedbackAndFootstepAndDynamicsAndAngularMomentumTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();

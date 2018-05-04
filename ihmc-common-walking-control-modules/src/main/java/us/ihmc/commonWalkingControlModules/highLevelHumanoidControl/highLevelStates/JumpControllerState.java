@@ -61,12 +61,6 @@ public class JumpControllerState extends HighLevelControllerState
          controllerCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       if (setupControllerCoreForInverseKinematics)
          controllerCoreToolbox.setupForInverseKinematicsSolver();
-      if (setupControllerCoreForVirutalModelControl)
-      {
-         RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
-         controllerCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies,
-                                                                 controllerCoreToolbox.getContactablePlaneBodies());
-      }
 
       controllerCoreToolbox.setJointPrivilegedConfigurationParameters(jumpingControlParameters.getJointPrivilegedConfigurationParameters());
 
@@ -86,7 +80,7 @@ public class JumpControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       jumpController.doAction();
       ControllerCoreCommand controllerCoreCommand = jumpController.getControllerCoreCommand();
@@ -109,15 +103,14 @@ public class JumpControllerState extends HighLevelControllerState
    }
  
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       initialize();
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
 
    }
-
 }

@@ -7,6 +7,9 @@ byte FOOTSTEP_STATUS_COMPLETED = 1
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # The current footstep status enum value.
 byte footstep_status 255
 # footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.

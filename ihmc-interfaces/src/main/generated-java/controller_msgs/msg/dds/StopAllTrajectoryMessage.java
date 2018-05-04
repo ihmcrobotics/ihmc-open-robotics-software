@@ -1,11 +1,21 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
-public class StopAllTrajectoryMessage implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
+/**
+       * This message is part of the IHMC whole-body controller API.
+       * Stop the execution of any trajectory being executed.
+       */
+public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage> implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
 {
-   private boolean unused_placeholder_field_;
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public long sequence_id_;
 
    public StopAllTrajectoryMessage()
    {
@@ -13,34 +23,50 @@ public class StopAllTrajectoryMessage implements Settable<StopAllTrajectoryMessa
 
    public StopAllTrajectoryMessage(StopAllTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(StopAllTrajectoryMessage other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
+      sequence_id_ = other.sequence_id_;
+
    }
 
-   public boolean getUnusedPlaceholderField()
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public void setSequenceId(long sequence_id)
    {
-      return unused_placeholder_field_;
+      sequence_id_ = sequence_id;
+   }
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
+
+   public static Supplier<StopAllTrajectoryMessagePubSubType> getPubSubType()
    {
-      unused_placeholder_field_ = unused_placeholder_field;
+      return StopAllTrajectoryMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return StopAllTrajectoryMessagePubSubType::new;
    }
 
    @Override
    public boolean epsilonEquals(StopAllTrajectoryMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       return true;
    }
@@ -48,17 +74,14 @@ public class StopAllTrajectoryMessage implements Settable<StopAllTrajectoryMessa
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof StopAllTrajectoryMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof StopAllTrajectoryMessage)) return false;
 
       StopAllTrajectoryMessage otherMyClass = (StopAllTrajectoryMessage) other;
 
-      if (this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
 
       return true;
    }
@@ -69,9 +92,8 @@ public class StopAllTrajectoryMessage implements Settable<StopAllTrajectoryMessa
       StringBuilder builder = new StringBuilder();
 
       builder.append("StopAllTrajectoryMessage {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
-
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append("}");
       return builder.toString();
    }

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -13,6 +15,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,7 +23,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -33,64 +35,64 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.0)
+   @Test(timeout = 180000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.8)
+   @Test(timeout = 79000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 31.8)
+   @Test(timeout = 160000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 51.8)
+   @Test(timeout = 260000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 26.3)
+   @Test(timeout = 130000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 19.3)
+   @Test(timeout = 97000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 32.6)
+   @Test(timeout = 160000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.7)
+   @Test(timeout = 190000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
@@ -100,8 +102,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
     * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
     * This bug was due to limiting the angle described by a Quaternion to be in [-Pi; Pi].
     */
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.6)
+   @Test(timeout = 150000)
    public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -137,11 +139,13 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       Quaternion waypointOrientation1 = new Quaternion();
       waypoint0.get(waypointPosition0, waypointOrientation0);
       waypoint1.get(waypointPosition1, waypointOrientation1);
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 2);
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chest.getBodyFixedFrame());
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D(), worldFrame);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+      handTrajectoryMessage.setRobotSide(robotSide.toByte());
+      SE3TrajectoryMessage se3Trajectory = handTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chest.getBodyFixedFrame()));
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D()));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
 
       drcSimulationTestHelper.send(handTrajectoryMessage);
 

@@ -15,10 +15,14 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::HeightQuadTreeMessage_")
       struct HeightQuadTreeMessage
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         float default_height;
         float resolution;
-        float x_size;
-        float y_size;
+        float size_x;
+        float size_y;
         sequence<controller_msgs::msg::dds::HeightQuadTreeLeafMessage, 5000> leaves;
       };
     };

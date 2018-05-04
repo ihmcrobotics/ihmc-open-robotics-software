@@ -31,11 +31,12 @@ public class TabSaver
       saveDefaultTabs();
    }
 
-   public void loadTab(TabPane tabPane, Map<String, Tuner> tunerMap)
+   public TuningTab loadTab(TabPane tabPane, Map<String, Tuner> tunerMap)
    {
       ImmutablePair<TuningTab, File> filePair = TabSavingTools.loadTab(tabPane, tunerMap, getWindow());
       activeTabs.add(filePair);
       saveDefaultTabs();
+      return filePair.getLeft();
    }
 
    public void loadDefaultTabs(TabPane tabPane, Map<String, Tuner> tunerMap)

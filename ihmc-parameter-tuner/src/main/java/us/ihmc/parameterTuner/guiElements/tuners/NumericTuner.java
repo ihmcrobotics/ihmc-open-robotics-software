@@ -1,12 +1,13 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public abstract class NumericTuner<T extends Number> extends HBox implements InputNode
@@ -16,9 +17,13 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    private final NumericSpinner<T> max = createSpinner();
    private final NumericSlider<T> slider = createSlider();
 
+   private final String parameterName;
+   private boolean haveSliderBoundsBeenInvalid = false;
+
    public NumericTuner(GuiParameter parameter)
    {
       setupNode();
+      parameterName = parameter.getName();
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
@@ -32,7 +37,7 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          Platform.runLater(() -> parameter.setMax(max.getValueAsText()));
       });
 
-      // Use the slider value when it gets clicked or dragged and released.
+      // Use the slider value when it gets clicked or dragged and released. Otherwise unwanted rounding will happen.
       slider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
          if (!newValue && oldValue)
          {
@@ -52,7 +57,6 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    {
       setSpacing(10.0);
       setAlignment(Pos.CENTER_LEFT);
-      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
       HBox.setHgrow(slider, Priority.ALWAYS);
 
       getChildren().add(new Text("Value"));
@@ -89,5 +93,43 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
       duplicate.setPrefHeight(height);
       duplicate.setPrefWidth(width);
       return duplicate;
+   }
+
+   @Override
+   public Node getFullInputNode()
+   {
+      return this;
+   }
+
+   @Override
+   public void setValueFromPercent(double percent)
+   {
+      if (slider.isDisabled())
+      {
+         if (!haveSliderBoundsBeenInvalid)
+         {
+            PrintTools.warn("Slider bounds not valid for " + parameterName + ".");
+         }
+         haveSliderBoundsBeenInvalid = true;
+         return;
+      }
+      haveSliderBoundsBeenInvalid = false;
+
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double newValue = min + percent * (max - min);
+
+      double rounded = slider.roundToPrecision(newValue);
+      rounded = MathTools.clamp(rounded, min, max);
+      value.setValue(slider.toNumber(rounded));
+   }
+
+   @Override
+   public double getValuePercent()
+   {
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double value = slider.toDouble(this.value.getValue());
+      return MathTools.clamp((value - min) / (max - min), 0.0, 1.0);
    }
 }

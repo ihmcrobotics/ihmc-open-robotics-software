@@ -1,21 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "KinematicsToolboxConfigurationMessage" defined in "KinematicsToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from KinematicsToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit KinematicsToolboxConfigurationMessage_.idl instead.
- */
-public class KinematicsToolboxConfigurationMessagePubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage>
+* 
+* Topic data type of the struct "KinematicsToolboxConfigurationMessage" defined in "KinematicsToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from KinematicsToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit KinematicsToolboxConfigurationMessage_.idl instead.
+*
+*/
+public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::KinematicsToolboxConfigurationMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public KinematicsToolboxConfigurationMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,12 +40,16 @@ public class KinematicsToolboxConfigurationMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -46,89 +63,79 @@ public class KinematicsToolboxConfigurationMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPrivilegedRootJointPosition(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getPrivilegedRootJointOrientation(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getPrivilegedJointNameBasedHashCodes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getPrivilegedJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPrivilegedRootJointPosition(), cdr);
-
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getPrivilegedRootJointOrientation(), cdr);
+      if(data.getPrivilegedJointNameBasedHashCodes().size() <= 100)
+      cdr.write_type_e(data.getPrivilegedJointNameBasedHashCodes());else
+          throw new RuntimeException("privileged_joint_name_based_hash_codes field exceeds the maximum length");
 
-      if (data.getPrivilegedJointNameBasedHashCodes().size() <= 100)
-         cdr.write_type_e(data.getPrivilegedJointNameBasedHashCodes());
-      else
-         throw new RuntimeException("privileged_joint_name_based_hash_codes field exceeds the maximum length");
+      if(data.getPrivilegedJointAngles().size() <= 100)
+      cdr.write_type_e(data.getPrivilegedJointAngles());else
+          throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
 
-      cdr.write_type_5(data.getPrivilegedJointAngles());
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getPrivilegedRootJointPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);	
+      cdr.read_type_e(data.getPrivilegedJointNameBasedHashCodes());	
+      cdr.read_type_e(data.getPrivilegedJointAngles());	
 
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getPrivilegedRootJointPosition(), cdr);
-
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);
-
-      cdr.read_type_e(data.getPrivilegedJointNameBasedHashCodes());
-
-      data.setPrivilegedJointAngles(cdr.read_type_5());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src,
-                                 controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());
 
       ser.write_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
       ser.write_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
-
-      ser.write_type_5("privileged_joint_angles", data.getPrivilegedJointAngles());
+      ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());
 
       ser.read_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
       ser.read_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
+      ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
+   }
 
-      data.setPrivilegedJointAngles(ser.read_type_5("privileged_joint_angles"));
+   public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override
@@ -136,7 +143,6 @@ public class KinematicsToolboxConfigurationMessagePubSubType
    {
       return new controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -148,7 +154,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -158,7 +164,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)
    {
       staticCopy(src, dest);

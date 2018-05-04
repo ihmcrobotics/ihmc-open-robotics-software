@@ -25,8 +25,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * Test functionality of CoPPointsInFoot
@@ -66,7 +66,7 @@ public class CoPPointsInFootTest
       registry.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddCoPPointToList()
    {
@@ -80,7 +80,7 @@ public class CoPPointsInFootTest
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddandSetIncludingFrameWithFramePoint()
    {
@@ -93,12 +93,12 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.2, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
-      YoFramePoint testLocation1 = new YoFramePoint("TestLocation1", footSpoof.getSoleFrame(), null);
-      YoFramePoint testLocation2 = new YoFramePoint("TestLocation2", footSpoof.getSoleFrame(), null);
+      YoFramePoint3D testLocation1 = new YoFramePoint3D("TestLocation1", footSpoof.getSoleFrame(), null);
+      YoFramePoint3D testLocation2 = new YoFramePoint3D("TestLocation2", footSpoof.getSoleFrame(), null);
       testLocation1.set(Math.random(), Math.random(), Math.random());
       testLocation2.set(Math.random(), Math.random(), Math.random());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.HEEL_COP, 0.87, testLocation1);
@@ -134,7 +134,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition(), epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSetFeetLocations()
    {
@@ -177,7 +177,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + zToAnkle);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRegisterFrame()
    {
@@ -214,7 +214,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + newFrameOriginZ);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testVisualization()
    {

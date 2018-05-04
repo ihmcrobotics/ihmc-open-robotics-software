@@ -12,11 +12,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -34,15 +37,11 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -55,9 +54,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
@@ -75,6 +76,7 @@ public class FootstepSnapperSimulationTest
 
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
       FootstepDataMessage footstepData = new FootstepDataMessage();
+      footstepData.setRobotSide(RobotSide.LEFT.toByte());
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2D desiredPose = new FramePose2D(ReferenceFrame.getWorldFrame());
 
@@ -542,9 +544,9 @@ public class FootstepSnapperSimulationTest
 
                   String footside = tokenizer.nextToken();
                   if (footside == "l_foot")
-                     footstepData.robotSide = RobotSide.LEFT.toByte();
+                     footstepData.setRobotSide(RobotSide.LEFT.toByte());
                   if (footside == "r_foot")
-                     footstepData.robotSide = RobotSide.RIGHT.toByte();
+                     footstepData.setRobotSide(RobotSide.RIGHT.toByte());
 
                   for (int i = 5; i < 8; i++)
                   {
@@ -554,7 +556,7 @@ public class FootstepSnapperSimulationTest
                   position.setX(Double.parseDouble(tokenizer.nextToken()));
                   position.setY(Double.parseDouble(tokenizer.nextToken()));
                   position.setZ(Double.parseDouble(tokenizer.nextToken()));
-                  footstepData.location = position;
+                  footstepData.getLocation().set(position);
                }
 
                if (numberOfTokens == 9)
@@ -562,7 +564,7 @@ public class FootstepSnapperSimulationTest
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
                   RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3D(0.0, 0.0, 1.0), orientation);
-                  footstepData.setOrientation(orientation);
+                  footstepData.getOrientation().set(orientation);
                }
             }
 
@@ -594,9 +596,9 @@ public class FootstepSnapperSimulationTest
       private final YoDouble soleY = new YoDouble("soleY", registry);
       private final YoDouble soleZ = new YoDouble("soleZ", registry);
       private final YoDouble soleYaw = new YoDouble("soleYaw", registry);
-      private final YoFramePose planePose = new YoFramePose("planePose", "", worldFrame, registry);
-      private final YoFramePoint queryPoint = new YoFramePoint("query", "", worldFrame, registry);
-      private final YoFramePoint planePoint = new YoFramePoint("planePoint", "", worldFrame, registry);
+      private final YoFramePoseUsingYawPitchRoll planePose = new YoFramePoseUsingYawPitchRoll("planePose", "", worldFrame, registry);
+      private final YoFramePoint3D queryPoint = new YoFramePoint3D("query", "", worldFrame, registry);
+      private final YoFramePoint3D planePoint = new YoFramePoint3D("planePoint", "", worldFrame, registry);
       private BagOfBalls pointListBalls = null;
 
 
@@ -619,13 +621,13 @@ public class FootstepSnapperSimulationTest
             robot.getRobotsYoVariableRegistry().addChild(registry);
             YoGraphicsListRegistry yoGraphicsListRegistry = footstepVisualizer.getGraphicsListRegistry();
 
-            ConvexPolygon2D polygon2d = new ConvexPolygon2D(new double[][]
+            ConvexPolygon2D polygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][]
             {
                {0.1, 0.1}, {0.1, -0.1}, {-0.1, -0.1}, {-0.1, 0.1}
-            });
+            }));
 
-            YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("plane", "", worldFrame, 4, registry);
-            yoFrameConvexPolygon2d.setConvexPolygon2d(polygon2d);
+            YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D("plane", "", worldFrame, 4, registry);
+            yoFrameConvexPolygon2d.set(polygon2d);
 
 //          YoGraphicPolygon polygonViz = new YoGraphicPolygon("plane", yoFrameConvexPolygon2d, planePose, 1.0, YoAppearance.Gold());
 //          yoGraphicsListRegistry.registerYoGraphic("Plane", polygonViz);

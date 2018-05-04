@@ -4,12 +4,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class TimeBasedPerturbance implements RobotController
 {
@@ -18,9 +18,9 @@ public class TimeBasedPerturbance implements RobotController
 
    private final ForcePerturbable perturbable;
    
-   private final YoFrameVector perturbanceForce;
-   private final YoFrameVector2d perturbanceUnitVector;
-   private YoFramePoint perturbanceApplicationPoint;
+   private final YoFrameVector3D perturbanceForce;
+   private final YoFrameVector2D perturbanceUnitVector;
+   private YoFramePoint3D perturbanceApplicationPoint;
    
    private double xNegForce = 0.0;
    private double xPosForce = 0.0;
@@ -45,8 +45,8 @@ public class TimeBasedPerturbance implements RobotController
       this.perturbable = perturbable;
       this.name = name;
       
-      this.perturbanceForce = new YoFrameVector("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
-      this.perturbanceUnitVector = new YoFrameVector2d("kDirectionedExtForce", "", ReferenceFrame.getWorldFrame(), registry);
+      this.perturbanceForce = new YoFrameVector3D("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
+      this.perturbanceUnitVector = new YoFrameVector2D("kDirectionedExtForce", "", ReferenceFrame.getWorldFrame(), registry);
 
       this.timeToDoPerturbance.set(timeToDoPerturbance);
       this.time = time;
@@ -103,7 +103,7 @@ public class TimeBasedPerturbance implements RobotController
 
    private void populateDynamicsGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      perturbanceApplicationPoint = new YoFramePoint("perturbanceApplicationPoint", "", ReferenceFrame.getWorldFrame(), registry);
+      perturbanceApplicationPoint = new YoFramePoint3D("perturbanceApplicationPoint", "", ReferenceFrame.getWorldFrame(), registry);
       
       YoGraphicVector perturbanceVisual = new YoGraphicVector("perturbanceVisual" + name, perturbanceApplicationPoint, perturbanceForce, 0.005, YoAppearance.BlackMetalMaterial());
       yoGraphicsListRegistry.registerYoGraphic(name, perturbanceVisual);

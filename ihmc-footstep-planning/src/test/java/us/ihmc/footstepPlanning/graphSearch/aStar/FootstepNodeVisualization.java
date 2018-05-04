@@ -14,9 +14,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
@@ -51,7 +52,7 @@ public class FootstepNodeVisualization implements GraphVisualization
       String listName = getClass().getSimpleName();
       for (int i = 0; i < maxNodes; i++)
       {
-         YoFramePoint yoPoint = new YoFramePoint("ActiveNode" + i, worldFrame, registry);
+         YoFramePoint3D yoPoint = new YoFramePoint3D("ActiveNode" + i, worldFrame, registry);
          yoPoint.setToNaN();
          YoGraphicPosition yoGraphic = new YoGraphicPosition("ActiveNode " + i, yoPoint, 0.025, YoAppearance.Green());
          activeNodeGraphicsQueue.add(yoGraphic);
@@ -60,7 +61,7 @@ public class FootstepNodeVisualization implements GraphVisualization
 
       for (int i = 0; i < maxNodes; i++)
       {
-         YoFramePoint yoPoint = new YoFramePoint("InactiveNode" + i, worldFrame, registry);
+         YoFramePoint3D yoPoint = new YoFramePoint3D("InactiveNode" + i, worldFrame, registry);
          yoPoint.setToNaN();
          YoGraphicPosition yoGraphic = new YoGraphicPosition("InactiveNode " + i, yoPoint, 0.025, YoAppearance.Red());
          inactiveNodeGraphicsQueue.add(yoGraphic);
@@ -72,7 +73,7 @@ public class FootstepNodeVisualization implements GraphVisualization
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       if (regions != null)
-         graphics3DObject.addPlanarRegionsList(regions);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       scs.addYoVariableRegistry(registry);

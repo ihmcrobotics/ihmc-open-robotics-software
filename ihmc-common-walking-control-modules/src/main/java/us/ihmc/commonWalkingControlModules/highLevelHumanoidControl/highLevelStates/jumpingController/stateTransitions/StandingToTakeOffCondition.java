@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.stateTransitions;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.StandingState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionAction;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
 
 public class StandingToTakeOffCondition implements StateTransitionCondition, StateTransitionAction
 {

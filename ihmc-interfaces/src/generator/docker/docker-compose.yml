@@ -1,0 +1,9 @@
+version: "2"
+services:
+  ros1-bridge-build:
+    image: ihmc/ros1-bridge
+    container_name: ros1-bridge-build
+    build:
+      context: .
+    volumes:
+      - ./../../main/messages:/not/sure/where

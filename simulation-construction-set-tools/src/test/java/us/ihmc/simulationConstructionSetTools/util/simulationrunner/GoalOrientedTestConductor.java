@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -15,6 +15,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
+
+import static org.junit.Assert.fail;
 
 public class GoalOrientedTestConductor implements SimulationDoneListener
 {
@@ -34,8 +36,10 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private final AtomicBoolean createAssertionFailedException = new AtomicBoolean();
    private final AtomicBoolean printSuccessMessage = new AtomicBoolean();
+   private final AtomicBoolean scsHasCrashed = new AtomicBoolean();
 
    private String assertionFailedMessage = null;
+   private String scsCrashedException = null;
    
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
    {
@@ -164,6 +168,9 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       
       assertionFailedMessage = message.toString();
    }
+
+   public void setTerrainObject3D(TerrainObject3D terrainObject3D)
+   {}
    
    private void stop()
    {
@@ -182,12 +189,13 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
       createAssertionFailedException.set(false);
       printSuccessMessage.set(false);
+      scsHasCrashed.set(false);
       
       printSimulatingMessage();
-      
+
       scs.simulate();
 
-      while (!createAssertionFailedException.get() && !printSuccessMessage.get())
+      while (!createAssertionFailedException.get() && !printSuccessMessage.get() && !scsHasCrashed.get())
       {
          Thread.yield();
       }
@@ -201,6 +209,12 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          printSuccessMessage();
          stop();
+      }
+      else if(scsHasCrashed.get())
+      {
+         stop();
+         PrintTools.error(scsCrashedException);
+         fail();
       }
       
       //wait to see if scs threw any exceptions
@@ -289,7 +303,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    @Override
    public void simulationDone()
    {
-      
    }
 
    @Override
@@ -299,6 +312,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          PrintTools.error(throwable.getMessage());
       }
-      assertionFailedMessage = throwable.getMessage();
+      scsCrashedException = throwable.getMessage();
+      scsHasCrashed.set(true);
    }
 }

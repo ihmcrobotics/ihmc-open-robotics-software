@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "OneDoFJointTrajectoryMessage" defined in "OneDoFJointTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from OneDoFJointTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit OneDoFJointTrajectoryMessage_.idl instead.
- */
+* 
+* Topic data type of the struct "OneDoFJointTrajectoryMessage" defined in "OneDoFJointTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from OneDoFJointTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit OneDoFJointTrajectoryMessage_.idl instead.
+*
+*/
 public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::OneDoFJointTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public OneDoFJointTrajectoryMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,12 +41,12 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 2000; ++i0)
-      {
-         current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 2000; ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -47,34 +61,56 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getTrajectoryPoints().size(); ++i0)
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getTrajectoryPoints().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType
-               .getCdrSerializedSize(data.getTrajectoryPoints().get(i0), current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getCdrSerializedSize(data.getTrajectoryPoints().get(i0), current_alignment);}
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
-      if (data.getTrajectoryPoints().size() <= 2000)
-         cdr.write_type_e(data.getTrajectoryPoints());
-      else
-         throw new RuntimeException("trajectory_points field exceeds the maximum length");
+      if(data.getTrajectoryPoints().size() <= 2000)
+      cdr.write_type_e(data.getTrajectoryPoints());else
+          throw new RuntimeException("trajectory_points field exceeds the maximum length");
 
       cdr.write_type_6(data.getWeight());
+
    }
 
    public static void read(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
-      cdr.read_type_e(data.getTrajectoryPoints());
-
+      data.setSequenceId(cdr.read_type_4());
+      	
+      cdr.read_type_e(data.getTrajectoryPoints());	
       data.setWeight(cdr.read_type_6());
+      	
+
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_e("trajectory_points", data.getTrajectoryPoints());
+      ser.write_type_6("weight", data.getWeight());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      ser.read_type_e("trajectory_points", data.getTrajectoryPoints());
+      data.setWeight(ser.read_type_6("weight"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage src, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage dest)
@@ -83,45 +119,10 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_e("trajectory_points", data.getTrajectoryPoints());
-
-      ser.write_type_6("weight", data.getWeight());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data)
-   {
-      ser.read_type_e("trajectory_points", data.getTrajectoryPoints());
-
-      data.setWeight(ser.read_type_6("weight"));
-   }
-
-   @Override
    public controller_msgs.msg.dds.OneDoFJointTrajectoryMessage createData()
    {
       return new controller_msgs.msg.dds.OneDoFJointTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -133,7 +134,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -143,7 +144,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage src, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage dest)
    {
       staticCopy(src, dest);

@@ -1,21 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "HumanoidKinematicsToolboxConfigurationMessage" defined in "HumanoidKinematicsToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from HumanoidKinematicsToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit HumanoidKinematicsToolboxConfigurationMessage_.idl instead.
- */
-public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage>
+* 
+* Topic data type of the struct "HumanoidKinematicsToolboxConfigurationMessage" defined in "HumanoidKinematicsToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from HumanoidKinematicsToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HumanoidKinematicsToolboxConfigurationMessage_.idl instead.
+*
+*/
+public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HumanoidKinematicsToolboxConfigurationMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public HumanoidKinematicsToolboxConfigurationMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,9 +40,12 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -43,67 +59,59 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
 
       cdr.write_type_7(data.getHoldSupportFootPositions());
+
    }
 
    public static void read(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
-
+      	
       data.setHoldSupportFootPositions(cdr.read_type_7());
-   }
+      	
 
-   public static void staticCopy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src,
-                                 controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload,
-                           controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data) throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
-
       ser.write_type_7("hold_support_foot_positions", data.getHoldSupportFootPositions());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
-
       data.setHoldSupportFootPositions(ser.read_type_7("hold_support_foot_positions"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override
@@ -111,7 +119,6 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
    {
       return new controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -123,7 +130,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -133,9 +140,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType
    {
       read(data, cdr);
    }
-
-   public void copy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src,
-                    controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)
+   
+   public void copy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)
    {
       staticCopy(src, dest);
    }

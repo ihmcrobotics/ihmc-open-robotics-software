@@ -17,8 +17,9 @@ package us.ihmc.ros2.atlasMock;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import us.ihmc.ros2.RosNode;
-import us.ihmc.ros2.RosPublisher;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Publisher;
 
 import java.io.IOException;
 
@@ -26,8 +27,8 @@ public class MockAtlasController
 {
    public static void main(String[] args) throws IOException, InterruptedException
    {
-      RosNode node = new RosNode("MockAtlasController");
-      RosPublisher<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
+      Ros2Node node = new Ros2Node(PubSubImplementation.FAST_RTPS, "MockAtlasController");
+      Ros2Publisher<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
 
       for (int i = 0; true; i++)
       {
@@ -35,7 +36,9 @@ public class MockAtlasController
          RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
          // Pack message with data
-         robotConfigurationData.getHeader().getStamp().setNanosec(i);
+//         robotConfigurationData.getHeader().getStamp().setNanosec(i);
+         robotConfigurationData.setTimestamp(i);
+         System.out.println("Publishing timestamp: " + i);
 
          // Publish message, thread safe, copies data into another preallocated holder for sending
          publisher.publish(robotConfigurationData);

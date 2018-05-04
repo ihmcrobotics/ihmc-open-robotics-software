@@ -77,7 +77,7 @@ public class FlightState extends AbstractJumpState
    {
       wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
       pelvisManager.maintainDesiredOrientationOnly();
-      feetManager.compute();
+      feetManager.compute(getTimeInCurrentState());
       for (RobotSide side : RobotSide.values)
          handManagers.get(side).compute();
       chestManager.compute();

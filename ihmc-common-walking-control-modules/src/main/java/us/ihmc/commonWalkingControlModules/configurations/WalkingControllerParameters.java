@@ -292,6 +292,7 @@ public abstract class WalkingControllerParameters extends AbstractHighLevelContr
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getContactThresholdForce();
 
    /**
@@ -303,6 +304,7 @@ public abstract class WalkingControllerParameters extends AbstractHighLevelContr
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // move this to the state estimator parameters
    public abstract double getSecondContactThresholdForceIgnoringCoP();
 
    /**
@@ -314,6 +316,7 @@ public abstract class WalkingControllerParameters extends AbstractHighLevelContr
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#WrenchBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public abstract double getCoPThresholdFraction();
 
    /**
@@ -324,6 +327,7 @@ public abstract class WalkingControllerParameters extends AbstractHighLevelContr
     * This will be used if the foot switch type as defined in {@link #getFootSwitchType()} is set to
     * {@link FootSwitchType#KinematicBased}
     */
+   @Deprecated // this is duplicated in the state estimator parameters
    public double getContactThresholdHeight()
    {
       return 0.05;

@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -76,7 +76,12 @@ public class FootstepTestHelper
 
    public List<Footstep> convertToFootsteps(FootstepDataListMessage footstepDataListMessage)
    {
-      return footstepDataListMessage.footstepDataList.stream().map(this::convertToFootstep).collect(Collectors.toList());
+      List<Footstep> ret = new ArrayList<>();
+      for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+      {
+         ret.add(convertToFootstep(footstepDataListMessage.getFootstepDataList().get(i)));
+      }
+      return ret;
    }
 
    public Footstep convertToFootstep(FootstepDataMessage footstepDataMessage)
@@ -85,8 +90,8 @@ public class FootstepTestHelper
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);
-      if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
-         footstep.setPredictedContactPoints(footstepDataMessage.getPredictedContactPoints());
+      if (footstepDataMessage.getPredictedContactPoints2d() != null && !footstepDataMessage.getPredictedContactPoints2d().isEmpty())
+         footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepDataMessage));
       else
          footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 

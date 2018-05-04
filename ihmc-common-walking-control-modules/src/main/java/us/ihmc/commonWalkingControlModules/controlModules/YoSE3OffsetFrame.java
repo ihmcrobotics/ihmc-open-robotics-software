@@ -5,21 +5,21 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
-   private final YoFrameVector translationToParent;
+   private final YoFrameVector3D translationToParent;
    private final YoFrameQuaternion rotationToParent;
 
    /**
     * Creates a new reference frame with a mutable offset to its parent frame.
     * <p>
-    * The offset to the parent frame is backed by a {@link YoFrameVector} and a
+    * The offset to the parent frame is backed by a {@link YoFrameVector3D} and a
     * {@link YoFrameQuaternion} internally.
     * </p>
     * 
@@ -31,7 +31,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    {
       super(frameName, parentFrame);
 
-      translationToParent = new YoFrameVector(frameName, parentFrame, registry);
+      translationToParent = new YoFrameVector3D(frameName, parentFrame, registry);
       rotationToParent = new YoFrameQuaternion(frameName, parentFrame, registry);
    }
 

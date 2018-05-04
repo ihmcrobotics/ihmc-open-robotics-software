@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -16,7 +16,7 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
@@ -24,7 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class REAOcTreeUpdater
 {
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
    private final NormalOcTree referenceOctree;
    private final REAOcTreeBuffer reaOcTreeBuffer;
 
@@ -42,7 +42,7 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, REAMessager reaMessager, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, Messager reaMessager, PacketCommunicator publicPacketCommunicator)
    {
       this.referenceOctree = octree;
       reaOcTreeBuffer = buffer;
@@ -193,6 +193,6 @@ public class REAOcTreeUpdater
 
    private void handlePacket(LidarScanMessage lidarScanMessage)
    {
-      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.lidarPosition, lidarScanMessage.lidarOrientation));
+      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.getLidarPosition(), lidarScanMessage.getLidarOrientation()));
    }
 }

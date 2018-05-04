@@ -1,21 +1,32 @@
 package us.ihmc.robotics.geometry;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.interfaces.Line2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
@@ -25,7 +36,7 @@ public class ConvexPolygonTools
    /**
     * Assumes that the polygons are disjoint. Find the vertex indices corresponding to the end
     * points of the two connecting edges.
-    * 
+    *
     * @param polygon1 the first polygon
     * @param polygon2 the second polygon
     * @param verticesIndices in[2][2] contains the indexes of the connecting edges end points. The
@@ -35,7 +46,7 @@ public class ConvexPolygonTools
     *           the second connecting edge.
     * @return success (false = failed, true = succeeded)
     */
-   public static boolean findConnectingEdgesVerticesIndexes(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, int[][] verticesIndices)
+   public static boolean findConnectingEdgesVerticesIndexes(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, int[][] verticesIndices)
    {
       boolean success = false;
 
@@ -147,6 +158,8 @@ public class ConvexPolygonTools
       return true;
    }
 
+   private final int[][] verticesIndices = new int[2][2];
+
    /**
     * Efficiently combines two Disjoint Polygons. Returns false if not disjoint.
     *
@@ -160,11 +173,10 @@ public class ConvexPolygonTools
     *           polygon2.
     * @return true if succeeded, false if failed
     */
-   public static boolean combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, ConvexPolygon2D combinedPolygonToPack,
-                                                 LineSegment2DBasics connectingEdge1ToPack, LineSegment2DBasics connectingEdge2Topack)
+   public boolean combineDisjointPolygons(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, ConvexPolygon2DBasics combinedPolygonToPack,
+                                          LineSegment2DBasics connectingEdge1ToPack, LineSegment2DBasics connectingEdge2Topack)
    {
 
-      int[][] verticesIndices = new int[2][2];
       boolean success = findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices);
       if (!success)
          return false;
@@ -179,10 +191,9 @@ public class ConvexPolygonTools
       return true;
    }
 
-   public static boolean findConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2DBasics connectingEdge1ToPack,
-                                             LineSegment2DBasics connectingEdge2Topack)
+   public boolean findConnectingEdges(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                      LineSegment2DBasics connectingEdge2Topack)
    {
-      int[][] verticesIndices = new int[2][2];
       boolean success = findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices);
       if (!success)
          return false;
@@ -191,39 +202,22 @@ public class ConvexPolygonTools
       return true;
    }
 
-   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2DBasics connectingEdge1ToPack,
-                                          LineSegment2DBasics connectingEdge2ToPack, int[][] verticesIndices)
+   protected static void getConnectingEdges(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                            LineSegment2DBasics connectingEdge2ToPack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
-   /**
-    * Efficiently combines two Disjoint Polygons. Returns null if not disjoint. Note: Generates
-    * garbage!
-    *
-    * @param polygon1 ConvexPolygon2d
-    * @param polygon2 ConvexPolygon2d
-    * @return ConvexPolygon2dAndConnectingEdges
-    */
-   public static ConvexPolygon2dAndConnectingEdges combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2)
-   {
-      ConvexPolygon2D combinedPolygon = new ConvexPolygon2D();
-      LineSegment2D connectingEdge1 = new LineSegment2D();
-      LineSegment2D connectingEdge2 = new LineSegment2D();
-      boolean success = combineDisjointPolygons(polygon1, polygon2, combinedPolygon, connectingEdge1, connectingEdge2);
-      if (!success)
-         return null;
-
-      return new ConvexPolygon2dAndConnectingEdges(combinedPolygon, connectingEdge1, connectingEdge2);
-   }
-
-   public static ConvexPolygon2D computeIntersectionOfPolygons(ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ)
-   {
-      ConvexPolygon2D intersection = new ConvexPolygon2D();
-      boolean success = computeIntersectionOfPolygons(polygonP, polygonQ, intersection);
-      return success ? intersection : null;
-   }
+   private final Vector2D caliperForPolygonP = new Vector2D();
+   private final Vector2D caliperForPolygonQ = new Vector2D();
+   private final Point2D lineStart = new Point2D();
+   private final Point2D lineEnd = new Point2D();
+   private final TIntArrayList bridgeIndicesP = new TIntArrayList();
+   private final TIntArrayList bridgeIndicesQ = new TIntArrayList();
+   private final TIntArrayList bridgeWasOnLeft = new TIntArrayList();
+   private final Vector2D vectorToNextPointOnPolygonP = new Vector2D();
+   private final Vector2D vectorToNextPointOnPolygonQ = new Vector2D();
 
    /**
     * Computes the intersection of two convex polygons. For references see:
@@ -234,7 +228,8 @@ public class ConvexPolygonTools
     * @param polygonQ ConvexPolygon2d
     * @return ConvexPolygon2d Intersection of polygonP and polygonQ
     */
-   public static boolean computeIntersectionOfPolygons(ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   public boolean computeIntersectionOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
+                                                ConvexPolygon2DBasics intersectingPolygonToPack)
    {
       // return false if either polygon null
       if (polygonP == null || polygonP.isEmpty())
@@ -263,22 +258,22 @@ public class ConvexPolygonTools
       }
 
       // Find left most point on polygon1
-      int currentPPolygonPointIndex = polygonP.getMinXIndex();
-      int initialPolygonPIndex = polygonP.getMinXIndex();
+      int currentPPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonP, true, Bound.MIN, Bound.MIN);
+      int initialPolygonPIndex = currentPPolygonPointIndex;
       Point2DReadOnly currentPolygonPPoint = polygonP.getVertex(currentPPolygonPointIndex);
 
       // Find left most point on polygon2
-      int currentQPolygonPointIndex = polygonQ.getMinXIndex();
-      int initialPolygonQIndex = polygonQ.getMinXIndex();
+      int currentQPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
+      int initialPolygonQIndex = currentQPolygonPointIndex;
       Point2DReadOnly currentPolygonQPoint = polygonQ.getVertex(currentQPolygonPointIndex);
 
       // At each of those two vertices, place a vertical line passing through it. Associate that line to the polygon to which the vertex belongs.
-      Vector2D caliperForPolygonP = new Vector2D(0.0, 1.0);
-      Vector2D caliperForPolygonQ = new Vector2D(0.0, 1.0);
+      caliperForPolygonP.set(0.0, 1.0);
+      caliperForPolygonQ.set(0.0, 1.0);
 
       // determine which side polygon2's caliper line is on relative to polygon1's caliper line
-      Point2D lineStart = new Point2D(currentPolygonPPoint);
-      Point2D lineEnd = new Point2D(currentPolygonPPoint);
+      lineStart.set(currentPolygonPPoint);
+      lineEnd.set(currentPolygonPPoint);
       lineEnd.add(caliperForPolygonP);
       boolean isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
       boolean wasOnLeft = isOnLeft;
@@ -290,9 +285,9 @@ public class ConvexPolygonTools
       boolean DONE = false;
 
       int bridgeCount = 0;
-      ArrayList<Integer> bridgeIndicesP = new ArrayList<Integer>();
-      ArrayList<Integer> bridgeIndicesQ = new ArrayList<Integer>();
-      ArrayList<Boolean> bridgeWasOnLeft = new ArrayList<Boolean>();
+      bridgeIndicesP.reset();
+      bridgeIndicesQ.reset();
+      bridgeWasOnLeft.reset();
 
       do
       {
@@ -306,7 +301,7 @@ public class ConvexPolygonTools
          // If the line passes through more than one vertex of the assciated polygon, the farthest (in clockwise order) is taken.
 
          // find angle from current to next point for polygon1
-         Vector2D vectorToNextPointOnPolygonP = new Vector2D(polygonP.getNextVertex(currentPPolygonPointIndex));
+         vectorToNextPointOnPolygonP.set(polygonP.getNextVertex(currentPPolygonPointIndex));
          vectorToNextPointOnPolygonP.sub(polygonP.getVertex(currentPPolygonPointIndex));
          vectorToNextPointOnPolygonP.normalize();
 
@@ -315,7 +310,7 @@ public class ConvexPolygonTools
          double dotProductToNextPointOnPolygonP = caliperForPolygonP.dot(vectorToNextPointOnPolygonP); // Math.acos(vectorToNextPointOnPolygon1.getY());
 
          // find angle from current to next point for polygon2
-         Vector2D vectorToNextPointOnPolygonQ = new Vector2D(polygonQ.getNextVertex(currentQPolygonPointIndex));
+         vectorToNextPointOnPolygonQ.set(polygonQ.getNextVertex(currentQPolygonPointIndex));
          vectorToNextPointOnPolygonQ.sub(polygonQ.getVertex(currentQPolygonPointIndex));
          vectorToNextPointOnPolygonQ.normalize();
 
@@ -357,8 +352,8 @@ public class ConvexPolygonTools
          // the order of the two lines has changed.
 
          // detemine which side polygon Q's caliper line is on relative to polygon P's caliper lline
-         lineStart = new Point2D(currentPolygonPPoint);
-         lineEnd = new Point2D(currentPolygonPPoint);
+         lineStart.set(currentPolygonPPoint);
+         lineEnd.set(currentPolygonPPoint);
          lineEnd.add(caliperForPolygonP);
          isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
 
@@ -385,7 +380,7 @@ public class ConvexPolygonTools
             {
                bridgeIndicesP.add(currentPPolygonPointIndex);
                bridgeIndicesQ.add(currentQPolygonPointIndex);
-               bridgeWasOnLeft.add(wasOnLeft);
+               bridgeWasOnLeft.add(wasOnLeft ? 1 : 0);
 
                // bridgeIndices1[bridgeCount] = currentPPolygonPointIndex;
                // bridgeIndices2[bridgeCount] = currentQPolygonPointIndex;
@@ -429,12 +424,12 @@ public class ConvexPolygonTools
          // check to see if a polygons is contained in another.
          if (polygonP.isPointInside(polygonQ.getVertex(0)))
          {
-            intersectingPolygonToPack.setAndUpdate(polygonQ);
+            intersectingPolygonToPack.set(polygonQ);
          }
 
          if (polygonQ.isPointInside(polygonP.getVertex(0)))
          {
-            intersectingPolygonToPack.setAndUpdate(polygonP);
+            intersectingPolygonToPack.set(polygonP);
          }
       }
       else
@@ -451,12 +446,13 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(ConvexPolygon2D polygonWithExactlyOneVertex,
-                                                                                       ConvexPolygon2D otherPolygon, ConvexPolygon2D intersectingPolygon)
+   private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(ConvexPolygon2DReadOnly polygonWithExactlyOneVertex,
+                                                                                       ConvexPolygon2DReadOnly otherPolygon,
+                                                                                       ConvexPolygon2DBasics intersectingPolygon)
    {
       if (otherPolygon.pointIsOnPerimeter(polygonWithExactlyOneVertex.getVertex(0)))
       {
-         intersectingPolygon.setAndUpdate(polygonWithExactlyOneVertex);
+         intersectingPolygon.set(polygonWithExactlyOneVertex);
          return false;
       }
       else
@@ -466,28 +462,41 @@ public class ConvexPolygonTools
       }
    }
 
-   private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2D polygonWithExactlyTwoVertices,
-                                                                                                                         ConvexPolygon2D polygonWithAtLeastTwoVertices,
-                                                                                                                         ConvexPolygon2D intersectingPolygon)
-   {
-      LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D(polygonWithExactlyTwoVertices.getVertex(0),
-                                                                            polygonWithExactlyTwoVertices.getVertex(1));
-      Point2D[] intersection = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment);
+   private final LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D();
+   private final Point2D intersection1 = new Point2D();
+   private final Point2D intersection2 = new Point2D();
 
-      if (intersection == null)
+   private boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
+                                                                                                                  ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices,
+                                                                                                                  ConvexPolygon2DBasics intersectingPolygon)
+   {
+      polygonWithTwoVerticesAsLineSegment.set(polygonWithExactlyTwoVertices.getVertex(0), polygonWithExactlyTwoVertices.getVertex(1));
+      int intersections = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment, intersection1, intersection2);
+
+      if (intersections == 0)
       {
          intersectingPolygon.clearAndUpdate();
          return false;
       }
+      else if (intersections == 1)
+      {
+         intersectingPolygon.clear();
+         intersectingPolygon.addVertex(intersection1);
+         intersectingPolygon.update();
+         return true;
+      }
       else
       {
-         intersectingPolygon.setAndUpdate(intersection, intersection.length);
+         intersectingPolygon.clear();
+         intersectingPolygon.addVertex(intersection1);
+         intersectingPolygon.addVertex(intersection2);
+         intersectingPolygon.update();
          return true;
       }
    }
 
-   private static int[][] findCrossingIndices(boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ, ConvexPolygon2D polygonP,
-                                              ConvexPolygon2D polygonQ)
+   private static boolean findCrossingIndices(boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ, ConvexPolygon2DReadOnly polygonP,
+                                              ConvexPolygon2DReadOnly polygonQ, TIntArrayList indicesToPack)
    {
       int incrementP = 1, incrementQ = 1;
       if (decrementP)
@@ -533,7 +542,7 @@ public class ConvexPolygonTools
             finished = false;
 
             if (indexQStart == initialQPolygonStartIndex)
-               return null; // No intersection. Prevent infinite loop.
+               return false; // No intersection. Prevent infinite loop.
          }
 
          while ((!decrementP) ^ EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(linePEnd, lineQStart, lineQEnd))
@@ -549,23 +558,30 @@ public class ConvexPolygonTools
             finished = false;
 
             if (indexPStart == initialPPolygonStartIndex)
-               return null; // No intersection. Prevent infinite loop.
+               return false; // No intersection. Prevent infinite loop.
          }
 
       }
       while (!finished);
 
-      return new int[][] {{indexPStart, indexPEnd}, {indexQStart, indexQEnd}};
+      indicesToPack.reset();
+      indicesToPack.add(indexPStart);
+      indicesToPack.add(indexPEnd);
+      indicesToPack.add(indexQStart);
+      indicesToPack.add(indexQEnd);
+      return true;
    }
 
-   static boolean constructPolygonForIntersection(int[][][] crossingIndices, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ,
-                                                          ConvexPolygon2D intersectingPolygonToPack)
-   {
-      int startIndexP1 = crossingIndices[0][0][0];
-      int endIndexP1 = crossingIndices[0][0][1];
+   private final Point2D intersection = new Point2D();
 
-      int startIndexQ1 = crossingIndices[0][1][0];
-      int endIndexQ1 = crossingIndices[0][1][1];
+   protected boolean constructPolygonForIntersection(List<TIntArrayList> crossingIndices, ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
+                                                     ConvexPolygon2DBasics intersectingPolygonToPack)
+   {
+      int startIndexP1 = crossingIndices.get(0).get(0);
+      int endIndexP1 = crossingIndices.get(0).get(1);
+
+      int startIndexQ1 = crossingIndices.get(0).get(2);
+      int endIndexQ1 = crossingIndices.get(0).get(3);
 
       // Want to do things in clockwise order so that making the new polygon is fast. Should only be one of two cases.
       // a) P1/Q2 start->end increments, P2/Q1 start->end decrement; OR
@@ -588,26 +604,29 @@ public class ConvexPolygonTools
       intersectingPolygonToPack.clear();
 
       // Start at the first intersection. Add it. Then march to the next intersection. Then continue.
-      for (int i = 0; i < crossingIndices.length; i++)
+      for (int i = 0; i < crossingIndices.size(); i++)
       {
-         int startIndexP = crossingIndices[i][0][0];
-         int endIndexP = crossingIndices[i][0][1];
+         int startIndexP = crossingIndices.get(i).get(0);
+         int endIndexP = crossingIndices.get(i).get(1);
 
-         int startIndexQ = crossingIndices[i][1][0];
-         int endIndexQ = crossingIndices[i][1][1];
+         int startIndexQ = crossingIndices.get(i).get(2);
+         int endIndexQ = crossingIndices.get(i).get(3);
 
          Point2DReadOnly startP = polygonP.getVertex(startIndexP);
          Point2DReadOnly endP = polygonP.getVertex(endIndexP);
          Point2DReadOnly startQ = polygonQ.getVertex(startIndexQ);
          Point2DReadOnly endQ = polygonQ.getVertex(endIndexQ);
 
-         Point2D intersection = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ);
-         if (intersection == null)
+         boolean success = EuclidCoreMissingTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ, intersection);
+         if (!success)
          {
-            System.err.println("intersection is null in constructPolygonForIntersection!. startP = " + startP + ", endP = " + endP + ", startQ = " + startQ
-                  + ", endQ = " + endQ);
-            System.err.println("startIndexP = " + startIndexP + ", endIndexP = " + endIndexP);
-            System.err.println("Returning null polygon");
+            if (DEBUG)
+            {
+               PrintTools.error("intersection is null in constructPolygonForIntersection!. startP = " + startP + ", endP = " + endP + ", startQ = " + startQ
+                     + ", endQ = " + endQ);
+               PrintTools.error("startIndexP = " + startIndexP + ", endIndexP = " + endIndexP);
+               PrintTools.error("Returning null polygon");
+            }
 
             intersectingPolygonToPack.clear();
             intersectingPolygonToPack.update();
@@ -618,8 +637,8 @@ public class ConvexPolygonTools
 
          if (incrementPNext)
          {
-            int indexP = crossingIndices[i][0][1]; // endIndexP;
-            int indexPNext = crossingIndices[(i + 1) % crossingIndices.length][0][0];
+            int indexP = crossingIndices.get(i).get(1); // endIndexP;
+            int indexPNext = crossingIndices.get((i + 1) % crossingIndices.size()).get(0);
 
             //          System.out.println("indexP = " + indexP + ", indexPNext = " + indexPNext);
 
@@ -631,8 +650,8 @@ public class ConvexPolygonTools
          }
          else
          {
-            int indexQ = crossingIndices[i][1][1]; // endIndexQ;
-            int indexQNext = crossingIndices[(i + 1) % crossingIndices.length][1][0];
+            int indexQ = crossingIndices.get(i).get(3); // endIndexQ;
+            int indexQNext = crossingIndices.get((i + 1) % crossingIndices.size()).get(2);
 
             //          System.out.println("indexQ = " + indexQ + ", indexQNext = " + indexQNext);
 
@@ -654,23 +673,24 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private static boolean buildCommonPolygonFromBridges(ArrayList<Integer> bridgeIndicesP, ArrayList<Integer> bridgeIndicesQ,
-                                                        ArrayList<Boolean> bridgeWasOnLeft, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ,
-                                                        ConvexPolygon2D intersectingPolygonToPack)
-   {
-      int[][][] crossingIndices = new int[bridgeIndicesP.size()][][];
+   private final RecyclingArrayList<TIntArrayList> crossingIndices = new RecyclingArrayList<>(TIntArrayList.class);
 
-      for (int i = 0; i < crossingIndices.length; i++)
+   private boolean buildCommonPolygonFromBridges(TIntArrayList bridgeIndicesP, TIntArrayList bridgeIndicesQ, TIntArrayList bridgeWasOnLeft,
+                                                 ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
+                                                 ConvexPolygon2DBasics intersectingPolygonToPack)
+   {
+      crossingIndices.clear();
+      for (int i = 0; i < bridgeIndicesP.size(); i++)
       {
          // find intersection for bridge
          int bridgeIndexForPolygonP = bridgeIndicesP.get(i);
          int bridgeIndexForPolygonQ = bridgeIndicesQ.get(i);
 
          // for each bridge, compute the intersection points
+         TIntArrayList indices = crossingIndices.add();
+         boolean success = findCrossingIndices(bridgeWasOnLeft.get(i) == 1, bridgeIndexForPolygonP, bridgeIndexForPolygonQ, polygonP, polygonQ, indices);
 
-         crossingIndices[i] = findCrossingIndices(bridgeWasOnLeft.get(i), bridgeIndexForPolygonP, bridgeIndexForPolygonQ, polygonP, polygonQ);
-
-         if (crossingIndices[i] == null)
+         if (!success)
          {
             intersectingPolygonToPack.clearAndUpdate();
             return false; // No intersection.
@@ -681,42 +701,48 @@ public class ConvexPolygonTools
       return success;
    }
 
-   public static ConvexPolygon2D shrinkInto(ConvexPolygon2D polygonP, Point2DReadOnly referencePointInP, ConvexPolygon2D polygonQ)
+   private final Point2D referencePointInPCopy = new Point2D();
+   private final RecyclingArrayList<Line2D> rays = new RecyclingArrayList<>(Line2D.class);
+   private final Vector2D edgeOnQ = new Vector2D();
+   private final Vector2D edgeOnP = new Vector2D();
+   private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
+
+   public boolean shrinkInto(ConvexPolygon2DReadOnly polygonP, Point2DReadOnly referencePointInP, ConvexPolygon2DReadOnly polygonQ,
+                             ConvexPolygon2D polygonToPack)
    {
       if (!polygonQ.isEmpty() && polygonQ.getNumberOfVertices() < 3)
       {
-         return new ConvexPolygon2D(polygonQ);
+         polygonToPack.set(polygonQ);
+         return true;
       }
 
-      ArrayList<Line2D> rays = new ArrayList<Line2D>();
+      rays.clear();
+      referencePointInPCopy.set(referencePointInP);
 
-      Point2D referencePointInPCopy = new Point2D(referencePointInP);
-
-      int leftMostIndexOnPolygonQ = polygonQ.getMinXIndex();
+      int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
 
-      int leftMostIndexOnPolygonP = polygonP.getMinXIndex();
+      int leftMostIndexOnPolygonP = EuclidGeometryPolygonTools.findVertexIndex(polygonP, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexP = polygonP.getVertex(leftMostIndexOnPolygonP);
       int nextVertexPIndex = polygonP.getNextVertexIndex(leftMostIndexOnPolygonP);
       Point2DReadOnly nextVertexP = polygonP.getVertex(nextVertexPIndex);
 
       forEachPolygonQ: for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {
-         Vector2D edgeOnQ = new Vector2D(nextVertexQ.getX() - vertexQ.getX(), nextVertexQ.getY() - vertexQ.getY());
+         edgeOnQ.set(nextVertexQ.getX() - vertexQ.getX(), nextVertexQ.getY() - vertexQ.getY());
 
          int j = 0;
          while (j < polygonP.getNumberOfVertices())
          {
-            Vector2D edgeOnP = new Vector2D(nextVertexP.getX() - vertexP.getX(), nextVertexP.getY() - vertexP.getY());
+            edgeOnP.set(nextVertexP.getX() - vertexP.getX(), nextVertexP.getY() - vertexP.getY());
             double crossProduct = edgeOnQ.getX() * edgeOnP.getY() - edgeOnP.getX() * edgeOnQ.getY();
             if (crossProduct <= 0.0)
             {
                referencePointInPCopy.setX(referencePointInP.getX() + vertexQ.getX() - vertexP.getX());
                referencePointInPCopy.setY(referencePointInP.getY() + vertexQ.getY() - vertexP.getY());
-               Line2D ray = new Line2D(referencePointInPCopy, edgeOnQ);
-               rays.add(ray);
+               rays.add().set(referencePointInPCopy, edgeOnQ);
 
                vertexQ = nextVertexQ;
                nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
@@ -736,25 +762,20 @@ public class ConvexPolygonTools
          throw new RuntimeException("Should never get here!!");
       }
 
-      ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
-
-      ConvexPolygon2D polygonToReturn = new ConvexPolygon2D();
-
-      boolean foundPolygon = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToReturn);
-      if (foundPolygon)
-         return polygonToReturn;
-      return null;
+      return convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToPack);
    }
 
-   public static boolean combineDisjointPolygons(FrameConvexPolygon2d polygon1, FrameConvexPolygon2d polygon2, FrameConvexPolygon2d combinedPolygonToPack,
-                                                 FrameLineSegment2D connectingEdge1ToPack, FrameLineSegment2D connectingEdge2ToPack)
+   public boolean combineDisjointPolygons(FrameConvexPolygon2DReadOnly polygon1, FrameConvexPolygon2DReadOnly polygon2,
+                                          FrameConvexPolygon2DBasics combinedPolygonToPack, FrameLineSegment2DBasics connectingEdge1ToPack,
+                                          FrameLineSegment2DBasics connectingEdge2ToPack)
    {
       combinedPolygonToPack.clear(polygon1.getReferenceFrame());
       combinedPolygonToPack.checkReferenceFrameMatch(connectingEdge1ToPack);
       combinedPolygonToPack.checkReferenceFrameMatch(connectingEdge2ToPack);
 
-      boolean success = combineDisjointPolygons(polygon1.convexPolygon, polygon2.convexPolygon, combinedPolygonToPack.convexPolygon,
-                                                connectingEdge1ToPack, connectingEdge2ToPack);
+      boolean success = combineDisjointPolygons((ConvexPolygon2DReadOnly) polygon1, (ConvexPolygon2DReadOnly) polygon2,
+                                                (ConvexPolygon2DBasics) combinedPolygonToPack, (LineSegment2DBasics) connectingEdge1ToPack,
+                                                (LineSegment2DBasics) connectingEdge2ToPack);
 
       if (!success)
          return false;
@@ -765,81 +786,13 @@ public class ConvexPolygonTools
       return true;
    }
 
-   /**
-    * generates garbage
-    * 
-    * @param polygon1
-    * @param polygon2
-    * @return
-    */
-   //this should throw away points that are inside of the other polygon
-   public static FrameConvexPolygon2dAndConnectingEdges combineDisjointPolygons(FrameConvexPolygon2d polygon1, FrameConvexPolygon2d polygon2)
-   {
-      ReferenceFrame referenceFrame = polygon1.getReferenceFrame();
-      polygon2.checkReferenceFrameMatch(referenceFrame);
-
-      ConvexPolygon2dAndConnectingEdges polygonAndEdges = combineDisjointPolygons(polygon1.convexPolygon, polygon2.convexPolygon);
-
-      if (polygonAndEdges == null)
-         return null; // Return null if not disjoint
-
-      FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(referenceFrame, polygonAndEdges.getConvexPolygon2d());
-      FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D(referenceFrame, polygonAndEdges.getConnectingEdge1());
-      FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D(referenceFrame, polygonAndEdges.getConnectingEdge2());
-
-      FrameConvexPolygon2dAndConnectingEdges ret = new FrameConvexPolygon2dAndConnectingEdges(polygon1, polygon2, frameConvexPolygon2d, connectingEdge1,
-                                                                                              connectingEdge2);
-
-      return ret;
-   }
-
-   public static int cutPolygonWithLine(FrameLine2D cuttingLine, FrameConvexPolygon2d polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
-                                        RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut,
+                                        FrameConvexPolygonWithLineIntersector2d lineIntersector2d, RobotSide sideOfLineToCut)
    {
       lineIntersector2d.intersectWithLine(polygonToCut, cuttingLine);
 
-      if (lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.NO_INTERSECTION ||
-            lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.POINT_INTERSECTION)
-      {
-         return -1;
-      }
-      else
-      {
-         int numberOfVerticesRemoved = 0;
-         int index = 0;
-         while (index < polygonToCut.getNumberOfVertices())
-         {
-            Point2DReadOnly vertex = polygonToCut.getConvexPolygon2d().getVertex(index);
-            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
-            {
-               polygonToCut.removeVertex(index);
-               polygonToCut.update();
-               numberOfVerticesRemoved++;
-            }
-            else
-            {
-               index++;
-            }
-         }
-         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointOne());
-         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointTwo());
-         polygonToCut.update();
-         return numberOfVerticesRemoved;
-      }
-   }
-
-   public static int cutPolygonWithLine(FrameLine2D cuttingLine, FrameConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
-   {
-      cuttingLine.checkReferenceFrameMatch(polygonToCut);
-      return cutPolygonWithLine(cuttingLine, polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
-   }
-
-   // TODO Needs to be extracted to Euclid and improved such that it is garbage free.
-   public static int cutPolygonWithLine(Line2DBasics cuttingLine, ConvexPolygon2D polygonToCut, RobotSide sideOfLineToCut)
-   {
-      Point2D[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
-
-      if (intersectionPoints == null || intersectionPoints.length == 1)
+      if (lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.NO_INTERSECTION
+            || lineIntersector2d.getIntersectionResult() == FrameConvexPolygonWithLineIntersector2d.IntersectionResult.POINT_INTERSECTION)
       {
          return -1;
       }
@@ -861,7 +814,51 @@ public class ConvexPolygonTools
                index++;
             }
          }
-         polygonToCut.addVertices(intersectionPoints, intersectionPoints.length);
+         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointOne());
+         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointTwo());
+         polygonToCut.update();
+         return numberOfVerticesRemoved;
+      }
+   }
+
+   public int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      cuttingLine.checkReferenceFrameMatch(polygonToCut);
+      return cutPolygonWithLine(cuttingLine, (ConvexPolygon2DBasics) polygonToCut, sideOfLineToCut);
+   }
+
+   private final Point2D intersectionPoint1 = new Point2D();
+   private final Point2D intersectionPoint2 = new Point2D();
+
+   // TODO Needs to be extracted to Euclid.
+   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      int intersectionPoints = polygonToCut.intersectionWith(cuttingLine, intersectionPoint1, intersectionPoint2);
+
+      if (intersectionPoints < 2)
+      {
+         return -1;
+      }
+      else
+      {
+         int numberOfVerticesRemoved = 0;
+         int index = 0;
+         while (index < polygonToCut.getNumberOfVertices())
+         {
+            Point2DReadOnly vertex = polygonToCut.getVertex(index);
+            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
+            {
+               polygonToCut.removeVertex(index);
+               polygonToCut.update();
+               numberOfVerticesRemoved++;
+            }
+            else
+            {
+               index++;
+            }
+         }
+         polygonToCut.addVertex(intersectionPoint1);
+         polygonToCut.addVertex(intersectionPoint2);
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }
@@ -875,7 +872,7 @@ public class ConvexPolygonTools
     * @param polygon: modified to have the desired number of vertices
     * @param desiredVertices: number of vertices that the polygon should have
     */
-   public static void limitVerticesConservative(ConvexPolygon2D polygon, int desiredVertices)
+   public static void limitVerticesConservative(ConvexPolygon2DBasics polygon, int desiredVertices)
    {
       polygon.checkNonEmpty();
 
@@ -998,22 +995,28 @@ public class ConvexPolygonTools
     * @param polygon: modified to have the desired number of vertices
     * @param desiredVertices: number of vertices that the polygon should have
     */
-   public static void limitVerticesConservative(FrameConvexPolygon2d polygon, int desiredVertices)
+   public static void limitVerticesConservative(FixedFrameConvexPolygon2DBasics polygon, int desiredVertices)
    {
-      limitVerticesConservative(polygon.getConvexPolygon2d(), desiredVertices);
+      limitVerticesConservative((ConvexPolygon2DBasics) polygon, desiredVertices);
    }
+
+   private final ConvexPolygon2D intersectingPolygonToPack = new ConvexPolygon2D();
+   private final int[] v1Tangents = new int[2];
+   private final int[] v2Tangents = new int[2];
+   private final int[] updatedIndices = new int[4];
 
    /**
     * Finds the minimum distance between two convex polygons Taken from
     * http://cygnus-x1.cs.duke.edu/~edels/Papers/1985-J-02-ComputingExtremeDistances.pdf
-    * 
+    *
     * @return Two points, one from each polygon, between which is the minimum distance between the
     *         two polygons
     */
-   public static Point2DReadOnly[] computeMinimumDistancePoints(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, double epsilon)
+   public void computeMinimumDistancePoints(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, double epsilon, Point2DBasics point1ToPack,
+                                            Point2DBasics point2ToPack)
    {
       // TODO Do something more clever than actually computing the intersection there!
-      if (computeIntersectionOfPolygons(polygon1, polygon2, new ConvexPolygon2D()))
+      if (computeIntersectionOfPolygons(polygon1, polygon2, intersectingPolygonToPack))
       {
          throw new RuntimeException("Cannot compute minimum distance between intersecting polygons.");
       }
@@ -1023,40 +1026,44 @@ public class ConvexPolygonTools
          throw new RuntimeException("Polygon inputs are degenerate.");
       }
 
-      int[] v1Tangents = findStartAndEndTangents(polygon2.getVertex(0), polygon1, epsilon);
-      int[] v2Tangents = findStartAndEndTangents(polygon1.getVertex(0), polygon2, epsilon);
+      findStartAndEndTangents(polygon2.getVertex(0), polygon1, epsilon, v1Tangents);
+      findStartAndEndTangents(polygon1.getVertex(0), polygon2, epsilon, v2Tangents);
 
       int v1Start = v1Tangents[0];
       int v1End = v1Tangents[1];
       int v2Start = v2Tangents[0];
       int v2End = v2Tangents[1];
 
-      int[] updatedIndices = binaryElimination(polygon1, polygon2, v1Start, v1End, v2Start, v2End, epsilon);
+      binaryElimination(polygon1, polygon2, v1Start, v1End, v2Start, v2End, epsilon, updatedIndices);
       v1Start = updatedIndices[0];
       v1End = updatedIndices[1];
       v2Start = updatedIndices[2];
       v2End = updatedIndices[3];
 
-      return getClosestPointsFromRemainingEdgesAndVertices(polygon1, polygon2, v1Start, v1End, v2Start, v2End);
+      getClosestPointsFromRemainingEdgesAndVertices(polygon1, polygon2, v1Start, v1End, v2Start, v2End, point1ToPack, point2ToPack);
    }
 
-   public static Point2DReadOnly[] computeMinimumDistancePoints(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2)
+   public void computeMinimumDistancePoints(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, Point2DBasics point1ToPack,
+                                            Point2DBasics point2ToPack)
    {
-      return computeMinimumDistancePoints(polygon1, polygon2, .01);
+      computeMinimumDistancePoints(polygon1, polygon2, .01, point1ToPack, point2ToPack);
    }
 
    // TODO potentially implement [Chazelle and Dobkin] to get logarithmic running time for computeMinimumDistancePoints (though it would actually be log^2 in current
    // implementation, since binaryElimination, which has is O(log(n)) uses this method in each loop)
 
+   private final Vector2D tangent1 = new Vector2D();
+   private final Vector2D tangent2 = new Vector2D();
+
    /**
     * Finds the indices of the vertices of the polygon that form tangent lines to the polygon with
     * the parameter point
-    * 
+    *
     * @return The desired indices, ordered such that they form a range that includes all vertices
     *         visible from the parameter point; if there are more than two only returns the two
     *         necessary to specify this range
     */
-   private static int[] findStartAndEndTangents(Point2DReadOnly point, ConvexPolygon2D polygon, double epsilon)
+   private void findStartAndEndTangents(Point2DReadOnly point, ConvexPolygon2DReadOnly polygon, double epsilon, int[] tangetsToPack)
    {
       int tangentIndex1;
       int tangentIndex2;
@@ -1070,7 +1077,7 @@ public class ConvexPolygonTools
       }
 
       tangentIndex1 = vIndex;
-      Vector2D tangent1 = new Vector2D(polygon.getVertex(tangentIndex1).getX() - point.getX(), polygon.getVertex(tangentIndex1).getY() - point.getY());
+      tangent1.set(polygon.getVertex(tangentIndex1).getX() - point.getX(), polygon.getVertex(tangentIndex1).getY() - point.getY());
 
       vIndex++;
       vIndex %= polygon.getNumberOfVertices();
@@ -1082,31 +1089,40 @@ public class ConvexPolygonTools
       }
 
       tangentIndex2 = vIndex;
-      Vector2D tangent2 = new Vector2D(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
+      tangent2.set(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
 
       if (tangent1.angle(tangent2) >= 0)
       {
-         return new int[] {tangentIndex1, tangentIndex2};
+         tangetsToPack[0] = tangentIndex1;
+         tangetsToPack[1] = tangentIndex2;
+      }
+      else
+      {
+         tangetsToPack[0] = tangentIndex2;
+         tangetsToPack[1] = tangentIndex1;
       }
 
-      return new int[] {tangentIndex2, tangentIndex1};
    }
+
+   private final Vector2D base = new Vector2D();
+   private final Vector2D first = new Vector2D();
+   private final Vector2D second = new Vector2D();
 
    /**
     * Uses the fact that if a line passes through a vertex of a convex polygon, the angles to the
     * adjacent edges are going to be in opposite directions
-    * 
+    *
     * @return Whether or not the line including the point and vertex is tangent to the polygon
     */
-   private static boolean pointMakesTangentToPolygon(ConvexPolygon2D polygon, Point2DReadOnly point, int vertexIndex, double epsilon)
+   private boolean pointMakesTangentToPolygon(ConvexPolygon2DReadOnly polygon, Point2DReadOnly point, int vertexIndex, double epsilon)
    {
       Point2DReadOnly vertex = polygon.getVertex(vertexIndex);
       Point2DReadOnly previous = polygon.getPreviousVertex(vertexIndex);
       Point2DReadOnly next = polygon.getNextVertex(vertexIndex);
 
-      Vector2D base = new Vector2D(point.getX() - vertex.getX(), point.getY() - vertex.getY());
-      Vector2D first = new Vector2D(previous.getX() - vertex.getX(), previous.getY() - vertex.getY());
-      Vector2D second = new Vector2D(next.getX() - vertex.getX(), next.getY() - vertex.getY());
+      base.set(point.getX() - vertex.getX(), point.getY() - vertex.getY());
+      first.set(previous.getX() - vertex.getX(), previous.getY() - vertex.getY());
+      second.set(next.getX() - vertex.getX(), next.getY() - vertex.getY());
       double firstAngle = base.angle(first);
       double secondAngle = base.angle(second);
 
@@ -1126,7 +1142,7 @@ public class ConvexPolygonTools
    /**
     * Checks if index is within range; if low is greater than high, this implies a modularly
     * cyclical range
-    * 
+    *
     * @return True if the index is between low and high
     */
    private static boolean isInRange(int index, int low, int high)
@@ -1144,13 +1160,22 @@ public class ConvexPolygonTools
       return false;
    }
 
+   private final Vector2D m = new Vector2D();
+   private final Vector2D mReversed = new Vector2D();
+   private final Vector2D edge1A = new Vector2D();
+   private final Vector2D edge1B = new Vector2D();
+   private final Vector2D edge2A = new Vector2D();
+   private final Vector2D edge2B = new Vector2D();
+   private final int[] range1 = new int[2];
+   private final int[] range2 = new int[2];
+   private final int[] updatedIndicesInBinaryElimination = new int[4];
+
    /**
     * Eliminates vertices and return a range for each polygon, each of which comprises of at most
     * two vertices
-    * 
-    * @return Array with the low and high end of each range, respectively
     */
-   private static int[] binaryElimination(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, int v1Start, int v1End, int v2Start, int v2End, double epsilon)
+   private void binaryElimination(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, int v1Start, int v1End, int v2Start, int v2End,
+                                  double epsilon, int[] indicesToPack)
    {
       Point2DReadOnly v1Median;
       Point2DReadOnly v2Median;
@@ -1165,17 +1190,17 @@ public class ConvexPolygonTools
          v1Median = polygon1.getVertex(v1MedianIndex);
          v2Median = polygon2.getVertex(v2MedianIndex);
 
-         Vector2D m = new Vector2D(v2Median.getX() - v1Median.getX(), v2Median.getY() - v1Median.getY());
-         Vector2D mReversed = new Vector2D(v1Median.getX() - v2Median.getX(), v1Median.getY() - v2Median.getY());
+         m.set(v2Median.getX() - v1Median.getX(), v2Median.getY() - v1Median.getY());
+         mReversed.set(v1Median.getX() - v2Median.getX(), v1Median.getY() - v2Median.getY());
 
          int edge1AStart = ((v1MedianIndex + numberOfVertices1 - 1) % numberOfVertices1);
          int edge1BEnd = (v1MedianIndex + 1) % numberOfVertices1;
          int edge2BStart = ((v2MedianIndex + numberOfVertices2 - 1) % numberOfVertices2);
          int edge2AEnd = (v2MedianIndex + 1) % numberOfVertices2;
-         Vector2D edge1A = new Vector2D(polygon1.getVertex(edge1AStart).getX() - v1Median.getX(), polygon1.getVertex(edge1AStart).getY() - v1Median.getY());
-         Vector2D edge1B = new Vector2D(polygon1.getVertex(edge1BEnd).getX() - v1Median.getX(), polygon1.getVertex(edge1BEnd).getY() - v1Median.getY());
-         Vector2D edge2A = new Vector2D(polygon2.getVertex(edge2AEnd).getX() - v2Median.getX(), polygon2.getVertex(edge2AEnd).getY() - v2Median.getY());
-         Vector2D edge2B = new Vector2D(polygon2.getVertex(edge2BStart).getX() - v2Median.getX(), polygon2.getVertex(edge2BStart).getY() - v2Median.getY());
+         edge1A.set(polygon1.getVertex(edge1AStart).getX() - v1Median.getX(), polygon1.getVertex(edge1AStart).getY() - v1Median.getY());
+         edge1B.set(polygon1.getVertex(edge1BEnd).getX() - v1Median.getX(), polygon1.getVertex(edge1BEnd).getY() - v1Median.getY());
+         edge2A.set(polygon2.getVertex(edge2AEnd).getX() - v2Median.getX(), polygon2.getVertex(edge2AEnd).getY() - v2Median.getY());
+         edge2B.set(polygon2.getVertex(edge2BStart).getX() - v2Median.getX(), polygon2.getVertex(edge2BStart).getY() - v2Median.getY());
 
          // see diagram 3.2 in [Edelsbrunner]
          double angle1A = m.angle(edge1A); // A' in diagram
@@ -1183,8 +1208,8 @@ public class ConvexPolygonTools
          double angle2A = edge2A.angle(mReversed); // B' in diagram
          double angle2B = mReversed.angle(edge2B); // B'' in diagram
 
-         int[] range1 = findStartAndEndTangents(v2Median, polygon1, epsilon);
-         int[] range2 = findStartAndEndTangents(v1Median, polygon2, epsilon);
+         findStartAndEndTangents(v2Median, polygon1, epsilon, range1);
+         findStartAndEndTangents(v1Median, polygon2, epsilon, range2);
 
          angle1A = MathTools.epsilonEquals(angle1A, 0, 0.01) ? 0 : angle1A;
          angle1B = MathTools.epsilonEquals(angle1B, 0, 0.01) ? 0 : angle1B;
@@ -1201,55 +1226,58 @@ public class ConvexPolygonTools
          angle2A += ((angle2A <= 0) && (angle2B <= 0) && (angle2A < angle2B)) ? 2 * Math.PI : 0;
          angle2B += ((angle2A <= 0) && (angle2B <= 0) && (angle2B < angle2A)) ? 2 * Math.PI : 0;
 
-         int[] updatedIndices;
-
          if ((v1Start == v1End) || (v2Start == v2End))
          {
-            updatedIndices = binaryEliminationCase1(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End, polygon1,
-                                                    polygon2);
-            v1Start = updatedIndices[0];
-            v1End = updatedIndices[1];
-            v2Start = updatedIndices[2];
-            v2End = updatedIndices[3];
+            binaryEliminationCase1(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End, polygon1, polygon2,
+                                   updatedIndicesInBinaryElimination);
+            v1Start = updatedIndicesInBinaryElimination[0];
+            v1End = updatedIndicesInBinaryElimination[1];
+            v2Start = updatedIndicesInBinaryElimination[2];
+            v2End = updatedIndicesInBinaryElimination[3];
          }
          else if ((v1End - v1Start + numberOfVertices1) % numberOfVertices1 == 1)
          {
-            updatedIndices = binaryEliminationCase2(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End, polygon1,
-                                                    polygon2);
-            v1Start = updatedIndices[0];
-            v1End = updatedIndices[1];
-            v2Start = updatedIndices[2];
-            v2End = updatedIndices[3];
+            binaryEliminationCase2(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End, polygon1, polygon2,
+                                   updatedIndicesInBinaryElimination);
+            v1Start = updatedIndicesInBinaryElimination[0];
+            v1End = updatedIndicesInBinaryElimination[1];
+            v2Start = updatedIndicesInBinaryElimination[2];
+            v2End = updatedIndicesInBinaryElimination[3];
          }
          else if ((v2End - v2Start + numberOfVertices2) % numberOfVertices2 == 1)
          {
-            updatedIndices = binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon1,
-                                                    polygon2);
-            v2End = updatedIndices[0];
-            v2Start = updatedIndices[1];
-            v1End = updatedIndices[2];
-            v1Start = updatedIndices[3];
+            binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon1, polygon2,
+                                   updatedIndicesInBinaryElimination);
+            v2End = updatedIndicesInBinaryElimination[0];
+            v2Start = updatedIndicesInBinaryElimination[1];
+            v1End = updatedIndicesInBinaryElimination[2];
+            v1Start = updatedIndicesInBinaryElimination[3];
          }
          else
          {
-            updatedIndices = binaryEliminationCase3(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End);
-            v1Start = updatedIndices[0];
-            v1End = updatedIndices[1];
-            v2Start = updatedIndices[2];
-            v2End = updatedIndices[3];
+            binaryEliminationCase3(angle1A, angle1B, angle2A, angle2B, v1Start, v1MedianIndex, v1End, v2Start, v2MedianIndex, v2End,
+                                   updatedIndicesInBinaryElimination);
+            v1Start = updatedIndicesInBinaryElimination[0];
+            v1End = updatedIndicesInBinaryElimination[1];
+            v2Start = updatedIndicesInBinaryElimination[2];
+            v2End = updatedIndicesInBinaryElimination[3];
          }
       }
 
-      return new int[] {v1Start, v1End, v2Start, v2End};
+      indicesToPack[0] = v1Start;
+      indicesToPack[1] = v1End;
+      indicesToPack[2] = v2Start;
+      indicesToPack[3] = v2End;
    }
 
    /**
     * Binary elimination helper method called if one range has a size of exactly one
-    * 
+    *
     * @return Array with the low and high end of each range, respectively
     */
-   private static int[] binaryEliminationCase1(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End,
-                                               int v2Start, int v2MedianIndex, int v2End, ConvexPolygon2D polygon1, ConvexPolygon2D polygon2)
+   private static void binaryEliminationCase1(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End,
+                                              int v2Start, int v2MedianIndex, int v2End, ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2,
+                                              int[] updatedIndices)
    {
       if (v1Start == v1End)
       { // v1 contains only 1 viable vertex
@@ -1276,16 +1304,21 @@ public class ConvexPolygonTools
          }
       }
 
-      return new int[] {v1Start, v1End, v2Start, v2End};
+      updatedIndices[0] = v1Start;
+      updatedIndices[1] = v1End;
+      updatedIndices[2] = v2Start;
+      updatedIndices[3] = v2End;
    }
+
+   private final LineSegment2D p = new LineSegment2D();
 
    /**
     * Binary elimination helper method called if one range has a size of exactly two
-    * 
+    *
     * @return Array with the low and high end of each range, respectively
     */
-   private static int[] binaryEliminationCase2(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End,
-                                               int v2Start, int v2MedianIndex, int v2End, ConvexPolygon2D polygon1, ConvexPolygon2D polygon2)
+   private void binaryEliminationCase2(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End, int v2Start,
+                                       int v2MedianIndex, int v2End, ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, int[] updatedIndices)
    {
       if (angle1A > 0)
       {
@@ -1311,7 +1344,7 @@ public class ConvexPolygonTools
          {
             Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(polygon2.getVertex(v2MedianIndex), polygon1.getVertex(v1Start),
                                                                             polygon1.getVertex(v1End));
-            LineSegment2D p = new LineSegment2D(polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
+            p.set(polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
             if (p.isBetweenEndpoints(proj, 0))
             {
                v2Start = v2MedianIndex;
@@ -1337,16 +1370,19 @@ public class ConvexPolygonTools
          }
       }
 
-      return new int[] {v1Start, v1End, v2Start, v2End};
+      updatedIndices[0] = v1Start;
+      updatedIndices[1] = v1End;
+      updatedIndices[2] = v2Start;
+      updatedIndices[3] = v2End;
    }
 
    /**
     * Binary Elimination helper method called if both ranges have size greater than two
-    * 
+    *
     * @return Array with the low and high end of each range, respectively
     */
-   private static int[] binaryEliminationCase3(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End,
-                                               int v2Start, int v2MedianIndex, int v2End)
+   private static void binaryEliminationCase3(double angle1A, double angle1B, double angle2A, double angle2B, int v1Start, int v1MedianIndex, int v1End,
+                                              int v2Start, int v2MedianIndex, int v2End, int[] updatedIndices)
    {
       if ((angle1A > 0) && (angle1B > 0) && (angle2A > 0) && (angle2B > 0))
       {
@@ -1397,79 +1433,122 @@ public class ConvexPolygonTools
          v2End = v2MedianIndex;
       }
 
-      return new int[] {v1Start, v1End, v2Start, v2End};
+      updatedIndices[0] = v1Start;
+      updatedIndices[1] = v1End;
+      updatedIndices[2] = v2Start;
+      updatedIndices[3] = v2End;
    }
 
    /**
     * Takes in two ranges each of which are of size at most two and returns the two points on each
     * respective polygon which are closest to one another
     */
-   private static Point2DReadOnly[] getClosestPointsFromRemainingEdgesAndVertices(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, int v1Start, int v1End,
-                                                                                  int v2Start, int v2End)
+   private void getClosestPointsFromRemainingEdgesAndVertices(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, int v1Start, int v1End,
+                                                              int v2Start, int v2End, Point2DBasics point1ToPack, Point2DBasics point2ToPack)
    {
       if ((v1Start == v1End) && (v2Start == v2End))
       {
-         return new Point2DReadOnly[] {polygon1.getVertex(v1Start), polygon2.getVertex(v2Start)};
+         point1ToPack.set(polygon1.getVertex(v1Start));
+         point2ToPack.set(polygon2.getVertex(v2Start));
       }
-
       else if (v1Start == v1End)
       {
-         return finalPhasePointAndEdge(polygon2.getVertex(v2Start), polygon2.getVertex(v2End), polygon1.getVertex(v1Start));
+         finalPhasePointAndEdge(polygon2.getVertex(v2Start), polygon2.getVertex(v2End), polygon1.getVertex(v1Start), point1ToPack, point2ToPack);
       }
-
       else if (v2Start == v2End)
       {
-         Point2DReadOnly[] reverseOutput = finalPhasePointAndEdge(polygon1.getVertex(v1Start), polygon1.getVertex(v1End), polygon2.getVertex(v2Start));
-
-         return new Point2DReadOnly[] {reverseOutput[1], reverseOutput[0]}; // switch order of output so that points are returned in the order that their polygons were inputed
+         finalPhasePointAndEdge(polygon1.getVertex(v1Start), polygon1.getVertex(v1End), polygon2.getVertex(v2Start), point2ToPack, point1ToPack);
       }
-
-      return finalPhaseTwoEdges(polygon1.getVertex(v1Start), polygon1.getVertex(v1End), polygon2.getVertex(v2Start), polygon2.getVertex(v2End));
+      else
+      {
+         finalPhaseTwoEdges(polygon1.getVertex(v1Start), polygon1.getVertex(v1End), polygon2.getVertex(v2Start), polygon2.getVertex(v2End), point1ToPack,
+                            point2ToPack);
+      }
    }
+
+   private final LineSegment2D edge1 = new LineSegment2D();
+   private final LineSegment2D edge2 = new LineSegment2D();
+   private final Point2D proj1AOnto2 = new Point2D();
+   private final Point2D proj1BOnto2 = new Point2D();
+   private final Point2D proj2AOnto1 = new Point2D();
+   private final Point2D proj2BOnto1 = new Point2D();
+   private final Point2D[][] possiblePointPairsWithProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
+         {new Point2D(), new Point2D()}, {new Point2D(), new Point2D()}};
+   private final Point2D[][] possiblePointPairsWithoutProj = new Point2D[][] {{new Point2D(), new Point2D()}, {new Point2D(), new Point2D()},
+         {new Point2D(), new Point2D()}, {new Point2D(), new Point2D()}};
+   private final double[] possibleDistancesWithProj = new double[4];
+   private final double[] possibleDistancesWithoutProj = new double[4];
+   private final boolean[] possiblePointPairsWithProjValid = new boolean[4];
 
    /**
     * Final phase helper method called if each range has size of exactly two
-    * 
+    *
     * @return The two points on each respective polygon which are closest to one another
     */
-   private static Point2DReadOnly[] finalPhaseTwoEdges(Point2DReadOnly edgePoint1A, Point2DReadOnly edgePoint1B, Point2DReadOnly edgePoint2A,
-                                                       Point2DReadOnly edgePoint2B)
+   private void finalPhaseTwoEdges(Point2DReadOnly edgePoint1A, Point2DReadOnly edgePoint1B, Point2DReadOnly edgePoint2A, Point2DReadOnly edgePoint2B,
+                                   Point2DBasics point1ToPack, Point2DBasics point2ToPack)
    {
-      LineSegment2D edge1 = new LineSegment2D(edgePoint1A, edgePoint1B);
-      LineSegment2D edge2 = new LineSegment2D(edgePoint2A, edgePoint2B);
-      Point2D proj1AOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1A, edgePoint2A, edgePoint2B);
-      Point2D proj1BOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1B, edgePoint2A, edgePoint2B);
-      Point2D proj2AOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2A, edgePoint1A, edgePoint1B);
-      Point2D proj2BOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2B, edgePoint1A, edgePoint1B);
+      edge1.set(edgePoint1A, edgePoint1B);
+      edge2.set(edgePoint2A, edgePoint2B);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1A, edgePoint2A, edgePoint2B, proj1AOnto2);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1B, edgePoint2A, edgePoint2B, proj1BOnto2);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2A, edgePoint1A, edgePoint1B, proj2AOnto1);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2B, edgePoint1A, edgePoint1B, proj2BOnto1);
 
-      Point2DReadOnly[][] possiblePointPairsWithProj = new Point2DReadOnly[4][2];
-      Point2DReadOnly[][] possiblePointPairsWithoutProj = new Point2DReadOnly[4][2];
-      double[] possibleDistancesWithProj = new double[4];
-      double[] possibleDistancesWithoutProj = new double[4];
+      possiblePointPairsWithProjValid[0] = edge2.isBetweenEndpoints(proj1AOnto2);
+      possiblePointPairsWithProjValid[1] = edge2.isBetweenEndpoints(proj1BOnto2);
+      possiblePointPairsWithProjValid[2] = edge1.isBetweenEndpoints(proj2AOnto1);
+      possiblePointPairsWithProjValid[3] = edge1.isBetweenEndpoints(proj2BOnto1);
 
-      possiblePointPairsWithProj[0] = edge2.isBetweenEndpoints(proj1AOnto2, 0) ? new Point2DReadOnly[] {edgePoint1A, proj1AOnto2} : null;
-      possiblePointPairsWithProj[1] = edge2.isBetweenEndpoints(proj1BOnto2, 0) ? new Point2DReadOnly[] {edgePoint1B, proj1BOnto2} : null;
-      possiblePointPairsWithProj[2] = edge1.isBetweenEndpoints(proj2AOnto1, 0) ? new Point2DReadOnly[] {proj2AOnto1, edgePoint2A} : null;
-      possiblePointPairsWithProj[3] = edge1.isBetweenEndpoints(proj2BOnto1, 0) ? new Point2DReadOnly[] {proj2BOnto1, edgePoint2B} : null;
+      if (possiblePointPairsWithProjValid[0])
+      {
+         possiblePointPairsWithProj[0][0].set(edgePoint1A);
+         possiblePointPairsWithProj[0][1].set(proj1AOnto2);
+      }
+      if (possiblePointPairsWithProjValid[1])
+      {
+         possiblePointPairsWithProj[1][0].set(edgePoint1B);
+         possiblePointPairsWithProj[1][1].set(proj1BOnto2);
+      }
+      if (possiblePointPairsWithProjValid[2])
+      {
+         possiblePointPairsWithProj[2][0].set(proj2AOnto1);
+         possiblePointPairsWithProj[2][1].set(edgePoint2A);
+      }
+      if (possiblePointPairsWithProjValid[3])
+      {
+         possiblePointPairsWithProj[3][0].set(proj2BOnto1);
+         possiblePointPairsWithProj[3][1].set(edgePoint2B);
+      }
 
-      possiblePointPairsWithoutProj[0] = new Point2DReadOnly[] {edgePoint1A, edgePoint2A};
-      possiblePointPairsWithoutProj[1] = new Point2DReadOnly[] {edgePoint1A, edgePoint2B};
-      possiblePointPairsWithoutProj[2] = new Point2DReadOnly[] {edgePoint1B, edgePoint2A};
-      possiblePointPairsWithoutProj[3] = new Point2DReadOnly[] {edgePoint1B, edgePoint2B};
+      possiblePointPairsWithoutProj[0][0].set(edgePoint1A);
+      possiblePointPairsWithoutProj[0][1].set(edgePoint2A);
+      possiblePointPairsWithoutProj[1][0].set(edgePoint1A);
+      possiblePointPairsWithoutProj[1][1].set(edgePoint2B);
+      possiblePointPairsWithoutProj[2][0].set(edgePoint1B);
+      possiblePointPairsWithoutProj[2][1].set(edgePoint2A);
+      possiblePointPairsWithoutProj[3][0].set(edgePoint1B);
+      possiblePointPairsWithoutProj[3][1].set(edgePoint2B);
 
       for (int i = 0; i < 4; i++)
       {
-         possibleDistancesWithProj[i] = (possiblePointPairsWithProj[i] == null) ? Double.MAX_VALUE
+         possibleDistancesWithProj[i] = !possiblePointPairsWithProjValid[i] ? Double.MAX_VALUE
                : possiblePointPairsWithProj[i][0].distance(possiblePointPairsWithProj[i][1]);
          possibleDistancesWithoutProj[i] = possiblePointPairsWithoutProj[i][0].distance(possiblePointPairsWithoutProj[i][1]);
       }
 
       if (possibleDistancesWithProj[indexOfMin(possibleDistancesWithProj)] != Double.MAX_VALUE)
       {
-         return possiblePointPairsWithProj[indexOfMin(possibleDistancesWithProj)];
+         Point2D[] pair = possiblePointPairsWithProj[indexOfMin(possibleDistancesWithProj)];
+         point1ToPack.set(pair[0]);
+         point2ToPack.set(pair[1]);
       }
-
-      return possiblePointPairsWithoutProj[indexOfMin(possibleDistancesWithoutProj)];
+      else
+      {
+         Point2D[] pair = possiblePointPairsWithoutProj[indexOfMin(possibleDistancesWithoutProj)];
+         point1ToPack.set(pair[0]);
+         point2ToPack.set(pair[1]);
+      }
    }
 
    /**
@@ -1499,22 +1578,27 @@ public class ConvexPolygonTools
       return minIndex;
    }
 
+   private final LineSegment2D pFinalPhasePoint = new LineSegment2D();
+
    /**
     * Final phase helper method called if one range has a size of exactly one
-    * 
+    *
     * @return The two points on each respective polygon which are closest to one another
     */
-   private static Point2DReadOnly[] finalPhasePointAndEdge(Point2DReadOnly edgePoint1, Point2DReadOnly edgePoint2, Point2DReadOnly lonePoint)
+   private void finalPhasePointAndEdge(Point2DReadOnly edgePoint1, Point2DReadOnly edgePoint2, Point2DReadOnly lonePoint, Point2DBasics point1ToPack,
+                                       Point2DBasics point2ToPack)
    {
       Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(lonePoint, edgePoint1, edgePoint2);
-      LineSegment2D p = new LineSegment2D(edgePoint1, edgePoint2);
-      if (p.isBetweenEndpoints(proj, 0))
+      pFinalPhasePoint.set(edgePoint1, edgePoint2);
+      if (pFinalPhasePoint.isBetweenEndpoints(proj, 0))
       {
-         return new Point2DReadOnly[] {lonePoint, proj};
+         point1ToPack.set(lonePoint);
+         point2ToPack.set(proj);
       }
       else
       {
-         return new Point2DReadOnly[] {lonePoint, (lonePoint.distance(edgePoint1) < lonePoint.distance(edgePoint2)) ? edgePoint1 : edgePoint2};
+         point1ToPack.set(lonePoint);
+         point2ToPack.set((lonePoint.distance(edgePoint1) < lonePoint.distance(edgePoint2)) ? edgePoint1 : edgePoint2);
       }
    }
 
@@ -1524,7 +1608,7 @@ public class ConvexPolygonTools
     * Input: a 2D segment S from point P0 to point P1 a 2D convex polygon W with n vertices
     * V0,...,Vn-1,Vn=V0
     */
-   public static boolean doesSegmentIntersectConvexPolygon2D(Point2D P0, Point2D P1, ConvexPolygon2D convexPolygon2d)
+   public static boolean doesSegmentIntersectConvexPolygon2D(Point2DReadOnly P0, Point2DReadOnly P1, ConvexPolygon2DReadOnly convexPolygon2d)
    {
       // if segment is a single point
       if (P0.equals(P1))
@@ -1543,19 +1627,19 @@ public class ConvexPolygonTools
       return doesSegmentPassCompletelyThroughPolygon(P0, P1, convexPolygon2d);
    }
 
-   private static boolean doesSegmentPassCompletelyThroughPolygon(Point2D P0, Point2D P1, ConvexPolygon2D convexPolygon2d)
+   private static boolean doesSegmentPassCompletelyThroughPolygon(Point2DReadOnly P0, Point2DReadOnly P1, ConvexPolygon2DReadOnly convexPolygon2d)
    {
       // Initialize:
       double tE = 0.0; // for the maximum entering segment parameter;
       double tL = 1.0; // for the minimum leaving segment parameter;
 
       // segment direction vector
-      Vector2D dS = new Vector2D(P1);
-      dS.sub(P0);
+      double dSx = P1.getX() - P0.getX();
+      double dSy = P1.getY() - P0.getY();
 
       if (DEBUG)
       {
-         System.out.println("dS = " + dS);
+         PrintTools.info("dS = [" + dSx + ", " + dSy + "]");
       }
 
       int numberOfVertices = convexPolygon2d.getNumberOfVertices();
@@ -1572,52 +1656,55 @@ public class ConvexPolygonTools
       for (int i = 0; i < numberOfVertices; i++)
       {
          // edge vertices
-         Point2D V0 = new Point2D(convexPolygon2d.getVertexCCW(i));
+         double V0x = convexPolygon2d.getVertexCCW(i).getX();
+         double V0y = convexPolygon2d.getVertexCCW(i).getY();
          if (DEBUG)
          {
-            System.out.println("V0 = " + V0);
+            PrintTools.info("V0 = [" + V0x + ", " + V0y + "]");
          }
 
-         Point2D V1 = new Point2D(convexPolygon2d.getNextVertexCCW(i));
+         double V1x = convexPolygon2d.getNextVertexCCW(i).getX();
+         double V1y = convexPolygon2d.getNextVertexCCW(i).getY();
          if (DEBUG)
          {
-            System.out.println("V1 = " + V1);
+            PrintTools.info("V1 = [" + V1x + ", " + V1y + "]");
          }
 
          // edge vector
-         Vector2D V0toV1 = new Vector2D(V1);
-         V0toV1.sub(V0);
+         double V0toV1x = V1x - V0x;
+         double V0toV1y = V1y - V0y;
 
          if (DEBUG)
          {
-            System.out.println("V0toV1 = " + V0toV1);
+            PrintTools.info("V0toV1 = [" + V0toV1x + ", " + V0toV1y + "]");
          }
 
          // outward normal of the edge
-         Vector2D ni = new Vector2D(V0toV1.getY(), -V0toV1.getX());
+         double nix = V0toV1y;
+         double niy = -V0toV1x;
          if (DEBUG)
          {
-            System.out.println("ni = " + ni);
+            PrintTools.info("ni = [" + nix + ", " + niy + "]");
          }
 
-         Vector2D P0toVi = new Vector2D(P0);
-         P0toVi.sub(V0);
+         double P0toVix = P0.getX() - V0x;
+         double P0toViy = P0.getY() - V0y;
 
          if (DEBUG)
          {
-            System.out.println("P0toVi = " + P0toVi);
+            PrintTools.info("P0toVi = [" + P0toVix + ", " + P0toViy + "]");
          }
 
-         double N = -P0toVi.dot(ni);
+         double N = -(P0toVix * nix + P0toViy * niy);
          if (DEBUG)
          {
-            System.out.println("N = " + N);
+            PrintTools.info("N = " + N);
          }
 
-         double D = dS.dot(ni);
+         double D = dSx * nix + dSy * niy;
          if (DEBUG)
          {
-            System.out.println("D = " + D);
+            PrintTools.info("D = " + D);
          }
 
          if (D == 0)
@@ -1640,7 +1727,7 @@ public class ConvexPolygonTools
          double t = N / D;
          if (DEBUG)
          {
-            System.out.println("t = " + t);
+            PrintTools.info("t = " + t);
          }
 
          if (D < 0)
@@ -1672,5 +1759,16 @@ public class ConvexPolygonTools
       // from the entering point: P(tE) = P0 + tE * dS
       // to the leaving point:    P(tL) = P0 + tL * dS
       return true;
+   }
+
+   private final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
+
+   //TODO do something smarter here
+   public double computeIntersectionAreaOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
+   {
+      if (computeIntersectionOfPolygons(polygonP, polygonQ, intersectionToThrowAway))
+         return intersectionToThrowAway.getArea();
+      else
+         return 0.0;
    }
 }

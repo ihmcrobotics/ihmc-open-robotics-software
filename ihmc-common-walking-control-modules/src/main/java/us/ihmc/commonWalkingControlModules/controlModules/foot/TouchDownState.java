@@ -6,9 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -24,8 +22,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,6 +33,8 @@ import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
@@ -62,9 +60,9 @@ public class TouchDownState extends AbstractFootControlState
 
    private final YoEnum<LineContactActivationMethod> lineContactActivationMethod;
    private final YoFrameQuaternion initialOrientation;
-   private final YoFrameVector initialAngularVelocity;
+   private final YoFrameVector3D initialAngularVelocity;
    private final YoFrameQuaternion finalOrientation;
-   private final YoFrameVector finalAngularVelocity;
+   private final YoFrameVector3D finalAngularVelocity;
 
    private final FramePoint3D contactPointPosition = new FramePoint3D();
 
@@ -102,7 +100,7 @@ public class TouchDownState extends AbstractFootControlState
     */
    public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
    {
-      super(ConstraintType.TOUCHDOWN, footControlHelper);
+      super(footControlHelper);
 
       this.gains = swingFootControlGains;
 
@@ -124,9 +122,9 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "OrientationTrajectory", worldFrame, registry);
 
       initialOrientation = new YoFrameQuaternion(namePrefix + "initialOrientation", worldFrame, registry);
-      initialAngularVelocity = new YoFrameVector(namePrefix + "initialAngularVelocity", worldFrame, registry);
+      initialAngularVelocity = new YoFrameVector3D(namePrefix + "initialAngularVelocity", worldFrame, registry);
       finalOrientation = new YoFrameQuaternion(namePrefix + "finalOrientation", worldFrame, registry);
-      finalAngularVelocity = new YoFrameVector(namePrefix + "finalAngularVelocity", worldFrame, registry);
+      finalAngularVelocity = new YoFrameVector3D(namePrefix + "finalAngularVelocity", worldFrame, registry);
 
       timeInContact = new YoDouble(namePrefix + "TimeInContact", registry);
       desiredTouchdownDuration = new YoDouble(namePrefix + "DesiredTouchdownDuration", registry);
@@ -158,16 +156,15 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
-      double timeInCurrentState = getTimeInCurrentState();
+      timeInContact.set(timeInState);
+      footContactRhoRamper.update(timeInState);
 
-      timeInContact.set(timeInCurrentState);
-      footContactRhoRamper.update(timeInCurrentState);
-
-      orientationTrajectory.compute(timeInCurrentState);
+      orientationTrajectory.compute(timeInState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      feedbackControlCommand.setFeedForwardAngularAction(desiredAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       feedbackControlCommand.setGains(gains);
    }
@@ -217,9 +214,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
       
       enableLineContactAndSetTheGroundContactFrame(contactPointPosition, groundContactFrame);
       footContactRhoRamper.initialize(desiredTouchdownDuration.getDoubleValue());
@@ -235,9 +232,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
       footContactRhoRamper.resetContactState();
    }
 
@@ -319,9 +316,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      return getTimeInCurrentState() > desiredTouchdownDuration.getDoubleValue();
+      return timeInState > desiredTouchdownDuration.getDoubleValue();
    }
 
    /**

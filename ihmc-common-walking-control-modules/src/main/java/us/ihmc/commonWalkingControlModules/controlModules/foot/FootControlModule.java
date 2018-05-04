@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -27,11 +25,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
+import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -62,7 +59,7 @@ public class FootControlModule
 
    private static final double coefficientOfFriction = 0.8;
 
-   private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
+   private final StateMachine<ConstraintType, AbstractFootControlState> stateMachine;
    private final YoEnum<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
@@ -115,43 +112,26 @@ public class FootControlModule
       
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
-      // set up states and state machine
-      YoDouble time = controllerToolbox.getYoTime();
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);
 
       setupContactStatesMap();
 
-      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownVelocity.set(touchdownVelocity);
+      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(),
+                                                                            defaultTouchdownVelocity, registry);
 
-      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownAcceleration.set(touchdownAcceleration);
-
-      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(yoTouchdownVelocity);
-      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(yoTouchdownAcceleration);
-
-      List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
+      Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
+      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(),
+                                                                                defaultTouchdownAcceleration, registry);
 
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
-      states.add(onToesState);
-
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
-      states.add(supportState);
-
-      swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
-      states.add(swingState);
-      
+      swingState = new SwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
       touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
-      states.add(touchdownState);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
 
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
-      states.add(moveViaWaypointsState);
-
-      setupStateMachine(states);
+      stateMachine = setupStateMachine(namePrefix);
 
       requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
@@ -182,22 +162,23 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
-   private void setupStateMachine(List<AbstractFootControlState> states)
+   private StateMachine<ConstraintType, AbstractFootControlState> setupStateMachine(String namePrefix)
    {
-      // TODO Clean that up (Sylvain)
-      for (AbstractFootControlState fromState : states)
+      StateMachineFactory<ConstraintType, AbstractFootControlState> factory = new StateMachineFactory<>(ConstraintType.class);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(footControlHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
+      factory.addState(ConstraintType.TOES, onToesState);
+      factory.addState(ConstraintType.FULL, supportState);
+      factory.addState(ConstraintType.SWING, swingState);
+      factory.addState(ConstraintType.TOUCHDOWN, touchdownState);
+      factory.addState(ConstraintType.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
+      
+      for (ConstraintType from : ConstraintType.values())
       {
-         for (AbstractFootControlState toState : states)
-         {
-            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
+         factory.addRequestedTransition(from, requestedState);
+         factory.addRequestedTransition(from, from, requestedState);
       }
       
-      for (AbstractFootControlState state : states)
-      {
-         stateMachine.addState(state);
-      }
-      stateMachine.setCurrentState(ConstraintType.FULL);
+      return factory.build(ConstraintType.FULL);
    }
 
    public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
@@ -218,12 +199,12 @@ public class FootControlModule
    public void requestTouchdownForDisturbanceRecovery()
    {
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
-         moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
+         moveViaWaypointsState.requestTouchdownForDisturbanceRecovery(stateMachine.getTimeInCurrentState());
    }
    
    public void requestTouchdown()
    {
-    if(stateMachine.isCurrentState(ConstraintType.SWING))
+    if(stateMachine.getCurrentStateKey() == ConstraintType.SWING)
     {
        setContactState(ConstraintType.TOUCHDOWN);
        swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
@@ -259,12 +240,12 @@ public class FootControlModule
 
    public ConstraintType getCurrentConstraintType()
    {
-      return stateMachine.getCurrentStateEnum();
+      return stateMachine.getCurrentStateKey();
    }
 
    public void initialize()
    {
-      stateMachine.setCurrentState(ConstraintType.FULL);
+      stateMachine.resetToInitialState();
    }
 
    public void doControl()
@@ -286,7 +267,7 @@ public class FootControlModule
          requestExploration();
       }
       
-      stateMachine.checkTransitionConditions();
+      stateMachine.doTransitions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
@@ -296,14 +277,14 @@ public class FootControlModule
 
       if (ankleControlModule != null)
       {
-         ankleControlModule.compute(stateMachine.getCurrentState());
+         ankleControlModule.compute(stateMachine.getCurrentStateKey(), stateMachine.getCurrentState());
       }
    }
 
    // Used to restart the current state reseting the current state time
    public void resetCurrentState()
    {
-      stateMachine.setCurrentState(getCurrentConstraintType());
+      stateMachine.resetCurrentState();
    }
    
    public boolean isInFlatSupportState()

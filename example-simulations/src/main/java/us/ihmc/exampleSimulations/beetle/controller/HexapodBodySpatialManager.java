@@ -12,10 +12,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -36,10 +36,10 @@ public class HexapodBodySpatialManager
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
-   private final YoFrameOrientation yoDesiredBodyOrientation;
-   private final YoFrameVector yoDesiredBodyLinearVelocity;
-   private final YoFrameVector yoDesiredBodyAngularVelocity;
-   private final YoFramePoint yoDesiredBodyPosition;
+   private final YoFrameYawPitchRoll yoDesiredBodyOrientation;
+   private final YoFrameVector3D yoDesiredBodyLinearVelocity;
+   private final YoFrameVector3D yoDesiredBodyAngularVelocity;
+   private final YoFramePoint3D yoDesiredBodyPosition;
    private final YoDouble desiredBodyHeight;
    private final AlphaFilteredYoVariable filteredBodyHeight;
 
@@ -56,10 +56,10 @@ public class HexapodBodySpatialManager
       ReferenceFrame bodyZUpFrame = referenceFrames.getBodyZUpFrame();
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
 
-      yoDesiredBodyPosition = new YoFramePoint(prefix + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
-      yoDesiredBodyLinearVelocity = new YoFrameVector(prefix + "desiredLinearVelocity", bodyZUpFrame, registry);
-      yoDesiredBodyOrientation = new YoFrameOrientation(prefix + "desiredOrientation", ReferenceFrame.getWorldFrame(), registry);
-      yoDesiredBodyAngularVelocity = new YoFrameVector(prefix + "desiredAngularVelocity", bodyFixedFrame, registry);
+      yoDesiredBodyPosition = new YoFramePoint3D(prefix + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredBodyLinearVelocity = new YoFrameVector3D(prefix + "desiredLinearVelocity", bodyZUpFrame, registry);
+      yoDesiredBodyOrientation = new YoFrameYawPitchRoll(prefix + "desiredOrientation", ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredBodyAngularVelocity = new YoFrameVector3D(prefix + "desiredAngularVelocity", bodyFixedFrame, registry);
       desiredBodyHeight = new YoDouble(prefix + "desiredBodyHeight", registry);
       double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controllerDt);
       filteredBodyHeight = new AlphaFilteredYoVariable("filteredDesiredBodyHeight", registry, alpha, desiredBodyHeight);
@@ -75,8 +75,9 @@ public class HexapodBodySpatialManager
       desiredPosition.setToZero(body.getBodyFixedFrame());
       desiredOrientation.setToZero(body.getBodyFixedFrame());
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
       yoDesiredBodyOrientation.set(desiredOrientation);
       yoDesiredBodyPosition.set(desiredPosition);
@@ -104,8 +105,9 @@ public class HexapodBodySpatialManager
       yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
    }
 
  /**

@@ -102,11 +102,4 @@ public class HexapodMomentumOptimizationSettings implements ControllerCoreOptimi
    {
       return nContactableBodies;
    }
-
-   /** @inheritDoc */
-   @Override
-   public int getRhoSize()
-   {
-      return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
-   }
 }

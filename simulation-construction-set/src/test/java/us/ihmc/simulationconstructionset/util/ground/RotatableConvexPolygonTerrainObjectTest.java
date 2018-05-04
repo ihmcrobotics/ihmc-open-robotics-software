@@ -1,6 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -10,6 +12,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -34,7 +37,7 @@ public class RotatableConvexPolygonTerrainObjectTest
          {2.0, 1.0}, {1.0, 2.0}, {-1.0, 2.0}, {-2.0, 1.0}, {-2.0, -1.0}, {-1.0, -2.0}, {1.0, -2.0}, {2.0, -1.0}
       };
       this.pointList = pointList;
-      convexPolygon = new ConvexPolygon2D(pointList);
+      convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointList));
 
       centroidHeight = 1.0;
 

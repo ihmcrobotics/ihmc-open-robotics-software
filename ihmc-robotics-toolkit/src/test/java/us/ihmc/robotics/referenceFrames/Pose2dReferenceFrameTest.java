@@ -55,7 +55,7 @@ public class Pose2dReferenceFrameTest
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testLongChainEfficiency()
    {

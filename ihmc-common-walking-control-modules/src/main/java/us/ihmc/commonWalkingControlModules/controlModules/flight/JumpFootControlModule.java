@@ -131,7 +131,7 @@ public class JumpFootControlModule
       controlState.set(FootControlState.INVERSE_DYNAMICS);
    }
 
-   public void compute()
+   public void compute(double timeInState)
    {
       switch (controlState.getValue())
       {
@@ -139,10 +139,10 @@ public class JumpFootControlModule
          computeForInverseDynamicsMode();
          break;
       case JOINTSPACE:
-         jointspaceControlState.doAction();
+         jointspaceControlState.doAction(timeInState);
          break;
       case TASKSPACE:
-         taskspaceControlState.doAction();
+         taskspaceControlState.doAction(timeInState);
          break;
       default:
          throw getExceptionForInvalidStateEnum();

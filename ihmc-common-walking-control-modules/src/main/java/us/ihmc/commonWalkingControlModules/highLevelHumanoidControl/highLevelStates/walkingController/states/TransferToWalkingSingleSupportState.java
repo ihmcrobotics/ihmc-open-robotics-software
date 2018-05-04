@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -24,13 +23,13 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
-   public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
+   public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                               WalkingControllerParameters walkingControllerParameters,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
                                               YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
+      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);
@@ -102,12 +101,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      super.doAction();
+      super.doAction(timeInState);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
-      boolean pastMinimumTime = getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
+      boolean pastMinimumTime = timeInState > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
       boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
       if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
       {
@@ -116,9 +115,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      return super.isDone() || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+      return super.isDone(timeInState) || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
    }
 
    /**

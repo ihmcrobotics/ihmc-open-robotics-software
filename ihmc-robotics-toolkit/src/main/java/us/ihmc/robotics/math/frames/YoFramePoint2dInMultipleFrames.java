@@ -9,9 +9,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements YoMultipleFramesHolder
+public class YoFramePoint2dInMultipleFrames extends YoFramePoint2D implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
@@ -96,8 +97,8 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
       return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
    }
 
-   private YoFramePoint2d yoFramePointInWorld;
-   public YoFramePoint2d buildUpdatedYoFramePointForVisualizationOnly()
+   private YoFramePoint2D yoFramePointInWorld;
+   public YoFramePoint2D buildUpdatedYoFramePointForVisualizationOnly()
    {
       if (yoFramePointInWorld == null)
       {
@@ -105,18 +106,18 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
          if (!isReferenceFrameRegistered(worldFrame))
             registerReferenceFrame(worldFrame);
 
-         yoFramePointInWorld = new YoFramePoint2d(namePrefix, worldFrame.getName(), worldFrame, registry);
+         yoFramePointInWorld = new YoFramePoint2D(namePrefix, worldFrame.getName(), worldFrame, registry);
 
          attachVariableChangedListener(new VariableChangedListener()
          {
             private final FramePoint2D localFramePoint = new FramePoint2D();
-            private final YoFramePoint2d point = yoFramePointInWorld;
+            private final YoFramePoint2D point = yoFramePointInWorld;
 
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFramePoint.setIncludingFrame(YoFramePoint2dInMultipleFrames.this);
-               point.setAndMatchFrame(localFramePoint);
+               point.setMatchingFrame(localFramePoint);
             }
          });
       }

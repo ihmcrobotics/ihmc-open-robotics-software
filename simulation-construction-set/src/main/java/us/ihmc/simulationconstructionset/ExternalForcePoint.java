@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.JointPhysics;
 
 public class ExternalForcePoint extends KinematicPoint
@@ -15,9 +15,9 @@ public class ExternalForcePoint extends KinematicPoint
    private static final long serialVersionUID = -7715587266631433612L;
 
    // The force, impulse, and moment are all in world frame.
-   private final YoFrameVector force;
-   private final YoFrameVector moment;
-   private final YoFrameVector impulse;
+   private final YoFrameVector3D force;
+   private final YoFrameVector3D moment;
+   private final YoFrameVector3D impulse;
 
    private RotationMatrix R0_coll = new RotationMatrix(), Rcoll_0 = new RotationMatrix(), Rk_coll = new RotationMatrix(), Rk_coll2 = new RotationMatrix();
    private Vector3D u_coll = new Vector3D();
@@ -56,9 +56,9 @@ public class ExternalForcePoint extends KinematicPoint
    {
       super(name, offset, registry);
 
-      force = new YoFrameVector(name + "_f", "", ReferenceFrame.getWorldFrame(), registry);
-      moment = new YoFrameVector(name + "_m", "", ReferenceFrame.getWorldFrame(), registry);
-      impulse = new YoFrameVector(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
+      force = new YoFrameVector3D(name + "_f", "", ReferenceFrame.getWorldFrame(), registry);
+      moment = new YoFrameVector3D(name + "_m", "", ReferenceFrame.getWorldFrame(), registry);
+      impulse = new YoFrameVector3D(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
    @Override
@@ -110,6 +110,7 @@ public class ExternalForcePoint extends KinematicPoint
 
 
    private final Vector3D otherObjectVelocity = new Vector3D();
+
    public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3DReadOnly collisionNormalInWorld, double epsilon, double mu, Vector3DBasics impulseInWorldToPack)
    {
 //      System.out.println("Resolving collision with other object");
@@ -265,17 +266,17 @@ public class ExternalForcePoint extends KinematicPoint
       this.impulse.set(px, py, pz);
    }
 
-   public YoFrameVector getYoForce()
+   public YoFrameVector3D getYoForce()
    {
       return force;
    }
 
-   public YoFrameVector getYoMoment()
+   public YoFrameVector3D getYoMoment()
    {
 	   return moment;
    }
 
-   public YoFrameVector getYoImpulse()
+   public YoFrameVector3D getYoImpulse()
    {
       return impulse;
    }

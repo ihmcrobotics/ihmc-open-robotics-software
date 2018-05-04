@@ -9,30 +9,27 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
@@ -46,7 +43,6 @@ import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -273,7 +269,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -371,7 +367,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -479,7 +475,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
@@ -978,16 +974,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
-   }
-
-   private Handstep createHandstepForTesting(ScriptedHandstepGenerator scriptedHandstepGenerator)
-   {
-      RobotSide robotSide = RobotSide.LEFT;
-      Tuple3DBasics position = new Point3D(0.6, 0.3, 1.0);
-      Vector3D surfaceNormal = new Vector3D(-1.0, 0.0, 0.0);
-      double rotationAngleAboutNormal = 0.0;
-      double swingTrajectoryTime = 1.0;
-      return scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
    }
 
    private FootstepDataListMessage createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)

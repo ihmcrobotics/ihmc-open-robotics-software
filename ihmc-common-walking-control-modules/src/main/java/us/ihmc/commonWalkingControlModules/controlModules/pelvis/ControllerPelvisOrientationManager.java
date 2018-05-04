@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ControllerPelvisOrientationManager extends PelvisOrientationControlState
+public class ControllerPelvisOrientationManager implements PelvisOrientationControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -75,8 +75,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoVariableRegistry parentRegistry)
    {
-      super(PelvisOrientationControlMode.WALKING_CONTROLLER);
-
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       midFeetZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -160,7 +158,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       double deltaTime = yoTime.getDoubleValue() - initialPelvisOrientationTime.getDoubleValue();
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
@@ -192,7 +190,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
       desiredPelvisAngularAcceleration.add(tempAngularAcceleration);
 
-      orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
+      orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity);
+      orientationFeedbackControlCommand.setFeedForwardAction(desiredPelvisAngularAcceleration);
       orientationFeedbackControlCommand.setWeightsForSolver(tempWeight);
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);

@@ -10,31 +10,30 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class GroundContactPointBasedWrenchCalculator implements WrenchCalculatorInterface
 {
    private final String forceSensorName;
    private final List<GroundContactPoint> contactPoints;
-   private final OneDegreeOfFreedomJoint forceTorqueSensorJoint;
+   private final Joint forceTorqueSensorJoint;
 
    private final RigidBodyTransform transformToParentJoint;
 
    private boolean doWrenchCorruption = false;
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final Map<String, YoFrameVector> yoContactForceInSensorFrame = new HashMap<>();
+   private final Map<String, YoFrameVector3D> yoContactForceInSensorFrame = new HashMap<>();
    private final PoseReferenceFrame sensorFrame;
 
-   public GroundContactPointBasedWrenchCalculator(String forceSensorName, List<GroundContactPoint> contactPoints,
-                                                  OneDegreeOfFreedomJoint forceTorqueSensorJoint, RigidBodyTransform transformToParentJoint,
-                                                  YoVariableRegistry registry)
+   public GroundContactPointBasedWrenchCalculator(String forceSensorName, List<GroundContactPoint> contactPoints, Joint forceTorqueSensorJoint,
+                                                  RigidBodyTransform transformToParentJoint, YoVariableRegistry registry)
    {
       this.forceSensorName = forceSensorName;
       this.contactPoints = contactPoints;
@@ -50,7 +49,7 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
             String namePrefix = contactPointName + "_ForceInSensorFrame";
             // Checking if that variable does already exist for some reason.
             if (registry.getVariable(namePrefix + "X") == null)
-               this.yoContactForceInSensorFrame.put(contactPointName, new YoFrameVector(namePrefix, sensorFrame, registry));
+               this.yoContactForceInSensorFrame.put(contactPointName, new YoFrameVector3D(namePrefix, sensorFrame, registry));
          }
       }
    }
@@ -117,7 +116,7 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    }
 
    @Override
-   public OneDegreeOfFreedomJoint getJoint()
+   public Joint getJoint()
    {
       return forceTorqueSensorJoint;
    }

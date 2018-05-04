@@ -6,7 +6,9 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -17,16 +19,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class AvatarSwingOverPlanarRegionsVisualizer
 {
@@ -37,7 +39,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final YoVariableRegistry registry;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final YoFramePose solePose;
+   private final YoFramePoseUsingYawPitchRoll solePose;
    private final YoGraphicEllipsoid collisionSphere;
    private final YoGraphicPolygon stanceFootGraphic;
    private final YoGraphicPolygon swingStartGraphic;
@@ -57,12 +59,12 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       this.registry = registry;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      footPolygon = new ConvexPolygon2D(contactPointParameters.getFootContactPoints().get(RobotSide.LEFT));
+      footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPointParameters.getFootContactPoints().get(RobotSide.LEFT)));
 
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
       swingOverPlanarRegionsTrajectoryExpander.attachVisualizer(this::update);
 
-      solePose = new YoFramePose("SolePose", WORLD, registry);
+      solePose = new YoFramePoseUsingYawPitchRoll("SolePose", WORLD, registry);
       AppearanceDefinition bubble = YoAppearance.LightBlue();
       bubble.setTransparency(0.5);
       collisionSphere = new YoGraphicEllipsoid("CollisionSphere", solePose.getPosition(), solePose.getOrientation(), bubble, new Vector3D());
@@ -99,7 +101,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
          }
          intersectionMap.put(swingOverPlanarRegionsTrajectoryCollisionType,
                              new YoGraphicPosition("IntersectionGraphic" + swingOverPlanarRegionsTrajectoryCollisionType.name(),
-                                                   new YoFramePoint("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
+                                                   new YoFramePoint3D("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
                                                                     registry),
                                                    size, appearance));
 
@@ -139,7 +141,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       PlanarRegionsList terrain = generator.getPlanarRegionsList();
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.3);
-      graphics3DObject.addPlanarRegionsList(terrain, appearances);
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, terrain, appearances);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       stanceFootPose.setPosition(0.4, 0.3, 0.0);

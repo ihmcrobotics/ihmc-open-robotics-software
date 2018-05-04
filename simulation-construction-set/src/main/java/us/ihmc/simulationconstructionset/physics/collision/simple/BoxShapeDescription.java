@@ -95,9 +95,13 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
       throw new RuntimeException("Implement Me!");
    }
 
+   /**
+    * Box shape will not roll, so this method always returns false.
+    * @return false
+    */
    @Override
    public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
-   {
-      throw new RuntimeException("Implement Me!");      
+   { 
+      return false;
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
@@ -12,9 +13,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
@@ -78,14 +79,16 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 
    @Override
-   @Test(timeout = 520000)
+   @ContinuousIntegrationTest(estimatedDuration = 57.4)
+   @Test(timeout = 290000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalk();
    }
 
    @Override
-   @Test(timeout = 520000)
+   @ContinuousIntegrationTest(estimatedDuration = 59.7)
+   @Test(timeout = 300000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithForceDisturbances();

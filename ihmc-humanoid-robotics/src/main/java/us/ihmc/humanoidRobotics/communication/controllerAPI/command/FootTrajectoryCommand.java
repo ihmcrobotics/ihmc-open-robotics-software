@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -35,14 +35,14 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    @Override
    public void set(FootTrajectoryMessage message)
    {
-      se3Trajectory.set(message.se3Trajectory);
+      se3Trajectory.set(message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootTrajectoryMessage message)
    {
-      se3Trajectory.set(resolver, message.se3Trajectory);
+      se3Trajectory.set(resolver, message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 

@@ -12,9 +12,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
+import us.ihmc.robotics.sliderboard.Sliderboard;
 
 public class TuningTab extends Tab
 {
@@ -23,7 +23,7 @@ public class TuningTab extends Tab
    private final TextField textField = new TextField();
    private final TabPane parent;
 
-   private final TuningBoxManager tuningBoxManager;
+   private final TuningBox tuningBox = new TuningBox();
 
    public TuningTab(String name, TabPane parent)
    {
@@ -50,11 +50,6 @@ public class TuningTab extends Tab
          }
       });
 
-      VBox tuningBox = new VBox();
-      tuningBox.setFillWidth(true);
-      tuningBox.setSpacing(10.0);
-      tuningBoxManager = new TuningBoxManager(tuningBox);
-
       ScrollPane scrollPane = new ScrollPane();
       AnchorPane.setLeftAnchor(scrollPane, 0.0);
       AnchorPane.setRightAnchor(scrollPane, 0.0);
@@ -71,9 +66,10 @@ public class TuningTab extends Tab
       scrollPane.setContent(tuningBox);
 
       parent.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-         if (this == newValue)
+         if (this == newValue && oldValue != null)
          {
-            tuningBoxManager.updateView();
+            ((TuningTab) oldValue).hide();
+            ((TuningTab) newValue).updateView();
          }
       });
 
@@ -104,16 +100,31 @@ public class TuningTab extends Tab
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
    {
-      tuningBoxManager.setTunerMap(tunerMap);
+      tuningBox.setTunerMap(tunerMap);
    }
 
-   public void handleNewParameter(String uniqueName)
+   public void setSliderboard(Sliderboard sliderboard)
    {
-      tuningBoxManager.handleNewParameter(uniqueName);
+      tuningBox.setSliderboard(sliderboard);
    }
 
-   public List<String> getParameterUniqueNames()
+   public void handleNewParameter(String uniqueName, int sliderIndex)
    {
-      return tuningBoxManager.getParameterUniqueNames();
+      tuningBox.handleNewParameter(uniqueName, sliderIndex);
+   }
+
+   public List<Pair<String, Integer>> getParameterSavingInfo()
+   {
+      return tuningBox.getParameterSavingInfo();
+   }
+
+   private void hide()
+   {
+      tuningBox.hide();
+   }
+
+   private void updateView()
+   {
+      tuningBox.updateView();
    }
 }

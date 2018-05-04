@@ -3,22 +3,25 @@ package us.ihmc.avatar.roughTerrainWalking;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,7 +30,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -84,7 +86,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
-         footPolygons.set(side, new ConvexPolygon2D(contactPointParameters.getFootContactPoints().get(side)));
+         footPolygons.set(side, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPointParameters.getFootContactPoints().get(side))));
       }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -127,19 +129,20 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepData.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
+         MessageTools.copyData(new Point3D[] {waypointOne, waypointTwo}, footstepData.getCustomPositionWaypoints());
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)
          {
             double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
-            footstepData.setTimings(adjustedSwingTime, transferTime);
+            footstepData.setSwingDuration(adjustedSwingTime);
+            footstepData.setTransferDuration(transferTime);
             simulationTime += adjustedSwingTime;
          }
          else
             simulationTime += swingTime;
 
-         footsteps.add(footstepData);
+         footsteps.getFootstepDataList().add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);

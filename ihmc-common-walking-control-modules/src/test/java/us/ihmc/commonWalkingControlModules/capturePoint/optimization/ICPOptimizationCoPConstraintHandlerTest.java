@@ -1,16 +1,23 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import static org.fest.assertions.Fail.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -18,7 +25,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,13 +32,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.fest.assertions.Fail.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationCoPConstraintHandlerTest
@@ -46,7 +45,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testDoubleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -54,9 +53,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -66,17 +66,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -96,8 +89,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -109,7 +102,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSingleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -117,9 +110,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
@@ -130,17 +124,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
@@ -157,8 +144,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -184,8 +171,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      copConstraint = new FrameConvexPolygon2d();
-      cmpConstraint = new FrameConvexPolygon2d();
+      copConstraint = new FrameConvexPolygon2D();
+      cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
@@ -202,8 +189,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -215,7 +202,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testDoubleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -223,9 +210,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -234,17 +222,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -261,7 +242,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
@@ -272,7 +253,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSingleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -280,9 +261,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
-      ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+      solver.setMinimumFeedbackWeight(0.0001);
+      solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
@@ -292,17 +274,10 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (Exception e)
-      {
-         fail();
-      }
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
@@ -316,7 +291,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
@@ -340,8 +315,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      copConstraint = new FrameConvexPolygon2d();
-      cmpConstraint = new FrameConvexPolygon2d();
+      copConstraint = new FrameConvexPolygon2D();
+      cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
@@ -355,7 +330,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
@@ -425,137 +400,4 @@ public class ICPOptimizationCoPConstraintHandlerTest
       return bipedSupportPolygons;
    }
 
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
-   {
-      @Override
-      public double getForwardFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getLateralFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getFootstepRateWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getFeedbackForwardWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackLateralWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackRateWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public ICPControlGainsReadOnly getICPFeedbackGains()
-      {
-         ICPControlGains gains = new ICPControlGains();
-         gains.setKpParallelToMotion(3.0);
-         gains.setKpOrthogonalToMotion(2.5);
-
-         return gains;
-      }
-
-      @Override
-      public double getDynamicsObjectiveWeight()
-      {
-         return 500.0;
-      }
-
-      @Override
-      public double getDynamicsObjectiveDoubleSupportWeightModifier()
-      {
-         return 1.0;
-      }
-
-      @Override
-      public double getAngularMomentumMinimizationWeight()
-      {
-         return 50;
-      }
-
-      @Override
-      public boolean scaleStepRateWeightWithTime()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean scaleFeedbackWeightWithGain()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFeedbackRate()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean allowStepAdjustment()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useAngularMomentum()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFootstepRate()
-      {
-         return false;
-      }
-
-      @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
-
-      @Override
-      public double getMinimumTimeRemaining()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getAdjustmentDeadband()
-      {
-         return 0.03;
-      }
-
-      @Override
-      public double getSafeCoPDistanceToEdge()
-      {
-         return 0.0;
-      }
-   }
 }

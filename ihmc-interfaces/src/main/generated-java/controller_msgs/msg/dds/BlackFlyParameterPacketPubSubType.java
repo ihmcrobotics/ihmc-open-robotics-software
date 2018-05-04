@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "BlackFlyParameterPacket" defined in "BlackFlyParameterPacket_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from BlackFlyParameterPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit BlackFlyParameterPacket_.idl instead.
- */
+* 
+* Topic data type of the struct "BlackFlyParameterPacket" defined in "BlackFlyParameterPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from BlackFlyParameterPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit BlackFlyParameterPacket_.idl instead.
+*
+*/
 public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.BlackFlyParameterPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::BlackFlyParameterPacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public BlackFlyParameterPacketPubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.BlackFlyParameterPacket data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,9 +40,17 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -38,11 +60,6 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
    }
@@ -56,29 +73,43 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_7(data.getAutoExposure());
 
@@ -97,28 +128,62 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
       cdr.write_type_6(data.getShutter());
 
       cdr.write_type_9(data.getRobotSide());
+
    }
 
    public static void read(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.idl.CDR cdr)
    {
-
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setAutoExposure(cdr.read_type_7());
-
+      	
       data.setAutoGain(cdr.read_type_7());
-
+      	
       data.setAutoShutter(cdr.read_type_7());
-
+      	
       data.setExposure(cdr.read_type_6());
-
+      	
       data.setFrameRate(cdr.read_type_6());
-
+      	
       data.setFromUi(cdr.read_type_7());
-
+      	
       data.setGain(cdr.read_type_6());
-
+      	
       data.setShutter(cdr.read_type_6());
-
+      	
       data.setRobotSide(cdr.read_type_9());
+      	
+
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("auto_exposure", data.getAutoExposure());
+      ser.write_type_7("auto_gain", data.getAutoGain());
+      ser.write_type_7("auto_shutter", data.getAutoShutter());
+      ser.write_type_6("exposure", data.getExposure());
+      ser.write_type_6("frame_rate", data.getFrameRate());
+      ser.write_type_7("from_ui", data.getFromUi());
+      ser.write_type_6("gain", data.getGain());
+      ser.write_type_6("shutter", data.getShutter());
+      ser.write_type_9("robot_side", data.getRobotSide());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BlackFlyParameterPacket data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setAutoExposure(ser.read_type_7("auto_exposure"));
+      data.setAutoGain(ser.read_type_7("auto_gain"));
+      data.setAutoShutter(ser.read_type_7("auto_shutter"));
+      data.setExposure(ser.read_type_6("exposure"));
+      data.setFrameRate(ser.read_type_6("frame_rate"));
+      data.setFromUi(ser.read_type_7("from_ui"));
+      data.setGain(ser.read_type_6("gain"));
+      data.setShutter(ser.read_type_6("shutter"));
+      data.setRobotSide(ser.read_type_9("robot_side"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.BlackFlyParameterPacket src, controller_msgs.msg.dds.BlackFlyParameterPacket dest)
@@ -127,73 +192,10 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.BlackFlyParameterPacket data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_7("auto_exposure", data.getAutoExposure());
-
-      ser.write_type_7("auto_gain", data.getAutoGain());
-
-      ser.write_type_7("auto_shutter", data.getAutoShutter());
-
-      ser.write_type_6("exposure", data.getExposure());
-
-      ser.write_type_6("frame_rate", data.getFrameRate());
-
-      ser.write_type_7("from_ui", data.getFromUi());
-
-      ser.write_type_6("gain", data.getGain());
-
-      ser.write_type_6("shutter", data.getShutter());
-
-      ser.write_type_9("robot_side", data.getRobotSide());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BlackFlyParameterPacket data)
-   {
-      data.setAutoExposure(ser.read_type_7("auto_exposure"));
-
-      data.setAutoGain(ser.read_type_7("auto_gain"));
-
-      data.setAutoShutter(ser.read_type_7("auto_shutter"));
-
-      data.setExposure(ser.read_type_6("exposure"));
-
-      data.setFrameRate(ser.read_type_6("frame_rate"));
-
-      data.setFromUi(ser.read_type_7("from_ui"));
-
-      data.setGain(ser.read_type_6("gain"));
-
-      data.setShutter(ser.read_type_6("shutter"));
-
-      data.setRobotSide(ser.read_type_9("robot_side"));
-   }
-
-   @Override
    public controller_msgs.msg.dds.BlackFlyParameterPacket createData()
    {
       return new controller_msgs.msg.dds.BlackFlyParameterPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -205,7 +207,7 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.BlackFlyParameterPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -215,7 +217,7 @@ public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.BlackFlyParameterPacket src, controller_msgs.msg.dds.BlackFlyParameterPacket dest)
    {
       staticCopy(src, dest);

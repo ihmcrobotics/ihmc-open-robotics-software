@@ -14,12 +14,15 @@ import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
 public class RandomHumanoidMessagesTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.SECONDS));
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMethodName()
    { // Assert that all the methods are following the convention: ReturnedObjectType nextReturnedObjectType(Random)
       for (Method method : RandomHumanoidMessages.class.getDeclaredMethods())

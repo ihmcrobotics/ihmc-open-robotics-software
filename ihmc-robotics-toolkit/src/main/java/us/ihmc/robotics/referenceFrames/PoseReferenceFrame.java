@@ -1,6 +1,7 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -75,6 +76,12 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void setPoseAndUpdate(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       originPose.set(position, orientation);
+      this.update();
+   }
+
+   public void setPoseAndUpdate(Pose3D pose)
+   {
+      originPose.set(pose);
       this.update();
    }
 

@@ -39,7 +39,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControlState
+public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightControlState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -73,7 +73,6 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    public PelvisHeightControlState(YoPID3DGains gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      super(PelvisHeightControlMode.USER);
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       pelvis = fullRobotModel.getPelvis();
@@ -138,9 +137,9 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      taskspaceControlState.doAction();
+      taskspaceControlState.doAction(timeInState);
    }
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose3D initialPose)
@@ -326,8 +325,10 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       pointFeedbackCommand.getSpatialAccelerationCommand().set(spcatialAccelerationCommand);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.set(spatialFeedbackControlCommand.getBase(), spatialFeedbackControlCommand.getEndEffector());
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
+      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity);
+      pointFeedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
       pointFeedbackCommand.setGainsFrame(baseFrame);
@@ -346,7 +347,8 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
          FeetManager feetManager)
    {
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       controlPosition.changeFrame(pelvis.getBodyFixedFrame());
 

@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {

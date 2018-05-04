@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -11,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.modules.uiConnector.ControllerFilteredConnectionModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
@@ -22,7 +24,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -61,6 +62,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupLidarScanLogger(params));
       tryToStartModule(() -> setupRemoteObjectDetectionFeedbackEndpoint(params));
+      tryToStartModule(() -> setupJoystickBasedContinuousSteppingModule(params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -349,10 +351,18 @@ public class DRCNetworkProcessor
       if (params.isControllerCommunicatorEnabled())
       {
          PacketCommunicator controllerPacketCommunicator;
+
          if(params.isLocalControllerCommunicatorEnabled())
          {
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
+         }
+         else if (params.isFilterControllerInputMessages())
+         {
+            new ControllerFilteredConnectionModule(NET_CLASS_LIST);
+
+            PrintTools.info(this, "Connecting to controller using filtered connection module.");
+            controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_FILTER_MODULE_PORT, NET_CLASS_LIST);
          }
          else
          {
@@ -376,6 +386,16 @@ public class DRCNetworkProcessor
          server.throwExceptionForUnregisteredPackets(false);
          PacketCommunicator reaCommunicator = PacketCommunicator.createCustomPacketCommunicator(server, REACommunicationKryoNetClassLists.getPublicNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
+         reaCommunicator.connect();
+      }
+   }
+
+   private void setupJoystickBasedContinuousSteppingModule(DRCNetworkModuleParameters parameters) throws IOException
+   {
+      if (parameters.isEnableJoystickBasedStepping())
+      {
+         PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.JOYSTICK_BASED_STEPPING, reaCommunicator);
          reaCommunicator.connect();
       }
    }

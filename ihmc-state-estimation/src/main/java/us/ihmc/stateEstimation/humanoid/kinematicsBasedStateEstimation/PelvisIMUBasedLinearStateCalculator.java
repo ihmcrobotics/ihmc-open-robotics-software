@@ -6,15 +6,17 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PelvisIMUBasedLinearStateCalculator
 {
@@ -27,20 +29,20 @@ public class PelvisIMUBasedLinearStateCalculator
    private final FrameVector3D accelerationBias = new FrameVector3D(worldFrame);
    private final FrameVector3D gravityVector = new FrameVector3D();
 
-   private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
-   private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
+   private final YoFrameVector3D rootJointLinearVelocity = new YoFrameVector3D("imuRootJointLinearVelocity", worldFrame, registry);
+   private final YoFrameVector3D rootJointPosition = new YoFrameVector3D("imuRootJointPosition", worldFrame, registry);
    private final YoBoolean setRootJointPositionImuOnlyToCurrent = new YoBoolean("setRootJointPositionImuOnlyToCurrent", registry);
    private final YoDouble alphaLeakIMUOnly = new YoDouble("imuOnlyAlphaLeak", registry);
-   private final YoFrameVector rootJointPositionImuOnly = new YoFrameVector("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
-   private final YoFrameVector imuLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedIMULinearVelocity", worldFrame, registry);
-   private final YoFrameVector rootJointLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedRootJointLinearVelocity", worldFrame, registry);
+   private final YoFrameVector3D rootJointPositionImuOnly = new YoFrameVector3D("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
+   private final YoFrameVector3D imuLinearVelocityIMUOnly = new YoFrameVector3D("imuOnlyIntegratedIMULinearVelocity", worldFrame, registry);
+   private final YoFrameVector3D rootJointLinearVelocityIMUOnly = new YoFrameVector3D("imuOnlyIntegratedRootJointLinearVelocity", worldFrame, registry);
 
-   private final YoFrameVector yoMeasurementFrameLinearVelocityInWorld;
-   private final YoFrameVector yoRootJointIMUBasedLinearVelocityInWorld;
-   private final YoFrameVector yoLinearAccelerationMeasurementInWorld;
-   private final YoFrameVector yoLinearAccelerationMeasurement;
+   private final YoFrameVector3D yoMeasurementFrameLinearVelocityInWorld;
+   private final YoFrameVector3D yoRootJointIMUBasedLinearVelocityInWorld;
+   private final YoFrameVector3D yoLinearAccelerationMeasurementInWorld;
+   private final YoFrameVector3D yoLinearAccelerationMeasurement;
 
-   private final YoBoolean imuBasedStateEstimationEnabled = new YoBoolean("imuBasedStateEstimationEnabled", registry);
+   private final BooleanProvider useAccelerometerForEstimation;
 
    private final ReferenceFrame measurementFrame;
 
@@ -57,42 +59,43 @@ public class PelvisIMUBasedLinearStateCalculator
 
    public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
                                               IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, double estimatorDT,
-                                              double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                              YoVariableRegistry parentRegistry)
+                                              double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
 
+      if (stateEstimatorParameters == null)
+      {
+         useAccelerometerForEstimation = new BooleanParameter("useAccelerometerForEstimation", registry);
+      }
+      else
+      {
+         boolean initialValue = stateEstimatorParameters.useAccelerometerForEstimation();
+         useAccelerometerForEstimation = new BooleanParameter("useAccelerometerForEstimation", registry, initialValue);
+      }
+
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
       if (imuProcessedOutputs.size() == 0)
       {
          imuProcessedOutput = null;
-         imuBasedStateEstimationEnabled.set(false);
+         measurementFrame = null;
       }
       else
       {
          if (imuProcessedOutputs.size() > 1)
             System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: " + imuProcessedOutputs.get(0).getSensorName());
          imuProcessedOutput = imuProcessedOutputs.get(0);
-         imuBasedStateEstimationEnabled.set(true);
-      }
-
-      if (imuBasedStateEstimationEnabled.getBooleanValue())
-      {
          measurementFrame = imuProcessedOutput.getMeasurementFrame();
       }
-      else
-      {
-         measurementFrame = null;
-      }
 
-      yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector("imuLinearVelocityInWorld", worldFrame, registry);
-      yoRootJointIMUBasedLinearVelocityInWorld = new YoFrameVector("rootJointIMUBasedLinearVelocityInWorld", worldFrame, registry);
-      yoLinearAccelerationMeasurement = new YoFrameVector("imuLinearAcceleration", measurementFrame, registry);
-      yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
+      yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector3D("imuLinearVelocityInWorld", worldFrame, registry);
+      yoRootJointIMUBasedLinearVelocityInWorld = new YoFrameVector3D("rootJointIMUBasedLinearVelocityInWorld", worldFrame, registry);
+      yoLinearAccelerationMeasurement = new YoFrameVector3D("imuLinearAcceleration", measurementFrame, registry);
+      yoLinearAccelerationMeasurementInWorld = new YoFrameVector3D("imuLinearAccelerationInWorld", worldFrame, registry);
 
       setRootJointPositionImuOnlyToCurrent.set(true);
       alphaLeakIMUOnly.set(0.999);
@@ -100,15 +103,9 @@ public class PelvisIMUBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void enableEstimationModule(boolean enable)
-   {
-      if (imuProcessedOutput != null)
-         imuBasedStateEstimationEnabled.set(enable);
-   }
-
    public boolean isEstimationEnabled()
    {
-      return imuBasedStateEstimationEnabled.getBooleanValue();
+      return useAccelerometerForEstimation.getValue() && imuProcessedOutput != null;
    }
 
    private final FrameVector3D tempVector = new FrameVector3D();

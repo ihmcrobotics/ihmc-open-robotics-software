@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -8,7 +9,6 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -17,6 +17,8 @@ public class SnapAndWiggleSingleStep
 {
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private PlanarRegionsList planarRegionsList;
+
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
@@ -32,11 +34,11 @@ public class SnapAndWiggleSingleStep
       }
 
       PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
-      FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrameBeforeSnapping, footStepPolygon);
+      FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(soleFrameBeforeSnapping, footStepPolygon);
       footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
       PlanarRegion regionToMoveTo = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList,
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList,
             regionToMoveTo);
       if (snapTransform == null)
       {
@@ -54,7 +56,7 @@ public class SnapAndWiggleSingleStep
 
       RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
       ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
-      footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
+      footPolygonInRegion.applyTransform(soleToRegion, false);
 
       // TODO: make the delta inside value part of the optimization.
       wiggleParameters.deltaInside = 0.0;
@@ -79,11 +81,12 @@ public class SnapAndWiggleSingleStep
       {
          PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
-         footPolygonInRegion.setAndUpdate(footStepPolygon);
-         footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-         ConvexPolygon2D foothold = ConvexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion);
+         footPolygonInRegion.set(footStepPolygon);
+         footPolygonInRegion.applyTransform(soleToRegion, false);
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         convexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion, foothold);
          soleToRegion.invert();
-         foothold.applyTransformAndProjectToXYPlane(soleToRegion);
+         foothold.applyTransform(soleToRegion, false);
          return foothold;
       }
       return null;

@@ -49,7 +49,7 @@ public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConvergence() throws Exception
    {
@@ -94,7 +94,8 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(50.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -183,7 +184,8 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(5.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -262,7 +264,7 @@ public final class PointFeedbackControllerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCompareAgainstSpatialController() throws Exception
    {
@@ -329,8 +331,10 @@ public final class PointFeedbackControllerTest
          pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
 
-         pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+         pointFeedbackControlCommand.setFeedForwardAction(feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+         spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);

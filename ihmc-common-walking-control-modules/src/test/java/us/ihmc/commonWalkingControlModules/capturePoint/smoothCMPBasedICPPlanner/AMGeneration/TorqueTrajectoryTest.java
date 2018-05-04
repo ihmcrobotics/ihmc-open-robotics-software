@@ -41,7 +41,7 @@ public class TorqueTrajectoryTest
       calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetter()
    {
@@ -60,7 +60,7 @@ public class TorqueTrajectoryTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testScaling()
    {

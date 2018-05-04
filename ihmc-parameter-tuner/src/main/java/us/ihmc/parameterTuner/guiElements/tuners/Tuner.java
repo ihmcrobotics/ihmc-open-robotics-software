@@ -1,36 +1,41 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-
 import org.apache.commons.lang3.StringUtils;
 
-import javafx.geometry.Insets;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
+import us.ihmc.robotics.sliderboard.SliderboardListener;
 
-public class Tuner extends VBox
+public class Tuner extends VBox implements SliderboardListener
 {
    private static final int MAX_DESCRIPTION_CHARACTERS = 255;
 
-   private Label name;
-   private TextField description;
-   private InputNode inputNode;
+   private final Label name = new Label();
+   private final TitledPane descriptionPane = new TitledPane();
+   private final TextField description = new TextField();
+   private final InputNode inputNode;
+
+   private final GuiParameter parameter;
 
    public Tuner(GuiParameter parameter)
    {
-      setupNode();
+      this.parameter = parameter;
 
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
@@ -45,66 +50,67 @@ public class Tuner extends VBox
       switch (parameter.getType())
       {
       case "DoubleParameter":
-         DoubleTuner doubleTuner = new DoubleTuner(parameter);
-         getChildren().add(doubleTuner);
-         inputNode = doubleTuner;
+         inputNode = new DoubleTuner(parameter);
          break;
       case "IntegerParameter":
-         IntegerTuner integerTuner = new IntegerTuner(parameter);
-         getChildren().add(integerTuner);
-         inputNode = integerTuner;
+         inputNode = new IntegerTuner(parameter);
          break;
       case "BooleanParameter":
-         BooleanTuner booleanTuner = new BooleanTuner(parameter);
-         getChildren().add(booleanTuner);
-         inputNode = booleanTuner;
+         inputNode = new BooleanTuner(parameter);
          break;
       case "EnumParameter":
-         EnumTuner enumTuner = new EnumTuner(parameter);
-         getChildren().add(enumTuner);
-         inputNode = enumTuner;
+         inputNode = new EnumTuner(parameter);
          break;
       default:
-         PrintTools.info("Implement me.");
+         throw new RuntimeException("Implement tuner type: " + parameter.getType());
       }
 
-      Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
-      Tooltip.install(name, tooltip);
-      ContextMenu contextMenu = new ContextMenu();
-      name.setContextMenu(contextMenu);
+      setupNode(parameter);
    }
 
    public ContextMenu getContextMenu()
    {
-      return name.getContextMenu();
+      return descriptionPane.getContextMenu();
    }
 
-   private void setupNode()
+   private void setupNode(GuiParameter parameter)
    {
-      setSpacing(10.0);
+      Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
+      Tooltip.install(descriptionPane, tooltip);
+      ContextMenu contextMenu = new ContextMenu();
+      descriptionPane.setContextMenu(contextMenu);
 
-      name = new Label();
-      description = new TextField();
       HBox.setHgrow(this, Priority.ALWAYS);
       HBox.setHgrow(name, Priority.ALWAYS);
       HBox.setHgrow(description, Priority.ALWAYS);
 
-      HBox parameterInfoBox = new HBox();
-      parameterInfoBox.setSpacing(10.0);
-      parameterInfoBox.setAlignment(Pos.CENTER_LEFT);
-      parameterInfoBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
-      parameterInfoBox.getChildren().add(name);
-      HBox.setHgrow(parameterInfoBox, Priority.ALWAYS);
-      getChildren().add(parameterInfoBox);
-
       HBox parameterDescriptionBox = new HBox();
       parameterDescriptionBox.setSpacing(10.0);
       parameterDescriptionBox.setAlignment(Pos.CENTER_LEFT);
-      parameterDescriptionBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       parameterDescriptionBox.getChildren().add(new Text("Description"));
       parameterDescriptionBox.getChildren().add(description);
       HBox.setHgrow(parameterDescriptionBox, Priority.ALWAYS);
-      getChildren().add(parameterDescriptionBox);
+
+      VBox extendedOptionsBox = new VBox();
+      extendedOptionsBox.setSpacing(10.0);
+      extendedOptionsBox.getChildren().add(parameterDescriptionBox);
+      extendedOptionsBox.getChildren().add(inputNode.getFullInputNode());
+
+      HBox dropdownGraphic = new HBox();
+      dropdownGraphic.setSpacing(10.0);
+      dropdownGraphic.setAlignment(Pos.CENTER_LEFT);
+      dropdownGraphic.getChildren().add(name);
+      Region spacer = new Region();
+      HBox.setHgrow(spacer, Priority.ALWAYS);
+      dropdownGraphic.getChildren().add(spacer);
+      dropdownGraphic.getChildren().add(inputNode.getSimpleInputNode(120.0, 20.0));
+      dropdownGraphic.minWidthProperty().bind(descriptionPane.widthProperty().subtract(40));
+
+      descriptionPane.setContent(extendedOptionsBox);
+      descriptionPane.setAlignment(Pos.CENTER_LEFT);
+      descriptionPane.setGraphic(dropdownGraphic);
+      descriptionPane.setExpanded(false);
+      getChildren().add(descriptionPane);
 
       setId("tuner-window");
       name.setId("parameter-name-in-tuner");
@@ -115,4 +121,24 @@ public class Tuner extends VBox
       return inputNode.getSimpleInputNode(100.0, 20.0);
    }
 
+   @Override
+   public void sliderMoved(double sliderPercentage)
+   {
+      Platform.runLater(() -> inputNode.setValueFromPercent(sliderPercentage));
+   }
+
+   public void addChangeListener(ParameterChangeListener listener)
+   {
+      parameter.addChangedListener(listener);
+   }
+
+   public void removeChangeListener(ParameterChangeListener listener)
+   {
+      parameter.removeChangeListener(listener);
+   }
+
+   public double getValuePercent()
+   {
+      return inputNode.getValuePercent();
+   }
 }

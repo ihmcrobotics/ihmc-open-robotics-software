@@ -310,6 +310,17 @@ public class FullRobotModelFromDescription implements FullRobotModel
    {
       return this.contactSensorDefinitions.toArray(new ContactSensorDefinition[this.contactSensorDefinitions.size()]);
    }
+   
+   
+   public List<String> getLidarSensorNames()
+   {
+      return new ArrayList<>(lidarBaseFrames.keySet());
+   }
+   
+   public List<String> getCameraSensorNames()
+   {
+      return new ArrayList<>(cameraFrames.keySet());
+   }
 
    @Override
    public ReferenceFrame getCameraFrame(String name)

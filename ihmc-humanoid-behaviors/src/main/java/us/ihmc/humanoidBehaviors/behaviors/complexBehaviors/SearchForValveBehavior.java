@@ -1,16 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.ValveLocationPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 
 public class SearchForValveBehavior extends AbstractBehavior
 {
-   private RigidBodyTransform valveTransformToWorld;
+   private Pose3D valveTransformToWorld;
    private double valveRadius;
    private boolean recievedNewValveLocation = false;
 
@@ -50,7 +50,7 @@ public class SearchForValveBehavior extends AbstractBehavior
       recievedNewValveLocation = false;
    }
 
-   public RigidBodyTransform getLocation()
+   public Pose3D getLocation()
    {
       return valveTransformToWorld;
    }
@@ -64,7 +64,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    {
       TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Valve Location From UI");
       sendPacket(p1);
-      valveTransformToWorld = valveLocationPacket.getValveTransformToWorld();
+      valveTransformToWorld = valveLocationPacket.getValvePoseInWorld();
 
       valveRadius = valveLocationPacket.getValveRadius();
       recievedNewValveLocation = true;

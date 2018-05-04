@@ -2,10 +2,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -51,12 +51,12 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingPelvisOrientationTrajectoryMessage.setDestination(PacketDestination.UI);
+         outgoingPelvisOrientationTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
          sendPacket(outgoingPelvisOrientationTrajectoryMessage);
          sendPacketToController(outgoingPelvisOrientationTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingPelvisOrientationTrajectoryMessage.getSO3Trajectory().getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisOrientationTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
       }
    }
 

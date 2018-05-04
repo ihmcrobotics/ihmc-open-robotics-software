@@ -16,10 +16,10 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
@@ -30,7 +30,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
-   private final ArrayList<YoFramePoint> copPositionsAtStartOfInterval;
+   private final ArrayList<YoFramePoint3D> copPositionsAtStartOfInterval;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
@@ -56,7 +56,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
-         copPositionsAtStartOfInterval.add(i, new YoFramePoint("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
+         copPositionsAtStartOfInterval.add(i, new YoFramePoint3D("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
 
          normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
          normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
@@ -80,7 +80,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    {
       for (int i = 0; i < copPositionsAtStartOfInterval.size(); i++)
       {
-         YoFramePoint copLocation = copPositionsAtStartOfInterval.get(i);
+         YoFramePoint3D copLocation = copPositionsAtStartOfInterval.get(i);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
                                                                      YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
          graphicsList.add(yoGraphicPosition);

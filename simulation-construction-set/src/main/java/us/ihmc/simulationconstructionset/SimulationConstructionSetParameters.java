@@ -12,6 +12,7 @@ public class SimulationConstructionSetParameters
    public static final String SCS_DATA_BUFFER_SIZE = "scs.dataBuffer.size";
    public static final String SHOW_SCS_YOGRAPHICS = "show.scs.yographics";
    public static final String SCS_YOGRAPHICS_GLOBALSCALE = "scs.yographics.globalscale";
+   public static final String USE_AUTO_GROUND_GRAPHICS = "use.auto.ground.graphics";
 
    protected HashMap<String, TypeHolder> parameters = new HashMap<>();
 
@@ -23,6 +24,7 @@ public class SimulationConstructionSetParameters
       parameters.put(SCS_DATA_BUFFER_SIZE, new IntHolder("8192"));
       parameters.put(SHOW_SCS_YOGRAPHICS, new BooleanHolder("true"));
       parameters.put(SCS_YOGRAPHICS_GLOBALSCALE, new DoubleHolder("1.0"));
+      parameters.put(USE_AUTO_GROUND_GRAPHICS, new BooleanHolder("true"));
    }
 
    public SimulationConstructionSetParameters(boolean createGUI, int bufferSize)
@@ -137,6 +139,16 @@ public class SimulationConstructionSetParameters
    public void setYoGraphicsGlobalScale(double value)
    {
       ((DoubleHolder) parameters.get(SCS_YOGRAPHICS_GLOBALSCALE)).value = value;
+   }
+
+   public void setUseAutoGroundGraphics(boolean value)
+   {
+      ((BooleanHolder) parameters.get(USE_AUTO_GROUND_GRAPHICS)).value = value;
+   }
+
+   public boolean getUseAutoGroundGraphics()
+   {
+      return ((BooleanHolder) parameters.get(USE_AUTO_GROUND_GRAPHICS)).value;
    }
 
    protected class DoubleHolder extends TypeHolder

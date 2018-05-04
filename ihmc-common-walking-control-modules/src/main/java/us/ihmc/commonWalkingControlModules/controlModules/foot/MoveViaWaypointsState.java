@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.Collection;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -10,15 +9,13 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTra
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
-import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,8 +23,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MoveViaWaypointsState extends AbstractFootControlState
 {
    private final YoBoolean isPerformingTouchdown;
-   private final SettableDoubleProvider touchdownInitialTimeProvider = new SettableDoubleProvider(0.0);
-   private final SettablePositionProvider currentDesiredFootPosition = new SettablePositionProvider();
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
    private final RigidBodyTaskspaceControlState taskspaceControlState;
@@ -38,6 +33,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private final FramePose3D initialPose = new FramePose3D();
 
+   private final FrameVector3DReadOnly touchdownVelocity;
+   private final FrameVector3DReadOnly touchdownAcceleration;
+
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private ReferenceFrame controlFrame;
    private final ReferenceFrame ankleFrame;
@@ -45,19 +43,20 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
-   public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
+   public MoveViaWaypointsState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration,
                                 PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper);
+      super(footControlHelper);
 
       this.gains = gains;
+      this.touchdownVelocity = touchdownVelocity;
+      this.touchdownAcceleration = touchdownAcceleration;
 
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";
 
       isPerformingTouchdown = new YoBoolean(namePrefix + "IsPerformingTouchdown", registry);
-      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
-            touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
+      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", registry);
 
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -111,9 +110,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      taskspaceControlState.doTransitionIntoAction();
+      taskspaceControlState.onEntry();
       isPerformingTouchdown.set(false);
 
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
@@ -123,11 +122,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
       if (isPerformingTouchdown.getBooleanValue())
       {
-         positionTrajectoryForDisturbanceRecovery.compute(getTimeInCurrentState());
+         positionTrajectoryForDisturbanceRecovery.compute(timeInState);
          positionTrajectoryForDisturbanceRecovery.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          desiredAngularVelocity.setToZero();
          desiredAngularAcceleration.setToZero();
@@ -136,11 +135,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       }
       else
       {
-         taskspaceControlState.doAction();
+         taskspaceControlState.doAction(timeInState);
          spatialFeedbackControlCommand.set(taskspaceControlState.getSpatialFeedbackControlCommand());
 
          if (taskspaceControlState.abortState())
-            requestTouchdownForDisturbanceRecovery();
+            requestTouchdownForDisturbanceRecovery(timeInState);
       }
 
       doSingularityAvoidance(spatialFeedbackControlCommand);
@@ -148,13 +147,14 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void packCommandForTouchdown()
    {
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(gains);
    }
 
-   public void requestTouchdownForDisturbanceRecovery()
+   public void requestTouchdownForDisturbanceRecovery(double timeInState)
    {
       if (isPerformingTouchdown.getBooleanValue())
          return;
@@ -164,8 +164,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       desiredPosition.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
 
-      currentDesiredFootPosition.set(desiredPosition);
-      touchdownInitialTimeProvider.setValue(getTimeInCurrentState());
+      positionTrajectoryForDisturbanceRecovery.setLinearTrajectory(timeInState, desiredAnklePosition, touchdownVelocity, touchdownAcceleration);
       positionTrajectoryForDisturbanceRecovery.initialize();
 
       isPerformingTouchdown.set(true);
@@ -178,8 +177,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    {
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
-         spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+         spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+         spatialFeedbackControlCommand.getFeedForwardActionIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
 
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
@@ -192,8 +192,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
 
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
    }
 
    private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();
@@ -230,8 +231,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      taskspaceControlState.doTransitionOutOfAction();
+      taskspaceControlState.onExit();
    }
 }

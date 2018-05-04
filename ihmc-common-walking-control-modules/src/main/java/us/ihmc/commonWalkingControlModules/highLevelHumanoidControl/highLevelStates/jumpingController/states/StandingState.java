@@ -61,7 +61,7 @@ public class StandingState extends AbstractJumpState
    {
       centroidalMomentumManager.computeForZeroMomentumRateOfChange();
       pelvisControlManager.maintainDesiredPositionAndOrientation();
-      feetManager.compute();
+      feetManager.compute(getTimeInCurrentState());
       headManager.compute();
       chestManager.compute();
       for (RobotSide robotSide : RobotSide.values)

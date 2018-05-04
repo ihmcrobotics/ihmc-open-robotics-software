@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 
 public class LIPMDynamicsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNextStateComputation()
    {
@@ -142,7 +142,7 @@ public class LIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDynamicsStateGradient()
    {
@@ -365,7 +365,7 @@ public class LIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDynamicsControlGradient()
    {
@@ -545,7 +545,7 @@ public class LIPMDynamicsTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDynamicsStateHessian()
    {
@@ -767,7 +767,7 @@ public class LIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDynamicsControlHessian()
    {
@@ -948,7 +948,7 @@ public class LIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDynamicsStateGradientOfControlGradient()
    {

@@ -9,9 +9,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /*
  * This visualizer show state of the CTTaskNodeTree.
@@ -32,10 +32,10 @@ public class TreeStateVisualizer
    private Point3D pointCurrentTime = new Point3D(0.0, 0.0, 1.0);
    private Point3D pointTreeReachingTime = new Point3D(0.0, 0.0, 1.0);
 
-   private final YoFramePoint yoFramePointCurrentTimeLineOrigin;
-   private final YoFramePoint yoFramePointCurrentTime;
-   private final YoFramePoint yoFramePointCurrentTimeInvalid;
-   private final YoFramePoint yoFramePointTreeReachingTime;
+   private final YoFramePoint3D yoFramePointCurrentTimeLineOrigin;
+   private final YoFramePoint3D yoFramePointCurrentTime;
+   private final YoFramePoint3D yoFramePointCurrentTimeInvalid;
+   private final YoFramePoint3D yoFramePointTreeReachingTime;
 
    /*
     * find sphere thing
@@ -52,10 +52,10 @@ public class TreeStateVisualizer
       /*
        * set currentTimeLine.
        */
-      yoFramePointCurrentTimeLineOrigin = new YoFramePoint(name + "currentTimeOrigin", worldFrame, registry);
+      yoFramePointCurrentTimeLineOrigin = new YoFramePoint3D(name + "currentTimeOrigin", worldFrame, registry);
       yoFramePointCurrentTimeLineOrigin.set(pointCurrentTimeLineOrigin);
 
-      YoFrameVector currentTimeLineVector = new YoFrameVector("currentTimeLineVector", worldFrame, registry);
+      YoFrameVector3D currentTimeLineVector = new YoFrameVector3D("currentTimeLineVector", worldFrame, registry);
       currentTimeLineVector.set(new Vector3D(0.0, 1.0, 0.0));
 
       currentTimeLineViz = new YoGraphicCylinder("currentTimeLine", yoFramePointCurrentTimeLineOrigin, currentTimeLineVector, YoAppearance.LightBlue(), 0.03);
@@ -65,11 +65,11 @@ public class TreeStateVisualizer
       /*
        * set currentTime.
        */
-      yoFramePointCurrentTime = new YoFramePoint(name + "currentTime", worldFrame, registry);
+      yoFramePointCurrentTime = new YoFramePoint3D(name + "currentTime", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointCurrentTime.set(pointCurrentTime);
       
-      yoFramePointCurrentTimeInvalid = new YoFramePoint(name + "currentTimeInvalid", worldFrame, registry);
+      yoFramePointCurrentTimeInvalid = new YoFramePoint3D(name + "currentTimeInvalid", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointCurrentTimeInvalid.set(pointCurrentTime);
 
@@ -82,7 +82,7 @@ public class TreeStateVisualizer
       /*
        * set treeReachingTime.
        */
-      yoFramePointTreeReachingTime = new YoFramePoint(name + "treeReachingTime", worldFrame, registry);
+      yoFramePointTreeReachingTime = new YoFramePoint3D(name + "treeReachingTime", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointTreeReachingTime.set(pointCurrentTime);
 

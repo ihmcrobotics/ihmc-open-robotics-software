@@ -13,10 +13,11 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
+import controller_msgs.msg.dds.IMUPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import sensor_msgs.JointState;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,7 +28,6 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -108,8 +108,10 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
-         imuPacket.set(RandomGeometry.nextVector3D32(random), RandomGeometry.nextQuaternion32(random), RandomGeometry.nextVector3D32(random));
+         IMUPacket imuPacket = robotConfigurationData.getImuSensorData().add();
+         imuPacket.getLinearAcceleration().set(RandomGeometry.nextVector3D32(random));
+         imuPacket.getOrientation().set(RandomGeometry.nextQuaternion32(random));
+         imuPacket.getAngularVelocity().set(RandomGeometry.nextVector3D32(random));
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
@@ -121,8 +123,8 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          Quaternion orientation = new Quaternion();
          pelvisPoseInMocapFrame.getTranslation(translation);
          pelvisPoseInMocapFrame.getRotation(orientation);
-         robotConfigurationData.setRootTranslation(translation);
-         robotConfigurationData.setRootOrientation(orientation);
+         robotConfigurationData.getRootTranslation().set(translation);
+         robotConfigurationData.getRootOrientation().set(orientation);
       }
       fullRobotModel.updateFrames();
       packetCommunicator.send(robotConfigurationData);

@@ -16,6 +16,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -26,6 +27,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -38,9 +40,11 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUsePushRobotController(true);
+         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         pusher = new PushRobotTestConductor(conductor.getScs(), "neck_root_yaw");
+         pusher = new PushRobotTestConductor(conductor.getScs(), "body");
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -56,19 +60,19 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor = null;
       variables = null;
       pusher = null;
+      stepTeleopManager = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
-   public void testWalkingForwardFastWithPush()
+   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
-      variables.getYoPlanarVelocityInputX().set(0.8);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));

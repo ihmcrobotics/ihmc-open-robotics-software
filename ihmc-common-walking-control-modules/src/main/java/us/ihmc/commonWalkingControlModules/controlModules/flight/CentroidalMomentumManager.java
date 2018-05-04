@@ -13,11 +13,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Generates a feasible momentum command for jumping depending on the state 
@@ -42,16 +42,16 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final FrameVector3D desiredLinearMomentumRateOfChange = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRateOfChange = new FrameVector3D();
 
-   private final YoFrameVector yoDesiredLinearMomentumRateOfChange;
-   private final YoFrameVector yoDesiredAngularMomentumRateOfChange;
-   private final YoFrameVector yoDesiredGroundReactionForce;
-   private final YoFrameVector yoPlannedGroundReactionForce;
-   private final YoFramePoint yoPlannedCoMPosition;
+   private final YoFrameVector3D yoDesiredLinearMomentumRateOfChange;
+   private final YoFrameVector3D yoDesiredAngularMomentumRateOfChange;
+   private final YoFrameVector3D yoDesiredGroundReactionForce;
+   private final YoFrameVector3D yoPlannedGroundReactionForce;
+   private final YoFramePoint3D yoPlannedCoMPosition;
    private final YoDouble yoPlannedYawTorque;
-   private final YoFrameVector yoPlannedCoMVelocity;
-   private final YoFramePoint yoEstimatedCoMPosition;
-   private final YoFrameVector yoEstimatedCoMVelocity;
-   private final YoFrameVector yoEstimatedAngularMomentum;
+   private final YoFrameVector3D yoPlannedCoMVelocity;
+   private final YoFramePoint3D yoEstimatedCoMPosition;
+   private final YoFrameVector3D yoEstimatedCoMVelocity;
+   private final YoFrameVector3D yoEstimatedAngularMomentum;
 
    private final double totalMass;
    private final ForceTrajectory groundReactionForceProfile = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments,
@@ -100,16 +100,16 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       velocityErrorGain = parameters.getVelocityErrorGain();
 
       String namePrefix = getClass().getSimpleName();
-      yoDesiredAngularMomentumRateOfChange = new YoFrameVector(namePrefix + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
-      yoDesiredLinearMomentumRateOfChange = new YoFrameVector(namePrefix + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
-      yoDesiredGroundReactionForce = new YoFrameVector(namePrefix + "DesiredGroundReactionForce", controlFrame, registry);
-      yoPlannedGroundReactionForce = new YoFrameVector(namePrefix + "PlannedGroundReactionForce", controlFrame, registry);
-      yoPlannedCoMPosition = new YoFramePoint(namePrefix + "PlannedCoMPosition", controlFrame, registry);
-      yoPlannedCoMVelocity = new YoFrameVector(namePrefix + "PlannedCoMVelocity", controlFrame, registry);
+      yoDesiredAngularMomentumRateOfChange = new YoFrameVector3D(namePrefix + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
+      yoDesiredLinearMomentumRateOfChange = new YoFrameVector3D(namePrefix + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
+      yoDesiredGroundReactionForce = new YoFrameVector3D(namePrefix + "DesiredGroundReactionForce", controlFrame, registry);
+      yoPlannedGroundReactionForce = new YoFrameVector3D(namePrefix + "PlannedGroundReactionForce", controlFrame, registry);
+      yoPlannedCoMPosition = new YoFramePoint3D(namePrefix + "PlannedCoMPosition", controlFrame, registry);
+      yoPlannedCoMVelocity = new YoFrameVector3D(namePrefix + "PlannedCoMVelocity", controlFrame, registry);
       yoPlannedYawTorque = new YoDouble(namePrefix + "PlannedYawTorque", registry);
-      yoEstimatedCoMPosition = new YoFramePoint(namePrefix + "EstimatedCoMPosition", controlFrame, registry);
-      yoEstimatedCoMVelocity = new YoFrameVector(namePrefix + "EstimatedCoMVelocity", controlFrame, registry);
-      yoEstimatedAngularMomentum = new YoFrameVector(namePrefix + "EstimatedAngularMomentum", controlFrame, registry);
+      yoEstimatedCoMPosition = new YoFramePoint3D(namePrefix + "EstimatedCoMPosition", controlFrame, registry);
+      yoEstimatedCoMVelocity = new YoFrameVector3D(namePrefix + "EstimatedCoMVelocity", controlFrame, registry);
+      yoEstimatedAngularMomentum = new YoFrameVector3D(namePrefix + "EstimatedAngularMomentum", controlFrame, registry);
       timeInState = new YoDouble(getClass().getSimpleName() + "TimeInState", registry);
       clippingTime = new YoBoolean(getClass().getSimpleName() + "ClippingTime", registry);
       rateLimitedAngularMomentumRateOfChange = new FrameVector3D(controlFrame);

@@ -1,14 +1,19 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationSolutionHandler;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -16,20 +21,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationSolutionHandlerTest
@@ -49,7 +46,10 @@ public class ICPOptimizationSolutionHandlerTest
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
       solutionHandler = new ICPOptimizationSolutionHandler(parameters, new YoBoolean("useICPControlPolygons", registry), "test", registry);
-      solver = new ICPOptimizationQPSolver(parameters, 4, false);
+      solver = new ICPOptimizationQPSolver(4, false);
+      solver.setMinimumFeedbackWeight(parameters.getMinimumFeedbackWeight());
+      solver.setMinimumFootstepWeight(parameters.getMinimumFootstepWeight());
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    private Footstep createFootsteps(double length, double width, int numberOfSteps)
@@ -79,8 +79,8 @@ public class ICPOptimizationSolutionHandlerTest
       return referenceLocation;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWellWithinDeadband()
    {
       double scale = 0.2;
@@ -88,8 +88,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testALittleWithinDeadband()
    {
       double scale = 0.9;
@@ -97,8 +97,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustWithinDeadband()
    {
       double scale = 0.99;
@@ -106,8 +106,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testRightOnDeadband()
    {
       double scale = 1.0;
@@ -115,8 +115,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustOutsideDeadband()
    {
       double scale = 1.01;
@@ -124,8 +124,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testALittleOutsideDeadband()
    {
       double scale = 1.05;
@@ -133,8 +133,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWellOutsideDeadband()
    {
       double scale = 1.5;
@@ -142,9 +142,9 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testWithinDeadbandResolution() throws NoConvergenceException
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testWithinDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -155,8 +155,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D foostepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D foostepPose = new FramePose3D();
       FramePoint2D foostepXYSolution = new FramePoint2D();
 
@@ -171,7 +171,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep,  solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -228,9 +228,9 @@ public class ICPOptimizationSolutionHandlerTest
       assertEquals(0.0, solutionHandler.getFootstepAdjustment().length(), 1e-3);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
-   public void testOutsideDeadbandResolution() throws NoConvergenceException
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testOutsideDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -241,8 +241,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D foostepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
 
@@ -257,7 +257,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -325,8 +325,8 @@ public class ICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
 
-      YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose3D footstepSolution = new YoFramePose3D("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
 
@@ -341,13 +341,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (NoConvergenceException e)
-      {
-      }
+      solver.compute(currentICPError, perfectCMP);
 
       solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -388,7 +382,7 @@ public class ICPOptimizationSolutionHandlerTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
       supportPolygon.addVertex(new Point2D(0.5 * footLength, 0.5 * footWidth - 0.5 * stanceWidth));
       supportPolygon.addVertex(new Point2D(0.5 * footLength, -0.5 * footWidth - 0.5 * stanceWidth));
       supportPolygon.addVertex(new Point2D(-0.5 * footLength, 0.5 * footWidth - 0.5 * stanceWidth));

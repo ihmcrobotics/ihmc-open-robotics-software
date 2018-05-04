@@ -28,8 +28,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotControllerAdapter;
 import us.ihmc.simulationconstructionset.Robot;
@@ -56,7 +56,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private int numInY = (int) ((xMax - yMin) / incrementY);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 3000000)
+   @Test(timeout = 30000)
    public void testIdealFootstepAlwaysBetterThanOthers()
    {
       Random random = new Random(1776L);
@@ -119,8 +119,8 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.3)
+   @Test(timeout = 30000)
    public void testScoringFootsteps()
    {
       SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
@@ -235,7 +235,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
    private void createCandidateFootstep(String name, int index, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoFramePose footstepYoFramePose = new YoFramePose(name + index + "FramePose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll footstepYoFramePose = new YoFramePoseUsingYawPitchRoll(name + index + "FramePose", ReferenceFrame.getWorldFrame(), registry);
       footstepYoFramePose.setToNaN();
       YoGraphicPolygon footstepYoGraphicPolygon = new YoGraphicPolygon(name + index + "YoGraphicPolygon", footstepYoFramePose,
                                                                        defaultFootPolygon.getNumberOfVertices(), registry, 1.0, YoAppearance.Red());
@@ -247,7 +247,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private YoGraphicPolygon createStaticFootstep(String name, FramePose3D framePose, AppearanceDefinition appearance, YoVariableRegistry registry,
                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoFramePose footstepYoFramePose = new YoFramePose(name + "FramePose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll footstepYoFramePose = new YoFramePoseUsingYawPitchRoll(name + "FramePose", ReferenceFrame.getWorldFrame(), registry);
       footstepYoFramePose.set(framePose);
       YoGraphicPolygon footstepYoGraphicPolygon = new YoGraphicPolygon(name + "YoGraphicPolygon", footstepYoFramePose, defaultFootPolygon.getNumberOfVertices(),
                                                                        registry, 1.0, appearance);

@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandler
 {
@@ -40,7 +41,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final YoDouble kdRotationalDamping = new YoDouble("kdRotationalDamping", registry);
    private final YoDouble pullingOutSpringHysteresisReduction = new YoDouble("pullingOutSpringHysteresisReduction", registry);
 
-   private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
+   private double velocityForMicrocollision = 0.05; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4
    private double minDistanceToConsiderDifferent = 0.003; //0.003; //0.002; //0.02;
    private double percentMoveTowardTouchdownWhenSamePoint = 0.2; //0.2; //0.05; //1.0; //0.05; 
@@ -51,16 +52,18 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean useAverageNewCollisionTouchdownPoints = true;
    private double maximumPenetrationToStart = 0.002;
 
-   private static final boolean divideByNumberContacting = true; //true; //false;
+   private static final boolean divideByNumberContacting = false; //true; //false;
 
    private static final boolean resolveCollisionWithAnImpact = false;
    private static final boolean allowMicroCollisions = false;
 
    private static final boolean performSpringDamper = true;
    private static final boolean createNewContactPairs = true;
-   private static final boolean slipTowardEachOtherIfSlipping = true;
+   private static final boolean slipTowardEachOtherIfSlipping = false;
 
    private static final boolean allowRecyclingOfPointsInUse = true;
+
+   private static boolean useShuffleContactingPairs = false;
 
    private final Random random;
 
@@ -73,6 +76,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final Vector3D tempVectorForAveraging = new Vector3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
+
+   private final YoInteger numberOfContacts = new YoInteger("numberOfContacts", registry);
 
    public HybridImpulseSpringDamperCollisionHandler(double epsilon, double mu, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -93,8 +98,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       this.coefficientOfFriction.set(mu);
 
       rotationalCoefficientOfFrictionBeta.set(0.01);
-      kpCollision.set(2000.0);
-      kdCollision.set(200.0);
+      kpCollision.set(20000.0);
+      kdCollision.set(5000.0);
       kdRotationalDamping.set(0.05);
       pullingOutSpringHysteresisReduction.set(0.8);
 
@@ -122,6 +127,16 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       parentRegistry.addChild(registry);
    }
 
+   public void setKp(double value)
+   {
+      kpCollision.set(value);
+   }
+
+   public void setKd(double value)
+   {
+      kdCollision.set(value);
+   }
+
    @Override
    public void maintenanceBeforeCollisionDetection()
    {
@@ -133,7 +148,10 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    {
       int numberOfCollisions = shapesInContactList.size();
 
-      Collections.shuffle(shapesInContactList, random);
+      numberOfContacts.set(numberOfCollisions);
+
+      if (useShuffleContactingPairs)
+         Collections.shuffle(shapesInContactList, random);
 
       if (DEBUG)
          System.out.println("Resolving " + numberOfCollisions + " collisions....");
@@ -222,6 +240,11 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       {
          contactingExternalForcePointsVisualizer.update();
       }
+   }
+
+   public void useShuffleContactingPairs(boolean value)
+   {
+      useShuffleContactingPairs = value;
    }
 
    private final Point3D positionOne = new Point3D();
@@ -936,7 +959,6 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
                                                                             p_world); // link1.epsilon, link1.mu, p_world);
          }
       }
-
       if (collisionOccurred)
       {
          for (CollisionHandlerListener listener : listeners)
@@ -1042,6 +1064,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       //      for (int j=0; j<10; j++)
       {
          this.maintenanceBeforeCollisionDetection();
+         detachNonContactingPairs(results);
 
          for (int i = 0; i < results.getNumberOfCollisions(); i++)
          {
@@ -1054,6 +1077,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    }
 
    private final ArrayList<ContactingExternalForcePoint> allContactingExternalForcePoints = new ArrayList<>();
+   private final ArrayList<String> linkNamesOfForcePoints = new ArrayList<>();
 
    @Override
    public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
@@ -1065,12 +1089,56 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          ContactingExternalForcePoint contactingExternalForcePoint = contactingExternalForcePoints.get(i);
          contactingExternalForcePoint.setIndex(index);
          allContactingExternalForcePoints.add(contactingExternalForcePoint);
+         linkNamesOfForcePoints.add(link.getName());
          index++;
       }
 
       if (visualize)
       {
          contactingExternalForcePointsVisualizer.addPoints(contactingExternalForcePoints);
+      }
+   }
+
+   private void detachNonContactingPairs(CollisionDetectionResult results)
+   {
+      ArrayList<String> linkNamesOfContacting = new ArrayList<>();
+
+      for (int i = 0; i < results.getNumberOfCollisions(); i++)
+      {
+         Contacts contact = results.getCollision(i);
+         CollisionShapeWithLink shapeA = (CollisionShapeWithLink) contact.getShapeA();
+         CollisionShapeWithLink shapeB = (CollisionShapeWithLink) contact.getShapeB();
+
+         if (!linkNamesOfContacting.contains(shapeA.getLink().getName()))
+            linkNamesOfContacting.add(shapeA.getLink().getName());
+         if (!linkNamesOfContacting.contains(shapeB.getLink().getName()))
+            linkNamesOfContacting.add(shapeB.getLink().getName());
+      }
+
+      for (int i = 0; i < allContactingExternalForcePoints.size(); i++)
+      {
+         ContactingExternalForcePoint contactingExternalForcePoint = allContactingExternalForcePoints.get(i);
+
+         boolean isContacting = false;
+         for (int j = 0; j < linkNamesOfContacting.size(); j++)
+         {
+            if (linkNamesOfContacting.get(j).equals(linkNamesOfForcePoints.get(i)))
+            {
+               isContacting = true;
+               break;
+            }
+         }
+
+         if (!isContacting)
+         {
+            boolean isPairedWhileNonContacting = contactingExternalForcePoint.getIndexOfContactingPair() != -1;
+            if (isPairedWhileNonContacting)
+            {               
+               //System.out.println("" + linkNamesOfForcePoints.get(i) + " is not contacting, but point is activated.");
+               allContactingExternalForcePoints.get(contactingExternalForcePoint.getIndexOfContactingPair()).setIndexOfContactingPair(-1);
+               contactingExternalForcePoint.setIndexOfContactingPair(-1);
+            }
+         }
       }
    }
 }

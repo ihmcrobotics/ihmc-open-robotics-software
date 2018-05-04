@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "HandTrajectoryMessage" defined in "HandTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from HandTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit HandTrajectoryMessage_.idl instead.
- */
+* 
+* Topic data type of the struct "HandTrajectoryMessage" defined in "HandTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from HandTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HandTrajectoryMessage_.idl instead.
+*
+*/
 public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public HandTrajectoryMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HandTrajectoryMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,9 +40,12 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -42,15 +59,21 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -59,10 +82,30 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setRobotSide(cdr.read_type_9());
+      	
+      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandTrajectoryMessage data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setRobotSide(ser.read_type_9("robot_side"));
+      ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandTrajectoryMessage src, controller_msgs.msg.dds.HandTrajectoryMessage dest)
@@ -71,45 +114,10 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HandTrajectoryMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_9("robot_side", data.getRobotSide());
-
-      ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandTrajectoryMessage data)
-   {
-      data.setRobotSide(ser.read_type_9("robot_side"));
-
-      ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
-   }
-
-   @Override
    public controller_msgs.msg.dds.HandTrajectoryMessage createData()
    {
       return new controller_msgs.msg.dds.HandTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -121,7 +129,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -131,7 +139,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.HandTrajectoryMessage src, controller_msgs.msg.dds.HandTrajectoryMessage dest)
    {
       staticCopy(src, dest);

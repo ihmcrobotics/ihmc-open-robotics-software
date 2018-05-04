@@ -5,15 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotics.graphics.RoboticsRemoteYoGraphicFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class YoVariableHandshakeParser
 {
+   private final RemoteYoGraphicFactory yoGraphicFactory = new RoboticsRemoteYoGraphicFactory();
 
    @SuppressWarnings("deprecation")
    public static YoVariableHandshakeParser create(HandshakeFileType type)
@@ -109,6 +114,10 @@ public abstract class YoVariableHandshakeParser
    {
       return numberOfJointStateVariables;
    }
-   
+
+   protected RemoteYoGraphic yoGraphicFromMessage(int registrationID, String name, YoVariable<?>[] vars, double[] consts, AppearanceDefinition appearance)
+   {
+      return yoGraphicFactory.yoGraphicFromMessage(registrationID, name, vars, consts, appearance);
+   }
    
 }

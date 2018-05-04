@@ -5,21 +5,21 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicTheme;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.CategoryTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TopicTheme;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TypedTopicTheme;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class UIVisibilityGraphsTopics
 {
-   private static final APIFactory apiFactory = new APIFactory();
+   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
    private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
@@ -64,7 +64,7 @@ public class UIVisibilityGraphsTopics
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
-   private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("VizGraphs"));
+   private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("VizGraphs"));
    
    public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
 
@@ -117,5 +117,5 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> StopWalker = Root.child(UnitTest).child(Walker).topic(Stop);
    public static final Topic<PlanarRegionsList> ShadowPlanarRegionData = Root.child(PlanarRegion).child(Shadow).topic(Data);
 
-   public static final API API = apiFactory.getAPIAndCloseFactory();
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

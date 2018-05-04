@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
@@ -14,6 +14,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarState>
@@ -29,48 +30,41 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final boolean requireUserValidation;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public SearchFarForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public SearchFarForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
+                                     CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+                                     AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereFar", SearchFarState.class, yoTime, outgoingCommunicationBridge);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
-      
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
 
-
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
-            coactiveElement.validAcknowledged);
-      setupStateMachine();
+                                                                        coactiveElement.validAcknowledged);
    }
 
-   private void setupStateMachine()
+   @Override
+   protected SearchFarState configureStateMachineAndReturnInitialKey(StateMachineFactory<SearchFarState, BehaviorAction> factory)
    {
-
       //ENABLE LIDAR
-      BehaviorAction<SearchFarState> enableLidarTask = new BehaviorAction<SearchFarState>(SearchFarState.ENABLE_LIDAR,
-            atlasPrimitiveActions.enableLidarBehavior)
+      BehaviorAction enableLidarTask = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            // FIXME
-//            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
+            // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
          }
       };
 
       //REDUCE LIDAR RANGE *******************************************
 
-      BehaviorAction<SearchFarState> setLidarMediumRangeTask = new BehaviorAction<SearchFarState>(SearchFarState.SETUP_LIDAR,
-            atlasPrimitiveActions.setLidarParametersBehavior)
+      BehaviorAction setLidarMediumRangeTask = new BehaviorAction(atlasPrimitiveActions.setLidarParametersBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 1.4f;
             atlasPrimitiveActions.setLidarParametersBehavior.setInput(param);
@@ -78,11 +72,11 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorAction<SearchFarState> clearLidarTask = new BehaviorAction<SearchFarState>(SearchFarState.CLEAR_LIDAR, atlasPrimitiveActions.clearLidarBehavior);
+      BehaviorAction clearLidarTask = new BehaviorAction(atlasPrimitiveActions.clearLidarBehavior);
 
       //SEARCH FOR BALL *******************************************
 
-      BehaviorAction<SearchFarState> findBallTask = new BehaviorAction<SearchFarState>(SearchFarState.SEARCHING_FOR_SPHERE, initialSphereDetectionBehavior)
+      BehaviorAction findBallTask = new BehaviorAction(initialSphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -94,7 +88,6 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
             coactiveElement.ballX.set(0);
             coactiveElement.ballY.set(0);
             coactiveElement.ballZ.set(0);
-
          }
       };
 
@@ -102,7 +95,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       // Confirm from the user that this is the correct ball *******************************************
 
-      BehaviorAction<SearchFarState> validateBallTask = new BehaviorAction<SearchFarState>(SearchFarState.VALIDATING, waitForUserValidationBehavior)
+      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -120,20 +113,21 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
          }
       };
 
-      statemachine.addStateWithDoneTransition(enableLidarTask, SearchFarState.SETUP_LIDAR);
-      statemachine.addStateWithDoneTransition(setLidarMediumRangeTask, SearchFarState.CLEAR_LIDAR);
-      statemachine.addStateWithDoneTransition(clearLidarTask, SearchFarState.SEARCHING_FOR_SPHERE);
+      factory.addStateAndDoneTransition(SearchFarState.ENABLE_LIDAR, enableLidarTask, SearchFarState.SETUP_LIDAR);
+      factory.addStateAndDoneTransition(SearchFarState.SETUP_LIDAR, setLidarMediumRangeTask, SearchFarState.CLEAR_LIDAR);
+      factory.addStateAndDoneTransition(SearchFarState.CLEAR_LIDAR, clearLidarTask, SearchFarState.SEARCHING_FOR_SPHERE);
 
       if (requireUserValidation)
       {
-         statemachine.addStateWithDoneTransition(findBallTask, SearchFarState.VALIDATING);
-         statemachine.addState(validateBallTask);
+         factory.addStateAndDoneTransition(SearchFarState.SEARCHING_FOR_SPHERE, findBallTask, SearchFarState.VALIDATING);
+         factory.addState(SearchFarState.VALIDATING, validateBallTask);
+      }
+      else
+      {
+         factory.addState(SearchFarState.SEARCHING_FOR_SPHERE, findBallTask);
       }
 
-      else
-         statemachine.addState(findBallTask);
-      statemachine.setStartState(SearchFarState.ENABLE_LIDAR);
-
+      return SearchFarState.ENABLE_LIDAR;
    }
 
    public boolean foundBall()
@@ -141,7 +135,6 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
       return initialSphereDetectionBehavior.foundBall();
    }
 
-  
    public Point3D getBallLocation()
    {
       return initialSphereDetectionBehavior.getBallLocation();
@@ -151,5 +144,4 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    public void onBehaviorExited()
    {
    }
-
 }

@@ -1,4 +1,5 @@
 package us.ihmc.robotDataLogger;
+
 /**
 * 
 * Definition of the enum "HandshakeFileType" defined in LogProperties.idl. 
@@ -7,16 +8,21 @@ package us.ihmc.robotDataLogger;
 * Do not update this file directly, edit LogProperties.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum HandshakeFileType
 {
-        	PROTOBUFFER,
-        
-        	IDL_YAML,
-        
-        	IDL_CDR,
-        
-	;
-	
-	public static HandshakeFileType[] values = values();
+         PROTOBUFFER,
+      
+         IDL_YAML,
+      
+         IDL_CDR,
+      
+   ;
+   public static HandshakeFileType[] values = values();
 
+   public boolean epsilonEquals(HandshakeFileType other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

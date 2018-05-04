@@ -39,7 +39,7 @@ public class ReflectionSimulationComparerTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testTwoEmptySimulations()
    {
@@ -59,12 +59,12 @@ public class ReflectionSimulationComparerTest
       assertFalse(simulationsAreTheSame);
 
       Collection<Field> differingFields = comparer.getDifferingFields();
-      
-      assertEquals(4, differingFields.size());
+
+      assertEquals(2, differingFields.size());
       for (Field field : differingFields)
       {
         String fieldName = field.getName();
-        assertTrue((fieldName.equals("hash")) || (fieldName.equals("nnuId")));
+        assertTrue(fieldName.equals("hash"));
       }
       
       comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -90,7 +90,7 @@ public class ReflectionSimulationComparerTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
@@ -131,7 +131,7 @@ public class ReflectionSimulationComparerTest
       return robot0;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      

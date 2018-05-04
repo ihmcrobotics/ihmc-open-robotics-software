@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
@@ -22,8 +23,8 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
@@ -109,6 +110,12 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
                public void exportSnapshot(File snapshotFile)
                {
+               }
+
+               @Override
+               public void streamTo(RGBDStreamer cameraStreamer, int framesPerSecond)
+               {
+                  
                }
             };
          }

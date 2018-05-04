@@ -20,6 +20,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -34,8 +35,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -43,6 +42,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class MomentumRecoveryControlModuleTest
@@ -59,7 +59,7 @@ public class MomentumRecoveryControlModuleTest
    private SideDependentList<SixDoFJoint> footJoints = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
+   private SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
@@ -82,7 +82,7 @@ public class MomentumRecoveryControlModuleTest
       setupTest(footPositions);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
       FrameVector2D icpError = new FrameVector2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
 
       momentumRecoveryControlModule.setSupportSide(null);
@@ -92,16 +92,15 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       boolean useHighMomentumWeight = momentumRecoveryControlModule.getUseHighMomentumWeight();
 
       assertFalse(safeArea.isEmpty());
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2D tmpPoint = new FramePoint2D();
-         supportPolygon.getFrameVertex(i, tmpPoint);
+         FramePoint2D tmpPoint = new FramePoint2D(supportPolygon.getVertex(i));
          assertTrue(areaToProjectInto.isPointInside(tmpPoint));
       }
       assertTrue(useHighMomentumWeight);
@@ -124,7 +123,7 @@ public class MomentumRecoveryControlModuleTest
       setupTest(footPositions);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
       FrameVector2D icpError = new FrameVector2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
 
       momentumRecoveryControlModule.setSupportSide(RobotSide.LEFT);
@@ -134,16 +133,15 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       boolean useHighMomentumWeight = momentumRecoveryControlModule.getUseHighMomentumWeight();
 
       assertFalse(safeArea.isEmpty());
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2D tmpPoint = new FramePoint2D();
-         supportPolygon.getFrameVertex(i, tmpPoint);
+         FramePoint2D tmpPoint = new FramePoint2D(supportPolygon.getVertex(i));
          assertTrue(areaToProjectInto.isPointInside(tmpPoint));
       }
       assertTrue(useHighMomentumWeight);
@@ -173,7 +171,7 @@ public class MomentumRecoveryControlModuleTest
       usingHighMomentumWeight.set(true);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
       FrameVector2D icpError = new FrameVector2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
 
       momentumRecoveryControlModule.setSupportSide(null);
@@ -183,8 +181,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       boolean useHighMomentumWeight = momentumRecoveryControlModule.getUseHighMomentumWeight();
 
@@ -217,7 +215,7 @@ public class MomentumRecoveryControlModuleTest
       usingHighMomentumWeight.set(true);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
       FrameVector2D icpError = new FrameVector2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
 
       momentumRecoveryControlModule.setSupportSide(RobotSide.LEFT);
@@ -227,8 +225,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       boolean useHighMomentumWeight = momentumRecoveryControlModule.getUseHighMomentumWeight();
 
@@ -250,7 +248,7 @@ public class MomentumRecoveryControlModuleTest
       setupTest(footPositions);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, 0.1, 0.0);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
 
       momentumRecoveryControlModule.setSupportSide(null);
       momentumRecoveryControlModule.setICPError(new FrameVector2D(worldFrame));
@@ -259,8 +257,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (showPlotter)
@@ -285,7 +283,7 @@ public class MomentumRecoveryControlModuleTest
       setupTest(footPositions);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, -0.2, 0.0);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
 
       momentumRecoveryControlModule.setSupportSide(null);
       momentumRecoveryControlModule.setICPError(new FrameVector2D(worldFrame));
@@ -294,8 +292,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (showPlotter)
@@ -310,7 +308,7 @@ public class MomentumRecoveryControlModuleTest
       assertTrue(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test (timeout = 30000)
    public void testLogicSingleSupportSafe()
    {
@@ -322,7 +320,7 @@ public class MomentumRecoveryControlModuleTest
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, 0.1, 0.0);
 
       RobotSide stepSide = RobotSide.RIGHT;
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
       FramePose3D stepPose = new FramePose3D(worldFrame, rightFootPosition, new Quaternion());
       Footstep footStep = new Footstep(stepSide, stepPose);
 
@@ -334,8 +332,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (showPlotter)
@@ -362,7 +360,7 @@ public class MomentumRecoveryControlModuleTest
       FramePoint2D capturePoint = new FramePoint2D(worldFrame, 0.35, 0.05);
 
       RobotSide stepSide = RobotSide.RIGHT;
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
       FramePose3D stepPose = new FramePose3D(worldFrame, rightFootPosition, new Quaternion());
       Footstep footStep = new Footstep(stepSide, stepPose);
 
@@ -374,8 +372,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (showPlotter)
@@ -404,7 +402,7 @@ public class MomentumRecoveryControlModuleTest
       setupTest(footPositions);
 
       FramePoint2D capturePoint = new FramePoint2D(worldFrame);
-      FrameConvexPolygon2d supportPolygon = makeSupportPolygon(true, true);
+      FrameConvexPolygon2D supportPolygon = makeSupportPolygon(true, true);
       FrameVector2D icpError = new FrameVector2D(worldFrame, Double.MAX_VALUE, Double.MAX_VALUE);
 
       momentumRecoveryControlModule.setSupportSide(null);
@@ -414,8 +412,8 @@ public class MomentumRecoveryControlModuleTest
 
       momentumRecoveryControlModule.compute();
 
-      FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       boolean useHighMomentumWeight = momentumRecoveryControlModule.getUseHighMomentumWeight();
 
@@ -441,7 +439,7 @@ public class MomentumRecoveryControlModuleTest
          ankleFrames.put(robotSide, ankleFrame);
          soleFrames.put(robotSide, soleFrame);
 
-         FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrame);
+         FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(soleFrame);
          footPolygon.addVertex(new Point2D(0.1, 0.05));
          footPolygon.addVertex(new Point2D(0.1, -0.05));
          footPolygon.addVertex(new Point2D(-0.1, -0.05));
@@ -468,22 +466,22 @@ public class MomentumRecoveryControlModuleTest
       ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
+         FrameConvexPolygon2D footPolygonInWorld = new FrameConvexPolygon2D();
          footPolygonInWorld.setIncludingFrame(defaultFootPolygons.get(robotSide));
          footPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
          String prefix = robotSide.getLowerCaseName();
          String Prefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(prefix + "FootPolygon", worldFrame, 10, registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(prefix + "FootPolygon", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon(Prefix + " Foot Polygon", yoFootPolygon, Color.BLACK, false, 1));
-         yoFootPolygon.setFrameConvexPolygon2d(footPolygonInWorld);
+         yoFootPolygon.set(footPolygonInWorld);
       }
       yoGraphicsListRegistry.registerArtifactList(artifacts);
    }
 
-   private FrameConvexPolygon2d makeSupportPolygon(boolean leftFootContact, boolean rightFootContact)
+   private FrameConvexPolygon2D makeSupportPolygon(boolean leftFootContact, boolean rightFootContact)
    {
-      FrameConvexPolygon2d support = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D support = new FrameConvexPolygon2D(worldFrame);
       for (RobotSide robotSide : RobotSide.values)
       {
          if (robotSide == RobotSide.LEFT && !leftFootContact)
@@ -491,11 +489,11 @@ public class MomentumRecoveryControlModuleTest
          if (robotSide == RobotSide.RIGHT && !rightFootContact)
             continue;
 
-         FrameConvexPolygon2d footPolygon = defaultFootPolygons.get(robotSide);
+         FrameConvexPolygon2D footPolygon = defaultFootPolygons.get(robotSide);
          FramePoint2D tempPoint = new FramePoint2D();
          for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
          {
-            footPolygon.getFrameVertex(i, tempPoint);
+            tempPoint.setIncludingFrame(footPolygon.getVertex(i));
             tempPoint.changeFrameAndProjectToXYPlane(worldFrame);
             support.addVertex(tempPoint);
          }

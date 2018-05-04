@@ -10,6 +10,10 @@
 # messages as a per joint basis. The first trajectory point has to be greater than zero.
 int8 execution_mode
 
+# Defines a unique ID for this message. Only needed when you want to queue another message to this
+# message.
+int64 message_id
+
 # Only needed when using QUEUE mode, it refers to the message Id to which this message should be
 # queued to. It is used by the controller to ensure that no message has been lost on the way. If a
 # message appears to be missing (previousMessageId different from the last message ID received by the

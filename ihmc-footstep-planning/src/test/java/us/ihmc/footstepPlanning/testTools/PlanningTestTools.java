@@ -29,10 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -40,6 +37,10 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PlanningTestTools
 {
@@ -107,7 +108,7 @@ public class PlanningTestTools
 //      graphics3DObject.addCoordinateSystem(0.3);
       if (planarRegionsList != null)
       {
-         graphics3DObject.addPlanarRegionsList(planarRegionsList, appearances);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, appearances);
          scs.setGroundVisible(false);
       }
       scs.addStaticLinkGraphics(graphics3DObject);
@@ -128,7 +129,7 @@ public class PlanningTestTools
             double alpha = (double) i / (double) (markers - 1);
             Pose2D pose = new Pose2D();
             bodyPath.getPointAlongPath(alpha, pose);
-            YoFramePoint yoPoint = new YoFramePoint("BodyPathPoint" + i, worldFrame, vizRegistry);
+            YoFramePoint3D yoPoint = new YoFramePoint3D("BodyPathPoint" + i, worldFrame, vizRegistry);
             yoPoint.set(pose.getPosition());
             YoGraphicPosition pointVis = new YoGraphicPosition("BodyPathPoint" + i, yoPoint, 0.025, YoAppearance.Blue());
             vizGraphicsListRegistry.registerYoGraphic("viz", pointVis);
@@ -137,8 +138,8 @@ public class PlanningTestTools
 
       if (footseps != null)
       {
-         YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, vizRegistry);
-         yoDefaultFootPolygon.setConvexPolygon2d(createDefaultFootPolygon());
+         YoFrameConvexPolygon2D yoDefaultFootPolygon = new YoFrameConvexPolygon2D("DefaultFootPolygon", worldFrame, 4, vizRegistry);
+         yoDefaultFootPolygon.set(createDefaultFootPolygon());
 
          int numberOfSteps = footseps.getNumberOfSteps();
 
@@ -149,7 +150,7 @@ public class PlanningTestTools
             footstep.getSoleFramePose(footstepPose);
 
             AppearanceDefinition appearance = footstep.getRobotSide() == RobotSide.RIGHT ? YoAppearance.Green() : YoAppearance.Red();
-            YoFramePose yoFootstepPose = new YoFramePose("footPose" + i, worldFrame, vizRegistry);
+            YoFramePoseUsingYawPitchRoll yoFootstepPose = new YoFramePoseUsingYawPitchRoll("footPose" + i, worldFrame, vizRegistry);
             yoFootstepPose.set(footstepPose);
             yoFootstepPose.setZ(yoFootstepPose.getZ() + (footstep.getRobotSide() == RobotSide.RIGHT ? 0.001 : 0.0));
 
@@ -166,8 +167,8 @@ public class PlanningTestTools
                ConvexPolygon2D foothold = new ConvexPolygon2D();
                footstep.getFoothold(foothold);
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
-               YoFrameConvexPolygon2d yoFoothold = new YoFrameConvexPolygon2d("Foothold" + i, worldFrame, 4, vizRegistry);
-               yoFoothold.setConvexPolygon2d(foothold);
+               YoFrameConvexPolygon2D yoFoothold = new YoFrameConvexPolygon2D("Foothold" + i, worldFrame, 4, vizRegistry);
+               yoFoothold.set(foothold);
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoFoothold, yoFootstepPose, 1.0, appearance);
                vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
             }
@@ -182,15 +183,15 @@ public class PlanningTestTools
 
    public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      YoFramePoint yoGoal = new YoFramePoint("GoalPosition", worldFrame, registry);
+      YoFramePoint3D yoGoal = new YoFramePoint3D("GoalPosition", worldFrame, registry);
       yoGoal.set(goalPose.getPosition());
       graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("GoalViz", yoGoal, 0.05, YoAppearance.Yellow()));
-      YoFramePoint yoStart = new YoFramePoint("StartPosition", worldFrame, registry);
+      YoFramePoint3D yoStart = new YoFramePoint3D("StartPosition", worldFrame, registry);
       graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("StartViz", yoStart, 0.05, YoAppearance.Blue()));
       PoseReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
       FrameVector3D goalOrientation = new FrameVector3D(goalFrame, 0.5, 0.0, 0.0);
       goalOrientation.changeFrame(worldFrame);
-      YoFrameVector yoGoalOrientation = new YoFrameVector("GoalVector", worldFrame, registry);
+      YoFrameVector3D yoGoalOrientation = new YoFrameVector3D("GoalVector", worldFrame, registry);
       yoGoalOrientation.set(goalOrientation);
 //      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }

@@ -32,9 +32,9 @@ import javax.swing.JTextField;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -43,6 +43,9 @@ import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.color.MutableColor;
+import us.ihmc.graphicsDescription.image.DepthImageCallback;
+import us.ihmc.graphicsDescription.image.ImageCallback;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
@@ -54,9 +57,8 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
@@ -88,14 +90,12 @@ import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
-import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
@@ -2097,7 +2097,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       HeightMap heightMap = null;
 
       // TODO: GroundProfile is just that of the first robot. Need to make it part of the sim or something...
-      if ((robots != null) && (robots.length > 0))
+      if (parameters.getUseAutoGroundGraphics() && (robots != null) && (robots.length > 0))
       {
          GroundContactModel groundContactModel = robots[0].getGroundContactModel();
          if (groundContactModel != null)
@@ -4528,6 +4528,50 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          myGUI.startStreamingVideoData(cameraConfiguration, width, height, imageCallback, timestampProvider, framesPerSecond);
       }
    }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param timestampProvider Provider for the current timestamp to mark the image with
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       TimestampProvider timestampProvider, int framesPerSecond)
+
+   {
+      if(myGUI != null)
+      {
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       int framesPerSecond)
+   
+   {
+      if(myGUI != null)
+      {
+         TimestampProvider timestampProvider = () -> Conversions.secondsToNanoseconds(getTime());
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
 
    private boolean systemExitDisabled = false;
 
@@ -4571,32 +4615,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   public void initializeShapeCollision(CollisionManager collisionManager)
    {
-      mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      collisionManager.setUpCollisionVisualizer(this);
+      mySimulation.initializeShapeCollision(collisionManager);
    }
-
-   public void initializeCollisionDetector(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
-   {
-      mySimulation.initializeCollisionDetector(collisionVisualizer, collisionHandler);
-   }
-
-   public void addEnvironmentCollisionShapes(Shape3D<?> simpleShape)
-   {
-      mySimulation.addEnvironmentCollisionShapes(simpleShape);
-   }
-
-   public void addEnvironmentCollisionShapes(List<? extends Shape3D<?>> simpleShapes)
-   {
-      for (int i = 0; i < simpleShapes.size(); i++)
-         mySimulation.addEnvironmentCollisionShapes(simpleShapes.get(i));
-   }
-
-   public void initializeCollisionHandler(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
-   {
-      mySimulation.initializeCollisionHandler(collisionVisualizer, collisionHandler);
-   }
-
+   
    @Override
    public NameSpace getParameterRootPath()
    {

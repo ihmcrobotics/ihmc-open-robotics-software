@@ -66,7 +66,7 @@ public class LandingState extends AbstractJumpState
       double time = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(time, false);
       pelvisControlManager.maintainDesiredPositionAndOrientation(linearWeights);
-      feetManager.compute();
+      feetManager.compute(time);
       headManager.compute();
       chestManager.compute();
       for (RobotSide robotSide : RobotSide.values)

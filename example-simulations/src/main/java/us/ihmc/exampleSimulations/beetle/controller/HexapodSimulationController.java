@@ -165,7 +165,7 @@ public class HexapodSimulationController implements RobotController
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       toolbox.setupForInverseDynamicsSolver(footContactableBodies);
       toolbox.setupForInverseKinematicsSolver();
-      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getRootBody(), controlledBodies, footContactableBodies);
+      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getRootBody(), footContactableBodies);
 
       return toolbox;
    }

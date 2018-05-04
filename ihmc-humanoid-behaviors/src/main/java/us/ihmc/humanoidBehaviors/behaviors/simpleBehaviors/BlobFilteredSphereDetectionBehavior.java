@@ -4,18 +4,19 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -61,7 +62,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       if (pointCloudQueue.isNewPacketAvailable())
       {
          PointCloudWorldPacket latestPointCloudWorldPacket = pointCloudQueue.getLatestPacket();
-         Point3D32[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
+         Point3D32[] fullPointCloud = HumanoidMessageTools.getDecayingWorldScan(latestPointCloudWorldPacket);
 
          Point3D32[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
 
@@ -149,7 +150,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 //      sendPacket(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
-      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
+      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH.ordinal());
       sendPacket(textToSpeechPacket);
    }
 

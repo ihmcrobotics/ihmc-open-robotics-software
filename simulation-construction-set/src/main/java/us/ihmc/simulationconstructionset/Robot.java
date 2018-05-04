@@ -425,7 +425,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * is called once per simulation tick.  If simulationTicksPerControlTick for a given controller
     * is something other than one the function will skip that controller.
     */
-   protected final void doControllers()
+   public final void doControllers()
    {
       if (controllers == null)
          return;

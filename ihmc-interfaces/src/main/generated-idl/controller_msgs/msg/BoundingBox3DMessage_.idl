@@ -12,6 +12,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::BoundingBox3DMessage_")
       struct BoundingBox3DMessage
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         geometry_msgs::msg::dds::Point min_point;
         geometry_msgs::msg::dds::Point max_point;
       };

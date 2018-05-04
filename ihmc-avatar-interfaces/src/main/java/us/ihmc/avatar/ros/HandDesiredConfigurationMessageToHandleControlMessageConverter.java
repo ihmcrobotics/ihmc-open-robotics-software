@@ -1,14 +1,14 @@
 package us.ihmc.avatar.ros;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import handle_msgs.HandleControl;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 
 public class HandDesiredConfigurationMessageToHandleControlMessageConverter
 {
    public static void convertHandDesiredConfigurationMessage(HandDesiredConfigurationMessage ihmcMessage, HandleControl message)
    {
-      switch (HandConfiguration.fromByte(ihmcMessage.getHandDesiredConfiguration()))
+      switch (HandConfiguration.fromByte(ihmcMessage.getDesiredHandConfiguration()))
       {
          case CLOSE :
             message.setType(new int[] {2, 2, 2, 2, 2});

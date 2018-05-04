@@ -19,10 +19,10 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -41,7 +41,7 @@ public class PlanarRegionViewer
    private final AnimationTimer renderMeshAnimation;
    private final AtomicReference<Boolean> show;
 
-   public PlanarRegionViewer(REAMessager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
+   public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
       messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
       show = messager.createInput(showPlanarRegionsTopic, true);

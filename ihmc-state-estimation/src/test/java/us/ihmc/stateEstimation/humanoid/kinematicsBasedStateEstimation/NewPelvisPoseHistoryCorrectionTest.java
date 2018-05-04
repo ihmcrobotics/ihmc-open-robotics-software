@@ -8,6 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -18,16 +21,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -267,7 +267,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisExpectedCorrection = new RigidBodyTransform();
 
       FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
-      YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
+      YoFramePoseUsingYawPitchRoll correctedPelvisToVerifyTheTest = new YoFramePoseUsingYawPitchRoll("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
@@ -335,7 +335,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
 
       FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
-      YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
+      YoFramePoseUsingYawPitchRoll correctedPelvisToVerifyTheTest = new YoFramePoseUsingYawPitchRoll("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)

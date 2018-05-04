@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.StateEstimatorModePacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 
 public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimatorModePacket>
 {
@@ -30,7 +30,7 @@ public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimat
       if (packet == null)
          return;
 
-      StateEstimatorMode requestedOperatingMode = StateEstimatorMode.fromByte(packet.getRequestedOperatingMode());
+      StateEstimatorMode requestedOperatingMode = StateEstimatorMode.fromByte(packet.getRequestedStateEstimatorMode());
       if (requestedOperatingMode != null)
       {
          referenceToRequestedMode.set(requestedOperatingMode);

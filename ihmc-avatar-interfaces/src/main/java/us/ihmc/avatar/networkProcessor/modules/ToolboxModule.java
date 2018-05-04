@@ -1,17 +1,13 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationOptions;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -20,21 +16,28 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as an example.
@@ -52,6 +55,7 @@ public abstract class ToolboxModule
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
+   protected final RealtimeRos2Node realtimeRos2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
@@ -86,10 +90,15 @@ public abstract class ToolboxModule
       this.startYoVariableServer = startYoVariableServer;
       this.thisDesitination = toolboxDestination.ordinal();
       this.fullRobotModel = fullRobotModelToLog;
-      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
+      packetCommunicator = CommunicationOptions.USE_KRYO ?
+            PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList()) :
+            null;
+      realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
+            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, this.getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
+            null;
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator, realtimeRos2Node);
 
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -225,7 +234,7 @@ public abstract class ToolboxModule
                return;
             }
 
-            switch (ToolboxState.fromByte(message.getRequestedState()))
+            switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
             {
             case WAKE_UP:
                wakeUp(message.getSource());
@@ -370,7 +379,7 @@ public abstract class ToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus();
+   abstract public List<Class<? extends Packet<?>>> createListOfSupportedStatus();
    
    /**
     * @return the collection of commands that cannot wake up this module.

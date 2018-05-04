@@ -26,13 +26,13 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend.TextureDefinition;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.tools.ClassLoaderTools;
 
 public class JMEAppearanceMaterial

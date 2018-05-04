@@ -10,7 +10,7 @@ import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,13 +31,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
 
    private final AtomicBoolean orientationValidated = new AtomicBoolean(false);
 
-   private final REAMessager messager;
+   private final Messager messager;
    private final SubScene subScene;
 
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
 
-   public StartGoalOrientationEditor(REAMessager messager, SubScene subScene)
+   public StartGoalOrientationEditor(Messager messager, SubScene subScene)
    {
       this.messager = messager;
       this.subScene = subScene;

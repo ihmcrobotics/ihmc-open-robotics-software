@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "CenterOfMassTrajectoryMessage" defined in "CenterOfMassTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from CenterOfMassTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit CenterOfMassTrajectoryMessage_.idl instead.
- */
+* 
+* Topic data type of the struct "CenterOfMassTrajectoryMessage" defined in "CenterOfMassTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from CenterOfMassTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit CenterOfMassTrajectoryMessage_.idl instead.
+*
+*/
 public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.CenterOfMassTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public CenterOfMassTrajectoryMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,7 +40,10 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -40,21 +57,44 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage src, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage dest)
@@ -63,41 +103,10 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
-   {
-      ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
-   }
-
-   @Override
    public controller_msgs.msg.dds.CenterOfMassTrajectoryMessage createData()
    {
       return new controller_msgs.msg.dds.CenterOfMassTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -109,7 +118,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -119,7 +128,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage src, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage dest)
    {
       staticCopy(src, dest);

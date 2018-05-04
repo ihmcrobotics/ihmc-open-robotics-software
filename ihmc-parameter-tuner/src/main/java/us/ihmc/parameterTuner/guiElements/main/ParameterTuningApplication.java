@@ -6,6 +6,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -18,6 +19,8 @@ public abstract class ParameterTuningApplication extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      primaryStage.getIcons().add(new Image(ParameterTuningApplication.class.getResourceAsStream("/icon.png")));
+
       ParameterGuiInterface guiInterface = createInputManager();
 
       FXMLLoader mainLoader = new FXMLLoader();
@@ -59,6 +62,7 @@ public abstract class ParameterTuningApplication extends Application
       primaryStage.setOnCloseRequest(event -> {
          animationTimer.stop();
          guiInterface.shutdown();
+         controller.close();
       });
 
       primaryStage.setTitle(getClass().getSimpleName());

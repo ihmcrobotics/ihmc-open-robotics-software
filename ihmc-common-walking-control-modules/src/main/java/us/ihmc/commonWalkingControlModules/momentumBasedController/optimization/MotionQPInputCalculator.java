@@ -12,9 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -117,14 +116,14 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
    }
 
-   public void submitPrivilegedAccelerations(PrivilegedAccelerationCommand command)
+   public void submitPrivilegedAccelerations(PrivilegedJointSpaceCommand command)
    {
       if (privilegedConfigurationHandler == null)
          throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
       privilegedConfigurationHandler.submitPrivilegedAccelerations(command);
    }
 
-   public void submitPrivilegedVelocities(PrivilegedVelocityCommand command)
+   public void submitPrivilegedVelocities(PrivilegedJointSpaceCommand command)
    {
       if (privilegedConfigurationHandler == null)
          throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");

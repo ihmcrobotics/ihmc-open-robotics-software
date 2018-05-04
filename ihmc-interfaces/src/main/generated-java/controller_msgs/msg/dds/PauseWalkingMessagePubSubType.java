@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "PauseWalkingMessage" defined in "PauseWalkingMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PauseWalkingMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PauseWalkingMessage_.idl instead.
- */
+* 
+* Topic data type of the struct "PauseWalkingMessage" defined in "PauseWalkingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PauseWalkingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PauseWalkingMessage_.idl instead.
+*
+*/
 public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PauseWalkingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PauseWalkingMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public PauseWalkingMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PauseWalkingMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,7 +40,10 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -40,21 +57,45 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_7(data.getPause());
+
    }
 
    public static void read(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setPause(cdr.read_type_7());
+      	
+
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("pause", data.getPause());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PauseWalkingMessage data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPause(ser.read_type_7("pause"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PauseWalkingMessage src, controller_msgs.msg.dds.PauseWalkingMessage dest)
@@ -63,40 +104,10 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PauseWalkingMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_7("pause", data.getPause());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PauseWalkingMessage data)
-   {
-      data.setPause(ser.read_type_7("pause"));
-   }
-
-   @Override
    public controller_msgs.msg.dds.PauseWalkingMessage createData()
    {
       return new controller_msgs.msg.dds.PauseWalkingMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -108,7 +119,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -118,7 +129,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PauseWalkingMessage src, controller_msgs.msg.dds.PauseWalkingMessage dest)
    {
       staticCopy(src, dest);

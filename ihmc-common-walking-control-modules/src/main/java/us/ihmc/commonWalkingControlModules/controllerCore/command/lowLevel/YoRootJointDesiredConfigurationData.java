@@ -2,24 +2,23 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoRootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameQuaternion orientation;
-   private final YoFramePoint position;
-   private final YoFrameVector linearVelocity;
-   private final YoFrameVector angularVelocity;
-   private final YoFrameVector linearAcceleration;
-   private final YoFrameVector angularAcceleration;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D linearVelocity;
+   private final YoFrameVector3D angularVelocity;
+   private final YoFrameVector3D linearAcceleration;
+   private final YoFrameVector3D angularAcceleration;
 
    private final DenseMatrix64F desiredConfiguration = new DenseMatrix64F(7, 0);
    private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
@@ -33,11 +32,11 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
 
       String namePrefix = "rootJointLowLevel";
       orientation = new YoFrameQuaternion(namePrefix + "DesiredOrientation", worldFrame, registry);
-      position = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
-      linearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", frameAfterJoint, registry);
-      angularVelocity = new YoFrameVector(namePrefix + "DesiredAngularVelocity", frameAfterJoint, registry);
-      linearAcceleration = new YoFrameVector(namePrefix + "DesiredLinearAcceleration", frameAfterJoint, registry);
-      angularAcceleration = new YoFrameVector(namePrefix + "DesiredAngularAcceleration", frameAfterJoint, registry);
+      position = new YoFramePoint3D(namePrefix + "DesiredPosition", worldFrame, registry);
+      linearVelocity = new YoFrameVector3D(namePrefix + "DesiredLinearVelocity", frameAfterJoint, registry);
+      angularVelocity = new YoFrameVector3D(namePrefix + "DesiredAngularVelocity", frameAfterJoint, registry);
+      linearAcceleration = new YoFrameVector3D(namePrefix + "DesiredLinearAcceleration", frameAfterJoint, registry);
+      angularAcceleration = new YoFrameVector3D(namePrefix + "DesiredAngularAcceleration", frameAfterJoint, registry);
 
       clear();
    }
@@ -109,7 +108,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       
       DenseMatrix64F otherDesiredConfiguration = other.getDesiredConfiguration();
       MatrixTools.extractYoFrameQuaternionFromEJMLVector(orientation, otherDesiredConfiguration, 0);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(position, otherDesiredConfiguration, 4);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(position, otherDesiredConfiguration, 4);
    }
 
    private void setVelocity(RootJointDesiredConfigurationDataReadOnly other)
@@ -121,8 +120,8 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       }
 
       DenseMatrix64F otherDesiredVelocity = other.getDesiredVelocity();
-      MatrixTools.extractYoFrameTupleFromEJMLVector(angularVelocity, otherDesiredVelocity, 0);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(linearVelocity, otherDesiredVelocity, 3);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(angularVelocity, otherDesiredVelocity, 0);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(linearVelocity, otherDesiredVelocity, 3);
    }
 
    private void setAcceleration(RootJointDesiredConfigurationDataReadOnly other)
@@ -134,8 +133,8 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       }
 
       DenseMatrix64F otherDesiredAcceleration = other.getDesiredAcceleration();
-      MatrixTools.extractYoFrameTupleFromEJMLVector(angularAcceleration, otherDesiredAcceleration, 0);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(linearAcceleration, otherDesiredAcceleration, 3);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(angularAcceleration, otherDesiredAcceleration, 0);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(linearAcceleration, otherDesiredAcceleration, 3);
    }
 
    @Override

@@ -3,10 +3,15 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.List;
 
+import junit.framework.TestCase;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,14 +19,13 @@ import us.ihmc.avatar.environments.DarpaRoboticsChallengeTrialsWalkingEnvironmen
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -30,7 +34,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
@@ -221,12 +224,18 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
       ThreadTools.sleep(1000);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
-      footstepDataList.getDataList().addAll(createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getDataList());
+      List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.getFootstepDataList().add().set(step);
+      }
       drcSimulationTestHelper.send(footstepDataList);
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.size() * stepTime + 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepTime + 2.0);
       assertTrue(success);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);

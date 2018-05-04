@@ -15,7 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 
 public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
 {

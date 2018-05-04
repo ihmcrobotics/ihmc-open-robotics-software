@@ -112,4 +112,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
+   
+   public default boolean useShapeCollision()
+   {
+      return false;
+   }
 }

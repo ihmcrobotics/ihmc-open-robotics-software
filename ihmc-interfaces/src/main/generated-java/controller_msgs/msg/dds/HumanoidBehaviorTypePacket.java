@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
- * This message is part of the IHMC humanoid behavior module.
- */
-public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorTypePacket>, EpsilonComparable<HumanoidBehaviorTypePacket>
+       * This message is part of the IHMC humanoid behavior module.
+       */
+public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacket> implements Settable<HumanoidBehaviorTypePacket>, EpsilonComparable<HumanoidBehaviorTypePacket>
 {
    public static final byte STOP = (byte) 0;
    public static final byte TEST = (byte) 1;
@@ -37,7 +40,11 @@ public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorType
    public static final byte FIRE_FIGHTING = (byte) 26;
    public static final byte CUTTING_WALL = (byte) 27;
    public static final byte REPEATEDLY_WALK_FOOTSTEP_LIST = (byte) 28;
-   private byte humanoid_behavior_type_ = (byte) 255;
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public long sequence_id_;
+   public byte humanoid_behavior_type_ = (byte) 255;
 
    public HumanoidBehaviorTypePacket()
    {
@@ -45,34 +52,64 @@ public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorType
 
    public HumanoidBehaviorTypePacket(HumanoidBehaviorTypePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(HumanoidBehaviorTypePacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       humanoid_behavior_type_ = other.humanoid_behavior_type_;
+
    }
 
-   public byte getHumanoidBehaviorType()
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public void setSequenceId(long sequence_id)
    {
-      return humanoid_behavior_type_;
+      sequence_id_ = sequence_id;
+   }
+   /**
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setHumanoidBehaviorType(byte humanoid_behavior_type)
    {
       humanoid_behavior_type_ = humanoid_behavior_type;
    }
+   public byte getHumanoidBehaviorType()
+   {
+      return humanoid_behavior_type_;
+   }
+
+
+   public static Supplier<HumanoidBehaviorTypePacketPubSubType> getPubSubType()
+   {
+      return HumanoidBehaviorTypePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return HumanoidBehaviorTypePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HumanoidBehaviorTypePacket other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_behavior_type_, other.humanoid_behavior_type_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_behavior_type_, other.humanoid_behavior_type_, epsilon)) return false;
+
 
       return true;
    }
@@ -80,17 +117,16 @@ public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorType
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof HumanoidBehaviorTypePacket))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof HumanoidBehaviorTypePacket)) return false;
 
       HumanoidBehaviorTypePacket otherMyClass = (HumanoidBehaviorTypePacket) other;
 
-      if (this.humanoid_behavior_type_ != otherMyClass.humanoid_behavior_type_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
+      if(this.humanoid_behavior_type_ != otherMyClass.humanoid_behavior_type_) return false;
+
 
       return true;
    }
@@ -101,9 +137,10 @@ public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorType
       StringBuilder builder = new StringBuilder();
 
       builder.append("HumanoidBehaviorTypePacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("humanoid_behavior_type=");
       builder.append(this.humanoid_behavior_type_);
-
       builder.append("}");
       return builder.toString();
    }

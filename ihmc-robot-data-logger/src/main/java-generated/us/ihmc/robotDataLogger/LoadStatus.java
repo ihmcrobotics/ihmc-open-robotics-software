@@ -1,4 +1,5 @@
 package us.ihmc.robotDataLogger;
+
 /**
 * 
 * Definition of the enum "LoadStatus" defined in Handshake.idl. 
@@ -7,18 +8,23 @@ package us.ihmc.robotDataLogger;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
+import us.ihmc.idl.IDLTools;
+
 public enum LoadStatus
 {
-        	NoParameter,
-        
-        	Unloaded,
-        
-        	Default,
-        
-        	Loaded,
-        
-	;
-	
-	public static LoadStatus[] values = values();
+         NoParameter,
+      
+         Unloaded,
+      
+         Default,
+      
+         Loaded,
+      
+   ;
+   public static LoadStatus[] values = values();
 
+   public boolean epsilonEquals(LoadStatus other, double epsilon)
+   {
+      return IDLTools.epsilonEqualsEnum(this, other, epsilon);
+   }
 }

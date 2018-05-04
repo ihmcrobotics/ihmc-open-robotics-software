@@ -2,14 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.simulation;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,16 +18,15 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -36,6 +34,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SimpleLidarRobotController implements RobotController
@@ -74,7 +73,7 @@ public class SimpleLidarRobotController implements RobotController
       spinLidar.set(true);
       lidarRange.set(30.0);
 
-      final YoFrameOrientation lidarYawPitchRoll = new YoFrameOrientation("lidar", null, registry);
+      final YoFrameYawPitchRoll lidarYawPitchRoll = new YoFrameYawPitchRoll("lidar", null, registry);
       lidarYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
       {
          private final Quaternion localQuaternion = new Quaternion();
@@ -148,10 +147,10 @@ public class SimpleLidarRobotController implements RobotController
          }
 
          LidarScanMessage lidarScanMessage = new LidarScanMessage();
-         lidarScanMessage.robotTimestamp = -1L;
-         lidarScanMessage.lidarPosition = lidarPosition;
-         lidarScanMessage.lidarOrientation = lidarOrientation;
-         lidarScanMessage.scan = newScan.toArray();
+         lidarScanMessage.setRobotTimestamp(-1L);
+         lidarScanMessage.getLidarPosition().set(lidarPosition);
+         lidarScanMessage.getLidarOrientation().set(lidarOrientation);
+         MessageTools.copyData(newScan, lidarScanMessage.getScan());
          executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
       }
 

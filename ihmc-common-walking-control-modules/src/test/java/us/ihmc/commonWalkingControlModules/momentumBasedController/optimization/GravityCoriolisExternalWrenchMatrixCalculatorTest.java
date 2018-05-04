@@ -55,7 +55,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
     * This should return equivalence, as acceleration should not play a factor in the coriolis, centrifugal, and gravity force matrix.
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testWithAndWithoutAcceleration() throws Exception
    {
@@ -278,13 +278,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
          return nContactableBodies;
       }
 
-      /** @inheritDoc */
       @Override
-      public int getRhoSize()
-      {
-         return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
-      }
-
       public boolean getDeactivateRhoWhenNotInContact()
       {
          return false;

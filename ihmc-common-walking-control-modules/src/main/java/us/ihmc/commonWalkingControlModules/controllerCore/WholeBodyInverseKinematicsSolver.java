@@ -133,8 +133,8 @@ public class WholeBodyInverseKinematicsSolver
          case PRIVILEGED_CONFIGURATION:
             optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
             break;
-         case PRIVILEGED_VELOCITY:
-            optimizationControlModule.submitPrivilegedVelocityCommand((PrivilegedVelocityCommand) command);
+         case PRIVILEGED_JOINTSPACE_COMMAND:
+            optimizationControlModule.submitPrivilegedVelocityCommand((PrivilegedJointSpaceCommand) command);
             break;
          case LIMIT_REDUCTION:
             optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);

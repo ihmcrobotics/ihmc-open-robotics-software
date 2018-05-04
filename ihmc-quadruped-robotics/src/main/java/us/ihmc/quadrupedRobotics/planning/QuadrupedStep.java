@@ -4,7 +4,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedStepCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
@@ -24,7 +26,7 @@ public class QuadrupedStep
       setGroundClearance(groundClearance);
    }
 
-   public QuadrupedStep(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance)
+   public QuadrupedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -42,42 +44,43 @@ public class QuadrupedStep
       return robotQuadrant;
    }
 
+   /**
+    * Unsafe for external use.
+    */
+   protected Point3DBasics getGoalPosition()
+   {
+      return goalPosition;
+   }
+
    public void setRobotQuadrant(RobotQuadrant robotQuadrant)
    {
       this.robotQuadrant = robotQuadrant;
    }
 
-   /**
-    * Unsafe for external use.
-    */
-   protected Point3D getGoalPosition()
-   {
-      return goalPosition;
-   }
 
    public void getGoalPosition(Point3D goalPosition)
    {
-      goalPosition.set(this.goalPosition);
+      goalPosition.set(getGoalPosition());
    }
 
    public void getGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.set(this.goalPosition);
+      goalPosition.set(getGoalPosition());
       goalPosition.changeFrame(originalFrame);
    }
 
    public void setGoalPosition(Point3DReadOnly goalPosition)
    {
-      this.goalPosition.set(goalPosition);
+      getGoalPosition().set(goalPosition);
    }
 
    public void setGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      this.goalPosition.set(goalPosition);
+      getGoalPosition().set(goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 
@@ -96,6 +99,13 @@ public class QuadrupedStep
       setRobotQuadrant(other.getRobotQuadrant());
       setGoalPosition(other.getGoalPosition());
       setGroundClearance(other.getGroundClearance());
+   }
+
+   public void set(QuadrupedStepCommand command)
+   {
+      setRobotQuadrant(command.getRobotQuadrant());
+      setGoalPosition(command.getGoalPosition());
+      setGroundClearance(command.getGroundClearance());
    }
 
    public void get(QuadrupedTimedStep other)

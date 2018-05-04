@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,18 +27,20 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -60,7 +61,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static boolean DEBUG = true;
 
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
-   private static SimpleUIMessager messager = null;
+   private static JavaFXMessager messager = null;
    // Because JavaFX will create a fresh new instance of VisibilityGraphsFrameworkTest, the ui has to be static so there is only one instance and we can refer to it in the test part.
    private static VisibilityGraphsTestVisualizer ui;
 
@@ -113,14 +114,14 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Before
-   public void setup() throws InterruptedException, IOException
+   public void setup() throws InterruptedException, Exception
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       DEBUG = (VISUALIZE || (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()));
 
       if (VISUALIZE)
       {
-         messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+         messager = new SharedMemoryJavaFXMessager(UIVisibilityGraphsTopics.API);
          messager.startMessager();
 
          // Did not find a better solution for starting JavaFX and still be able to move on.
@@ -553,7 +554,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
          {
             ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
-            Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
+            Point2DBasics closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
             if (closestPoint2D == null)
             {
                if (convexPolygon.isPointInside(walkerPosition2D))
@@ -570,7 +571,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             if (walkerShapeLocal.isInsideOrOnSurface(closestPoint))
             {
-               Point2D intersectionLocal = closestPoint2D;
+               Point2DBasics intersectionLocal = closestPoint2D;
                Point3D intersectionWorld = new Point3D(intersectionLocal);
                planarRegion.transformFromLocalToWorld(intersectionWorld);
                errorMessages += fail(datasetName, "Body path is going through a region at: " + intersectionWorld);

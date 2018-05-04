@@ -1,21 +1,21 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -48,18 +48,18 @@ public class KinematicsToolboxOutputConverter
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)
    {
-      if (jointsHashCode != solution.jointNameHash)
+      if (jointsHashCode != solution.getJointNameHash())
          throw new RuntimeException("Hashes are different.");
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         float q = solution.getJointAngles()[i];
+         float q = solution.getDesiredJointAngles().get(i);
          OneDoFJoint joint = oneDoFJoints[i];
          joint.setQ(q);
       }
-      Vector3D32 translation = solution.getPelvisTranslation();
+      Vector3D translation = solution.getDesiredRootTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion32 orientation = solution.getPelvisOrientation();
+      Quaternion orientation = solution.getDesiredRootOrientation();
       rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       fullRobotModelToUseForConversion.updateFrames();
    }
@@ -96,8 +96,8 @@ public class KinematicsToolboxOutputConverter
          OneDoFJoint armJoint = armJoints[i];
          desiredJointPositions[i] = MathTools.clamp(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
       }
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
-      output.setArmTrajectoryMessage(armTrajectoryMessage);
+      ArmTrajectoryMessage armTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftArmTrajectoryMessage() : output.getRightArmTrajectoryMessage();
+      armTrajectoryMessage.set(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions));
    }
 
    public void computeHandTrajectoryMessages()
@@ -117,9 +117,9 @@ public class KinematicsToolboxOutputConverter
       FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
       desiredHandPose.get(desiredPosition, desiredOrientation);
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, trajectoryFrame);
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
-      output.setHandTrajectoryMessage(handTrajectoryMessage);
+      HandTrajectoryMessage handTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftHandTrajectoryMessage() : output.getRightHandTrajectoryMessage();
+      handTrajectoryMessage.set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, trajectoryFrame));
+      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
    }
 
    public void computeChestTrajectoryMessage()
@@ -133,7 +133,7 @@ public class KinematicsToolboxOutputConverter
       desiredQuaternion.set(desiredOrientation);
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame, pelvisZUpFrame);
-      output.setChestTrajectoryMessage(chestTrajectoryMessage);
+      output.getChestTrajectoryMessage().set(chestTrajectoryMessage);
    }
 
    public void computePelvisTrajectoryMessage()
@@ -147,7 +147,7 @@ public class KinematicsToolboxOutputConverter
       desiredPelvisPose.changeFrame(worldFrame);
       desiredPelvisPose.get(desiredPosition, desiredOrientation);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
-      output.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      output.getPelvisTrajectoryMessage().set(pelvisTrajectoryMessage);
    }
 
    public void computeFootTrajectoryMessages()
@@ -166,8 +166,8 @@ public class KinematicsToolboxOutputConverter
       FramePose3D desiredFootPose = new FramePose3D(footFrame);
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
-      FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
-      output.setFootTrajectoryMessage(footTrajectoryMessage);
+      FootTrajectoryMessage footTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftFootTrajectoryMessage() : output.getRightFootTrajectoryMessage();
+      footTrajectoryMessage.set(HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation));
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

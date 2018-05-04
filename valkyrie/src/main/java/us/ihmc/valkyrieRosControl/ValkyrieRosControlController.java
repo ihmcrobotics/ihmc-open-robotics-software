@@ -1,16 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.affinity.Affinity;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -21,22 +11,25 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.CommunicationOptions;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -56,6 +49,14 @@ import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotControll
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
@@ -132,7 +133,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private ValkyrieCalibrationControllerStateFactory calibrationStateFactory = null;
 
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, PacketCommunicator packetCommunicator,
-                                                                               DRCRobotSensorInformation sensorInformation)
+                                                                               RealtimeRos2Node realtimeRos2Node, DRCRobotSensorInformation sensorInformation)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
@@ -159,7 +160,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                                                     capturePointPlannerParameters);
 
       PeriodicRealtimeThreadScheduler networkSubscriberScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
-      controllerFactory.createControllerNetworkSubscriber(networkSubscriberScheduler, packetCommunicator);
+      controllerFactory.createControllerNetworkSubscriber(networkSubscriberScheduler, packetCommunicator, realtimeRos2Node);
 
       // setup states
       controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
@@ -283,8 +284,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create network servers/clients
        */
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
-                                                                                                             new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = CommunicationOptions.USE_KRYO ?
+            PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList()) :
+            null;
+      RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
+            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
+            null;
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
@@ -307,7 +312,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create controllers
        */
-      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
+      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, controllerPacketCommunicator, realtimeRos2Node, sensorInformation);
       CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
 

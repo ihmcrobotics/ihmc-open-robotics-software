@@ -6,21 +6,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HeightQuadTreeMessage;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class HeightQuadTreeToolboxModule extends ToolboxModule
 {
@@ -55,7 +54,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
    {
       return Collections.singletonList(HeightQuadTreeMessage.class);
    }

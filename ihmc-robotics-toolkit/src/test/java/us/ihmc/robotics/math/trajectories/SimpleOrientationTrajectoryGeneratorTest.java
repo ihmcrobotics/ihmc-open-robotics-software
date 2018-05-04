@@ -15,8 +15,8 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SimpleOrientationTrajectoryGeneratorTest
@@ -78,7 +78,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareWithSingleFrameTrajectoryGenerator()
    {
@@ -194,7 +194,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {

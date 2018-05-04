@@ -1,21 +1,35 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class GenericQuadrupedSquaredUpInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
-   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.566);
+   private final Point3D initialBodyPosition;
+   private final Quaternion initialBodyOrientation;
+
+   public GenericQuadrupedSquaredUpInitialPosition()
+   {
+      initialBodyPosition = new Point3D(0.0, 0.0, 0.566);
+      initialBodyOrientation = new Quaternion();
+   }
 
    @Override
    public Point3D getInitialBodyPosition()
    {
-      return INITIAL_BODY_POSITION;
+      return initialBodyPosition;
+   }
+
+   @Override
+   public Quaternion getInitialBodyOrientation()
+   {
+      return initialBodyOrientation;
    }
 
    @Override
    double getHipRollAngle()
    {
-      return -0.142;
+      return -0.1;
    }
 
    @Override

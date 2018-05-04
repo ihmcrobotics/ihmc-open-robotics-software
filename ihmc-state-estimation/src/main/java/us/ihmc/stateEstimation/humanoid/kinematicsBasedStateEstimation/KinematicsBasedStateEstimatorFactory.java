@@ -1,5 +1,8 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
@@ -11,12 +14,16 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.*;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.ContactSensor;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -24,10 +31,9 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -144,16 +150,16 @@ public class KinematicsBasedStateEstimatorFactory
       StateEstimatorParameters stateEstimatorParameters = stateEstimatorParametersField.get();
       ContactSensorHolder contactSensorHolder = contactSensorHolderField.get();
 
+      DoubleProvider contactThresholdForce = new DoubleParameter("ContactThresholdForce", stateEstimatorRegistry, stateEstimatorParameters.getContactThresholdForce());
+      DoubleProvider copThresholdFraction = new DoubleParameter("CoPThresholdFraction", stateEstimatorRegistry, stateEstimatorParameters.getFootSwitchCoPThresholdFraction());
+      DoubleProvider contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", stateEstimatorRegistry, stateEstimatorParameters.getContactThresholdHeight());
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
-
-         //         double footSwitchCoPThresholdFraction = 0.01;
-         double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
-         double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
 
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
@@ -162,28 +168,26 @@ public class KinematicsBasedStateEstimatorFactory
          {
          case KinematicBased:
 
-            KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, bipedFeet, stateEstimatorParameters.getContactThresholdHeight(),
-                                                                                 totalRobotWeight, robotSide, stateEstimatorRegistry);
+            KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, bipedFeet, contactThresholdHeight, totalRobotWeight, robotSide,
+                                                                                 stateEstimatorRegistry);
             footSwitchMap.put(foot, footSwitch);
             break;
          case WrenchBased:
-            WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
-                                                                                                footSwitchCoPThresholdFraction, totalRobotWeight,
-                                                                                                bipedFeet.get(robotSide), null, contactThresholdForce,
-                                                                                                stateEstimatorRegistry);
+            WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, totalRobotWeight,
+                                                                                                bipedFeet.get(robotSide), contactThresholdForce, null,
+                                                                                                copThresholdFraction, null, stateEstimatorRegistry);
             footSwitchMap.put(foot, wrenchBasedFootSwitchForEstimator);
             break;
 
          case WrenchAndContactSensorFused:
+            ContactSensor footContactSensor = contactSensorHolder.getByName(footContactSensorName);
             WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix,
                                                                                                                                     footForceSensorForEstimator,
-                                                                                                                                    contactSensorHolder
-                                                                                                                                          .getByName(
-                                                                                                                                                footContactSensorName),
-                                                                                                                                    footSwitchCoPThresholdFraction,
+                                                                                                                                    footContactSensor,
                                                                                                                                     totalRobotWeight,
                                                                                                                                     bipedFeet.get(robotSide),
-                                                                                                                                    null, contactThresholdForce,
+                                                                                                                                    contactThresholdForce, null,
+                                                                                                                                    copThresholdFraction, null,
                                                                                                                                     stateEstimatorRegistry);
             footSwitchMap.put(foot, wrenchAndContactSensorBasedFootswitch);
             break;

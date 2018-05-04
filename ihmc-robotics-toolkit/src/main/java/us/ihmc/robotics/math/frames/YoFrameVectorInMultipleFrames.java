@@ -9,9 +9,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMultipleFramesHolder
+public class YoFrameVectorInMultipleFrames extends YoFrameVector3D implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
@@ -95,8 +96,8 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
    }
 
-   private YoFrameVector yoFrameVectorInWorld;
-   public YoFrameVector buildUpdatedYoFrameVectorForVisualizationOnly()
+   private YoFrameVector3D yoFrameVectorInWorld;
+   public YoFrameVector3D buildUpdatedYoFrameVectorForVisualizationOnly()
    {
       if (yoFrameVectorInWorld == null)
       {
@@ -104,18 +105,18 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
          if (!isReferenceFrameRegistered(worldFrame))
             registerReferenceFrame(worldFrame);
 
-         yoFrameVectorInWorld = new YoFrameVector(namePrefix, worldFrame.getName(), worldFrame, registry);
+         yoFrameVectorInWorld = new YoFrameVector3D(namePrefix, worldFrame.getName(), worldFrame, registry);
 
          attachVariableChangedListener(new VariableChangedListener()
          {
             private final FrameVector3D localFrameVector = new FrameVector3D();
-            private final YoFrameVector vector = yoFrameVectorInWorld;
+            private final YoFrameVector3D vector = yoFrameVectorInWorld;
 
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFrameVector.setIncludingFrame(YoFrameVectorInMultipleFrames.this);
-               vector.setAndMatchFrame(localFrameVector);
+               vector.setMatchingFrame(localFrameVector);
             }
          });
       }

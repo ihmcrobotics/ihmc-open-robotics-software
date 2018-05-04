@@ -8,6 +8,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -17,16 +19,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,6 +34,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -57,13 +58,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * they can be held in place during the optimization process such that the solution will be
     * statically reachable.
     */
-   private final SideDependentList<YoFramePoseUsingQuaternions> initialFootPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
    /**
     * Updated during the initialization phase, this is where the robot's center of mass position is
     * stored so it can be held in place during the optimization process such that the solution will
     * be statically reachable.
     */
-   private final YoFramePoint initialCenterOfMassPosition = new YoFramePoint("initialCenterOfMass", worldFrame, registry);
+   private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
    /**
     * Indicates whether the support foot/feet should be held in place for this run. It is
@@ -121,7 +122,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
+         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
       populateJointLimitReductionFactors();
@@ -182,7 +183,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       else
       {
          for (RobotSide robotside : RobotSide.values)
-            isFootInSupport.get(robotside).set(capturabilityBasedStatus.isSupportFoot(robotside));
+            isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
       }
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
@@ -329,8 +330,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void updateFootSupportState(boolean isLeftFootInSupport, boolean isRightFootInSupport)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-      capturabilityBasedStatus.leftFootSupportPolygonLength = isLeftFootInSupport ? 1 : 0;
-      capturabilityBasedStatus.rightFootSupportPolygonLength = isRightFootInSupport ? 1 : 0;
+      if (isLeftFootInSupport)
+         capturabilityBasedStatus.getLeftFootSupportPolygon2d().add();
+      if (isRightFootInSupport)
+         capturabilityBasedStatus.getRightFootSupportPolygon2d().add();
       updateCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 

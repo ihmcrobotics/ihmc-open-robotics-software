@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,7 +31,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  * @author Robert Griffin
  *
  */
-public class VirtualForceCommand implements VirtualModelControlCommand<VirtualForceCommand>
+public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCommand>
 {
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
@@ -50,7 +51,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     * control frame.
     * </p>
     */
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
@@ -67,7 +68,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
      */
-   private VirtualForceCommand()
+   public VirtualForceCommand()
    {
    }
 
@@ -86,6 +87,24 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
 
       controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredLinearForce.set(other.desiredLinearForce);
+   }
+
+   /**
+    * Copies all the fields of the given {@link SpatialAccelerationCommand} into this except for the
+    * spatial acceleration or the weights.
+    *
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(SpatialAccelerationCommand command)
+   {
+      command.getLinearSelectionMatrix(selectionMatrix);
+      base = command.getBase();
+      endEffector = command.getEndEffector();
+      baseName = command.getBaseName();
+      endEffectorName = command.getEndEffectorName();
+
+      command.getControlFramePoseIncludingFrame(controlFramePose);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
    }
 
    /**
@@ -206,7 +225,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.resetSelection();
    }
 
    /**
@@ -223,7 +242,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    public void setSelectionMatrixToIdentity(SelectionMatrix3D linearSelectionMatrix)
    {
       selectionMatrix.clearSelection();
-      selectionMatrix.setLinearPart(linearSelectionMatrix);
+      selectionMatrix.set(linearSelectionMatrix);
    }
 
    /**
@@ -240,7 +259,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
    }
@@ -260,7 +279,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    public void getDesiredLinearForce(PoseReferenceFrame controlFrameToPack, FrameVector3D desiredLinearForceToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredLinearForceToPack.set(controlFrameToPack, desiredLinearForce);
+      desiredLinearForceToPack.setIncludingFrame(controlFrameToPack, desiredLinearForce);
    }
 
    /**
@@ -277,7 +296,34 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
    {
       desiredLinearForceToPack.reshape(6, 1);
-      desiredLinearForce.get(0, desiredLinearForceToPack);
+      desiredLinearForceToPack.zero();
+      desiredLinearForce.get(3, desiredLinearForceToPack);
+   }
+
+   /**
+    * Packs the control frame and desired wrench held in this command.
+    * <p>
+    * The first argument {@code controlFrameToPack} is required to properly express the
+    * {@code desiredWrenchToPack}. Indeed the desired wrench has to be
+    * expressed in the control frame.
+    * </p>
+    *
+    * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
+    * @param desiredWrenchToPack the desired wrench of the end-effector
+    *           with respect to the base, expressed in the control frame. Modified.
+    */
+   public void getDesiredWrench(PoseReferenceFrame controlFrameToPack, Wrench desiredWrenchToPack)
+   {
+      getControlFrame(controlFrameToPack);
+      desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
+      desiredWrenchToPack.setLinearPart(desiredLinearForce);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredEffort(DenseMatrix64F desiredLinearForceToPack)
+   {
+      getDesiredLinearForce(desiredLinearForceToPack);
    }
 
    /**
@@ -323,18 +369,14 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
    }
 
-   /**
-    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
-    * this command.
-    *
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed
-    *           in.
-    * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
-    *           stored in. Modified.
-    */
+   /** {@inheritDoc} */
+   @Override
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 3, selectionMatrixToPack);
    }
 
    /**
@@ -345,53 +387,33 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     */
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      selectionMatrixToPack.set(selectionMatrix);
+      selectionMatrixToPack.clearSelection();
+      selectionMatrixToPack.setLinearPart(selectionMatrix);
    }
 
-   /**
-    * Gets the reference to the base of this command.
-    * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
-    * </p>
-    *
-    * @return the rigid-body located right before the first joint to be used for controlling the
-    *         end-effector.
-    */
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getBase()
    {
       return base;
    }
 
-   /**
-    * Gets the name of the base rigid-body.
-    *
-    * @return the base's name.
-    */
+   /** {@inheritDoc} */
+   @Override
    public String getBaseName()
    {
       return baseName;
    }
 
-   /**
-    * Gets the reference to the end-effector of this command.
-    * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
-    * </p>
-    *
-    * @return the rigid-body to be controlled.
-    */
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getEndEffector()
    {
       return endEffector;
    }
 
-   /**
-    * Gets the name of the end-effector rigid-body.
-    *
-    * @return the end-effector's name.
-    */
+   /** {@inheritDoc} */
+   @Override
    public String getEndEffectorName()
    {
       return endEffectorName;

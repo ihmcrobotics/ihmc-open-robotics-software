@@ -1,18 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.scene.layout.VBox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -45,16 +41,15 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
@@ -83,7 +78,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
    private final boolean visualizing;
    private static final int bodyPathPointsForVisualization = 100;
-   private final List<YoFramePoint> bodyPathPoints = new ArrayList<>();
+   private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
    public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
                                           YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -116,7 +111,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
-         YoFramePoint point = new YoFramePoint("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D point = new YoFramePoint3D("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
          point.setToNaN();
          bodyPathPoints.add(point);
          YoGraphicPosition pointVisualization = new YoGraphicPosition("BodyPathPoint" + i, point, 0.02, YoAppearance.Yellow());
@@ -164,8 +159,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       if (planarRegionsList == null)
       {
-         waypoints.add(new Point2D(bodyStartPose.getX(), bodyStartPose.getY()));
-         waypoints.add(new Point2D(bodyGoalPose.getX(), bodyGoalPose.getY()));
+         waypoints.add(new Point2D(bodyStartPose.getPosition()));
+         waypoints.add(new Point2D(bodyGoalPose.getPosition()));
       }
       else
       {
@@ -201,7 +196,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
             {
                if(parameters.getReturnBestEffortPlan())
                {
-                  Vector2D goalDirection = new Vector2D(bodyGoalPose.getX(), bodyGoalPose.getY());
+                  Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
                   goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
                   goalDirection.scale(planningHorizon / goalDirection.length());
                   waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));

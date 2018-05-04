@@ -9,6 +9,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -19,8 +20,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class AtlasNetworkProcessor
 {
@@ -70,6 +69,8 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableFootstepPlanningToolbox(true);
         networkModuleParams.enableKinematicsToolbox(true);
         networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
+        networkModuleParams.setFilterControllerInputMessages(true);
+        networkModuleParams.setEnableJoystickBasedStepping(true);
 
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 

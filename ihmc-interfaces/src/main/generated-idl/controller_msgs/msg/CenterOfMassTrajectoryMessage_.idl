@@ -17,6 +17,10 @@ module controller_msgs
       struct CenterOfMassTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
          */
         controller_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;

@@ -4,11 +4,13 @@ import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
@@ -19,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -28,9 +31,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -39,18 +39,26 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTraject
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class SwingState extends AbstractUnconstrainedState
+public class SwingState extends AbstractFootControlState
 {
+   private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
+
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
 
@@ -69,8 +77,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final FootLeapOfFaithModule leapOfFaithModule;
 
-   private final YoFrameVector yoTouchdownAcceleration;
-   private final YoFrameVector yoTouchdownVelocity;
+   private final FrameVector3DReadOnly touchdownAcceleration;
+   private final FrameVector3DReadOnly touchdownVelocity;
 
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -102,27 +110,27 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble currentTime;
    private final YoDouble currentTimeWithSwingSpeedUp;
 
-   private final YoBoolean doHeelTouchdownIfPossible;
-   private final YoDouble heelTouchdownAngle;
-   private final YoDouble maximumHeightForHeelTouchdown;
-   private final YoDouble heelTouchdownLengthRatio;
+   private final BooleanParameter doHeelTouchdownIfPossible;
+   private final DoubleParameter heelTouchdownAngle;
+   private final DoubleParameter maximumHeightForHeelTouchdown;
+   private final DoubleParameter heelTouchdownLengthRatio;
 
-   private final YoBoolean doToeTouchdownIfPossible;
-   private final YoDouble toeTouchdownAngle;
-   private final YoDouble stepDownHeightForToeTouchdown;
-   private final YoDouble toeTouchdownDepthRatio;
+   private final BooleanParameter doToeTouchdownIfPossible;
+   private final DoubleParameter toeTouchdownAngle;
+   private final DoubleParameter stepDownHeightForToeTouchdown;
+   private final DoubleParameter toeTouchdownDepthRatio;
 
-   private final YoBoolean addOrientationMidpointForClearance;
-   private final YoDouble midpointOrientationInterpolationForClearance;
+   private final BooleanParameter addOrientationMidpointForClearance;
+   private final DoubleParameter midpointOrientationInterpolationForClearance;
 
    private final YoBoolean ignoreInitialAngularVelocityZ;
    private final YoDouble maxInitialLinearVelocityMagnitude;
    private final YoDouble maxInitialAngularVelocityMagnitude;
 
-   private final YoDouble finalSwingHeightOffset;
+   private final DoubleParameter finalSwingHeightOffset;
    private final double controlDT;
 
-   private final YoDouble minHeightDifferenceForObstacleClearance;
+   private final DoubleParameter minHeightDifferenceForObstacleClearance;
 
    private final MovingReferenceFrame soleFrame;
 
@@ -134,8 +142,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
-   private final YoDouble velocityAdjustmentDamping;
-   private final YoFrameVector adjustmentVelocityCorrection;
+   private final DoubleParameter velocityAdjustmentDamping;
+   private final YoFrameVector3D adjustmentVelocityCorrection;
    private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
@@ -148,65 +156,106 @@ public class SwingState extends AbstractUnconstrainedState
 
    // for unit testing and debugging:
    private final YoInteger currentTrajectoryWaypoint;
-   private final YoFramePoint yoDesiredSolePosition;
+   private final YoFramePoint3D yoDesiredSolePosition;
    private final YoFrameQuaternion yoDesiredSoleOrientation;
-   private final YoFrameVector yoDesiredSoleLinearVelocity;
-   private final YoFrameVector yoDesiredSoleAngularVelocity;
+   private final YoFrameVector3D yoDesiredSoleLinearVelocity;
+   private final YoFrameVector3D yoDesiredSoleAngularVelocity;
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
+   private final YoFramePoint3D yoDesiredPosition;
+   private final YoFrameVector3D yoDesiredLinearVelocity;
+   private final YoBoolean yoSetDesiredAccelerationToZero;
+   private final YoBoolean yoSetDesiredVelocityToZero;
+   private final YoBoolean scaleSecondaryJointWeights;
+   private final YoDouble secondaryJointWeightScale;
+   private Vector3DReadOnly nominalAngularWeight;
+   private Vector3DReadOnly nominalLinearWeight;
+   private final YoFrameVector3D currentAngularWeight;
+   private final YoFrameVector3D currentLinearWeight;
+   private final ReferenceFrame ankleFrame;
+   private final PoseReferenceFrame controlFrame;
+   private final PIDSE3GainsReadOnly gains;
+   private final FramePoint3D desiredAnklePosition = new FramePoint3D();
+   private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();
+   private final RigidBodyTransform newBodyFrameDesiredTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromNewBodyFrameToOldBodyFrame = new RigidBodyTransform();
 
-   public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration, PIDSE3GainsReadOnly gains,
+   public SwingState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration, PIDSE3GainsReadOnly gains,
                      YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, footControlHelper, gains, registry);
+      super(footControlHelper);
+      this.gains = gains;
 
-      this.yoTouchdownAcceleration = yoTouchdownAcceleration;
-      this.yoTouchdownVelocity = yoTouchdownVelocity;
+      this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+
+      RigidBody foot = contactableFoot.getRigidBody();
+      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
+      yoDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
+      yoDesiredLinearVelocity.setToNaN();
+      yoDesiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", worldFrame, registry);
+      yoDesiredPosition.setToNaN();
+      yoSetDesiredAccelerationToZero = new YoBoolean(namePrefix + "SetDesiredAccelerationToZero", registry);
+      yoSetDesiredVelocityToZero = new YoBoolean(namePrefix + "SetDesiredVelocityToZero", registry);
+
+      scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
+      secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
+      secondaryJointWeightScale.set(1.0);
+
+      currentAngularWeight = new YoFrameVector3D(namePrefix + "CurrentAngularWeight", worldFrame, registry);
+      currentLinearWeight = new YoFrameVector3D(namePrefix + "CurrentLinearWeight", worldFrame, registry);
+
+      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
+         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, controllerToolbox, robotSide);
+      else
+         legJointLimitAvoidanceControlModule = null;
+
+      ankleFrame = contactableFoot.getFrameAfterParentJoint();
+      controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+
+      spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
+      ReferenceFrame linearGainsFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getPelvisZUpFrame();
+      spatialFeedbackControlCommand.setGainsFrames(null, linearGainsFrame);
+      FramePose3D anklePoseInFoot = new FramePose3D(ankleFrame);
+      anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      changeControlFrame(anklePoseInFoot);
+
+      this.touchdownAcceleration = touchdownAcceleration;
+      this.touchdownVelocity = touchdownVelocity;
 
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       swingWaypoints = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
       positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint3D.class);
 
-      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
-      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
-      finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
+      finalSwingHeightOffset = new DoubleParameter(namePrefix + "FinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
-      replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
+      replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
-      minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
-      minHeightDifferenceForObstacleClearance.set(swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown());
+      minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry, swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown());
 
-      velocityAdjustmentDamping = new YoDouble(namePrefix + "VelocityAdjustmentDamping", registry);
-      velocityAdjustmentDamping.set(swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
-      adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
+      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, swingTrajectoryParameters.getSwingFootVelocityAdjustmentDamping());
+      adjustmentVelocityCorrection = new YoFrameVector3D(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
 
-      doHeelTouchdownIfPossible = new YoBoolean(namePrefix + "DoHeelTouchdownIfPossible", registry);
-      heelTouchdownAngle = new YoDouble(namePrefix + "HeelTouchdownAngle", registry);
-      maximumHeightForHeelTouchdown = new YoDouble(namePrefix + "MaximumHeightForHeelTouchdown", registry);
-      heelTouchdownLengthRatio = new YoDouble(namePrefix + "HeelTouchdownLengthRatio", registry);
-      doHeelTouchdownIfPossible.set(swingTrajectoryParameters.doHeelTouchdownIfPossible());
-      heelTouchdownAngle.set(swingTrajectoryParameters.getHeelTouchdownAngle());
-      maximumHeightForHeelTouchdown.set(swingTrajectoryParameters.getMaximumHeightForHeelTouchdown());
-      heelTouchdownLengthRatio.set(swingTrajectoryParameters.getHeelTouchdownLengthRatio());
+      doHeelTouchdownIfPossible = new BooleanParameter(namePrefix + "DoHeelTouchdownIfPossible", registry, swingTrajectoryParameters.doHeelTouchdownIfPossible());
+      heelTouchdownAngle = new DoubleParameter(namePrefix + "HeelTouchdownAngle", registry, swingTrajectoryParameters.getHeelTouchdownAngle());
+      maximumHeightForHeelTouchdown = new DoubleParameter(namePrefix + "MaximumHeightForHeelTouchdown", registry, swingTrajectoryParameters.getMaximumHeightForHeelTouchdown());
+      heelTouchdownLengthRatio = new DoubleParameter(namePrefix + "HeelTouchdownLengthRatio", registry, swingTrajectoryParameters.getHeelTouchdownLengthRatio());
 
       rateLimitedAdjustedPose = new RateLimitedYoFramePose(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
 
-      doToeTouchdownIfPossible = new YoBoolean(namePrefix + "DoToeTouchdownIfPossible", registry);
-      toeTouchdownAngle = new YoDouble(namePrefix + "ToeTouchdownAngle", registry);
-      stepDownHeightForToeTouchdown = new YoDouble(namePrefix + "StepDownHeightForToeTouchdown", registry);
-      toeTouchdownDepthRatio = new YoDouble(namePrefix + "ToeTouchdownDepthRatio", registry);
-      doToeTouchdownIfPossible.set(swingTrajectoryParameters.doToeTouchdownIfPossible());
-      toeTouchdownAngle.set(swingTrajectoryParameters.getToeTouchdownAngle());
-      stepDownHeightForToeTouchdown.set(swingTrajectoryParameters.getStepDownHeightForToeTouchdown());
-      toeTouchdownDepthRatio.set(swingTrajectoryParameters.getToeTouchdownDepthRatio());
+      doToeTouchdownIfPossible = new BooleanParameter(namePrefix + "DoToeTouchdownIfPossible", registry, swingTrajectoryParameters.doToeTouchdownIfPossible());
+      toeTouchdownAngle = new DoubleParameter(namePrefix + "ToeTouchdownAngle", registry, swingTrajectoryParameters.getToeTouchdownAngle());
+      stepDownHeightForToeTouchdown = new DoubleParameter(namePrefix + "StepDownHeightForToeTouchdown", registry, swingTrajectoryParameters.getStepDownHeightForToeTouchdown());
+      toeTouchdownDepthRatio = new DoubleParameter(namePrefix + "ToeTouchdownDepthRatio", registry, swingTrajectoryParameters.getToeTouchdownDepthRatio());
 
-      addOrientationMidpointForClearance = new YoBoolean(namePrefix + "AddOrientationMidpointForClearance", registry);
-      midpointOrientationInterpolationForClearance = new YoDouble(namePrefix + "MidpointOrientationInterpolationForClearance", registry);
-      addOrientationMidpointForClearance.set(swingTrajectoryParameters.addOrientationMidpointForObstacleClearance());
-      midpointOrientationInterpolationForClearance.set(swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
+      addOrientationMidpointForClearance = new BooleanParameter(namePrefix + "AddOrientationMidpointForClearance", registry, swingTrajectoryParameters.addOrientationMidpointForObstacleClearance());
+      midpointOrientationInterpolationForClearance = new DoubleParameter(namePrefix + "MidpointOrientationInterpolationForClearance", registry, swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
 
       ignoreInitialAngularVelocityZ = new YoBoolean(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
       maxInitialLinearVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialLinearVelocityMagnitude", registry);
@@ -233,28 +282,28 @@ public class SwingState extends AbstractUnconstrainedState
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, obstacleClearanceProportions,
+      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, waypointProportions, obstacleClearanceProportions,
                                                                minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
 
-      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
-      blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
+      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
+      blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
-      swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
-      swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
+      swingDuration = new YoDouble(namePrefix + "Duration", registry);
+      swingHeight = new YoDouble(namePrefix + "Height", registry);
 
-      swingTimeSpeedUpFactor = new YoDouble(namePrefix + "SwingTimeSpeedUpFactor", registry);
-      minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
+      swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
+      minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinTimeForDisturbanceRecovery", registry);
       minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
-      maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
+      maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
       currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
-      currentTimeWithSwingSpeedUp = new YoDouble(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
-      isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSwingSpeedUpEnabled", registry);
+      currentTimeWithSwingSpeedUp = new YoDouble(namePrefix + "CurrentTimeWithSpeedUp", registry);
+      isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       swingTimeSpeedUpFactor.setToNaN();
@@ -273,10 +322,10 @@ public class SwingState extends AbstractUnconstrainedState
       footstepWasAdjusted.set(false);
 
       currentTrajectoryWaypoint = new YoInteger(namePrefix + "CurrentTrajectoryWaypoint", registry);
-      yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
+      yoDesiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
-      yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
-      yoDesiredSoleAngularVelocity = new YoFrameVector(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+      yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
+      yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -293,8 +342,7 @@ public class SwingState extends AbstractUnconstrainedState
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
    }
 
-   @Override
-   protected void initializeTrajectory()
+   private void initializeTrajectory()
    {
       currentStateProvider.getPosition(initialPosition);
       currentStateProvider.getLinearVelocity(initialLinearVelocity);
@@ -319,19 +367,32 @@ public class SwingState extends AbstractUnconstrainedState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
+      currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
+
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      }
+
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      contactState.notifyContactStateHasChanged();
+
+      spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
+
+      initializeTrajectory();
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
-
+      super.onExit();
+      currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
@@ -343,13 +404,60 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation.setToNaN();
       yoDesiredSoleLinearVelocity.setToNaN();
       yoDesiredSoleAngularVelocity.setToNaN();
+      yoDesiredPosition.setToNaN();
+      yoDesiredLinearVelocity.setToNaN();
    }
 
-
    @Override
-   protected void computeAndPackTrajectory()
+   public void doSpecificAction(double timeInState)
    {
-      currentTime.set(getTimeInCurrentState());
+      computeAndPackTrajectory(timeInState);
+
+      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
+      {
+         legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+               desiredLinearAcceleration, desiredAngularAcceleration);
+      }
+
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
+         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
+
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+         desiredPose.setPosition(desiredAnklePosition);
+         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+         desiredPosition.setIncludingFrame(desiredPose.getPosition());
+      }
+
+      if (yoSetDesiredVelocityToZero.getBooleanValue())
+      {
+         desiredLinearVelocity.setToZero();
+      }
+
+      if (yoSetDesiredAccelerationToZero.getBooleanValue())
+      {
+         desiredLinearAcceleration.setToZero();
+      }
+
+      computeCurrentWeights(nominalAngularWeight, nominalLinearWeight, currentAngularWeight, currentLinearWeight);
+
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
+      spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
+      spatialFeedbackControlCommand.setGains(gains);
+
+      yoDesiredPosition.setMatchingFrame(desiredPosition);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+   }
+
+   private void computeAndPackTrajectory(double timeInState)
+   {
+      currentTime.set(timeInState);
 
       if (footstepWasAdjusted.getBooleanValue())
       {
@@ -384,10 +492,11 @@ public class SwingState extends AbstractUnconstrainedState
          footstepWasAdjusted = true;
       }
 
+
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
          fillAndInitializeTrajectories(false);
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
-         fillAndInitializeBlendedTrajectory();
+         fillAndInitializeBlendedTrajectories();
       replanTrajectory.set(false);
 
       activeTrajectory.compute(time);
@@ -402,7 +511,7 @@ public class SwingState extends AbstractUnconstrainedState
          adjustmentVelocityCorrection.sub(unadjustedPosition);
          adjustmentVelocityCorrection.scale(1.0 / controlDT);
          adjustmentVelocityCorrection.setZ(0.0);
-         adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
+         adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getValue());
 
          desiredLinearVelocity.add(adjustmentVelocityCorrection);
       }
@@ -421,10 +530,10 @@ public class SwingState extends AbstractUnconstrainedState
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
 
-      yoDesiredSolePosition.setAndMatchFrame(desiredPosition);
-      yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
-      yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
-      yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      yoDesiredSolePosition.setMatchingFrame(desiredPosition);
+      yoDesiredSoleOrientation.setMatchingFrame(desiredOrientation);
+      yoDesiredSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredSoleAngularVelocity.setMatchingFrame(desiredAngularVelocity);
       currentTrajectoryWaypoint.set(blendedSwingTrajectory.getCurrentPositionWaypointIndex());
 
       transformDesiredsFromSoleFrameToControlFrame();
@@ -461,7 +570,7 @@ public class SwingState extends AbstractUnconstrainedState
             currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
 
-      return computeSwingTimeRemaining();
+      return computeSwingTimeRemaining(currentTime.getDoubleValue());
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
@@ -487,7 +596,7 @@ public class SwingState extends AbstractUnconstrainedState
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
       footstepPose.get(finalPosition, finalOrientation);
-      finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity);
+      finalLinearVelocity.setIncludingFrame(touchdownVelocity);
       finalAngularVelocity.setToZero(worldFrame);
 
       // append current pose as initial trajectory point
@@ -532,11 +641,11 @@ public class SwingState extends AbstractUnconstrainedState
          }
 
          // make the foot orientation better for avoidance
-         if (addOrientationMidpointForClearance.getBooleanValue() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+         if (addOrientationMidpointForClearance.getValue() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
          {
             tmpOrientation.setToZero(worldFrame);
             tmpVector.setToZero(worldFrame);
-            tmpOrientation.interpolate(initialOrientation, finalOrientation, midpointOrientationInterpolationForClearance.getDoubleValue());
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, midpointOrientationInterpolationForClearance.getValue());
             blendedSwingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
          }
       }
@@ -552,16 +661,14 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
+      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
-      touchdownTrajectory.initialize();
 
       blendedSwingTrajectory.initializeTrajectory();
-
-      fillAndInitializeBlendedTrajectory();
+      fillAndInitializeBlendedTrajectories();
    }
 
-   private void fillAndInitializeBlendedTrajectory()
+   private void fillAndInitializeBlendedTrajectories()
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
@@ -572,9 +679,13 @@ public class SwingState extends AbstractUnconstrainedState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
+         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
+         touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
+
          blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
+      touchdownTrajectory.initialize();
    }
 
    private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
@@ -585,20 +696,20 @@ public class SwingState extends AbstractUnconstrainedState
       double initialFootstepPitch = finalOrientationToPack.getPitch();
 
       double footstepPitchModification;
-      if (MathTools.intervalContains(stepHeight, stepDownHeightForToeTouchdown.getDoubleValue(), maximumHeightForHeelTouchdown.getDoubleValue()) && doHeelTouchdownIfPossible.getBooleanValue())
+      if (MathTools.intervalContains(stepHeight, stepDownHeightForToeTouchdown.getValue(), maximumHeightForHeelTouchdown.getValue()) && doHeelTouchdownIfPossible.getValue())
       { // not stepping down too far, and not stepping up too far, so do heel strike
          double stepLength = finalPosition.getX() - stanceFootPosition.getX();
-         double heelTouchdownAngle = MathTools.clamp(-stepLength * heelTouchdownLengthRatio.getDoubleValue(), -this.heelTouchdownAngle.getDoubleValue());
+         double heelTouchdownAngle = MathTools.clamp(-stepLength * heelTouchdownLengthRatio.getValue(), -this.heelTouchdownAngle.getValue());
          // use the footstep pitch if its greater than the heel strike angle
          footstepPitchModification = Math.max(initialFootstepPitch, heelTouchdownAngle);
          // decrease the foot pitch modification if next step pitches down
          footstepPitchModification = Math.min(footstepPitchModification, heelTouchdownAngle + initialFootstepPitch);
          footstepPitchModification -= initialFootstepPitch;
       }
-      else if (stepHeight < stepDownHeightForToeTouchdown.getDoubleValue() && doToeTouchdownIfPossible.getBooleanValue())
+      else if (stepHeight < stepDownHeightForToeTouchdown.getValue() && doToeTouchdownIfPossible.getValue())
       { // stepping down and do toe touchdown
-         double toeTouchdownAngle = MathTools.clamp(-toeTouchdownDepthRatio.getDoubleValue() * (stepHeight - stepDownHeightForToeTouchdown.getDoubleValue()),
-               this.toeTouchdownAngle.getDoubleValue());
+         double toeTouchdownAngle = MathTools.clamp(-toeTouchdownDepthRatio.getValue() * (stepHeight - stepDownHeightForToeTouchdown.getValue()),
+               this.toeTouchdownAngle.getValue());
          footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
          footstepPitchModification -= initialFootstepPitch;
       }
@@ -622,8 +733,7 @@ public class SwingState extends AbstractUnconstrainedState
    }
 
 
-   @Override
-   protected void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
+   private void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
                                         Vector3DBasics currentLinearWeightToPack)
    {
       currentAngularWeightToPack.set(nominalAngularWeight);
@@ -715,10 +825,10 @@ public class SwingState extends AbstractUnconstrainedState
    private boolean checkStepUpOrDown(FramePose3D footstepPose)
    {
       double zDifference = Math.abs(footstepPose.getZ() - lastFootstepPose.getZ());
-      return zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
+      return zDifference > minHeightDifferenceForObstacleClearance.getValue();
    }
 
-   private double computeSwingTimeRemaining()
+   private double computeSwingTimeRemaining(double timeInState)
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       if (!currentTimeWithSwingSpeedUp.isNaN())
@@ -728,7 +838,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       else
       {
-         return swingDuration - getTimeInCurrentState();
+         return swingDuration - timeInState;
       }
    }
 
@@ -743,6 +853,43 @@ public class SwingState extends AbstractUnconstrainedState
          scaleFactor = (1.0 + 0.1 * (timeInState - swingDuration.getDoubleValue())) * maxScalingFactor;
 
       return scaleFactor;
+   }
+
+   private void changeControlFrame(FramePose3D controlFramePoseInEndEffector)
+   {
+      controlFramePoseInEndEffector.checkReferenceFrameMatch(contactableFoot.getRigidBody().getBodyFixedFrame());
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePoseInEndEffector);
+      controlFrame.setPoseAndUpdate(controlFramePoseInEndEffector);
+   }
+
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
+   {
+      this.nominalAngularWeight = angularWeight;
+      this.nominalLinearWeight = linearWeight;
+   }
+
+   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose3D framePoseToModify)
+   {
+      if (oldBodyFrame == newBodyFrame)
+         return;
+
+      framePoseToModify.get(oldBodyFrameDesiredTransform);
+      newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
+      newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
+      newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
+      framePoseToModify.set(newBodyFrameDesiredTransform);
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 
 }

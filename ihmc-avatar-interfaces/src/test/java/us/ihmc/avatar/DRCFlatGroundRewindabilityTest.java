@@ -76,8 +76,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       BlockingSimulationRunner blockingSimulationRunner1 = new BlockingSimulationRunner(scs1, 1000.0);
       BlockingSimulationRunner blockingSimulationRunner2 = new BlockingSimulationRunner(scs2, 1000.0);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 4.0;
       initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);
@@ -119,8 +119,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       // checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking, maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
       numTicksToSimulateAhead = 1;
@@ -165,8 +165,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking,
               maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walk");
-      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walk");
+      YoBoolean walk1 = (YoBoolean) scs1.getVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) scs2.getVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
 

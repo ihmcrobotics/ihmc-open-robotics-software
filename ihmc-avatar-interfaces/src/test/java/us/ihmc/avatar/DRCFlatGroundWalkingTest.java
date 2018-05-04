@@ -13,7 +13,7 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -115,7 +115,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
       YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.getVariable("userUpdateDesiredPelvisPose");
       YoBoolean userDoPelvisPose = (YoBoolean) scs.getVariable("userDoPelvisPose");

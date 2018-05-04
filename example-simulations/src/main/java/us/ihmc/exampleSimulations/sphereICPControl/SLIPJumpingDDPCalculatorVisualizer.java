@@ -16,6 +16,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPJumpingDDPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,9 +34,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
@@ -45,6 +44,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -75,10 +76,10 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
 
-   private final List<YoFramePose> yoNextFootstepPoses = new ArrayList<>();
-   private final List<YoFramePose> yoNextNextFootstepPoses = new ArrayList<>();
-   private final List<YoFrameConvexPolygon2d> yoNextFootstepPolygons = new ArrayList<>();
-   private final List<YoFrameConvexPolygon2d> yoNextNextFootstepPolygons = new ArrayList<>();
+   private final List<YoFramePoseUsingYawPitchRoll> yoNextFootstepPoses = new ArrayList<>();
+   private final List<YoFramePoseUsingYawPitchRoll> yoNextNextFootstepPoses = new ArrayList<>();
+   private final List<YoFrameConvexPolygon2D> yoNextFootstepPolygons = new ArrayList<>();
+   private final List<YoFrameConvexPolygon2D> yoNextNextFootstepPolygons = new ArrayList<>();
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -107,10 +108,10 @@ public class SLIPJumpingDDPCalculatorVisualizer
          comTracks.add(new BagOfBalls(numberOfBalls, 0.005, "CoM" + i, YoAppearance.Black(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry));
          ddpSolvers.add(new SLIPJumpingDDPCalculator(dt, mass, nominalComHeight, gravityZ));
 
-         yoNextFootstepPoses.add(new YoFramePose("nextFootstepPose" + i, worldFrame, registry));
-         yoNextNextFootstepPoses.add(new YoFramePose("nextNextFootstepPose" + i, worldFrame, registry));
-         yoNextFootstepPolygons.add(new YoFrameConvexPolygon2d("nextFootstep" + i, "", worldFrame, 4, registry));
-         yoNextNextFootstepPolygons.add(new YoFrameConvexPolygon2d("nextNextFootstep" + i, "", worldFrame, 4, registry));
+         yoNextFootstepPoses.add(new YoFramePoseUsingYawPitchRoll("nextFootstepPose" + i, worldFrame, registry));
+         yoNextNextFootstepPoses.add(new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose" + i, worldFrame, registry));
+         yoNextFootstepPolygons.add(new YoFrameConvexPolygon2D("nextFootstep" + i, "", worldFrame, 4, registry));
+         yoNextNextFootstepPolygons.add(new YoFrameConvexPolygon2D("nextNextFootstep" + i, "", worldFrame, 4, registry));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -130,7 +131,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         YoFramePose currentFootPose = new YoFramePose(sidePrefix + "FootPose", worldFrame, registry);
+         YoFramePoseUsingYawPitchRoll currentFootPose = new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootPose", worldFrame, registry);
 
          Graphics3DObject footGraphics = new Graphics3DObject();
          AppearanceDefinition footColor = robotSide == RobotSide.LEFT ? YoAppearance.Color(defaultLeftColor) : YoAppearance.Color(defaultRightColor);
@@ -291,21 +292,21 @@ public class SLIPJumpingDDPCalculatorVisualizer
       updateFootstepViz(nextNextFootstep, yoNextNextFootstepPolygons.get(footstepIndex), yoNextNextFootstepPoses.get(footstepIndex), polygonShrinkAmount);
    }
 
-   private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D footstepPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D tempFootstepPolygonForShrinking = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
-   private void updateFootstepViz(Footstep footstep, YoFrameConvexPolygon2d convexPolygon2d, YoFramePose framePose, double polygonShrinkAmount)
+   private void updateFootstepViz(Footstep footstep, YoFrameConvexPolygon2D convexPolygon2d, YoFramePoseUsingYawPitchRoll framePose, double polygonShrinkAmount)
    {
       footstep.setPredictedContactPoints(contactableFeet.get(footstep.getRobotSide()).getContactPoints2d());
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstep.getSoleReferenceFrame(), footstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(footstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      convexPolygon2d.setFrameConvexPolygon2d(footstepPolygon);
+      convexPolygon2d.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(footstep.getSoleReferenceFrame());
-      framePose.setAndMatchFrame(nextNextNextFootstepPose);
+      framePose.setMatchingFrame(nextNextNextFootstepPose);
 
    }
 

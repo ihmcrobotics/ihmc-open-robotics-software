@@ -12,30 +12,34 @@ public class QuadrupedStepCrossoverProjection
    private final DoubleParameter minimumStepClearanceParameter;
    private final DoubleParameter maximumStepStrideParameter;
 
-   private final FramePoint3D goalPosition;
+   private final QuadrantDependentList<? extends ReferenceFrame> soleFrames;
+   private final FramePoint3D acrossBodySolePosition = new FramePoint3D();
+   private final FramePoint3D goalPosition = new FramePoint3D();
    private final ReferenceFrame bodyZUpFrame;
 
-   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, YoVariableRegistry registry)
+   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, QuadrantDependentList<? extends ReferenceFrame> soleFrames, YoVariableRegistry registry)
    {
+      this.bodyZUpFrame = bodyZUpFrame;
+      this.soleFrames = soleFrames;
+
       minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, 0.075);
       maximumStepStrideParameter = new DoubleParameter("maximumStepStride", registry, 1.0);
-      this.goalPosition = new FramePoint3D();
-      this.bodyZUpFrame = bodyZUpFrame;
    }
 
-   public void project(QuadrupedTimedStep step, QuadrantDependentList<FramePoint3D> solePositionEstimate)
+   public void project(QuadrupedTimedStep step)
    {
       step.getGoalPosition(goalPosition);
-      project(goalPosition, solePositionEstimate, step.getRobotQuadrant());
+      project(goalPosition, step.getRobotQuadrant());
       step.setGoalPosition(goalPosition);
    }
 
-   public void project(FramePoint3D goalPosition, QuadrantDependentList<FramePoint3D> solePositionEstimate, RobotQuadrant stepQuadrant)
+   public void project(FramePoint3D goalPosition, RobotQuadrant stepQuadrant)
    {
       ReferenceFrame referenceFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(bodyZUpFrame);
 
-      FramePoint3D acrossBodySolePosition = solePositionEstimate.get(stepQuadrant.getAcrossBodyQuadrant());
+      acrossBodySolePosition.setToZero(soleFrames.get(stepQuadrant.getAcrossBodyQuadrant()));
+//      FramePoint3D acrossBodySolePosition = solePositionEstimate.get(stepQuadrant.getAcrossBodyQuadrant());
       acrossBodySolePosition.changeFrame(bodyZUpFrame);
 
       double xStride = goalPosition.getX() - acrossBodySolePosition.getX();

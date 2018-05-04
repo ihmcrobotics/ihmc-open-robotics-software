@@ -1,11 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -16,12 +19,9 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
@@ -136,11 +136,11 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             if (footPlanStatusQueue.isNewPacketAvailable())
             {
                footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
-               if (footstepPlanningToolboxOutputStatus.footstepPlanningResult == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
-                     || footstepPlanningToolboxOutputStatus.footstepPlanningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
+               if (footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
+                     || footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
                {
                   planningSuccess = true;
-                  footstepDataListMessage = footstepPlanningToolboxOutputStatus.footstepDataList;
+                  footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
                else
                   planningSuccess = false;
@@ -178,7 +178,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private void sendPackageToPlanner(Packet<?> packet)
    {
-      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
       communicationBridge.sendPacket(packet);
    }
 

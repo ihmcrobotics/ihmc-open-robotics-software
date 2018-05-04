@@ -18,4 +18,6 @@ public interface CaptureDevice
 
    public abstract void streamTo(CameraStreamer cameraStreamer, int framesPerSecond);
 
+   public abstract void streamTo(RGBDStreamer cameraStreamer, int framesPerSecond);
+
 }

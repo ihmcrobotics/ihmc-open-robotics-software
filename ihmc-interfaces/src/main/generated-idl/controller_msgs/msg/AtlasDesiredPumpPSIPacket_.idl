@@ -15,6 +15,10 @@ module controller_msgs
       struct AtlasDesiredPumpPSIPacket
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The desired hydraulic pump PSI.
          */
         long desired_pump_psi;

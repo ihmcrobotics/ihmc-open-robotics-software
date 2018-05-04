@@ -22,7 +22,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -56,8 +56,8 @@ public class HexapodStepController
    private final SegmentDependentList<RobotSextant, TwoWaypointSwingGenerator> swingTrajectoryGenerators = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, SpatialFeedbackControlCommand> spatialFeedbackControlCommands = new SegmentDependentList<>(
          RobotSextant.class);
-   private final SegmentDependentList<RobotSextant, YoFramePoint> desiredPositions = new SegmentDependentList<>(RobotSextant.class);
-   private final SegmentDependentList<RobotSextant, YoFramePoint> currentPositions = new SegmentDependentList<>(RobotSextant.class);
+   private final SegmentDependentList<RobotSextant, YoFramePoint3D> desiredPositions = new SegmentDependentList<>(RobotSextant.class);
+   private final SegmentDependentList<RobotSextant, YoFramePoint3D> currentPositions = new SegmentDependentList<>(RobotSextant.class);
    
    private int legIndex = 0;
    private YoBoolean replanTrajectories;
@@ -113,10 +113,10 @@ public class HexapodStepController
          rigidBodiesToControl[i] = shinRigidBody;
          swingTrajectoryGenerators.set(robotSextant, new TwoWaypointSwingGenerator(name, 0.02, groundClearance.getDoubleValue(), registry, yoGraphicsListRegistry));
 
-         YoFramePoint desiredPosition = new YoFramePoint(name + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D desiredPosition = new YoFramePoint3D(name + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
          desiredPositions.set(robotSextant, desiredPosition);
 
-         YoFramePoint currentPosition = new YoFramePoint(name + "currentPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D currentPosition = new YoFramePoint3D(name + "currentPosition", ReferenceFrame.getWorldFrame(), registry);
          currentPositions.set(robotSextant, currentPosition);
 
          SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -271,7 +271,8 @@ public class HexapodStepController
       currentPositions.get(robotSextant).set(currentPosition);
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = spatialFeedbackControlCommands.get(robotSextant);
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
 
       PlaneContactStateCommand contactState = contactStateUpdaters.get(robotSextant).getNotInContactState();

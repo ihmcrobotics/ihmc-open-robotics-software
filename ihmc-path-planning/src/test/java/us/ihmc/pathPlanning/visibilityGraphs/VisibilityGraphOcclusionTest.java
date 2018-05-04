@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,6 +13,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.util.List;
@@ -31,13 +33,15 @@ public class VisibilityGraphOcclusionTest
       occludedEnvironmentWithoutAGoalPlane = simpleOccludedEnvironment(false);
    }
 
-   @Test(timeout = timeout)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testVisibilityGraphWithOcclusion()
    {
       runTest(occludedEnvironmentWithAGoalPlane);
    }
 
-   @Test(timeout = timeout)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    public void testVisibilityGraphWithOcclusionAndNoGoalPlane()
    {
       runTest(occludedEnvironmentWithoutAGoalPlane);
@@ -62,7 +66,7 @@ public class VisibilityGraphOcclusionTest
       SimulationConstructionSet scs = new SimulationConstructionSet();
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegionsList(planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
       scs.setGroundVisible(false);
 
       graphics3DObject.identity();

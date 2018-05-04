@@ -3,8 +3,15 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import java.awt.Color;
 import java.util.List;
 
-import com.jme3.math.*;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,7 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.TexCoord2f;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEDataTypeUtils
@@ -236,6 +243,13 @@ public class JMEDataTypeUtils
       }
 
       return ret;
+   }
+
+   public static Transform fromPose3DToJMETransform(Pose3D pose3D)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      pose3D.get(transform);
+      return j3dTransform3DToJMETransform(transform);
    }
 
    public static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)

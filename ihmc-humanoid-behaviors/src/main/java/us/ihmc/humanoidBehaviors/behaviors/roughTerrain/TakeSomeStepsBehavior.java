@@ -1,9 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import us.ihmc.communication.packets.ExecutionMode;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,21 +17,17 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class TakeSomeStepsBehavior extends AbstractBehavior
 {
@@ -42,16 +41,16 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
    private final SideDependentList<FootstepStatusMessage> latestFootstepStatus;
    private final SideDependentList<YoEnum<FootstepStatus>> latestFootstepStatusEnum;
-   private final SideDependentList<YoFramePose> desiredFootStatusPoses;
-   private final SideDependentList<YoFramePose> actualFootStatusPoses;
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> desiredFootStatusPoses;
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> actualFootStatusPoses;
 
    private final YoEnum<RobotSide> nextSideToSwing;
    private final YoEnum<RobotSide> currentlySwingingFoot;
 
    private final YoBoolean doneTakingSteps;
 
-   private final YoFramePose footstepPlannerInitialStepPose;
-   private final YoFramePose footstepPlannerGoalPose;
+   private final YoFramePoseUsingYawPitchRoll footstepPlannerInitialStepPose;
+   private final YoFramePoseUsingYawPitchRoll footstepPlannerGoalPose;
 
    private final FramePose3D tempFootstepPlannerGoalPose = new FramePose3D();
    private final FramePose3D leftFootPose = new FramePose3D();
@@ -79,15 +78,15 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
       footstepSentTimer = new YoStopwatch(yoTime);
       footstepSentTimer.start();
 
-      footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
-      footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
+      footstepPlannerGoalPose = new YoFramePoseUsingYawPitchRoll(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
+      footstepPlannerInitialStepPose = new YoFramePoseUsingYawPitchRoll(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
-      YoFramePose desiredLeftFootstepStatusPose = new YoFramePose(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePose desiredRightFootstepStatusPose = new YoFramePose(prefix + "DesiredRightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll desiredLeftFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll desiredRightFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "DesiredRightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       desiredFootStatusPoses = new SideDependentList<>(desiredLeftFootstepStatusPose, desiredRightFootstepStatusPose);
 
-      YoFramePose leftFootstepStatusPose = new YoFramePose(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll leftFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll rightFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
       latestFootstepStatus = new SideDependentList<>();
@@ -159,7 +158,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private void sendTextToSpeechPacket(String message)
    {
       TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
-      textToSpeechPacket.setbeep(false);
+      textToSpeechPacket.setBeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 
@@ -180,9 +179,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
          FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
-            latestFootstepStatusEnum.get(side).set(status.getStatus());
+            latestFootstepStatusEnum.get(side).set(status.getFootstepStatus());
 
-            if (status.getStatus() == FootstepStatus.STARTED.toByte())
+            if (status.getFootstepStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -211,10 +210,10 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
    private void sendFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
-      footstepDataListMessage.setDestination(PacketDestination.UI);
+      footstepDataListMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(footstepDataListMessage);
 
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(footstepDataListMessage);
       footstepSentTimer.reset();
    }
@@ -236,10 +235,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
          FootstepDataMessage firstFootstepMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition), new Quaternion(tempFirstFootstepPoseOrientation));
 
-         footstepDataListMessage.add(firstFootstepMessage);
+         footstepDataListMessage.getFootstepDataList().add().set(firstFootstepMessage);
       }
 
-      footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
       return footstepDataListMessage;
    }
 

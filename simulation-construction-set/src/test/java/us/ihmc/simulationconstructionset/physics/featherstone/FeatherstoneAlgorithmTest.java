@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
@@ -34,6 +35,7 @@ public class FeatherstoneAlgorithmTest
 
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testSinglePendulumAgainstLagrangianCalculation()
    {
@@ -42,6 +44,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testDoublePendulumAgainstLagrangianCalculation()
    {
@@ -50,6 +53,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testCartPoleAgainstLagrangianCalculation()
    {
@@ -58,6 +62,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(cartPoleRobot, epsilon);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testUniversalJointAgainLagrangianCalculation()
    {

@@ -78,17 +78,17 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       comHeightManager.setSupportLeg(RobotSide.LEFT);
       consumePrepareForLocomotion();
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       consumePrepareForLocomotion();
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
 
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
@@ -112,7 +112,7 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       if (doPrepareManipulationForLocomotion.getBooleanValue())
       {
@@ -156,7 +156,7 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return true;
    }

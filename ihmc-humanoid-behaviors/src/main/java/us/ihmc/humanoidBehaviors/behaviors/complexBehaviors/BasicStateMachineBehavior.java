@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,52 +11,48 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
 {
    private final AtlasPrimitiveActions atlasPrimitiveActions;
-   private BehaviorAction<BasicStates> walkToBallTaskAndHomeArm;
+   private BehaviorAction walkToBallTaskAndHomeArm;
 
    public enum BasicStates
    {
       ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM, BEHAVIOR_COMPLETE
    }
 
-   public BasicStateMachineBehavior(String name, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public BasicStateMachineBehavior(String name, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(name, BasicStates.class, yoTime, outgoingCommunicationBridge);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      setUpStateMachine();
    }
 
-   private void setUpStateMachine()
+   @Override
+   protected BasicStates configureStateMachineAndReturnInitialKey(StateMachineFactory<BasicStates, BehaviorAction> factory)
    {
-      BehaviorAction<BasicStates> enableLidarTask = new BehaviorAction<BasicStates>(BasicStates.ENABLE_LIDAR, atlasPrimitiveActions.enableLidarBehavior);
-
-      BehaviorAction<BasicStates> clearLidarTask = new BehaviorAction<BasicStates>(BasicStates.CLEAR_LIDAR, atlasPrimitiveActions.clearLidarBehavior);
-
-      walkToBallTaskAndHomeArm = new BehaviorAction<BasicStates>(BasicStates.WALK_TO_LOCATION_AND_HOME_ARM, atlasPrimitiveActions.walkToLocationBehavior,
-            atlasPrimitiveActions.leftArmGoHomeBehavior)
+      BehaviorAction enableLidarTask = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior);
+      BehaviorAction clearLidarTask = new BehaviorAction(atlasPrimitiveActions.clearLidarBehavior);
+      walkToBallTaskAndHomeArm = new BehaviorAction(atlasPrimitiveActions.walkToLocationBehavior, atlasPrimitiveActions.leftArmGoHomeBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
             GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, 2);
             atlasPrimitiveActions.leftArmGoHomeBehavior.setInput(goHomeLeftArmMessage);
             FramePose2D poseToWalkTo = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
             atlasPrimitiveActions.walkToLocationBehavior.setTarget(poseToWalkTo);
          }
       };
-      statemachine.addStateWithDoneTransition(enableLidarTask, BasicStates.CLEAR_LIDAR);
-      statemachine.addStateWithDoneTransition(clearLidarTask, BasicStates.WALK_TO_LOCATION_AND_HOME_ARM);
-      statemachine.addState(walkToBallTaskAndHomeArm);
-      statemachine.setStartState(BasicStates.ENABLE_LIDAR);
 
+      factory.addStateAndDoneTransition(BasicStates.ENABLE_LIDAR, enableLidarTask, BasicStates.CLEAR_LIDAR);
+      factory.addStateAndDoneTransition(BasicStates.CLEAR_LIDAR, clearLidarTask, BasicStates.WALK_TO_LOCATION_AND_HOME_ARM);
+      factory.addState(BasicStates.WALK_TO_LOCATION_AND_HOME_ARM, walkToBallTaskAndHomeArm);
+
+      return BasicStates.ENABLE_LIDAR;
    }
 
    @Override

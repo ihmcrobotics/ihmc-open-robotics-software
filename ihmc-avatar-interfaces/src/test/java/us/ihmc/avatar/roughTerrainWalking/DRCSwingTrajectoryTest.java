@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -17,6 +19,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,12 +30,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -261,7 +262,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       return desiredFootsteps;
    }
@@ -272,17 +273,17 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
       return desiredFootsteps;
    }
 
@@ -305,7 +306,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footContactPoints.get(robotSide));
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footContactPoints.get(robotSide)));
          ConvexPolygon2D shrunkFootPolygon = new ConvexPolygon2D();
          scaler.scaleConvexPolygon(footPolygon, 0.025, shrunkFootPolygon);
          footPolygons.put(robotSide, shrunkFootPolygon);
@@ -351,7 +352,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          lastPosition.set(stepLocation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(swingSide, stepLocation, stepOrientation);
          footstepData.setSwingDuration(swingTime);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          swingSide = swingSide.getOppositeSide();
       }
 
@@ -369,7 +370,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       private final HumanoidReferenceFrames referenceFrames;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInSole;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInWorld;
-      private final FrameConvexPolygon2d framePolygon = new FrameConvexPolygon2d();
+      private final FrameConvexPolygon2D framePolygon = new FrameConvexPolygon2D();
 
       private boolean collision = false;
 
@@ -389,7 +390,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
             MovingReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
             framePolygon.setIncludingFrame(soleFrame, footPolygonsInSole.get(robotSide));
             framePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-            footPolygonsInWorld.get(robotSide).setAndUpdate(framePolygon.getConvexPolygon2d());
+            footPolygonsInWorld.get(robotSide).set(framePolygon);
          }
 
          ConvexPolygon2D leftPolygon = footPolygonsInWorld.get(RobotSide.LEFT);

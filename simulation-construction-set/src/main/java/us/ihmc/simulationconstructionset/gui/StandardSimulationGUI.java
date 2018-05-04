@@ -54,7 +54,10 @@ import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
+import us.ihmc.graphicsDescription.image.DepthImageCallback;
+import us.ihmc.graphicsDescription.image.ImageCallback;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
@@ -69,12 +72,12 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferDepthImageServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
@@ -121,7 +124,6 @@ import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
@@ -3327,6 +3329,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       new OffscreenBufferVideoServer(graphics3dAdapter, cameraMountList, cameraConfiguration, cameraTrackingAndDollyPositionHolder, width, height,
             imageCallback, timestampProvider, framesPerSecond);
 
+   }
+
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       TimestampProvider timestampProvider, int framesPerSecond)
+   {
+      CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new CameraTrackAndDollyYoVariablesHolder(yoVariableHolder);
+      
+      
+      new OffscreenBufferDepthImageServer(graphics3dAdapter, cameraMountList, cameraConfiguration, cameraTrackingAndDollyPositionHolder, width, height,
+                                     nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      
    }
 
    public Graphics3DAdapter getGraphics3dAdapter()

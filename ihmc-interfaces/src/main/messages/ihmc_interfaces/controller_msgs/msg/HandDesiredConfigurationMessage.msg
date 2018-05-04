@@ -37,6 +37,9 @@ byte HAND_CONFIGURATION_CREEPY_GRASPING = 28
 byte HAND_CONFIGURATION_CREEPY_GRASPING_HARD = 29
 byte HAND_CONFIGURATION_SLOW_CLOSE = 30
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # Specifies the side of the robot that will execute the trajectory
 byte robot_side 255
 # Specifies the grasp to perform

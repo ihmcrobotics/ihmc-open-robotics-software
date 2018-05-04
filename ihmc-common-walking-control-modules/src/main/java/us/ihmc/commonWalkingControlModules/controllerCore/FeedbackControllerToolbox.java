@@ -22,15 +22,15 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * {@code FeedbackControllerToolbox} is meant to be used only in the
@@ -53,9 +53,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final List<Pair<? extends Clearable, List<YoBoolean>>> clearableData = new ArrayList<>();
 
-   private final Map<RigidBody, EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>>> endEffectorPositions = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Type, Pair<YoFramePoint3D, List<YoBoolean>>>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, Pair<YoFrameQuaternion, List<YoBoolean>>>> endEffectorOrientations = new HashMap<>();
-   private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
    private final Map<RigidBody, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
 
    private final Map<RigidBody, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
@@ -63,8 +63,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
-   private final EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
-   private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
+   private final EnumMap<Type, Pair<YoFramePoint3D, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
+   private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
    private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
    private YoPID3DGains centerOfMassPositionGains;
 
@@ -80,16 +80,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criterion.
     */
-   public YoFramePoint getCenterOfMassPosition(Type type, YoBoolean enabled)
+   public YoFramePoint3D getCenterOfMassPosition(Type type, YoBoolean enabled)
    {
-      Pair<YoFramePoint, List<YoBoolean>> yoFramePointEnabledPair = centerOfMassPositions.get(type);
+      Pair<YoFramePoint3D, List<YoBoolean>> yoFramePointEnabledPair = centerOfMassPositions.get(type);
 
       if (yoFramePointEnabledPair == null)
       {
          String namePrefix = centerOfMassName;
          namePrefix += type.getName();
          namePrefix += Space.POSITION.getName();
-         YoFramePoint yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
+         YoFramePoint3D yoFramePoint = new YoFramePoint3D(namePrefix, worldFrame, registry);
          List<YoBoolean> endabledList = new ArrayList<>();
          yoFramePointEnabledPair = new ImmutablePair<>(yoFramePoint, endabledList);
          centerOfMassPositions.put(type, yoFramePointEnabledPair);
@@ -109,9 +109,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
     */
-   public YoFrameVector getCenterOfMassDataVector(Type type, Space space, YoBoolean enabled)
+   public YoFrameVector3D getCenterOfMassDataVector(Type type, Space space, YoBoolean enabled)
    {
-      EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> dataVectors = centerOfMassDataVectors.get(type);
+      EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>> dataVectors = centerOfMassDataVectors.get(type);
 
       if (dataVectors == null)
       {
@@ -119,14 +119,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          centerOfMassDataVectors.put(type, dataVectors);
       }
 
-      Pair<YoFrameVector, List<YoBoolean>> yoFrameVectorEnabledPair = dataVectors.get(space);
+      Pair<YoFrameVector3D, List<YoBoolean>> yoFrameVectorEnabledPair = dataVectors.get(space);
 
       if (yoFrameVectorEnabledPair == null)
       {
          String namePrefix = centerOfMassName;
          namePrefix += type.getName();
          namePrefix += space.getName();
-         YoFrameVector yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
+         YoFrameVector3D yoFrameVector = new YoFrameVector3D(namePrefix, worldFrame, registry);
          List<YoBoolean> endabledList = new ArrayList<>();
          yoFrameVectorEnabledPair = new ImmutablePair<>(yoFrameVector, endabledList);
          dataVectors.put(space, yoFrameVectorEnabledPair);
@@ -163,7 +163,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
-         YoFrameVector rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space, enabled);
+         YoFrameVector3D rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space, enabled);
          RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
          List<YoBoolean> endabledList = new ArrayList<>();
          rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
@@ -206,9 +206,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criteria.
     */
-   public YoFramePoint getPosition(RigidBody endEffector, Type type, YoBoolean enabled)
+   public YoFramePoint3D getPosition(RigidBody endEffector, Type type, YoBoolean enabled)
    {
-      EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> typeDependentPositions = endEffectorPositions.get(endEffector);
+      EnumMap<Type, Pair<YoFramePoint3D, List<YoBoolean>>> typeDependentPositions = endEffectorPositions.get(endEffector);
 
       if (typeDependentPositions == null)
       {
@@ -216,14 +216,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorPositions.put(endEffector, typeDependentPositions);
       }
 
-      Pair<YoFramePoint, List<YoBoolean>> yoFramePointEnabledPair = typeDependentPositions.get(type);
+      Pair<YoFramePoint3D, List<YoBoolean>> yoFramePointEnabledPair = typeDependentPositions.get(type);
 
       if (yoFramePointEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += type.getName();
          namePrefix += Space.POSITION.getName();
-         YoFramePoint yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
+         YoFramePoint3D yoFramePoint = new YoFramePoint3D(namePrefix, worldFrame, registry);
          List<YoBoolean> endabledList = new ArrayList<>();
          yoFramePointEnabledPair = new ImmutablePair<>(yoFramePoint, endabledList);
          typeDependentPositions.put(type, yoFramePointEnabledPair);
@@ -294,9 +294,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
     */
-   public YoFrameVector getDataVector(RigidBody endEffector, Type type, Space space, YoBoolean enabled)
+   public YoFrameVector3D getDataVector(RigidBody endEffector, Type type, Space space, YoBoolean enabled)
    {
-      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
+      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
 
       if (dataVectorStep1 == null)
       {
@@ -304,7 +304,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorDataVectors.put(endEffector, dataVectorStep1);
       }
 
-      EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> dataVectorStep2 = dataVectorStep1.get(type);
+      EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>> dataVectorStep2 = dataVectorStep1.get(type);
 
       if (dataVectorStep2 == null)
       {
@@ -312,14 +312,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          dataVectorStep1.put(type, dataVectorStep2);
       }
 
-      Pair<YoFrameVector, List<YoBoolean>> yoFrameVectorEnabledPair = dataVectorStep2.get(space);
+      Pair<YoFrameVector3D, List<YoBoolean>> yoFrameVectorEnabledPair = dataVectorStep2.get(space);
 
       if (yoFrameVectorEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += type.getName();
          namePrefix += space.getName();
-         YoFrameVector yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
+         YoFrameVector3D yoFrameVector = new YoFrameVector3D(namePrefix, worldFrame, registry);
          List<YoBoolean> endabledList = new ArrayList<>();
          yoFrameVectorEnabledPair = new ImmutablePair<>(yoFrameVector, endabledList);
          dataVectorStep2.put(space, yoFrameVectorEnabledPair);
@@ -371,7 +371,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
-         YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space, enabled);
+         YoFrameVector3D rawYoFrameVector = getDataVector(endEffector, rawDataType, space, enabled);
          RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
          List<YoBoolean> endabledList = new ArrayList<>();
          rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
@@ -392,9 +392,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoseUsingQuaternions} matching the search criteria.
     */
-   public YoFramePoseUsingQuaternions getPose(RigidBody endEffector, Type type, YoBoolean enabled)
+   public YoFramePose3D getPose(RigidBody endEffector, Type type, YoBoolean enabled)
    {
-      return new YoFramePoseUsingQuaternions(getPosition(endEffector, type, enabled), getOrientation(endEffector, type, enabled));
+      return new YoFramePose3D(getPosition(endEffector, type, enabled), getOrientation(endEffector, type, enabled));
    }
 
    /**
@@ -428,6 +428,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
+    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
+    * forces of the given end-effector for representing a given data {@code type}. If it does
+    * not exist it is created.
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoSpatialVector} matching the search criteria.
+    */
+   public YoSpatialVector getWrench(RigidBody endEffector, Type type, YoBoolean enabled)
+   {
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_FORCE, enabled),
+                                 getDataVector(endEffector, type, Space.ANGULAR_TORQUE, enabled));
+   }
+
+   /**
     * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
     * linear velocities of the given end-effector. The date type of the vector is defined by
     * {@code type}. If it does not exist it is created.
@@ -439,7 +454,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
-    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
@@ -461,7 +477,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
-    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
@@ -469,6 +486,29 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    {
       return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate, enabled),
                                             getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate, enabled));
+   }
+
+   /**
+    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * linear accelerations of the given end-effector. The date type of the vector is defined by
+    * {@code type}. If it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
+    * only used if the data does not exist yet.
+    * </p>
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    */
+   public RateLimitedYoSpatialVector getRateLimitedWrench(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
+                                                                YoDouble maximumAngularRate, YoBoolean enabled)
+   {
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled));
    }
 
    /**
@@ -566,7 +606,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    @Override
    public boolean getCenterOfMassPositionData(FramePoint3D positionDataToPack, Type type)
    {
-      Pair<YoFramePoint, List<YoBoolean>> positionData = centerOfMassPositions.get(type);
+      Pair<YoFramePoint3D, List<YoBoolean>> positionData = centerOfMassPositions.get(type);
 
       if (positionData == null || !hasData(positionData.getRight()))
          return false;
@@ -578,12 +618,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    @Override
    public boolean getCenterOfMassVectorData(FrameVector3D vectorDataToPack, Type type, Space space)
    {
-      EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
+      EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
 
       if (endEffectorDataTyped == null)
          return false;
 
-      Pair<YoFrameVector, List<YoBoolean>> vectorData = endEffectorDataTyped.get(space);
+      Pair<YoFrameVector3D, List<YoBoolean>> vectorData = endEffectorDataTyped.get(space);
 
       if (vectorData == null || !hasData(vectorData.getRight()))
          return false;
@@ -595,12 +635,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    @Override
    public boolean getPositionData(RigidBody endEffector, FramePoint3D positionDataToPack, Type type)
    {
-      EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> endEffectorData = endEffectorPositions.get(endEffector);
+      EnumMap<Type, Pair<YoFramePoint3D, List<YoBoolean>>> endEffectorData = endEffectorPositions.get(endEffector);
 
       if (endEffectorData == null)
          return false;
 
-      Pair<YoFramePoint, List<YoBoolean>> positionData = endEffectorData.get(type);
+      Pair<YoFramePoint3D, List<YoBoolean>> positionData = endEffectorData.get(type);
 
       if (positionData == null || !hasData(positionData.getRight()))
          return false;
@@ -629,17 +669,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    @Override
    public boolean getVectorData(RigidBody endEffector, FrameVector3D vectorDataToPack, Type type, Space space)
    {
-      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> endEffectorData = endEffectorDataVectors.get(endEffector);
+      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>>> endEffectorData = endEffectorDataVectors.get(endEffector);
 
       if (endEffectorData == null)
          return false;
 
-      EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> endEffectorDataTyped = endEffectorData.get(type);
+      EnumMap<Space, Pair<YoFrameVector3D, List<YoBoolean>>> endEffectorDataTyped = endEffectorData.get(type);
 
       if (endEffectorDataTyped == null)
          return false;
 
-      Pair<YoFrameVector, List<YoBoolean>> vectorData = endEffectorDataTyped.get(space);
+      Pair<YoFrameVector3D, List<YoBoolean>> vectorData = endEffectorDataTyped.get(space);
 
       if (vectorData == null || !hasData(vectorData.getRight()))
          return false;

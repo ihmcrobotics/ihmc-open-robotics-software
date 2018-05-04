@@ -1,7 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,11 +21,9 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNearState>
@@ -41,8 +41,8 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame chestCoMFrame;
 
-   public SearchNearForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+   public SearchNearForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
+                                      FullHumanoidRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
                                       AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereNear", SearchNearState.class, yoTime, outgoingCommunicationBridge);
@@ -53,19 +53,18 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
 
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
-            coactiveElement.validAcknowledged);
-      setupStateMachine();
-      chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();;
-      
+                                                                        coactiveElement.validAcknowledged);
+      chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      ;
+
    }
 
-   private void setupStateMachine()
+   @Override
+   protected SearchNearState configureStateMachineAndReturnInitialKey(StateMachineFactory<SearchNearState, BehaviorAction> factory)
    {
-
       // BEND OVER *******************************************
 
-      BehaviorAction<SearchNearState> lookDown = new BehaviorAction<SearchNearState>(SearchNearState.LOOK_DOWN, atlasPrimitiveActions.headTrajectoryBehavior,
-            atlasPrimitiveActions.chestTrajectoryBehavior)
+      BehaviorAction lookDown = new BehaviorAction(atlasPrimitiveActions.headTrajectoryBehavior, atlasPrimitiveActions.chestTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -85,31 +84,28 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
             desiredChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
             Quaternion chestOrientation = new Quaternion(desiredChestOrientation);
             //MESSAGE
-            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(4.0, chestOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(4.0, chestOrientation,
+                                                                                                              ReferenceFrame.getWorldFrame(), chestCoMFrame);
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
 
          }
       };
 
       //ENABLE LIDAR
-      BehaviorAction<SearchNearState> enableLidarTask = new BehaviorAction<SearchNearState>(SearchNearState.ENABLE_LIDAR,
-            atlasPrimitiveActions.enableLidarBehavior)
+      BehaviorAction enableLidarTask = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            // FIXME
-//            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
+            // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
          }
       };
 
-      BehaviorAction<SearchNearState> setLidarMediumRangeTask = new BehaviorAction<SearchNearState>(SearchNearState.SETUP_LIDAR,
-            atlasPrimitiveActions.setLidarParametersBehavior)
+      BehaviorAction setLidarMediumRangeTask = new BehaviorAction(atlasPrimitiveActions.setLidarParametersBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 0.6f;
             atlasPrimitiveActions.setLidarParametersBehavior.setInput(param);
@@ -117,12 +113,11 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorAction<SearchNearState> clearLidarTask = new BehaviorAction<SearchNearState>(SearchNearState.CLEAR_LIDAR,
-            atlasPrimitiveActions.clearLidarBehavior);
+      BehaviorAction clearLidarTask = new BehaviorAction(atlasPrimitiveActions.clearLidarBehavior);
 
       //SEARCH FOR BALL *******************************************
 
-      BehaviorAction<SearchNearState> findBallTask = new BehaviorAction<SearchNearState>(SearchNearState.SEARCHING, initialSphereDetectionBehavior)
+      BehaviorAction findBallTask = new BehaviorAction(initialSphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -134,7 +129,6 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
             coactiveElement.ballX.set(0);
             coactiveElement.ballY.set(0);
             coactiveElement.ballZ.set(0);
-
          }
       };
 
@@ -142,7 +136,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
 
       // Confirm from the user that this is the correct ball *******************************************
 
-      BehaviorAction<SearchNearState> validateBallTask = new BehaviorAction<SearchNearState>(SearchNearState.VALIDATING, waitForUserValidationBehavior)
+      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -161,21 +155,22 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
          }
       };
 
-      statemachine.addStateWithDoneTransition(lookDown, SearchNearState.ENABLE_LIDAR);
-      statemachine.addStateWithDoneTransition(enableLidarTask, SearchNearState.SETUP_LIDAR);
-      statemachine.addStateWithDoneTransition(setLidarMediumRangeTask, SearchNearState.CLEAR_LIDAR);
-      statemachine.addStateWithDoneTransition(clearLidarTask, SearchNearState.SEARCHING);
+      factory.addStateAndDoneTransition(SearchNearState.LOOK_DOWN, lookDown, SearchNearState.ENABLE_LIDAR);
+      factory.addStateAndDoneTransition(SearchNearState.ENABLE_LIDAR, enableLidarTask, SearchNearState.SETUP_LIDAR);
+      factory.addStateAndDoneTransition(SearchNearState.SETUP_LIDAR, setLidarMediumRangeTask, SearchNearState.CLEAR_LIDAR);
+      factory.addStateAndDoneTransition(SearchNearState.CLEAR_LIDAR, clearLidarTask, SearchNearState.SEARCHING);
 
       if (requireUserValidation)
       {
-         statemachine.addStateWithDoneTransition(findBallTask, SearchNearState.VALIDATING);
-         statemachine.addState(validateBallTask);
+         factory.addStateAndDoneTransition(SearchNearState.SEARCHING, findBallTask, SearchNearState.VALIDATING);
+         factory.addState(SearchNearState.VALIDATING, validateBallTask);
+      }
+      else
+      {
+         factory.addState(SearchNearState.SEARCHING, findBallTask);
       }
 
-      else
-         statemachine.addState(findBallTask);
-      statemachine.setStartState(SearchNearState.LOOK_DOWN);
-
+      return SearchNearState.LOOK_DOWN;
    }
 
    public boolean foundBall()
@@ -197,5 +192,4 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    public void onBehaviorExited()
    {
    }
-
 }

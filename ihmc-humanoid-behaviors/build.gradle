@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.8"
+      classpath "us.ihmc:ihmc-build:0.13.3"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,8 +22,8 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
@@ -37,7 +37,7 @@ mainDependencies {
    compile "org.boofcv:io:0.24.1"
    compile "org.boofcv:recognition:0.24.1"
    compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
@@ -50,13 +50,13 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-perception", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

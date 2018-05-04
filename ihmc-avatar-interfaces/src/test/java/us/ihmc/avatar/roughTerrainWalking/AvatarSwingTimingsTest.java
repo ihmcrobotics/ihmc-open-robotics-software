@@ -5,20 +5,20 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
 {
@@ -56,7 +56,8 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
             // start with very slow swings and transfers
             transferTime = 1.0; // initial transfer
             swingTime = 3.0;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 1:
             // do a default step
@@ -65,7 +66,8 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
             // do a slow swing
             transferTime = 1.0;
             swingTime = 3.0;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 3:
             // do a default step
@@ -77,37 +79,42 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
             // do a fast swing and transfer
             transferTime = 0.2;
             swingTime = 0.6;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 6:
             // do a slow swing
             transferTime = 1.0;
             swingTime = 3.0;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 7:
             // do a fast swing and transfer
             transferTime = 0.2;
             swingTime = 0.6;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 8:
             // do a slow swing
             transferTime = 1.0;
             swingTime = 3.0;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          case 9:
             // do a slow transfer and a fast swing
             transferTime = 3.0;
             swingTime = 0.6;
-            footstepData.setTimings(swingTime, transferTime);
+            footstepData.setSwingDuration(swingTime);
+            footstepData.setTransferDuration(transferTime);
             break;
          default:
             break;
          }
 
-         footsteps.add(footstepData);
+         footsteps.getFootstepDataList().add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.HandLoadBearingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, HandLoadBearingMessage>
@@ -37,10 +37,10 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    @Override
    public void set(HandLoadBearingMessage message)
    {
-      loadBearingCommand.set(message.loadBearingMessage);
-      executionDelayTime = message.executionDelayTime;
-      robotSide = RobotSide.fromByte(message.robotSide);
-      useJointspaceCommand = message.isUseJointspaceCommand();
+      loadBearingCommand.set(message.getLoadBearingMessage());
+      executionDelayTime = message.getExecutionDelayTime();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
+      useJointspaceCommand = message.getUseJointspaceCommand();
       if (message.getJointspaceTrajectory() != null)
       {
          jointspaceTrajectory.set(message.getJointspaceTrajectory());

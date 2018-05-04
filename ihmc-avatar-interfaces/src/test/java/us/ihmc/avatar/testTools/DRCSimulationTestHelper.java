@@ -19,7 +19,7 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -79,7 +79,6 @@ public class DRCSimulationTestHelper
    private final DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
-   private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
    private DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
    private DRCSimulationStarter simulationStarter;
@@ -115,7 +114,6 @@ public class DRCSimulationTestHelper
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
-      scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
@@ -279,11 +277,6 @@ public class DRCSimulationTestHelper
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {
       return scriptedFootstepGenerator;
-   }
-
-   public ScriptedHandstepGenerator createScriptedHandstepGenerator()
-   {
-      return scriptedHandstepGenerator;
    }
 
    public void checkNothingChanged()

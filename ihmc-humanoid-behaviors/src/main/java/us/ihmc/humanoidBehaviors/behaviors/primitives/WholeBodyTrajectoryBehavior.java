@@ -1,13 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 {
@@ -56,17 +55,17 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
-         outgoingMessage.setDestination(PacketDestination.CONTROLLER);  
+         outgoingMessage.setDestination(PacketDestination.CONTROLLER.ordinal());  
          sendPacketToController(outgoingMessage);
          sendPacket(outgoingMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          
          double getTrajectoryTime = 0;
-         if(outgoingMessage.getHandTrajectoryMessage(RobotSide.RIGHT) != null)
-            getTrajectoryTime = outgoingMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getSe3Trajectory().getTrajectoryTime();
-         if(outgoingMessage.getHandTrajectoryMessage(RobotSide.LEFT) != null)
-            getTrajectoryTime = outgoingMessage.getHandTrajectoryMessage(RobotSide.LEFT).getSe3Trajectory().getTrajectoryTime();
+         if(outgoingMessage.getRightHandTrajectoryMessage() != null)
+            getTrajectoryTime = outgoingMessage.getRightHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
+         if(outgoingMessage.getLeftHandTrajectoryMessage() != null)
+            getTrajectoryTime = outgoingMessage.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
          
          trajectoryTime.set(getTrajectoryTime);
       }

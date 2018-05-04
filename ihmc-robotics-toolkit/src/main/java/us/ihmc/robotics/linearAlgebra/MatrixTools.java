@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -34,8 +35,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameTuple3D;
 
 public class MatrixTools
 {
@@ -825,11 +826,18 @@ public class MatrixTools
       frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractYoFrameTupleFromEJMLVector(YoFrameTuple yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void extractFixedFrameTupleFromEJMLVector(FixedFrameTuple3DBasics yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       yoFrameTuple.setX(ejmlVector.get(startIndex + 0, 0));
       yoFrameTuple.setY(ejmlVector.get(startIndex + 1, 0));
       yoFrameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
+   }
+
+   public static void extractAddFixedFrameTupleFromEJMLVector(FixedFrameTuple3DBasics yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   {
+      yoFrameTuple.addX(ejmlVector.get(startIndex + 0, 0));
+      yoFrameTuple.addY(ejmlVector.get(startIndex + 1, 0));
+      yoFrameTuple.addZ(ejmlVector.get(startIndex + 2, 0));
    }
 
    public static void extractYoFrameQuaternionFromEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)

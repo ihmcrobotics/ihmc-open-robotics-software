@@ -1,43 +1,38 @@
 package us.ihmc.quadrupedRobotics.providers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
-
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedPreplannedStepInputProvider
 {
-   private final AtomicReference<QuadrupedTimedStepPacket> inputTimedStepPacket;
-   private final QuadrupedTimedStepPacket emptyTimedStepPacket;
-   private final QuadrupedTimedStepPacket debugTimedStepPacket;
+   private final AtomicReference<List<QuadrupedTimedStep>> inputTimedSteps = new AtomicReference<>(new ArrayList<QuadrupedTimedStep>());
+   private final List<QuadrupedTimedStep> emptyTimedSteps = new ArrayList<>();
+   private final RecyclingArrayList<QuadrupedTimedStep> debugTimedSteps = new RecyclingArrayList<>(30, QuadrupedTimedStep.class);
 
    private final YoEnum<RobotQuadrant> yoTimedStepQuadrant;
    private final YoDouble yoTimedStepDuration;
    private final YoDouble yoTimedStepGroundClearance;
-   private final YoFramePoint yoTimedStepGoalPosition;
+   private final YoFramePoint3D yoTimedStepGoalPosition;
 
-   public QuadrupedPreplannedStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
+   public QuadrupedPreplannedStepInputProvider(YoVariableRegistry registry)
    {
-      inputTimedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
-      emptyTimedStepPacket = new QuadrupedTimedStepPacket();
-      debugTimedStepPacket = new QuadrupedTimedStepPacket(Collections.singletonList(new QuadrupedTimedStep()), false);
 
       yoTimedStepQuadrant = new YoEnum<>("timedStepQuadrant", registry, RobotQuadrant.class);
       yoTimedStepDuration = new YoDouble("timedStepDuration", registry);
       yoTimedStepGroundClearance = new YoDouble("timedStepGroundClearance", registry);
-      yoTimedStepGoalPosition = new YoFramePoint("timedStepGoalPosition", ReferenceFrame.getWorldFrame(), registry);
+      yoTimedStepGoalPosition = new YoFramePoint3D("timedStepGoalPosition", ReferenceFrame.getWorldFrame(), registry);
       
       setupYoVariableChangedListener(yoTimedStepQuadrant);
       setupYoVariableChangedListener(yoTimedStepDuration);
@@ -45,18 +40,6 @@ public class QuadrupedPreplannedStepInputProvider
       setupYoVariableChangedListener(yoTimedStepGoalPosition.getYoX());
       setupYoVariableChangedListener(yoTimedStepGoalPosition.getYoY());
       setupYoVariableChangedListener(yoTimedStepGoalPosition.getYoZ());
-      
-      if (globalDataProducer != null)
-      {
-         globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, new PacketConsumer<QuadrupedTimedStepPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedTimedStepPacket packet)
-            {
-               inputTimedStepPacket.set(packet);
-            }
-         });
-      }
    }
    
    private void setupYoVariableChangedListener(YoVariable<?> yoVariable)
@@ -66,30 +49,32 @@ public class QuadrupedPreplannedStepInputProvider
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            debugTimedStepPacket.getSteps().get(0).setRobotQuadrant(yoTimedStepQuadrant.getEnumValue());
-            debugTimedStepPacket.getSteps().get(0).setGroundClearance(yoTimedStepGroundClearance.getDoubleValue());
-            debugTimedStepPacket.getSteps().get(0).setGoalPosition(yoTimedStepGoalPosition);
-            debugTimedStepPacket.getSteps().get(0).getTimeInterval().setInterval(0.5, 0.5 + yoTimedStepDuration.getDoubleValue());
-            inputTimedStepPacket.set(debugTimedStepPacket);
+            debugTimedSteps.getAndGrowIfNeeded(0).setRobotQuadrant(yoTimedStepQuadrant.getEnumValue());
+            debugTimedSteps.get(0).setGroundClearance(yoTimedStepGroundClearance.getDoubleValue());
+            debugTimedSteps.get(0).setGoalPosition(yoTimedStepGoalPosition);
+            debugTimedSteps.get(0).getTimeInterval().setInterval(0.5, 0.5 + yoTimedStepDuration.getDoubleValue());
+            inputTimedSteps.set(debugTimedSteps);
+
          }
       });
    }
 
    public boolean isStepPlanAvailable()
    {
-      ArrayList<QuadrupedTimedStep> steps = inputTimedStepPacket.get().getSteps();
+      List<QuadrupedTimedStep> steps = inputTimedSteps.get();
       return (steps.size() > 0);
    }
 
    public boolean isStepPlanExpressedInAbsoluteTime()
    {
-      return inputTimedStepPacket.get().isExpressedInAbsoluteTime();
+      return false;
    }
 
-   public ArrayList<QuadrupedTimedStep> getAndClearSteps()
+   public List<QuadrupedTimedStep> getAndClearSteps()
    {
-      ArrayList<QuadrupedTimedStep> steps = inputTimedStepPacket.get().getSteps();
-      inputTimedStepPacket.set(emptyTimedStepPacket);
+      List<QuadrupedTimedStep> steps = inputTimedSteps.get();
+      inputTimedSteps.set(emptyTimedSteps);
+
       return steps;
    }
 }

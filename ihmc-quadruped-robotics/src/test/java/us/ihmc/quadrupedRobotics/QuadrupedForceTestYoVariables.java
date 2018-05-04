@@ -1,31 +1,24 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final YoEnum<QuadrupedForceControllerRequestedEvent> userTrigger;
+   private final YoEnum<QuadrupedControllerRequestedEvent> userTrigger;
    private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
-   private final YoEnum<QuadrupedForceControllerEnum> forceControllerState;
+   private final YoEnum<QuadrupedControllerEnum> controllerState;
    private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
 
    private final YoDouble stanceHeight;
    private final YoDouble groundPlanePointZ;
-   
-   // XGait
-   private final YoDouble xGaitEndPhaseShiftInput;
-   private final YoDouble xGaitEndDoubleSupportDurationInput;
-   private final YoDouble xGaitStanceWidthInput;
-   private final YoDouble xGaitStanceLengthInput;
-   private final YoDouble xGaitStepGroundClearanceInput;
-   private final YoDouble xGaitStepDurationInput;
    
    // Step
    private final YoEnum<RobotQuadrant> timedStepQuadrant;
@@ -35,33 +28,38 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble timedStepGoalPositionY;
    private final YoDouble timedStepGoalPositionZ;
 
+   // CoM
    private final YoDouble comPositionEstimateX;
    private final YoDouble comPositionEstimateY;
-   private final YoDouble comPositionEstimateZ;
+   private final YoDouble currentHeightInWorld;
+
+   private final YoDouble bodyCurrentOrientationQx;
+   private final YoDouble bodyCurrentOrientationQy;
+   private final YoDouble bodyCurrentOrientationQz;
+   private final YoDouble bodyCurrentOrientationQs;
+
+   private final YoDouble comPositionSetpointX;
+   private final YoDouble comPositionSetpointY;
+   private final YoDouble desiredHeightInWorld;
+
+   private final Quaternion bodyOrientation = new Quaternion();
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
    {
       super(scs);
       
-      userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
+      userTrigger = (YoEnum<QuadrupedControllerRequestedEvent>) scs.getVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
-      forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerState");
-      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingState");
+      controllerState = (YoEnum<QuadrupedControllerEnum>) scs.getVariable("controllerCurrentState");
+      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
 
       stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
       
-      xGaitEndPhaseShiftInput = (YoDouble) scs.getVariable("endPhaseShiftInput");
-      xGaitEndDoubleSupportDurationInput = (YoDouble) scs.getVariable("endDoubleSupportDurationInput");
-      xGaitStanceWidthInput = (YoDouble) scs.getVariable("stanceWidthInput");
-      xGaitStanceLengthInput = (YoDouble) scs.getVariable("stanceLengthInput");
-      xGaitStepGroundClearanceInput = (YoDouble) scs.getVariable("stepGroundClearanceInput");
-      xGaitStepDurationInput = (YoDouble) scs.getVariable("stepDurationInput");
-      
       comPositionEstimateX = (YoDouble) scs.getVariable("comPositionEstimateX");
       comPositionEstimateY = (YoDouble) scs.getVariable("comPositionEstimateY");
-      comPositionEstimateZ = (YoDouble) scs.getVariable("comPositionEstimateZ");
+      currentHeightInWorld = (YoDouble) scs.getVariable("currentHeightInWorld");
       
       timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
       timedStepDuration = (YoDouble) scs.getVariable("timedStepDuration");
@@ -69,9 +67,18 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timedStepGoalPositionX = (YoDouble) scs.getVariable("timedStepGoalPositionX");
       timedStepGoalPositionY = (YoDouble) scs.getVariable("timedStepGoalPositionY");
       timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
+
+      bodyCurrentOrientationQx = (YoDouble) scs.getVariable("bodyCurrentOrientationQx");
+      bodyCurrentOrientationQy = (YoDouble) scs.getVariable("bodyCurrentOrientationQy");
+      bodyCurrentOrientationQz = (YoDouble) scs.getVariable("bodyCurrentOrientationQz");
+      bodyCurrentOrientationQs = (YoDouble) scs.getVariable("bodyCurrentOrientationQs");
+
+      comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
+      comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
+      desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
    }
 
-   public YoEnum<QuadrupedForceControllerRequestedEvent> getUserTrigger()
+   public YoEnum<QuadrupedControllerRequestedEvent> getUserTrigger()
    {
       return userTrigger;
    }
@@ -81,9 +88,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return stepTrigger;
    }
 
-   public YoEnum<QuadrupedForceControllerEnum> getForceControllerState()
+   public YoEnum<QuadrupedControllerEnum> getControllerState()
    {
-      return forceControllerState;
+      return controllerState;
    }
 
    public YoEnum<QuadrupedSteppingStateEnum> getSteppingState()
@@ -101,36 +108,6 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return groundPlanePointZ;
    }
 
-   public YoDouble getXGaitEndDoubleSupportDurationInput()
-   {
-      return xGaitEndDoubleSupportDurationInput;
-   }
-
-   public YoDouble getXGaitEndPhaseShiftInput()
-   {
-      return xGaitEndPhaseShiftInput;
-   }
-
-   public YoDouble getXGaitStanceWidthInput()
-   {
-      return xGaitStanceWidthInput;
-   }
-
-   public YoDouble getXGaitStanceLengthInput()
-   {
-      return xGaitStanceLengthInput;
-   }
-
-   public YoDouble getXGaitStepGroundClearanceInput()
-   {
-      return xGaitStepGroundClearanceInput;
-   }
-
-   public YoDouble getXGaitStepDurationInput()
-   {
-      return xGaitStepDurationInput;
-   }
-
    public YoDouble getComPositionEstimateX()
    {
       return comPositionEstimateX;
@@ -141,9 +118,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return comPositionEstimateY;
    }
 
-   public YoDouble getComPositionEstimateZ()
+   public YoDouble getCurrentHeightInWorld()
    {
-      return comPositionEstimateZ;
+      return currentHeightInWorld;
    }
    
    public YoEnum<RobotQuadrant> getTimedStepQuadrant()
@@ -174,5 +151,41 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getTimedStepGoalPositionZ()
    {
       return timedStepGoalPositionZ;
+   }
+
+   public double getBodyEstimateYaw()
+   {
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                          bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getYaw();
+   }
+
+   public double getBodyEstimatePitch()
+   {
+       bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                                 bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getPitch();
+   }
+
+   public double getBodyEstimateRoll()
+   {
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+                          bodyCurrentOrientationQs.getDoubleValue());
+      return bodyOrientation.getRoll();
+   }
+
+   public YoDouble getComPositionSetpointX()
+   {
+      return comPositionSetpointX;
+   }
+
+   public YoDouble getComPositionSetpointY()
+   {
+      return comPositionSetpointY;
+   }
+
+   public YoDouble getHeightInWorldSetpoint()
+   {
+      return desiredHeightInWorld;
    }
 }

@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.8"
+      classpath "us.ihmc:ihmc-build:0.13.3"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,8 +22,8 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
@@ -47,7 +47,7 @@ mainDependencies {
    compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.4'
    compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
    compile "org.ddogleg:ddogleg:0.7"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
@@ -58,13 +58,13 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"

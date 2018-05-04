@@ -6,6 +6,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -13,14 +16,13 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
@@ -32,15 +34,14 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
@@ -101,11 +102,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private SpatialNodePlotter nodePlotter;
 
-   private final SideDependentList<YoFramePose> endeffectorPose = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> endeffectorPose = new SideDependentList<>();
 
    private final SideDependentList<YoGraphicCoordinateSystem> endeffectorFrame = new SideDependentList<>();
 
-   private final YoFramePose testFramePose;
+   private final YoFramePoseUsingYawPitchRoll testFramePose;
    private final YoGraphicCoordinateSystem testFrameViz;
    private final YoDouble minimumDistanceFromManifold = new YoDouble("minimumDistanceFromManifold", registry);
 
@@ -174,7 +175,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
+         endeffectorPose.put(robotSide, new YoFramePoseUsingYawPitchRoll("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
 
          endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", endeffectorPose.get(robotSide), 0.25));
          endeffectorFrame.get(robotSide).setVisible(true);
@@ -192,7 +193,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
-      testFramePose = new YoFramePose("testFramePose", ReferenceFrame.getWorldFrame(), registry);
+      testFramePose = new YoFramePoseUsingYawPitchRoll("testFramePose", ReferenceFrame.getWorldFrame(), registry);
       testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.25);
       yoGraphicsListRegistry.registerYoGraphic("testFrameYoGraphic", testFrameViz);
    }
@@ -253,8 +254,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       if (outputStatusToPack.getPlanningResult() == 4)
       {
-         outputStatusToPack.setRobotConfigurations(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]));
-         outputStatusToPack.setTrajectoryTimes(path.stream().mapToDouble(SpatialNode::getTime).toArray());
+         MessageTools.copyData(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]), outputStatusToPack.getRobotConfigurations());
+         outputStatusToPack.getTrajectoryTimes().reset();
+         outputStatusToPack.getTrajectoryTimes().add(path.stream().mapToDouble(SpatialNode::getTime).toArray());
 
          //if (VERBOSE)
          //   for (int i = 0; i < path.size(); i++)
@@ -751,13 +753,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          return false;
       }
 
-      initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getPelvisOrientation());
-      initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
+      initialConfiguration.getDesiredRootOrientation().set(currentRobotConfiguration.getRootOrientation());
+      initialConfiguration.getDesiredRootTranslation().set(currentRobotConfiguration.getRootTranslation());
 
-      initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
-      int length = currentRobotConfiguration.jointAngles.length;
-      initialConfiguration.desiredJointAngles = new float[length];
-      System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
+      initialConfiguration.setJointNameHash(currentRobotConfiguration.getJointNameHash());
+      int length = currentRobotConfiguration.getJointAngles().size();
+      MessageTools.copyData(currentRobotConfiguration.getJointAngles(), initialConfiguration.getDesiredJointAngles());
 
       PrintTools.info("update config done");
       return true;
@@ -765,7 +766,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void terminateToolboxController()
    {
-      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
+      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
       reportMessage(toolboxSolution);
 
@@ -835,14 +836,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void updateVisualizerRobotConfiguration(KinematicsToolboxOutputStatus robotKinematicsConfiguration)
    {
-      robotKinematicsConfiguration.getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
-                                                        FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
+      MessageTools.unpackDesiredJointState(robotKinematicsConfiguration, visualizedFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    private void updateVisualizerRobotConfiguration()
    {
-      visualizedNode.getConfiguration().getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
-                                                             FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
+      MessageTools.unpackDesiredJointState(visualizedNode.getConfiguration(), visualizedFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    /**

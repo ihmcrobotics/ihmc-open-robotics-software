@@ -7,7 +7,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
@@ -21,24 +20,16 @@ public class UIConnectionHandler
    {
       this.mainWindow = mainWindow;
       this.uiMessager = uiMessager;
-      uiMessager.registerModuleConnectionStateListener(new ConnectionStateListener()
-      {
-         @Override
-         public void disconnected()
-         {
-            displayWarning();
-         }
-
-         @Override
-         public void connected()
-         {
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+         if (isMessagerOpen)
             new Thread(() -> {
                // It seems like the main window has to be up to have access to the communication.
                while (!mainWindow.isShowing())
                   ThreadTools.sleep(100);
                refreshUIControls();
             }).start();
-         }
+         else
+            displayWarning();
       });
    }
 

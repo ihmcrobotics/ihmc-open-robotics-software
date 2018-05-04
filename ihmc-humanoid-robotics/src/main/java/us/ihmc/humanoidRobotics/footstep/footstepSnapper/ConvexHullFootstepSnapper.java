@@ -9,9 +9,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -24,7 +27,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.HullFace;
@@ -195,16 +197,16 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position);
-      originalFootstep.setOrientation(orientation);
+      originalFootstep.getLocation().set(position);
+      originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null)
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints2d().size() > 0 )
       {
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
@@ -249,13 +251,13 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position);
-      originalFootstep.setOrientation(orientation);
+      originalFootstep.getLocation().set(position);
+      originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, pointList, defaultHeight);
       footstep.setFootstepType(type);
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
@@ -290,9 +292,18 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // good list of points, fit plane;
       Plane3D fittedPlane = new Plane3D();
       double avgSquaredError = planeFitter.fitPlaneToPoints(new Point2D(position.getX(), position.getY()), pointList, fittedPlane);
-      height = fittedPlane.getZOnPlane(position.getX(), position.getY());
 
-      surfaceNormal = fittedPlane.getNormalCopy();
+      if (fittedPlane.containsNaN())
+      {
+         height = Double.NaN;
+         surfaceNormal = new Vector3D();
+         surfaceNormal.setToNaN();
+      }
+      else
+      {
+         height = fittedPlane.getZOnPlane(position.getX(), position.getY());
+         surfaceNormal = fittedPlane.getNormalCopy();
+      }
 
       // check point fit to plane.
       int notOnPlaneCount = 0;
@@ -329,7 +340,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       if (!badPlane)
       {
          adjustFootstepWithoutHeightmap(footstep, height, surfaceNormal);
-         footstep.predictedContactPoints = null;
+         footstep.getPredictedContactPoints2d().clear();
          return Footstep.FootstepType.FULL_FOOTSTEP;
       }
 
@@ -419,7 +430,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FootstepDataMessage maxValueFootstep = null;
       double valueOfCurrent;
 
-      ArrayList<? extends Point2DReadOnly> currentPredictedContactPoints;
+      List<Point2D> currentPredictedContactPoints;
       for (HullFace face : faces)
       {
          if (face.getSlopeAngle() > Math.PI / 4)
@@ -438,7 +449,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
             continue;
          }
 
-         currentFaceFootstep.setPredictedContactPoints((ArrayList<Point2D>) currentPredictedContactPoints);
+         HumanoidMessageTools.packPredictedContactPoints(currentPredictedContactPoints, currentFaceFootstep);
          valueOfCurrent = footstepValueFunction.getFootstepValue(currentFaceFootstep);
 
          if (valueOfCurrent > maxValue)
@@ -457,9 +468,9 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       // determine the footstep with the highest value, then
-      footstep.setLocation(maxValueFootstep.getLocation());
-      footstep.setOrientation(maxValueFootstep.getOrientation());
-      footstep.setPredictedContactPoints(maxValueFootstep.getPredictedContactPoints());
+      footstep.getLocation().set(maxValueFootstep.getLocation());
+      footstep.getOrientation().set(maxValueFootstep.getOrientation());
+      MessageTools.copyData(maxValueFootstep.getPredictedContactPoints2d(), footstep.getPredictedContactPoints2d());
       return true;
    }
 
@@ -495,7 +506,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
    }
 
-   private ArrayList<? extends Point2DReadOnly> getPredictedContactPointsForFootstep(FootstepDataMessage footstepData, List<Point3D> points, double distanceTolerance)
+   private List<Point2D> getPredictedContactPointsForFootstep(FootstepDataMessage footstepData, List<Point3D> points, double distanceTolerance)
    {
       // get the plane of the footstep
       RotationMatrix rotationMatrix = new RotationMatrix();
@@ -556,7 +567,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       int cropNumber = 4;
-      ArrayList<? extends Point2DReadOnly> finalSupportPoints;
+      List<Point2D> finalSupportPoints;
       if (cropNumber == 4)
       {
          finalSupportPoints = reduceListOfPointsToFourFootstepBased(supportPoints);
@@ -576,7 +587,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    // class to help with cropping calculations
    public class VertexData implements Comparable<VertexData>
    {
-      Point2DReadOnly position;
+      Point2D position;
       double area;
       double distanceToCentroid;
       VertexData nextVertexData;
@@ -584,7 +595,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
       public VertexData(Point2DReadOnly position)
       {
-         this.position = position;
+         this.position = new Point2D(position);
          this.area = 0.0;
          this.distanceToCentroid = 0.0;
       }
@@ -641,9 +652,9 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
    }
 
-   public ArrayList<Point2DReadOnly> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
+   public List<Point2D> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
    {
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
       supportPolygon.update();
       Point2DReadOnly polygonCentroid = supportPolygon.getCentroid();
 
@@ -673,7 +684,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
          currentNumberOfVertices--;
       }
 
-      ArrayList<Point2DReadOnly> finalListOfSupportPoints = new ArrayList<>();
+      ArrayList<Point2D> finalListOfSupportPoints = new ArrayList<>();
       for (VertexData vertex : verticesOfPolygon)
       {
          finalListOfSupportPoints.add(vertex.position);
@@ -682,11 +693,11 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       return finalListOfSupportPoints;
    }
 
-   private ArrayList<? extends Point2DReadOnly> reduceListOfPointsToFourFootstepBased(List<? extends Point2DReadOnly> listOfPoints)
+   private List<Point2D> reduceListOfPointsToFourFootstepBased(List<? extends Point2DReadOnly> listOfPoints)
    {
 
       ConvexPolygon2D basePolygon = parameters.getCollisionPolygon();
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
       supportPolygon.update();
 
       ArrayList<Point2D> finalListOfSupportPoints = new ArrayList<Point2D>();

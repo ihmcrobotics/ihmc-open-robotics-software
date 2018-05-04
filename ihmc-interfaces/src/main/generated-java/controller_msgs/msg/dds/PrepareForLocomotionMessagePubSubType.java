@@ -1,20 +1,34 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "PrepareForLocomotionMessage" defined in "PrepareForLocomotionMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PrepareForLocomotionMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PrepareForLocomotionMessage_.idl instead.
- */
+* 
+* Topic data type of the struct "PrepareForLocomotionMessage" defined in "PrepareForLocomotionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PrepareForLocomotionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PrepareForLocomotionMessage_.idl instead.
+*
+*/
 public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PrepareForLocomotionMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PrepareForLocomotionMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public PrepareForLocomotionMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PrepareForLocomotionMessage data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,9 +40,12 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -42,27 +59,54 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_7(data.getPrepareManipulation());
 
       cdr.write_type_7(data.getPreparePelvis());
+
    }
 
    public static void read(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setPrepareManipulation(cdr.read_type_7());
-
+      	
       data.setPreparePelvis(cdr.read_type_7());
+      	
+
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("prepare_manipulation", data.getPrepareManipulation());
+      ser.write_type_7("prepare_pelvis", data.getPreparePelvis());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PrepareForLocomotionMessage data)
+   {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPrepareManipulation(ser.read_type_7("prepare_manipulation"));
+      data.setPreparePelvis(ser.read_type_7("prepare_pelvis"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PrepareForLocomotionMessage src, controller_msgs.msg.dds.PrepareForLocomotionMessage dest)
@@ -71,45 +115,10 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PrepareForLocomotionMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_7("prepare_manipulation", data.getPrepareManipulation());
-
-      ser.write_type_7("prepare_pelvis", data.getPreparePelvis());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PrepareForLocomotionMessage data)
-   {
-      data.setPrepareManipulation(ser.read_type_7("prepare_manipulation"));
-
-      data.setPreparePelvis(ser.read_type_7("prepare_pelvis"));
-   }
-
-   @Override
    public controller_msgs.msg.dds.PrepareForLocomotionMessage createData()
    {
       return new controller_msgs.msg.dds.PrepareForLocomotionMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -121,7 +130,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -131,7 +140,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PrepareForLocomotionMessage src, controller_msgs.msg.dds.PrepareForLocomotionMessage dest)
    {
       staticCopy(src, dest);
