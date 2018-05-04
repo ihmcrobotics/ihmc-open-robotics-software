@@ -33,8 +33,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.VerticalScan;
-import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.lidar.SimulatedLIDARSensorLimitationParameters;
 import us.ihmc.robotics.lidar.SimulatedLIDARSensorNoiseParameters;
 import us.ihmc.robotics.lidar.SimulatedLIDARSensorUpdateParameters;
@@ -47,6 +45,7 @@ import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.ForceSensorDescription;
 import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
 import us.ihmc.robotics.robotDescription.IMUSensorDescription;
+import us.ihmc.robotics.robotDescription.InertiaTools;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -600,10 +599,6 @@ public class RobotDescriptionFromSDFLoader
          //         sdfMinAngle = -Math.PI/4;
          //         sdfMaxAngle = Math.PI/4;
 
-         LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, sdfScanHeight, (float) sdfMinSweepAngle, (float) sdfMaxSweepAngle,
-                                                                       (float) sdfMinHeightAngle, (float) sdfMaxHeightAngle, 0.0f, (float) sdfMinRange,
-                                                                       (float) sdfMaxRange, 0.0f, 0l);
-
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
          linkRotation.setTranslation(0.0, 0.0, 0.0);
@@ -625,7 +620,12 @@ public class RobotDescriptionFromSDFLoader
          updateParameters.setAlwaysOn(sdfAlwaysOn);
          updateParameters.setUpdatePeriodInMillis(sdfUpdateRate);
 
-         LidarSensorDescription lidarMount = new LidarSensorDescription(sensor.getName(), linkToSensorInZUp, polarDefinition);
+         LidarSensorDescription lidarMount = new LidarSensorDescription(sensor.getName(), linkToSensorInZUp);
+         lidarMount.setPointsPerSweep(sdfSamples);
+         lidarMount.setScanHeight(sdfScanHeight);
+         lidarMount.setSweepYawLimits(sdfMinSweepAngle, sdfMaxSweepAngle);
+         lidarMount.setHeightPitchLimits(sdfMinHeightAngle, sdfMaxHeightAngle);
+         lidarMount.setRangeLimits(sdfMinRange, sdfMaxRange);
          //         scsJoint.addLidarSensor(lidarMount);
          scsJoint.addLidarSensor(lidarMount);
       }

@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.robotdefinition;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Plane;
+import us.ihmc.robotics.robotDescription.Plane;
 
 public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixedFrame>
 {

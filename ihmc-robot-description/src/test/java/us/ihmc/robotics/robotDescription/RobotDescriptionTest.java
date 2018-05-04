@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -18,7 +19,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.testing.JUnitTools;
 
 public class RobotDescriptionTest
 {
@@ -102,7 +102,7 @@ public class RobotDescriptionTest
       DenseMatrix64F childMomentOfInertiaOneCheck = new DenseMatrix64F(3, 3);
       childLinkOne.getMomentOfInertia(childMomentOfInertiaOneCheck);
 
-      JUnitTools.assertMatrixEquals("", new DenseMatrix64F(new double[][] { { 1.0, 0.012, 0.013 }, { 0.021, 2.0, 0.023 }, { 0.031, 0.032, 3.0 } }), childMomentOfInertiaOneCheck, 1e-7);
+      assertTrue(MatrixFeatures.isEquals(new DenseMatrix64F(new double[][] { { 1.0, 0.012, 0.013 }, { 0.021, 2.0, 0.023 }, { 0.031, 0.032, 3.0 } }), childMomentOfInertiaOneCheck, 1e-7));
 
       rootJointOne.addJoint(childJointOne);
 
