@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.TransformTools;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -68,7 +67,15 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    public CylinderTerrainObject(Vector3D center, double pitchDownDegrees, double yawDegrees, double height, double radius, AppearanceDefinition app)
    {
-      this(TransformTools.yawPitchDegreesTransform(center, yawDegrees, pitchDownDegrees), height, radius, app);
+      this(yawPitchDegreesTransform(center, yawDegrees, pitchDownDegrees), height, radius, app);
+   }
+
+   private static RigidBodyTransform yawPitchDegreesTransform(Vector3D center, double yawCCWDegrees, double pitchDownDegrees)
+   {
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationYawPitchRoll(Math.toRadians(yawCCWDegrees), Math.toRadians(pitchDownDegrees), 0.0);
+      location.setTranslation(center);
+      return location;
    }
 
    protected void addGraphics(AppearanceDefinition appearance)

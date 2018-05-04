@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {

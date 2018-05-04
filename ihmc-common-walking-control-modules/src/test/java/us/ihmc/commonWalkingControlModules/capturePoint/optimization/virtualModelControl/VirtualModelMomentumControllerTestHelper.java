@@ -1,6 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
@@ -15,15 +21,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.simulationconstructionset.*;
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.*;
 
 public class VirtualModelMomentumControllerTestHelper
 {

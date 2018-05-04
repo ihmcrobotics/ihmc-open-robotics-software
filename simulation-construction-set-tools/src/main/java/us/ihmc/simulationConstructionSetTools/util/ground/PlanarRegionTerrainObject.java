@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,6 +8,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

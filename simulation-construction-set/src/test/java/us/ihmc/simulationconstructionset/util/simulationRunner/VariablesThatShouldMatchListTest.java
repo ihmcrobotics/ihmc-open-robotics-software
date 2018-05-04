@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariablesThatShouldMatchList;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

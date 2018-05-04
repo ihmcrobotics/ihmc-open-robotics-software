@@ -5,6 +5,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.util.CollisionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

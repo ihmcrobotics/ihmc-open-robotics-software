@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.torqueSpeedCurve.TypicalTorqueSpeedCurve;
 
 public class TypicalTorqueSpeedCurveTest
 {

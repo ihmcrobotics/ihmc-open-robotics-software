@@ -9,12 +9,13 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumRateADotVTerm;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -22,22 +23,23 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
-public class CentroidalMomentumRateADotVTermSCSTest
+public class CentroidalMomentumRateTermCalculatorSCSTest
 {
    private static final double EPSILON = 1.0e-5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int NUMBER_OF_ITERATIONS = 5;
+   private static final int NUMBER_OF_ITERATIONS = 10;
 
    private final double controlDT = 0.00000005;
 
    private final DenseMatrix64F a = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aPrevVal = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aDot = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F aTermCalculator = new DenseMatrix64F(0,0);
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
@@ -58,7 +60,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", elevator.getChildrenJoints().get(0));
 
-      assertADotV(random, joints, elevator, robot,numberOfJoints);
+      assertAAndADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -77,7 +79,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       joints.add(0, rootJoint);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", rootJoint);
 
-      assertADotV(random, joints, elevator, robot, numberOfJoints);
+      assertAAndADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -87,7 +89,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      int numberOfJoints = 6; 
+      int numberOfJoints = 12; 
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
@@ -98,10 +100,10 @@ public class CentroidalMomentumRateADotVTermSCSTest
 
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", idRobot.getRootJoint());
 
-      assertADotV(random, joints, elevator, robot, numberOfJoints + 1);
+      assertAAndADotV(random, joints, elevator, robot, numberOfJoints + 1);
    }
 
-   private void assertADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
+   private void assertAAndADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
          throws UnreasonableAccelerationException
    {
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(ScrewTools.computeSubtreeJoints(elevator));
@@ -115,10 +117,11 @@ public class CentroidalMomentumRateADotVTermSCSTest
       a.reshape(6, numberOfDoFs);
       aPrevVal.reshape(6, numberOfDoFs);
       aDot.reshape(6, numberOfDoFs);
+      aTermCalculator.reshape(6,numberOfDoFs);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-      CentroidalMomentumRateADotVTerm aDotVAnalyticalCalculator = new CentroidalMomentumRateADotVTerm(elevator, centerOfMassFrame,
-            centroidalMomentumMatrixCalculator, totalMass, v);
+      
+      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame, v, totalMass);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
@@ -145,10 +148,10 @@ public class CentroidalMomentumRateADotVTermSCSTest
          robot.packIdJoints(idJoints);
          ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
-         // Compute aDotV analytically
-         aDotVAnalyticalCalculator.compute();
-         aDotVAnalytical.set(aDotVAnalyticalCalculator.getMatrix());
+         centroidalMomentumRateTermCalculator.compute();
+         aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getADotVTerm());
 
+         aTermCalculator.set(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix());
          // Compute aDotV numerically
          centroidalMomentumMatrixCalculator.compute();
          a.set(centroidalMomentumMatrixCalculator.getMatrix());
@@ -158,6 +161,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
          smartPrintOutADotV(EPSILON);
 
          JUnitTools.assertMatrixEquals(aDotVNumerical, aDotVAnalytical, EPSILON);
+         JUnitTools.assertMatrixEquals(a,aTermCalculator,EPSILON);
       }
    }
 
@@ -167,8 +171,11 @@ public class CentroidalMomentumRateADotVTermSCSTest
       CommonOps.subtract(aDotVNumerical, aDotVAnalytical, difference);
 
       for (int i = 0; i < difference.numRows; i++)
-         if (Math.abs(difference.get(i, 0)) > epsilon)
+         if(Math.abs(difference.get(i, 0)) > epsilon)
+         {
             printOutADotV();
+            break;
+         }
    }
 
    private void printOutADotV()

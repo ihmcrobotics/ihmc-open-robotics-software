@@ -12,6 +12,11 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.simulationconstructionset.JointWrenchSensor;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointWrenchSensorTest

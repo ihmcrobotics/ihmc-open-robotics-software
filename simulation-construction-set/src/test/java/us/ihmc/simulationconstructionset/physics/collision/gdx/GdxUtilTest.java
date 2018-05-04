@@ -12,6 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxUtil;
 
 /**
  * @author Peter Abeles

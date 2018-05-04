@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground.steppingStones;
+package us.ihmc.simulationConstructionSetTools.util.ground.steppingStones;
 
 import java.util.ArrayList;
 import java.util.Random;

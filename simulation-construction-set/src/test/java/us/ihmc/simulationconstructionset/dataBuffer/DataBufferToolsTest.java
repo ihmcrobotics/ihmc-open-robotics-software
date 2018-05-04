@@ -5,6 +5,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

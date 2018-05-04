@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,16 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
+import us.ihmc.simulationconstructionset.util.ground.BoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.ConeTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RampTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableRampTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableTableTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.SimpleTableTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.SphereTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals
 {

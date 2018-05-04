@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RotatableConvexPolygonTerrainObjectTest

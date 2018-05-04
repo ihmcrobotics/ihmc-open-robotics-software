@@ -78,7 +78,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
@@ -128,6 +127,7 @@ import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -226,7 +226,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    private List<String> panelsSelectedEarly = new ArrayList<>();
    private boolean scsWindowOpened = false;
 
-   private final SettableDoubleProvider yoGraphicsGlobalScaleProvider = new SettableDoubleProvider(1.0);
+   private double yoGraphicsGlobalScale = 1.0;
 
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
@@ -2919,17 +2919,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setYoGraphicsGlobalScale(double globalScale)
    {
-      this.yoGraphicsGlobalScaleProvider.setValue(globalScale);
+      yoGraphicsGlobalScale = globalScale;
    }
 
    public double getYoGraphicsGlobalScale()
    {
-      return yoGraphicsGlobalScaleProvider.getValue();
+      return yoGraphicsGlobalScale;
    }
 
-   public SettableDoubleProvider getYoGraphicsGlobalScaleProvider()
+   public DoubleProvider getYoGraphicsGlobalScaleProvider()
    {
-      return yoGraphicsGlobalScaleProvider;
+      return () -> yoGraphicsGlobalScale;
    }
 
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean updateFromSimulationThread)
@@ -2950,7 +2950,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(updateFromSimulationThread);
       yoGraphicsListRegistry.setYoGraphicsRegistered();
       
-      yoGraphicsListRegistry.setGlobalScaleProvider(yoGraphicsGlobalScaleProvider);
+      yoGraphicsListRegistry.setGlobalScaleProvider(() -> yoGraphicsGlobalScale);
    }
 
    public GraphGroupList getGraphGroupList()

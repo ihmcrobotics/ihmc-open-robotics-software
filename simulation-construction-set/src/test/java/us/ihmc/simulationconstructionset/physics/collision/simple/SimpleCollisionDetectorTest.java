@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class SimpleCollisionDetectorTest
 {

@@ -6,6 +6,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 
 public class SlopedPlaneGroundProfileTest extends GroundProfileTest
 {

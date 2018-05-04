@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 
 public class CylinderTerrainObjectTest
 {

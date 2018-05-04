@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationConstructionSetTools.tools;
 
 import static org.junit.Assert.*;
 
@@ -10,7 +10,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotToolsTest
 {

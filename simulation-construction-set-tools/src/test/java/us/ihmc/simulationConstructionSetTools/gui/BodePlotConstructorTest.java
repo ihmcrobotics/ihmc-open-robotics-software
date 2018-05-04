@@ -1,10 +1,14 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationConstructionSetTools.gui;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
+import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
+import us.ihmc.simulationconstructionset.gui.FFTPlotter;
+import us.ihmc.simulationconstructionset.gui.HumanAssistedTestFrame;
 
 /**
  * All tests ignored because they are human assisted. They also might not work.
@@ -128,7 +132,7 @@ public class BodePlotConstructorTest
       System.out.println("wnIndex = " + wnIndex + ", wnMagnitude = " + wnMagnitude + ", wnPhase = " + wnPhase);
       System.out.println("wnMagnitudeDecibels = " + wnMagnitudeDecibels + ", wnPhaseDegrees = " + wnPhaseDegrees);
 
-      BodePlotConstructor.plotBodeForTransferFunction("2nd order Transfer Function", secondOrderTransferFunction, ws);
+      plotBodeForTransferFunction("2nd order Transfer Function", secondOrderTransferFunction, ws);
 
    }
 
@@ -227,5 +231,34 @@ public class BodePlotConstructorTest
 //   testSecondOrderResponse();
 // }
 
+
+   public static void plotBodeForTransferFunction(String name, TransferFunction transferFunction, double[] omega)
+   {
+      double[] bodeMagnitude = transferFunction.getMagnitude(omega);
+      for (int i = 0; i < bodeMagnitude.length; i++)
+      {
+         bodeMagnitude[i] = Conversions.amplitudeToDecibels(bodeMagnitude[i]);
+      }
+
+      double[] bodePhase = transferFunction.getPhase(omega);
+      for (int i = 0; i < bodePhase.length; i++)
+      {
+         bodePhase[i] = Math.toDegrees(bodePhase[i]);
+      }
+
+      double[] bodeFrequency = new double[omega.length];
+      for (int i = 0; i < omega.length; i++)
+      {
+         bodeFrequency[i] = Conversions.radiansPerSecondToHertz(omega[i]);
+      }
+
+      double[][] bodeData = new double[][]
+      {
+         bodeFrequency, bodeMagnitude, bodePhase
+      };
+
+      FFTPlotter plot = new FFTPlotter(bodeData, name + " Bode Plot", "(Hz)", "(dB)", "(deg)");
+      plot.packAndDisplayFrame(0, 0);
+   }
 
 }

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.util.IndexOrderChecker;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
