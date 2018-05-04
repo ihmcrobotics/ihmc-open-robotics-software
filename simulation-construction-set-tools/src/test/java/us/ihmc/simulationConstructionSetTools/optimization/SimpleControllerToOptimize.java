@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.optimization;
+package us.ihmc.simulationConstructionSetTools.optimization;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

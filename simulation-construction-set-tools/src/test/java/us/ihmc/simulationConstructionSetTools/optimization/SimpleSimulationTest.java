@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.optimization;
+package us.ihmc.simulationConstructionSetTools.optimization;
 
 import static org.junit.Assert.*;
 
