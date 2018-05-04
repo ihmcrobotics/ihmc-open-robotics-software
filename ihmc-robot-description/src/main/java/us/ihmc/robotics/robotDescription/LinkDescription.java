@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.InertiaTools;
 
 public class LinkDescription
 {
@@ -97,9 +96,9 @@ public class LinkDescription
 
    public void setMomentOfInertia(Matrix3DReadOnly momentOfInertia)
    {
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
-         for (int j=0; j<3; j++)
+         for (int j = 0; j < 3; j++)
          {
             this.momentOfInertia.set(i, j, momentOfInertia.getElement(i, j));
          }
@@ -110,9 +109,9 @@ public class LinkDescription
    {
       Matrix3D momentOfInertia = new Matrix3D();
 
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
-         for (int j=0; j<3; j++)
+         for (int j = 0; j < 3; j++)
          {
             momentOfInertia.setElement(i, j, this.momentOfInertia.get(i, j));
          }
@@ -154,8 +153,8 @@ public class LinkDescription
    // ////////// Graphics from Mass Properties Here ///////////////////////
 
    /**
-    * Adds an ellipsoid representing the mass and inertia of the link at its center of mass.
-    * This ellipsoid has a default matte black appearance.
+    * Adds an ellipsoid representing the mass and inertia of the link at its center of mass. This
+    * ellipsoid has a default matte black appearance.
     */
    public void addEllipsoidFromMassProperties()
    {
@@ -163,8 +162,8 @@ public class LinkDescription
    }
 
    /**
-    * Adds a coordinate system representation at the center of mass of this link.  The axis of this system
-    * have the given length.
+    * Adds a coordinate system representation at the center of mass of this link. The axis of this
+    * system have the given length.
     *
     * @param length length in meters of each arm/axis on the coordinate system.
     */
@@ -296,10 +295,11 @@ public class LinkDescription
    }
 
    /**
-    * Adds an ellipsoid representing the mass and inertia of the link at its center of mass
-    * with the specified appearance.
+    * Adds an ellipsoid representing the mass and inertia of the link at its center of mass with the
+    * specified appearance.
     *
-    * @param appearance Appearance to be used with the ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param appearance Appearance to be used with the ellipsoid. See {@link YoAppearance
+    *           YoAppearance} for implementations.
     */
    public void addEllipsoidFromMassProperties(AppearanceDefinition appearance)
    {
@@ -321,22 +321,26 @@ public class LinkDescription
    }
 
    /**
-    * Adds an box representing the mass and inertia of the link at its center of mass
-    * with the specified appearance.
+    * Adds an box representing the mass and inertia of the link at its center of mass with the
+    * specified appearance.
     *
     * Specifically, mimics the code from Gazebo to debug SDF loader
     *
-    * See https://bitbucket.org/osrf/gazebo/src/0709b57a8a3a8abce3c67e992e5c6a5c24c8d84a/gazebo/rendering/COMVisual.cc?at=default
+    * See
+    * https://bitbucket.org/osrf/gazebo/src/0709b57a8a3a8abce3c67e992e5c6a5c24c8d84a/gazebo/rendering/COMVisual.cc?at=default
     *
-    * @param appearance Appearance to be used with the ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param appearance Appearance to be used with the ellipsoid. See {@link YoAppearance
+    *           YoAppearance} for implementations.
     */
    public void addBoxFromMassProperties(AppearanceDefinition appearance)
    {
       Vector3D comOffset = new Vector3D();
       getCenterOfMassOffset(comOffset);
 
-      if (mass <= 0 || momentOfInertia.get(0, 0) <= 0 || momentOfInertia.get(1, 1) <= 0 || momentOfInertia.get(2, 2) <= 0 || momentOfInertia.get(0, 0) + momentOfInertia.get(1, 1) <= momentOfInertia.get(2, 2)
-            || momentOfInertia.get(1, 1) + momentOfInertia.get(2, 2) <= momentOfInertia.get(0, 0) || momentOfInertia.get(0, 0) + momentOfInertia.get(2, 2) <= momentOfInertia.get(1, 1))
+      if (mass <= 0 || momentOfInertia.get(0, 0) <= 0 || momentOfInertia.get(1, 1) <= 0 || momentOfInertia.get(2, 2) <= 0
+            || momentOfInertia.get(0, 0) + momentOfInertia.get(1, 1) <= momentOfInertia.get(2, 2)
+            || momentOfInertia.get(1, 1) + momentOfInertia.get(2, 2) <= momentOfInertia.get(0, 0)
+            || momentOfInertia.get(0, 0) + momentOfInertia.get(2, 2) <= momentOfInertia.get(1, 1))
       {
          System.err.println(getName() + " has unrealistic inertia");
       }
@@ -362,10 +366,10 @@ public class LinkDescription
    {
       // Center of mass offset scales with the scaling factor
       centerOfMassOffset.scale(factor);
-      
+
       // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
-      
-      if(scaleInertia)
+
+      if (scaleInertia)
       {
          mass = Math.pow(factor, massScalePower) * mass;
          // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
@@ -373,23 +377,20 @@ public class LinkDescription
          CommonOps.scale(inertiaScale, momentOfInertia);
          computePrincipalMomentsOfInertia();
       }
-      
-      
-      if(linkGraphics != null)
+
+      if (linkGraphics != null)
       {
          linkGraphics.preScale(factor);
       }
-      
-      if(collisionMeshes != null)
+
+      if (collisionMeshes != null)
       {
-         for (int i=0; i<collisionMeshes.size(); i++)
+         for (int i = 0; i < collisionMeshes.size(); i++)
          {
             collisionMeshes.get(i).scale(factor);
          }
       }
-      
-      
-      
+
    }
 
 }

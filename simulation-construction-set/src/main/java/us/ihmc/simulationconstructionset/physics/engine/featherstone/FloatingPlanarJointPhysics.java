@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Plane;
+import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;

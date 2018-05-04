@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry;
+package us.ihmc.robotics.robotDescription;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,13 +9,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class InertiaToolsTest
@@ -36,7 +36,7 @@ public class InertiaToolsTest
          double yRadius = maxRandomValue * random.nextDouble();
          double zRadius = maxRandomValue * random.nextDouble();
 
-         Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+         Matrix3D rotationalInertia = getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
          Vector3D principalMomentsOfInertia = new Vector3D(rotationalInertia.getM00(), rotationalInertia.getM11(), rotationalInertia.getM22());
 
          Vector3D ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
@@ -62,10 +62,10 @@ public class InertiaToolsTest
          double yRadius = maxRandomValue * random.nextDouble();
          double zRadius = maxRandomValue * random.nextDouble();
 
-         Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+         Matrix3D rotationalInertia = getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
 
          Matrix3D rotationalInertiaCopy = new Matrix3D(rotationalInertia);
-         RotationMatrix inertialFrameRotation = RandomGeometry.nextRotationMatrix(random);
+         RotationMatrix inertialFrameRotation = EuclidCoreRandomTools.nextRotationMatrix(random);
          
          Matrix3D rotatedInertia = InertiaTools.rotate(inertialFrameRotation, rotationalInertiaCopy);
          
@@ -98,6 +98,20 @@ public class InertiaToolsTest
          Matrix3D rotatedInertiaAgain = InertiaTools.rotate(principalAxesAfterRotation, inertiaAboutPrincipalAxes);
          assertTrue(rotatedInertiaAgain.epsilonEquals(rotatedInertia, epsilon));
       }
+   }
+
+	// TODO This is from RotationalInertiaCalculator. We probably need to start working on a low-level physics library.
+   public static Matrix3D getRotationalInertiaMatrixOfSolidEllipsoid(double mass, double xRadius, double yRadius, double zRadius)
+   {
+      double ixx = 1.0 / 5.0 * mass * (yRadius * yRadius + zRadius * zRadius);
+      double iyy = 1.0 / 5.0 * mass * (zRadius * zRadius + xRadius * xRadius);
+      double izz = 1.0 / 5.0 * mass * (xRadius * xRadius + yRadius * yRadius);
+
+      Matrix3D ret = new Matrix3D();
+      ret.setM00(ixx);
+      ret.setM11(iyy);
+      ret.setM22(izz);
+      return ret;
    }
 
 }

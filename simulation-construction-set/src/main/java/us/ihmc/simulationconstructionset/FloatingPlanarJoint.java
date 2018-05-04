@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.Plane;
+import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

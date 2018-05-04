@@ -13,6 +13,7 @@ import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -51,12 +52,17 @@ public class DRCLidar
       {
          LidarMount lidarMount = getSensor(robot, lidarParams.getSensorNameInSdf());
 
-         LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
-         int horizontalRays = lidarScanParameters.pointsPerSweep;
-         int scanHeight = lidarScanParameters.scanHeight;
-         float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
-         float near = lidarScanParameters.minRange;
-         float far = lidarScanParameters.maxRange;
+         LidarSensorDescription desciption = lidarMount.getDescription();
+         int horizontalRays = desciption.getPointsPerSweep();
+         int scanHeight = desciption.getScanHeight();
+         float fov = (float) (desciption.getSweepYawMax() - desciption.getSweepYawMin());
+         float near = (float) desciption.getMinRange();
+         float far = (float) desciption.getMaxRange();
+
+         LidarScanParameters lidarScanParameters = new LidarScanParameters(desciption.getPointsPerSweep(), desciption.getScanHeight(),
+                                                                           (float) desciption.getSweepYawMin(), (float) desciption.getSweepYawMax(),
+                                                                           (float) desciption.getHeightPitchMin(), (float) desciption.getHeightPitchMax(), 0,
+                                                                           (float) desciption.getMinRange(), (float) desciption.getMaxRange(), 0, 0);
 
          DRCLidarCallback callback = new DRCLidarCallback(objectCommunicator, lidarScanParameters, lidarParams.getSensorId());
          GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, scanHeight, fov, near, far);
@@ -81,9 +87,9 @@ public class DRCLidar
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
          final SimulatedLidarScanPacket lidarScan = MessageTools.createSimulatedLidarScanPacket(lidarSensorId,
-                                                                                                        new LidarScanParameters(lidarScanParameters,
-                                                                                                                                Conversions.secondsToNanoseconds(time)),
-                                                                                                        Arrays.copyOf(scan, scan.length));
+                                                                                                new LidarScanParameters(lidarScanParameters,
+                                                                                                                        Conversions.secondsToNanoseconds(time)),
+                                                                                                Arrays.copyOf(scan, scan.length));
 
          objectCommunicator.consumeObject(lidarScan);
       }
