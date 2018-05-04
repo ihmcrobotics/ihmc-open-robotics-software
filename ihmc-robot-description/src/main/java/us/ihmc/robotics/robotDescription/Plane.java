@@ -1,4 +1,4 @@
-package us.ihmc.robotics;
+package us.ihmc.robotics.robotDescription;
 
 public enum Plane
 {
