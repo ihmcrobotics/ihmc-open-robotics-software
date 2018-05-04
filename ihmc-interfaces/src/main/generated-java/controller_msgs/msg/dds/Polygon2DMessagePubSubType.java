@@ -42,7 +42,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -74,7 +74,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getVertices().size() <= 100)
+      if(data.getVertices().size() <= 1)
       cdr.write_type_e(data.getVertices());else
           throw new RuntimeException("vertices field exceeds the maximum length");
 

@@ -50,7 +50,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -96,7 +96,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
       controller_msgs.msg.dds.Polygon2DMessagePubSubType.write(data.getConcaveHull(), cdr);
-      if(data.getConvexPolygons().size() <= 100)
+      if(data.getConvexPolygons().size() <= 1)
       cdr.write_type_e(data.getConvexPolygons());else
           throw new RuntimeException("convex_polygons field exceeds the maximum length");
 
