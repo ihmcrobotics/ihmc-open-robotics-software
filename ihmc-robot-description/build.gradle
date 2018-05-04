@@ -26,7 +26,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-geometry", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
 }
 
 testDependencies {
