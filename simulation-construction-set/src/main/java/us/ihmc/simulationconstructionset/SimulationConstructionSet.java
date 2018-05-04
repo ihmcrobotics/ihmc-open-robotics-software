@@ -58,7 +58,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;

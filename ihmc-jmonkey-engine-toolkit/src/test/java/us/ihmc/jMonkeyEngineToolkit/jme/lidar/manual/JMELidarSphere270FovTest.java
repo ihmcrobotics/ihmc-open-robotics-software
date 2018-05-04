@@ -3,7 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidarTestEnviroment;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestListener;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestParameters;
-import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.jMonkeyEngineToolkit.jme.lidar.LidarTestScan;
 
 public class JMELidarSphere270FovTest extends LidarTestParameters implements LidarTestListener
 {
@@ -45,7 +45,7 @@ public class JMELidarSphere270FovTest extends LidarTestParameters implements Lid
 //      setLidarPitchMaxAngle(3 * Math.PI / 4);
    }
 
-   public void notify(LidarScan gpuScan, LidarScan traceScan)
+   public void notify(LidarTestScan gpuScan, LidarTestScan traceScan)
    {
    }
 

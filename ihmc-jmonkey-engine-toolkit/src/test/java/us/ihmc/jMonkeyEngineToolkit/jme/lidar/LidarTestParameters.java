@@ -1,7 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
-import us.ihmc.robotics.lidar.LidarScanParameters;
-
 public class LidarTestParameters
 {
    private double minRange;
@@ -89,11 +87,6 @@ public class LidarTestParameters
       }
    }
    
-   public LidarScanParameters getLidarScanParameters()
-   {
-      return new LidarScanParameters(scansPerSweep, scanHeight, (float) lidarSweepStartAngle, (float) lidarSweepEndAngle, (float) lidarPitchMinAngle, (float) lidarPitchMaxAngle, 0, (float) minRange, (float) maxRange, 0, 0l);
-   }
-
    public double getCurrentRotation()
    {
       return currentRotation;
@@ -162,6 +155,11 @@ public class LidarTestParameters
    public void setLidarSweepEndAngle(double lidarSweepEndAngle)
    {
       this.lidarSweepEndAngle = lidarSweepEndAngle;
+   }
+
+   public double getFieldOfView()
+   {
+      return lidarSweepEndAngle - lidarSweepStartAngle;
    }
 
    public int getScansPerSweep()

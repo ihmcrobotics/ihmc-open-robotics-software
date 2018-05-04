@@ -8,8 +8,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.robotics.random.RandomGeometry;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEPointCloudVisualizerTest
@@ -27,7 +27,9 @@ public class JMEPointCloudVisualizerTest
       
       Random random = new Random();
       
-      Point3D32[] randomPoint3fCloudArray = RandomGeometry.nextPoint3D32Array(random, 10000, new Point3D32(), new Point3D32(5.0f, 5.0f, 5.0f));
+      Point3D32[] randomPoint3fCloudArray = new Point3D32[10000];
+      for (int i = 0; i < randomPoint3fCloudArray.length; i++)
+         randomPoint3fCloudArray[i] = new Point3D32(EuclidCoreRandomTools.nextPoint3D(random, 0.0, 0.0, 0.0, 5.0, 5.0, 5.0));
       
       jmePointCloudVisualizer.addPointCloud(Arrays.asList(randomPoint3fCloudArray));
    }

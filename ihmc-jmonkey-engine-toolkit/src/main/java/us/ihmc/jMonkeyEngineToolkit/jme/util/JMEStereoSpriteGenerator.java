@@ -16,8 +16,6 @@ import com.jme3.math.Transform;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.jMonkeyEngineToolkit.Updatable;
@@ -112,10 +110,10 @@ public class JMEStereoSpriteGenerator extends Node implements Updatable
       pointCloudGenerator.setSizeCM(resolution);
    }
 
-   public void updatePoints(StereoVisionPointCloudMessage source)
+   public void updatePoints(Point3D32[] points, Color[] colors)
    {
-      this.pointSource.set(MessageTools.unpackPointCloud32(source));
-      this.colors = MessageTools.unpackPointCloudColors(source);
+      this.pointSource.set(points);
+      this.colors = colors;
 
       newCloudAvailable = true;
       getNextCloudReady();

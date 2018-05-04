@@ -1,17 +1,17 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.Ray3d;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMERayCollisionAdapterTest
@@ -38,7 +38,7 @@ public class JMERayCollisionAdapterTest
       
       world.keepAlive(0.1); // Needs to happen so scene graph initializes properly!
       
-      Ray3d ray3d = new Ray3d(new Point3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
+      Line3D ray3d = new Line3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
 
       JMERayCollisionAdapter rayCollisionAdapter = new JMERayCollisionAdapter(world.getJMERootNode());
       rayCollisionAdapter.setPickingGeometry(ray3d);
