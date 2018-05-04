@@ -92,12 +92,6 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2D
       y.update(vector2dUnfiltered.getY());
    }
 
-   public void setMaxRate(double maxRate)
-   {
-      x.setMaxRate(maxRate);
-      y.setMaxRate(maxRate);
-   }
-
    public void reset()
    {
       x.reset();
