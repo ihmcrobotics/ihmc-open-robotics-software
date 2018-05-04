@@ -29,8 +29,8 @@ import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState.DiagnosticsWhenHangingState;
 

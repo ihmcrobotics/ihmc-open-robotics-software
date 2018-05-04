@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import java.util.ArrayList;
 import java.util.List;

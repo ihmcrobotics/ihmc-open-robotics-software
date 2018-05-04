@@ -19,6 +19,8 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
+import us.ihmc.simulationconstructionset.simulatedSensors.PerfectSimulatedIMURawSensorReader;
+import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReader;
 
 public class SimulatedIMURawSensorReaderTest
 {

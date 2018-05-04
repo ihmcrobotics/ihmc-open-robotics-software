@@ -16,7 +16,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;

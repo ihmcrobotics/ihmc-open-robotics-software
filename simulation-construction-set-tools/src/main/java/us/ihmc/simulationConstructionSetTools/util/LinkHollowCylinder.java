@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationConstructionSetTools.util;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -15,6 +15,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
 
 
 public class LinkHollowCylinder extends Link

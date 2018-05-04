@@ -1,6 +1,9 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -14,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

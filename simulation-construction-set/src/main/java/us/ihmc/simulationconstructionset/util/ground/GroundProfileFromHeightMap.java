@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
 public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals, GroundProfile3D
 {   
@@ -95,33 +94,4 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
 
       return ret;
    }
-   
-   public static GroundProfileFromHeightMap createAGroundProfileFromAHeightMapWithPoints(final HeightMapWithPoints heightMapWithPoints, final BoundingBox3D boundingBox)
-   {
-      GroundProfileFromHeightMap ret = new GroundProfileFromHeightMap()
-      {
-
-         @Override
-         public double heightAt(double x, double y, double z)
-         {
-            return heightMapWithPoints.getHeightAtPoint(x, y);
-         }
-
-         @Override
-         public BoundingBox3D getBoundingBox()
-         {
-            return boundingBox;
-         }
-
-         @Override
-         public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
-         {
-            normalToPack.set(0.0, 0.0, 1.0);
-            return heightMapWithPoints.getHeightAtPoint(x, y);
-         }
-      };
-
-      return ret;
-   }
-
 }

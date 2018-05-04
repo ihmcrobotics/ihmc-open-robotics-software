@@ -1,9 +1,16 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import static junit.framework.TestCase.fail;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -12,20 +19,19 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import static junit.framework.TestCase.fail;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class JointPhysicsConservedQuantitiesTest

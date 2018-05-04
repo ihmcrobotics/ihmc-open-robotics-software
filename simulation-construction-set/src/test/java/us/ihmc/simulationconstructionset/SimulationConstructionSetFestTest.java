@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.commons.thread.ThreadTools;

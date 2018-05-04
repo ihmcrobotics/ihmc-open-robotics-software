@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;

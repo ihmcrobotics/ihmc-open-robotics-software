@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 

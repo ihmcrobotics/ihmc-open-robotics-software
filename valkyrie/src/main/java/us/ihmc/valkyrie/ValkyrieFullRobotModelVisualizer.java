@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 

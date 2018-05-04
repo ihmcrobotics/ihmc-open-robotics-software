@@ -3,7 +3,6 @@ package us.ihmc.simulationconstructionset.gui;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 
 public class BodePlotConstructor
 {
@@ -51,35 +50,6 @@ public class BodePlotConstructor
       };
 
       FFTPlotter plot = new FFTPlotter(bodeData, outputName + "/" + inputName + " Bode Plot", "(Hz)", "(dB)", "(deg)");
-      plot.packAndDisplayFrame(0, 0);
-   }
-
-   public static void plotBodeForTransferFunction(String name, TransferFunction transferFunction, double[] omega)
-   {
-      double[] bodeMagnitude = transferFunction.getMagnitude(omega);
-      for (int i = 0; i < bodeMagnitude.length; i++)
-      {
-         bodeMagnitude[i] = Conversions.amplitudeToDecibels(bodeMagnitude[i]);
-      }
-
-      double[] bodePhase = transferFunction.getPhase(omega);
-      for (int i = 0; i < bodePhase.length; i++)
-      {
-         bodePhase[i] = Math.toDegrees(bodePhase[i]);
-      }
-
-      double[] bodeFrequency = new double[omega.length];
-      for (int i = 0; i < omega.length; i++)
-      {
-         bodeFrequency[i] = Conversions.radiansPerSecondToHertz(omega[i]);
-      }
-
-      double[][] bodeData = new double[][]
-      {
-         bodeFrequency, bodeMagnitude, bodePhase
-      };
-
-      FFTPlotter plot = new FFTPlotter(bodeData, name + " Bode Plot", "(Hz)", "(dB)", "(deg)");
       plot.packAndDisplayFrame(0, 0);
    }
 

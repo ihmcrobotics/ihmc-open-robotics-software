@@ -48,6 +48,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;

@@ -9,6 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.scripts.TimeScript;
+import us.ihmc.simulationconstructionset.scripts.TimeScriptCommand;
+import us.ihmc.simulationconstructionset.scripts.TimeScriptEntry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

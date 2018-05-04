@@ -17,6 +17,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
+import us.ihmc.simulationconstructionset.gui.EntryBoxArrayPanel;
+import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.simulationconstructionset.gui.YoEntryBox;
+import us.ihmc.simulationconstructionset.gui.YoEnumEntryContainer;
+import us.ihmc.simulationconstructionset.gui.YoTextEntryContainer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})

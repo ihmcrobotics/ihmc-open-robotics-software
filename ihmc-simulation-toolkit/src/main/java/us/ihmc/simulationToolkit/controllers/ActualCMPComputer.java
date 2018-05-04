@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ActualCMPComputer extends SimpleRobotController

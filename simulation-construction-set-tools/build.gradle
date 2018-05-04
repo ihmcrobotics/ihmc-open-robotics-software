@@ -34,4 +34,5 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.0"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
 }

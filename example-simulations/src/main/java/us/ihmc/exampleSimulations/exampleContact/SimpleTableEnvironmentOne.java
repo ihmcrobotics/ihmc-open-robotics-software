@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.exampleContact;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 
 public class SimpleTableEnvironmentOne extends CombinedTerrainObject3D
 {

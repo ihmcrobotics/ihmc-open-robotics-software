@@ -15,6 +15,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 
 public class SimulationRewindabilityVerifierTest
 {

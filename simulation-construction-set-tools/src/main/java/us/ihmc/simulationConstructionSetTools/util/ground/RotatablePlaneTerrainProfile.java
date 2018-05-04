@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.ground;
+package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import java.util.ArrayList;
 
@@ -16,6 +16,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
+import us.ihmc.robotics.geometry.shapes.FramePlane3d;
+import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,13 +31,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Robot;
 
 public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotController
 {

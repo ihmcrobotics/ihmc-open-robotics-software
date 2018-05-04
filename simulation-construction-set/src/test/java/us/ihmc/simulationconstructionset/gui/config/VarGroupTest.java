@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class VarGroupTest {

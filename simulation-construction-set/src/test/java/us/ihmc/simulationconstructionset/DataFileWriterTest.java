@@ -2,6 +2,9 @@ package us.ihmc.simulationconstructionset;
 
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.DataFileReader;
+import us.ihmc.simulationconstructionset.DataFileWriter;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;

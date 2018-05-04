@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
 import us.ihmc.tools.MemoryTools;
 
 public class VaryingStairGroundProfileTest

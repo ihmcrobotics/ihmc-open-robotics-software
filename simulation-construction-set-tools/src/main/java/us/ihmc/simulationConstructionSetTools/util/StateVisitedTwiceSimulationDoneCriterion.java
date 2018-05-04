@@ -1,10 +1,11 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationConstructionSetTools.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateChangeRecorder;
+import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 
 
 public class StateVisitedTwiceSimulationDoneCriterion implements SimulationDoneCriterion

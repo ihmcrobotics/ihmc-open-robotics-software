@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationConstructionSetTools.tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +21,14 @@ import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
+import us.ihmc.simulationconstructionset.FloatingSCSJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotTools
 {
