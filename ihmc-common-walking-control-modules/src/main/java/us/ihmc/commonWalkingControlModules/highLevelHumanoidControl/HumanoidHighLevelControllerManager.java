@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ju
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -103,7 +104,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
-      stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
+      stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory, jumpControlManagerFactory, controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
       for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
@@ -175,11 +176,12 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState, EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                                                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                                                                             HighLevelControlManagerFactory managerFactory, YoDouble yoTime,
+                                                                                             HighLevelControlManagerFactory managerFactory, JumpControlManagerFactory jumpControlManagerFactory, YoDouble yoTime,
                                                                                              YoVariableRegistry registry)
    {
       controllerFactoryHelper.setControllerFactories(controllerStateFactories);
       controllerFactoryHelper.setHighLevelControlManagerFactory(managerFactory);
+      controllerFactoryHelper.setJumpControlManagerFactory(jumpControlManagerFactory);
 
       StateMachineFactory<HighLevelControllerName, HighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
       factory.setNamePrefix("highLevelControllerName").setRegistry(registry).buildYoClock(yoTime);

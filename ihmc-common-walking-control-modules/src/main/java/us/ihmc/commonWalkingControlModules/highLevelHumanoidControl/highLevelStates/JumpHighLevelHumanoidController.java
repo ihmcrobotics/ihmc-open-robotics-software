@@ -35,10 +35,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.StandingState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.Skully;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -161,7 +163,6 @@ public class JumpHighLevelHumanoidController
          rigidBodyManagersByName.put(manager.getControllerBodyName(), manager);
       }
       setupStateMachine();
-      initializeManagers();
       parentRegistry.addChild(registry);
    }
 
@@ -270,6 +271,7 @@ public class JumpHighLevelHumanoidController
          for (int i = 0; i < legJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointNames[i]), PrivilegedConfigurationOption.AT_ZERO);
       }
+      initializeManagers();
    }
 
    private void initializeManagers()
@@ -277,6 +279,12 @@ public class JumpHighLevelHumanoidController
       this.centroidalMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(),
                                                             momentumOptimizationSettings.getLinearMomentumWeight());
       this.centroidalMomentumManager.initialize();
+      RigidBodyControlManager headManager = rigidBodyManagersByName.get(controllerToolbox.getFullRobotModel().getHead().getName());
+	  headManager.initialize();
+      RigidBodyControlManager chestManager = rigidBodyManagersByName.get(controllerToolbox.getFullRobotModel().getChest().getName());
+	  chestManager.initialize();
+	  for (RobotSide robotSide : RobotSide.values)
+		  handManagers.get(robotSide).initialize();
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
