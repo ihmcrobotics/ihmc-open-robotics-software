@@ -62,7 +62,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-swing-plotting", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-geometry", version: "source"
+   compile group: "us.ihmc", name: "ihmc-geometry", version: "0.12.0"
 }
 
 testDependencies {
