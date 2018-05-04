@@ -3,11 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
-import controller_msgs.msg.dds.MessageCollectionPubSubType;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.CommunicationOptions;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -17,7 +14,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.RealtimeRos2Publisher;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -45,12 +41,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final CommandInputManager controllerCommandInputManager;
    /** The output API that provides the status messages to send to the packet communicator. */
    private final StatusMessageOutputManager controllerStatusOutputManager;
-   /** Topic name for communication */
-   private final String topicName;
-   /** ROS2 node for publishing and subscribing */
-   private final RealtimeRos2Node realtimeRos2Node;
-   /** Publishers for ROS2 */
-   private final HashMap<String, RealtimeRos2Publisher<Packet>> ros2Publishers;
    /** Communicator from which commands are received and status messages can send to. */
    private final PacketCommunicator packetCommunicator;
    /** Used to schedule status message sending. */
@@ -75,30 +65,18 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Packet<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-                                      PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator, RealtimeRos2Node realtimeRos2Node)
+                                      PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.scheduler = scheduler;
-      this.realtimeRos2Node = realtimeRos2Node;
-      ros2Publishers = CommunicationOptions.USE_ROS2 ? new HashMap<>() : null;
-      topicName = "/controller_network_subscriber";
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (CommunicationOptions.USE_KRYO && packetCommunicator == null)
-      {
-         PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
-         return;
-      }
-      if (CommunicationOptions.USE_ROS2 && realtimeRos2Node == null)
-      {
-         PrintTools.error(this, "No ros2 node, " + getClass().getSimpleName() + " cannot be created.");
-         return;
-      }
+      PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
 
@@ -113,24 +91,11 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageHolderClass, int expectedMessageSize,
                                                                           MessageUnpacker<T> messageUnpacker)
    {
-      if (CommunicationOptions.USE_KRYO)
-      {
-         final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
-         PacketConsumer<T> packetConsumer = multipleMessageHolder -> {
-            unpackMultiMessage(multipleMessageHolderClass, messageUnpacker, unpackedMessages, multipleMessageHolder);
-         };
-         packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
-      }
-      if (CommunicationOptions.USE_ROS2)
-      {
-         final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
-         final T multipleMessageHolder = ROS2Tools.createMessage(multipleMessageHolderClass, ROS2Tools.RUNTIME_EXCEPTION);
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageHolder.getPubSubTypePacket().get(), topicName, subscriber -> {
-            unpackMultiMessage(multipleMessageHolderClass, messageUnpacker, unpackedMessages, multipleMessageHolder);
-         }, ROS2Tools.RUNTIME_EXCEPTION);
-         ros2Publishers.put(multipleMessageHolder.getClass().getName(), ROS2Tools
-               .createPublisher(realtimeRos2Node, multipleMessageHolder.getPubSubTypePacket().get(), topicName, Throwable::printStackTrace));
-      }
+      final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      PacketConsumer<T> packetConsumer = multipleMessageHolder -> {
+         unpackMultiMessage(multipleMessageHolderClass, messageUnpacker, unpackedMessages, multipleMessageHolder);
+      };
+      packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
    }
 
    private <T extends Packet<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
@@ -165,22 +130,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
       createStatusMessageBuffer(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
-      if (CommunicationOptions.USE_KRYO)
-      {
-         packetCommunicator.attachListener(MessageCollection.class, message -> {
-            MessageCollectionNotification notification = messageCollector.startCollecting(message);
-            copyAndCommitStatusMessage(notification);
-         });
-      }
-      if (CommunicationOptions.USE_ROS2)
-      {
-         final MessageCollection message = new MessageCollection();
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, new MessageCollectionPubSubType(), topicName, subscriber -> {
-            ROS2Tools.popMessage(subscriber, message, Throwable::printStackTrace);
-            MessageCollectionNotification notification = messageCollector.startCollecting(message);
-            copyAndCommitStatusMessage(notification);
-         }, ROS2Tools.RUNTIME_EXCEPTION);
-      }
+      packetCommunicator.attachListener(MessageCollection.class, message -> {
+         MessageCollectionNotification notification = messageCollector.startCollecting(message);
+         copyAndCommitStatusMessage(notification);
+      });
    }
 
    public void addMessageFilter(MessageFilter newFilter)
@@ -225,18 +178,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       {
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         if (CommunicationOptions.USE_KRYO)
-            packetCommunicator.attachListener(messageClass, this::receivedMessage);
-         if (CommunicationOptions.USE_ROS2)
-         {
-            final T message = ROS2Tools.createMessage(messageClass, Throwable::printStackTrace);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, message.getPubSubTypePacket().get(), topicName, subscriber -> {
-               ROS2Tools.popMessage(subscriber, message, Throwable::printStackTrace);
-               receivedMessage(message);
-            }, ROS2Tools.RUNTIME_EXCEPTION);
-            ros2Publishers.put(messageClass.getName(),
-                               ROS2Tools.createPublisher(realtimeRos2Node, message.getPubSubTypePacket().get(), topicName, ROS2Tools.RUNTIME_EXCEPTION));
-         }
+         packetCommunicator.attachListener(messageClass, this::receivedMessage);
       }
    }
 
@@ -333,10 +275,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
             Packet<?> statusMessage;
             while ((statusMessage = buffer.read()) != null)
             {
-               if (CommunicationOptions.USE_KRYO)
-                  packetCommunicator.send(statusMessage);
-               if (CommunicationOptions.USE_ROS2)
-                  ros2Publishers.get(statusMessage.getClass().getName()).publish(statusMessage);
+               packetCommunicator.send(statusMessage);
             }
             buffer.flush();
          }

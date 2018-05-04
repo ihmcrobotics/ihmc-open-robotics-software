@@ -29,9 +29,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.CommunicationOptions;
 import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -50,7 +48,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -104,7 +101,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * It is bidirectional meaning that it carries commands to be executed by the controller and that the controller is able to send feedback the other way to whoever is listening to the PacketCommunicator.
     */
    private PacketCommunicator controllerPacketCommunicator;
-   private RealtimeRos2Node realtimeRos2Node;
 
    /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
@@ -348,21 +344,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       networkParameters.enableLocalControllerCommunicator(true);
 
-      if (CommunicationOptions.USE_KRYO)
+      controllerPacketCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      try
       {
-         controllerPacketCommunicator = PacketCommunicator
-               .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-         try
-         {
-            controllerPacketCommunicator.connect();
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
+         controllerPacketCommunicator.connect();
       }
-      if (CommunicationOptions.USE_ROS2)
-         realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, this.getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION);
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    /**
@@ -449,7 +440,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
          controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
-                                                             controllerPacketCommunicator, realtimeRos2Node);
+                                                             controllerPacketCommunicator);
 
       for (int i = 0; i < highLevelControllerFactories.size(); i++)
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));

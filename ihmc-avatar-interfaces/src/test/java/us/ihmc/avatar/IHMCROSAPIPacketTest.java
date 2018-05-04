@@ -17,9 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.CommunicationOptions;
 import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -29,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -117,12 +114,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       Random random = new Random();
 
-      PacketCommunicator controllerCommunicatorServer = CommunicationOptions.USE_KRYO ?
-            PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList()) :
-            null;
-      RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
-            null;
+      PacketCommunicator controllerCommunicatorServer = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       PacketCommunicator controllerCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
 
@@ -154,7 +147,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
 
-      AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, realtimeRos2Node, globalDataProducer, outputWriter, sdfRobot);
+      AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
@@ -229,13 +222,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       Random random = new Random();
 
-      PacketCommunicator packetCommunicatorServer = CommunicationOptions.USE_KRYO ?
-            PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT,
-                                                                    new IHMCCommunicationKryoNetClassList()) :
-            null;
-      RealtimeRos2Node realtimeRos2Node = CommunicationOptions.USE_ROS2 ?
-            ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName(), ROS2Tools.RUNTIME_EXCEPTION) :
-            null;
+      PacketCommunicator packetCommunicatorServer = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT, new IHMCCommunicationKryoNetClassList());
       PacketCommunicator packetCommunicatorClient = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT, new IHMCCommunicationKryoNetClassList());
 
@@ -255,7 +243,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 
-      AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, realtimeRos2Node, globalDataProducer, outputWriter, sdfRobot);
+      AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
@@ -311,14 +299,14 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
    }
 
-   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator, RealtimeRos2Node realtimeRos2Node,
+   private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
                                                             HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter,
                                                             FloatingRootJointRobot sdfRobot)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
 
-      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelHumanoidControllerFactory(robotModel, packetCommunicator, realtimeRos2Node);
+      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelHumanoidControllerFactory(robotModel, packetCommunicator);
       RobotVisualizer robotVisualizer = null;
       ThreadDataSynchronizerInterface threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(null, robotModel, registry);
 
@@ -344,7 +332,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    }
 
 
-   private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator, RealtimeRos2Node realtimeRos2Node)
+   private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
@@ -369,7 +357,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                                                     feetContactSensorNames, wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
 
-      controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator, realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
 
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
