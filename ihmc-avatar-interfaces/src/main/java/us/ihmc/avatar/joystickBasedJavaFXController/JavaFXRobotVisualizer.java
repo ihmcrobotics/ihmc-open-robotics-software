@@ -14,6 +14,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
 public class JavaFXRobotVisualizer
@@ -32,7 +33,7 @@ public class JavaFXRobotVisualizer
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
-      graphicsRobot = new GraphicsRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
+      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
       rootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       rootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), rootNode);
