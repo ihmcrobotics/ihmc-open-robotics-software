@@ -14,7 +14,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
@@ -49,7 +48,7 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
       }
    }
 
-   public void addGraphicsUpdateable(GraphicsRobot updateable)
+   public void addGraphicsUpdateable(GraphicsUpdatable updateable)
    {
       graphicsToUpdate.add(updateable);
    }

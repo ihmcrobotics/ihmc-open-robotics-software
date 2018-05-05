@@ -1,4 +1,4 @@
-package us.ihmc.robotics.numericalMethods;
+package us.ihmc.simulationConstructionSet.util;
 
 
 /*
