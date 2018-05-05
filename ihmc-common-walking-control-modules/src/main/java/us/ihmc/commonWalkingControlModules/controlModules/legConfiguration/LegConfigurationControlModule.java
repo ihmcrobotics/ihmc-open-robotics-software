@@ -331,7 +331,6 @@ public class LegConfigurationControlModule
          dampingActionScaleFactor = 1.0;
       this.dampingActionScaleFactor.set(dampingActionScaleFactor);
 
-
       double jointSpaceAction = computeJointSpaceAction(dampingActionScaleFactor);
       double actuatorSpaceAction = computeActuatorSpaceAction(dampingActionScaleFactor);
 
@@ -371,7 +370,7 @@ public class LegConfigurationControlModule
 
       double virtualError = desiredVirtualLength - currentVirtualLength;
 
-      double actuatorSpacePAction = Double.isNaN(actuatorSpaceConfigurationGain) ? 0.0 : -actuatorSpaceConfigurationGain * virtualError;
+      double actuatorSpacePAction = Double.isNaN(actuatorSpaceConfigurationGain) ? 0.0 : actuatorSpaceConfigurationGain * virtualError;
       double actuatorSpaceDAction = Double.isNaN(actuatorSpaceVelocityGain) ? 0.0 : dampingActionScaleFactor * actuatorSpaceVelocityGain * currentVirtualVelocity;
 
       this.actuatorSpacePAction.set(actuatorSpacePAction);
@@ -392,25 +391,22 @@ public class LegConfigurationControlModule
       return Math.sqrt(length);
    }
 
-   // FIXME is this right?
    private double computeVirtualActuatorVelocity(double kneePitchAngle, double kneePitchVelocity)
    {
       double virtualLength = computeVirtualActuatorLength(kneePitchAngle);
-      double velocity = -thighLength * shinLength / virtualLength * kneePitchVelocity * Math.sin(kneePitchAngle);
-      return velocity;
+      return -thighLength * shinLength / virtualLength * kneePitchVelocity * Math.sin(kneePitchAngle);
    }
 
-   // FIXME is this right?
    private double computeJointAccelerationFromActuatorAcceleration(double kneePitchAngle, double kneePitchVelocity, double actuatorAcceleration)
    {
       double actuatorLength = computeVirtualActuatorLength(kneePitchAngle);
       double actuatorVelocity = computeVirtualActuatorVelocity(kneePitchAngle, kneePitchVelocity);
 
-      double temp = Math.pow(thighLength, 2.0) + Math.pow(shinLength, 2.0) + 2.0 * thighLength * shinLength * (actuatorAcceleration * Math.sin(kneePitchAngle)
-            + Math.pow(kneePitchVelocity, 2.0) * Math.cos(kneePitchAngle));
+      double coriolisAcceleration = thighLength * shinLength / actuatorLength * Math.pow(kneePitchVelocity, 2.0) * Math.cos(kneePitchAngle);
+      double centripetalAcceleration = -Math.pow(actuatorVelocity, 2.0) / actuatorLength;
+      double regularAcceleration = -thighLength * shinLength / actuatorLength * actuatorAcceleration * Math.sin(kneePitchAngle);
 
-      double acceleration = 1.0 / actuatorLength * (0.5 * temp - Math.pow(actuatorVelocity, 2.0));
-      return acceleration;
+      return regularAcceleration + coriolisAcceleration + centripetalAcceleration;
    }
 
    public void setKneeAngleState(LegConfigurationType controlType)
