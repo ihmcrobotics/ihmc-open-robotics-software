@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -242,19 +240,10 @@ public class BlockingSimulationRunner
       }
    }
 
-   public ControllerFailureListener createControllerFailureListener()
+   public void notifyControllerHasFailed()
    {
-      ControllerFailureListener controllerFailureListener = new ControllerFailureListener()
-      {
-         @Override
-         public void controllerFailed(FrameVector2D fallingDirection)
-         {
-            hasControllerFailed.set(true);
-            scs.stop();
-         }
-      };
-
-      return controllerFailureListener;
+      hasControllerFailed.set(true);
+      scs.stop();
    }
 
    public void createValidDesiredICPListener()

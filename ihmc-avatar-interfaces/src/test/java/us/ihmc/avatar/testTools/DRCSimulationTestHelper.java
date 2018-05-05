@@ -170,7 +170,7 @@ public class DRCSimulationTestHelper
       if (useBlockingSimulationRunner)
       {
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
-         simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
+         simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
          blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }

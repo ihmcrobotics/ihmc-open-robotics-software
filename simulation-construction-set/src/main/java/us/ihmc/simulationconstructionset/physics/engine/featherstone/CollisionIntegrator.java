@@ -6,7 +6,7 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.numericalMethods.QuarticRootFinder;
+import us.ihmc.simulationConstructionSet.util.QuarticRootFinder;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionRungeKutta.ODEException;
 
 
