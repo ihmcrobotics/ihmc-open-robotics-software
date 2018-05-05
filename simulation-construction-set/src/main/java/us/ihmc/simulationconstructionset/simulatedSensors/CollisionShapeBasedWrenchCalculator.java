@@ -8,15 +8,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInterface
 {
+   private static final int WRENCH_SIZE = 6;
+
    private final String forceSensorName;
    private final List<ExternalForcePoint> contactPoints;
    private final Joint forceTorqueSensorJoint;
@@ -24,10 +23,10 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
    private final RigidBodyTransform transformToParentJoint;
 
    private boolean doWrenchCorruption = false;
-   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(WRENCH_SIZE, 1);
+   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(WRENCH_SIZE, 1);
 
-   private final PoseReferenceFrame sensorFrame;
+   private final ReferenceFrame sensorFrame;
 
    private final RigidBodyTransform transformToOriginFrame = new RigidBodyTransform();
    private final Vector3D force = new Vector3D();
@@ -43,7 +42,14 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
       this.forceTorqueSensorJoint = forceTorqueSensorJoint;
       this.transformToParentJoint = transformToParentJoint;
 
-      this.sensorFrame = new PoseReferenceFrame(forceSensorName + "Frame", ReferenceFrame.getWorldFrame());
+      this.sensorFrame = new ReferenceFrame(forceSensorName + "Frame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(transformToOriginFrame);
+         }
+      };
    }
 
    @Override
@@ -65,7 +71,7 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
 
       forceTorqueSensorJoint.getTransformToWorld(transformToOriginFrame);
       transformToOriginFrame.multiply(transformToParentJoint);
-      sensorFrame.setPoseAndUpdate(transformToOriginFrame);
+      sensorFrame.update();
       transformToOriginFrame.invert();
 
       for (int i = 0; i < contactPoints.size(); i++)
@@ -95,7 +101,7 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
 
       if (doWrenchCorruption)
       {
-         for (int i = 0; i < SpatialForceVector.SIZE; i++)
+         for (int i = 0; i < WRENCH_SIZE; i++)
          {
             wrenchMatrix.add(i, 0, corruptionMatrix.get(i, 0));
          }
