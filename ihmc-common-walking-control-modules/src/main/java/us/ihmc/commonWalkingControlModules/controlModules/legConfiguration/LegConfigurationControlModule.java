@@ -197,7 +197,7 @@ public class LegConfigurationControlModule
       desiredFractionOfMidRangeForCollapsed.set(legConfigurationParameters.getDesiredFractionOfMidrangeForCollapsedAngle());
 
       straighteningAcceleration = new YoDouble(namePrefix + "SupportKneeStraighteningAcceleration", registry);
-      straighteningAcceleration.set(10.0);
+      straighteningAcceleration.set(legConfigurationParameters.getAccelerationForSupportKneeStraightening());
 
       collapsingDuration = new YoDouble(namePrefix + "SupportKneeCollapsingDuration", registry);
       collapsingDurationFractionOfStep = new YoDouble(namePrefix + "SupportKneeCollapsingDurationFractionOfStep", registry);
