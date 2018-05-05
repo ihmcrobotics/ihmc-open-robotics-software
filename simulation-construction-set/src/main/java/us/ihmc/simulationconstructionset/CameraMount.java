@@ -3,11 +3,11 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.TransformTools;
 
 public class CameraMount implements CameraMountInterface
 {
@@ -38,7 +38,7 @@ public class CameraMount implements CameraMountInterface
 
    public CameraMount(String name, Vector3D offsetVector, double fieldOfView, double clipDistanceNear, double clipDistanceFar, Robot rob)
    {
-      this(name, TransformTools.createTranslationTransform(offsetVector), fieldOfView, clipDistanceNear, clipDistanceFar, rob);
+      this(name, new RigidBodyTransform(new Quaternion(), offsetVector), fieldOfView, clipDistanceNear, clipDistanceFar, rob);
    }
 
    public CameraMount(String name, RigidBodyTransform offset, double fieldOfView, double clipDistanceNear, double clipDistanceFar, Robot rob)

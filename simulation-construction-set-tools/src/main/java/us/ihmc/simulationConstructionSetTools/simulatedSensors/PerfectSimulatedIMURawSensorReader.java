@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulatedSensors;
+package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;

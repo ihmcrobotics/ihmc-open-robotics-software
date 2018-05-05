@@ -1,4 +1,4 @@
-package us.ihmc.robotics.time;
+package us.ihmc.simulationConstructionSet.util;
 
 /**
  * Class for enforcing that a simulation or other computational process doesn't run any faster than real time.
