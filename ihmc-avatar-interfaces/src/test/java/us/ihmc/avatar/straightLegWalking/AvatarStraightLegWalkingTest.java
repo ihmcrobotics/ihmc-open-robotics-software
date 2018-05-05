@@ -45,8 +45,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final String forwardFastScript = "scripts/ExerciseAndJUnitScripts/stepAdjustment_forwardWalkingFast.xml";
-   private static final String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
-   private static final String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
 
    private static double simulationTime = 10.0;
 
@@ -121,8 +119,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    @Test(timeout = 840000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());
 
@@ -149,8 +145,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    @Test(timeout = 840000)
    public void testWalkingOverStairs() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       StairsUpAndDownEnvironment stairsEnvironment = new StairsUpAndDownEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForStairs(stairsEnvironment.getStairPoses());
       //footsteps.setDefaultTransferDuration(0.5);
@@ -178,8 +172,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
@@ -236,8 +228,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
    public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       double stepLength = 0.35;
       double dropHeight = -stepDownHeight;
 
@@ -331,7 +321,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
    public void testSteppingDown(double stepDownHeight, double stepLength, int stepsBeforeDrop) throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setKeepSCSUp(true);
 
       double dropHeight = -stepDownHeight;
 

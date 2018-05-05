@@ -135,7 +135,7 @@ public class LegConfigurationParameters
 
    public double getLegPrivilegedMediumWeight()
    {
-      return 25.0;
+      return 50.0;
    }
 
    /**
