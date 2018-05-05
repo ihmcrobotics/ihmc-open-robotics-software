@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,10 +9,12 @@ import java.util.Random;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,28 +23,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.RandomRobotGenerator;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class RobotTest
 {
@@ -256,12 +243,12 @@ public class RobotTest
       floatingBody.setMass(random.nextDouble());
 
       floatingBody.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      floatingBody.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(floatingBody.getMass(), random.nextDouble(),
+      floatingBody.setMomentOfInertia(getRotationalInertiaMatrixOfSolidEllipsoid(floatingBody.getMass(), random.nextDouble(),
               random.nextDouble(), random.nextDouble()));
       root1.setLink(floatingBody);
 
-      Vector3D offset = RandomGeometry.nextVector3D(random);
-      PinJoint pin1 = new PinJoint("pin1", offset, robot, RandomGeometry.nextVector3D(random));
+      Vector3D offset = EuclidCoreRandomTools.nextVector3D(random);
+      PinJoint pin1 = new PinJoint("pin1", offset, robot, EuclidCoreRandomTools.nextVector3D(random));
       pin1.setLink(massiveLink());
       root1.addJoint(pin1);
 
@@ -424,7 +411,7 @@ public class RobotTest
       ret.setMass(random.nextDouble());
 
       ret.setComOffset(0.0, 0.0, -l1 / 2.0);
-      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r1, r1, l1 / 2.0));
+      ret.setMomentOfInertia(getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r1, r1, l1 / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -452,7 +439,7 @@ public class RobotTest
       ret.setComOffset(0.0, 0.0, l2 / 2.0);
 
 //    ret.setComOffset(0.0, 0.0, 0.0);
-      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
+      ret.setMomentOfInertia(getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -504,7 +491,7 @@ public class RobotTest
       Link ret = new Link("floatingBody");
       ret.setMass(random.nextDouble());
       ret.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
+      ret.setMomentOfInertia(getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -520,7 +507,7 @@ public class RobotTest
       Link ret = new Link("floatingBody");
       ret.setMass(random.nextDouble());
       ret.setComOffset(random.nextDouble(), 0.0, random.nextDouble());
-      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
+      ret.setMomentOfInertia(getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -1052,5 +1039,19 @@ public class RobotTest
       EuclidCoreTestTools.assertTuple3DEquals("Linear momentum should be conserved", linearMomentumStart, linearMomentumEnd, epsilon);
    
       if (SHOW_GUI) ThreadTools.sleepForever();
+   }
+
+   public static Matrix3D getRotationalInertiaMatrixOfSolidEllipsoid(double mass, double xRadius, double yRadius, double zRadius)
+   {
+      double ixx = 1.0 / 5.0 * mass * (yRadius * yRadius + zRadius * zRadius);
+      double iyy = 1.0 / 5.0 * mass * (zRadius * zRadius + xRadius * xRadius);
+      double izz = 1.0 / 5.0 * mass * (xRadius * xRadius + yRadius * yRadius);
+
+      Matrix3D ret = new Matrix3D();
+      ret.setM00(ixx);
+      ret.setM11(iyy);
+      ret.setM22(izz);
+
+      return ret;
    }
 }

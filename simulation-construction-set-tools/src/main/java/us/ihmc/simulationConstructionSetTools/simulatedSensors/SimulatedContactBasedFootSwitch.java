@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulatedSensors;
+package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

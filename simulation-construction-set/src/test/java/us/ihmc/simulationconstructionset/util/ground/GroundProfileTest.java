@@ -1,15 +1,19 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,13 +25,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class GroundProfileTest
 {
@@ -189,7 +191,7 @@ public abstract class GroundProfileTest
                {
                   numberOfTotalChecks++;
                   
-                  Vector2D excursionVector2d = RandomGeometry.nextVector2D(random, excursionDistance);
+                  Vector2D excursionVector2d = EuclidCoreRandomTools.nextVector2DWithFixedLength(random, excursionDistance);
                   Vector3D excursionVector = new Vector3D(alongDirectionOne);
                   excursionVector.scale(excursionVector2d.getX());
                   excursionVector.scaleAdd(excursionVector2d.getY(), alongDirectionTwo, excursionVector);

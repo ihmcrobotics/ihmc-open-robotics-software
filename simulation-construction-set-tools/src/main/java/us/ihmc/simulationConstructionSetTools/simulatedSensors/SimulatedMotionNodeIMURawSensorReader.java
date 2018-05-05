@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulatedSensors;
+package us.ihmc.simulationConstructionSetTools.simulatedSensors;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;

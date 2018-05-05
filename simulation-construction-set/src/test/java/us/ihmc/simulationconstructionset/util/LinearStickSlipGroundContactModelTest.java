@@ -1,27 +1,28 @@
 package us.ihmc.simulationconstructionset.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class LinearStickSlipGroundContactModelTest
 {
@@ -134,13 +135,13 @@ public class LinearStickSlipGroundContactModelTest
          double maxAbsoluteZ = 0.01;
          double maxSpeed = 0.1;
 
-         position = RandomGeometry.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ);
+         position = EuclidCoreRandomTools.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ);
 
          // Keep it under ground for now to make sure touchdown doesn't change.
          if (position.getZ() > -0.002)
             position.setZ(-0.002);
 
-         velocity = RandomGeometry.nextVector3D(random, maxSpeed);
+         velocity = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, maxSpeed);
          if (velocity.getZ() > 0.0) velocity.setZ(-velocity.getZ());
 
          groundContactPoint.setPosition(position);
@@ -226,8 +227,8 @@ public class LinearStickSlipGroundContactModelTest
       {
          double maxAbsoluteXYZ = 0.1;
          double maxAbsoluteVelocity = 1.0;
-         Point3D queryPointOnFlat = RandomGeometry.nextPoint3D(random, maxAbsoluteXYZ , maxAbsoluteXYZ, maxAbsoluteXYZ);
-         Vector3D queryVelocityOnFlat = RandomGeometry.nextVector3D(random, maxAbsoluteVelocity);
+         Point3D queryPointOnFlat = EuclidCoreRandomTools.nextPoint3D(random, maxAbsoluteXYZ , maxAbsoluteXYZ, maxAbsoluteXYZ);
+         Vector3D queryVelocityOnFlat = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, maxAbsoluteVelocity);
 
          groundContactPointOnFlat.setPosition(queryPointOnFlat);
          groundContactPointOnFlat.setVelocity(queryVelocityOnFlat);
