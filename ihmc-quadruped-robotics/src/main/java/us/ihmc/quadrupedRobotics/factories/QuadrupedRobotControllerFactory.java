@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.factories;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 
 public interface QuadrupedRobotControllerFactory

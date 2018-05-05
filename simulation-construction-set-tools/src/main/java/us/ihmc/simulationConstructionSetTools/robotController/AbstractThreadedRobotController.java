@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class AbstractThreadedRobotController implements RobotController

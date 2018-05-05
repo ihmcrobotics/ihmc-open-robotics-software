@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simplePendulum;
 
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotController.RobotController;
 
 /**
  * Created by amoucheboeuf on 2/11/16.

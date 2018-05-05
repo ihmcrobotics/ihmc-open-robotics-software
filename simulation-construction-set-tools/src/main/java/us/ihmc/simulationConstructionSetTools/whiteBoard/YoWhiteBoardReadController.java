@@ -4,9 +4,9 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.util.IndexOrderChecker;
 
 public class YoWhiteBoardReadController implements RobotController, SensorProcessor

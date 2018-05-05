@@ -2,8 +2,8 @@ package us.ihmc.avatar.drcRobot;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.robotController.RobotController;
 
 public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvider implements RobotController
 {

@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;

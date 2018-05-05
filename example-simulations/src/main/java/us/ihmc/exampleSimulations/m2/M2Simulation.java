@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

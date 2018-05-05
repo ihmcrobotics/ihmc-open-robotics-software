@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.cart;
 
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

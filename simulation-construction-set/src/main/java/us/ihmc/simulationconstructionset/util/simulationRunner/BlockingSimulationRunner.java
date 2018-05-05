@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
