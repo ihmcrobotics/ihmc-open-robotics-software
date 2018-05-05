@@ -28,7 +28,6 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestInterface
 {
-   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -69,7 +68,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       drcSimulationTestHelper.send(footstepDataListMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
 
       Point3D center = new Point3D(stepLength, 0.0, 0.9);
       Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
@@ -175,6 +174,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       setupCamera();
       ThreadTools.sleep(1000);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    private void setupCamera()

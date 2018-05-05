@@ -792,7 +792,7 @@ public class ToeOffManager
          needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
          needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
 
-         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
             computeToeLineContact.set(true);
@@ -804,6 +804,13 @@ public class ToeOffManager
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getBooleanValue());
+            return false;
+         }
+
+         if (!isCurrentICPOKForToeOffFilt.getBooleanValue())
+         {
+            doLineToeOff.set(false);
+            computeToeLineContact.set(true);
             return false;
          }
 
@@ -871,7 +878,7 @@ public class ToeOffManager
          needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
          needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
 
-         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+         if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
             computeToeLineContact.set(true);
@@ -883,6 +890,13 @@ public class ToeOffManager
          {
             doPointToeOff.set(true);
             computeToePointContact.set(updatePointContactDuringToeOff.getBooleanValue());
+            return false;
+         }
+
+         if (!isCurrentICPOKForToeOffFilt.getBooleanValue())
+         {
+            doLineToeOff.set(false);
+            computeToeLineContact.set(true);
             return false;
          }
 

@@ -35,7 +35,7 @@ public class AtlasLegConfigurationParameters extends LegConfigurationParameters
    public LegConfigurationGains getStraightLegGains()
    {
       LegConfigurationGains gains = new LegConfigurationGains();
-      gains.setActuatorSpaceKp(1000.0);
+      gains.setActuatorSpaceKp(750.0);
       gains.setJointSpaceKd(runningOnRealRobot ? 3.0 : 6.0);
 
       return gains;
@@ -45,7 +45,7 @@ public class AtlasLegConfigurationParameters extends LegConfigurationParameters
    @Override
    public double getLegPrivilegedHighWeight()
    {
-      return runningOnRealRobot ? 50.0 : 150.0;
+      return runningOnRealRobot ? 50.0 : 100.0;
    }
 
    /** {@inheritDoc} */
