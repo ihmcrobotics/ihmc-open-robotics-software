@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
 public class SimulatedRobotCenterOfMassVisualizer implements RobotController

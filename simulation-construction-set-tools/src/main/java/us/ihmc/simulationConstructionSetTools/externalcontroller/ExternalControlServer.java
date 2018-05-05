@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 
 public class ExternalControlServer implements RobotController

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.robotController;
+package us.ihmc.simulationConstructionSet.util;
 
 /**
  * Interface for controlling a robot. doControl() gets called each update.

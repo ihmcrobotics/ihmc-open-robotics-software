@@ -27,6 +27,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import us.ihmc.simulationConstructionSet.util.RegularExpression;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
@@ -34,7 +35,6 @@ import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
 import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
-import us.ihmc.tools.string.RegularExpression;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 

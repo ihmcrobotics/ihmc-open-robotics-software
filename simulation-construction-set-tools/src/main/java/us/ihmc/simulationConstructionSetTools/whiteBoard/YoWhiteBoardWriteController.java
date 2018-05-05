@@ -5,7 +5,7 @@ import java.io.IOException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.OutputProcessor;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 
 public class YoWhiteBoardWriteController implements RobotController, OutputProcessor
 {

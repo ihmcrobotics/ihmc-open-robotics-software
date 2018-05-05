@@ -8,7 +8,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlTurning360Test;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 import java.io.IOException;

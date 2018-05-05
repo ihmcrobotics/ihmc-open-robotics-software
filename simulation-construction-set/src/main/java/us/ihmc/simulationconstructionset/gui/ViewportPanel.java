@@ -19,6 +19,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
@@ -26,7 +27,6 @@ import us.ihmc.simulationconstructionset.ViewportPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
-import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class ViewportPanel extends JPanel implements CameraSelector, ActiveCameraHolder, ActiveCanvas3DHolder
 {

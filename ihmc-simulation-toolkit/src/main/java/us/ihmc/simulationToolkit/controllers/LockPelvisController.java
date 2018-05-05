@@ -12,7 +12,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;

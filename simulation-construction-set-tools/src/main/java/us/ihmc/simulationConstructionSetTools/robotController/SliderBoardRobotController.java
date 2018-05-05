@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 
 public abstract class SliderBoardRobotController implements RobotController
 {

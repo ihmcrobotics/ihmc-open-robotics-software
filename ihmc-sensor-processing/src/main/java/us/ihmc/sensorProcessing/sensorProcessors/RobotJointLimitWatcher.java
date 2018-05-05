@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 
 public class RobotJointLimitWatcher implements RobotController
 {

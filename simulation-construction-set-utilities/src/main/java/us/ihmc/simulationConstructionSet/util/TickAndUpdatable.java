@@ -1,4 +1,4 @@
-package us.ihmc.robotics;
+package us.ihmc.simulationConstructionSet.util;
 
 public interface TickAndUpdatable
 {

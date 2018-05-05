@@ -1,4 +1,4 @@
-package us.ihmc.robotics.kinematics;
+package us.ihmc.simulationConstructionSet.util;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 

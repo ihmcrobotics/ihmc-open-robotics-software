@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.simulationConstructionSet.util.ControllerFailureException;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

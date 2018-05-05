@@ -15,6 +15,7 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
@@ -22,7 +23,6 @@ import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
 
 public class ExportVideo implements ExportVideoCommandExecutor

@@ -1,4 +1,4 @@
-package us.ihmc.tools.io.xml;
+package us.ihmc.simulationConstructionSet.util;
 
 import java.util.StringTokenizer;
 

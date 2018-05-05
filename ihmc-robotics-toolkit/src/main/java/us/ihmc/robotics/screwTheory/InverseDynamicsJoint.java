@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
-import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.simulationConstructionSet.util.CommonJoint;
 
 /**
  * Base interface that describes the basic API for the joints composing a kinematic chain/tree

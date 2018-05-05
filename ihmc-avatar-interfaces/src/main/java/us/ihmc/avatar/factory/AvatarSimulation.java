@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
