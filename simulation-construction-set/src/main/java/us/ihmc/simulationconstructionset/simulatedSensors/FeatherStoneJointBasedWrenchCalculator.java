@@ -4,19 +4,19 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.JointWrenchSensor;
 
 public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorInterface
 {
+   private static final int WRENCH_SIZE = 6;
+
    private final String forceSensorName;
    private final Joint forceTorqueSensorJoint;
    private boolean doWrenchCorruption = false;
 
-   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(WRENCH_SIZE, 1);
+   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(WRENCH_SIZE, 1);
 
    public FeatherStoneJointBasedWrenchCalculator(String forceSensorName, Joint forceTorqueSensorJoint)
    {
@@ -53,7 +53,7 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
 
       if (doWrenchCorruption)
       {
-         for (int i = 0; i < SpatialForceVector.SIZE; i++)
+         for (int i = 0; i < WRENCH_SIZE; i++)
          {
             wrenchMatrix.add(i, 0, corruptionMatrix.get(i, 0));
          }
