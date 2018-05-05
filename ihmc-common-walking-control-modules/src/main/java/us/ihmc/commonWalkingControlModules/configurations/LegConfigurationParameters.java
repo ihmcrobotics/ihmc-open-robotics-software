@@ -6,15 +6,15 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 public class LegConfigurationParameters
 {
    /**
-    * This is the speed used to straighten the desire privileged configuration of the support leg's knee.
+    * This is the acceleration used to straighten the desire privileged configuration of the support leg's knee.
     * This is used whenever a leg is first loaded to straighten from the current configuration to the
     * straight configuration defined by {@link #getKneeAngleWhenStraight()}.
     *
-    * @return knee rad/second for straightening
+    * @return knee rad/second^2 for straightening
     */
-   public double getSpeedForSupportKneeStraightening()
+   public double getAccelerationForSupportKneeStraightening()
    {
-      return 1.0;
+      return 10.0;
    }
 
    public double getSupportKneeCollapsingDurationFractionOfStep()
