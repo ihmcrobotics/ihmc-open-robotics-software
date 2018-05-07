@@ -25,10 +25,10 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
    compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.0"
 }
 
 testDependencies {
