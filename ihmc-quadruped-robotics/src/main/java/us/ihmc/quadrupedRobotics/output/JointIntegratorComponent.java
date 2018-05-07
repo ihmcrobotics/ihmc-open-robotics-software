@@ -9,15 +9,15 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JointControlComponent implements OutputProcessorComponent
+public class JointIntegratorComponent implements OutputProcessorComponent
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final JointDesiredOutputList jointDesiredOutputList;
-   private final List<QuadrupedJoint> quadrupedJoints = new ArrayList<>();
+   private final List<QuadrupedJointIntegrator> quadrupedJoints = new ArrayList<>();
 
    private final double controlDT;
 
-   public JointControlComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
+   public JointIntegratorComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
       this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
       controlDT = runtimeEnvironment.getControlDT();
@@ -30,7 +30,7 @@ public class JointControlComponent implements OutputProcessorComponent
       OneDoFJoint[] controllerJoints = fullRobotModel.getOneDoFJoints();
       for (OneDoFJoint controllerJoint : controllerJoints)
       {
-         quadrupedJoints.add(new QuadrupedJoint(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), controlDT, registry));
+         quadrupedJoints.add(new QuadrupedJointIntegrator(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), controlDT, registry));
       }
 
    }
