@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.After;
 import org.junit.Before;
 
@@ -18,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -71,6 +73,49 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
 
       Point3D center = new Point3D(stepLength, 0.0, 0.9);
+      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
+   public void testForwardSteps(double startingLength, double nominalLength, int stepsToLength, double stepWidth, int totalSteps) throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      setupTest();
+
+      TDoubleArrayList stepLengths = new TDoubleArrayList();
+      stepsToLength++;
+
+      double length = startingLength;
+      stepLengths.add(length);
+      for (int i = 1; i < Math.max(stepsToLength, totalSteps); i++)
+      {
+         double alpha = (double) i / (double) stepsToLength;
+         length = stepLengths.get(i - 1) + InterpolationTools.linearInterpolate(startingLength, nominalLength, alpha);
+         stepLengths.add(length);
+      }
+      stepLengths.add(length);
+
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      double width = stepWidth;
+      RobotSide side = RobotSide.LEFT;
+      for (int i = 0; i < stepLengths.size(); i++)
+      {
+         footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, new Point3D(stepLengths.get(i), width / 2.0, 0.0), new FrameQuaternion()));
+         width = -width;
+         side = side.getOppositeSide();
+      }
+
+      footstepDataListMessage.setDefaultSwingDuration(0.45);
+      footstepDataListMessage.setDefaultTransferDuration(0.1);
+      footstepDataListMessage.setAreFootstepsAdjustable(true);
+
+      drcSimulationTestHelper.send(footstepDataListMessage);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0));
+
+      Point3D center = new Point3D(stepLengths.get(stepLengths.size() - 1), 0.0, 0.9);
       Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
