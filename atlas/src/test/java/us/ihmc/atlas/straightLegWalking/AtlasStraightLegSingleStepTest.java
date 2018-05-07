@@ -33,6 +33,19 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  45.0)
+   @Test(timeout = 99990000)
+   public void testForwardSteps() throws SimulationExceededMaximumTimeException
+   {
+      double startingLength = 0.4;
+      double nominalStepLength = 1.0;
+      double stepWidth = 0.25;
+      int stepsToLength = 4;
+      int totalSteps = 10;
+
+      super.testForwardSteps(startingLength, nominalStepLength, stepsToLength, stepWidth, totalSteps);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  45.0)
    @Test(timeout = 70000)
    public void testWideStep() throws SimulationExceededMaximumTimeException
    {
