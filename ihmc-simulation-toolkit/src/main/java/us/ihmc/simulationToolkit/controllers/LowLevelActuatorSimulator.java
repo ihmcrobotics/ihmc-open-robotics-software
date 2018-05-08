@@ -5,8 +5,8 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.sensorProcessing.outputData.LowLevelActuatorMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelStateReadOnly;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class LowLevelActuatorSimulator implements RobotController

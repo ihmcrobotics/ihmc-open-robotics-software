@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotDescription.InertiaTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
-import us.ihmc.simulationConstructionSet.util.RobotController;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {

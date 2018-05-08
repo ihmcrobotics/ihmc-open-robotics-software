@@ -7,13 +7,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class SelfStablePlanarRunner_Robot extends Robot implements RobotController {
 

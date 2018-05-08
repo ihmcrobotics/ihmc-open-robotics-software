@@ -5,8 +5,8 @@ import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedSimulationController implements RobotController

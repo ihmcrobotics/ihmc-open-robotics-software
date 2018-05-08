@@ -17,10 +17,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.simulationconstructionset.util.XMLReaderUtility;
 import us.ihmc.tools.gui.MyFileFilter;
 
 public class LoadConfigurationDialogGenerator implements LoadConfigurationDialogConstructor

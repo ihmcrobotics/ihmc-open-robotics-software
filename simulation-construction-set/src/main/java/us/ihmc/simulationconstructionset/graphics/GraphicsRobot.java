@@ -6,10 +6,10 @@ import java.util.LinkedHashMap;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.simulationConstructionSet.util.CommonJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
+import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 public class GraphicsRobot implements GraphicsUpdatable
 {

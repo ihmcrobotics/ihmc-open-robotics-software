@@ -22,7 +22,7 @@ import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
 import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationConstructionSet.util.TickAndUpdatable;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;

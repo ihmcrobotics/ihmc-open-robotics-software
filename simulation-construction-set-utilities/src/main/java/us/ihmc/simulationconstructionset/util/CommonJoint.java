@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSet.util;
+package us.ihmc.simulationconstructionset.util;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 

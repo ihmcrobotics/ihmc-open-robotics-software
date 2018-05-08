@@ -4,7 +4,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
+import us.ihmc.simulationconstructionset.util.XMLReaderUtility;
 
 public class LinkDefinitionFixedFrame
 {

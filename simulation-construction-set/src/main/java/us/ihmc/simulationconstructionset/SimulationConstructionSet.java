@@ -57,8 +57,6 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationConstructionSet.util.RealTimeRateEnforcer;
-import us.ihmc.simulationConstructionSet.util.TickAndUpdatable;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
@@ -94,6 +92,8 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManag
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
+import us.ihmc.simulationconstructionset.util.RealTimeRateEnforcer;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;

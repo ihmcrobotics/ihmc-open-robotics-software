@@ -2,9 +2,9 @@ package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class PassiveJointController implements RobotController
 {

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.robotController;
 
-import us.ihmc.simulationConstructionSet.util.RobotControlElement;
+import us.ihmc.simulationconstructionset.util.RobotControlElement;
 
 public interface RawSensorReader extends RobotControlElement
 {

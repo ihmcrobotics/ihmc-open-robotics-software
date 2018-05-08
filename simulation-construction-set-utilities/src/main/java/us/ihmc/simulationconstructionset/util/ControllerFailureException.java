@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSet.util;
+package us.ihmc.simulationconstructionset.util;
 
 public class ControllerFailureException extends Exception
 {

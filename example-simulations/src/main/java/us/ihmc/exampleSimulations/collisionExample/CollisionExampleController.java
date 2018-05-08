@@ -3,10 +3,10 @@ package us.ihmc.exampleSimulations.collisionExample;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionIntegrator;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class CollisionExampleController implements RobotController
 {

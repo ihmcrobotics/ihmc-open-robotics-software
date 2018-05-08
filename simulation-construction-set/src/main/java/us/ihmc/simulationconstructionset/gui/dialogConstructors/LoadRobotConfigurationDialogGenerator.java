@@ -9,12 +9,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.simulationconstructionset.util.XMLReaderUtility;
 import us.ihmc.tools.gui.MyFileFilter;
 
 public class LoadRobotConfigurationDialogGenerator implements LoadRobotConfigurationDialogConstructor
