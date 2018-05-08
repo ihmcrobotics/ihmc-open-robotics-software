@@ -21,10 +21,10 @@ public class QuadrupedFootSwitchFactory
    // Factory fields
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
-   protected final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>("footContactableBodies");
+   protected final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>(
+         "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
-
 
    // Private fields
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
@@ -33,18 +33,24 @@ public class QuadrupedFootSwitchFactory
 
    protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch;
-         touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, footContactableBodies.get().get(robotQuadrant),
-                                                                                          totalRobotWeight, registry);
+         QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant,
+                                                                                                                                    footContactableBodies.get()
+                                                                                                                                                         .get(robotQuadrant),
+                                                                                                                                    totalRobotWeight, registry);
 
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
+         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(
+               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
          jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
-         
-         ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(fullRobotModel.get(), robotQuadrant, footContactableBodies.get().get(robotQuadrant).getSoleFrame(), registry);
+
+         ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(fullRobotModel.get(), robotQuadrant,
+                                                                                                      footContactableBodies.get().get(robotQuadrant)
+                                                                                                                           .getSoleFrame(), registry);
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(forceBasedTouchDownDetection);
 
          footSwitches.set(robotQuadrant, touchdownDetectorBasedFootSwitch);
@@ -88,7 +94,7 @@ public class QuadrupedFootSwitchFactory
       default:
          setupSettableFootSwitches(footSwitches, totalRobotWeight);
       }
-      
+
       FactoryTools.disposeFactory(this);
 
       return footSwitches;
@@ -115,7 +121,6 @@ public class QuadrupedFootSwitchFactory
    {
       this.fullRobotModel.set(fullRobotModel);
    }
-
 
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
