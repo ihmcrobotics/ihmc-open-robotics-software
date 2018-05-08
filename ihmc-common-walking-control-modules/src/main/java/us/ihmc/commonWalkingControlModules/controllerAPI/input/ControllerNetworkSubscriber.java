@@ -76,7 +76,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
+      if (packetCommunicator == null)
+         PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
 
