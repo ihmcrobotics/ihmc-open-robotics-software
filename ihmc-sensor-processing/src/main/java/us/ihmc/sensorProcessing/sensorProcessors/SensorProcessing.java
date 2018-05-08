@@ -911,11 +911,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Creates a new processor that allows to switch the output of this sensor processing to either use the current 
+    * Creates a new processor that allows to switch the output of this sensor processing to either
+    * use the current output, which is the result of all the active ({@code forVizOnly = false})
+    * processors added up to now, or use the given backup input variable.
     *
-    * @param jointName the name of the joint for which the current processed position should have a backup signal.
+    * @param jointName the name of the joint for which the current processed position should have a
+    *           backup signal.
     * @param backupInput the secondary signal to use.
-    * @param backupProcessorTrigger the trigger used to determine when to switch to the secondary position signal. The {@link Predicate#test(DoubleProvider)} is called with the default signal as argument and this switch changes to the secondary signal when the test method returns {@code true}.
+    * @param backupProcessorTrigger the trigger used to determine when to switch to the secondary
+    *           position signal. The {@link Predicate#test(DoubleProvider)} is called with the
+    *           default signal as argument and this switch changes to the secondary signal when the
+    *           test method returns {@code true}.
     */
    public void addJointPositionSensorSwitch(String jointName, DoubleProvider backupInput, Predicate<DoubleProvider> backupProcessorTrigger, boolean forVizOnly)
    {
