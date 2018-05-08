@@ -3,7 +3,6 @@ package us.ihmc.simulationConstructionSetTools.externalcontroller;
 import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.simulationConstructionSet.util.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -12,6 +11,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class ExternalControlAdapter implements RobotController
 {

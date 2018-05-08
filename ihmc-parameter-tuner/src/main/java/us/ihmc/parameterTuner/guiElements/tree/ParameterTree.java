@@ -13,7 +13,7 @@ import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.simulationConstructionSet.util.RegularExpression;
+import us.ihmc.simulationconstructionset.util.RegularExpression;
 
 public class ParameterTree extends TreeView<ParameterTreeValue>
 {

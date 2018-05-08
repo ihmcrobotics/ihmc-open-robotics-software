@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
-import us.ihmc.simulationConstructionSet.util.RobotController;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class SimpleRobotController implements RobotController

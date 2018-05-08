@@ -15,9 +15,9 @@ import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
+import us.ihmc.simulationconstructionset.util.XMLReaderUtility;
 
 public class GUIConfigurationSaveAndLoad
 {

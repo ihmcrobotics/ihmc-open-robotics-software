@@ -8,11 +8,11 @@ import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
-import us.ihmc.simulationConstructionSet.util.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.simulationconstructionset.util.XMLReaderUtility;
 import us.ihmc.tools.gui.MyFileFilter;
 
 public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstructor
