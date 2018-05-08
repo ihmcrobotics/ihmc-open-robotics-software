@@ -31,6 +31,11 @@ public class StateEstimatorSensorDefinitions
       return forceSensorDefinitions;
    }
 
+   public void addJointSensorDefinitions(OneDoFJoint[] oneDoFJoints)
+   {
+      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         addJointSensorDefinition(oneDoFJoint);
+   }
    public void addJointSensorDefinition(OneDoFJoint oneDoFJoint)
    {
       oneDoFJointSensorDefinitions.add(oneDoFJoint);
@@ -44,7 +49,7 @@ public class StateEstimatorSensorDefinitions
    public void addIMUSensorDefinition(IMUDefinition[] imuDefinitions)
    {
       for (IMUDefinition imuDefinition : imuDefinitions)
-         imuSensorDefinitions.add(imuDefinition);
+         addIMUSensorDefinition(imuDefinition);
    }
 
    public void addForceSensorDefinition(ForceSensorDefinition forceSensorDefinition)
