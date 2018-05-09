@@ -23,12 +23,12 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
