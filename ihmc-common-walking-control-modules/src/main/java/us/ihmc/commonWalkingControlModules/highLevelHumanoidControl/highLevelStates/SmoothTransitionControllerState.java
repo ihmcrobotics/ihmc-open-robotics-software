@@ -13,27 +13,30 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class StandTransitionControllerState extends HighLevelControllerState
+public class SmoothTransitionControllerState extends HighLevelControllerState
 {
-   private static final HighLevelControllerName controllerState = HighLevelControllerName.STAND_TRANSITION_STATE;
-
-   private final YoDouble standTransitionDuration = new YoDouble("standTransitionDuration", registry);
-   private final YoDouble standTransitionGainRatio = new YoDouble("standTransitionGainRatio", registry);
-   private final YoPolynomial walkingControlRatioTrajectory = new YoPolynomial("walkingControlRatioTrajectory", 2, registry);
+   private final YoDouble standTransitionDuration;
+   private final YoDouble standTransitionRatioCurrentValue;
+   private final YoPolynomial transitionRatioTrajectory;
 
    private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final HighLevelControllerState standReadyControllerState;
-   private final HighLevelControllerState walkingControllerState;
+   private final HighLevelControllerState initialControllerState;
+   private final HighLevelControllerState finalControllerState;
 
-   public StandTransitionControllerState(HighLevelControllerState standReadyControllerState, HighLevelControllerState walkingControllerState,
-                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public SmoothTransitionControllerState(String namePrefix, HighLevelControllerName controllerState, HighLevelControllerState initialControllerState,
+                                          HighLevelControllerState finalControllerState, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                          HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, controllerToolbox);
+      super(namePrefix, controllerState, highLevelControllerParameters, controllerToolbox);
 
-      this.standReadyControllerState = standReadyControllerState;
-      this.walkingControllerState = walkingControllerState;
+      this.initialControllerState = initialControllerState;
+      this.finalControllerState = finalControllerState;
+
+      standTransitionDuration = new YoDouble(namePrefix + "TransitionDuration", registry);
+      standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
+      transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
       this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
       OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
@@ -49,24 +52,24 @@ public class StandTransitionControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
-      walkingControllerState.onEntry();
+      finalControllerState.onEntry();
 
-      walkingControlRatioTrajectory.setLinear(0.0, standTransitionDuration.getDoubleValue(), 0.0, 1.0);
+      transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getDoubleValue(), 0.0, 1.0);
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      standReadyControllerState.doAction(timeInState);
-      walkingControllerState.doAction(timeInState);
+      initialControllerState.doAction(timeInState);
+      finalControllerState.doAction(timeInState);
 
       double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getDoubleValue());
-      walkingControlRatioTrajectory.compute(timeInBlending);
-      double gainRatio = walkingControlRatioTrajectory.getPosition();
-      standTransitionGainRatio.set(gainRatio);
+      transitionRatioTrajectory.compute(timeInBlending);
+      double gainRatio = transitionRatioTrajectory.getPosition();
+      standTransitionRatioCurrentValue.set(gainRatio);
 
-      JointDesiredOutputListReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
-      JointDesiredOutputListReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly standReadyJointCommand = initialControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly walkingJointCommand = finalControllerState.getOutputForLowLevelController();
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
@@ -85,7 +88,7 @@ public class StandTransitionControllerState extends HighLevelControllerState
    @Override
    public void onExit()
    {
-      standReadyControllerState.onExit();
+      initialControllerState.onExit();
    }
 
    @Override

@@ -50,6 +50,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
                                                           wholeBodyControllerParameters.getWalkingControllerParameters());
+      setupStateMachine();
    }
 
    @Override

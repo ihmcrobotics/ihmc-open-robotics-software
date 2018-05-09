@@ -133,6 +133,11 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       }
    }
 
+   public void finalizeStateMachine()
+   {
+      stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
+   }
+
    public void addBehaviorService(BehaviorService behaviorService)
    {
       registry.addChild(behaviorService.getYoVariableRegistry());
@@ -140,15 +145,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private void initialize()
    {
-      if (stateMachine == null)
-      {
-         stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
-         stateMachine.initialize();
-      }
-      else
-      {
-         stateMachine.resetCurrentState();
-      }
+      stateMachine.initialize();
    }
 
    private void doControl()
