@@ -282,6 +282,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
       ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
 
+      ret.finalizeStateMachine();
+
       return ret;
    }
 
