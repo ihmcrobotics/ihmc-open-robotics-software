@@ -372,7 +372,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       assertFalse(diagnosticBehavior.isDone());
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(32.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(36.0);
       assertTrue(success);
 
       assertTrue(diagnosticBehavior.isDone());
