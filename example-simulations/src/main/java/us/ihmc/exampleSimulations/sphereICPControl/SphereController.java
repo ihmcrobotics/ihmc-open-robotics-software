@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 
 import us.ihmc.exampleSimulations.sphereICPControl.controllers.*;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.RobotTools;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SphereController implements RobotController

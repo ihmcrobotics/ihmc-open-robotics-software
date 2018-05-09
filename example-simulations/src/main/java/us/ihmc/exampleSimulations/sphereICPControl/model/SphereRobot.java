@@ -7,6 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.variable.YoDouble;
 

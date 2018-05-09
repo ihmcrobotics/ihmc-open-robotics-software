@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 

@@ -36,13 +36,13 @@ import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRo
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
 import us.ihmc.simulationToolkit.controllers.JointLowLevelJointControlSimulator;
 import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
 import us.ihmc.simulationToolkit.controllers.PassiveJointController;
 import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

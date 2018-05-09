@@ -5,10 +5,10 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 /**

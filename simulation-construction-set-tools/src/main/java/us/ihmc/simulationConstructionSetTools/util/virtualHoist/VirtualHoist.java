@@ -10,10 +10,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class VirtualHoist implements RobotController
 {

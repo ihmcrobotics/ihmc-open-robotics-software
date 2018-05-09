@@ -43,7 +43,7 @@ public class SkippySimulationV2
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       blockingSimulationRunner = new BlockingSimulationRunner(sim, 10.0 * 60.0);
-      controllerFailureListener = blockingSimulationRunner.createControllerFailureListener();
+      controllerFailureListener = direction -> blockingSimulationRunner.notifyControllerHasFailed();
       skippy.setController(new FallChecker());
 
       sim.startOnAThread();
