@@ -5,7 +5,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -33,7 +32,6 @@ public class QuadrupedInverseKinematicsSimulationFactory
    private final RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
    private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
-   private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<Double> simulationDT = new RequiredFactoryField<>("simulationDT");
    private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
@@ -55,12 +53,12 @@ public class QuadrupedInverseKinematicsSimulationFactory
 
    private void createSensorReader()
    {
-      sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get());
+      sensorReader = new SDFQuadrupedPerfectSimulatedSensor(quadrants.get(), sdfRobot.get(), fullRobotModel.get(), null);
    }
 
    private void createKinematicsController()
    {
-      ikController = new QuadrupedInverseKinematicsController(fullRobotModel.get(), quadrants.get(), referenceFrames.get(), jointDesiredOutputList.get(),
+      ikController = new QuadrupedInverseKinematicsController(fullRobotModel.get(), quadrants.get(), jointDesiredOutputList.get(),
                                                               optimizationSettings.get(), controlDT.get(), gravity.get(), yoGraphicsListRegistry);
    }
 
@@ -100,7 +98,6 @@ public class QuadrupedInverseKinematicsSimulationFactory
       double totalMass = sdfRobot.get().computeCenterOfMass(initialCoMPosition);
 
       sdfRobot.get().setGravity(gravity.get());
-      //      sdfRobot.get().setGroundContactModel(groundContactModel);
       PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
 
@@ -150,11 +147,6 @@ public class QuadrupedInverseKinematicsSimulationFactory
    public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
-   }
-
-   public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
-   {
-      this.referenceFrames.set(referenceFrames);
    }
 
    public void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList)
