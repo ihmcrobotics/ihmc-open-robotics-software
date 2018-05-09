@@ -1,17 +1,20 @@
 package us.ihmc.quadrupedRobotics.inverseKinematics;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -21,6 +24,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -39,6 +43,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
    private final RobotQuadrant[] quadrants;
 
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final QuadrantDependentList<PointFeedbackControlCommand> feedbackControlCommands = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint3D> desiredSolePositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<RateLimitedYoFramePoint> limitedDesiredSolePositions = new QuadrantDependentList<>();
@@ -97,9 +102,17 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
       controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, fullRobotModel.getControllableOneDoFJoints(),
                                                            referenceFrames.getCenterOfMassFrame(), optimizationSettings, graphicsListRegistry, registry);
+      controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       controlCoreToolbox.setupForInverseKinematicsSolver();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, getFeedbackCommandTemplate(), lowLevelJointOutputList, registry);
       controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+
+      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      {
+         double midrange = 0.5 * joint.getJointLimitUpper() + joint.getJointLimitLower();
+         privilegedConfigurationCommand.addJoint(joint, midrange);
+         privilegedConfigurationCommand.setDefaultWeight(5.0);
+      }
    }
 
    @Override
@@ -131,6 +144,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
          controllerCoreCommand.addFeedbackControlCommand(feedbackControlCommand);
       }
+      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
 
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
