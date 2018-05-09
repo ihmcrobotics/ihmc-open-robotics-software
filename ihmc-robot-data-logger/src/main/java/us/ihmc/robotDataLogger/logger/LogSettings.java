@@ -26,7 +26,6 @@ public class LogSettings
    public static final LogSettings FOOTSTEP_PLANNER = new LogSettings(true);
    public static final LogSettings LLAMA = new LogSettings(false);
    public static final LogSettings THOR = new LogSettings(false);
-   public static final LogSettings LLAMA = new LogSettings(false);
 
    private final boolean log;
    private final String videoStream;
