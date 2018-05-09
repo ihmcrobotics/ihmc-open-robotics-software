@@ -1262,21 +1262,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain
-    *           gain used to correct the orientation resulting from integrating angular velocity
-    *           using the accelerometer.
-    * @param integralGain
-    *           gain used to update the angular velocity bias.
-    * @param useStateEstimatorData
-    *           when {@code false}, the filter will use acceleration measurements from the IMU to
-    *           correct the orientation. When {@code true}, a state estimator has to be running and
-    *           this filter should NOT be used on the principal IMU; it creates a virtual
-    *           accelerometer and a virtual magnetometer such that the resulting orientation is
-    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    * @param proportionalGain gain used to correct the orientation resulting from integrating
+    *           angular velocity using the accelerometer.
+    * @param integralGain gain used to update the angular velocity bias.
+    * @param useStateEstimatorData when {@code false}, the filter will use acceleration measurements
+    *           from the IMU to correct the orientation. When {@code true}, a state estimator has to
+    *           be running and this filter should NOT be used on the principal IMU; it creates a
+    *           virtual accelerometer and a virtual magnetometer such that the resulting orientation
+    *           is consistent with the robot state estimation. This is a hack, if you need it, we
     *           should spend time on implementing this feature properly.
-    * @param forVizOnly
-    *           if set to true, the result will not be used as the input of the next processing
-    *           stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next
+    *           processing stage, nor as the output of the sensor processing.
     */
    public Map<String, Integer> addIMUMahonyFusion(double proportionalGain, double integralGain, boolean useStateEstimatorData, boolean forVizOnly)
    {
@@ -1290,28 +1286,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain
-    *           gain used to correct the orientation resulting from integrating angular velocity
-    *           using the accelerometer.
-    * @param integralGain
-    *           gain used to update the angular velocity bias.
-    * @param useStateEstimatorData
-    *           when {@code false}, the filter will use acceleration measurements from the IMU to
-    *           correct the orientation. When {@code true}, a state estimator has to be running and
-    *           this filter should NOT be used on the principal IMU; it creates a virtual
-    *           accelerometer and a virtual magnetometer such that the resulting orientation is
-    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    * @param proportionalGain gain used to correct the orientation resulting from integrating
+    *           angular velocity using the accelerometer.
+    * @param integralGain gain used to update the angular velocity bias.
+    * @param useStateEstimatorData when {@code false}, the filter will use acceleration measurements
+    *           from the IMU to correct the orientation. When {@code true}, a state estimator has to
+    *           be running and this filter should NOT be used on the principal IMU; it creates a
+    *           virtual accelerometer and a virtual magnetometer such that the resulting orientation
+    *           is consistent with the robot state estimation. This is a hack, if you need it, we
     *           should spend time on implementing this feature properly.
-    * @param forVizOnly
-    *           if set to true, the result will not be used as the input of the next processing
-    *           stage, nor as the output of the sensor processing.
-    * @param sensorsToBeProcessed
-    *           list of the names of the sensors that need to be filtered.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next
+    *           processing stage, nor as the output of the sensor processing.
+    * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean useStateEstimatorData, boolean forVizOnly, String... sensorsToBeProcessed)
+   public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean useStateEstimatorData,
+                                                                         boolean forVizOnly, String... sensorsToBeProcessed)
    {
       return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain, integralGain, useStateEstimatorData, forVizOnly,
-                                                             invertSensorSelection(IMU_ORIENTATION, sensorsToBeProcessed));
+                                                   invertSensorSelection(IMU_ORIENTATION, sensorsToBeProcessed));
    }
 
    /**
@@ -1321,23 +1313,18 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain
-    *           gain used to correct the orientation resulting from integrating angular velocity
-    *           using the accelerometer.
-    * @param integralGain
-    *           gain used to update the angular velocity bias.
-    * @param useStateEstimatorData
-    *           when {@code false}, the filter will use acceleration measurements from the IMU to
-    *           correct the orientation. When {@code true}, a state estimator has to be running and
-    *           this filter should NOT be used on the principal IMU; it creates a virtual
-    *           accelerometer and a virtual magnetometer such that the resulting orientation is
-    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    * @param proportionalGain gain used to correct the orientation resulting from integrating
+    *           angular velocity using the accelerometer.
+    * @param integralGain gain used to update the angular velocity bias.
+    * @param useStateEstimatorData when {@code false}, the filter will use acceleration measurements
+    *           from the IMU to correct the orientation. When {@code true}, a state estimator has to
+    *           be running and this filter should NOT be used on the principal IMU; it creates a
+    *           virtual accelerometer and a virtual magnetometer such that the resulting orientation
+    *           is consistent with the robot state estimation. This is a hack, if you need it, we
     *           should spend time on implementing this feature properly.
-    * @param forVizOnly
-    *           if set to true, the result will not be used as the input of the next processing
-    *           stage, nor as the output of the sensor processing.
-    * @param sensorsToIgnore
-    *           list of the names of the sensors to ignore.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next
+    *           processing stage, nor as the output of the sensor processing.
+    * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
    public Map<String, Integer> addIMUMahonyFusionWithSensorsToIgnore(double proportionalGain, double integralGain, boolean useStateEstimatorData,
                                                                      boolean forVizOnly, String... sensorsToIgnore)
@@ -1374,7 +1361,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName, orientationSuffix, updateDT, sensorFrame, processedOrientation, processedAngularVelocity,
                                                           registry);
          filter.setGains(proportionalGain, integralGain);
-
 
          if (useStateEstimatorData)
          {
@@ -1415,7 +1401,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          }
 
          angularVelocityProcessors.add(EMPTY_PROCESSOR);
-
 
          if (!forVizOnly)
          {
