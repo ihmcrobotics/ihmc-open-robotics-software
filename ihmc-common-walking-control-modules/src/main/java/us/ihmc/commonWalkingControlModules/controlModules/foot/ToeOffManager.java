@@ -75,6 +75,9 @@ public class ToeOffManager
    private final YoBoolean isFrontFootWellPositionedForToeOff = new YoBoolean("isFrontFootWellPositionedForToeOff", registry);
 
    private final YoBoolean needToSwitchToToeOffForJointLimit = new YoBoolean("needToSwitchToToeOffForJointLimit", registry);
+   private final YoBoolean needToSwitchToToeOffForAnkleLimit = new YoBoolean("needToSwitchToToeOffForAnkleLimit", registry);
+   private final YoBoolean needToSwitchToToeOffForLeadingKneeAtLimit = new YoBoolean("needToSwitchToToeOffForLeadingKneeAtLimit", registry);
+   private final YoBoolean needToSwitchToToeOffForTrailingKneeAtLimit = new YoBoolean("needToSwitchToToeOffForTrailingKneeAtLimit", registry);
    private final YoBoolean isRearAnklePitchHittingLimit = new YoBoolean("isRearAnklePitchHittingLimit", registry);
    private final YoBoolean isLeadingKneePitchHittingUpperLimit = new YoBoolean("isLeadingKneePitchHittingUpperLimit", registry);
    private final YoBoolean isRearKneePitchHittingLowerLimit = new YoBoolean("isRearKneePitchHittingLowerLimit", registry);
@@ -790,6 +793,10 @@ public class ToeOffManager
          boolean leadingKneeAtLimit = checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          boolean trailingKneeAtLimit = checkRearKneeLowerLimitForToeOff(trailingLeg);
 
+         needToSwitchToToeOffForAnkleLimit.set(ankleAtLimit);
+         needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
+         needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
+         
          needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
          if (needToSwitchToToeOffForJointLimit.getBooleanValue())
          {
@@ -864,6 +871,10 @@ public class ToeOffManager
          boolean ankleAtLimit = checkAnkleLimitForToeOff(trailingLeg);
          boolean leadingKneeAtLimit = checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          boolean trailingKneeAtLimit = checkRearKneeLowerLimitForToeOff(trailingLeg);
+         
+         needToSwitchToToeOffForAnkleLimit.set(ankleAtLimit);
+         needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
+         needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
 
          needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
          if (needToSwitchToToeOffForJointLimit.getBooleanValue())
