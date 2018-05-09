@@ -15,12 +15,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
+import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -31,6 +33,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedInverseKinematicsController implements RobotController
 {
@@ -49,7 +53,8 @@ public class QuadrupedInverseKinematicsController implements RobotController
    private final QuadrantDependentList<RateLimitedYoFramePoint> limitedDesiredSolePositions = new QuadrantDependentList<>();
    private final YoDouble maxRate = new YoDouble("maxRate", registry);
 
-   private final QuadrupedReferenceFrames referenceFrames;
+   private final ReferenceFrame centerOfMassFrame;
+   private final FullLeggedRobotModel fullRobotModel;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
@@ -60,17 +65,17 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
    private boolean initialized = false;
 
-   public QuadrupedInverseKinematicsController(FullQuadrupedRobotModel fullRobotModel, RobotQuadrant[] quadrants, QuadrupedReferenceFrames referenceFrames,
+   public QuadrupedInverseKinematicsController(FullQuadrupedRobotModel fullRobotModel, RobotQuadrant[] quadrants,
                                                JointDesiredOutputList lowLevelJointOutputList, ControllerCoreOptimizationSettings optimizationSettings,
                                                double controlDT, double gravityZ, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.quadrants = quadrants;
-      this.referenceFrames = referenceFrames;
+      this.fullRobotModel = fullRobotModel;
 
       for (RobotQuadrant robotQuadrant : quadrants)
       {
          RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
-         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotQuadrant);
+         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotQuadrant);
          RigidBody body = fullRobotModel.getBody();
 
          FramePoint3D currentPosition = new FramePoint3D(soleFrame);
@@ -100,8 +105,10 @@ public class QuadrupedInverseKinematicsController implements RobotController
       weight.set(1.0);
       maxRate.set(0.1);
 
-      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, fullRobotModel.getControllableOneDoFJoints(),
-                                                           referenceFrames.getCenterOfMassFrame(), optimizationSettings, graphicsListRegistry, registry);
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator());
+
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, fullRobotModel.getControllableOneDoFJoints(), centerOfMassFrame,
+                                                           optimizationSettings, graphicsListRegistry, registry);
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       controlCoreToolbox.setupForInverseKinematicsSolver();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, getFeedbackCommandTemplate(), lowLevelJointOutputList, registry);
@@ -118,7 +125,8 @@ public class QuadrupedInverseKinematicsController implements RobotController
    @Override
    public void doControl()
    {
-      referenceFrames.updateFrames();
+      centerOfMassFrame.update();
+      fullRobotModel.updateFrames();
 
       if (!initialized)
       {
@@ -164,7 +172,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
 
       for (RobotQuadrant robotQuadrant : quadrants)
       {
-         desiredPosition.setToZero(referenceFrames.getSoleFrame(robotQuadrant));
+         desiredPosition.setToZero(fullRobotModel.getSoleFrame(robotQuadrant));
          desiredSolePositions.get(robotQuadrant).setMatchingFrame(desiredPosition);
          limitedDesiredSolePositions.get(robotQuadrant).setMatchingFrame(desiredPosition);
       }
