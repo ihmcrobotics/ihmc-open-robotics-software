@@ -145,6 +145,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private void initialize()
    {
+      if (stateMachine == null)
+         finalizeStateMachine();
       stateMachine.initialize();
    }
 
