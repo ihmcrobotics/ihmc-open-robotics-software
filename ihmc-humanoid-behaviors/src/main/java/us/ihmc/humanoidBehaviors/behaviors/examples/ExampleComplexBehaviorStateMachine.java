@@ -60,6 +60,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       //            System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
       //         }
       //      });
+      setupStateMachine();
    }
 
    @Override

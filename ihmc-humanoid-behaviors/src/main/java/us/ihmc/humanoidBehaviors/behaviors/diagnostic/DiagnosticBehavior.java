@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
@@ -69,6 +70,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -98,7 +101,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class DiagnosticBehavior extends AbstractBehavior
 {
    private static final boolean FAST_MOTION = false;
-   private static final boolean CAN_ARMS_REACH_FAR_BEHIND = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
@@ -113,6 +115,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoDouble timeWhenControllerWokeUp;
    private final YoDouble timeToWaitBeforeEnable;
    private final YoBoolean enableHandOrientation;
+   private final YoBoolean canArmsReachFarBehind;
 
    private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
    private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
@@ -260,6 +263,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       timeWhenControllerWokeUp = new YoDouble("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
       timeToWaitBeforeEnable = new YoDouble("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
       enableHandOrientation = new YoBoolean("diagnosticEnableHandOrientation", registry);
+      canArmsReachFarBehind = new YoBoolean("diagnosticCanArmsReachFarBehind", registry);
 
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
@@ -495,6 +499,11 @@ public class DiagnosticBehavior extends AbstractBehavior
          inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
       }
+   }
+
+   public void setCanArmsReachFarBehind(boolean value)
+   {
+      canArmsReachFarBehind.set(value);
    }
 
    public void setupForAutomaticDiagnostic(double timeToWait)
@@ -1277,11 +1286,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       // Go to running man pose:
       FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredUpperArmOrientation.setYawPitchRoll(-1.2, -Math.PI / 2.0, 0.0);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.2, - 0.90 * Math.PI / 2.0, 0.0);
       submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
-      if (CAN_ARMS_REACH_FAR_BEHIND)
-         desiredUpperArmOrientation.setYawPitchRoll(1.2, Math.PI / 2.0, 0.0); // Normal Running man
+      if (canArmsReachFarBehind.getValue())
+         desiredUpperArmOrientation.setYawPitchRoll(1.2, 0.90 * Math.PI / 2.0, 0.0); // Normal Running man
       else
          desiredUpperArmOrientation.setYawPitchRoll(0.7800, 1.4300, -0.0000); // Running man for Atlas  //FIXME check values for atlas
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
@@ -1508,7 +1517,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
 
-      if (CAN_ARMS_REACH_FAR_BEHIND)
+      if (canArmsReachFarBehind.getValue())
          desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, -1.3708);
       else
          desiredUpperArmOrientation.setYawPitchRoll(0.0000, 0.5230, -1.2708); //FIXME check values for atlas
@@ -1517,7 +1526,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
-      if (CAN_ARMS_REACH_FAR_BEHIND)
+      if (canArmsReachFarBehind.getValue())
       {
          desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
@@ -1527,7 +1536,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pipeLine.requestNewStage();
 
       //bend forward and arms
-      if (CAN_ARMS_REACH_FAR_BEHIND)
+      if (canArmsReachFarBehind.getValue())
       {
          desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
@@ -1538,7 +1547,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitDesiredPelvisOrientation(true, 0.0, 0.5 * maxPitchForward, 0.0);
       pipeLine.requestNewStage();
 
-      if (CAN_ARMS_REACH_FAR_BEHIND)
+      if (canArmsReachFarBehind.getValue())
       {
          desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -2.1144);
          submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
@@ -1708,7 +1717,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          System.out.println("choose a foot to be squared up");
       else
       {
-         footstepPose.setToZero(fullRobotModel.getEndEffectorFrame(robotSide.getOppositeSide(), LimbName.LEG));
+         footstepPose.setToZero(fullRobotModel.getSoleFrame(robotSide.getOppositeSide()));
          footstepPose.setY(robotSide.getOppositeSide().negateIfLeftSide(walkingControllerParameters.getSteppingParameters().getInPlaceWidth()));
          footstepPose.changeFrame(worldFrame);
 
@@ -1817,18 +1826,24 @@ public class DiagnosticBehavior extends AbstractBehavior
             }
             calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
             calculator.computeTrajectoryPointVelocities(true);
-            flyingMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));;
+            SimpleTrajectoryPoint1DList trajectoryData = calculator.getTrajectoryData();
+            trajectoryData.addTimeOffset(trajectoryTime.getDoubleValue()); // Add time to reach the first waypoint.
+
+            for (int i = 1; i < trajectoryData.getNumberOfTrajectoryPoints(); i++)
+            {
+               SimpleTrajectoryPoint1D previousTrajectoryPoint = trajectoryData.getTrajectoryPoint(i - 1);
+               SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
+               if (previousTrajectoryPoint.getTime() >= trajectoryPoint.getTime())
+                  trajectoryPoint.setTime(previousTrajectoryPoint.getTime() + 1.0e-5); // Hack to get the controller to accept some of the waypoints, needs to be properly fixed at some point.
+            }
+            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = flyingMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+            oneDoFJointTrajectoryMessage.set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryData));
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
                new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide)));
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
-
-
-
-
-
       }
 
       // Put the arms in front
@@ -1866,6 +1881,19 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(30.0), 0.0);
       submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
+
+      pipeLine.requestNewStage();
+
+      // Supa powerful front kick!!!!!
+      desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, -0.8235);
+      submitSymmetricHandPose(desiredUpperArmOrientation, -1.40, null);
+      footPose.setToZero(ankleZUpFrame);
+      footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
+      footPose.setOrientationYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
+      submitFootPose(true, robotSide, footPose);
+
+      submitDesiredChestOrientation(true, 0.0, Math.toRadians(-5.0), 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(-15.0), 0.0);
 
       pipeLine.requestNewStage();
 
@@ -1960,7 +1988,6 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(pelvisZUpFrame, yaw, pitch, roll);
-      desiredChestOrientation.changeFrame(worldFrame);
       ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior,
             trajectoryTime.getDoubleValue(), pelvisZUpFrame);
       if (parallelize)

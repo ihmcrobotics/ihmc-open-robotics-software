@@ -25,9 +25,9 @@ public class ChestOrientationTask extends BehaviorAction
    {
       super(chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
+      desiredChestOrientation.changeFrame(trajectoryFrame);
       Quaternion chestOrientation = new Quaternion(desiredChestOrientation);
-      chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, chestOrientation, ReferenceFrame.getWorldFrame(),
-                                                                                 trajectoryFrame);
+      chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, chestOrientation, trajectoryFrame);
    }
 
    @Override

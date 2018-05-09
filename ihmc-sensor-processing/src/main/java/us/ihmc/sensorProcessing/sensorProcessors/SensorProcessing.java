@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -73,6 +74,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private static final String CONSTANT = "cst";
    private static final String AFFINE = "aff";
    private static final String COUPLING = "cpl";
+   private static final String SWITCH = "switch";
    private static final String ALPHA_FILTER = "filt";
    private static final String FINITE_DIFFERENCE = "fd";
    private static final String ELASTICITY_COMPENSATOR = "stiff";
@@ -858,34 +860,86 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param couplingRatio the ratio between the master position and the slave position. Can be {@code null}.
     * @param couplingBias the position offset between the master and the slave. Can be {@code null}.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @return a provider to get the output of the new processor.
     * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
     */
-   public void computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, DoubleProvider couplingRatio, DoubleProvider couplingBias, boolean forVizOnly)
+   public DoubleProvider computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, DoubleProvider couplingRatio, DoubleProvider couplingBias, boolean forVizOnly)
+   {
+      OneDoFJoint jointMaster = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointMaster)).findFirst().get();
+      return computeJointPositionUsingCoupling(jointMaster::getQ, nameOfJointSlave, couplingRatio, couplingBias, forVizOnly);
+   }
+
+   /**
+    * Computes the position of a slave joint from a master joint as follows:
+    * <p>
+    * <code> q_slave = couplingRatio * q_master + couplingBias </code>
+    * </p> 
+    * 
+    * @param jointMasterPositionProvider the provider of the master joint position that is to be used to compute the slave position.
+    * @param nameOfJointSlave the name of the joint to compute the position of.
+    * @param couplingRatio the ratio between the master position and the slave position. Can be {@code null}.
+    * @param couplingBias the position offset between the master and the slave. Can be {@code null}.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @return a provider to get the output of the new processor.
+    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
+    */
+   public DoubleProvider computeJointPositionUsingCoupling(DoubleProvider jointMasterPositionProvider, String nameOfJointSlave, DoubleProvider couplingRatio, DoubleProvider couplingBias, boolean forVizOnly)
    {
       if (couplingRatio == null && couplingBias == null)
          throw new RuntimeException("Cannot create joint position coupling without giving either a couplingRatio or couplingBias.");
 
-      OneDoFJoint jointMaster = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointMaster)).findFirst().get();
       OneDoFJoint jointSlave = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointSlave)).findFirst().get();
-
-
-      YoDouble intermediateMasterPosition = outputJointPositions.get(jointMaster);
 
       List<ProcessingYoVariable> slaveProcessors = processedJointPositions.get(jointSlave);
       String prefix = JOINT_POSITION.getProcessorNamePrefix(COUPLING);
-      String suffix = JOINT_POSITION.getProcessorNameSuffix(nameOfJointSlave, slaveProcessors.size());
+      int newProcessorID = slaveProcessors.size();
+      String suffix = JOINT_POSITION.getProcessorNameSuffix(nameOfJointSlave, newProcessorID);
       YoDouble filteredJointSlavePosition = new YoDouble(prefix + suffix, registry);
       ProcessingYoVariable slaveProcessor;
       if (couplingRatio == null)
-         slaveProcessor = () -> filteredJointSlavePosition.set(intermediateMasterPosition.getDoubleValue() + couplingBias.getValue());
+         slaveProcessor = () -> filteredJointSlavePosition.set(jointMasterPositionProvider.getValue() + couplingBias.getValue());
       else if (couplingBias == null)
-         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getValue() * intermediateMasterPosition.getDoubleValue());
+         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getValue() * jointMasterPositionProvider.getValue());
       else
-         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getValue() * intermediateMasterPosition.getDoubleValue() + couplingBias.getValue());
+         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getValue() * jointMasterPositionProvider.getValue() + couplingBias.getValue());
       slaveProcessors.add(slaveProcessor);
 
       if (!forVizOnly)
          outputJointPositions.put(jointSlave, filteredJointSlavePosition);
+
+      return filteredJointSlavePosition;
+   }
+
+   /**
+    * Creates a new processor that allows to switch the output of this sensor processing to either
+    * use the current output, which is the result of all the active ({@code forVizOnly = false})
+    * processors added up to now, or use the given backup input variable.
+    *
+    * @param jointName the name of the joint for which the current processed position should have a
+    *           backup signal.
+    * @param backupInput the secondary signal to use.
+    * @param backupProcessorTrigger the trigger used to determine when to switch to the secondary
+    *           position signal. The {@link Predicate#test(DoubleProvider)} is called with the
+    *           default signal as argument and this switch changes to the secondary signal when the
+    *           test method returns {@code true}.
+    */
+   public void addJointPositionSensorSwitch(String jointName, DoubleProvider backupInput, Predicate<DoubleProvider> backupProcessorTrigger, boolean forVizOnly)
+   {
+      OneDoFJoint joint = jointSensorDefinitions.stream().filter(j -> j.getName().equals(jointName)).findFirst().get();
+      List<ProcessingYoVariable> jointProcessors = processedJointPositions.get(joint);
+
+      DoubleProvider defaultInput = outputJointPositions.get(joint);
+
+      String prefix = JOINT_POSITION.getProcessorNamePrefix(SWITCH);
+      int newProcessorID = jointProcessors.size();
+      String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, newProcessorID);
+      YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
+      ProcessingYoVariable jointProcessor = () -> filteredJointPosition.set(backupProcessorTrigger.test(defaultInput) ? backupInput.getValue() : defaultInput.getValue());
+
+      jointProcessors.add(jointProcessor);
+
+      if (!forVizOnly)
+         outputJointPositions.put(joint, filteredJointPosition);
    }
 
    public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, boolean forVizOnly)

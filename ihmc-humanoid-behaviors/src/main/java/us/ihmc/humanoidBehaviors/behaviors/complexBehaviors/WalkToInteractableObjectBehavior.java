@@ -44,6 +44,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
       reset = new ResetRobotBehavior(false, false, false, false, outgoingCommunicationBridge, yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
+      setupStateMachine();
    }
 
    @Override

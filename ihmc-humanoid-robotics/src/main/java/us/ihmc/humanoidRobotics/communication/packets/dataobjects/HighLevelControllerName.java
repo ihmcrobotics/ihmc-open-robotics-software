@@ -20,6 +20,8 @@ public enum HighLevelControllerName
    STAND_TRANSITION_STATE,
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC walking, balance, and manipulation algorithms")
    WALKING,
+   @RosEnumValueDocumentation(documentation = "Smooth transition state from walking to stand prep.")
+   EXIT_WALKING,
    @RosEnumValueDocumentation(documentation = "The robot is peforming an automated diagnostic routine")
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")

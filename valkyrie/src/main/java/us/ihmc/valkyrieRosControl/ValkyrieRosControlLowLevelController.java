@@ -33,8 +33,10 @@ public class ValkyrieRosControlLowLevelController
 
    private final TimestampProvider timestampProvider;
 
-   private final ArrayList<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
+   private final List<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
+
+   private final List<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
 
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
@@ -46,14 +48,16 @@ public class ValkyrieRosControlLowLevelController
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+                                               ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
+                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
+                                               YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
       wakeUpTime.set(Double.NaN);
 
-      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
+      fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
 
       // Remove the finger joints to let the finger controller be the only controlling them
       yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
@@ -76,6 +80,13 @@ public class ValkyrieRosControlLowLevelController
          effortJointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
       }
 
+      for (YoPositionJointHandleHolder positionJointHandleHolder : yoPositionJointHandleHolders)
+      {
+         ValkyrieRosControlPositionJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlPositionJointControlCommandCalculator(positionJointHandleHolder,
+                                                                                                                                                        registry);
+         positionControlCommandCalculators.add(controlCommandCalculator);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -95,10 +106,9 @@ public class ValkyrieRosControlLowLevelController
    public void updateCommandCalculators()
    {
       for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-      {
-         ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-         commandCalculator.computeAndUpdateJointTorque();
-      }
+         effortControlCommandCalculators.get(i).computeAndUpdateJointTorque();
+      for (int i = 0; i < positionControlCommandCalculators.size(); i++)
+         positionControlCommandCalculators.get(i).computeAndUpdateJointPosition();
    }
 
    private void writeTorqueOffsets()
