@@ -2,8 +2,8 @@ package us.ihmc.stateEstimation.humanoid;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public interface DRCStateEstimatorInterface extends RobotController
 {

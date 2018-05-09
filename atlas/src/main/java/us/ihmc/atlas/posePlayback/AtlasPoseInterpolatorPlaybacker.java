@@ -13,7 +13,7 @@ import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.avatar.posePlayback.PoseCheckerCallback;
 import us.ihmc.avatar.posePlayback.PoseInterpolatorPlaybacker;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
 public class AtlasPoseInterpolatorPlaybacker
 {
