@@ -75,11 +75,11 @@ public class HexapodSimulationController implements RobotController
       this.fullRobotModel = fullRobotModel;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
-      this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
       setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
 
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
+      this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, lowLevelControllerCoreOutput);
       
       highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
