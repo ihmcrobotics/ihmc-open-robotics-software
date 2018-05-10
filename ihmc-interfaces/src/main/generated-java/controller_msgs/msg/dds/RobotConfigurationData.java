@@ -34,19 +34,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
    public RobotConfigurationData()
    {
-      joint_angles_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_angles_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
-      joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
-      joint_torques_ = new us.ihmc.idl.IDLSequence.Float (1, "type_5");
+      joint_torques_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
       root_translation_ = new us.ihmc.euclid.tuple3D.Vector3D();
       root_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       pelvis_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (1, controller_msgs.msg.dds.SpatialVectorMessage.class, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
-      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (1, controller_msgs.msg.dds.IMUPacket.class, new controller_msgs.msg.dds.IMUPacketPubSubType());
+      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (50, controller_msgs.msg.dds.SpatialVectorMessage.class, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
+      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (50, controller_msgs.msg.dds.IMUPacket.class, new controller_msgs.msg.dds.IMUPacketPubSubType());
 
    }
 
