@@ -10,9 +10,9 @@ uint32 sequence_id
 int64 timestamp
 int64 sensor_head_pps_timestamp
 int32 joint_name_hash
-float32[<=1] joint_angles
-float32[<=1] joint_velocities
-float32[<=1] joint_torques
+float32[<=50] joint_angles
+float32[<=50] joint_velocities
+float32[<=50] joint_torques
 
 geometry_msgs/Vector3 root_translation
 geometry_msgs/Quaternion root_orientation
@@ -20,8 +20,8 @@ geometry_msgs/Vector3 pelvis_linear_velocity
 geometry_msgs/Vector3 pelvis_angular_velocity
 geometry_msgs/Vector3 pelvis_linear_acceleration
 
-SpatialVectorMessage[<=1] force_sensor_data
-IMUPacket[<=1] imu_sensor_data
+SpatialVectorMessage[<=50] force_sensor_data
+IMUPacket[<=50] imu_sensor_data
 byte robot_motion_status 255
 
 int32 last_received_packet_type_id
