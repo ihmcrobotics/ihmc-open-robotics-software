@@ -54,6 +54,7 @@ public class FootStepPlanner
    private FrameVector3D angularVelocity = new FrameVector3D();
    private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();
    private FramePoint3D centerOfTurn = new FramePoint3D();
+   private final Vector3D offset = new Vector3D();
 
    private final CircleArtifact turnRadiusVisual = new CircleArtifact("turnRadiusVisual", 0.0, 0.0, 0.0, false);
    private final PoseReferenceFrame bodyFrameProjectedInFuture;
@@ -192,8 +193,17 @@ public class FootStepPlanner
 //      }
       
       framePointToPack.setToZero(bodyFrameEndRotationProjectedInFuture);
-      framePointToPack.add(offsetFromBodyToFoot);
-      framePointToPack.add(feetOffsetFromBody);
+      
+      
+//      framePointToPack.add(offsetFromBodyToFoot.getVector());
+//      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
+      
+      offset.set(offsetFromBodyToFoot);
+      framePointToPack.add(offset);
+      
+      offset.set(feetOffsetFromBody);
+      framePointToPack.add(offset);
+      
       framePointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       framePointToPack.setZ(0.0);
       
