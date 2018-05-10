@@ -14,6 +14,7 @@ import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleVirtualModelContr
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -51,6 +52,7 @@ public class RhinoBeetleSimpleSimulation
       RhinoBeetleGroundContactParameters groundContactParameters = new RhinoBeetleGroundContactParameters();
       GroundContactModel groundContactModel = createGroundContactModel(sdfRobot, groundContactParameters);
       sdfRobot.setGroundContactModel(groundContactModel);
+      
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
 
@@ -70,6 +72,9 @@ public class RhinoBeetleSimpleSimulation
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }
+      
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
 
       RhinoBeetleSimInitialSetup initialSetup = new RhinoBeetleSimInitialSetup();
       initialSetup.initializeRobot(sdfRobot, modelFactory.getJointNameMap());
