@@ -52,7 +52,7 @@ public class AllocationRecordingDemo implements AllocationTest
    @Override
    public List<Class<?>> getClassesToIgnore()
    {
-      return Collections.singletonList(ClassLoader.class);
+      return Collections.emptyList();
    }
 
    public static void main(String[] args) throws IOException

@@ -74,6 +74,7 @@ public abstract interface AllocationTest
 
       AllocationRecorder.addSampler(sampler);
       runnable.run();
+      sampler.stop();
       AllocationRecorder.removeSampler(sampler);
 
       return removeDuplicateStackTraces(sampler.getAndClearAllocations());
