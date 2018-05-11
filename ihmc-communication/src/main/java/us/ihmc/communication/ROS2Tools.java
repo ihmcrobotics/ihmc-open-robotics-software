@@ -83,14 +83,7 @@ public class ROS2Tools
 
    public static void popMessage(Subscriber subscriber, Object message, ExceptionHandler exceptionHandler)
    {
-      try
-      {
-         subscriber.takeNextData(message, null);
-      }
-      catch (IOException e)
-      {
-         exceptionHandler.handleException(e);
-      }
+      subscriber.takeNextData(message, null);
    }
 
    public static <T> T createMessage(Class<T> messageType, ExceptionHandler exceptionHandler)
