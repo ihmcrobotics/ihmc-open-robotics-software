@@ -44,17 +44,10 @@ public class Ros2IntraProcessExample
       node.createSubscription(new RobotConfigurationDataPubSubType(), subscriber -> {
          RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-         try
+         if (subscriber.takeNextData(robotConfigurationData, null))
          {
-            if (subscriber.takeNextData(robotConfigurationData, null))
-            {
-               //                  System.out.println(robotConfigurationData.getHeader().getStamp().getNanosec());
-               System.out.println(robotConfigurationData.getTimestamp());
-            }
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
+            //                  System.out.println(robotConfigurationData.getHeader().getStamp().getNanosec());
+            System.out.println(robotConfigurationData.getTimestamp());
          }
       }, (subscriber, info) -> {
          System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopic().getTopicName() + " " + info.getStatus().name());
