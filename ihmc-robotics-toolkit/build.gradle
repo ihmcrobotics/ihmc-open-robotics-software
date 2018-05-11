@@ -12,7 +12,6 @@ apply plugin: "us.ihmc.ihmc-build"
 ihmc {
    loadProductProperties("../product.properties")
 
-   repository("http://clojars.org/repo")
    configureDependencyResolution()
    configurePublications()
 }
