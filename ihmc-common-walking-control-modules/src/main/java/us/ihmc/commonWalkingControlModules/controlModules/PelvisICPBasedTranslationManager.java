@@ -224,15 +224,16 @@ public class PelvisICPBasedTranslationManager
       if (!linearSelectionMatrix.isXSelected() && !linearSelectionMatrix.isYSelected())
          return; // The user does not want to control the x and y of the pelvis, do nothing.
 
-      switch (se3Trajectory.getExecutionMode())
+      if (se3Trajectory.getExecutionMode() == ExecutionMode.OVERRIDE)
       {
-      case OVERRIDE:
          isReadyToHandleQueuedCommands.set(true);
          clearCommandQueue(se3Trajectory.getCommandId());
          initialPelvisPositionTime.set(yoTime.getDoubleValue());
          initializeTrajectoryGenerator(command, 0.0);
          return;
-      case QUEUE:
+      }
+      else if (se3Trajectory.getExecutionMode() == ExecutionMode.QUEUE)
+      {
          boolean success = queuePelvisTrajectoryCommand(command);
          if (!success)
          {
@@ -241,9 +242,10 @@ public class PelvisICPBasedTranslationManager
             holdCurrentPosition();
          }
          return;
-      default:
+      }
+      else
+      {
          PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
-         break;
       }
    }
 
