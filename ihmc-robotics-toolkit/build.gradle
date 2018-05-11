@@ -24,7 +24,7 @@ testSuites {
 mainDependencies {
    compile group: "us.ihmc", name: "euclid", version: "0.8.2"
    compile group: "org.ejml", name: "denseC64", version: "0.30"
-   compile group: "com.esotericsoftware.kryo", name: "kryo", version: "2.20"
+   compile group: "kryonet", name: "kryonet", version: "2.21-2"
    compile group: "com.github.quickhull3d", name: "quickhull3d", version: "1.0.0"
    compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
    compile group: "org.georegression", name: "georegression", version: "0.11"
