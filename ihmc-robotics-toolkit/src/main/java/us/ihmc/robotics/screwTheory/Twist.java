@@ -144,7 +144,7 @@ public class Twist extends SpatialMotionVector
    public void getAngularVelocityInBaseFrame(FrameVector3DBasics vectorToPack)
    {
       vectorToPack.setToZero(baseFrame);
-      getAngularVelocityInBaseFrame(vectorToPack);
+      getAngularVelocityInBaseFrame((Vector3DBasics) vectorToPack);
    }
 
    /**
