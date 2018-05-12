@@ -1,23 +1,17 @@
 package us.ihmc.communication.packetCommunicator;
 
-import java.io.IOException;
-import java.util.HashMap;
-
+import us.ihmc.communication.CommunicationOptions;
 import us.ihmc.communication.interfaces.Connectable;
-import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.net.GlobalObjectConsumer;
-import us.ihmc.communication.net.KryoObjectClient;
-import us.ihmc.communication.net.KryoObjectServer;
-import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.net.*;
 import us.ihmc.communication.net.NetClassList.PacketTrimmer;
-import us.ihmc.communication.net.NetworkedObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.net.TcpNetStateListener;
 import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 public class PacketCommunicator implements Connectable
 {
@@ -45,8 +39,17 @@ public class PacketCommunicator implements Connectable
 
    public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList, boolean reconnectAutomatically)
    {
-      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
-      objectCommunicator.setReconnectAutomatically(reconnectAutomatically);
+      NetworkedObjectCommunicator objectCommunicator;
+      if (CommunicationOptions.USE_ROS2)
+      {
+         objectCommunicator = new ROS2ObjectCommunicator(PubSubImplementation.FAST_RTPS, port, netClassList);
+      }
+      else
+      {
+         KryoObjectClient client = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
+         client.setReconnectAutomatically(reconnectAutomatically);
+         objectCommunicator = client;
+      }
       return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList);
    }
 
@@ -58,20 +61,47 @@ public class PacketCommunicator implements Connectable
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList,
                                                                       int maximumObjectSize)
    {
-      KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
-      server.setMaximumObjectSize(maximumObjectSize);
-
-      return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList);
+      NetworkedObjectCommunicator objectCommunicator;
+      if (CommunicationOptions.USE_ROS2)
+      {
+         objectCommunicator = new ROS2ObjectCommunicator(PubSubImplementation.FAST_RTPS, port, netClassList);
+      }
+      else
+      {
+         KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
+         server.setMaximumObjectSize(maximumObjectSize);
+         objectCommunicator = server;
+      }
+      return new PacketCommunicator("TCPServer[port=" + port + "]", objectCommunicator, netClassList);
    }
 
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList);
+      NetworkedObjectCommunicator objectCommunicator;
+      if (CommunicationOptions.USE_ROS2)
+      {
+         objectCommunicator = new ROS2ObjectCommunicator(PubSubImplementation.FAST_RTPS, port, netClassList);
+      }
+      else
+      {
+         KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
+         objectCommunicator = server;
+      }
+      return new PacketCommunicator("TCPServer[port=" + port + "]", objectCommunicator, netClassList);
    }
 
    public static PacketCommunicator createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
-      return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList);
+      NetworkedObjectCommunicator objectCommunicator;
+      if (CommunicationOptions.USE_ROS2)
+      {
+         objectCommunicator = new ROS2ObjectCommunicator(PubSubImplementation.INTRAPROCESS, port, netClassList);
+      }
+      else
+      {
+         objectCommunicator = new IntraprocessObjectCommunicator(port.getPort(), netClassList);
+      }
+      return new PacketCommunicator("IntraProcess[port=" + port + "]", objectCommunicator, netClassList);
    }
 
    public static PacketCommunicator createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
