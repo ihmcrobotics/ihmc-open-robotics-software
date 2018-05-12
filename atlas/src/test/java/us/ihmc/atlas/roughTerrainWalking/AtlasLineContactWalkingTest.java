@@ -37,7 +37,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
    public void testWalkingOnLines() throws SimulationExceededMaximumTimeException
    {
@@ -45,7 +45,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
@@ -53,7 +53,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {

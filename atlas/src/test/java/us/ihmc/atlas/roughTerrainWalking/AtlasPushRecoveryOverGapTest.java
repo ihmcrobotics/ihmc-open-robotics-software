@@ -36,7 +36,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 70000)
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {

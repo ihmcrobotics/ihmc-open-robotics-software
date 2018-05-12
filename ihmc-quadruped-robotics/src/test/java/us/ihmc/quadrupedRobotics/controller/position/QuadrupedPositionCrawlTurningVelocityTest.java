@@ -69,7 +69,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    }
 
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
-   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.EXCLUDE, IntegrationCategory.VIDEO})
    @Test(timeout = 600000)
    public void testTurnInPlaceSlowly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

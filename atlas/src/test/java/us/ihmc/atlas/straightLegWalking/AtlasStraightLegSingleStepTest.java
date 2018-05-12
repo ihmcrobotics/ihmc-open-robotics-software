@@ -22,7 +22,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
@@ -32,7 +32,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       super.testForwardStep(stepLength, stepWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testWideStep() throws SimulationExceededMaximumTimeException
    {
@@ -42,7 +42,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       super.testWideStep(stepWidth, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
@@ -52,7 +52,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       super.testSteppingDown(stepDownHeight, stepLength, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {

@@ -29,7 +29,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       super.testFlatGroundWalking(robotModel, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 348.7, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 348.7, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 1700000)
    public void testAtlasFlatGroundWalkingWithShapeCollision() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

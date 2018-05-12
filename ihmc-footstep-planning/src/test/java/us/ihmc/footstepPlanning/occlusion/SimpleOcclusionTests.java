@@ -79,7 +79,7 @@ public class SimpleOcclusionTests
    public TestName name = new TestName();
 
    @Test(timeout = 300000)
-   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testSimpleOcclusions()
    {
       FramePose3D startPose = new FramePose3D();

@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
