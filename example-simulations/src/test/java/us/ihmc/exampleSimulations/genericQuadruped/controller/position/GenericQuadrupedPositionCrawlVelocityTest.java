@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class GenericQuadrupedPositionCrawlVelocityTest extends QuadrupedPositionCrawlVelocityTest
 {
    @Override

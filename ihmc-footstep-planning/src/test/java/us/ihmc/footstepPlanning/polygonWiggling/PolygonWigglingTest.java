@@ -987,7 +987,7 @@ public class PolygonWigglingTest
    }
 
    // TODO: 05/10/2017 moved to development
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
    public void testConvexConstraintOfLine()
    {
@@ -1299,7 +1299,7 @@ public class PolygonWigglingTest
    }
 
    // TODO: 05/03/2017 moved to development
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
    public void testConvexConstraintOfQuadrangle()
    {

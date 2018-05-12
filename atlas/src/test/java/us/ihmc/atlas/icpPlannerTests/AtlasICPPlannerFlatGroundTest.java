@@ -21,7 +21,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
 
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 370000)
    /** {@inheritDoc} */
    public void testChangeOfSupport() throws SimulationExceededMaximumTimeException, RuntimeException

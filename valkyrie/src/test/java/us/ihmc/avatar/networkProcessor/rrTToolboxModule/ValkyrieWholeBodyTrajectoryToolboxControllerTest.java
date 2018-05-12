@@ -35,7 +35,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBodyTrajectoryToolboxControllerTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);

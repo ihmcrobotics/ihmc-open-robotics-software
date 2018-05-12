@@ -75,7 +75,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 6.6, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 6.6, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 33000)
    public void testRandomTranslationErrorInterpolation()
    {

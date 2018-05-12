@@ -108,7 +108,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 57.8, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 57.8, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 290000)
    public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -116,7 +116,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 45.7, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 230000)
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -124,7 +124,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 67.6, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 67.6, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 340000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
    {

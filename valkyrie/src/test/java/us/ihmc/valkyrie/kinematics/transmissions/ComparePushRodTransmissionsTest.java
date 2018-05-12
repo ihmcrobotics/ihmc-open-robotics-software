@@ -73,7 +73,7 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
@@ -95,7 +95,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testCompareInefficientToJSCWaist()
    {
@@ -118,7 +118,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, nasaPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaistOverRenishaw()
    {
@@ -142,7 +142,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testCompareEfficientToJSCWaist()
    {

@@ -85,7 +85,7 @@ public class VisibilityGraphsOcclusionTest
    public TestName name = new TestName();
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
@@ -95,7 +95,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testFlatGroundWithWall()
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -114,7 +114,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -135,7 +135,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testCrazyBridgeEnvironment()
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
