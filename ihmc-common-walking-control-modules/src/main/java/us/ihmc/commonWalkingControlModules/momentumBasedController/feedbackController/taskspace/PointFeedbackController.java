@@ -95,15 +95,22 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RigidBody endEffector;
 
    private final double dt;
+   private final boolean isRootBody;
 
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       if (toolbox.getRootJoint() != null)
+      {
          this.rootBody = toolbox.getRootJoint().getSuccessor();
+         isRootBody = this.endEffector.getName().equals(rootBody.getName());
+      }
       else
+      {
+         isRootBody = false;
          rootBody = null;
+      }
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -307,7 +314,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       computeFeedbackForce();
 
-      if (endEffector.getName().equals(rootBody.getName()))
+      if (isRootBody)
       {
          desiredLinearForce.changeFrame(worldFrame);
 
@@ -552,6 +559,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
+      return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 }
