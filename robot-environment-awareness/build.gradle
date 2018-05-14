@@ -48,7 +48,7 @@ applicationDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
 }
 
 visualizersDependencies {
