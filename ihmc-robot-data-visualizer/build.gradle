@@ -34,13 +34,13 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.3'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.1"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.0"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
