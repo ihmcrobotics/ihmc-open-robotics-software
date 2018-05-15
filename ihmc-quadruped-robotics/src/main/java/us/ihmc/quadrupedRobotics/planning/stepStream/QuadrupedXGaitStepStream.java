@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
@@ -31,12 +29,6 @@ public class QuadrupedXGaitStepStream
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
-   {
-      this(xGaitSettings, Double.NaN, timestamp, bodyPathProvider, parentRegistry);
-   }
-
-   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, double controlDT, YoDouble timestamp,
                                    QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
