@@ -40,6 +40,7 @@ import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicTy
 
 public class QuadrupedBalanceManager
 {
+   private static final boolean debug = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
@@ -108,7 +109,7 @@ public class QuadrupedBalanceManager
       double nominalHeight = physicalProperties.getNominalCoMHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
-                                  yoGraphicsListRegistry);
+                                  yoGraphicsListRegistry, debug);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
@@ -262,12 +263,24 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
+      if (debug)
+         runDebugChecks();
+
       double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
 
       momentumRateOfChangeModule.setDCMEstimate(dcmPositionEstimate);
       momentumRateOfChangeModule.setDCMSetpoints(yoDesiredDCMPosition, yoDesiredDCMVelocity);
       momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
       momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredCMP);
+   }
+
+   private void runDebugChecks()
+   {
+      if (yoDesiredDCMPosition.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Position contains NaN");
+
+      if (yoDesiredDCMVelocity.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Velocity contains NaN");
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps)

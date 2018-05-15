@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -44,24 +45,36 @@ public class DCMPlanner
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final YoDouble robotTimestamp;
+   private final YoDouble controllerTime;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
    private final ReferenceFrame supportFrame;
-   private final FramePoint3D dcmPositionAtStartOfState = new FramePoint3D();
+   private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
    private final FramePoint3D finalDesiredDCM = new FramePoint3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
+   private final boolean debug;
+
    public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.robotTimestamp = robotTimestamp;
+      this(gravity, nominalHeight, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+   }
+
+   public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+                     QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
+                     boolean debug)
+
+   {
+      this.controllerTime = robotTimestamp;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
+      this.debug = debug;
       this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
@@ -107,6 +120,7 @@ public class DCMPlanner
    public void initializeForStanding()
    {
       isStanding.set(true);
+      timedContactSequence.clear();
       piecewiseConstantCopTrajectory.resetVariables();
       dcmTrajectory.resetVariables();
    }
@@ -115,15 +129,17 @@ public class DCMPlanner
    {
       isStanding.set(false);
 
-      double currentTime = robotTimestamp.getDoubleValue();
+      double currentTime = controllerTime.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
+      timedContactSequence.clear();
 
       if (isCurrentPlanValid)
       {
          // compute dcm trajectory
          computeDcmTrajectory(currentContactStates);
 
-         dcmPositionAtStartOfState.setIncludingFrame(dcmPosition);
+         dcmPositionAtStartOfState.setMatchingFrame(dcmPosition);
+         timeAtStartOfState.set(controllerTime.getDoubleValue());
          computeTransitionTrajectory();
       }
    }
@@ -131,7 +147,7 @@ public class DCMPlanner
    private void computeDcmTrajectory(QuadrantDependentList<ContactState> currentContactStates)
    {
       // compute piecewise constant center of pressure plan
-      double currentTime = robotTimestamp.getDoubleValue();
+      double currentTime = controllerTime.getDoubleValue();
       timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
       piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
 
@@ -150,14 +166,35 @@ public class DCMPlanner
    private void computeTransitionTrajectory()
    {
       double transitionEndTime = piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1);
-      double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
+      double transitionStartTime = Math.max(timeAtStartOfState.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
+
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalDesiredDCM);
 
-      dcmPositionAtStartOfState.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      tempPoint.setIncludingFrame(dcmPositionAtStartOfState);
+      tempPoint.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
       finalDesiredDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      dcmTransitionTrajectory
-            .setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, dcmPositionAtStartOfState, finalDesiredDCM);
+
+      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalDesiredDCM);
+
+      if (debug)
+         runTransitionDebugChecks(transitionStartTime, transitionEndTime);
+   }
+
+   private void runTransitionDebugChecks(double transitionStartTime, double transitionEndTime)
+   {
+      if (finalDesiredDCM.containsNaN())
+         throw new IllegalArgumentException("Final DCM at end of transition contains NaN.");
+      if (dcmPositionAtStartOfState.containsNaN())
+         throw new IllegalArgumentException("DCM Position at start of state contains NaN.");
+      if (!Double.isFinite(transitionStartTime))
+         throw new IllegalArgumentException("Transition start time is not valid.");
+      if (!Double.isFinite(transitionEndTime))
+         throw new IllegalArgumentException("Transition end time is not valid.");
+      if (transitionStartTime > transitionEndTime)
+         throw new IllegalArgumentException("Transition start time is after the transition end time.");
+      if (!dcmTransitionTrajectory.isValidTrajectory())
+         throw new IllegalArgumentException("Transition trajectory is invalid.");
    }
 
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
@@ -176,18 +213,18 @@ public class DCMPlanner
       {
          computeDcmTrajectory(currentContactStates);
 
-         double currentTime = robotTimestamp.getDoubleValue();
+         double currentTime = controllerTime.getDoubleValue();
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
             computeTransitionTrajectory();
 
-            dcmTransitionTrajectory.compute(robotTimestamp.getDoubleValue());
+            dcmTransitionTrajectory.compute(controllerTime.getDoubleValue());
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
          }
          else
          {
-            dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+            dcmTrajectory.computeTrajectory(controllerTime.getDoubleValue());
             dcmTrajectory.getPosition(desiredDCMPosition);
             dcmTrajectory.getVelocity(desiredDCMVelocity);
          }
@@ -196,8 +233,19 @@ public class DCMPlanner
       desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());
       desiredDCMVelocity.changeFrame(desiredDCMVelocityToPack.getReferenceFrame());
 
+      if (debug)
+         runOutputDebugChecks();
+
       desiredDCMPositionToPack.set(desiredDCMPosition);
       desiredDCMVelocityToPack.set(desiredDCMVelocity);
+   }
+
+   private void runOutputDebugChecks()
+   {
+      if (desiredDCMPosition.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Position contains NaN.");
+      if (desiredDCMVelocity.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Velocity contains NaN.");
    }
 
    public void getFinalDesiredDCM(FixedFramePoint3DBasics finalDesiredDCMToPack)
