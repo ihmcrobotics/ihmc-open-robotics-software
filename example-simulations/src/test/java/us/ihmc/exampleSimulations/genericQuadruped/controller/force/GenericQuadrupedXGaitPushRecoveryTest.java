@@ -25,4 +25,10 @@ public class GenericQuadrupedXGaitPushRecoveryTest extends QuadrupedXGaitPushRec
       super.testWalkingWithPush(90.0, 0.8);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testScriptedWalkingForwardFastWithPush()
+   {
+      super.testScriptedWalkingWithPush(90.0, 0.8, 0.35);
+   }
 }

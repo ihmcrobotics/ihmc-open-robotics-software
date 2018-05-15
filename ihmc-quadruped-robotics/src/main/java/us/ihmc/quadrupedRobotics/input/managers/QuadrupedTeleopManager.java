@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
@@ -75,6 +76,11 @@ public class QuadrupedTeleopManager
       packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp_));
 
       parentRegistry.addChild(registry);
+   }
+
+   public void sendMessage(Packet<?> packet)
+   {
+      packetCommunicator.send(packet);
    }
 
    public void update()
