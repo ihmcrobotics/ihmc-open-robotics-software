@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -11,6 +12,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FramePoint3D tempGoalPosition = new FramePoint3D();
    private RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_RIGHT;
    private Point3D goalPosition = new Point3D(0.0, 0.0, 0.0);
    private double groundClearance = 0.0;
@@ -63,12 +66,10 @@ public class QuadrupedStep
       goalPosition.set(getGoalPosition());
    }
 
-   public void getGoalPosition(FramePoint3D goalPosition)
+   public void getGoalPosition(FixedFramePoint3DBasics goalPosition)
    {
-      ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
-      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.set(getGoalPosition());
-      goalPosition.changeFrame(originalFrame);
+      tempGoalPosition.setIncludingFrame(worldFrame, getGoalPosition());
+      goalPosition.setMatchingFrame(tempGoalPosition);
    }
 
    public void setGoalPosition(Point3DReadOnly goalPosition)
@@ -79,7 +80,7 @@ public class QuadrupedStep
    public void setGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
-      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPosition.changeFrame(worldFrame);
       getGoalPosition().set(goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
