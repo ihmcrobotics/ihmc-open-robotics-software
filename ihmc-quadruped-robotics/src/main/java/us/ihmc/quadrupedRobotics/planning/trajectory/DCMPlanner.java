@@ -132,6 +132,7 @@ public class DCMPlanner
       double currentTime = controllerTime.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
       timedContactSequence.clear();
+      piecewiseConstantCopTrajectory.resetVariables();
 
       if (isCurrentPlanValid)
       {
