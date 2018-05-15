@@ -33,10 +33,10 @@ public class QuadrupedStepAdjustmentController
    private final QuadrantDependentList<RateLimitedYoFrameVector> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
    private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 1.0);
 
+   private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
-   private final YoDouble dcmStepAdjustmentMultiplier = new YoDouble("dcmStepAdjustmentMultiplier", registry);
 
-   private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.5);
+   private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.02);
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -61,13 +61,16 @@ public class QuadrupedStepAdjustmentController
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D(robotQuadrant.getShortName() + "InstantaneousStepAdjustment", worldFrame, registry);
-         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector("limitedInstantaneousStepAdjustment", "", registry, maxStepAdjustmentRate,
+         String prefix = robotQuadrant.getShortName();
+
+         YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D(prefix + "InstantaneousStepAdjustment", worldFrame, registry);
+         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector(prefix + "LimitedInstantaneousStepAdjustment", "", registry, maxStepAdjustmentRate,
                                                                                 controllerToolbox.getRuntimeEnvironment().getControlDT(),
                                                                                 instantaneousStepAdjustment);
 
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
          limitedInstantaneousStepAdjustments.put(robotQuadrant, limitedInstantaneousStepAdjustment);
+         dcmStepAdjustmentMultipliers.put(robotQuadrant, new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry));
       }
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
@@ -109,10 +112,23 @@ public class QuadrupedStepAdjustmentController
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
-         instantaneousStepAdjustment.set(dcmError);
-         instantaneousStepAdjustment.scale(-dcmStepAdjustmentGain.getValue());
-         instantaneousStepAdjustment.setZ(0);
-         limitedInstantaneousStepAdjustments.get(robotQuadrant).update();
+
+         YoDouble dcmStepAdjustmentMultiplier = dcmStepAdjustmentMultipliers.get(robotQuadrant);
+
+         if (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue())
+         {
+            double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
+            dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency()));
+
+            instantaneousStepAdjustment.set(dcmError);
+            instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
+            instantaneousStepAdjustment.setZ(0);
+            limitedInstantaneousStepAdjustments.get(robotQuadrant).update();
+         }
+         else
+         {
+            instantaneousStepAdjustment.setToZero();
+         }
 
          activeStep.getGoalPosition(tempPoint);
          tempPoint.changeFrame(worldFrame);
