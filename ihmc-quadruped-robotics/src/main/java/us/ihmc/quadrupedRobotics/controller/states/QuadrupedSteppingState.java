@@ -242,6 +242,10 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempPoint);
       footstepStatusMessage.getDesiredTouchdownPositionInWorld().add(balanceManager.getStepAdjustment(thisStepQuadrant));
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
+
+      stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
+
+      balanceManager.completedStep(thisStepQuadrant);
    }
 
    @Override
@@ -366,7 +370,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-//         stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment());
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
