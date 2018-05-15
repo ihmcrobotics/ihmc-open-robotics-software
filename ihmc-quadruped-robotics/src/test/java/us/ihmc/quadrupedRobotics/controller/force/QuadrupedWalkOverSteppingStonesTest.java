@@ -108,55 +108,53 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
    {
       ArrayList<QuadrupedTimedStepMessage> steps = new ArrayList<>();
 
-      FramePoint3D goalPosition1 = new FramePoint3D(baseBlockFrame, 0.7, 0.075, 0.0);
+      FramePoint3D goalPosition1 = new FramePoint3D(baseBlockFrame, 0.7, 0.08, 0.0);
       FramePoint3D goalPosition2 = new FramePoint3D(baseBlockFrame, -0.25, -0.25, 0.0);
       FramePoint3D goalPosition3 = new FramePoint3D(baseBlockFrame, 0.7, -0.3, 0.0);
-      FramePoint3D goalPosition4 = new FramePoint3D(baseBlockFrame, -0.3, 0.05, 0.0);
+      FramePoint3D goalPosition4 = new FramePoint3D(baseBlockFrame, -0.3, 0.08, 0.0);
 
-      FramePoint3D goalPosition5 = new FramePoint3D(baseBlockFrame, 0.875, 0.05, 0.0);
+      FramePoint3D goalPosition5 = new FramePoint3D(baseBlockFrame, 0.95, 0.08, 0.0);
       FramePoint3D goalPosition6 = new FramePoint3D(baseBlockFrame, -0.0, -0.35, 0.0);
-      FramePoint3D goalPosition7 = new FramePoint3D(baseBlockFrame, 0.9, -0.45, 0.0);
-      FramePoint3D goalPosition8 = new FramePoint3D(baseBlockFrame, 0.5, 0.075, 0.0);
+      FramePoint3D goalPosition7 = new FramePoint3D(baseBlockFrame, 0.9, -0.35, 0.0);
+      FramePoint3D goalPosition8 = new FramePoint3D(baseBlockFrame, 0.1, 0.08, 0.0);
 
-      FramePoint3D goalPosition9 = new FramePoint3D(baseBlockFrame, 1.05, 0.0, 0.0);
-      FramePoint3D goalPosition10 = new FramePoint3D(baseBlockFrame, 0.35, -0.4, 0.0);
-      FramePoint3D goalPosition11 = new FramePoint3D(baseBlockFrame, 1.25, -0.45, 0.0);
-      FramePoint3D goalPosition12 = new FramePoint3D(baseBlockFrame, 0.4, 0.10, 0.0);
+      FramePoint3D goalPosition9 = new FramePoint3D(baseBlockFrame, 1.35, 0.08, 0.0);
+      FramePoint3D goalPosition10 = new FramePoint3D(baseBlockFrame, 0.4, -0.35, 0.0);
+      FramePoint3D goalPosition11 = new FramePoint3D(baseBlockFrame, 1.25, -0.35, 0.0);
+      FramePoint3D goalPosition12 = new FramePoint3D(baseBlockFrame, 0.55, 0.08, 0.0);
 
-      FramePoint3D goalPosition13 = new FramePoint3D(baseBlockFrame, 1.4, -0.02, 0.0);
-      FramePoint3D goalPosition14 = new FramePoint3D(baseBlockFrame, 0.55, -0.35, 0.0);
-      FramePoint3D goalPosition15 = new FramePoint3D(baseBlockFrame, 1.45, -0.45, 0.0);
-      FramePoint3D goalPosition16 = new FramePoint3D(baseBlockFrame, 0.6, -0.03, 0.0);
+      FramePoint3D goalPosition13 = new FramePoint3D(baseBlockFrame, 1.7, 0.15, 0.0);
+      FramePoint3D goalPosition14 = new FramePoint3D(baseBlockFrame, 0.85, -0.35, 0.0);
+      FramePoint3D goalPosition15 = new FramePoint3D(baseBlockFrame, 1.7, -0.2, 0.0);
+      FramePoint3D goalPosition16 = new FramePoint3D(baseBlockFrame, 1.0, 0.08, 0.0);
 
-      FramePoint3D goalPosition17 = new FramePoint3D(baseBlockFrame, 1.55, -0.02, 0.0);
-      FramePoint3D goalPosition18 = new FramePoint3D(baseBlockFrame, 0.8, -0.35, 0.0);
-      FramePoint3D goalPosition19 = new FramePoint3D(baseBlockFrame, 1.8, -0.3, 0.0);
-      FramePoint3D goalPosition20 = new FramePoint3D(baseBlockFrame, 0.825, -0.05, 0.0);
 
-      FramePoint3D goalPosition21 = new FramePoint3D(baseBlockFrame, 1.9, 0.05, 0.0);
-      FramePoint3D goalPosition22 = new FramePoint3D(baseBlockFrame, 1.2, -0.45, 0.0);
-      FramePoint3D goalPosition23 = new FramePoint3D(baseBlockFrame, 2.15, -0.3, 0.0);
-      FramePoint3D goalPosition24 = new FramePoint3D(baseBlockFrame, 1.15, 0.05, 0.0);
+      FramePoint3D goalPosition17 = new FramePoint3D(baseBlockFrame, 1.95, 0.15, 0.0);
+      FramePoint3D goalPosition18 = new FramePoint3D(baseBlockFrame, 1.25, -0.35, 0.0);
+      FramePoint3D goalPosition19 = new FramePoint3D(baseBlockFrame, 2.0, -0.2, 0.0);
+      FramePoint3D goalPosition20 = new FramePoint3D(baseBlockFrame, 1.4, 0.08, 0.0);
 
-      FramePoint3D goalPosition25 = new FramePoint3D(baseBlockFrame, 2.2, 0.05, 0.0);
-      FramePoint3D goalPosition26 = new FramePoint3D(baseBlockFrame, 1.5, -0.45, 0.0);
-      FramePoint3D goalPosition27 = new FramePoint3D(baseBlockFrame, 2.4, -0.3, 0.0);
-      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 1.6, -0.05, 0.0);
 
-      FramePoint3D goalPosition29 = new FramePoint3D(baseBlockFrame, 2.65, 0.05, 0.0);
-      FramePoint3D goalPosition30 = new FramePoint3D(baseBlockFrame, 1.9, -0.2, 0.0);
-      FramePoint3D goalPosition31 = new FramePoint3D(baseBlockFrame, 2.7, -0.3, 0.0);
-      FramePoint3D goalPosition32 = new FramePoint3D(baseBlockFrame, 2.0, 0.1, 0.0);
 
-      FramePoint3D goalPosition33 = new FramePoint3D(baseBlockFrame, 3.1, 0.05, 0.0);
-      FramePoint3D goalPosition34 = new FramePoint3D(baseBlockFrame, 2.35, -0.2, 0.0);
-      FramePoint3D goalPosition35 = new FramePoint3D(baseBlockFrame, 3.2, -0.3, 0.0);
-      FramePoint3D goalPosition36 = new FramePoint3D(baseBlockFrame, 2.4, 0.05, 0.0);
+      FramePoint3D goalPosition21 = new FramePoint3D(baseBlockFrame, 2.45, 0.15, 0.0);
+      FramePoint3D goalPosition22 = new FramePoint3D(baseBlockFrame, 1.65, -0.2, 0.0);
+      FramePoint3D goalPosition23 = new FramePoint3D(baseBlockFrame, 2.55, -0.2, 0.0);
+      FramePoint3D goalPosition24 = new FramePoint3D(baseBlockFrame, 1.7, 0.15, 0.0);
 
-      FramePoint3D goalPosition37 = new FramePoint3D(baseBlockFrame, 3.6, 0.05, 0.0);
-      FramePoint3D goalPosition38 = new FramePoint3D(baseBlockFrame, 2.6, -0.2, 0.0);
-      FramePoint3D goalPosition39 = new FramePoint3D(baseBlockFrame, 3.6, -0.2, 0.0);
-      FramePoint3D goalPosition40 = new FramePoint3D(baseBlockFrame, 2.6, 0.05, 0.0);
+
+
+
+      FramePoint3D goalPosition25 = new FramePoint3D(baseBlockFrame, 2.95, 0.10, 0.0);
+      FramePoint3D goalPosition26 = new FramePoint3D(baseBlockFrame, 2.1, -0.2, 0.0);
+      FramePoint3D goalPosition27 = new FramePoint3D(baseBlockFrame, 3.1, -0.15, 0.0);
+      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 2.2, 0.15, 0.0);
+
+      FramePoint3D goalPosition29 = new FramePoint3D(baseBlockFrame, 3.55, 0.10, 0.0);
+      FramePoint3D goalPosition30 = new FramePoint3D(baseBlockFrame, 2.45, -0.15, 0.0);
+      FramePoint3D goalPosition31 = new FramePoint3D(baseBlockFrame, 3.55, -0.15, 0.0);
+      FramePoint3D goalPosition32 = new FramePoint3D(baseBlockFrame, 2.45, 0.10, 0.0);
+
+
 
 
 
@@ -214,15 +212,8 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       goalPosition31.changeFrame(ReferenceFrame.getWorldFrame());
       goalPosition32.changeFrame(ReferenceFrame.getWorldFrame());
 
-      goalPosition33.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition34.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition35.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition36.changeFrame(ReferenceFrame.getWorldFrame());
 
-      goalPosition37.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition38.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition39.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition40.changeFrame(ReferenceFrame.getWorldFrame());
+
 
 
 
@@ -472,65 +463,8 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 
 
 
-      QuadrupedTimedStepMessage message33 = new QuadrupedTimedStepMessage();
-      message33.getTimeInterval().setStartTime(6.4);
-      message33.getTimeInterval().setEndTime(6.8);
-      message33.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message33.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.FRONT_LEFT);
-      message33.getQuadrupedStepMessage().getGoalPosition().set(goalPosition33);
-
-      QuadrupedTimedStepMessage message34 = new QuadrupedTimedStepMessage();
-      message34.getTimeInterval().setStartTime(6.6);
-      message34.getTimeInterval().setEndTime(7.0);
-      message34.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message34.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.HIND_RIGHT);
-      message34.getQuadrupedStepMessage().getGoalPosition().set(goalPosition34);
-
-      QuadrupedTimedStepMessage message35 = new QuadrupedTimedStepMessage();
-      message35.getTimeInterval().setStartTime(6.8);
-      message35.getTimeInterval().setEndTime(7.2);
-      message35.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message35.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.FRONT_RIGHT);
-      message35.getQuadrupedStepMessage().getGoalPosition().set(goalPosition35);
-
-      QuadrupedTimedStepMessage message36 = new QuadrupedTimedStepMessage();
-      message36.getTimeInterval().setStartTime(7.0);
-      message36.getTimeInterval().setEndTime(7.4);
-      message36.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message36.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.HIND_LEFT);
-      message36.getQuadrupedStepMessage().getGoalPosition().set(goalPosition36);
 
 
-
-
-
-      QuadrupedTimedStepMessage message37 = new QuadrupedTimedStepMessage();
-      message37.getTimeInterval().setStartTime(7.2);
-      message37.getTimeInterval().setEndTime(7.6);
-      message37.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message37.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.FRONT_LEFT);
-      message37.getQuadrupedStepMessage().getGoalPosition().set(goalPosition37);
-
-      QuadrupedTimedStepMessage message38 = new QuadrupedTimedStepMessage();
-      message38.getTimeInterval().setStartTime(7.4);
-      message38.getTimeInterval().setEndTime(7.8);
-      message38.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message38.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.HIND_RIGHT);
-      message38.getQuadrupedStepMessage().getGoalPosition().set(goalPosition38);
-
-      QuadrupedTimedStepMessage message39 = new QuadrupedTimedStepMessage();
-      message39.getTimeInterval().setStartTime(7.6);
-      message39.getTimeInterval().setEndTime(8.0);
-      message39.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message39.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.FRONT_RIGHT);
-      message39.getQuadrupedStepMessage().getGoalPosition().set(goalPosition39);
-
-      QuadrupedTimedStepMessage message40 = new QuadrupedTimedStepMessage();
-      message40.getTimeInterval().setStartTime(7.8);
-      message40.getTimeInterval().setEndTime(8.2);
-      message40.getQuadrupedStepMessage().setGroundClearance(0.1);
-      message40.getQuadrupedStepMessage().setRobotQuadrant(QuadrupedStepMessage.HIND_LEFT);
-      message40.getQuadrupedStepMessage().getGoalPosition().set(goalPosition40);
 
 
       steps.add(message1);
@@ -573,15 +507,6 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       steps.add(message31);
       steps.add(message32);
 
-      steps.add(message33);
-      steps.add(message34);
-      steps.add(message35);
-      steps.add(message36);
-
-      steps.add(message37);
-      steps.add(message38);
-      steps.add(message39);
-      steps.add(message40);
 
       return steps;
    }
