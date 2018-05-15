@@ -14,6 +14,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -68,9 +69,14 @@ public class QuadrupedStepAdjustmentController
                                                                                 controllerToolbox.getRuntimeEnvironment().getControlDT(),
                                                                                 instantaneousStepAdjustment);
 
+         YoDouble dcmStepAdjustmentMultiplier = new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry);
+         instantaneousStepAdjustment.setToNaN();
+         limitedInstantaneousStepAdjustment.setToNaN();
+         dcmStepAdjustmentMultiplier.setToNaN();
+
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
          limitedInstantaneousStepAdjustments.put(robotQuadrant, limitedInstantaneousStepAdjustment);
-         dcmStepAdjustmentMultipliers.put(robotQuadrant, new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry));
+         dcmStepAdjustmentMultipliers.put(robotQuadrant, dcmStepAdjustmentMultiplier);
       }
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
@@ -87,6 +93,13 @@ public class QuadrupedStepAdjustmentController
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void completedStep(RobotQuadrant robotQuadrant)
+   {
+      instantaneousStepAdjustments.get(robotQuadrant).setToNaN();
+      limitedInstantaneousStepAdjustments.get(robotQuadrant).setToNaN();
+      dcmStepAdjustmentMultipliers.get(robotQuadrant).setToNaN();
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition)
@@ -112,10 +125,11 @@ public class QuadrupedStepAdjustmentController
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
+         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = limitedInstantaneousStepAdjustments.get(robotQuadrant);
 
          YoDouble dcmStepAdjustmentMultiplier = dcmStepAdjustmentMultipliers.get(robotQuadrant);
 
-         if (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue())
+         if (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0)
          {
             double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
             dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency()));
@@ -123,16 +137,19 @@ public class QuadrupedStepAdjustmentController
             instantaneousStepAdjustment.set(dcmError);
             instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
             instantaneousStepAdjustment.setZ(0);
-            limitedInstantaneousStepAdjustments.get(robotQuadrant).update();
+
+            if (limitedInstantaneousStepAdjustment.containsNaN())
+               limitedInstantaneousStepAdjustment.set(instantaneousStepAdjustment);
          }
          else
          {
             instantaneousStepAdjustment.setToZero();
          }
+         limitedInstantaneousStepAdjustment.update();
 
          activeStep.getGoalPosition(tempPoint);
          tempPoint.changeFrame(worldFrame);
-         tempPoint.add(limitedInstantaneousStepAdjustments.get(robotQuadrant));
+         tempPoint.add(limitedInstantaneousStepAdjustment);
          crossoverProjection.project(tempPoint, robotQuadrant);
          groundPlaneEstimator.projectZ(tempPoint);
          adjustedStep.setGoalPosition(tempPoint);

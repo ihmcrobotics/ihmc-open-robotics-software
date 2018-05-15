@@ -241,7 +241,11 @@ public class QuadrupedBalanceManager
    {
       initialize();
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
+   }
 
+   public void completedStep(RobotQuadrant robotQuadrant)
+   {
+      stepAdjustmentController.completedStep(robotQuadrant);
    }
 
    public void compute()
