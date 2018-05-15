@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.planning.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -32,7 +31,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final YoDouble timestamp;
    private final ReferenceFrame supportFrame;
-   private final YoBoolean footstepStatusHasBeenReceived = new YoBoolean("footstepStatusHasBeenReceived", registry);
+   private final YoBoolean footstepPlanHasBeenComputed = new YoBoolean("footstepPlanHasBeenComputed", registry);
 
    private final YoFramePoint2D startPoint = new YoFramePoint2D("startPoint", worldFrame, registry);
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
@@ -47,19 +46,18 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final Vector3D tempVector = new Vector3D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
-   public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                    YoDouble timestamp, PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
+   public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
+                                                    PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          footstepStatuses.set(quadrant, new AtomicReference<>());
       }
 
-      packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) ->
-      {
-         if(packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+      packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) -> {
+         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          {
             RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
             footstepStatuses.get(quadrant).set(packet);
@@ -76,13 +74,13 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    @Override
    public void initialize()
    {
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          footstepStatuses.get(quadrant).set(null);
       }
 
       recomputeInitialPose.set(false);
-      footstepStatusHasBeenReceived.set(false);
+      footstepPlanHasBeenComputed.set(false);
    }
 
    public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -95,11 +93,12 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       if (recomputeInitialPose.getAndSet(false))
       {
-         footstepStatusHasBeenReceived.set(true);
+         footstepPlanHasBeenComputed.set(true);
          setStartConditionsFromFootstepStatus();
       }
-      else if(!footstepStatusHasBeenReceived.getBooleanValue())
+      else if (!footstepPlanHasBeenComputed.getBooleanValue())
       {
+         footstepPlanHasBeenComputed.set(true);
          setStartConditionsFromCurrent();
       }
 
@@ -150,7 +149,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private void setStartConditionsFromFootstepStatus()
    {
       QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStatusMessage();
-      if (latestStatusMessage == null) return;
+      if (latestStatusMessage == null)
+         return;
 
       double previousStartTime = startTime.getDoubleValue();
       double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
@@ -159,7 +159,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       startTime.set(newStartTime);
 
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
-      Point3DReadOnly latestMessageSolePosition = latestStatusMessage.desired_touchdown_position_in_world_;
+      Point3DReadOnly latestMessageSolePosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
 
       double halfStanceLength = quadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
       double halfStanceWidth = quadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
@@ -175,10 +175,10 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       double latestEndTime = Double.NEGATIVE_INFINITY;
       QuadrupedFootstepStatusMessage latestMessage = null;
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          QuadrupedFootstepStatusMessage message = footstepStatuses.get(quadrant).get();
-         if(message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
+         if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
          {
             latestEndTime = message.getDesiredStepInterval().getEndTime();
             latestMessage = message;
