@@ -102,7 +102,7 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnInwards()
    {
-      return Math.toRadians(30.0);
+      return -Math.toRadians(30.0);
    }
 
    @Override
