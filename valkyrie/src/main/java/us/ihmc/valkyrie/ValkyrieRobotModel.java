@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +37,9 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -91,6 +94,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
    private boolean useShapeCollision = false;
+   private final boolean useOBJGraphics;
 
    private final String[] resourceDirectories;
    {
@@ -127,7 +131,13 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
    {
+      this(target, headless, model, simulationContactPoints, useShapeCollision, false);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
+   {
       this.target = target;
+      this.useOBJGraphics = useOBJGraphics;
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
@@ -481,6 +491,31 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       if (this.jointMap.getModelName().equals(model.getName()))
       {
+         if (useOBJGraphics)
+         {
+            List<SDFVisual> visuals = linkHolder.getVisuals();
+            if (visuals != null)
+            {
+               for (SDFVisual sdfVisual : visuals)
+               {
+                  SDFGeometry geometry = sdfVisual.getGeometry();
+                  if (geometry == null)
+                     continue;
+
+                  SDFGeometry.Mesh mesh = geometry.getMesh();
+                  if (mesh == null)
+                     continue;
+
+                  String meshUri = mesh.getUri();
+                  if (meshUri.contains("meshes"))
+                  {
+                     String replacedURI = meshUri.replace(".dae", ".obj");
+                     mesh.setUri(replacedURI);
+                  }
+               }
+            }
+         }
+
          switch (linkHolder.getName())
          {
          case "hokuyo_link":
