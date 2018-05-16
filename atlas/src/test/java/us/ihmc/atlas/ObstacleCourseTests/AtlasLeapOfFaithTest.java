@@ -7,15 +7,18 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarLeapOfFaithTest;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {
@@ -116,11 +119,14 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
       private final TestLeapOfFaithParameters leapOfFaithParameters;
+      private final TestSteppingParameters steppingParameters;
+
       public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
 
          leapOfFaithParameters = new TestLeapOfFaithParameters();
+         steppingParameters = new TestSteppingParameters(jointMap);
       }
 
       @Override
@@ -139,6 +145,12 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       public LeapOfFaithParameters getLeapOfFaithParameters()
       {
          return leapOfFaithParameters;
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return steppingParameters;
       }
    }
 
@@ -167,5 +179,25 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
+   }
+
+   private class TestSteppingParameters extends AtlasSteppingParameters
+   {
+      public TestSteppingParameters(AtlasJointMap jointMap)
+      {
+         super(jointMap);
+      }
+
+      @Override
+      public double getMaxStepLength()
+      {
+         return 0.8;
+      }
+
+      @Override
+      public double getMaxStepWidth()
+      {
+         return getMaxStepLength();
+      }
    }
 }

@@ -66,7 +66,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       }
 
       @Override
-      public QuaternionReadOnly getInitialBodyOrientation()
+      public Quaternion getInitialBodyOrientation()
       {
          return new Quaternion(0.0, 0.2, 0.0);
       }
@@ -81,7 +81,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       }
 
       @Override
-      public QuaternionReadOnly getInitialBodyOrientation()
+      public Quaternion getInitialBodyOrientation()
       {
          return new Quaternion(0.0, -0.1, 0.0);
       }

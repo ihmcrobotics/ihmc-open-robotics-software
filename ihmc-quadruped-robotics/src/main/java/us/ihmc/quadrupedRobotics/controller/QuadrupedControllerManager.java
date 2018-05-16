@@ -16,19 +16,19 @@ import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlCo
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.output.JointControlComponent;
+import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotController.OutputProcessor;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -80,14 +80,14 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, FullQuadrupedRobotModelFactory modelFactory,
                                      QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
-                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControlMode controlMode) throws IOException
+                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControlMode controlMode)
    {
       this(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, initialPositionParameters,
            QuadrupedControllerEnum.JOINT_INITIALIZATION, controlMode);
    }
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControllerEnum initialState) throws IOException
+                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControllerEnum initialState)
    {
       this(runtimeEnvironment, null, physicalProperties, null, initialPositionParameters, initialState, QuadrupedControlMode.FORCE);
    }
@@ -95,7 +95,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, FullQuadrupedRobotModelFactory modelFactory,
                                      QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
                                      QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControllerEnum initialState,
-                                     QuadrupedControlMode controlMode) throws IOException
+                                     QuadrupedControlMode controlMode)
    {
       this.controllerToolbox = new QuadrupedControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
@@ -122,7 +122,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
       // Initialize output processor
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);
-      JointControlComponent jointControlComponent = new JointControlComponent(runtimeEnvironment, registry);
+      JointIntegratorComponent jointControlComponent = new JointIntegratorComponent(runtimeEnvironment, registry);
       controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener());
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
@@ -235,7 +235,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).reset();
 
-            if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+            if (controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
             {
                runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
             }
@@ -299,7 +299,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       {
          steppingController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
       }
-      final QuadrupedController fallController = new QuadrupedFallController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
       EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
       factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
@@ -312,7 +311,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       factory.addState(QuadrupedControllerEnum.STAND_READY, freezeController);
       factory.addState(QuadrupedControllerEnum.FREEZE, freezeController);
       factory.addState(QuadrupedControllerEnum.STEPPING, steppingController);
-      factory.addState(QuadrupedControllerEnum.FALL, fallController);
+      factory.addState(QuadrupedControllerEnum.FALL, freezeController);
 
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.JOINT_INITIALIZATION, QuadrupedControllerEnum.DO_NOTHING);

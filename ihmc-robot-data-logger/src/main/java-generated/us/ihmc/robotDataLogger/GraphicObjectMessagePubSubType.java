@@ -40,7 +40,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1024 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -63,7 +63,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
@@ -86,7 +86,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_3(data.getType());
+      cdr.write_type_2(data.getRegistrationID());
 
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
@@ -109,7 +109,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setType(cdr.read_type_3());
+      data.setRegistrationID(cdr.read_type_2());
       	
       cdr.read_type_d(data.getName());	
       cdr.read_type_e(data.getYoVariableIndex());	
@@ -122,7 +122,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_3("type", data.getType());
+      ser.write_type_2("registrationID", data.getRegistrationID());
       ser.write_type_d("name", data.getName());
       ser.write_type_e("yoVariableIndex", data.getYoVariableIndex());
       ser.write_type_e("constants", data.getConstants());
@@ -134,7 +134,7 @@ public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.GraphicObjectMessage data)
    {
-      data.setType(ser.read_type_3("type"));
+      data.setRegistrationID(ser.read_type_2("registrationID"));
       ser.read_type_d("name", data.getName());
       ser.read_type_e("yoVariableIndex", data.getYoVariableIndex());
       ser.read_type_e("constants", data.getConstants());

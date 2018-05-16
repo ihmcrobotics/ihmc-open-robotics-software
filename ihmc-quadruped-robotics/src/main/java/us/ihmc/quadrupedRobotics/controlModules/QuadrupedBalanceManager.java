@@ -1,15 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
-import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType.BALL_WITH_CROSS;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.mutable.MutableInt;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,7 +19,6 @@ import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -40,11 +30,13 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType.BALL_WITH_CROSS;
 
 public class QuadrupedBalanceManager
 {
@@ -87,7 +79,6 @@ public class QuadrupedBalanceManager
 
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
-   private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    // footstep graphics
@@ -116,7 +107,6 @@ public class QuadrupedBalanceManager
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       double nominalHeight = physicalProperties.getNominalCoMHeight();
-      currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry);
@@ -126,7 +116,7 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
 
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
@@ -257,14 +247,14 @@ public class QuadrupedBalanceManager
       dcmPlanner.initializeForStanding();
    }
 
-   public void initializeForStepping(QuadrantDependentList<ContactState> contactStates)
+   public void initializeForStepping()
    {
       initialize();
-      dcmPlanner.initializeForStepping(contactStates, dcmPositionEstimate);
+      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
 
    }
 
-   public void compute(QuadrantDependentList<ContactState> contactStates)
+   public void compute()
    {
       centerOfMassHeightManager.update();
       linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
@@ -273,7 +263,7 @@ public class QuadrupedBalanceManager
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
-      dcmPlanner.computeDcmSetpoints(contactStates, yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
       double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
@@ -315,7 +305,7 @@ public class QuadrupedBalanceManager
             activeStep.getGoalPosition(tempPoint);
             tempPoint.changeFrame(worldFrame);
             tempPoint.add(instantaneousStepAdjustment);
-            crossoverProjection.project(tempPoint, currentSolePositions, robotQuadrant);
+            crossoverProjection.project(tempPoint, robotQuadrant);
             groundPlaneEstimator.projectZ(tempPoint);
             adjustedStep.setGoalPosition(tempPoint);
          }

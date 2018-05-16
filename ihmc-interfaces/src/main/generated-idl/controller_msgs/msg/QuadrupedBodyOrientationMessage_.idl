@@ -29,6 +29,11 @@ module controller_msgs
         @defaultValue(value=True)
         boolean is_expressed_in_absolute_time;
         /**
+         * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
+         */
+        @defaultValue(value=True)
+        boolean is_an_offset_orientation;
+        /**
          * The orientation trajectory information.
          */
         controller_msgs::msg::dds::SO3TrajectoryMessage so3_trajectory;

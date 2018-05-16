@@ -62,7 +62,7 @@ module robotDataLogger{
 	
 	struct GraphicObjectMessage
 	{
-		unsigned short type;
+		long registrationID;
 		string name;
 		
 		sequence<unsigned short, 1024> yoVariableIndex;

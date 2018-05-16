@@ -181,44 +181,11 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * @return The maximum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityOuterLimit()
-   {
-      return 0.5;
-   }
-
-   /**
-    * @return The minimum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityInnerLimit()
-   {
-      return 0.1;
-   }
-
-   /**
-    * @return The forward limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getForwardReachabilityLimit()
-   {
-      return 0.5;
-   }
-
-   /**
     * @return The backward limit that the swing foot can reach w.r.t. the stance foot.
     */
    public double getBackwardReachabilityLimit()
    {
       return -0.3;
-   }
-
-   /**
-    * Sets whether or not to use a warm start in the active set solver. This exploits that the active set doesn't change often.
-    * @return Whether or not to use a warm start in the solver
-    */
-   public boolean useWarmStartInSolver()
-   {
-      return false;
    }
 
    /**

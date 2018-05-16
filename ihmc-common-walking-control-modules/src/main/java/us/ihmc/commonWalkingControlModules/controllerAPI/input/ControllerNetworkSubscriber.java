@@ -1,5 +1,22 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.MessageCollectionNotification;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.util.PeriodicThreadScheduler;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,30 +24,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import controller_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.MessageCollectionNotification;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.util.PeriodicThreadScheduler;
-
 /**
  * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
  * communicator and the controller API. It automatically creates all the {@link PacketConsumer} for
  * all the messages supported by the {@link CommandInputManager}. The status messages are send to
  * the network communicator on a separate thread to avoid any delay in the controller thread.
- * 
- * @author Sylvain
  *
+ * @author Sylvain
  */
 public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
 {
@@ -77,10 +77,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       messageValidator = new AtomicReference<>(message -> null);
 
       if (packetCommunicator == null)
-      {
          PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
-         return;
-      }
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
 
@@ -95,38 +92,38 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageHolderClass, int expectedMessageSize,
                                                                           MessageUnpacker<T> messageUnpacker)
    {
-      PacketConsumer<T> packetConsumer = new PacketConsumer<T>()
-      {
-         private final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
-
-         @Override
-         public void receivedPacket(T multipleMessageHolder)
-         {
-            if (DEBUG)
-               PrintTools.debug(ControllerNetworkSubscriber.this,
-                                "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
-
-            String errorMessage = messageValidator.get().validate(multipleMessageHolder);
-
-            if (errorMessage != null)
-            {
-               reportInvalidMessage(multipleMessageHolderClass, errorMessage);
-               return;
-            }
-
-            if (testMessageWithMessageFilter(multipleMessageHolder))
-            {
-               messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
-
-               for (int i = 0; i < unpackedMessages.size(); i++)
-               {
-                  receivedMessage(unpackedMessages.get(i));
-               }
-               unpackedMessages.clear();
-            }
-         }
+      final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      PacketConsumer<T> packetConsumer = multipleMessageHolder -> {
+         unpackMultiMessage(multipleMessageHolderClass, messageUnpacker, unpackedMessages, multipleMessageHolder);
       };
       packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
+   }
+
+   private <T extends Packet<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
+                                                         List<Packet<?>> unpackedMessages, T multipleMessageHolder)
+   {
+      if (DEBUG)
+         PrintTools
+               .debug(ControllerNetworkSubscriber.this, "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
+
+      String errorMessage = messageValidator.get().validate(multipleMessageHolder);
+
+      if (errorMessage != null)
+      {
+         reportInvalidMessage(multipleMessageHolderClass, errorMessage);
+         return;
+      }
+
+      if (testMessageWithMessageFilter(multipleMessageHolder))
+      {
+         messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
+
+         for (int i = 0; i < unpackedMessages.size(); i++)
+         {
+            receivedMessage(unpackedMessages.get(i));
+         }
+         unpackedMessages.clear();
+      }
    }
 
    public void addMessageCollector(MessageIDExtractor messageIDExtractor)

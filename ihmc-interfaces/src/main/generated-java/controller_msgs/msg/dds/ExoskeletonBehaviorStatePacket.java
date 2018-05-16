@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is used to switch the control scheme between force and position control.
@@ -61,6 +62,12 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
 
 
    public static Supplier<ExoskeletonBehaviorStatePacketPubSubType> getPubSubType()
+   {
+      return ExoskeletonBehaviorStatePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ExoskeletonBehaviorStatePacketPubSubType::new;
    }

@@ -31,6 +31,23 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(PI / 2, fourBar.getAngleCDA(), eps);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstruction()
+   {
+      Random random = new Random(1738);
+      double DA = random.nextDouble();
+      double AB = random.nextDouble();
+      double BC = random.nextDouble();
+      double CD = random.nextDouble();
+
+      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
+      assertEquals(AB, fourBar.getAB(), eps);
+      assertEquals(BC, fourBar.getBC(), eps);
+      assertEquals(CD, fourBar.getCD(), eps);
+      assertEquals(DA, fourBar.getDA(), eps);
+   }
+
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSquareDer()

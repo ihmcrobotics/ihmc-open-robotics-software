@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message should disappear to be replaced by ROS equivalent.
@@ -88,6 +89,12 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
 
    public static Supplier<LidarScanMessagePubSubType> getPubSubType()
+   {
+      return LidarScanMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return LidarScanMessagePubSubType::new;
    }

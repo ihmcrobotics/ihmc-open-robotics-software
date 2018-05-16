@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
@@ -24,6 +26,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private boolean triggerSwing;
 
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+   private final FramePoint3D nextStepGoalPosition = new FramePoint3D(worldFrame);
 
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoPlaneContactState contactState, YoBoolean stepCommandIsValid, YoDouble timestamp,
                                 YoQuadrupedTimedStep stepCommand)
@@ -41,6 +44,9 @@ public class QuadrupedSupportState extends QuadrupedFootState
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
       triggerSwing = false;
+
+      if (waypointCallback != null)
+         waypointCallback.isDoneMoving(robotQuadrant, true);
    }
 
    @Override
@@ -51,7 +57,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
       {
          if (stepTransitionCallback != null)
          {
-            stepTransitionCallback.onLiftOff(robotQuadrant);
+            currentStepCommand.getGoalPosition(nextStepGoalPosition);
+            stepTransitionCallback.onLiftOff(currentStepCommand);
          }
          triggerSwing = true;
       }

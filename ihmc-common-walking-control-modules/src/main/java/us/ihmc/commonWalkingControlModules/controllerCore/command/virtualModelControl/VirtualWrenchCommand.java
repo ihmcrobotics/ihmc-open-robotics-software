@@ -554,7 +554,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    @Override
    public ControllerCoreCommandType getCommandType()
    {
-      return ControllerCoreCommandType.TASKSPACE;
+      return ControllerCoreCommandType.VIRTUAL_WRENCH;
    }
 
    @Override

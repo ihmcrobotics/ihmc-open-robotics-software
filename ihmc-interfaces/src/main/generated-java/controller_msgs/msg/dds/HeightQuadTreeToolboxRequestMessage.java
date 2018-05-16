@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC height quad tree module
@@ -72,6 +73,12 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
 
    public static Supplier<HeightQuadTreeToolboxRequestMessagePubSubType> getPubSubType()
+   {
+      return HeightQuadTreeToolboxRequestMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HeightQuadTreeToolboxRequestMessagePubSubType::new;
    }

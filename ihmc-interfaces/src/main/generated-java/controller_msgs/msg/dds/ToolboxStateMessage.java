@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC toolbox framework.
@@ -63,6 +64,12 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
 
 
    public static Supplier<ToolboxStateMessagePubSubType> getPubSubType()
+   {
+      return ToolboxStateMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ToolboxStateMessagePubSubType::new;
    }

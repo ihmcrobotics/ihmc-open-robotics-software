@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -49,6 +50,12 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
 
 
    public static Supplier<ManipulationAbortedStatusPubSubType> getPubSubType()
+   {
+      return ManipulationAbortedStatusPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ManipulationAbortedStatusPubSubType::new;
    }

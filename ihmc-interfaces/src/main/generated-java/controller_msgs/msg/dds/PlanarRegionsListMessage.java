@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC robot environment awareness module.
@@ -19,7 +20,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
    public PlanarRegionsListMessage()
    {
-      planar_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> (100, controller_msgs.msg.dds.PlanarRegionMessage.class, new controller_msgs.msg.dds.PlanarRegionMessagePubSubType());
+      planar_regions_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> (1, controller_msgs.msg.dds.PlanarRegionMessage.class, new controller_msgs.msg.dds.PlanarRegionMessagePubSubType());
 
    }
 
@@ -59,6 +60,12 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    public static Supplier<PlanarRegionsListMessagePubSubType> getPubSubType()
+   {
+      return PlanarRegionsListMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return PlanarRegionsListMessagePubSubType::new;
    }

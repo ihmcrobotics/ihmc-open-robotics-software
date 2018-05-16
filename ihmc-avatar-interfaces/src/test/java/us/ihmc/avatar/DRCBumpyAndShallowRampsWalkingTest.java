@@ -22,18 +22,18 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 
@@ -87,7 +87,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
       double desiredVelocityValue = 1.0;
-      double desiredHeadingValue = 0.0;
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
@@ -120,10 +119,9 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          nothingChangedVerifier = new NothingChangedVerifier("DRCOverShallowRampTest", scs);
       }
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       YoDouble q_x = (YoDouble) scs.getVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityX");
-      YoDouble desiredHeading = (YoDouble) scs.getVariable("desiredHeading");
+      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityCSGX");
 
 //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
@@ -132,7 +130,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
-      desiredHeading.set(desiredHeadingValue);
 
 //    ThreadTools.sleepForever();
 
@@ -169,7 +166,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 10.0;
       double desiredVelocityValue = 0.5;
-      double desiredHeadingValue = 0.0;
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
@@ -194,17 +190,15 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       YoDouble q_x = (YoDouble) scs.getVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityX");
-      YoDouble desiredHeading = (YoDouble) scs.getVariable("desiredHeading");
+      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityCSGX");
 
 //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
-      desiredHeading.set(desiredHeadingValue);
 
 //    ThreadTools.sleepForever();
 
@@ -316,8 +310,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
-      YoDouble stepLength = (YoDouble) scs.getVariable("maxStepLength");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
+      YoDouble stepLength = (YoDouble) scs.getVariable("maxStepLengthCSG");
       YoDouble offsetHeightAboveGround = (YoDouble) scs.getVariable("offsetHeightAboveGround");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
       stepLength.set(0.4);

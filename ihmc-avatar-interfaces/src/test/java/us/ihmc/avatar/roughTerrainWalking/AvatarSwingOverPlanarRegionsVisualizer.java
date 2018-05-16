@@ -21,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -140,7 +141,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       PlanarRegionsList terrain = generator.getPlanarRegionsList();
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.3);
-      graphics3DObject.addPlanarRegionsList(terrain, appearances);
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, terrain, appearances);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       stanceFootPose.setPosition(0.4, 0.3, 0.0);

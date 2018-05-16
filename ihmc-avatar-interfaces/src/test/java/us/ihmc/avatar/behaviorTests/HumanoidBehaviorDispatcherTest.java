@@ -62,8 +62,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -372,7 +372,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       assertFalse(diagnosticBehavior.isDone());
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(32.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(36.0);
       assertTrue(success);
 
       assertTrue(diagnosticBehavior.isDone());

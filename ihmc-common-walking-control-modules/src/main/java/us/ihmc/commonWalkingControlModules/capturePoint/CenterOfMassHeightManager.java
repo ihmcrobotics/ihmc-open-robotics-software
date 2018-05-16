@@ -108,7 +108,8 @@ public class CenterOfMassHeightManager
 
    public void initialize()
    {
-      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+      stateMachine.resetToInitialState();
+//      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    /**

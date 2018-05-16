@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
@@ -10,14 +14,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
+import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -25,10 +29,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
 
 public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
@@ -44,8 +44,7 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoDouble maxSwingHeight;
    private final YoDouble minSwingHeight;
 
-   public static final PolynomialOrder order = PolynomialOrder.ORDER3;
-   private final double[] tempCoeffs = new double[order.getCoefficients()];
+   private final double[] tempCoeffs = new double[TrajectoryPointOptimizer.coefficients];
 
    private final YoInteger segments;
    private final YoInteger activeSegment;
@@ -140,7 +139,7 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
    {
       int size = waypointTimes.size() + 1;
       for (Axis axis : Axis.values)
-         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.ordinal(), order.getCoefficients(), registry));
+         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.ordinal(), TrajectoryPointOptimizer.coefficients, registry));
       waypointTimes.add(new YoDouble(namePrefix + "WaypointTime" + size, registry));
    }
 
@@ -415,12 +414,14 @@ public class OneWaypointSwingGenerator implements PositionTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void showVisualization()
    {
       if (trajectoryViz != null)
          trajectoryViz.showGraphic();
    }
 
+   @Override
    public void hideVisualization()
    {
       if (trajectoryViz != null)

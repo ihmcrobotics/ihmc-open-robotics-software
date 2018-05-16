@@ -13,6 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -60,7 +61,7 @@ public class PolygonSnapperVisualizer
    public void addPlanarRegionsList(PlanarRegionsList planarRegions, AppearanceDefinition... appearances)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegionsList(planarRegions, appearances);
+      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegions, appearances);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       scs.setTime(scs.getTime() + 1.0);

@@ -78,10 +78,10 @@ public class IMUBasedJointVelocityEstimator
       CommonOps.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
 
       childAngularVelocity.setToZero(childIMU.getMeasurementFrame());
-      childIMU.getAngularVelocityMeasurement(childAngularVelocity);
+      childAngularVelocity.set(childIMU.getAngularVelocityMeasurement());
       childAngularVelocity.changeFrame(jacobian.getJacobianFrame());
       parentAngularVelocity.setToZero(parentIMU.getMeasurementFrame());
-      parentIMU.getAngularVelocityMeasurement(parentAngularVelocity);
+      parentAngularVelocity.set(parentIMU.getAngularVelocityMeasurement());
       parentAngularVelocity.changeFrame(jacobian.getJacobianFrame());
       childAngularVelocity.sub(parentAngularVelocity);
       childAngularVelocity.get(omega);

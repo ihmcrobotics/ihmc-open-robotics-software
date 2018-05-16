@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Atlas specific message: request taring of the wrist force/torque sensors.
@@ -71,6 +72,12 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
 
    public static Supplier<AtlasWristSensorCalibrationRequestPacketPubSubType> getPubSubType()
+   {
+      return AtlasWristSensorCalibrationRequestPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return AtlasWristSensorCalibrationRequestPacketPubSubType::new;
    }

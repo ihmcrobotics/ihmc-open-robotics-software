@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * General purpose message that contains vertices to represent a 2D polygon (z ignored).
@@ -18,7 +19,7 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
 
    public Polygon2DMessage()
    {
-      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 
@@ -58,6 +59,12 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
 
 
    public static Supplier<Polygon2DMessagePubSubType> getPubSubType()
+   {
+      return Polygon2DMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return Polygon2DMessagePubSubType::new;
    }

@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Specifies a specific electric motor in the Atlas forearm to power on or off.
@@ -96,6 +97,12 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
 
    public static Supplier<AtlasElectricMotorEnablePacketPubSubType> getPubSubType()
+   {
+      return AtlasElectricMotorEnablePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return AtlasElectricMotorEnablePacketPubSubType::new;
    }

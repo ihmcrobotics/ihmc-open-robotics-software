@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -89,6 +90,12 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
 
 
    public static Supplier<HumanoidBehaviorTypePacketPubSubType> getPubSubType()
+   {
+      return HumanoidBehaviorTypePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return HumanoidBehaviorTypePacketPubSubType::new;
    }

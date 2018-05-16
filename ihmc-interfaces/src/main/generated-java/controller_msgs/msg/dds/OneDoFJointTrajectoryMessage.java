@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -33,7 +34,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage()
    {
-      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage> (2000, controller_msgs.msg.dds.TrajectoryPoint1DMessage.class, new controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
+      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage> (1, controller_msgs.msg.dds.TrajectoryPoint1DMessage.class, new controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
 
    }
 
@@ -102,6 +103,12 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
 
    public static Supplier<OneDoFJointTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return OneDoFJointTrajectoryMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return OneDoFJointTrajectoryMessagePubSubType::new;
    }

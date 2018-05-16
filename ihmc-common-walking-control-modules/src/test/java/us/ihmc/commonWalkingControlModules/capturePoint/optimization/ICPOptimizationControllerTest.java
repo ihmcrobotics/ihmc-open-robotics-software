@@ -32,6 +32,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -90,7 +91,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
-
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -161,7 +162,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
-
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -232,6 +233,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -318,6 +320,7 @@ public class ICPOptimizationControllerTest
       double controlDT = 0.001;
       ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
                                                                            null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
 

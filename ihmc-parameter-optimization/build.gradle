@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.0"
+      classpath "us.ihmc:ihmc-build:0.13.7"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,13 +22,13 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.0'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.19.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

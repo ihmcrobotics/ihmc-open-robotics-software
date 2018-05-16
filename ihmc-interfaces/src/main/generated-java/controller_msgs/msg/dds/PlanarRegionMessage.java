@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC robot environment awareness module.
@@ -29,7 +30,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       concave_hull_ = new controller_msgs.msg.dds.Polygon2DMessage();
-      convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> (100, controller_msgs.msg.dds.Polygon2DMessage.class, new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
+      convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> (1, controller_msgs.msg.dds.Polygon2DMessage.class, new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
 
    }
 
@@ -101,6 +102,12 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
 
    public static Supplier<PlanarRegionMessagePubSubType> getPubSubType()
+   {
+      return PlanarRegionMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return PlanarRegionMessagePubSubType::new;
    }

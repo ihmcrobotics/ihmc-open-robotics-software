@@ -24,7 +24,6 @@ module controller_msgs
         /**
          * If true, the times are expressed in absolute time relative to the robot start
          */
-        @defaultValue(value=True)
         boolean is_expressed_in_absolute_time;
         /**
          * If true, the body height is controlled, rather than the center of mass height

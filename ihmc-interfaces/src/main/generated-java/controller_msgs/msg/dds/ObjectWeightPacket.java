@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part the IHMC humanoid behavior module.
@@ -74,6 +75,12 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
 
 
    public static Supplier<ObjectWeightPacketPubSubType> getPubSubType()
+   {
+      return ObjectWeightPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ObjectWeightPacketPubSubType::new;
    }

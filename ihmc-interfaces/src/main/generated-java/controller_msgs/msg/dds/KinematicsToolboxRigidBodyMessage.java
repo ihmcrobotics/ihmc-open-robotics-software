@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC hole-body inverse kinematics module.
@@ -239,6 +240,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    public static Supplier<KinematicsToolboxRigidBodyMessagePubSubType> getPubSubType()
+   {
+      return KinematicsToolboxRigidBodyMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return KinematicsToolboxRigidBodyMessagePubSubType::new;
    }

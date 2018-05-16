@@ -155,9 +155,9 @@ public class ICPOptimizationQPSolver
    private boolean hasFeedbackRateTerm = false;
 
    /** Minimum allowable weight on the step adjustment task. */
-   private final double minimumFootstepWeight;
+   private double minimumFootstepWeight;
    /** Minimum allowable weight on the feedback task. */
-   private final double minimumFeedbackWeight;
+   private double minimumFeedbackWeight;
 
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
@@ -178,26 +178,12 @@ public class ICPOptimizationQPSolver
     * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
     * @param computeCostToGo whether or not to compute the cost to go.
     */
-   public ICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
-      this(icpOptimizationParameters, maximumNumberOfCMPVertices, computeCostToGo, true);
+      this(maximumNumberOfCMPVertices, computeCostToGo, true);
    }
 
-
-   public ICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
-                                  boolean autoSetPreviousSolution)
-   {
-      this(icpOptimizationParameters.getMinimumFootstepWeight(), icpOptimizationParameters.getMinimumFeedbackWeight(), maximumNumberOfCMPVertices,
-           computeCostToGo, autoSetPreviousSolution);
-   }
-
-   public ICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo)
-   {
-      this(minimumFootstepWeight, minimumFeedbackWeight, maximumNumberOfCMPVertices, computeCostToGo, true);
-   }
-
-   public ICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo,
-                                  boolean autoSetPreviousSolution)
+   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution)
    {
       this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
@@ -205,8 +191,8 @@ public class ICPOptimizationQPSolver
       indexHandler = new ICPQPIndexHandler();
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      this.minimumFootstepWeight = minimumFootstepWeight;
-      this.minimumFeedbackWeight = minimumFeedbackWeight;
+      this.minimumFootstepWeight = 0.0;
+      this.minimumFeedbackWeight = 0.0;
 
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
@@ -247,6 +233,32 @@ public class ICPOptimizationQPSolver
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
       solver.setUseWarmStart(useWarmStart);
+   }
+
+   /**
+    * Sets a lower limit for the optimization weight for the feedback objective. When calling
+    * {@link #setFeedbackConditions(double, double, double, double, double)} the user can provide
+    * weights for the feedback conditions. If they are lower then the value specified here they will
+    * be increased to {@link #minimumFeedbackWeight}.
+    *
+    * @param minimumFeedbackWeight the new value {@link #minimumFeedbackWeight}.
+    */
+   public void setMinimumFeedbackWeight(double minimumFeedbackWeight)
+   {
+      this.minimumFeedbackWeight = minimumFeedbackWeight;
+   }
+
+   /**
+    * Sets a lower limit for the optimization weight for the feedback objective. When calling
+    * {@link #setFootstepAdjustmentConditions(double, double, double, double, double)} the user can provide
+    * weights for the feedback conditions. If they are lower then the value specified here they will
+    * be increased to {@link #minimumFootstepWeight}.
+    *
+    * @param minimumFootstepWeight the new value {@link #minimumFootstepWeight}.
+    */
+   public void setMinimumFootstepWeight(double minimumFootstepWeight)
+   {
+      this.minimumFootstepWeight = minimumFootstepWeight;
    }
 
    /**

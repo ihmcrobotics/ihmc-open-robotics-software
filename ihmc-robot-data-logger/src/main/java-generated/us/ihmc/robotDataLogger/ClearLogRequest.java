@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class ClearLogRequest extends Packet<ClearLogRequest> implements Settable<ClearLogRequest>, EpsilonComparable<ClearLogRequest>
 {
@@ -40,6 +42,17 @@ public class ClearLogRequest extends Packet<ClearLogRequest> implements Settable
       return guid_;
    }
 
+
+   public static Supplier<ClearLogRequestPubSubType> getPubSubType()
+   {
+      return ClearLogRequestPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return ClearLogRequestPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ClearLogRequest other, double epsilon)

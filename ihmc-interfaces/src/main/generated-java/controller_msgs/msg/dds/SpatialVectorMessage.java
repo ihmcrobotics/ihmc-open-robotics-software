@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Represents a 6D vector composed of a 3D anuglar vector and a 3D linear vector.
@@ -66,6 +67,12 @@ public class SpatialVectorMessage extends Packet<SpatialVectorMessage> implement
 
 
    public static Supplier<SpatialVectorMessagePubSubType> getPubSubType()
+   {
+      return SpatialVectorMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return SpatialVectorMessagePubSubType::new;
    }

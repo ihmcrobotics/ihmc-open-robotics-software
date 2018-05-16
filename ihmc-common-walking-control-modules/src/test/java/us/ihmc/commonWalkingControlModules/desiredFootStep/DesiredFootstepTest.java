@@ -299,8 +299,6 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(FootstepDataListMessage.class);
       netClassList.registerPacketClass(PauseWalkingMessage.class);
       netClassList.registerPacketClass(FootstepStatusMessage.class);
-      netClassList.registerPacketClass(ExecutionMode.class);
-      netClassList.registerPacketClass(ExecutionTiming.class);
 
       netClassList.registerPacketField(FootstepDataMessage.class);
       netClassList.registerPacketField(FootstepDataMessage[].class);

@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotController.RobotController;
 
 public class StewartPlatformController implements RobotController
 {

@@ -1323,7 +1323,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://multisense_sl_description/meshes/head.dae</uri>
+            <uri>model://multisense_sl_description/meshes/head.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1514,7 +1514,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://multisense_sl_description/meshes/head_camera.dae</uri>
+            <uri>model://multisense_sl_description/meshes/head_camera.obj</uri>
           </mesh>
         </geometry>
       </visual>
