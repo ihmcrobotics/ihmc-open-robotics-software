@@ -26,6 +26,7 @@ import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -58,6 +59,8 @@ public class QuadrupedBalanceManager
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
 
    private final YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D("instantaneousStepAdjustment", worldFrame, registry);
+   private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 1.0);
+   private final RateLimitedYoFrameVector limitedInstantaneousStepAdjustment;
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
 
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
@@ -104,6 +107,8 @@ public class QuadrupedBalanceManager
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
+
+      limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector("limitedInstantaneousStepAdjustment", "", registry, maxStepAdjustmentRate, runtimeEnvironment.getControlDT(), instantaneousStepAdjustment);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
@@ -296,6 +301,7 @@ public class QuadrupedBalanceManager
       instantaneousStepAdjustment.set(dcmError);
       instantaneousStepAdjustment.scale(-dcmPositionStepAdjustmentGainParameter.getValue());
       instantaneousStepAdjustment.setZ(0);
+      limitedInstantaneousStepAdjustment.update();
 
       // adjust nominal step goal positions in foot state machine
       for (int i = 0; i < activeSteps.size(); i++)
@@ -307,7 +313,7 @@ public class QuadrupedBalanceManager
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
          activeStep.getGoalPosition(tempPoint);
          tempPoint.changeFrame(worldFrame);
-         tempPoint.add(instantaneousStepAdjustment);
+         tempPoint.add(limitedInstantaneousStepAdjustment);
          crossoverProjection.project(tempPoint, robotQuadrant);
          groundPlaneEstimator.projectZ(tempPoint);
          adjustedStep.setGoalPosition(tempPoint);
@@ -329,6 +335,6 @@ public class QuadrupedBalanceManager
 
    public FrameVector3DReadOnly getStepAdjustment()
    {
-      return instantaneousStepAdjustment;
+      return limitedInstantaneousStepAdjustment;
    }
 }
