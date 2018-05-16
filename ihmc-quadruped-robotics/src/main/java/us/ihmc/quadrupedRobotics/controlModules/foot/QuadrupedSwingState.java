@@ -84,6 +84,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final FootSwitchInterface footSwitch;
 
+
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
@@ -144,6 +145,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       timeInState.set(0.0);
       controllerToolbox.getFootContactState(robotQuadrant).clear();
+      currentStepCommand.getGoalPosition(finalPosition);
+
+      if (stepTransitionCallback != null)
+      {
+         stepTransitionCallback.onLiftOff(currentStepCommand);
+      }
 
       // initialize swing trajectory
       currentStateProvider.getPosition(initialPosition);
@@ -151,7 +158,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       initialPosition.changeFrame(worldFrame);
       initialLinearVelocity.changeFrame(worldFrame);
 
-      currentStepCommand.getGoalPosition(finalPosition);
 
       finalPosition.changeFrame(worldFrame);
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());

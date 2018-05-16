@@ -236,6 +236,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
 
+      footstepStatusMessage.setFootstepQuadrant(thisStepQuadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
       footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
       footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempPoint);
@@ -326,7 +327,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // update controller state machine
       stateMachine.doActionAndTransition();
 
-      updateManagers();
+      jointSpaceManager.compute();
 
       handleChangeInContactState();
 
@@ -353,20 +354,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       groundPlaneMessage.region_origin_.set(tempPoint);
       groundPlaneMessage.region_normal_.set(tempVector);
       statusMessageOutputManager.reportStatusMessage(groundPlaneMessage);
-   }
-
-   private void updateManagers()
-   {
-      // update desired horizontal com forces
-      balanceManager.compute();
-
-      // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute();
-
-      // update desired contact state and sole forces
-      feetManager.compute();
-
-      jointSpaceManager.compute();
    }
 
    private void handleChangeInContactState()

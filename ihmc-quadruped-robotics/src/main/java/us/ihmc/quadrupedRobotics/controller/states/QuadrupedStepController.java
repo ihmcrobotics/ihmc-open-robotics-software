@@ -58,10 +58,6 @@ public class QuadrupedStepController implements QuadrupedController
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
-      // compute step adjustment
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
-      feetManager.adjustSteps(adjustedSteps);
-
       balanceManager.initializeForStepping();
    }
 
@@ -73,12 +69,21 @@ public class QuadrupedStepController implements QuadrupedController
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());
 
+      // update desired contact state and sole forces
+      feetManager.compute();
+
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
+
+      // update desired horizontal com forces
+      balanceManager.compute();
 
       // update step adjustment
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
+
+      // update desired body orientation, angular velocity, and torque
+      bodyOrientationManager.compute();
    }
 
    @Override
