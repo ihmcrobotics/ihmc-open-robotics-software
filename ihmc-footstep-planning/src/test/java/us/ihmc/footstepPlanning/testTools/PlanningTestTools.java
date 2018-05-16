@@ -29,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -107,7 +108,7 @@ public class PlanningTestTools
 //      graphics3DObject.addCoordinateSystem(0.3);
       if (planarRegionsList != null)
       {
-         graphics3DObject.addPlanarRegionsList(planarRegionsList, appearances);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, appearances);
          scs.setGroundVisible(false);
       }
       scs.addStaticLinkGraphics(graphics3DObject);

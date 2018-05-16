@@ -1,24 +1,28 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.javaFXToolkit.messager.Message;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.javaFXToolkit.messager.Messager;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Topic;
+import us.ihmc.javaFXToolkit.messager.MessagerStateListener;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryMessager;
+import us.ihmc.javaFXToolkit.messager.TopicListener;
 
 public class REAUIMessager
 {
-   private final REAMessagerSharedVariables internalMessager;
-   private final REAMessager reaMessagerToModule;
+   private final SharedMemoryMessager internalMessager;
+   private final Messager reaMessagerToModule;
 
-   public REAUIMessager(REAMessager reaMessagerToModule)
+   public REAUIMessager(Messager reaMessagerToModule)
    {
       this.reaMessagerToModule = reaMessagerToModule;
-      internalMessager = new REAMessagerSharedVariables(reaMessagerToModule.getMessagerAPI());
+      internalMessager = new SharedMemoryMessager(reaMessagerToModule.getMessagerAPI());
    }
 
    public <T> AtomicReference<T> createInput(Topic<T> topic)
@@ -51,7 +55,7 @@ public class REAUIMessager
       submitMessageInternal(topic, messageContent);
    }
 
-   public <T> void broadcastMessage(REAMessage<T> message)
+   public <T> void broadcastMessage(Message<T> message)
    {
       submitMessageToModule(message);
       submitMessageInternal(message);
@@ -59,7 +63,7 @@ public class REAUIMessager
 
    public void submitStateRequestToModule(Topic<Boolean> requestTopic)
    {
-      reaMessagerToModule.submitStateRequest(requestTopic);
+      reaMessagerToModule.submitMessage(requestTopic, true);
    }
 
    public <T> void submitMessageToModule(Topic<T> topic, T messageContent)
@@ -67,7 +71,7 @@ public class REAUIMessager
       reaMessagerToModule.submitMessage(topic, messageContent);
    }
 
-   public <T> void submitMessageToModule(REAMessage<T> message)
+   public <T> void submitMessageToModule(Message<T> message)
    {
       reaMessagerToModule.submitMessage(message);
    }
@@ -77,21 +81,22 @@ public class REAUIMessager
       internalMessager.submitMessage(topic, messageContent);
    }
 
-   public <T> void submitMessageInternal(REAMessage<T> message)
+   public <T> void submitMessageInternal(Message<T> message)
    {
       internalMessager.submitMessage(message);
    }
 
-   public <T> void registerTopicListener(Topic<T> topic, REATopicListener<T> listener)
+   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
       internalMessager.registerTopicListener(topic, listener);
       reaMessagerToModule.registerTopicListener(topic, listener);
    }
 
-   public <M, P> void bindBidirectionalInternal(Topic<M> topic, Property<P> property, PropertyToMessageTypeConverter<M, P> converterToMessageType, boolean pushValue)
+   public <M, P> void bindBidirectionalInternal(Topic<M> topic, Property<P> property, PropertyToMessageTypeConverter<M, P> converterToMessageType,
+                                                boolean pushValue)
    {
       MessageBidirectionalBinding<M, P> bind = new MessageBidirectionalBinding<>(messageContent -> submitMessageInternal(topic, messageContent), property,
-            converterToMessageType);
+                                                                                 converterToMessageType);
       property.addListener(bind);
       internalMessager.registerTopicListener(topic, bind);
       if (pushValue)
@@ -100,8 +105,9 @@ public class REAUIMessager
 
    public <T> void bindBidirectionalInternal(Topic<T> topic, Property<T> property, boolean pushValue)
    {
-      MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding
-            .createSingleTypedBinding(messageContent -> submitMessageInternal(topic, messageContent), property);
+      MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding.createSingleTypedBinding(messageContent -> submitMessageInternal(topic,
+                                                                                                                                            messageContent),
+                                                                                                    property);
       property.addListener(bind);
       internalMessager.registerTopicListener(topic, bind);
       if (pushValue)
@@ -110,8 +116,9 @@ public class REAUIMessager
 
    public <T> void bindBidirectionalModule(Topic<T> topic, Property<T> property)
    {
-      MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding
-            .createSingleTypedBinding(messageContent -> submitMessageToModule(topic, messageContent), property);
+      MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding.createSingleTypedBinding(messageContent -> submitMessageToModule(topic,
+                                                                                                                                            messageContent),
+                                                                                                    property);
       property.addListener(bind);
       reaMessagerToModule.registerTopicListener(topic, bind);
    }
@@ -119,7 +126,7 @@ public class REAUIMessager
    public <M, P> void bindBidirectionalGlobal(Topic<M> topic, Property<P> property, PropertyToMessageTypeConverter<M, P> converterToMessageType)
    {
       MessageBidirectionalBinding<M, P> bind = new MessageBidirectionalBinding<>(messageContent -> broadcastMessage(topic, messageContent), property,
-            converterToMessageType);
+                                                                                 converterToMessageType);
       property.addListener(bind);
       internalMessager.registerTopicListener(topic, bind);
       reaMessagerToModule.registerTopicListener(topic, bind);
@@ -128,7 +135,7 @@ public class REAUIMessager
    public <T> void bindBidirectionalGlobal(Topic<T> topic, Property<T> property)
    {
       MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding.createSingleTypedBinding(messageContent -> broadcastMessage(topic, messageContent),
-            property);
+                                                                                                    property);
       property.addListener(bind);
       internalMessager.registerTopicListener(topic, bind);
       reaMessagerToModule.registerTopicListener(topic, bind);
@@ -155,13 +162,13 @@ public class REAUIMessager
       observableValue.addListener((observable) -> broadcastMessage(topic, observableValue.getValue()));
    }
 
-   public void startMessager() throws IOException
+   public void startMessager() throws Exception
    {
       internalMessager.startMessager();
       reaMessagerToModule.startMessager();
    }
 
-   public void closeMessager()
+   public void closeMessager() throws Exception
    {
       internalMessager.closeMessager();
       reaMessagerToModule.closeMessager();
@@ -177,14 +184,13 @@ public class REAUIMessager
       return reaMessagerToModule.isMessagerOpen();
    }
 
-   public void registerModuleConnectionStateListener(ConnectionStateListener listener)
+   public void registerModuleMessagerStateListener(MessagerStateListener listener)
    {
-      reaMessagerToModule.registerConnectionStateListener(listener);
+      reaMessagerToModule.registerMessagerStateListener(listener);
    }
 
-
-   public void notifyModuleConnectionStateListeners()
+   public void notifyModuleMessagerStateListeners()
    {
-      reaMessagerToModule.notifyConnectionStateListeners();
+      reaMessagerToModule.notifyMessagerStateListeners();
    }
 }

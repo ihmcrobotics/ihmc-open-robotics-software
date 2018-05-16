@@ -13,7 +13,7 @@ public enum BDIRobotBehavior
    CALIBRATE,
    SOFT_STOP;
    
-   public static BDIRobotBehavior[] values = values();
+   public static final BDIRobotBehavior[] values = values();
 
    public byte toByte()
    {
@@ -22,6 +22,8 @@ public enum BDIRobotBehavior
 
    public static BDIRobotBehavior fromByte(byte enumAsByte)
    {
+      if (enumAsByte == -1)
+         return null;
       return values[enumAsByte];
    }
 }

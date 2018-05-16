@@ -42,7 +42,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 2000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -79,7 +79,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getTrajectoryPoints().size() <= 2000)
+      if(data.getTrajectoryPoints().size() <= 1)
       cdr.write_type_e(data.getTrajectoryPoints());else
           throw new RuntimeException("trajectory_points field exceeds the maximum length");
 

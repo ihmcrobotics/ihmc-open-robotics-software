@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.input;
 
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -11,23 +10,21 @@ import java.util.Random;
 public class QuadrupedTestTeleopScript implements Script
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final QuadrupedStepTeleopManager stepTeleopManager;
-   private final QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
+   private final QuadrupedTeleopManager teleopManager;
    private final YoInteger counter = new YoInteger("counter", registry);
    private final int updateFrequency;
 
    private final Random random = new Random(125937L);
    private final int updateJitter;
 
-   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager teleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency, YoVariableRegistry parentRegistry)
+   public QuadrupedTestTeleopScript(QuadrupedTeleopManager teleopManager, int updateFrequency, YoVariableRegistry parentRegistry)
    {
-      this(teleopManager, bodyPoseTeleopManager, updateFrequency, 0, parentRegistry);
+      this(teleopManager, updateFrequency, 0, parentRegistry);
    }
 
-   public QuadrupedTestTeleopScript(QuadrupedStepTeleopManager stepTeleopManager, QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager, int updateFrequency, int updateJitter, YoVariableRegistry parentRegistry)
+   public QuadrupedTestTeleopScript(QuadrupedTeleopManager teleopManager, int updateFrequency, int updateJitter, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = stepTeleopManager;
-      this.bodyPoseTeleopManager = bodyPoseTeleopManager;
+      this.teleopManager = teleopManager;
       this.updateFrequency = updateFrequency;
       this.updateJitter = updateJitter;
       parentRegistry.addChild(registry);
@@ -38,8 +35,7 @@ public class QuadrupedTestTeleopScript implements Script
    {
       if(counter.getIntegerValue() == 0)
       {
-         stepTeleopManager.update();
-         bodyPoseTeleopManager.update();
+         teleopManager.update();
          updateCounter();
       }
       else

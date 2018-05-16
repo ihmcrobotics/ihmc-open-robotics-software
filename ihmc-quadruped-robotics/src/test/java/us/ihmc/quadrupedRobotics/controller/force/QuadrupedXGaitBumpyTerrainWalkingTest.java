@@ -11,10 +11,9 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -24,8 +23,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -40,8 +38,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = null;
       variables = null;
       stepTeleopManager = null;
-      poseTeleopManager = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
@@ -58,7 +55,6 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -109,16 +105,17 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      
-      poseTeleopManager.setDesiredCoMHeight(0.55);
+
+      stepTeleopManager.setDesiredCoMHeight(0.55);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
-      
+
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
       stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.075);
+      stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
       conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));
       conductor.addTimeLimit(variables.getYoTime(), 20.0);

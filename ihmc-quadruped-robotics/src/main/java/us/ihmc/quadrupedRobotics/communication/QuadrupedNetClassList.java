@@ -70,6 +70,8 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(StringBuilder.class);
       registerPacketField(StringBuilder[].class);
 
+      registerPacketClass(CenterOfMassTrajectoryMessage.class);
+
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketField(VideoPacket.class);
@@ -178,5 +180,12 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(IMUPacketPubSubType.class);
       registerPacketField(QuadrupedTimedStepMessagePubSubType.class);
       registerPacketField(PointPubSubType.class);
+
+      // planner messages
+      registerPacketClass(QuadrupedBodyPathPlanMessage.class);
+      registerPacketField(QuadrupedBodyPathPlanMessagePubSubType.class);
+
+      registerPacketClass(QuadrupedFootstepStatusMessage.class);
+      registerPacketClass(QuadrupedGroundPlaneMessage.class);
    }
 }

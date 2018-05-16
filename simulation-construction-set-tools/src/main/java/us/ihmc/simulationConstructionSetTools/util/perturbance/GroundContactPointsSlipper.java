@@ -15,9 +15,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 //Used to make ground contact points slip a delta.
 public class GroundContactPointsSlipper implements RobotController

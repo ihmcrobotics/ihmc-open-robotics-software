@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>

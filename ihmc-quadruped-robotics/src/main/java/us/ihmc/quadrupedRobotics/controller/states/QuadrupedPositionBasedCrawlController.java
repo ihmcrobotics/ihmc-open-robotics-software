@@ -1025,7 +1025,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       if (swingQuadrant != null)
          currentSupportPolygon.removeFootstep(swingQuadrant);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      distanceInside.set(currentSupportPolygon.getDistanceInside2d(centerOfMassFramePoint));
+      distanceInside.set(-currentSupportPolygon.signedDistance(centerOfMassFramePoint));
    }
 
    private void updateGraphics()
@@ -1611,7 +1611,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             lineSegment.perpendicular(true, perpendicularBisector);
             perpendicularBisector.scale(-bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
-            if (!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
+            if (!tripleStateWithoutCurrentSwing.isPointInside(circleCenter2d))
             {
                perpendicularBisector.scale(-1.0);
                circleCenter2d.add(midpoint, perpendicularBisector);
@@ -1622,7 +1622,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          /**
           * something went wrong!
           */
-         if (!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
+         if (!tripleStateWithoutCurrentSwing.isPointInside(circleCenter2d))
          {
             System.err.println(safeToShiftMode + " tried to shift outside of the support polygon. Fix this");
             tripleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
@@ -1871,7 +1871,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          commonSupportPolygon.set(commonTriangle);
          double radius = subCircleRadius.getDoubleValue();
-         boolean hasEnoughSides = commonSupportPolygon.size() >= 3;
+         boolean hasEnoughSides = commonSupportPolygon.getNumberOfVertices() >= 3;
          boolean requestedRadiusLargerThanInCircle = true;
          if (useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
@@ -1987,7 +1987,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
 
-         return estimatedCommonTriangle.get(swingLeg).isInside(centerOfMassFramePoint);
+         return estimatedCommonTriangle.get(swingLeg).isPointInside(centerOfMassFramePoint);
       }
 
       /**
@@ -1999,7 +1999,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
          fourFootSupportPolygon.getAndRemoveFootstep(temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg, swingLeg);
          //         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.isInside(centerOfMassFramePoint);
-         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.getDistanceInside2d(centerOfMassFramePoint)
+         return -temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.signedDistance(centerOfMassFramePoint)
                > distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
       }
 
@@ -2172,7 +2172,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          if (swingQuadrant != null)
             currentSupportPolygon.removeFootstep(swingQuadrant);
          cOMTarget.changeFrame(ReferenceFrame.getWorldFrame());
-         double distanceInside = currentSupportPolygon.getDistanceInside2d(cOMTarget);
+         double distanceInside = -currentSupportPolygon.signedDistance(cOMTarget);
          return distanceInside > thresholdDistance;
       }
 

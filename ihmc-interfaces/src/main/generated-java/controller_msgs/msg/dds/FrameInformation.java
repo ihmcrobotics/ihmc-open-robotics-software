@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class FrameInformation extends Packet<FrameInformation> implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
 {
@@ -145,6 +146,12 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
 
    public static Supplier<FrameInformationPubSubType> getPubSubType()
+   {
+      return FrameInformationPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return FrameInformationPubSubType::new;
    }

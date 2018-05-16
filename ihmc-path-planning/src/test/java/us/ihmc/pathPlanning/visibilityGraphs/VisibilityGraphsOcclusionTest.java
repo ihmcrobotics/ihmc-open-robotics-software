@@ -40,6 +40,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -84,7 +85,7 @@ public class VisibilityGraphsOcclusionTest
    public TestName name = new TestName();
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
@@ -94,7 +95,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testFlatGroundWithWall()
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -113,7 +114,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
@@ -134,7 +135,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testCrazyBridgeEnvironment()
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
@@ -456,7 +457,7 @@ public class VisibilityGraphsOcclusionTest
       graphics3DObject.addCoordinateSystem(0.8);
       if (regions != null)
       {
-         graphics3DObject.addPlanarRegionsList(regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
          scs.setGroundVisible(false);
       }
 

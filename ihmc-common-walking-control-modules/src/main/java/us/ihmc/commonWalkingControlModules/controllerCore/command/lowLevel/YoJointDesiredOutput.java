@@ -24,6 +24,8 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    private final YoDouble velocityScaling;
    private final YoDouble velocityIntegrationBreakFrequency;
    private final YoDouble positionIntegrationBreakFrequency;
+   private final YoDouble maxPositionError;
+   private final YoDouble maxVelocityError;
 
    public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -43,6 +45,8 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       velocityScaling = new YoDouble(namePrefix + "VelocityScaling" + suffixString, registry);
       velocityIntegrationBreakFrequency = new YoDouble(namePrefix + "VelocityIntegrationBreakFrequency" + suffixString, registry);
       positionIntegrationBreakFrequency = new YoDouble(namePrefix + "PositionIntegrationBreakFrequency" + suffixString, registry);
+      maxPositionError = new YoDouble(namePrefix + "MaxPositionError" + suffixString, registry);
+      maxVelocityError = new YoDouble(namePrefix + "MaxVelocityError" + suffixString, registry);
 
       clear();
    }
@@ -60,6 +64,8 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       velocityScaling.set(Double.NaN);
       velocityIntegrationBreakFrequency.set(Double.NaN);
       positionIntegrationBreakFrequency.set(Double.NaN);
+      maxPositionError.set(Double.NaN);
+      maxVelocityError.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -77,6 +83,8 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       velocityScaling.set(other.getVelocityScaling());
       velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
       positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
+      maxPositionError.set(other.getMaxPositionError());
+      maxVelocityError.set(other.getMaxVelocityError());
    }
 
    /**
@@ -109,6 +117,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
          velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
       if(!hasPositionIntegrationBreakFrequency())
          positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
+      if(!hasMaxPositionError())
+         maxPositionError.set(other.getMaxPositionError());
+      if(!hasMaxVelocityError())
+         maxVelocityError.set(other.getMaxVelocityError());
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -315,5 +327,39 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
    {
       this.positionIntegrationBreakFrequency.set(positionIntegrationBreakFrequency);
+   }
+
+   @Override
+   public boolean hasMaxPositionError()
+   {
+      return maxPositionError.isNaN();
+   }
+
+   @Override
+   public double getMaxPositionError()
+   {
+      return maxPositionError.getDoubleValue();
+   }
+
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError.set(maxPositionError);
+   }
+
+   @Override
+   public boolean hasMaxVelocityError()
+   {
+      return maxVelocityError.isNaN();
+   }
+
+   @Override
+   public double getMaxVelocityError()
+   {
+      return maxVelocityError.getDoubleValue();
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.maxVelocityError.set(maxVelocityError);
    }
 }

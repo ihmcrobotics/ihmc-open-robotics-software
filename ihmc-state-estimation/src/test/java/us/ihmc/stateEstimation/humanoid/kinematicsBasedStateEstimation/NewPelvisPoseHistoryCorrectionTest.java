@@ -244,7 +244,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    private YoDouble maximumErrorTranslation;
    private YoDouble maximumErrorAngleInDegrees;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -320,7 +320,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = {IntegrationCategory.EXCLUDE}) // This test used to hack the rootBody and 6-DoF joint in a way that is not possible since the feature 'feature/moving-reference-frame'.
    @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {

@@ -17,6 +17,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
    private double velocityScaling = Double.NaN;
    private double velocityIntegrationBreakFrequency = Double.NaN;
    private double positionIntegrationBreakFrequency = Double.NaN;
+   private double maxPositionError = Double.NaN;
+   private double maxVelocityError = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -39,6 +41,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       velocityScaling = Double.NaN;
       velocityIntegrationBreakFrequency = Double.NaN;
       positionIntegrationBreakFrequency = Double.NaN;
+      maxPositionError = Double.NaN;
+      maxVelocityError = Double.NaN;
    }
 
    public void set(JointDesiredOutputReadOnly other)
@@ -55,6 +59,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       velocityScaling = other.getVelocityScaling();
       velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
       positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
+      maxPositionError = other.getMaxPositionError();
+      maxVelocityError = other.getMaxVelocityError();
    }
 
    /**
@@ -87,6 +93,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
          velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
       if (!hasPositionIntegrationBreakFrequency())
          positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
+      if (!hasMaxPositionError())
+         maxPositionError = other.getMaxPositionError();
+      if (!hasMaxVelocityError())
+         maxVelocityError = other.getMaxVelocityError();
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -294,5 +304,39 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
    public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
    {
       this.positionIntegrationBreakFrequency = positionIntegrationBreakFrequency;
+   }
+
+   @Override
+   public boolean hasMaxPositionError()
+   {
+      return !Double.isNaN(maxPositionError);
+   }
+
+   @Override
+   public double getMaxPositionError()
+   {
+      return maxPositionError;
+   }
+
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError = maxPositionError;
+   }
+
+   @Override
+   public boolean hasMaxVelocityError()
+   {
+      return !Double.isNaN(maxVelocityError);
+   }
+
+   @Override
+   public double getMaxVelocityError()
+   {
+      return maxVelocityError;
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.maxVelocityError = maxVelocityError;
    }
 }

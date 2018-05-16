@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class FisheyePacket extends Packet<FisheyePacket> implements Settable<FisheyePacket>, EpsilonComparable<FisheyePacket>
 {
@@ -54,6 +55,12 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
 
 
    public static Supplier<FisheyePacketPubSubType> getPubSubType()
+   {
+      return FisheyePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return FisheyePacketPubSubType::new;
    }

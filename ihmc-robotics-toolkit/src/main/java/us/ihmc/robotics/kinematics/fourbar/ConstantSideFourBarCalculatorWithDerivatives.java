@@ -266,21 +266,21 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    
    public double getAB()
    {
-      return a;
+      return b;
    }
    
    public double getBC()
    {
-      return b;
+      return c;
    }
    
    public double getCD()
    {
-      return c;
+      return d;
    }
    
    public double getDA()
    {
-      return d;
+      return a;
    }
 }

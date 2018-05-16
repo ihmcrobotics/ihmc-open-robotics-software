@@ -19,22 +19,18 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedRobotControllerFactory;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
+import us.ihmc.quadrupedRobotics.model.*;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -47,17 +43,18 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.*;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
@@ -91,6 +88,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
    private final RequiredFactoryField<GroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
    private final RequiredFactoryField<QuadrupedInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
+   private final RequiredFactoryField<QuadrupedInitialOffsetAndYaw> initialOffset = new RequiredFactoryField<>("initialOffset");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
    private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
    private final RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
@@ -108,6 +106,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
+   private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
@@ -355,7 +354,7 @@ public class QuadrupedSimulationFactory
 
    private void createGroundContactModel()
    {
-      if (!providedGroundProfile3D.hasValue())
+      if (!providedGroundProfile3D.hasValue() && !providedTerrainObject3D.hasValue())
       {
          switch (groundContactModelType.get())
          {
@@ -382,6 +381,13 @@ public class QuadrupedSimulationFactory
             break;
          }
       }
+      else if (providedTerrainObject3D.hasValue())
+      {
+         if (providedGroundProfile3D.hasValue())
+            throw new RuntimeException("You can only set either a terrain object or a ground profile.");
+
+         groundProfile3D = providedTerrainObject3D.get();
+      }
       else
       {
          groundProfile3D = providedGroundProfile3D.get();
@@ -403,6 +409,8 @@ public class QuadrupedSimulationFactory
 
    private void setupSDFRobot()
    {
+      initialPositionParameters.get().offsetInitialConfiguration(initialOffset.get());
+
       int simulationTicksPerControllerTick = (int) Math.round(controlDT.get() / simulationDT.get());
       sdfRobot.get().setController(simulationController, simulationTicksPerControllerTick);
       sdfRobot.get().setPositionInWorld(initialPositionParameters.get().getInitialBodyPosition());
@@ -473,13 +481,18 @@ public class QuadrupedSimulationFactory
       setupJointElasticity();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
-      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
+      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
       {
          scs.setGroundVisible(false);
       }
       if (scsBufferSize.hasValue())
       {
          scs.setMaxBufferSize(scsBufferSize.get());
+      }
+
+      if (providedTerrainObject3D.hasValue())
+      {
+         scs.addStaticLinkGraphics(providedTerrainObject3D.get().getLinkGraphics());
       }
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -595,6 +608,11 @@ public class QuadrupedSimulationFactory
       this.initialPositionParameters.set(initialPositionParameters);
    }
 
+   public void setInitialOffset(QuadrupedInitialOffsetAndYaw initialOffset)
+   {
+      this.initialOffset.set(initialOffset);
+   }
+
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
    {
       this.physicalProperties.set(physicalProperties);
@@ -663,6 +681,11 @@ public class QuadrupedSimulationFactory
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       providedGroundProfile3D.set(groundProfile3D);
+   }
+
+   public void setTerrainObject3D(TerrainObject3D terrainObject3D)
+   {
+      providedTerrainObject3D.set(terrainObject3D);
    }
 
    public void setUsePushRobotController(boolean usePushRobotController)

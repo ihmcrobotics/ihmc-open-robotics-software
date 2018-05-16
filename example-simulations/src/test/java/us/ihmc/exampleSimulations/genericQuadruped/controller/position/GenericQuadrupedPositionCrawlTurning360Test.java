@@ -8,12 +8,12 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlTurning360Test;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class GenericQuadrupedPositionCrawlTurning360Test extends QuadrupedPositionCrawlTurning360Test
 {
    @Override

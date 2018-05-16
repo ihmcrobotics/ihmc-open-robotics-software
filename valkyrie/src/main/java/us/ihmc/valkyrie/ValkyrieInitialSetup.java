@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
@@ -35,14 +35,14 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    @Override
    public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      if(!robotInitialized)
+      if (!robotInitialized)
       {
          setActuatorPositions(robot, jointMap);
          positionRobotInWorld(robot);
          robotInitialized = true;
       }
    }
-   
+
    private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -52,7 +52,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
          String anklePitch = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH);
          String hipRoll = jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL);
          String ankleRoll = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL);
-         
+
          robot.getOneDegreeOfFreedomJoint(hipPitch).setQ(-0.6);
          robot.getOneDegreeOfFreedomJoint(knee).setQ(1.3);
          robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.65);
@@ -63,7 +63,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
          String shoulderPitch = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
          String elbowPitch = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
          String elbowRoll = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL);
-         
+
          if (shoulderRoll != null)
             robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(robotSide.negateIfRightSide(-1.2));//inv
          if (shoulderPitch != null)
@@ -75,7 +75,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       }
       robot.update();
    }
-   
+
    private void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJointToWorldTransform(rootToWorld);
@@ -83,31 +83,38 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       positionInWorld.setZ(groundZ + getPelvisToFoot(robot));
       positionInWorld.add(offset);
       robot.setPositionInWorld(positionInWorld);
-      
+
       FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
       double[] yawPitchRoll = new double[3];
       frameOrientation.getYawPitchRoll(yawPitchRoll);
       yawPitchRoll[0] = initialYaw;
       frameOrientation.setYawPitchRoll(yawPitchRoll);
-      
+
       robot.setOrientation(frameOrientation);
       robot.update();
    }
-   
+
    private double getPelvisToFoot(HumanoidFloatingRootJointRobot robot)
    {
       List<GroundContactPoint> contactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
       double height = Double.POSITIVE_INFINITY;
-      for(GroundContactPoint gc : contactPoints)
+
+      if (contactPoints.size() == 0)
+         height = -1.0050100629487357;
+      else
       {
-         if(gc.getPositionPoint().getZ() < height)
+         for (GroundContactPoint gc : contactPoints)
          {
-            height = gc.getPositionPoint().getZ();
+            if (gc.getPositionPoint().getZ() < height)
+            {
+               height = gc.getPositionPoint().getZ();
+            }
          }
       }
+
       return offset.getZ() - height;
    }
-   
+
    public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);

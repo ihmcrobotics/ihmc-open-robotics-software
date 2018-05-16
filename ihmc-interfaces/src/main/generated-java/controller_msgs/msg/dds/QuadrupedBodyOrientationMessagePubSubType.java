@@ -44,6 +44,8 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -65,6 +67,9 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSo3Trajectory(), current_alignment);
 
 
@@ -77,6 +82,8 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
 
+      cdr.write_type_7(data.getIsAnOffsetOrientation());
+
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getSo3Trajectory(), cdr);
    }
 
@@ -85,6 +92,8 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
       data.setSequenceId(cdr.read_type_4());
       	
       data.setIsExpressedInAbsoluteTime(cdr.read_type_7());
+      	
+      data.setIsAnOffsetOrientation(cdr.read_type_7());
       	
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);	
 
@@ -95,6 +104,7 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
+      ser.write_type_7("is_an_offset_orientation", data.getIsAnOffsetOrientation());
       ser.write_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }
@@ -104,6 +114,7 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
+      data.setIsAnOffsetOrientation(ser.read_type_7("is_an_offset_orientation"));
       ser.read_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }

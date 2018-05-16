@@ -142,12 +142,16 @@ public class JointSettingsHelper
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersLoaded);
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersLoaded.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersLoaded.getPositionBreakFrequency());
+            jointDesiredOutput.setMaxPositionError(integrationParametersLoaded.getMaxPositionError());
+            jointDesiredOutput.setMaxVelocityError(integrationParametersLoaded.getMaxVelocity());
          }
          else if (integrationParametersNoLoad != null)
          { // The joint is not loaded or we do not have parameters for the loaded joint but we have default no load parameters.
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersNoLoad);
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersNoLoad.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersNoLoad.getPositionBreakFrequency());
+            jointDesiredOutput.setMaxPositionError(integrationParametersNoLoad.getMaxPositionError());
+            jointDesiredOutput.setMaxVelocityError(integrationParametersNoLoad.getMaxVelocity());
          }
 
          JointDesiredBehaviorReadOnly desiredBehaviorNoLoad = jointDesiredBehaviorNoLoad[jointIdx];

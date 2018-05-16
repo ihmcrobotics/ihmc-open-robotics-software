@@ -9,7 +9,9 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SimulatedQuadrupedOutputWriter implements OutputWriter
 {
@@ -20,7 +22,10 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
    private final LowLevelStateList lowLevelStateList;
    private final HashMap<OneDoFJoint, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
 
-   public SimulatedQuadrupedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputListReadOnly jointDesiredOutputList,
+   private final List<QuadrupedJointController> quadrupedJoints = new ArrayList<>();
+
+
+   public SimulatedQuadrupedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputList jointDesiredOutputList,
                                          double controlDT)
    {
       this.jointDesiredOutputList = jointDesiredOutputList;
@@ -35,6 +40,8 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
          LowLevelActuatorSimulator actuator = new LowLevelActuatorSimulator(simulatedJoint, lowLevelStateList.getLowLevelState(controllerJoint), controlDT);
          quadrupedActuators.put(controllerJoint, actuator);
          robot.setController(actuator);
+
+         quadrupedJoints.add(new QuadrupedJointController(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), registry));
       }
 
       robot.getRobotsYoVariableRegistry().addChild(registry);
@@ -54,6 +61,11 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
    @Override
    public void write()
    {
+      for (int i = 0; i < controllerJoints.length; i++)
+      {
+         quadrupedJoints.get(i).computeDesiredStateFromJointController();
+      }
+
       for (OneDoFJoint controllerJoint : controllerJoints)
       {
          LowLevelState desiredState = lowLevelStateList.getLowLevelState(controllerJoint);

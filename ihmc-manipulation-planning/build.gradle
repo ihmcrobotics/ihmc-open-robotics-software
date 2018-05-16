@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.0"
+      classpath "us.ihmc:ihmc-build:0.13.7"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -34,8 +34,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.2"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
 }

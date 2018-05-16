@@ -30,10 +30,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.commons.thread.ThreadTools;
 

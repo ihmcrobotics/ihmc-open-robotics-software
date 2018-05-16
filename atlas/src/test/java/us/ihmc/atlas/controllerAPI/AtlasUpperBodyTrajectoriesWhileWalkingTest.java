@@ -12,19 +12,15 @@ import org.junit.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -32,12 +28,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -53,7 +48,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AtlasUpperBodyTrajectoriesWhileWalkingTest
@@ -217,59 +211,18 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       double transferTime = walkingControllerParameters.getDefaultTransferTime();
       double stepTime = swingTime + transferTime;
 
-      RateBasedDesiredHeadingControlModule desiredHeadingControlModule = new RateBasedDesiredHeadingControlModule(0.0, robotModel.getControllerDT(), registry);
-      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(
-            desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
-
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
-      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory.setReferenceFrames(referenceFrames);
-      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
-      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
-      contactableBodiesFactory.disposeFactory();
-
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
-            bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
-
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
-
-      desiredFootstepCalculator.initialize();
-      FootstepDataListMessage footsteps = computeNextFootsteps(RobotSide.LEFT, desiredFootstepCalculator, stepTime);
+      Vector2D desiredVelocity = new Vector2D(0.15, 0.0);
+      int numberOfSteps = 30;
+      FootstepDataListMessage footsteps = EndToEndPelvisTrajectoryMessageTest.computeNextFootsteps(numberOfSteps, RobotSide.LEFT, referenceFrames.getSoleFrames(), walkingControllerParameters,
+                                                                                                   desiredVelocity);
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
 
-      int numberOfSteps = footsteps.getFootstepDataList().size();
       drcSimulationTestHelper.send(footsteps);
 
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
       return timeToCompleteWalking;
-   }
-
-   private FootstepDataListMessage computeNextFootsteps(RobotSide supportLeg, ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator, double stepTime)
-   {
-      componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
-      FootstepDataMessage footStep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(Double.NaN, Double.NaN);
-
-      RobotSide robotSide = supportLeg;
-      FootstepDataMessage previousFootStep = footStep;
-      for (int i = 0; i < 30; i++)
-      {
-         footStep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(robotSide, previousFootStep, stepTime * i, stepTime);
-         footsteps.getFootstepDataList().add().set(footStep);
-         robotSide = robotSide.getOppositeSide();
-         previousFootStep = footStep;
-      }
-
-      return footsteps;
    }
 
    @Before

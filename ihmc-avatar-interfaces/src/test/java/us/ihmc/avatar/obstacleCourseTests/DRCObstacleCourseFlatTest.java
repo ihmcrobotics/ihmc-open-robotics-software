@@ -35,9 +35,9 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -269,7 +269,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -367,7 +367,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -475,7 +475,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();

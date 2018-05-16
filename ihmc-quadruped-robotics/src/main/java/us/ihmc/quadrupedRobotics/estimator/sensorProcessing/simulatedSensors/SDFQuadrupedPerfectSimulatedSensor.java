@@ -15,9 +15,9 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.simulationConstructionSetTools.simulatedSensors.SimulatedContactBasedFootSwitch;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedContactBasedFootSwitch;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly, SensorReader
@@ -30,6 +30,11 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
    public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, FullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
+      this(RobotQuadrant.values, sdfRobot, fullRobotModel, referenceFrames);
+   }
+
+   public SDFQuadrupedPerfectSimulatedSensor(RobotQuadrant[] quadrants,  FloatingRootJointRobot sdfRobot, FullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
+   {
       super(sdfRobot, fullRobotModel, referenceFrames);
 
       sensorOneDoFJoints = fullRobotModel.getOneDoFJoints();
@@ -37,7 +42,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       //FootSwitches
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
 
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for(RobotQuadrant quadrant : quadrants)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
          InverseDynamicsJoint jointBeforeFoot = fullRobotModel.getFoot(quadrant).getParentJoint();

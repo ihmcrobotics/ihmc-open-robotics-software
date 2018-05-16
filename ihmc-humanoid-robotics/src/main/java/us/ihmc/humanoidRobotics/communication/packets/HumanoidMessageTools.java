@@ -989,6 +989,19 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, RobotSide robotSide)
+   {
+      FootstepStatusMessage message = new FootstepStatusMessage();
+      message.setFootstepStatus(status.toByte());
+      message.setFootstepIndex(footstepIndex);
+      message.getDesiredFootPositionInWorld().setToNaN();
+      message.getDesiredFootOrientationInWorld().setToNaN();
+      message.getActualFootPositionInWorld().setToNaN();
+      message.getActualFootOrientationInWorld().setToNaN();
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
    public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
                                                             Quaternion actualFootOrientationInWorld)
    {

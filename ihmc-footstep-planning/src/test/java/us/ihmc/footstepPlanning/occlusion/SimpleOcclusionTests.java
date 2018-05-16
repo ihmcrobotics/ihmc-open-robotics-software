@@ -48,6 +48,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -78,7 +79,7 @@ public class SimpleOcclusionTests
    public TestName name = new TestName();
 
    @Test(timeout = 300000)
-   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
    public void testSimpleOcclusions()
    {
       FramePose3D startPose = new FramePose3D();
@@ -411,7 +412,7 @@ public class SimpleOcclusionTests
       graphics3DObject.addCoordinateSystem(0.8);
       if (regions != null)
       {
-         graphics3DObject.addPlanarRegionsList(regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
          scs.setGroundVisible(false);
       }
 

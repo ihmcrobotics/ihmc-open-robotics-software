@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC localization module.
@@ -101,6 +102,12 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
 
    public static Supplier<StampedPosePacketPubSubType> getPubSubType()
+   {
+      return StampedPosePacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return StampedPosePacketPubSubType::new;
    }

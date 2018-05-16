@@ -16,8 +16,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -28,8 +27,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -46,7 +44,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-         poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
       }
       catch (IOException e)
       {
@@ -60,7 +57,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor = null;
       variables = null;
       stepTeleopManager = null;
-      poseTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -147,7 +143,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      poseTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+      stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), desiredCoMHeight, 0.01));
       conductor.simulate();
@@ -158,7 +154,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       for (double heightDelta = 0.0; (originalHeight + heightDelta) > 0.38; heightDelta -= 0.01)
       {
          double desiredCoMHeight = originalHeight + heightDelta;
-         poseTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+         stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -186,7 +182,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       for (double heightDelta = 0.38 - originalHeight; (originalHeight + heightDelta) < originalHeight; heightDelta += 0.01)
       {
          double desiredCoMHeight = originalHeight + heightDelta;
-         poseTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+         stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

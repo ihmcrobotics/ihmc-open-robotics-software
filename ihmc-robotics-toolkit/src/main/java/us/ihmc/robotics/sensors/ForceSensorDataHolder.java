@@ -96,6 +96,12 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
       forceSensors.get(key).getWrench(wrenchToPack);
    }
 
+   @Override
+   public void getForceSensorValue(ForceSensorDefinition key, DenseMatrix64F wrenchToPack)
+   {
+      forceSensors.get(key).getWrench(wrenchToPack);
+   }
+
    public void calculateChecksum(GenericCRC32 checksum)
    {
       for (int i = 0; i < forceSensorDefinitions.size(); i++)

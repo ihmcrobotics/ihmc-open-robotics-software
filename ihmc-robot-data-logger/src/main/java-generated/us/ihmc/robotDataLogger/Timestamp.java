@@ -3,6 +3,8 @@ package us.ihmc.robotDataLogger;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class Timestamp extends Packet<Timestamp> implements Settable<Timestamp>, EpsilonComparable<Timestamp>
 {
@@ -33,6 +35,17 @@ public class Timestamp extends Packet<Timestamp> implements Settable<Timestamp>,
       return timestamp_;
    }
 
+
+   public static Supplier<TimestampPubSubType> getPubSubType()
+   {
+      return TimestampPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return TimestampPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Timestamp other, double epsilon)

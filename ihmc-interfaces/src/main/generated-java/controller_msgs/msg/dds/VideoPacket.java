@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPacket>, EpsilonComparable<VideoPacket>
 {
@@ -113,6 +114,12 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
 
    public static Supplier<VideoPacketPubSubType> getPubSubType()
+   {
+      return VideoPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return VideoPacketPubSubType::new;
    }

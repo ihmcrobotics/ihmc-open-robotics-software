@@ -16,7 +16,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
    @Override

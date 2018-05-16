@@ -7,12 +7,12 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.CollisionShapeBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CollisionShapeBasedEstimator implements RobotController

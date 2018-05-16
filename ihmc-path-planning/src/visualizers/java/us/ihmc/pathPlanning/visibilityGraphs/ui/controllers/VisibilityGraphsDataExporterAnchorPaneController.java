@@ -10,8 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class VisibilityGraphsDataExporterAnchorPaneController
@@ -19,7 +19,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
    private final DirectoryChooser directoryChooser = new DirectoryChooser();
    private final File defaultDataFolder;
    private Window ownerWindow;
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
 
    @FXML
    private TextField currentPlanarRegionDataFolderTextField;
@@ -47,7 +47,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
       this.ownerWindow = ownerWindow;
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
       currentPlanarRegionDataFolderTextField.setText(defaultDataFolder.getAbsolutePath());

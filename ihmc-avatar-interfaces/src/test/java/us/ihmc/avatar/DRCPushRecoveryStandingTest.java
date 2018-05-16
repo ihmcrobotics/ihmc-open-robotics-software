@@ -16,11 +16,11 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -91,7 +91,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -121,7 +121,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -158,7 +158,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -200,7 +200,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -237,7 +237,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);

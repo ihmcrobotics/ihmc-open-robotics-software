@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -167,6 +168,9 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       
       assertionFailedMessage = message.toString();
    }
+
+   public void setTerrainObject3D(TerrainObject3D terrainObject3D)
+   {}
    
    private void stop()
    {

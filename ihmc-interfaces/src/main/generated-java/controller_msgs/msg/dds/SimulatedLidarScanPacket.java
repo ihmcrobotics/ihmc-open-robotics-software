@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket> implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
 {
@@ -76,6 +77,12 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket> i
 
 
    public static Supplier<SimulatedLidarScanPacketPubSubType> getPubSubType()
+   {
+      return SimulatedLidarScanPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return SimulatedLidarScanPacketPubSubType::new;
    }

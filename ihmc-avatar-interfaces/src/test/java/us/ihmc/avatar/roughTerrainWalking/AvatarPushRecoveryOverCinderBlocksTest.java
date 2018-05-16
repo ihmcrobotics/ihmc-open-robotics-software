@@ -151,7 +151,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "State");
+         final YoEnum<FootControlModule.ConstraintType> footConstraintType = (YoEnum<FootControlModule.ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
          final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));

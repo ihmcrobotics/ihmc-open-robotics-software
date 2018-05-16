@@ -72,4 +72,9 @@ public class YoVariableClient
       yoVariableClientImplementation.reconnect();
    }
    
+   public void disconnect()
+   {
+      yoVariableClientImplementation.disconnect();
+   }
+   
 }

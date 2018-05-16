@@ -4,14 +4,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ComputePathTopic;
 
 public class FootstepPlannerParametersUIController
 {
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
    @FXML
@@ -41,7 +41,7 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Slider maxStepWidth;
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }

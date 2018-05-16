@@ -28,6 +28,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -68,13 +69,13 @@ public class SnapBasedNodeCheckerTest
       {
          Graphics3DObject graphics = new Graphics3DObject();
          graphics.addCoordinateSystem(0.3);
-         graphics.addPlanarRegionsList(planarRegions);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics, planarRegions);
 
          Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
-         graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
          {
@@ -148,12 +149,12 @@ public class SnapBasedNodeCheckerTest
       {
          Graphics3DObject graphics = new Graphics3DObject();
          graphics.addCoordinateSystem(0.3);
-         graphics.addPlanarRegionsList(planarRegions);
+         Graphics3DObjectTools.addPlanarRegionsList(graphics, planarRegions);
 
          Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
-         graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
          {

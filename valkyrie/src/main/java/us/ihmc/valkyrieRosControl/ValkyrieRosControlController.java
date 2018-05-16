@@ -309,8 +309,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create network servers/clients
        */
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
-                                                                                                             new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator
+            .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
@@ -358,7 +358,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Build controller
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       PeriodicRealtimeThreadScheduler estimatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, robotModel, stateEstimatorParameters, sensorReaderFactory,
                                                                   threadDataSynchronizer, estimatorScheduler, dataProducer, valkyrieLowLevelOutputWriter,

@@ -18,8 +18,8 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -112,4 +112,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
+   
+   public default boolean useShapeCollision()
+   {
+      return false;
+   }
 }

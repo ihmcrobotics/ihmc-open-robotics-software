@@ -5,7 +5,7 @@ import java.awt.Color;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

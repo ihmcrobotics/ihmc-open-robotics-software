@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implements Settable<DrillDetectionPacket>, EpsilonComparable<DrillDetectionPacket>
 {
@@ -57,6 +58,12 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
 
 
    public static Supplier<DrillDetectionPacketPubSubType> getPubSubType()
+   {
+      return DrillDetectionPacketPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return DrillDetectionPacketPubSubType::new;
    }

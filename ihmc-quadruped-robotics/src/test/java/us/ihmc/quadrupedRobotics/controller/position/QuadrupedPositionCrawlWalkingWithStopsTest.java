@@ -16,8 +16,8 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -121,7 +121,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.EXCLUDE, IntegrationCategory.VIDEO})
    @Test(timeout = 600000)
    public void testWalkingBackwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

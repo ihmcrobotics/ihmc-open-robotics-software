@@ -15,14 +15,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -97,7 +97,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setForwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -130,7 +130,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setBackwardPushParameters();
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      YoBoolean walk = (YoBoolean) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);

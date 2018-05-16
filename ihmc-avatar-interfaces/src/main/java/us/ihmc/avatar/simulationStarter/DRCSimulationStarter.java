@@ -23,7 +23,7 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -53,12 +53,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.SCSPlaybackListener;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
@@ -161,7 +162,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    /**
     * Register a controller to be created in addition to the walking controller.
-    * For instance, the {@link CarIngressEgressController} can be created by passing its factory, i.e. {@link CarIngressEgressControllerFactory}.
+    * For instance, the CarIngressEgressController can be created by passing its factory, i.e. CarIngressEgressControllerFactory.
     * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
     * @param controllerFactory a factory to create an additional controller.
     */
@@ -326,6 +327,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    //      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
    //   }
 
+   private boolean alreadyCreatedCommunicator = false;
+
    /**
     * Creates a default output PacketCommunicator for the network processor.
     * This PacketCommunicator is also set to be used as input for the controller.
@@ -333,14 +336,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
    {
-      // Don't do anything if the network processor has already been setup
-      if (controllerPacketCommunicator != null)
+      // Apparently this can get called more than once so somebody put a check here.
+      // Had to modify it with two possible types of comms @dcalvert
+      if (alreadyCreatedCommunicator)
          return;
+      alreadyCreatedCommunicator = true;
 
       networkParameters.enableLocalControllerCommunicator(true);
 
-      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-                                                                                             new IHMCCommunicationKryoNetClassList());
+      controllerPacketCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       try
       {
          controllerPacketCommunicator.connect();
@@ -364,8 +369,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Creates and starts the simulation and automatically starts the network processor if required.
     * All the specific requirements (environment, robot initial setup, etc.) have to be set before calling this method.
-    * @param startNetworkProcessor if true the network processor is created and started.
-    * @param automaticallyStartSimulation if true SCS will be simulating when it shows up.
+    * @param networkParameters if true the network processor is created and started.
+    * @param automaticallySimulate if true SCS will be simulating when it shows up.
     * @return
     */
    @Override
@@ -462,6 +467,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();

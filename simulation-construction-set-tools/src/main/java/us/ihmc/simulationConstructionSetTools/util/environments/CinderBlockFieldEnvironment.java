@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface

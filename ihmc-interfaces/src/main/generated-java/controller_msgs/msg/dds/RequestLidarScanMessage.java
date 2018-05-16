@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Message used to request a new LIDAR scan, and also enable some filters.
@@ -72,6 +73,12 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
 
 
    public static Supplier<RequestLidarScanMessagePubSubType> getPubSubType()
+   {
+      return RequestLidarScanMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return RequestLidarScanMessagePubSubType::new;
    }

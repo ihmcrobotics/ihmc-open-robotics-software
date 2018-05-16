@@ -22,11 +22,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotDescription.InertiaTools;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {

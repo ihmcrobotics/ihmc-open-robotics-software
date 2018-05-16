@@ -21,9 +21,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetCl
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.util.RealtimeTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;

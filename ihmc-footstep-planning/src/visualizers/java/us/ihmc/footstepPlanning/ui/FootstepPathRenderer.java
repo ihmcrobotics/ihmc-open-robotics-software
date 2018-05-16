@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,7 +49,7 @@ public class FootstepPathRenderer
 
    private final FootstepPathMeshViewer footstepPathMeshViewer;
 
-   public FootstepPathRenderer(REAMessager messager)
+   public FootstepPathRenderer(Messager messager)
    {
       planarRegionsReference = messager.createInput(PlanarRegionDataTopic);
       startPositionReference = messager.createInput(StartPositionTopic);

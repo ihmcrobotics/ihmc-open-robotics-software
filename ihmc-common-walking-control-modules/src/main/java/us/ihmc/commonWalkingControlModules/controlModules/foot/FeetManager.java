@@ -384,9 +384,10 @@ public class FeetManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, Footstep nextFootstep, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
          FramePoint2D desiredICP, FramePoint2D currentICP)
    {
+      toeOffManager.submitNextFootstep(nextFootstep);
       toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
    }
 

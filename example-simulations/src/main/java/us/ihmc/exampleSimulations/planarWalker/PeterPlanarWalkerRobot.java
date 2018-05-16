@@ -4,7 +4,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Plane;
+import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;

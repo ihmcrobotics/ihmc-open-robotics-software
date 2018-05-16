@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -98,6 +99,12 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
 
    public static Supplier<ClearDelayQueueMessagePubSubType> getPubSubType()
+   {
+      return ClearDelayQueueMessagePubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return ClearDelayQueueMessagePubSubType::new;
    }

@@ -29,6 +29,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -55,7 +57,7 @@ public class PlanarRegionConstraintProvider
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
    private final YoInteger numberOfPlanarListsToConsider;
 
-   private final YoBoolean usePlanarRegionConstraints;
+   private final BooleanProvider usePlanarRegionConstraints;
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
 
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -94,9 +96,8 @@ public class PlanarRegionConstraintProvider
       distanceToPlanarRegionEdgeForNoOverhang = new YoDouble(yoNamePrefix + "DistanceToPlanarRegionEdgeForNoOverhang", registry);
       numberOfPlanarListsToConsider = new YoInteger(yoNamePrefix + "NumberOfPlanarListsToConsider", registry);
 
-      usePlanarRegionConstraints = new YoBoolean(yoNamePrefix + "UsePlanarRegionConstraints", registry);
+      usePlanarRegionConstraints = new BooleanParameter(yoNamePrefix + "UsePlanarRegionConstraints", registry, optimizationParameters.usePlanarRegionConstraints());
       switchPlanarRegionConstraintsAutomatically = new YoBoolean(yoNamePrefix + "SwitchPlanarRegionConstraintsAutomatically", registry);
-      usePlanarRegionConstraints.set(optimizationParameters.usePlanarRegionConstraints());
       switchPlanarRegionConstraintsAutomatically.set(optimizationParameters.switchPlanarRegionConstraintsAutomatically());
 
       planeReferenceFrame = new ReferenceFrame("planeReferenceFrame", worldFrame)
@@ -207,7 +208,7 @@ public class PlanarRegionConstraintProvider
 
       solver.resetPlanarRegionConstraint();
 
-      if (usePlanarRegionConstraints.getBooleanValue())
+      if (usePlanarRegionConstraints.getValue())
       {
          boolean planarRegionNeedsUpdating = true;
 

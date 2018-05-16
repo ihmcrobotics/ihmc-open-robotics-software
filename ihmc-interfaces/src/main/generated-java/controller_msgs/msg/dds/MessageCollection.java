@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -68,6 +69,12 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
 
 
    public static Supplier<MessageCollectionPubSubType> getPubSubType()
+   {
+      return MessageCollectionPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
    {
       return MessageCollectionPubSubType::new;
    }

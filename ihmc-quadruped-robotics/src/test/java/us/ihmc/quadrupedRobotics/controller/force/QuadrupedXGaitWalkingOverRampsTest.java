@@ -8,9 +8,8 @@ import org.junit.Before;
 import junit.framework.AssertionFailedError;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
@@ -21,8 +20,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -50,7 +48,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    public void testWalkingOverAggressiveRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
-      
       walkOverRamps(groundProfile, comHeightForRoughTerrain);
    }
 
@@ -63,14 +60,14 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
       stepTeleopManager.getXGaitSettings().setStanceLength(1.00);
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.30);
       stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
-      poseTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
+      stepTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
+      stepTeleopManager.setStepSnapper((x, y) -> groundProfile.heightAt(x, y, 0.0));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

@@ -12,11 +12,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehaviorTest
 {
    @Override
@@ -32,7 +32,7 @@ public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehav
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 400000)
    public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {

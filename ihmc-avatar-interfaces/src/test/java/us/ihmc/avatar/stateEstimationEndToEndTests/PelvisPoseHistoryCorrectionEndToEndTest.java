@@ -35,24 +35,24 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -860,7 +860,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       AvatarSimulation avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
       avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
-      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walk");
+      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walkCSG");
       walk.set(true);
       return drcFlatGroundWalkingTrack;
    }
