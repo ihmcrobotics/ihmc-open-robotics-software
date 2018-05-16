@@ -77,7 +77,7 @@ mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataLogger.
 
 if (ihmc.isBuildRoot())
 {
-   task loggerStartScripts(type: CreateStartScripts) {
+   task loggerStartScripts(type: org.gradle.jvm.application.tasks.CreateStartScripts) {
       outputDir = file("build/scripts")
       mainClassName = "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
       applicationName = "IHMCLogger"
