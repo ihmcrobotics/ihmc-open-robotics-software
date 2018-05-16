@@ -65,17 +65,27 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   private static final String[] torqueControlledJoints = {
-         "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
-         "torsoYaw", "torsoPitch", "torsoRoll",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
-         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
-         "leftForearmYaw", "leftWristRoll", "leftWristPitch",
-         "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2",
-         "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"
-         };
+   public static final boolean ENABLE_FINGER_JOINTS = true;
+
+   private static final String[] torqueControlledJoints;
+   static
+   {
+      List<String> jointList = new ArrayList<>();
+      jointList.addAll(Arrays.asList("leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll"));
+      jointList.addAll(Arrays.asList("rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"));
+      jointList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
+      jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
+      jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
+      jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
+      jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
+      
+      if (ENABLE_FINGER_JOINTS)
+      {
+         jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
+         jointList.addAll(Arrays.asList("rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"));
+      }
+      torqueControlledJoints = jointList.toArray(new String[0]);
+   }
 
    private static final String[] positionControlledJoints = {
          "lowerNeckPitch", "neckYaw", "upperNeckPitch",
@@ -88,13 +98,16 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       Arrays.stream(torqueControlledJoints).forEach(allJointsList::add);
       Arrays.stream(positionControlledJoints).forEach(allJointsList::add);
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (ENABLE_FINGER_JOINTS)
       {
-         String prefix = robotSide.getCamelCaseName();
-         allJointsList.addAll(Arrays.asList(prefix + "IndexFingerPitch1", prefix + "IndexFingerPitch2", prefix + "IndexFingerPitch3"));
-         allJointsList.addAll(Arrays.asList(prefix + "MiddleFingerPitch1", prefix + "MiddleFingerPitch2", prefix + "MiddleFingerPitch3"));
-         allJointsList.addAll(Arrays.asList(prefix + "PinkyPitch1", prefix + "PinkyPitch2", prefix + "PinkyPitch3"));
-         allJointsList.addAll(Arrays.asList(prefix + "ThumbRoll", prefix + "ThumbPitch1", prefix + "ThumbPitch2", prefix + "ThumbPitch3"));
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            String prefix = robotSide.getCamelCaseName();
+            allJointsList.addAll(Arrays.asList(prefix + "IndexFingerPitch1", prefix + "IndexFingerPitch2", prefix + "IndexFingerPitch3"));
+            allJointsList.addAll(Arrays.asList(prefix + "MiddleFingerPitch1", prefix + "MiddleFingerPitch2", prefix + "MiddleFingerPitch3"));
+            allJointsList.addAll(Arrays.asList(prefix + "PinkyPitch1", prefix + "PinkyPitch2", prefix + "PinkyPitch3"));
+            allJointsList.addAll(Arrays.asList(prefix + "ThumbRoll", prefix + "ThumbPitch1", prefix + "ThumbPitch2", prefix + "ThumbPitch3"));
+         }
       }
       allValkyrieJoints = allJointsList.toArray(new String[0]);
    }
