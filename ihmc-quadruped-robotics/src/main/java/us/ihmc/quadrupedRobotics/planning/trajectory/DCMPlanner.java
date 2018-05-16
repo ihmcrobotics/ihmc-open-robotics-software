@@ -133,7 +133,6 @@ public class DCMPlanner
    public void initializeForStanding()
    {
       isStanding.set(true);
-//      timedContactSequence.clear();
       piecewiseConstantCopTrajectory.resetVariables();
       dcmTrajectory.resetVariables();
    }
@@ -144,8 +143,6 @@ public class DCMPlanner
 
       double currentTime = controllerTime.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
-//      timedContactSequence.clear();
-//      piecewiseConstantCopTrajectory.resetVariables();
 
       if (isCurrentPlanValid)
       {

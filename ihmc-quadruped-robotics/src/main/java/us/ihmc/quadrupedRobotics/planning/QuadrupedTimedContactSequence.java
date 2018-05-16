@@ -177,7 +177,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             solePosition.get(stepTransition[i].robotQuadrant).set(stepTransition[i].solePosition);
             break;
          }
-         if ((i + 1 == numberOfStepTransitions) || ((stepTransition[i].time != stepTransition[i + 1].time)))// && stepTransition[i].time > currentTime))
+         if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
             contactPhase.getTimeInterval().setEndTime(stepTransition[i].time);
             contactPhase = createNewContactPhase(stepTransition[i].time, contactState, solePosition);
