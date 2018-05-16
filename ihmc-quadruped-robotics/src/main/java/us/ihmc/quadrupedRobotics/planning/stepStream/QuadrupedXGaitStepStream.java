@@ -34,7 +34,7 @@ public class QuadrupedXGaitStepStream
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
 
       if (parentRegistry != null)
@@ -62,7 +62,7 @@ public class QuadrupedXGaitStepStream
       double initialTime = timestamp.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }
@@ -75,7 +75,7 @@ public class QuadrupedXGaitStepStream
       footstepPlan.updateCurrentSteps(timestamp.getDoubleValue());
 
       updateXGaitSettings();
-      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime, xGaitSettings);
+      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime);
    }
 
    public List<? extends QuadrupedTimedStep> getSteps()

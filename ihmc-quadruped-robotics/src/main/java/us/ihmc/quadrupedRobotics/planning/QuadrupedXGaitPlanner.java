@@ -1,10 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
@@ -16,22 +13,22 @@ public class QuadrupedXGaitPlanner
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FramePoint3D goalPosition;
-   private final QuadrantDependentList<FramePoint3D> xGaitRectangle;
-   private final FramePose3D xGaitRectanglePose;
-   private final PoseReferenceFrame xGaitRectangleFrame;
+   private final FramePoint3D goalPosition = new FramePoint3D();
+   private final QuadrantDependentList<FramePoint3D> xGaitRectangle = new QuadrantDependentList<>();
+   private final FramePose3D xGaitRectanglePose = new FramePose3D();
+   private final PoseReferenceFrame xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
    private final EndDependentList<QuadrupedTimedStep> pastSteps;
 
+   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final FramePose2D bodyPathPose = new FramePose2D();
    private QuadrupedStepSnapper snapper = null;
 
-   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider)
+   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
-      goalPosition = new FramePoint3D();
-      xGaitRectangle = new QuadrantDependentList<>();
-      xGaitRectanglePose = new FramePose3D(worldFrame);
-      xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
+      this.bodyPathProvider = bodyPathProvider;
+      this.xGaitSettings = xGaitSettings;
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          xGaitRectangle.set(robotQuadrant, new FramePoint3D(xGaitRectangleFrame));
@@ -39,11 +36,9 @@ public class QuadrupedXGaitPlanner
       pastSteps = new EndDependentList<>();
       pastSteps.put(RobotEnd.FRONT, new QuadrupedTimedStep());
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
-      this.bodyPathProvider = bodyPathProvider;
    }
 
-   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS,
-                                  QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeInitialPlan(QuadrupedPlanarFootstepPlan footstepPlan, RobotQuadrant initialStepQuadrant, double timeAtSoS)
    {
       bodyPathProvider.initialize();
 
@@ -110,7 +105,7 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(QuadrupedPlanarFootstepPlan footstepPlan, double currentTime, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public void computeOnlinePlan(QuadrupedPlanarFootstepPlan footstepPlan, double currentTime)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -176,6 +171,7 @@ public class QuadrupedXGaitPlanner
       {
          snapStep(plannedSteps.get(i));
       }
+
    }
 
    private void snapStep(QuadrupedTimedOrientedStep step)

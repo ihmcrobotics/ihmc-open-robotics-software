@@ -14,10 +14,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,13 +34,17 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
    private final YoDouble startTime = new YoDouble("startTime", registry);
 
+   private final YoFramePoint3D achievedStepAdjustment = new YoFramePoint3D("achievedStepAdjustment", worldFrame, registry);
    private final YoFrameVector3D desiredPlanarVelocity = new YoFrameVector3D("desiredPlanarVelocity", worldFrame, registry);
    private final FramePose2D initialPose = new FramePose2D();
 
-   private final QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepStatuses = new QuadrantDependentList<>();
+   private final QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepStartStatuses = new QuadrantDependentList<>();
+   private final QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepCompleteStatuses = new QuadrantDependentList<>();
    private final AtomicBoolean recomputeInitialPose = new AtomicBoolean();
+   private final AtomicBoolean recomputeStepAdjustment = new AtomicBoolean();
 
    private final Vector3D tempVector = new Vector3D();
+   private final Vector3D tempAdjustmentVector = new Vector3D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
    public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
@@ -53,15 +54,25 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         footstepStatuses.set(quadrant, new AtomicReference<>());
+         footstepStartStatuses.set(quadrant, new AtomicReference<>());
+         footstepCompleteStatuses.set(quadrant, new AtomicReference<>());
       }
+
+      packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) -> {
+         if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+         {
+            RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
+            footstepStartStatuses.get(quadrant).set(packet);
+            recomputeInitialPose.set(true);
+         }
+      });
 
       packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) -> {
          if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          {
             RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
-            footstepStatuses.get(quadrant).set(packet);
-            recomputeInitialPose.set(true);
+            footstepCompleteStatuses.get(quadrant).set(packet);
+            recomputeStepAdjustment.set(true);
          }
       });
 
@@ -76,11 +87,12 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         footstepStatuses.get(quadrant).set(null);
+         footstepStartStatuses.get(quadrant).set(null);
       }
 
       recomputeInitialPose.set(false);
       footstepPlanHasBeenComputed.set(false);
+      recomputeStepAdjustment.set(false);
    }
 
    public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -91,6 +103,10 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    @Override
    public void getPlanarPose(double time, FramePose2D poseToPack)
    {
+      if (recomputeStepAdjustment.getAndSet(false))
+      {
+         computeAccumulatedStepAdjustmentFromFootstepStatus();
+      }
       if (recomputeInitialPose.getAndSet(false))
       {
          footstepPlanHasBeenComputed.set(true);
@@ -148,7 +164,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
    private void setStartConditionsFromFootstepStatus()
    {
-      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStatusMessage();
+      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
       if (latestStatusMessage == null)
          return;
 
@@ -159,7 +175,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       startTime.set(newStartTime);
 
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
-      Point3DReadOnly latestMessageSolePosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
+      Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
 
       double halfStanceLength = quadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
       double halfStanceWidth = quadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
@@ -167,17 +183,50 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       tempVector.set(halfStanceLength, halfStanceWidth, 0.0);
       tempTransform.setRotationYaw(startYaw.getDoubleValue());
       tempVector.applyTransform(tempTransform);
-      tempVector.add(latestMessageSolePosition);
+      tempVector.add(latestMessageSoleDesiredPosition);
       startPoint.set(tempVector);
+
+      startPoint.add(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
    }
 
-   private QuadrupedFootstepStatusMessage getLatestStatusMessage()
+   private void computeAccumulatedStepAdjustmentFromFootstepStatus()
+   {
+      QuadrupedFootstepStatusMessage latestCompleteStatusMessage = getLatestCompleteStatusMessage();
+      RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestCompleteStatusMessage.getFootstepQuadrant());
+      QuadrupedFootstepStatusMessage startStatusMessage = footstepStartStatuses.get(quadrant).get();
+
+      if (startStatusMessage == null || latestCompleteStatusMessage == null)
+         return;
+
+      Point3DReadOnly soleDesiredAtStartOfStep = startStatusMessage.getDesiredTouchdownPositionInWorld();
+      Point3DReadOnly soleDesiredAtTouchdown = latestCompleteStatusMessage.getDesiredTouchdownPositionInWorld();
+
+      achievedStepAdjustment.sub(soleDesiredAtTouchdown, soleDesiredAtStartOfStep);
+   }
+
+   private QuadrupedFootstepStatusMessage getLatestStartStatusMessage()
    {
       double latestEndTime = Double.NEGATIVE_INFINITY;
       QuadrupedFootstepStatusMessage latestMessage = null;
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         QuadrupedFootstepStatusMessage message = footstepStatuses.get(quadrant).get();
+         QuadrupedFootstepStatusMessage message = footstepStartStatuses.get(quadrant).get();
+         if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
+         {
+            latestEndTime = message.getDesiredStepInterval().getEndTime();
+            latestMessage = message;
+         }
+      }
+      return latestMessage;
+   }
+
+   private QuadrupedFootstepStatusMessage getLatestCompleteStatusMessage()
+   {
+      double latestEndTime = Double.NEGATIVE_INFINITY;
+      QuadrupedFootstepStatusMessage latestMessage = null;
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         QuadrupedFootstepStatusMessage message = footstepCompleteStatuses.get(quadrant).get();
          if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
          {
             latestEndTime = message.getDesiredStepInterval().getEndTime();
