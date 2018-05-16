@@ -40,7 +40,7 @@ import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicTy
 
 public class QuadrupedBalanceManager
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
@@ -58,6 +58,7 @@ public class QuadrupedBalanceManager
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
 
    private final YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D("instantaneousStepAdjustment", worldFrame, registry);
+   private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
 
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
@@ -286,32 +287,30 @@ public class QuadrupedBalanceManager
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps)
    {
       adjustedActiveSteps.clear();
-      if (robotTimestamp.getDoubleValue() > dcmPlanner.getFinalTime())
+      // compute step adjustment for ongoing steps (proportional to dcm tracking error)
+      dcmPositionSetpoint.setIncludingFrame(yoDesiredDCMPosition);
+      dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
+      dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
+
+      dcmError.sub(dcmPositionSetpoint, dcmPositionEstimate);
+      instantaneousStepAdjustment.set(dcmError);
+      instantaneousStepAdjustment.scale(-dcmPositionStepAdjustmentGainParameter.getValue());
+      instantaneousStepAdjustment.setZ(0);
+
+      // adjust nominal step goal positions in foot state machine
+      for (int i = 0; i < activeSteps.size(); i++)
       {
-         // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         dcmPositionSetpoint.setIncludingFrame(yoDesiredDCMPosition);
-         dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-         dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
+         YoQuadrupedTimedStep activeStep = activeSteps.get(i);
+         QuadrupedStep adjustedStep = adjustedActiveSteps.add();
+         adjustedStep.set(activeStep);
 
-         instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
-         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.getValue());
-         instantaneousStepAdjustment.setZ(0);
-
-         // adjust nominal step goal positions in foot state machine
-         for (int i = 0; i < activeSteps.size(); i++)
-         {
-            YoQuadrupedTimedStep activeStep = activeSteps.get(i);
-            QuadrupedStep adjustedStep = adjustedActiveSteps.add();
-            adjustedStep.set(activeStep);
-
-            RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
-            activeStep.getGoalPosition(tempPoint);
-            tempPoint.changeFrame(worldFrame);
-            tempPoint.add(instantaneousStepAdjustment);
-            crossoverProjection.project(tempPoint, robotQuadrant);
-            groundPlaneEstimator.projectZ(tempPoint);
-            adjustedStep.setGoalPosition(tempPoint);
-         }
+         RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
+         activeStep.getGoalPosition(tempPoint);
+         tempPoint.changeFrame(worldFrame);
+         tempPoint.add(instantaneousStepAdjustment);
+         crossoverProjection.project(tempPoint, robotQuadrant);
+         groundPlaneEstimator.projectZ(tempPoint);
+         adjustedStep.setGoalPosition(tempPoint);
       }
 
       adjustActiveFootstepGraphics(activeSteps);
