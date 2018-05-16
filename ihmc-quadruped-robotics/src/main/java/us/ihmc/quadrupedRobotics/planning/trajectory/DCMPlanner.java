@@ -1,11 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -25,11 +28,13 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
 public class DCMPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 50;
@@ -48,6 +53,8 @@ public class DCMPlanner
    private final YoDouble controllerTime;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
+   private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
+
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
@@ -93,6 +100,12 @@ public class DCMPlanner
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
       dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
 
+      YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.005, YoAppearance.Black(),
+                                                                  YoGraphicPosition.GraphicType.SOLID_BALL);
+      yoGraphicsList.add(perfectCMPPositionViz);
+
+      artifactList.add(perfectCMPPositionViz.createArtifact());
+
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
 
@@ -120,7 +133,7 @@ public class DCMPlanner
    public void initializeForStanding()
    {
       isStanding.set(true);
-      timedContactSequence.clear();
+//      timedContactSequence.clear();
       piecewiseConstantCopTrajectory.resetVariables();
       dcmTrajectory.resetVariables();
    }
@@ -131,8 +144,8 @@ public class DCMPlanner
 
       double currentTime = controllerTime.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
-      timedContactSequence.clear();
-      piecewiseConstantCopTrajectory.resetVariables();
+//      timedContactSequence.clear();
+//      piecewiseConstantCopTrajectory.resetVariables();
 
       if (isCurrentPlanValid)
       {
@@ -193,7 +206,7 @@ public class DCMPlanner
       if (!Double.isFinite(transitionEndTime))
          throw new IllegalArgumentException("Transition end time is not valid.");
       if (transitionStartTime > transitionEndTime)
-         throw new IllegalArgumentException("Transition start time is after the transition end time.");
+         throw new IllegalArgumentException("Transition start time " + transitionStartTime + " is after the transition end time " + transitionEndTime +".");
       if (!dcmTransitionTrajectory.isValidTrajectory())
          throw new IllegalArgumentException("Transition trajectory is invalid.");
    }
@@ -239,6 +252,8 @@ public class DCMPlanner
 
       desiredDCMPositionToPack.set(desiredDCMPosition);
       desiredDCMVelocityToPack.set(desiredDCMVelocity);
+
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
    }
 
    private void runOutputDebugChecks()
