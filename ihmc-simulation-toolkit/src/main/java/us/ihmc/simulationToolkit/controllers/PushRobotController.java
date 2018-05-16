@@ -7,6 +7,7 @@ import javax.swing.JButton;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -99,7 +100,7 @@ public class PushRobotController implements RobotController
       pushForceMagnitude.set(magnitude);
    }
 
-   public void setPushForceDirection(Vector3D direction)
+   public void setPushForceDirection(Vector3DReadOnly direction)
    {
       pushDirection.set(direction);
    }
@@ -131,12 +132,12 @@ public class PushRobotController implements RobotController
       }
    }
 
-   public void applyForce(Vector3D direction, double magnitude, double duration)
+   public void applyForce(Vector3DReadOnly direction, double magnitude, double duration)
    {
       applyForceDelayed(null, 0.0, direction, magnitude, duration);
    }
 
-   public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3D direction, double magnitude, double duration)
+   public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
    {
       this.pushCondition = pushCondition;
       setPushDuration(duration);
