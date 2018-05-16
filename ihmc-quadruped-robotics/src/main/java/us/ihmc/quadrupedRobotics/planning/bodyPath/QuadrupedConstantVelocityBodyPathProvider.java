@@ -35,6 +35,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoDouble startTime = new YoDouble("startTime", registry);
 
    private final YoFramePoint3D achievedStepAdjustment = new YoFramePoint3D("achievedStepAdjustment", worldFrame, registry);
+   private final YoEnum<RobotQuadrant> mostRecentTouchdown = new YoEnum<>("mostRecentTouchdown", registry, RobotQuadrant.class);
    private final YoFrameVector3D desiredPlanarVelocity = new YoFrameVector3D("desiredPlanarVelocity", worldFrame, registry);
    private final FramePose2D initialPose = new FramePose2D();
 
@@ -44,7 +45,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final AtomicBoolean recomputeStepAdjustment = new AtomicBoolean();
 
    private final Vector3D tempVector = new Vector3D();
-   private final Vector3D tempAdjustmentVector = new Vector3D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
    public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
@@ -105,7 +105,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       if (recomputeStepAdjustment.getAndSet(false))
       {
-         computeAccumulatedStepAdjustmentFromFootstepStatus();
+         computeStepAdjustmentFromFootstepStatus();
       }
       if (recomputeInitialPose.getAndSet(false))
       {
@@ -189,7 +189,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       startPoint.add(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
    }
 
-   private void computeAccumulatedStepAdjustmentFromFootstepStatus()
+   private void computeStepAdjustmentFromFootstepStatus()
    {
       QuadrupedFootstepStatusMessage latestCompleteStatusMessage = getLatestCompleteStatusMessage();
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestCompleteStatusMessage.getFootstepQuadrant());
@@ -201,7 +201,9 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       Point3DReadOnly soleDesiredAtStartOfStep = startStatusMessage.getDesiredTouchdownPositionInWorld();
       Point3DReadOnly soleDesiredAtTouchdown = latestCompleteStatusMessage.getDesiredTouchdownPositionInWorld();
 
+      mostRecentTouchdown.set(quadrant);
       achievedStepAdjustment.sub(soleDesiredAtTouchdown, soleDesiredAtStartOfStep);
+      startPoint.add(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
    }
 
    private QuadrupedFootstepStatusMessage getLatestStartStatusMessage()
