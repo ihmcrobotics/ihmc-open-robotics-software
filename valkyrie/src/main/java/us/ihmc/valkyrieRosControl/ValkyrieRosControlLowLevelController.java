@@ -57,7 +57,10 @@ public class ValkyrieRosControlLowLevelController
 
       wakeUpTime.set(Double.NaN);
 
-      fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
+      else
+         fingerController = null;
 
       // Remove the finger joints to let the finger controller be the only controlling them
       yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
@@ -99,7 +102,8 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      fingerController.doControl();
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController.doControl();
       updateCommandCalculators();
    }
 
@@ -160,7 +164,8 @@ public class ValkyrieRosControlLowLevelController
 
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
    {
-      fingerController.setupCommunication(packetCommunicator);
+      if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
+         fingerController.setupCommunication(packetCommunicator);
    }
 
    /**
