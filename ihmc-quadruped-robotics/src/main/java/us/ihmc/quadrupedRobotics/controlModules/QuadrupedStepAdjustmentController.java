@@ -38,7 +38,7 @@ public class QuadrupedStepAdjustmentController
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
 
    private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
-   private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.02);
+   private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final GroundPlaneEstimator groundPlaneEstimator;
