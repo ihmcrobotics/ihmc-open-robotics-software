@@ -164,9 +164,16 @@ public class DataConsumerSession
       @Override
       public void onNewDataMessage(Subscriber subscriber)
       {
-         if (subscriber.takeNextData(timestamp, info))
+         try
          {
-            listener.receivedTimestampOnly(timestamp.getTimestamp());
+            if (subscriber.takeNextData(timestamp, info))
+            {
+               listener.receivedTimestampOnly(timestamp.getTimestamp());
+            }
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
          }
       }
 
@@ -196,16 +203,23 @@ public class DataConsumerSession
          ClearLogRequest clearLogRequest = new ClearLogRequest();
          SampleInfo info = new SampleInfo();
 
-         if (subscriber.takeNextData(clearLogRequest, info))
+         try
          {
-            if (clearLogListener != null && clearLogRequest.getGuidAsString().equals(logGuid))
+            if (subscriber.takeNextData(clearLogRequest, info))
             {
-               clearLogListener.clearLog(LogParticipantTools.createGuidString(info.getSampleIdentity().getGuid()));
+               if (clearLogListener != null && clearLogRequest.getGuidAsString().equals(logGuid))
+               {
+                  clearLogListener.clearLog(LogParticipantTools.createGuidString(info.getSampleIdentity().getGuid()));
+               }
+               else
+               {
+                  System.err.println("Clear log guid is invalid");
+               }
             }
-            else
-            {
-               System.err.println("Clear log guid is invalid");
-            }
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
          }
       }
 
