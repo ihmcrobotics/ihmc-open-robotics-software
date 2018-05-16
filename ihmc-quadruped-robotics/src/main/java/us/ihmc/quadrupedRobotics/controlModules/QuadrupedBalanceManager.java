@@ -54,12 +54,6 @@ public class QuadrupedBalanceManager
 
    private final DCMPlanner dcmPlanner;
 
-   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
-
-   private final YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D("instantaneousStepAdjustment", worldFrame, registry);
-   private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
-
-   private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);

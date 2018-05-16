@@ -32,7 +32,7 @@ public class QuadrupedStepAdjustmentController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final QuadrantDependentList<FixedFrameVector3DBasics> instantaneousStepAdjustments = new QuadrantDependentList<>();
    private final QuadrantDependentList<RateLimitedYoFrameVector> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
-   private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 1.0);
+   private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 5.0);
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
@@ -98,7 +98,7 @@ public class QuadrupedStepAdjustmentController
    public void completedStep(RobotQuadrant robotQuadrant)
    {
       instantaneousStepAdjustments.get(robotQuadrant).setToNaN();
-      limitedInstantaneousStepAdjustments.get(robotQuadrant).setToNaN();
+      limitedInstantaneousStepAdjustments.get(robotQuadrant).setToZero();
       dcmStepAdjustmentMultipliers.get(robotQuadrant).setToNaN();
    }
 
@@ -137,9 +137,6 @@ public class QuadrupedStepAdjustmentController
             instantaneousStepAdjustment.set(dcmError);
             instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
             instantaneousStepAdjustment.setZ(0);
-
-            if (limitedInstantaneousStepAdjustment.containsNaN())
-               limitedInstantaneousStepAdjustment.set(instantaneousStepAdjustment);
          }
          else
          {
