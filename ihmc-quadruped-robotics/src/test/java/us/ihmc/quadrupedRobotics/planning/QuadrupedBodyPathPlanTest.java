@@ -89,10 +89,6 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       QuadrupedTestBehaviors.executeBodyPathPlan(conductor, variables, stepTeleopManager, 0.1, 0.2, point1, point2, point3, point4);
    }
 
-   /**
-    * This test will need to be updated as footstep tracking improves, i.e. if this test breaks it could be because step tracking has improved.
-    * The last few points have been adjusted pretty heavily to compensate
-    */
    public void testBodyPathAroundABox()
    {
       setUpSimulation(new SimpleMazeEnvironment());
@@ -124,17 +120,17 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       time += 7.0;
       EuclideanTrajectoryPointMessage point5 = new EuclideanTrajectoryPointMessage();
       point5.setTime(time);
-      point5.position_.set(2.45, 0.7, 0.4 * Math.PI);
+      point5.position_.set(2.3, 0.7, 0.4 * Math.PI);
 
       time += 4.0;
       EuclideanTrajectoryPointMessage point6 = new EuclideanTrajectoryPointMessage();
       point6.setTime(time);
-      point6.position_.set(2.5, 0.85, 0.1);
+      point6.position_.set(2.4, 0.85, 0.1);
 
       time += 3.0;
       EuclideanTrajectoryPointMessage point7 = new EuclideanTrajectoryPointMessage();
       point7.setTime(time);
-      point7.position_.set(3.0, 0.85, 0.0);
+      point7.position_.set(2.7, 0.85, 0.0);
 
       time += 4.0;
       EuclideanTrajectoryPointMessage point8 = new EuclideanTrajectoryPointMessage();
