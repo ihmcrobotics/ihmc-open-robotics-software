@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
+import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -20,11 +21,12 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
       PrintTools.info("-------------------------------------------------------------------");
       PrintTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       PrintTools.info("-------------------------------------------------------------------");
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false);
-      ValkyrieKickAndPunchMessenger kickAndPunchMessenger = new ValkyrieKickAndPunchMessenger();
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false, "DEFAULT", null, false, true);
+      ValkyriePunchMessenger kickAndPunchMessenger = new ValkyriePunchMessenger();
 
-      ui = new JoystickBasedSteppingMainUI(primaryStage, robotModel, robotModel.getWalkingControllerParameters(), kickAndPunchMessenger, kickAndPunchMessenger,
+      ui = new JoystickBasedSteppingMainUI(primaryStage, robotModel, robotModel.getWalkingControllerParameters(), null, kickAndPunchMessenger,
                                            kickAndPunchMessenger);
+      ui.setActiveSecondaryControlOption(SecondaryControlOption.PUNCH);
    }
 
    @Override
