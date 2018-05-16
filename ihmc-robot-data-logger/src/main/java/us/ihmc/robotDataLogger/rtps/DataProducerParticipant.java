@@ -76,12 +76,19 @@ public class DataProducerParticipant
       {
          VariableChangeRequest msg = new VariableChangeRequest();
          SampleInfo info = new SampleInfo();
-         if (subscriber.takeNextData(msg, info))
+         try
          {
-            if (dataProducerListener != null && activated)
+            if (subscriber.takeNextData(msg, info))
             {
-               dataProducerListener.changeVariable(msg.getVariableID(), msg.getRequestedValue());
+               if (dataProducerListener != null && activated)
+               {
+                  dataProducerListener.changeVariable(msg.getVariableID(), msg.getRequestedValue());
+               }
             }
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
          }
       }
 

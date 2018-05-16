@@ -51,11 +51,18 @@ public class GUICaptureReceiver implements SubscriberListener
    @Override
    public void onNewDataMessage(Subscriber subscriber)
    {
-      receiveBuffer.clear();
-      if (subscriber.takeNextData(receiveBuffer, null))
+      try
       {
-         receiveBuffer.flip();
-         handler.receivedFrame(receiveBuffer);
+         receiveBuffer.clear();
+         if(subscriber.takeNextData(receiveBuffer, null))
+         {
+            receiveBuffer.flip();
+            handler.receivedFrame(receiveBuffer);
+         }
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
    }
 
