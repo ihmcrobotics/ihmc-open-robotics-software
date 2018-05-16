@@ -165,6 +165,11 @@ public class PiecewiseReverseDcmTrajectory
       }
    }
 
+   public double getNaturalFrequency()
+   {
+      return Math.sqrt(gravity / comHeight);
+   }
+
    public void setComHeight(double comHeight)
    {
       this.comHeight = Math.max(comHeight, 0.001);
