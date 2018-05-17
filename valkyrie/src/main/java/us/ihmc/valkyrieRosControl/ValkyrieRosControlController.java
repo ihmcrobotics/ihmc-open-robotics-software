@@ -65,7 +65,8 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   public static final boolean ENABLE_FINGER_JOINTS = true;
+   public static final boolean HAS_FOREARMS_ON = false;
+   public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
 
    private static final String[] torqueControlledJoints;
    static
@@ -76,8 +77,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       jointList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
       jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
       jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
-      jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
-      jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
+
+      if (HAS_FOREARMS_ON)
+      {
+         jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
+         jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
+      }
       
       if (ENABLE_FINGER_JOINTS)
       {
