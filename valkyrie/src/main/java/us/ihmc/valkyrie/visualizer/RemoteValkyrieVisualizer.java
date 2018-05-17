@@ -36,7 +36,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       System.out.println("Connecting to host " + host);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
-      scsVisualizer.setDisplayOneInNPackets(5);
+      scsVisualizer.setDisplayOneInNPackets(15);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(true);
 
