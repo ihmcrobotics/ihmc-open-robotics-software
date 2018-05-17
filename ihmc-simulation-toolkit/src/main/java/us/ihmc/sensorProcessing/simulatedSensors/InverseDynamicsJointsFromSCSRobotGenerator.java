@@ -67,7 +67,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
             FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator);
-            ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -85,7 +85,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
@@ -103,7 +103,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
             currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
 
-            ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
+            ScrewTools.addRigidBody(link.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
