@@ -7,7 +7,7 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# Trajectory for each.
+# Trajectory for each joint.
 OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 # Properties for queueing trajectories.
 QueueableMessage queueing_properties
