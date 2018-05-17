@@ -695,6 +695,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int numberOfWaypoints = 100;
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
       pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
+      pelvisTrajectoryMessage.setEnableUserPelvisControl(true);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
