@@ -14,6 +14,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   public int source_;
+   public int destination_;
    public long timestamp_;
    public long sensor_head_pps_timestamp_;
    public int joint_name_hash_;
@@ -60,6 +62,10 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    {
       sequence_id_ = other.sequence_id_;
 
+      source_ = other.source_;
+
+      destination_ = other.destination_;
+
       timestamp_ = other.timestamp_;
 
       sensor_head_pps_timestamp_ = other.sensor_head_pps_timestamp_;
@@ -99,6 +105,24 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setSource(int source)
+   {
+      source_ = source;
+   }
+   public int getSource()
+   {
+      return source_;
+   }
+
+   public void setDestination(int destination)
+   {
+      destination_ = destination;
+   }
+   public int getDestination()
+   {
+      return destination_;
    }
 
    public void setTimestamp(long timestamp)
@@ -244,6 +268,10 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.source_, other.source_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.destination_, other.destination_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_head_pps_timestamp_, other.sensor_head_pps_timestamp_, epsilon)) return false;
@@ -298,6 +326,10 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.source_ != otherMyClass.source_) return false;
+
+      if(this.destination_ != otherMyClass.destination_) return false;
+
       if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
       if(this.sensor_head_pps_timestamp_ != otherMyClass.sensor_head_pps_timestamp_) return false;
@@ -334,6 +366,10 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       builder.append("RobotConfigurationData {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("source=");
+      builder.append(this.source_);      builder.append(", ");
+      builder.append("destination=");
+      builder.append(this.destination_);      builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);      builder.append(", ");
       builder.append("sensor_head_pps_timestamp=");

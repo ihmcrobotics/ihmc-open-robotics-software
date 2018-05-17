@@ -25,6 +25,8 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        long source;
+        long destination;
         long long timestamp;
         long long sensor_head_pps_timestamp;
         long joint_name_hash;

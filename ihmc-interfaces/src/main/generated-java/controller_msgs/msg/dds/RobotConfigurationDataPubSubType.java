@@ -42,6 +42,10 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -90,6 +94,12 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    public final static int getCdrSerializedSize(controller_msgs.msg.dds.RobotConfigurationData data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -155,6 +165,10 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_2(data.getSource());
+
+      cdr.write_type_2(data.getDestination());
+
       cdr.write_type_11(data.getTimestamp());
 
       cdr.write_type_11(data.getSensorHeadPpsTimestamp());
@@ -200,6 +214,10 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      data.setSource(cdr.read_type_2());
+      	
+      data.setDestination(cdr.read_type_2());
+      	
       data.setTimestamp(cdr.read_type_11());
       	
       data.setSensorHeadPpsTimestamp(cdr.read_type_11());
@@ -231,6 +249,8 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    public final void serialize(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_2("source", data.getSource());
+      ser.write_type_2("destination", data.getDestination());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_11("sensor_head_pps_timestamp", data.getSensorHeadPpsTimestamp());
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
@@ -259,6 +279,8 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RobotConfigurationData data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSource(ser.read_type_2("source"));
+      data.setDestination(ser.read_type_2("destination"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       data.setSensorHeadPpsTimestamp(ser.read_type_11("sensor_head_pps_timestamp"));
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
