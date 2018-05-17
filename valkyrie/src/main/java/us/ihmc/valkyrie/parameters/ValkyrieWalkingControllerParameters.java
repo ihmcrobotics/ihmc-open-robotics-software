@@ -181,7 +181,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setIntegralLeakRatio(kiBleedOff);
 
       if (target == RobotTarget.REAL_ROBOT)
-         gains.setFeedbackPartMaxRate(1.0);
+         gains.setFeedbackPartMaxRate(1.5);
 
       return gains;
    }
