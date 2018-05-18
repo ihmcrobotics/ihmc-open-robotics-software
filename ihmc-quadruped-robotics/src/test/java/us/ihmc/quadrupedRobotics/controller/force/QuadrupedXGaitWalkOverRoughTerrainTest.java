@@ -7,8 +7,11 @@ import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.*;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
@@ -70,7 +73,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
       double walkTime = 15.0;
-      double walkingSpeed = 0.25;
+      double walkingSpeed = 0.3;
       double minimumXPositionAfterWalking = 3.0;
 
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking);
@@ -79,8 +82,14 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    private void testWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed,
                                        double minimumXPositionAfterWalking) throws IOException
    {
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
+      simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
+
+
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setTerrainObject3D(environment.getCombinedTerrainObject3D());
+
+      quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
+      quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseNetworking(true);
 
