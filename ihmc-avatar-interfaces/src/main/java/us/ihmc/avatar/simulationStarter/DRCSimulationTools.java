@@ -70,6 +70,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
          networkProcessorParameters.enablePerceptionModule(true);
+         networkProcessorParameters.setEnableJoystickBasedStepping(true);
          networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.enableLocalControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
