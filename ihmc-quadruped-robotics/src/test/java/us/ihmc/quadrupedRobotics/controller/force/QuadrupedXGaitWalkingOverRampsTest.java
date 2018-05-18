@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import junit.framework.AssertionFailedError;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
@@ -67,7 +68,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
       stepTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
-      stepTeleopManager.setStepSnapper((x, y) -> groundProfile.heightAt(x, y, 0.0));
+      stepTeleopManager.setStepSnapper((x, y) -> new Point3D(x, y, groundProfile.heightAt(x, y, 0.0)));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
