@@ -42,7 +42,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -113,7 +113,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getFootstepDataList().size() <= 1)
+      if(data.getFootstepDataList().size() <= 50)
       cdr.write_type_e(data.getFootstepDataList());else
           throw new RuntimeException("footstep_data_list field exceeds the maximum length");
 
