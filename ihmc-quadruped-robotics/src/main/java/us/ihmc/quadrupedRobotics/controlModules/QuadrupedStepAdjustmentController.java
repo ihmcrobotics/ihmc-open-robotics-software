@@ -148,7 +148,7 @@ public class QuadrupedStepAdjustmentController
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(limitedInstantaneousStepAdjustment);
          crossoverProjection.project(tempPoint, robotQuadrant);
-         groundPlaneEstimator.projectZ(tempPoint);
+//         groundPlaneEstimator.projectZ(tempPoint);
          adjustedStep.setGoalPosition(tempPoint);
       }
 
