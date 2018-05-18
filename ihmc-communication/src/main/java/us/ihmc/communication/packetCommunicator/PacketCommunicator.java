@@ -3,6 +3,7 @@ package us.ihmc.communication.packetCommunicator;
 import java.io.IOException;
 import java.util.HashMap;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.interfaces.Connectable;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
@@ -45,6 +46,7 @@ public class PacketCommunicator implements Connectable
 
    public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList, boolean reconnectAutomatically)
    {
+      PrintTools.info(PacketCommunicator.class, "Creating Kryo TCP client on port: " + port.getName());
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(reconnectAutomatically);
       return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList);
@@ -58,24 +60,26 @@ public class PacketCommunicator implements Connectable
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList,
                                                                       int maximumObjectSize)
    {
+      PrintTools.info(PacketCommunicator.class, "Creating Kryo TCP server on port: " + port.getName());
       KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
       server.setMaximumObjectSize(maximumObjectSize);
-
       return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList);
    }
 
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList);
+      return createTCPPacketCommunicatorServer(port, writeBufferSize, receiveBufferSize, netClassList, 0); //infinite
    }
 
    public static PacketCommunicator createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
+      PrintTools.info(PacketCommunicator.class, "Creating Kryo intraprocess on port: " + port.getName());
       return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList);
    }
 
    public static PacketCommunicator createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
    {
+      PrintTools.info(PacketCommunicator.class, "Creating custom");
       return new PacketCommunicator("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList);
    }
 
