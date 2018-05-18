@@ -91,6 +91,7 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
+      parameters.setEnableJoystickBasedStepping(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
