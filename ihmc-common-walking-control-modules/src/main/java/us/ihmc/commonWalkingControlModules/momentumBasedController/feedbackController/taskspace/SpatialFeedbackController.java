@@ -118,6 +118,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoSE3OffsetFrame controlFrame;
 
    private final double dt;
+   private final boolean isRootBody;
 
    public SpatialFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                     YoVariableRegistry parentRegistry)
@@ -125,9 +126,15 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       this.endEffector = endEffector;
 
       if (toolbox.getRootJoint() != null)
-         rootBody = toolbox.getRootJoint().getSuccessor();
+      {
+         this.rootBody = toolbox.getRootJoint().getSuccessor();
+         isRootBody = this.endEffector.getName().equals(rootBody.getName());
+      }
       else
+      {
+         isRootBody = false;
          rootBody = null;
+      }
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -376,7 +383,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       computeFeedbackWrench();
 
-      if (endEffector.getName().equals(rootBody.getName()))
+      if (isRootBody)
       {
          desiredLinearForce.changeFrame(worldFrame);
          desiredAngularTorque.changeFrame(worldFrame);
@@ -724,7 +731,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
+      return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 
    @Override
