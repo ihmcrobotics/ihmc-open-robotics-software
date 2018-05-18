@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
@@ -112,7 +111,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFeedforward = new YoDouble("qd_ff_" + jointName, registry);
 
          qDFeedback = new YoDouble("qd_fb_" + jointName, registry);
-         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
+         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDFeedback, dt);
       }
       else
       {
@@ -142,6 +141,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       inverseDynamicsOutput.addJoint(joint, Double.NaN);
       inverseKinematicsOutput.addJoint(joint, Double.NaN);
+      virtualModelControlOutput.addJoint(joint, Double.NaN);
 
       parentRegistry.addChild(registry);
    }
