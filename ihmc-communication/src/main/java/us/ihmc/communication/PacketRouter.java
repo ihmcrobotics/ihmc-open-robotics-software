@@ -280,6 +280,8 @@ public class PacketRouter<T extends Enum<T>>
       @Override
       public void receivedPacket(Packet<?> packet)
       {
+//         Packet copiedPacket = (Packet) packet.getPubSubTypePacket().get().createData();
+//         copiedPacket.set(packet);
          processPacketRouting(communicator, packet);
       }
    }
