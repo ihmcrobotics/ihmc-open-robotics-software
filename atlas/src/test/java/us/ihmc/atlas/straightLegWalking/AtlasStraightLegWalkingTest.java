@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.straightLegWalking.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -302,6 +303,16 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public boolean attemptToStraightenLegs()
       {
          return true;
+      }
+
+      @Override
+      public LegConfigurationGains getBentLegGains()
+      {
+         LegConfigurationGains gains = new LegConfigurationGains();
+         gains.setJointSpaceKp(150.0);
+         gains.setJointSpaceKd(6.0);
+
+         return gains;
       }
 
    }
