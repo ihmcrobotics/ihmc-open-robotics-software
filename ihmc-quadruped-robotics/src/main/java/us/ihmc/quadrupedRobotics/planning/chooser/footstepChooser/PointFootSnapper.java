@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+
 public interface PointFootSnapper
 {
    /**
@@ -10,5 +12,5 @@ public interface PointFootSnapper
     * @param yPosition world-frame y location of step
     * @return world-frame z location, or {@link Double#NaN} if not a valid step location
     */
-   double snapStep(double xPosition, double yPosition);
+   Point3DReadOnly snapStep(double xPosition, double yPosition);
 }

@@ -34,7 +34,8 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setEndDoubleSupportDuration(0);
       xGaitSettings.setEndPhaseShift(90);
       QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
-      xGaitPlanner.setStepSnapper((x, y) -> 0.0);
+
+      xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
 
 
 
@@ -99,7 +100,7 @@ public class QuadrupedXGaitPlannerTest
          xGaitSettings.setEndDoubleSupportDuration(0);
          xGaitSettings.setEndPhaseShift(90);
          QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
-         xGaitPlanner.setStepSnapper((x, y) -> 0.0);
+         xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
 
          double currentTime = 0.125;
          double currentYaw = 0.0;

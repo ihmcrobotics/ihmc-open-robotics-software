@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
@@ -182,9 +183,7 @@ public class QuadrupedXGaitPlanner
       if (snapper != null)
       {
          goalPosition.setIncludingFrame(worldFrame, step.getGoalPosition());
-         double snappedHeight = snapper.snapStep(goalPosition.getX(), goalPosition.getY());
-         goalPosition.setZ(snappedHeight);
-         step.setGoalPosition(goalPosition);
+         step.setGoalPosition(snapper.snapStep(goalPosition.getX(), goalPosition.getY()));
       }
    }
 
