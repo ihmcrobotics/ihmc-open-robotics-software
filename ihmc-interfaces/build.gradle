@@ -41,6 +41,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.7.0'
    compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.7.4-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.19.1'
 }
 
 testDependencies {
