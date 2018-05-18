@@ -22,30 +22,40 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration =  45.0)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 70000)
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.1;
+      double stepLength = 1.5;
       double stepWidth = 0.25;
 
       super.testForwardStep(stepLength, stepWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  45.0)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 70000)
+   public void testForwardStepWithPause() throws SimulationExceededMaximumTimeException
+   {
+      double stepLength = 1.1;
+      double stepWidth = 0.25;
+
+      super.testForwardStepWithPause(stepLength, stepWidth);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 99990000)
    public void testForwardSteps() throws SimulationExceededMaximumTimeException
    {
       double startingLength = 0.4;
-      double nominalStepLength = 1.0;
-      double stepWidth = 0.25;
-      int stepsToLength = 4;
-      int totalSteps = 10;
+      double nominalStepLength = 0.75;
+      double stepWidth = 0.2;
+      int stepsToLength = 3;
+      int totalSteps = 20;
 
       super.testForwardSteps(startingLength, nominalStepLength, stepsToLength, stepWidth, totalSteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  45.0)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 70000)
    public void testWideStep() throws SimulationExceededMaximumTimeException
    {
@@ -55,26 +65,25 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       super.testWideStep(stepWidth, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  50.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 100000)
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.4;
-      double stepLength = 0.35;
+      double stepLength = 0.4;
       double stanceWidth = 0.25;
       super.testSteppingDown(stepDownHeight, stepLength, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  50.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 100000)
    public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.5;
-      double stepLength = 0.35;
+      double stepDownHeight = 0.35;
+      double stepLength = 0.4;
       double stanceWidth = 0.25;
       super.testSteppingDownWithClosing(stepDownHeight, stepLength, stanceWidth);
    }
-
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -130,7 +139,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public boolean applySecondaryJointScaleDuringSwing()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -194,12 +203,13 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       public double getICPPercentOfStanceForSSToeOff()
       {
          return 0.10;
+         //         return 0.50; for big step down
       }
 
       @Override
       public boolean checkECMPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -210,6 +220,12 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
 
       @Override
       public boolean doToeOffIfPossibleInSingleSupport()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean doToeOffIfPossible()
       {
          return true;
       }
@@ -267,7 +283,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public boolean doToeTouchdownIfPossible()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -322,9 +338,15 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
 
       @Override
+      public double getTransferSplitFraction()
+      {
+         return 0.8;
+      }
+
+      @Override
       public double getExitCoPForwardSafetyMarginOnToes()
       {
-         return 0.015;
+         return 0.02;
       }
 
       @Override

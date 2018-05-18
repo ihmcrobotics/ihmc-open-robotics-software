@@ -156,6 +156,7 @@ public class LegConfigurationControlModule
       jointSpacePAction = new YoDouble(sidePrefix + "KneePrivilegedJointSpacePAction", registry);
       jointSpaceDAction = new YoDouble(sidePrefix + "KneePrivilegedJointSpaceDAction", registry);
       jointSpaceAction = new YoDouble(sidePrefix + "KneePrivilegedJointSpaceAction", registry);
+
       actuatorSpacePAction = new YoDouble(sidePrefix + "KneePrivilegedActuatorSpacePAction", registry);
       actuatorSpaceDAction = new YoDouble(sidePrefix + "KneePrivilegedActuatorSpaceDAction", registry);
       actuatorSpaceAction = new YoDouble(sidePrefix + "KneePrivilegedActuatorSpaceAction", registry);
@@ -371,7 +372,7 @@ public class LegConfigurationControlModule
       double virtualError = desiredVirtualLength - currentVirtualLength;
 
       double actuatorSpacePAction = Double.isNaN(actuatorSpaceConfigurationGain) ? 0.0 : actuatorSpaceConfigurationGain * virtualError;
-      double actuatorSpaceDAction = Double.isNaN(actuatorSpaceVelocityGain) ? 0.0 : dampingActionScaleFactor * actuatorSpaceVelocityGain * currentVirtualVelocity;
+      double actuatorSpaceDAction = Double.isNaN(actuatorSpaceVelocityGain) ? 0.0 : -dampingActionScaleFactor * actuatorSpaceVelocityGain * currentVirtualVelocity;
 
       this.actuatorSpacePAction.set(actuatorSpacePAction);
       this.actuatorSpaceDAction.set(actuatorSpaceDAction);
@@ -601,10 +602,10 @@ public class LegConfigurationControlModule
 
          kneePitchPrivilegedConfiguration.set(desiredKneePosition);
 
-         jointSpaceConfigurationGain = bentJointSpacePositionGain.getDoubleValue();
-         jointSpaceVelocityGain = bentJointSpaceVelocityGain.getDoubleValue();
-         actuatorSpaceConfigurationGain = bentActuatorSpacePositionGain.getDoubleValue();
-         actuatorSpaceVelocityGain = bentActuatorSpaceVelocityGain.getDoubleValue();
+         jointSpaceConfigurationGain = straightJointSpacePositionGain.getDoubleValue();
+         jointSpaceVelocityGain = straightJointSpaceVelocityGain.getDoubleValue();
+         actuatorSpaceConfigurationGain = straightActuatorSpacePositionGain.getDoubleValue();
+         actuatorSpaceVelocityGain = straightActuatorSpaceVelocityGain.getDoubleValue();
       }
 
       private double computeConstantCollapseFactor(double timeInState, double duration)
@@ -614,13 +615,13 @@ public class LegConfigurationControlModule
 
       private double computeQuadraticCollapseFactor(double timeInState, double duration)
       {
-         return Math.max(Math.pow(timeInState / duration, 2.0), 0.0);
+         return MathTools.clamp(Math.pow(timeInState / duration, 2.0), 0.0, 1.0);
       }
 
       @Override
       public void onEntry()
       {
-         legControlWeight.set(LegControlWeight.LOW);
+         legControlWeight.set(LegControlWeight.MEDIUM);
       }
 
       @Override

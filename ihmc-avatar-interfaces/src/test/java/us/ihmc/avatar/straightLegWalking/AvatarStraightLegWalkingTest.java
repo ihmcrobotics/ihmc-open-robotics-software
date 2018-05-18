@@ -1,18 +1,10 @@
 package us.ihmc.avatar.straightLegWalking;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -36,6 +28,13 @@ import us.ihmc.simulationConstructionSetTools.util.environments.StairsUpAndDownE
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInterface
 {
@@ -99,7 +98,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       if (scriptName != null && !scriptName.isEmpty())
       {
-         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
          InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
          if (yawReferenceFrame != null)
          {

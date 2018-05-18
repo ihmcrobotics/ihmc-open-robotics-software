@@ -503,8 +503,8 @@ public class ToeOffManager
       else
       {
          requiredProximity = 0.0;
-         isDesiredICPOKForToeOff = leadingFootSupportPolygon.isPointInside(desiredICP);
-         isCurrentICPOKForToeOff = leadingFootSupportPolygon.isPointInside(currentICP);
+         isDesiredICPOKForToeOff = onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.isPointInside(desiredICP);
+         isCurrentICPOKForToeOff = onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.isPointInside(currentICP);
       }
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
