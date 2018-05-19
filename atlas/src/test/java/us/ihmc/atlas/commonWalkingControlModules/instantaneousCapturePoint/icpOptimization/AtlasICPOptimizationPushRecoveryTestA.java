@@ -46,23 +46,14 @@ public class AtlasICPOptimizationPushRecoveryTestA extends AvatarICPOptimization
                      }
 
                      @Override
-                     public boolean useStepAdjustment()
+                     public boolean allowStepAdjustment()
                      {
                         return true;
                      }
                   };
                }
             };
-
          }
-
-         /*
-         @Override
-         public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-         {
-            return new AtlasContinuousCMPPlannerParameters(new AtlasPhysicalProperties());
-         }
-         */
       };
 
       return atlasRobotModel;

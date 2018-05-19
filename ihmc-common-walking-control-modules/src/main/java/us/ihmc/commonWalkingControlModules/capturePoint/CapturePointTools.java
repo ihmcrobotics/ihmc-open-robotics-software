@@ -2,18 +2,17 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -37,15 +36,15 @@ public class CapturePointTools
     * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else
     *           it will at the last footstep.
     */
-   public static void computeConstantCMPs(List<YoFramePoint> constantCMPsToPack, List<FramePoint3D> footstepList, int firstFootstepIndex, int lastFootstepIndex,
-                                          boolean startStanding, boolean endStanding)
+   public static void computeConstantCMPs(List<YoFramePoint3D> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList, int firstFootstepIndex,
+                                          int lastFootstepIndex, boolean startStanding, boolean endStanding)
    {
       if (startStanding)
       {
          // Start with the first constant CMP located between the feet.
-         YoFramePoint firstConstantCMPPlanned = constantCMPsToPack.get(firstFootstepIndex);
-         FramePoint3D firstFootstepToConsider = footstepList.get(firstFootstepIndex);
-         FramePoint3D secondFootstepToConsider = footstepList.get(firstFootstepIndex + 1);
+         YoFramePoint3D firstConstantCMPPlanned = constantCMPsToPack.get(firstFootstepIndex);
+         FramePoint3DReadOnly firstFootstepToConsider = footstepList.get(firstFootstepIndex);
+         FramePoint3DReadOnly secondFootstepToConsider = footstepList.get(firstFootstepIndex + 1);
          putConstantCMPBetweenFeet(firstConstantCMPPlanned, firstFootstepToConsider, secondFootstepToConsider);
          firstFootstepIndex++;
       }
@@ -53,9 +52,9 @@ public class CapturePointTools
       if (endStanding)
       {
          // End with the last constant CMP located between the feet.
-         YoFramePoint lastConstantCMPPlanned = constantCMPsToPack.get(lastFootstepIndex);
-         FramePoint3D lastFootstepToConsider = footstepList.get(lastFootstepIndex);
-         FramePoint3D beforeLastFootstepToConsider = footstepList.get(lastFootstepIndex - 1);
+         YoFramePoint3D lastConstantCMPPlanned = constantCMPsToPack.get(lastFootstepIndex);
+         FramePoint3DReadOnly lastFootstepToConsider = footstepList.get(lastFootstepIndex);
+         FramePoint3DReadOnly beforeLastFootstepToConsider = footstepList.get(lastFootstepIndex - 1);
          putConstantCMPBetweenFeet(lastConstantCMPPlanned, beforeLastFootstepToConsider, lastFootstepToConsider);
          lastFootstepIndex--;
       }
@@ -73,14 +72,14 @@ public class CapturePointTools
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when
     *           laying out the CMP's
     */
-   public static void computeConstantCMPsOnFeet(List<YoFramePoint> constantCMPsToPack, List<FramePoint3D> footstepList, int firstFootstepIndex,
-                                                int lastFootstepIndex)
+   public static void computeConstantCMPsOnFeet(List<YoFramePoint3D> constantCMPsToPack, List<? extends FramePoint3DReadOnly> footstepList,
+                                                int firstFootstepIndex, int lastFootstepIndex)
    {
       for (int i = firstFootstepIndex; i <= lastFootstepIndex; i++)
       {
-         YoFramePoint constantCMP = constantCMPsToPack.get(i);
+         YoFramePoint3D constantCMP = constantCMPsToPack.get(i);
          // Put the constant CMP at the footstep location
-         constantCMP.setAndMatchFrame(footstepList.get(i));
+         constantCMP.setMatchingFrame(footstepList.get(i));
       }
    }
 
@@ -91,9 +90,9 @@ public class CapturePointTools
     * @param firstFootstep FramePoint holding the position of the first footstep
     * @param secondFootstep FramePoint holding the position of the second footstep
     */
-   public static void putConstantCMPBetweenFeet(YoFramePoint constantCMPToPack, FramePoint3D firstFootstep, FramePoint3D secondFootstep)
+   public static void putConstantCMPBetweenFeet(YoFramePoint3D constantCMPToPack, FramePoint3DReadOnly firstFootstep, FramePoint3DReadOnly secondFootstep)
    {
-      constantCMPToPack.setAndMatchFrame(firstFootstep);
+      constantCMPToPack.setMatchingFrame(firstFootstep);
       constantCMPToPack.add(secondFootstep);
       constantCMPToPack.scale(0.5);
    }
@@ -110,17 +109,17 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPoints(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint,
-                                                 double stepTime, double omega0)
+   public static void computeDesiredCornerPoints(List<? extends FixedFramePoint3DBasics> cornerPointsToPack, List<? extends FramePoint3DReadOnly> constantCMPs,
+                                                 boolean skipFirstCornerPoint, double stepTime, double omega0)
    {
       double exponentialTerm = Math.exp(-omega0 * stepTime);
-      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      FramePoint3DReadOnly nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
       int firstCornerPointIndex = skipFirstCornerPoint ? 1 : 0;
       for (int i = cornerPointsToPack.size() - 1; i >= firstCornerPointIndex; i--)
       {
-         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
-         YoFramePoint initialCMP = constantCMPs.get(i);
+         FixedFramePoint3DBasics cornerPoint = cornerPointsToPack.get(i);
+         FramePoint3DReadOnly initialCMP = constantCMPs.get(i);
 
          cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
 
@@ -150,11 +149,11 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
-                                                              double doubleSupportSplitFraction, double omega0)
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends FixedFramePoint3DBasics> cornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> constantCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double doubleSupportSplitFraction, double omega0)
    {
-      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      FramePoint3DReadOnly nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
       for (int i = cornerPointsToPack.size() - 1; i >= 1; i--)
       {
@@ -164,8 +163,8 @@ public class CapturePointTools
 
          double exponentialTerm = Math.exp(-omega0 * stepTime);
 
-         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
-         YoFramePoint initialCMP = constantCMPs.get(i);
+         FixedFramePoint3DBasics cornerPoint = cornerPointsToPack.get(i);
+         FramePoint3DReadOnly initialCMP = constantCMPs.get(i);
 
          if (Double.isNaN(stepTime))
          {
@@ -201,10 +200,11 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> doubleSupportSplitFractions, double omega0)
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends FixedFramePoint3DBasics> cornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> constantCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
-      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      FramePoint3DReadOnly nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
       for (int i = cornerPointsToPack.size() - 1; i >= 1; i--)
       {
@@ -226,8 +226,8 @@ public class CapturePointTools
 
          double exponentialTerm = Math.exp(-omega0 * stepTime);
 
-         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
-         YoFramePoint initialCMP = constantCMPs.get(i);
+         FixedFramePoint3DBasics cornerPoint = cornerPointsToPack.get(i);
+         FramePoint3DReadOnly initialCMP = constantCMPs.get(i);
 
          cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
 
@@ -254,11 +254,11 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
-                                                              double doubleSupportSplitFraction, double omega0)
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends FixedFramePoint3DBasics> cornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> constantCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double doubleSupportSplitFraction, double omega0)
    {
-      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      FramePoint3DReadOnly nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
       for (int i = cornerPointsToPack.size() - 1; i >= 0; i--)
       {
@@ -266,8 +266,8 @@ public class CapturePointTools
          stepTime += (1.0 - doubleSupportSplitFraction) * transferTimes.get(i).getDoubleValue();
          stepTime += doubleSupportSplitFraction * transferTimes.get(i + 1).getDoubleValue();
 
-         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
-         YoFramePoint initialCMP = constantCMPs.get(i);
+         FixedFramePoint3DBasics cornerPoint = cornerPointsToPack.get(i);
+         FramePoint3DReadOnly initialCMP = constantCMPs.get(i);
 
          if (Double.isNaN(stepTime))
          {
@@ -301,11 +301,11 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<YoDouble> swingTimes, List<YoDouble> transferTimes,
-         List<YoDouble> doubleSupportSplitFractions, double omega0)
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends FixedFramePoint3DBasics> cornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> constantCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
-      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      FramePoint3DReadOnly nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
       for (int i = cornerPointsToPack.size() - 1; i >= 0; i--)
       {
@@ -318,8 +318,8 @@ public class CapturePointTools
          stepTime += (1.0 - doubleSupportSplitFraction) * transferTime;
          stepTime += nextDoubleSupportSplitFraction * nextTransferTime;
 
-         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
-         YoFramePoint initialCMP = constantCMPs.get(i);
+         FixedFramePoint3DBasics cornerPoint = cornerPointsToPack.get(i);
+         FramePoint3DReadOnly initialCMP = constantCMPs.get(i);
 
          if (Double.isNaN(stepTime))
          {
@@ -351,8 +351,9 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPoints(List<? extends YoFramePoint> entryCornerPointsToPack, List<? extends YoFramePoint> exitCornerPointsToPack,
-                                                 List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, double stepTime,
+   public static void computeDesiredCornerPoints(List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                 List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack,
+                                                 List<? extends FramePoint3DReadOnly> entryCMPs, List<? extends FramePoint3DReadOnly> exitCMPs, double stepTime,
                                                  double timeInPercentSpentOnExitCMPs, double omega0)
    {
       double timeSpentOnExitCMP = stepTime * timeInPercentSpentOnExitCMPs;
@@ -360,14 +361,14 @@ public class CapturePointTools
       double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
       double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
 
-      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      FramePoint3DReadOnly nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
       for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
       {
-         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
-         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
-         YoFramePoint exitCMP = exitCMPs.get(i);
-         YoFramePoint entryCMP = entryCMPs.get(i);
+         FixedFramePoint3DBasics exitCornerPoint = exitCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCornerPoint = entryCornerPointsToPack.get(i);
+         FramePoint3DReadOnly exitCMP = exitCMPs.get(i);
+         FramePoint3DReadOnly entryCMP = entryCMPs.get(i);
 
          exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
          entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
@@ -401,13 +402,13 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-                                                              List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
-                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
-                                                              double omega0)
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                              List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> entryCMPs, List<? extends FramePoint3DReadOnly> exitCMPs,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes, double swingSplitFraction,
+                                                              double transferSplitFraction, double omega0)
    {
-      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      FramePoint3DReadOnly nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
       for (int i = exitCornerPointsToPack.size() - 1; i >= 1; i--)
       {
@@ -420,10 +421,10 @@ public class CapturePointTools
          double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
          double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
 
-         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
-         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
-         YoFramePoint exitCMP = exitCMPs.get(i);
-         YoFramePoint entryCMP = entryCMPs.get(i);
+         FixedFramePoint3DBasics exitCornerPoint = exitCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCornerPoint = entryCornerPointsToPack.get(i);
+         FramePoint3DReadOnly exitCMP = exitCMPs.get(i);
+         FramePoint3DReadOnly entryCMP = entryCMPs.get(i);
 
          if (Double.isNaN(nextTransferTime))
          {
@@ -468,12 +469,13 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs,
-         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions,
-         List<YoDouble> transferSplitFractions, double omega0)
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                              List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> entryCMPs, List<? extends FramePoint3DReadOnly> exitCMPs,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions,
+                                                              List<YoDouble> transferSplitFractions, double omega0)
    {
-      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      FramePoint3DReadOnly nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
       for (int i = exitCornerPointsToPack.size() - 1; i >= 1; i--)
       {
@@ -498,10 +500,10 @@ public class CapturePointTools
          double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
          double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
 
-         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
-         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
-         YoFramePoint exitCMP = exitCMPs.get(i);
-         YoFramePoint entryCMP = entryCMPs.get(i);
+         FixedFramePoint3DBasics exitCornerPoint = exitCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCornerPoint = entryCornerPointsToPack.get(i);
+         FramePoint3DReadOnly exitCMP = exitCMPs.get(i);
+         FramePoint3DReadOnly entryCMP = entryCMPs.get(i);
 
          exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
          entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
@@ -535,13 +537,13 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-                                                              List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
-                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
-                                                              double omega0)
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                              List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> entryCMPs, List<? extends FramePoint3DReadOnly> exitCMPs,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes, double swingSplitFraction,
+                                                              double transferSplitFraction, double omega0)
    {
-      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      FramePoint3DReadOnly nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
       for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
       {
@@ -549,10 +551,10 @@ public class CapturePointTools
          double previousTransferTime = transferTimes.get(i).getDoubleValue();
          double nextTransferTime = transferTimes.get(i + 1).getDoubleValue();
 
-         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
-         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
-         YoFramePoint exitCMP = exitCMPs.get(i);
-         YoFramePoint entryCMP = entryCMPs.get(i);
+         FixedFramePoint3DBasics exitCornerPoint = exitCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCornerPoint = entryCornerPointsToPack.get(i);
+         FramePoint3DReadOnly exitCMP = exitCMPs.get(i);
+         FramePoint3DReadOnly entryCMP = entryCMPs.get(i);
 
          if (Double.isNaN(swingTime))
          {
@@ -596,11 +598,13 @@ public class CapturePointTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     */
-   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
-         List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions, double omega0)
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                              List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack,
+                                                              List<? extends FramePoint3DReadOnly> entryCMPs, List<? extends FramePoint3DReadOnly> exitCMPs,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions,
+                                                              List<YoDouble> transferSplitFractions, double omega0)
    {
-      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      FramePoint3DReadOnly nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
       for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
       {
@@ -612,10 +616,10 @@ public class CapturePointTools
          double previousTransferTime = transferTimes.get(i).getDoubleValue();
          double nextTransferTime = transferTimes.get(i + 1).getDoubleValue();
 
-         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
-         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
-         YoFramePoint exitCMP = exitCMPs.get(i);
-         YoFramePoint entryCMP = entryCMPs.get(i);
+         FixedFramePoint3DBasics exitCornerPoint = exitCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCornerPoint = entryCornerPointsToPack.get(i);
+         FramePoint3DReadOnly exitCMP = exitCMPs.get(i);
+         FramePoint3DReadOnly entryCMP = entryCMPs.get(i);
 
          if (Double.isNaN(swingTime))
          {
@@ -650,8 +654,8 @@ public class CapturePointTools
     *           biped.
     * @param stepTime
     */
-   public static void computeConstantCMPFromInitialAndFinalCapturePointLocations(YoFramePoint cmpToPack, YoFramePoint finalDesiredCapturePoint,
-                                                                                 YoFramePoint initialCapturePoint, double omega0, double stepTime)
+   public static void computeConstantCMPFromInitialAndFinalCapturePointLocations(FixedFramePoint3DBasics cmpToPack, FramePoint3DReadOnly finalDesiredCapturePoint,
+                                                                                 FramePoint3DReadOnly initialCapturePoint, double omega0, double stepTime)
    {
       double exponentialTerm = Math.exp(-omega0 * stepTime);
       cmpToPack.scaleSub(exponentialTerm, finalDesiredCapturePoint, initialCapturePoint);
@@ -671,8 +675,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
-                                                         YoFramePoint desiredCapturePointToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
+                                                         FixedFramePoint3DBasics desiredCapturePointToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
@@ -693,33 +697,11 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
                                                          FramePoint3D desiredCapturePointToPack)
    {
       desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
-      else
-         desiredCapturePointToPack.set(initialCapturePoint);
-   }
-
-   /**
-    * Compute the desired capture point position at a given time. x<sup>ICP<sub>des</sub></sup> =
-    * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0
-    * t</sup>)x<sup>CMP<sub>0</sub></sup>
-    *
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointToPack
-    */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
-                                                         YoFramePoint desiredCapturePointToPack)
-   {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
       else
@@ -738,8 +720,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
-                                                         YoFrameVector desiredCapturePointVelocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
+                                                         FixedFrameVector3DBasics desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
       {
@@ -762,35 +744,11 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
                                                          FrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-      {
-         desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
-         desiredCapturePointVelocityToPack.scale(omega0 * Math.exp(omega0 * time));
-      }
-      else
-         desiredCapturePointVelocityToPack.setToZero();
-   }
-
-   /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w * * e^{w*t} * ICP0 - p0
-    * * w * e^{w*t}
-    *
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointVelocityToPack
-    */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
-                                                         YoFrameVector desiredCapturePointVelocityToPack)
-   {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
       {
          desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
@@ -809,10 +767,10 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity,
-                                                             YoFrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, FrameVector3DReadOnly desiredCapturePointVelocity,
+                                                             YoFrameVector3D desiredCapturePointAccelerationToPack)
    {
-      desiredCapturePointAccelerationToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
+      desiredCapturePointAccelerationToPack.setMatchingFrame(desiredCapturePointVelocity);
       desiredCapturePointAccelerationToPack.scale(omega0);
    }
 
@@ -828,56 +786,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
-                                                             YoFrameVector desiredCapturePointAccelerationToPack)
-   {
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-      {
-         desiredCapturePointAccelerationToPack.sub(initialCapturePoint, initialCMP);
-         desiredCapturePointAccelerationToPack.scale(omega0 * omega0 * Math.exp(omega0 * time));
-      }
-      else
-         desiredCapturePointAccelerationToPack.setToZero();
-   }
-
-   /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w^2 * e^{w*t} * ICP0 - p0
-    * * w^2 * e^{w*t}
-    *
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointAccelerationToPack
-    */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
-                                                             FrameVector3D desiredCapturePointAccelerationToPack)
-   {
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-      {
-         desiredCapturePointAccelerationToPack.sub(initialCapturePoint, initialCMP);
-         desiredCapturePointAccelerationToPack.scale(omega0 * omega0 * Math.exp(omega0 * time));
-      }
-      else
-         desiredCapturePointAccelerationToPack.setToZero();
-   }
-
-   /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w^2 * e^{w*t} * ICP0 - p0
-    * * w^2 * e^{w*t}
-    *
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointAccelerationToPack
-    */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3D initialCapturePoint, FramePoint3D initialCMP,
-                                                             YoFrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3DReadOnly initialCapturePoint,
+                                                             FramePoint3DReadOnly initialCMP, FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
       {
@@ -898,8 +808,8 @@ public class CapturePointTools
     *           biped.
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0,
-                                                            YoFramePoint desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint3DReadOnly desiredCapturePointPosition, FrameVector3DReadOnly desiredCapturePointVelocity,
+                                                            double omega0, FixedFramePoint3DBasics desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
@@ -915,8 +825,9 @@ public class CapturePointTools
     *           biped.
     * @param desiredCMPVelocityToPack
     */
-   public static void computeDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCapturePointVelocity, YoFrameVector desiredCapturePointAcceleration,
-                                                                    double omega0, YoFrameVector desiredCMPVelocityToPack)
+   public static void computeDesiredCentroidalMomentumPivotVelocity(FrameVector3DReadOnly desiredCapturePointVelocity,
+                                                                    FrameVector3DReadOnly desiredCapturePointAcceleration, double omega0,
+                                                                    FixedFrameVector3DBasics desiredCMPVelocityToPack)
    {
       desiredCMPVelocityToPack.scaleAdd(-1.0 / omega0, desiredCapturePointAcceleration, desiredCapturePointVelocity);
    }
@@ -929,40 +840,8 @@ public class CapturePointTools
     * @param omega0
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint2d desiredCapturePointPosition, YoFrameVector2d desiredCapturePointVelocity,
-                                                            double omega0, YoFramePoint2d desiredCMPToPack)
-   {
-      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
-   }
-
-   /**
-    * Computes the desired centroidal momentum pivot by, CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    *
-    * @param desiredCapturePointPosition
-    * @param desiredCapturePointVelocity
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param desiredCMPToPack
-    */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint3D desiredCapturePointPosition, FrameVector3D desiredCapturePointVelocity, double omega0,
-                                                            YoFramePoint desiredCMPToPack)
-   {
-      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
-   }
-
-   /**
-    * Computes the desired centroidal momentum pivot by, CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    *
-    * @param desiredCapturePointPosition
-    * @param desiredCapturePointVelocity
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param desiredCMPToPack
-    */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint2D desiredCapturePointPosition, FrameVector2D desiredCapturePointVelocity, double omega0,
-                                                            FramePoint2D desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2DReadOnly desiredCapturePointPosition, FrameVector2DReadOnly desiredCapturePointVelocity,
+                                                            double omega0, FixedFramePoint2DBasics desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
@@ -976,8 +855,9 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint3D currentCapturePointPosition, FramePoint3D desiredCapturePointPosition,
-                                                                    FrameVector3D desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint3DReadOnly currentCapturePointPosition,
+                                                                    FramePoint3DReadOnly desiredCapturePointPosition,
+                                                                    FrameVector3DReadOnly desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
@@ -1010,8 +890,9 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2D currentCapturePointPosition, FramePoint2D desiredCapturePointPosition,
-                                                                    FrameVector2D desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2DReadOnly currentCapturePointPosition,
+                                                                    FramePoint2DReadOnly desiredCapturePointPosition,
+                                                                    FrameVector2DReadOnly desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
@@ -1043,8 +924,8 @@ public class CapturePointTools
     * @param capturePointTrajectoryLine
     * @param projectedCapturePoint
     */
-   public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint3D actualICP, FrameLine2d capturePointTrajectoryLine,
-                                                                                    FramePoint2D projectedCapturePoint)
+   public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint3DReadOnly actualICP, FrameLine2D capturePointTrajectoryLine,
+                                                                                    FixedFramePoint2DBasics projectedCapturePoint)
    {
       projectedCapturePoint.set(actualICP.getX(), actualICP.getY());
       capturePointTrajectoryLine.orthogonalProjection(projectedCapturePoint);
@@ -1063,7 +944,7 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeCapturePointPosition(double omega0, double time, FramePoint2D initialCapturePoint, FramePoint2D initialCMP,
+   public static void computeCapturePointPosition(double omega0, double time, FramePoint2DReadOnly initialCapturePoint, FramePoint2DReadOnly initialCMP,
                                                   FramePoint2D desiredCapturePointToPack)
    {
       desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
@@ -1075,9 +956,9 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the angular momentum about the center of mass in the world frame.
-    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>,
-    * -&tau;<sup>x</sup>]. Assumes no acceleration in the vertical direction.
+    * Compute the angular momentum about the center of mass in the world frame. x<sup>eCMP</sup> =
+    * x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>, -&tau;<sup>x</sup>]. Assumes no
+    * acceleration in the vertical direction.
     *
     * @param mass total mass of the robot
     * @param gravity gravityZ
@@ -1085,14 +966,15 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FramePoint2DReadOnly eCMP, FramePoint2DReadOnly zmp,
+                                             FramePoint2D angularMomentumToPack)
    {
       computeAngularMomentum(mass, gravity, 0.0, eCMP, zmp, angularMomentumToPack);
    }
 
    /**
-    * Compute the angular momentum about the center of mass in the world frame.
-    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * Compute the angular momentum about the center of mass in the world frame. x<sup>eCMP</sup> =
+    * x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
     * -&tau;<sup>x</sup>].
     *
     * @param mass total mass of the robot
@@ -1102,15 +984,16 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FrameVector3D comAcceleration, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FrameVector3DReadOnly comAcceleration, FramePoint2DReadOnly eCMP,
+                                             FramePoint2DReadOnly zmp, FramePoint2D angularMomentumToPack)
    {
       comAcceleration.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       computeAngularMomentum(mass, gravity, comAcceleration.getZ(), eCMP, zmp, angularMomentumToPack);
    }
 
    /**
-    * Compute the angular momentum about the center of mass in the world frame.
-    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * Compute the angular momentum about the center of mass in the world frame. x<sup>eCMP</sup> =
+    * x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
     * -&tau;<sup>x</sup>].
     *
     * @param mass total mass of the robot
@@ -1120,7 +1003,8 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2DReadOnly eCMP, FramePoint2DReadOnly zmp,
+                                             FramePoint2D angularMomentumToPack)
    {
       angularMomentumToPack.setToZero(ReferenceFrame.getWorldFrame());
       angularMomentumToPack.set(eCMP);
@@ -1135,9 +1019,9 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the angular momentum about the center of mass in the world frame.
-    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>,
-    * -&tau;<sup>x</sup>]. Assumes no acceleration in the vertical direction.
+    * Compute the angular momentum about the center of mass in the world frame. x<sup>eCMP</sup> =
+    * x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>, -&tau;<sup>x</sup>]. Assumes no
+    * acceleration in the vertical direction.
     *
     * @param mass total mass of the robot
     * @param gravity gravityZ
@@ -1150,8 +1034,8 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the angular momentum about the center of mass in the world frame.
-    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * Compute the angular momentum about the center of mass in the world frame. x<sup>eCMP</sup> =
+    * x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
     * -&tau;<sup>x</sup>].
     *
     * @param mass total mass of the robot
@@ -1160,7 +1044,8 @@ public class CapturePointTools
     * @param delta distance between the eCMP and the ZMP.
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2D delta, FramePoint2D angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2D delta,
+                                             FramePoint2D angularMomentumToPack)
    {
       delta.changeFrame(ReferenceFrame.getWorldFrame());
 

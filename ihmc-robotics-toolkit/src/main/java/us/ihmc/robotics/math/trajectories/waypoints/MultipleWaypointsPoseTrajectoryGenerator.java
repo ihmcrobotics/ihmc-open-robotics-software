@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 
 public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -58,17 +58,14 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       orientationTrajectory.appendWaypoint(waypoint);
    }
    
-   public void appendPoseWaypoint(double timeAtWaypoint, FramePose pose, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
+   public void appendPoseWaypoint(double timeAtWaypoint, FramePose3D pose, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       pose.changeFrame(activeFrame);
       linearVelocity.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
       
-      pose.getPositionIncludingFrame(desiredPosition);
-      pose.getOrientationIncludingFrame(desiredOrientation);
-      
-      positionTrajectory.appendWaypoint(timeAtWaypoint, desiredPosition, linearVelocity);
-      orientationTrajectory.appendWaypoint(timeAtWaypoint, desiredOrientation, angularVelocity);
+      positionTrajectory.appendWaypoint(timeAtWaypoint, pose.getPosition(), linearVelocity);
+      orientationTrajectory.appendWaypoint(timeAtWaypoint, pose.getOrientation(), angularVelocity);
    }
 
    public void appendPositionWaypoint(double timeAtWaypoint, FramePoint3D position, FrameVector3D linearVelocity)
@@ -160,11 +157,11 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       getPosition(desiredPosition);
       getOrientation(desiredOrientation);
-      framePoseToPack.setPose(desiredPosition, desiredOrientation);
+      framePoseToPack.set(desiredPosition, desiredOrientation);
    }
 
    @Override

@@ -25,8 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class ParameterizedPID3DGains implements PID3DGainsReadOnly
 {
-   private final GainCoupling gainCoupling;
-   private final boolean useIntegrator;
+   private final boolean usingIntegrator;
 
    private final Map<Axis, DoubleParameter> kpMap = new EnumMap<>(Axis.class);
    private final Map<Axis, DoubleParameter> kiMap = new EnumMap<>(Axis.class);
@@ -43,68 +42,84 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    private final double[] tempDerivativeGains = new double[3];
    private final double[] tempIntegralGains = new double[3];
 
-   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
+   public ParameterizedPID3DGains(String suffix, PID3DConfiguration configuration, YoVariableRegistry registry)
    {
-      this.gainCoupling = gainCoupling;
-      this.useIntegrator = useIntegrator;
-
-      populateMap(kpMap, "kp", suffix, gainCoupling, registry);
-      DefaultYoPID3DGains.populateMap(kdMap, "kd", suffix, gainCoupling, registry);
-      populateMap(zetaMap, "zeta", suffix, gainCoupling, registry);
-
-      if (useIntegrator)
-      {
-         populateMap(kiMap, "ki", suffix, gainCoupling, registry);
-         maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
-      }
-      else
-      {
-         maxIntegralError = null;
-      }
-
-      createDampingUpdaters(kpMap, kdMap, zetaMap, gainCoupling);
-
-      maxDerivativeError = new DoubleParameter("maxDerivativeError" + suffix, registry, Double.POSITIVE_INFINITY);
-      maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, Double.POSITIVE_INFINITY);
-      maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, Double.POSITIVE_INFINITY);
-      maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, Double.POSITIVE_INFINITY);
+      this(suffix, configuration.getGainCoupling(), configuration.isUseIntegrator(), configuration.getGains(), registry);
    }
 
-   public ParameterizedPID3DGains(String suffix, PID3DGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
    {
-      this.gainCoupling = defaults.getGainCoupling();
-      this.useIntegrator = defaults.isUseIntegrator();
+      this(suffix, gainCoupling, useIntegrator, null, registry);
+   }
 
-      double[] defaultProportionalGains = defaults.getProportionalGains();
-      double[] defaultDerivativeGains = defaults.getDerivativeGains();
-      double[] defaultIntegralGains = defaults.getIntegralGains();
-      double[] defaultZetas = new double[3];
+   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly defaults, YoVariableRegistry registry)
+   {
+      this.usingIntegrator = useIntegrator;
 
-      for (int i = 0; i < 3; i++)
+      if (defaults == null)
       {
-         defaultZetas[i] = GainCalculator.computeDampingRatio(defaultProportionalGains[i], defaultDerivativeGains[i]);
-      }
+         populateMap(kpMap, "kp", suffix, gainCoupling, registry);
+         DefaultYoPID3DGains.populateMap(kdMap, "kd", suffix, gainCoupling, registry);
+         populateMap(zetaMap, "zeta", suffix, gainCoupling, registry);
 
-      populateMap(kpMap, "kp", suffix, gainCoupling, defaultProportionalGains, registry);
-      DefaultYoPID3DGains.populateMap(kdMap, "kd", suffix, gainCoupling, registry);
-      populateMap(zetaMap, "zeta", suffix, gainCoupling, defaultZetas, registry);
+         if (useIntegrator)
+         {
+            populateMap(kiMap, "ki", suffix, gainCoupling, registry);
+            maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
+         }
+         else
+         {
+            maxIntegralError = null;
+         }
 
-      if (useIntegrator)
-      {
-         populateMap(kiMap, "ki", suffix, gainCoupling, defaultIntegralGains, registry);
-         maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, defaults.getMaximumIntegralError());
+         createDampingUpdaters(kpMap, kdMap, zetaMap, gainCoupling);
+
+         maxDerivativeError = new DoubleParameter("maxDerivativeError" + suffix, registry, Double.POSITIVE_INFINITY);
+         maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, Double.POSITIVE_INFINITY);
+         maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, Double.POSITIVE_INFINITY);
+         maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, Double.POSITIVE_INFINITY);
       }
       else
       {
-         maxIntegralError = null;
+         double[] defaultProportionalGains = defaults.getProportionalGains();
+         double[] defaultDerivativeGains = defaults.getDerivativeGains();
+         double[] defaultIntegralGains = defaults.getIntegralGains();
+         double[] defaultZetas = new double[3];
+
+         for (int i = 0; i < 3; i++)
+         {
+            double proportionalGain = defaultProportionalGains[i];
+            if (proportionalGain != 0.0)
+            {
+               defaultZetas[i] = GainCalculator.computeDampingRatio(proportionalGain, defaultDerivativeGains[i]);
+            }
+            else
+            {
+               defaultZetas[i] = 0.0;
+            }
+         }
+
+         populateMap(kpMap, "kp", suffix, gainCoupling, defaultProportionalGains, registry);
+         DefaultYoPID3DGains.populateMap(kdMap, "kd", suffix, gainCoupling, registry);
+         populateMap(zetaMap, "zeta", suffix, gainCoupling, defaultZetas, registry);
+
+         if (useIntegrator)
+         {
+            populateMap(kiMap, "ki", suffix, gainCoupling, defaultIntegralGains, registry);
+            maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, defaults.getMaximumIntegralError());
+         }
+         else
+         {
+            maxIntegralError = null;
+         }
+
+         createDampingUpdaters(kpMap, kdMap, zetaMap, gainCoupling);
+
+         maxDerivativeError = new DoubleParameter("maxDerivativeError" + suffix, registry, defaults.getMaximumDerivativeError());
+         maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, defaults.getMaximumProportionalError());
+         maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, defaults.getMaximumFeedback());
+         maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, defaults.getMaximumFeedbackRate());
       }
-
-      createDampingUpdaters(kpMap, kdMap, zetaMap, gainCoupling);
-
-      maxDerivativeError = new DoubleParameter("maxDerivativeError" + suffix, registry, defaults.getMaximumDerivativeError());
-      maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, defaults.getMaximumProportionalError());
-      maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, defaults.getMaximumFeedback());
-      maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, defaults.getMaximumFeedbackRate());
    }
 
    private static void populateMap(Map<Axis, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
@@ -213,6 +228,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
          }
       };
 
+      updater.notifyOfParameterChange(null);
       kp.addParameterChangedListener(updater);
       zeta.addParameterChangedListener(updater);
    }
@@ -234,7 +250,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    @Override
    public double[] getIntegralGains()
    {
-      if (!useIntegrator)
+      if (!usingIntegrator)
       {
          for (int i = 0; i < 3; i++)
          {
@@ -257,7 +273,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    @Override
    public double getMaximumIntegralError()
    {
-      if (!useIntegrator)
+      if (!usingIntegrator)
       {
          return 0.0;
       }
@@ -297,17 +313,5 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    public DoubleParameter getMaximumProportionalErrorParameter()
    {
       return maxProportionalError;
-   }
-
-   @Override
-   public GainCoupling getGainCoupling()
-   {
-      return gainCoupling;
-   }
-
-   @Override
-   public boolean isUseIntegrator()
-   {
-      return useIntegrator;
    }
 }

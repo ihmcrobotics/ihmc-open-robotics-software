@@ -5,18 +5,18 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.avatar.sensors.DRCSimulatedIMUPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -36,19 +36,22 @@ import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRo
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
 import us.ihmc.simulationToolkit.controllers.JointLowLevelJointControlSimulator;
 import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
 import us.ihmc.simulationToolkit.controllers.PassiveJointController;
 import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -59,7 +62,6 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -80,6 +82,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> doSmoothJointTorquesAtControllerStateChanges = new OptionalFactoryField<>("doSmoothJointTorquesAtControllerStateChanges");
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
+   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -96,21 +99,35 @@ public class AvatarSimulationFactory
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
 
+   private boolean useShapeCollision;
+
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
    }
 
+   private void initializeCollisionManager()
+   {
+      if (useShapeCollision)
+      {
+         double coefficientOfRestitution = 0.0;
+         double coefficientOfFriction = 0.9;
+         HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
+                                                                                           simulationConstructionSet.getRootRegistry(),
+                                                                                           new YoGraphicsListRegistry());
+         collisionHandler.setKp(100000);
+         collisionHandler.setKd(500);
+         CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
+         simulationConstructionSet.initializeShapeCollision(collisionManager);
+      }
+   }
+
    private void setupYoVariableServer()
    {
-      if (robotModel.get().getLogSettings().isLog())
+      if (createYoVariableServer.get())
       {
-         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
-                                                 robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
-      }
-      else
-      {
-         yoVariableServer = null;
+         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), robotModel.get().getLogModelProvider(),
+                                                 robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
       }
    }
 
@@ -175,7 +192,8 @@ public class AvatarSimulationFactory
       if (doSmoothJointTorquesAtControllerStateChanges.get())
       {
          DRCOutputProcessorWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputProcessorWithStateChangeSmoother(simulationOutputProcessor);
-         highLevelHumanoidControllerFactory.get().attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+         highLevelHumanoidControllerFactory.get()
+                                           .attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
 
          simulationOutputProcessor = drcOutputWriterWithStateChangeSmoother;
       }
@@ -183,15 +201,15 @@ public class AvatarSimulationFactory
       if (doSlowIntegrationForTorqueOffset.get())
       {
          DRCOutputProcessorWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(simulationOutputProcessor,
-                                                                                                               robotModel.get().getControllerDT());
+                                                                                                                     robotModel.get().getControllerDT());
          simulationOutputProcessor = outputWriterWithTorqueOffsets;
       }
    }
 
    private void setupStateEstimationThread()
    {
-      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
+      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(), robotModel.get(),
+                                                     robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
                                                      new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), humanoidGlobalDataProducer.get(),
                                                      simulationOutputWriter, yoVariableServer, gravity.get());
 
@@ -243,14 +261,6 @@ public class AvatarSimulationFactory
       if (simulatedHandController != null)
       {
          threadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, false);
-      }
-      DRCRobotJointMap jointMap = robotModel.get().getJointMap();
-      if (jointMap.getHeadName() != null)
-      {
-         DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(humanoidGlobalDataProducer.get(),
-                                                                                          stateEstimationThread.getSimulatedIMUOutput(),
-                                                                                          jointMap.getHeadName());
-         threadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
       }
    }
 
@@ -328,7 +338,8 @@ public class AvatarSimulationFactory
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                  controllerDesiredOutput, isUpperBodyJoint,
                                                                                                                  isBackJoint, false,
-                                                                                                                 controllerFullRobotModel.getTotalMass(), robotModel.get().getSimulateDT());
+                                                                                                                 controllerFullRobotModel.getTotalMass(),
+                                                                                                                 robotModel.get().getSimulateDT());
             humanoidFloatingRootJointRobot.setController(positionControlSimulator);
          }
       }
@@ -376,7 +387,7 @@ public class AvatarSimulationFactory
    private void initializeSimulationConstructionSet()
    {
       simulationConstructionSet.setParameterRootPath(threadedRobotController.getYoVariableRegistry());
-      
+
       humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
       scsInitialSetup.get().initializeSimulation(simulationConstructionSet);
 
@@ -409,6 +420,7 @@ public class AvatarSimulationFactory
       doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
       createCollisionMeshes.setDefaultValue(false);
+      createYoVariableServer.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -431,6 +443,8 @@ public class AvatarSimulationFactory
       setupSimulatedRobotTimeProvider();
       setupCMPVisualization();
       setupCOMVisualization();
+
+      initializeCollisionManager();
       initializeSimulationConstructionSet();
 
       AvatarSimulation avatarSimulation = new AvatarSimulation();
@@ -506,8 +520,18 @@ public class AvatarSimulationFactory
       this.createCollisionMeshes.set(createCollisionMeshes);
    }
 
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer.set(createYoVariableServer);
+   }
+
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
+   }
+
+   public void setShapeCollision(boolean useShapeCollision)
+   {
+      this.useShapeCollision = useShapeCollision;
    }
 }

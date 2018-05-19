@@ -14,14 +14,13 @@ public class AtlasPhysicalProperties implements RobotPhysicalProperties
    private final double modelScale;
    private double massScalePower = 3.0;
 
-
-   private final double ankleHeight ;
+   private final double ankleHeight;
    private final double pelvisToFoot;
-   private final double footWidthForControl ;
-   private final double toeWidthForControl ;
+   private final double footWidthForControl;
+   private final double toeWidthForControl;
    private final double footLengthForControl;
-   private final double footBackForControl ;
-   private final double actualFootWidth ;
+   private final double footBackForControl;
+   private final double actualFootWidth;
    private final double actualFootLength;
    private final double footStartToetaperFromBack;
    private final double footForwardForControl; // 0.16;   //0.178;    // 0.18;
@@ -31,7 +30,6 @@ public class AtlasPhysicalProperties implements RobotPhysicalProperties
    private final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handAttachmentPlateToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
-
    public AtlasPhysicalProperties()
    {
       this(1.0);
@@ -39,23 +37,21 @@ public class AtlasPhysicalProperties implements RobotPhysicalProperties
 
    public AtlasPhysicalProperties(double height, double weight)
    {
-      this(height/ATLAS_HEIGHT);
+      this(height / ATLAS_HEIGHT);
 
-      double massFactor = Math.log(weight/ATLAS_WEIGHT)/Math.log(modelScale);
+      double massFactor = Math.log(weight / ATLAS_WEIGHT) / Math.log(modelScale);
       setMassScalePower(massFactor);
    }
-
 
    public AtlasPhysicalProperties(double modelScale)
    {
       this.modelScale = modelScale;
 
       double footWidthScale = modelScale;
-//      if (modelScale < 1.0)
-//      {
-//         footWidthScale = modelScale + 0.5 * (1.0 - modelScale);
-//      }
-
+      //      if (modelScale < 1.0)
+      //      {
+      //         footWidthScale = modelScale + 0.5 * (1.0 - modelScale);
+      //      }
 
       ankleHeight = modelScale * 0.084;
       pelvisToFoot = modelScale * 0.887;

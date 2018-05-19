@@ -5,10 +5,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -173,7 +174,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
-            interpolationTranslationAlphaFilter.setAlpha(alpha);
+            interpolationTranslationAlphaFilterAlphaValue.set(alpha);
          }
       });
       interpolationTranslationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
@@ -186,7 +187,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationRotationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
-            interpolationRotationAlphaFilter.setAlpha(alpha);
+            interpolationRotationAlphaFilterAlphaValue.set(alpha);
          }
       });
       interpolationRotationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
@@ -357,6 +358,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       stateEstimatorPelvisPoseBuffer.put(pelvisPose, timeStamp);
    }
 
+   private final TimeStampedTransform3D timeStampedExternalPose = new TimeStampedTransform3D();
    /**
     * pulls the corrected pose from the buffer, check that the nonprocessed buffer has
     * corresponding pelvis poses and calculates the total error
@@ -364,7 +366,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void processNewPacket()
    {
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
-      TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
+      timeStampedExternalPose.setTransform3D(newPacket.getPose());
+      timeStampedExternalPose.setTimeStamp(newPacket.getTimestamp());
 
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
@@ -467,7 +470,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       
       double absoluteTotalError = translationalTotalError.length();
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError, false);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = HumanoidMessageTools.createPelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError, false);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 

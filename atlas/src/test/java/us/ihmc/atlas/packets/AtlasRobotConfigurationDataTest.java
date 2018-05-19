@@ -1,6 +1,6 @@
 package us.ihmc.atlas.packets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -24,7 +24,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AtlasRobotConfigurationDataTest
@@ -65,9 +65,7 @@ public class AtlasRobotConfigurationDataTest
          forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, new RigidBodyTransform());
       }
 
-      AtlasAuxiliaryRobotData auxiliaryRobotData = new AtlasAuxiliaryRobotData();
-
-      RobotConfigurationData data = new RobotConfigurationData(joints, forceSensorDefinitions, auxiliaryRobotData, imuSensorDefinitions);
+      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuSensorDefinitions);
       kryo.writeClassAndObject(output, data);
       output.flush();
 

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,16 +15,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class UserPelvisOrientationManager extends PelvisOrientationControlState
+public class UserPelvisOrientationManager implements PelvisOrientationControlState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FramePose tempPose = new FramePose();
+   private final FramePose3D tempPose = new FramePose3D();
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final ReferenceFrame baseFrame;
 
@@ -32,12 +32,10 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
-   private final FramePose homePose;
+   private final FramePose3D homePose;
 
    public UserPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      super(PelvisOrientationControlMode.USER);
-
       RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
@@ -52,7 +50,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setPrimaryBase(elevator);
 
-      homePose = new FramePose(baseFrame);
+      homePose = new FramePose3D(baseFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -63,16 +61,16 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      taskspaceControlState.doAction();
+      taskspaceControlState.doAction(timeInState);
    }
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameQuaternion initialOrientation)
    {
       tempPose.setToNaN(initialOrientation.getReferenceFrame());
       tempPose.setOrientation(initialOrientation);
-      return taskspaceControlState.handleOrientationTrajectoryCommand(command, tempPose);
+      return taskspaceControlState.handleOrientationTrajectoryCommand(command.getSO3Trajectory(), tempPose);
    }
 
    public ReferenceFrame getControlFrame()
@@ -90,7 +88,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    public void getCurrentDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       taskspaceControlState.getDesiredPose(tempPose);
-      tempPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(tempPose.getOrientation());
    }
 
    @Override
@@ -99,8 +97,11 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
       orientationFeedbackControlCommand.setGains(spatialFeedbackControlCommand.getGains().getOrientationGains());
       orientationFeedbackControlCommand.getSpatialAccelerationCommand().set(spatialFeedbackControlCommand.getSpatialAccelerationCommand());
-      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.getFeedForwardAngularActionIncludingFrame(feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      orientationFeedbackControlCommand.setFeedForwardAction(feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       return orientationFeedbackControlCommand;
    }
 }

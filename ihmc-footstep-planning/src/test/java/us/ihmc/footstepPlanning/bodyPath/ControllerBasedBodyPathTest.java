@@ -11,6 +11,7 @@ import net.java.games.input.Component;
 import net.java.games.input.Event;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -39,10 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,6 +54,9 @@ import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class ControllerBasedBodyPathTest
 {
@@ -111,7 +111,7 @@ public class ControllerBasedBodyPathTest
       private final YoDouble y = new YoDouble("y", registry);
 
       private static final int numberOfPoints = 5;
-      private final List<YoFramePoint> points = new ArrayList<>();
+      private final List<YoFramePoint3D> points = new ArrayList<>();
 
       private final List<Point2D> waypoints = new ArrayList<>();
       private final WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
@@ -121,7 +121,7 @@ public class ControllerBasedBodyPathTest
 
       private static final int stepsPerSide = 10;
       private static final int steps = 15;
-      private final SideDependentList<List<YoFramePose>> yoSteps = new SideDependentList<>();
+      private final SideDependentList<List<YoFramePoseUsingYawPitchRoll>> yoSteps = new SideDependentList<>();
 
       private final YoPolynomial xPoly = new YoPolynomial("xPoly", 4, registry);
       private final YoPolynomial yPoly = new YoPolynomial("yPoly", 4, registry);
@@ -130,22 +130,22 @@ public class ControllerBasedBodyPathTest
       {
          for (int i = 0; i < numberOfPoints; i++)
          {
-            YoFramePoint yoPoint = new YoFramePoint("Position" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFramePoint3D yoPoint = new YoFramePoint3D("Position" + i, ReferenceFrame.getWorldFrame(), registry);
             YoGraphicPosition position = new YoGraphicPosition("Position" + i, yoPoint, 0.02, YoAppearance.Blue());
             points.add(yoPoint);
             graphicsListRegistry.registerYoGraphic("BodyPath", position);
          }
 
-         YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
-         yoDefaultFootPolygon.setConvexPolygon2d(PlanningTestTools.createDefaultFootPolygon());
+         YoFrameConvexPolygon2D yoDefaultFootPolygon = new YoFrameConvexPolygon2D("DefaultFootPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
+         yoDefaultFootPolygon.set(PlanningTestTools.createDefaultFootPolygon());
 
          for (RobotSide side : RobotSide.values)
          {
             AppearanceDefinition appearance = side == RobotSide.RIGHT ? YoAppearance.Green() : YoAppearance.Red();
-            ArrayList<YoFramePose> poses = new ArrayList<>();
+            ArrayList<YoFramePoseUsingYawPitchRoll> poses = new ArrayList<>();
             for (int i = 0; i < stepsPerSide; i++)
             {
-               YoFramePose yoFootstepPose = new YoFramePose("footPose" + side.getCamelCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
+               YoFramePoseUsingYawPitchRoll yoFootstepPose = new YoFramePoseUsingYawPitchRoll("footPose" + side.getCamelCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + side.getCamelCaseName() + i, yoDefaultFootPolygon, yoFootstepPose, 1.0,
                                                                    appearance);
                poses.add(yoFootstepPose);
@@ -216,21 +216,21 @@ public class ControllerBasedBodyPathTest
             Pose2D finalPose = new Pose2D();
             bodyPath.getPointAlongPath(1.0, finalPose);
 
-            FramePose initialMidFootPose = new FramePose();
+            FramePose3D initialMidFootPose = new FramePose3D();
             initialMidFootPose.setX(startPose.getX());
             initialMidFootPose.setY(startPose.getY());
-            initialMidFootPose.setYawPitchRoll(0.0, 0.0, 0.0);
+            initialMidFootPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose initialStanceFootPose = new FramePose(midFootFrame);
+            FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
             initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
             initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            FramePose goalPose = new FramePose();
+            FramePose3D goalPose = new FramePose3D();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+            goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -250,12 +250,12 @@ public class ControllerBasedBodyPathTest
                for (int i = 0; i < stepsToVisualize; i++)
                {
                   SimpleFootstep footstep = footstepPlan.getFootstep(i);
-                  FramePose footstepPose = new FramePose();
+                  FramePose3D footstepPose = new FramePose3D();
                   footstep.getSoleFramePose(footstepPose);
 
                   RobotSide robotSide = footstep.getRobotSide();
                   MutableInt sideCount = counts.get(robotSide);
-                  YoFramePose stepPose = yoSteps.get(robotSide).get(sideCount.intValue());
+                  YoFramePoseUsingYawPitchRoll stepPose = yoSteps.get(robotSide).get(sideCount.intValue());
                   stepPose.set(footstepPose);
                   sideCount.increment();
                }

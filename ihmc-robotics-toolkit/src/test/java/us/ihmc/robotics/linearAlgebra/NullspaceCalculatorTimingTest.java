@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class NullspaceCalculatorTimingTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testRemoveNullspaceComponent()
    {

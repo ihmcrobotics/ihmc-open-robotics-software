@@ -5,9 +5,9 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ControllerFailedTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
@@ -18,7 +18,8 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
    private final HighLevelControllerName nextStateEnum;
 
    /**
-    * This transition will transition the robot from its current state into another state if the standard controller failure listener returns true.
+    * This transition will transition the robot from its current state into another state if the
+    * standard controller failure listener returns true.
     *
     * @param stateToAttachEnum state to check if the controller has failed.
     * @param nextStateEnum state to transition to if the controller fails.
@@ -31,7 +32,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
 
    /** {@inheritDoc} */
    @Override
-   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends FinishableState<HighLevelControllerName>> controllerStateMap,
+   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends State> controllerStateMap,
                                                                               HighLevelControllerFactoryHelper controllerFactoryHelper,
                                                                               YoVariableRegistry parentRegistry)
    {

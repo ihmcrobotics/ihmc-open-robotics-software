@@ -1,7 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import static us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector;
-import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,23 +8,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.commons.FormattingTools;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class IMUBiasStateEstimator implements IMUBiasProvider
 {
@@ -38,16 +42,17 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoDouble> orientationBiasMagnitudes = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> angularVelocityBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> linearAccelerationBiases = new ArrayList<>();
-   private final List<YoFrameVector> angularVelocityBiasesInWorld = new ArrayList<>();
-   private final List<YoFrameVector> linearAccelerationBiasesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> angularVelocityBiasesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> linearAccelerationBiasesInWorld = new ArrayList<>();
 
-   private final List<YoFrameVector> angularVelocitiesInWorld = new ArrayList<>();
-   private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> angularVelocitiesInWorld = new ArrayList<>();
+   private final List<YoFrameVector3D> linearAccelerationsInWorld = new ArrayList<>();
    private final List<YoDouble> linearAccelerationMagnitudes = new ArrayList<>();
 
-   private final YoBoolean enableIMUBiasCompensation = new YoBoolean("enableIMUBiasCompensation", registry);
-   private final YoDouble imuBiasEstimationThreshold = new YoDouble("imuBiasEstimationThreshold", registry);
-   private final YoDouble biasAlphaFilter = new YoDouble("imuBiasAlphaFilter", registry);
+   private final BooleanProvider isAccelerationIncludingGravity;
+   private final BooleanProvider enableIMUBiasCompensation;
+   private final DoubleProvider imuBiasEstimationThreshold;
+   private final DoubleProvider biasFilterBreakFrequency;
 
    private final List<YoDouble> feetToIMUAngularVelocityMagnitudes = new ArrayList<>();
    private final List<YoDouble> feetToIMULinearVelocityMagnitudes = new ArrayList<>();
@@ -61,23 +66,41 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final Vector3D gravityVectorInWorld = new Vector3D();
    private final Vector3D zUpVector = new Vector3D();
 
-   private final boolean isAccelerationIncludingGravity;
-   private final double updateDT;
 
    public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
-         boolean isAccelerationIncludingGravity, double updateDT, YoVariableRegistry parentRegistry)
+                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, YoVariableRegistry parentRegistry)
+   {
+      this(imuProcessedOutputs, feet, gravitationalAcceleration, cancelGravityFromAccelerationMeasurement, updateDT, null, parentRegistry);
+   }
+   
+   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
+                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, StateEstimatorParameters stateEstimatorParameters,
+                                YoVariableRegistry parentRegistry)
    {
       this.imuProcessedOutputs = imuProcessedOutputs;
-      this.updateDT = updateDT;
       this.feet = new ArrayList<>(feet);
-      this.isAccelerationIncludingGravity = isAccelerationIncludingGravity;
 
-      imuBiasEstimationThreshold.set(0.015);
-      biasAlphaFilter.set(0.99995);
 
       gravityVectorInWorld.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
       zUpVector.set(0.0, 0.0, 1.0);
 
+      isAccelerationIncludingGravity = cancelGravityFromAccelerationMeasurement;
+      if(stateEstimatorParameters != null)
+      {
+         enableIMUBiasCompensation = new BooleanParameter("enableIMUBiasCompensation", registry, stateEstimatorParameters.enableIMUBiasCompensation());
+         biasFilterBreakFrequency = new DoubleParameter("biasFilterBreakFrequency", registry, stateEstimatorParameters.getIMUBiasFilterFreqInHertz());
+         imuBiasEstimationThreshold = new DoubleParameter("imuBiasEstimationThreshold", registry, stateEstimatorParameters.getIMUBiasVelocityThreshold());
+      }
+      else
+      {
+         enableIMUBiasCompensation = new BooleanParameter("enableIMUBiasCompensation", registry);
+         biasFilterBreakFrequency = new DoubleParameter("biasFilterBreakFrequency", registry);
+         imuBiasEstimationThreshold = new DoubleParameter("imuBiasEstimationThreshold", registry);
+      }
+
+      
+      
+      AlphaBasedOnBreakFrequencyProvider alphaProvider = new AlphaBasedOnBreakFrequencyProvider(() ->  biasFilterBreakFrequency.getValue(), updateDT);
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
          IMUSensorReadOnly imuSensor = imuProcessedOutputs.get(i);
@@ -88,24 +111,21 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          imuToIndexMap.put(imuSensor, i);
 
-         AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, biasAlphaFilter, measurementFrame);
-         angularVelocityBias.update(0.0, 0.0, 0.0);
+         AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
          angularVelocityBiases.add(angularVelocityBias);
 
-         AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, biasAlphaFilter, measurementFrame);
-         linearAccelerationBias.update(0.0, 0.0, 0.0);
+         AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
          linearAccelerationBiases.add(linearAccelerationBias);
 
          YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);
          rawOrientationBiases.add(rawOrientationBias);
 
-         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, biasAlphaFilter, registry);
-         orientationBias.update();
+         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, alphaProvider, registry);
          orientationBiases.add(orientationBias);
 
-         angularVelocitiesInWorld.add(new YoFrameVector("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
+         angularVelocitiesInWorld.add(new YoFrameVector3D("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
          
-         linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
+         linearAccelerationsInWorld.add(new YoFrameVector3D("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
          linearAccelerationMagnitudes.add(new YoDouble("unprocessed" + sensorName + "LinearAccelerationMagnitude", registry));
 
          orientationBiasMagnitudes.add(new YoDouble("estimated" + sensorName + "OrientationBiasMagnitude", registry));
@@ -115,26 +135,21 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          isBiasEstimated.add(new YoBoolean("is" + sensorName + "BiasEstimated", registry));
          isIMUOrientationBiasEstimated.add(new YoBoolean("is" + sensorName + "OrientationBiasEstimated", registry));
 
-         angularVelocityBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
-         linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
+         angularVelocityBiasesInWorld.add(new YoFrameVector3D("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
+         linearAccelerationBiasesInWorld.add(new YoFrameVector3D("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
       }
 
       parentRegistry.addChild(registry);
    }
-
-   public void configureModuleParameters(StateEstimatorParameters stateEstimatorParameters)
-   {
-      enableIMUBiasCompensation.set(stateEstimatorParameters.enableIMUBiasCompensation());
-      double biasFilterBreakFrequency = stateEstimatorParameters.getIMUBiasFilterFreqInHertz();
-      biasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency, updateDT));
-
-      imuBiasEstimationThreshold.set(stateEstimatorParameters.getIMUBiasVelocityThreshold());
-   }
-
+   
    public void initialize()
-   {
+   {    
       for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
       {
+         angularVelocityBiases.get(imuIndex).update(0.0, 0.0, 0.0);
+         linearAccelerationBiases.get(imuIndex).update(0.0, 0.0, 0.0);
+         orientationBiases.get(imuIndex).update();
+         
          rawOrientationBiases.get(imuIndex).setToZero();
          orientationBiases.get(imuIndex).setToZero();
          orientationBiasMagnitudes.get(imuIndex).set(0.0);
@@ -197,11 +212,11 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          feetToIMUAngularVelocityMagnitudes.get(imuIndex).set(feetToIMUAngularVelocityMagnitude);
          feetToIMULinearVelocityMagnitudes.get(imuIndex).set(feetToIMULinearVelocityMagnitude);
 
-         if (feetToIMUAngularVelocityMagnitude < imuBiasEstimationThreshold.getDoubleValue()
-               && feetToIMULinearVelocityMagnitude < imuBiasEstimationThreshold.getDoubleValue())
+         if (feetToIMUAngularVelocityMagnitude < imuBiasEstimationThreshold.getValue()
+               && feetToIMULinearVelocityMagnitude < imuBiasEstimationThreshold.getValue())
          {
             isBiasEstimated.get(imuIndex).set(true);
-            isIMUOrientationBiasEstimated.get(imuIndex).set(isAccelerationIncludingGravity);
+            isIMUOrientationBiasEstimated.get(imuIndex).set(isAccelerationIncludingGravity.getValue());
          }
          else
          {
@@ -219,23 +234,23 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          if (isBiasEstimated.get(imuIndex).getBooleanValue())
          {
-            imuSensor.getOrientationMeasurement(orientationMeasurement);
+            orientationMeasurement.set(imuSensor.getOrientationMeasurement());
             orientationMeasurementTransposed.setAndTranspose(orientationMeasurement);
 
-            imuSensor.getAngularVelocityMeasurement(measurement);
+            measurement.set(imuSensor.getAngularVelocityMeasurement());
             angularVelocityBiases.get(imuIndex).update(measurement);
-            angularVelocityBiases.get(imuIndex).get(measurementBias);
+            measurementBias.set(angularVelocityBiases.get(imuIndex));
             orientationMeasurement.transform(measurementBias);
             angularVelocityBiasesInWorld.get(imuIndex).set(measurementBias);
 
             orientationMeasurement.transform(measurement, measurementInWorld);
             angularVelocitiesInWorld.get(imuIndex).set(measurementInWorld);
 
-            imuSensor.getLinearAccelerationMeasurement(measurement);
+            measurement.set(imuSensor.getLinearAccelerationMeasurement());
             orientationMeasurement.transform(measurement, measurementInWorld);
             linearAccelerationsInWorld.get(imuIndex).set(measurementInWorld);
 
-            if (isAccelerationIncludingGravity)
+            if (isAccelerationIncludingGravity.getValue())
             {
                measurementNormalizedInWorld.setAndNormalize(measurementInWorld);
 
@@ -258,7 +273,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
                AlphaFilteredYoFrameQuaternion yoOrientationBias = orientationBiases.get(imuIndex);
                yoOrientationBias.update();
-               yoOrientationBias.get(biasAxisAngle);
+               biasAxisAngle.set(yoOrientationBias);
                orientationBiasMagnitudes.get(imuIndex).set(Math.abs(biasAxisAngle.getAngle()));
 
                measurementMinusGravityInWorld.add(measurementInWorld, gravityVectorInWorld);
@@ -270,7 +285,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
                linearAccelerationBiases.get(imuIndex).update(measurement);
             }
 
-            linearAccelerationBiases.get(imuIndex).get(measurementBias);
+            measurementBias.set(linearAccelerationBiases.get(imuIndex));
             orientationMeasurement.transform(measurementBias);
             linearAccelerationBiasesInWorld.get(imuIndex).set(measurementBias);
          }
@@ -281,79 +296,79 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, Vector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          angularVelocityBiasToPack.set(0.0, 0.0, 0.0);
       else
-         angularVelocityBiases.get(imuIndex.intValue()).get(angularVelocityBiasToPack);
+         angularVelocityBiasToPack.set(angularVelocityBiases.get(imuIndex.intValue()));
    }
 
    @Override
    public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          angularVelocityBiasToPack.setToZero(imu.getMeasurementFrame());
       else
-         angularVelocityBiases.get(imuIndex.intValue()).getFrameTupleIncludingFrame(angularVelocityBiasToPack);
+         angularVelocityBiasToPack.setIncludingFrame(angularVelocityBiases.get(imuIndex.intValue()));
    }
 
    @Override
    public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, Vector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          angularVelocityBiasToPack.set(0.0, 0.0, 0.0);
       else
-         angularVelocityBiasesInWorld.get(imuIndex.intValue()).get(angularVelocityBiasToPack);
+         angularVelocityBiasToPack.set(angularVelocityBiasesInWorld.get(imuIndex.intValue()));
    }
 
    @Override
    public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          angularVelocityBiasToPack.setToZero(worldFrame);
       else
-         angularVelocityBiasesInWorld.get(imuIndex.intValue()).getFrameTupleIncludingFrame(angularVelocityBiasToPack);
+         angularVelocityBiasToPack.setIncludingFrame(angularVelocityBiasesInWorld.get(imuIndex.intValue()));
    }
 
    @Override
    public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, Vector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          linearAccelerationBiasToPack.set(0.0, 0.0, 0.0);
       else
-         linearAccelerationBiases.get(imuIndex.intValue()).get(linearAccelerationBiasToPack);
+         linearAccelerationBiasToPack.set(linearAccelerationBiases.get(imuIndex.intValue()));
    }
 
    @Override
    public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          linearAccelerationBiasToPack.setToZero(imu.getMeasurementFrame());
       else
-         linearAccelerationBiases.get(imuIndex.intValue()).getFrameTupleIncludingFrame(linearAccelerationBiasToPack);
+         linearAccelerationBiasToPack.setIncludingFrame(linearAccelerationBiases.get(imuIndex.intValue()));
    }
 
    @Override
    public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, Vector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          linearAccelerationBiasToPack.set(0.0, 0.0, 0.0);
       else
-         linearAccelerationBiasesInWorld.get(imuIndex.intValue()).get(linearAccelerationBiasToPack);
+         linearAccelerationBiasToPack.set(linearAccelerationBiasesInWorld.get(imuIndex.intValue()));
    }
 
    @Override
    public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
-      if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
+      if (!enableIMUBiasCompensation.getValue() || imuIndex == null)
          linearAccelerationBiasToPack.setToZero(worldFrame);
       else
-         linearAccelerationBiasesInWorld.get(imuIndex.intValue()).getFrameTupleIncludingFrame(linearAccelerationBiasToPack);
+         linearAccelerationBiasToPack.setIncludingFrame(linearAccelerationBiasesInWorld.get(imuIndex.intValue()));
    }
 }

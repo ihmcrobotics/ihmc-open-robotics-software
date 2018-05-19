@@ -26,7 +26,7 @@ public class DoNothingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       for (int i = 0; i < allRobotJoints.length; i++)
       {
@@ -39,14 +39,14 @@ public class DoNothingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       // Do nothing
 
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       // Do nothing
 

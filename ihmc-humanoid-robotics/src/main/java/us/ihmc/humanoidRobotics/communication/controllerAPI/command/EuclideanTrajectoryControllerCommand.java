@@ -1,21 +1,29 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.List;
+import java.util.Random;
+
+import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.FrameInformation;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractEuclideanTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTrajectoryControllerCommand<T, M>, M extends AbstractEuclideanTrajectoryMessage<M>>
-      extends QueueableCommand<T, M> implements FrameBasedCommand<M>
+public final class EuclideanTrajectoryControllerCommand extends QueueableCommand<EuclideanTrajectoryControllerCommand, EuclideanTrajectoryMessage>
+      implements FrameBasedCommand<EuclideanTrajectoryMessage>
 {
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -25,10 +33,29 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    private boolean useCustomControlFrame = false;
    private final RigidBodyTransform controlFramePoseInBodyFrame = new RigidBodyTransform();
 
+   public EuclideanTrajectoryControllerCommand()
+   {
+      this(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
    public EuclideanTrajectoryControllerCommand(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       clear(dataFrame);
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   public EuclideanTrajectoryControllerCommand(Random random)
+   {
+      int randomNumberOfPoints = random.nextInt(16) + 1;
+      for (int i = 0; i < randomNumberOfPoints; i++)
+      {
+         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), RandomGeometry.nextPoint3D(random, -1.0, 1.0),
+                                                RandomGeometry.nextVector3D(random));
+      }
+
+      trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
+      controlFramePoseInBodyFrame.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      useCustomControlFrame = random.nextBoolean();
    }
 
    @Override
@@ -49,7 +76,7 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    }
 
    @Override
-   public void set(T other)
+   public void set(EuclideanTrajectoryControllerCommand other)
    {
       trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
@@ -59,36 +86,47 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, M message)
+   public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = FrameInformation.getDataFrameIDConsideringDefault(frameInformation);
+      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
       this.trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(trajectoryFrameId);
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
 
       clear(dataFrame);
       set(message);
 
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(linearSelectionFrame);
 
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrixFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(linearWeightFrame);
    }
 
    @Override
-   public void set(M message)
+   public void set(EuclideanTrajectoryMessage message)
    {
-      message.getTrajectoryPoints(trajectoryPointList);
-      setQueueableCommandVariables(message);
-      message.getSelectionMatrix(selectionMatrix);
-      message.getWeightMatrix(weightMatrix);
-      useCustomControlFrame = message.useCustomControlFrame();
-      message.getControlFramePose(controlFramePoseInBodyFrame);
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
+      List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages.get(i);
+         trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.getTime(), euclideanTrajectoryPointMessage.getPosition(),
+                                                euclideanTrajectoryPointMessage.getLinearVelocity());
+      }
+      setQueueableCommandVariables(message.getQueueingProperties());
+      selectionMatrix.resetSelection();
+      selectionMatrix.setAxisSelection(message.getSelectionMatrix().getXSelected(), message.getSelectionMatrix().getYSelected(), message.getSelectionMatrix().getZSelected());
+      weightMatrix.clear();
+      weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
+      useCustomControlFrame = message.getUseCustomControlFrame();
+      message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, EuclideanTrajectoryMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
@@ -96,11 +134,12 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    }
 
    /**
-    * Same as {@link #set(T)} but does not change the trajectory points.
+    * Same as {@link #set(EuclideanTrajectoryControllerCommand)} but does not change the trajectory
+    * points.
     *
     * @param other
     */
-   public void setPropertiesOnly(T other)
+   public void setPropertiesOnly(EuclideanTrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
@@ -122,7 +161,7 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    {
       return weightMatrix;
    }
-   
+
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       this.weightMatrix.set(weightMatrix);
@@ -250,5 +289,11 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
+   }
+
+   @Override
+   public Class<EuclideanTrajectoryMessage> getMessageClass()
+   {
+      return EuclideanTrajectoryMessage.class;
    }
 }

@@ -69,7 +69,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
    private void generateRandomQuinticSegmentedTrajectory(List<AngularMomentumTrajectory> trajectoriesList, int numberOfSegments, double[] segmentTimes,
                                                          int numberOfCoefficients)
    {
-      AngularMomentumTrajectory angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
+      AngularMomentumTrajectory angularMomentumTrajectory = new AngularMomentumTrajectory(numberOfSegments, numberOfCoefficients);
       angularMomentumTrajectory.reset();
       for (int j = 0; j < numberOfSegments; j++)
       {
@@ -116,7 +116,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDoubleSupportWithoutAngularMomentum()
    {
@@ -126,7 +126,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSingleSupportWithoutAngularMomentum()
    {
@@ -137,7 +137,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDoubleSupportWithAngularMomentum()
    {
@@ -148,7 +148,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForAddition();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSingleSupportWithAngularMomentum()
    {

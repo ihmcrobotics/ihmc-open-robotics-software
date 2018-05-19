@@ -1,10 +1,14 @@
 package us.ihmc.avatar.simulationStarter;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -19,8 +23,11 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -29,10 +36,10 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -44,13 +51,15 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.SCSPlaybackListener;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
@@ -58,8 +67,6 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -84,6 +91,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtForFootstep = false;
 
+   private boolean createYoVariableServer = false;
+
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
@@ -101,7 +110,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private final RobotContactPointParameters contactPointParameters;
+   private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
    private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
@@ -153,7 +162,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    /**
     * Register a controller to be created in addition to the walking controller.
-    * For instance, the {@link CarIngressEgressController} can be created by passing its factory, i.e. {@link CarIngressEgressControllerFactory}.
+    * For instance, the CarIngressEgressController can be created by passing its factory, i.e. CarIngressEgressControllerFactory.
     * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
     * @param controllerFactory a factory to create an additional controller.
     */
@@ -247,6 +256,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
+    * Allows configuring whether a YoVariableServer will be created.
+    */
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer = createYoVariableServer;
+   }
+
+   /**
     * Set a robot initial setup to use instead of the one in DRCRobotModel.
     * @param robotInitialSetup
     */
@@ -310,6 +327,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    //      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
    //   }
 
+   private boolean alreadyCreatedCommunicator = false;
+
    /**
     * Creates a default output PacketCommunicator for the network processor.
     * This PacketCommunicator is also set to be used as input for the controller.
@@ -317,14 +336,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
    {
-      // Don't do anything if the network processor has already been setup
-      if (controllerPacketCommunicator != null)
+      // Apparently this can get called more than once so somebody put a check here.
+      // Had to modify it with two possible types of comms @dcalvert
+      if (alreadyCreatedCommunicator)
          return;
+      alreadyCreatedCommunicator = true;
 
       networkParameters.enableLocalControllerCommunicator(true);
 
-      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-                                                                                             new IHMCCommunicationKryoNetClassList());
+      controllerPacketCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       try
       {
          controllerPacketCommunicator.connect();
@@ -348,8 +369,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Creates and starts the simulation and automatically starts the network processor if required.
     * All the specific requirements (environment, robot initial setup, etc.) have to be set before calling this method.
-    * @param startNetworkProcessor if true the network processor is created and started.
-    * @param automaticallyStartSimulation if true SCS will be simulating when it shows up.
+    * @param networkParameters if true the network processor is created and started.
+    * @param automaticallySimulate if true SCS will be simulating when it shows up.
     * @return
     */
    @Override
@@ -397,7 +418,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
       }
 
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+      ArrayList<String> additionaContactNames = contactPointParameters.getAdditionalContactNames();
+      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i), additionalContactTransforms.get(i));
+
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
@@ -436,6 +466,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
+      avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();

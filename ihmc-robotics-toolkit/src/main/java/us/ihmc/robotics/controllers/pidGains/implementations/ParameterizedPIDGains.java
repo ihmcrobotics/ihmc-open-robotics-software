@@ -21,20 +21,25 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
 
    public ParameterizedPIDGains(String suffix, YoVariableRegistry registry)
    {
-      super(suffix, registry);
-
-      ki = new DoubleParameter("ki" + suffix, registry);
-      maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
-      integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, 1.0);
+      this(suffix, null, registry);
    }
 
    public ParameterizedPIDGains(String suffix, PIDGainsReadOnly defaults, YoVariableRegistry registry)
    {
       super(suffix, defaults, registry);
 
-      ki = new DoubleParameter("ki" + suffix, registry, defaults.getKi());
-      maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, defaults.getMaxIntegralError());
-      integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, defaults.getIntegralLeakRatio());
+      if (defaults == null)
+      {
+         ki = new DoubleParameter("ki" + suffix, registry);
+         maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
+         integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, 1.0);
+      }
+      else
+      {
+         ki = new DoubleParameter("ki" + suffix, registry, defaults.getKi());
+         maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, defaults.getMaxIntegralError());
+         integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, defaults.getIntegralLeakRatio());
+      }
    }
 
    @Override

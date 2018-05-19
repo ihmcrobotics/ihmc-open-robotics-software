@@ -9,14 +9,15 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 //Used to make ground contact points slip a delta.
 public class GroundContactPointsSlipper implements RobotController
@@ -24,8 +25,8 @@ public class GroundContactPointsSlipper implements RobotController
    private final YoVariableRegistry registry;
 
    private final ArrayList<GroundContactPoint> groundContactPointsToSlip;
-   private final YoFrameVector slipAmount;
-   private final YoFrameOrientation slipRotation;
+   private final YoFrameVector3D slipAmount;
+   private final YoFrameYawPitchRoll slipRotation;
 
    private final YoDouble percentToSlipPerTick;
    private final YoBoolean doSlip;
@@ -36,8 +37,8 @@ public class GroundContactPointsSlipper implements RobotController
       registry = new YoVariableRegistry(registryPrefix + getClass().getSimpleName());
 
       groundContactPointsToSlip = new ArrayList<GroundContactPoint>();
-      slipAmount = new YoFrameVector("slipAmount", ReferenceFrame.getWorldFrame(), registry);
-      slipRotation = new YoFrameOrientation("slipRotation", ReferenceFrame.getWorldFrame(), registry);
+      slipAmount = new YoFrameVector3D("slipAmount", ReferenceFrame.getWorldFrame(), registry);
+      slipRotation = new YoFrameYawPitchRoll("slipRotation", ReferenceFrame.getWorldFrame(), registry);
 
       percentToSlipPerTick = new YoDouble("percentToSlipPerTick", registry);
       doSlip = new YoBoolean("doSlip", registry);
@@ -91,7 +92,7 @@ public class GroundContactPointsSlipper implements RobotController
       this.percentToSlipPerTick.set(percentToSlipPerTick);
    }
 
-   public void setSlipTranslation(Vector3D slipAmount)
+   public void setSlipTranslation(Vector3DReadOnly slipAmount)
    {
       this.slipAmount.set(slipAmount);
    }
@@ -135,7 +136,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyTranslationalSlip(double percentOfDelta) 
    {
-      FrameVector3D slipDelta = slipAmount.getFrameVectorCopy();
+      FrameVector3D slipDelta = new FrameVector3D(slipAmount);
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 

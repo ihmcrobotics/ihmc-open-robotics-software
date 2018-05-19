@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements YoMultipleFramesHolder
+public class YoFramePoint2dInMultipleFrames extends YoFramePoint2D implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
@@ -32,6 +33,12 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
@@ -40,15 +47,15 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(point2d);
+      point2d.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       framePoint2d.setIncludingFrame(currentReferenceFrame, point2d);
       framePoint2d.changeFrame(desiredFrame);
-      framePoint2d.get(point2d);
+      point2d.set(framePoint2d);
       set(point2d);
    }
 
-   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2DReadOnly frameTuple2d)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       set(frameTuple2d);
@@ -90,8 +97,8 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
       return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
    }
 
-   private YoFramePoint2d yoFramePointInWorld;
-   public YoFramePoint2d buildUpdatedYoFramePointForVisualizationOnly()
+   private YoFramePoint2D yoFramePointInWorld;
+   public YoFramePoint2D buildUpdatedYoFramePointForVisualizationOnly()
    {
       if (yoFramePointInWorld == null)
       {
@@ -99,18 +106,18 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
          if (!isReferenceFrameRegistered(worldFrame))
             registerReferenceFrame(worldFrame);
 
-         yoFramePointInWorld = new YoFramePoint2d(namePrefix, worldFrame.getName(), worldFrame, registry);
+         yoFramePointInWorld = new YoFramePoint2D(namePrefix, worldFrame.getName(), worldFrame, registry);
 
          attachVariableChangedListener(new VariableChangedListener()
          {
             private final FramePoint2D localFramePoint = new FramePoint2D();
-            private final YoFramePoint2d point = yoFramePointInWorld;
+            private final YoFramePoint2D point = yoFramePointInWorld;
 
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getFrameTuple2dIncludingFrame(localFramePoint);
-               point.setAndMatchFrame(localFramePoint);
+               localFramePoint.setIncludingFrame(YoFramePoint2dInMultipleFrames.this);
+               point.setMatchingFrame(localFramePoint);
             }
          });
       }
@@ -127,7 +134,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
 
       for (int i = 0; i < referenceFrames.size(); i++)
       {
-         getFrameTuple2dIncludingFrame(framePoint2d);
+         framePoint2d.setIncludingFrame(this);
          framePoint2d.changeFrame(referenceFrames.get(i));
          if (i > 0)
             ret += "\n";

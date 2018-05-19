@@ -35,7 +35,7 @@ public class NumericalInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.7)
+	@ContinuousIntegrationTest(estimatedDuration = 2.8)
 	@Test(timeout = 30000)
    public void testInfeasible()
    {
@@ -77,7 +77,7 @@ public class NumericalInverseKinematicsCalculatorTest
       if (DEBUG) printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testForwardThenInverse()
    {

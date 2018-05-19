@@ -16,14 +16,16 @@ public class ICPQPIndexHandler
 
    /** Index for the start of the footstep variables. */
    private int footstepStartingIndex;
-   /** Index for the CMP Feedback action term. */
-   private int feedbackCMPIndex;
-   /** Index for the angular momentum term. */
-   private int angularMomentumIndex;
+   /** Index for the CoP Feedback action term. */
+   private int copFeedbackIndex;
+   /** Index for the CMP feedback term. */
+   private int cmpFeedbackIndex;
 
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
-   /** Whether or not to use angular momentum in the optimization. */
+   /** Whether or not to include cmp feedback task in the optimization. */
+   private boolean hasCMPFeedbackTask = false;
+   /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private boolean useAngularMomentum = false;
 
    /**
@@ -65,6 +67,15 @@ public class ICPQPIndexHandler
    }
 
    /**
+    * Sets whether or not to use CMP feedback in the optimization.
+    * @param hasCMPFeedbackTask whether or not to use CMP feedback
+    */
+   public void setHasCMPFeedbackTask(boolean hasCMPFeedbackTask)
+   {
+      this.hasCMPFeedbackTask = hasCMPFeedbackTask;
+   }
+
+   /**
     * Sets whether or not to use angular momentum in the optimization.
     * @param useAngularMomentum whether or not to use angular momentum
     */
@@ -74,9 +85,17 @@ public class ICPQPIndexHandler
    }
 
    /**
-    * Whether or not the solver should include the use of angular momentum.
-    *
-    * @return whether or not to angular momentum.
+    * Whether or not the solver should include the CMP feedback.
+    * @return whether or not to has CMP feedback task.
+    */
+   public boolean hasCMPFeedbackTask()
+   {
+      return hasCMPFeedbackTask;
+   }
+
+   /**
+    * Whether or not the solver should use angular momentum with feedback.
+    * @return whether or not use angular momentum.
     */
    public boolean useAngularMomentum()
    {
@@ -88,18 +107,18 @@ public class ICPQPIndexHandler
     */
    public void computeProblemSize()
    {
-      feedbackCMPIndex = 0;
-      angularMomentumIndex = feedbackCMPIndex + 2;
-      if (useAngularMomentum)
-         footstepStartingIndex = angularMomentumIndex + 2;
+      copFeedbackIndex = 0;
+      cmpFeedbackIndex = copFeedbackIndex + 2;
+      if (hasCMPFeedbackTask)
+         footstepStartingIndex = cmpFeedbackIndex + 2;
       else
-         footstepStartingIndex = feedbackCMPIndex + 2;
+         footstepStartingIndex = copFeedbackIndex + 2;
 
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
       numberOfFreeVariables = 2; // the CMP delta
       if (useStepAdjustment)
          numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
-      if (useAngularMomentum)
+      if (hasCMPFeedbackTask)
          numberOfFreeVariables += 2;
    }
 
@@ -125,23 +144,23 @@ public class ICPQPIndexHandler
    }
 
    /**
-    * Gets the index of the CMP feedback action term.
+    * Gets the index of the CoP feedback action term.
     *
     * @return cmp feedback action index.
     */
-   public int getFeedbackCMPIndex()
+   public int getCoPFeedbackIndex()
    {
-      return feedbackCMPIndex;
+      return copFeedbackIndex;
    }
 
    /**
-    * Gets the index of the angular momentum term.
+    * Gets the index of the cmp feedback term.
     *
-    * @return angular momentum index.
+    * @return cmp feedback index.
     */
-   public int getAngularMomentumIndex()
+   public int getCMPFeedbackIndex()
    {
-      return angularMomentumIndex;
+      return cmpFeedbackIndex;
    }
 
    /**

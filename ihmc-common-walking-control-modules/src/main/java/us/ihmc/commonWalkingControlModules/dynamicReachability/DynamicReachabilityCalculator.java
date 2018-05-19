@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -23,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,6 +33,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DynamicReachabilityCalculator
@@ -84,8 +85,8 @@ public class DynamicReachabilityCalculator
    private final ArrayList<YoDouble> higherSwingAdjustments = new ArrayList<>();
    private final ArrayList<YoDouble> higherTransferAdjustments = new ArrayList<>();
 
-   private final SideDependentList<YoFramePoint> hipMinimumLocations = new SideDependentList<>();
-   private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> hipMinimumLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> hipMaximumLocations = new SideDependentList<>();
 
    private final ArrayList<YoDouble> requiredParallelCoMAdjustments = new ArrayList<>();
    private final ArrayList<YoDouble> achievedParallelCoMAdjustments = new ArrayList<>();
@@ -113,8 +114,8 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<FramePoint3D> adjustedAnkleLocations = new SideDependentList<>();
    private final SideDependentList<FrameVector3D> hipOffsets = new SideDependentList<>();
 
-   private final SideDependentList<YoFramePoint> yoAnkleLocations = new SideDependentList<>();
-   private final SideDependentList<YoFramePoint> yoHipLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoAnkleLocations = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoHipLocations = new SideDependentList<>();
 
    private Footstep nextFootstep;
    private boolean isInTransfer;
@@ -189,12 +190,12 @@ public class DynamicReachabilityCalculator
          String prefix = robotSide.getShortLowerCaseName();
          if (VISUALIZE_REACHABILITY)
          {
-            yoAnkleLocations.put(robotSide, new YoFramePoint(prefix + "AnkleLocation", worldFrame, registry));
-            yoHipLocations.put(robotSide, new YoFramePoint(prefix + "HipLocation", worldFrame, registry));
+            yoAnkleLocations.put(robotSide, new YoFramePoint3D(prefix + "AnkleLocation", worldFrame, registry));
+            yoHipLocations.put(robotSide, new YoFramePoint3D(prefix + "HipLocation", worldFrame, registry));
          }
 
-         YoFramePoint hipMaximumLocation = new YoFramePoint(prefix + "PredictedHipMaximumPoint", worldFrame, registry);
-         YoFramePoint hipMinimumLocation = new YoFramePoint(prefix + "PredictedHipMinimumPoint", worldFrame, registry);
+         YoFramePoint3D hipMaximumLocation = new YoFramePoint3D(prefix + "PredictedHipMaximumPoint", worldFrame, registry);
+         YoFramePoint3D hipMinimumLocation = new YoFramePoint3D(prefix + "PredictedHipMinimumPoint", worldFrame, registry);
          hipMaximumLocations.put(robotSide, hipMaximumLocation);
          hipMinimumLocations.put(robotSide, hipMinimumLocation);
          
@@ -258,13 +259,13 @@ public class DynamicReachabilityCalculator
          {
             predictedCoMPosition.changeFrame(worldFrame);
             predictedPelvisOrientation.changeFrame(worldFrame);
-            transformToParent.setTranslation(predictedCoMPosition.getPoint());
-            transformToParent.setRotation(predictedPelvisOrientation.getQuaternion());
+            transformToParent.setTranslation(predictedCoMPosition);
+            transformToParent.setRotation(predictedPelvisOrientation);
          }
       };
 
       predictedPelvisFrame = new TranslationReferenceFrame("Predicted Pelvis Frame", predictedCoMFrame);
-      predictedPelvisFrame.updateTranslation(translationToCoM.getVector());
+      predictedPelvisFrame.updateTranslation((Vector3DReadOnly) translationToCoM);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -276,7 +277,7 @@ public class DynamicReachabilityCalculator
          translationToPelvis.sub(pelvisCenter);
          TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame",
                predictedPelvisFrame);
-         predictedHipFrame.updateTranslation(translationToPelvis.getVector());
+         predictedHipFrame.updateTranslation((Vector3DReadOnly) translationToPelvis);
          predictedHipFrames.put(robotSide, predictedHipFrame);
 
          Vector2dZUpFrame stepDirectionFrame = new Vector2dZUpFrame(robotSide.getShortLowerCaseName() + "Step Direction Frame", worldFrame);
@@ -295,8 +296,8 @@ public class DynamicReachabilityCalculator
 
       for (RobotSide side : RobotSide.values)
       {
-         YoFramePoint hipMaximumLocation = hipMaximumLocations.get(side);
-         YoFramePoint hipMinimumLocation = hipMinimumLocations.get(side);
+         YoFramePoint3D hipMaximumLocation = hipMaximumLocations.get(side);
+         YoFramePoint3D hipMinimumLocation = hipMinimumLocations.get(side);
 
          YoGraphicPosition hipMaximumLocationViz = new YoGraphicPosition(side.getSideNameFirstLetter() + "Predicted Maximum Hip Point", hipMaximumLocation,
                0.01, YoAppearance.ForestGreen());

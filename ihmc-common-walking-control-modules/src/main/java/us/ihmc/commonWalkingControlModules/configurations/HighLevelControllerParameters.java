@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public interface HighLevelControllerParameters
 {
@@ -33,6 +32,12 @@ public interface HighLevelControllerParameters
     * track the desired values of the whole body controller. It contains information such as stiffness
     * and {@link JointDesiredControlMode}. The implementation of this is usually robot specific.
     * </p>
+    * <p>
+    * As long as a joint is not part of a loaded joint chain these behavior settings will be
+    * used for that joint. E.g. all joints of a leg in support will be considered loaded. If a joint is loaded
+    * the parameters defined here can be overwritten (this is optional) by defining integration parameters
+    * in {@link #getDesiredJointBehaviorsLoaded()}.
+    * </p>
     * @return list containing joint behavior parameters and the corresponding joint groups
     */
    public default List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
@@ -41,13 +46,16 @@ public interface HighLevelControllerParameters
    }
 
    /**
-    * Parameter that allows to scale desired joint velocities in the joint level control. This
-    * parameter is passed down as part of the {@link JointDesiredOutputReadOnly} and if or how the
-    * parameter is used is implementation specific to each robot.
+    * This method is similar to {@link #getDesiredJointBehaviors()}. The controller will
+    * apply the joint settings defined here only to joints that are part of a loaded chain.
+    * This can be used if, for example, a different set of parameters should be used for
+    * joints that are part of a leg that is swinging versus a leg that supporting weight.
+    *
+    * @return list containing joint behavior parameters to be used if a joint is loaded
     */
-   public default double getJointVelocityScaling(String joint, HighLevelControllerName state)
+   public default List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
    {
-      return 1.0;
+      return null;
    }
 
    /**
@@ -63,24 +71,24 @@ public interface HighLevelControllerParameters
     * As long as a joint is not part of a loaded joint chain these acceleration integration settings will be
     * used for that joint. E.g. all joints of a leg in support will be considered loaded. If a joint is loaded
     * the parameters defined here can be overwritten (this is optional) by defining integration parameters
-    * in {@link #getJointAccelerationIntegrationParametersLoaded()}.
+    * in {@link #getJointAccelerationIntegrationParametersUnderLoad()}.
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joint groups
     */
-   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
    {
       return null;
    }
 
    /**
-    * This method is similar to {@link #getJointAccelerationIntegrationParametersNoLoad()}. The controller will
+    * This method is similar to {@link #getJointAccelerationIntegrationParameters()}. The controller will
     * apply the acceleration integration parameters defined here only to joints that are part of a loaded chain.
     * This can be used if, for example, a different set of acceleration integration parameters should be used for
     * joints that are part of a leg that is swinging versus a leg that supporting weight.
     *
     * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersLoaded()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad()
    {
       return null;
    }

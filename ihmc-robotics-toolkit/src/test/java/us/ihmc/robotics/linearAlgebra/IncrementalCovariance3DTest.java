@@ -23,7 +23,7 @@ public class IncrementalCovariance3DTest
 {
    private static final double EPSILON = 1.0e-12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEasyCase()
    {

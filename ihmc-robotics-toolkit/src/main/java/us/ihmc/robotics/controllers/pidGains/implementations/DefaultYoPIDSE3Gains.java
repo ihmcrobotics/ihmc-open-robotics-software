@@ -2,7 +2,6 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -34,37 +33,34 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
    }
 
    /**
-    * Will create a copy of the provided {@link PIDSE3Gains}
-    * in the given registry and using the provided name prefix.
+    * Will create a new gains according to the provided gain configuration.
     *
     * @param suffix the name of the gains will be attached to all YoVariables.
-    * @param other the gains that will be copied into this object.
+    * @param configuration and initial values for the gains.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public DefaultYoPIDSE3Gains(String suffix, PIDSE3Gains other, YoVariableRegistry registry)
+   public DefaultYoPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoVariableRegistry registry)
    {
-      this(suffix, other.getPositionGains(), other.getOrientationGains(), registry);
+      this(suffix, configuration.getPositionConfiguration(), configuration.getOrientationConfiguration(), registry);
    }
 
    /**
-    * Will create a copy of the provided {@link PID3DGainsReadOnly}
-    * for position and orientation in the given registry and using the provided name prefix.
+    * Will create a new gains according to the provided gain configurations for position and orientation gains.
     *
     * @param suffix the name of the gains will be attached to all YoVariables.
-    * @param positionGains the position gains to be copied.
-    * @param orientationGains the orientation gains to be copied.
+    * @param positionConfiguration configuration and initial values for the position gains.
+    * @param orientationConfiguration configuration and initial values for the orientation gains.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public DefaultYoPIDSE3Gains(String suffix, PID3DGainsReadOnly positionGains, PID3DGainsReadOnly orientationGains, YoVariableRegistry registry)
+   public DefaultYoPIDSE3Gains(String suffix, PID3DConfiguration positionConfiguration, PID3DConfiguration orientationConfiguration,
+                               YoVariableRegistry registry)
    {
-      this(suffix, positionGains.getGainCoupling(), orientationGains.getGainCoupling(), positionGains.isUseIntegrator(), orientationGains.isUseIntegrator(),
-           registry);
-      setPositionGains(positionGains);
-      setOrientationGains(orientationGains);
+      this(suffix, positionConfiguration.getGainCoupling(), orientationConfiguration.getGainCoupling(), positionConfiguration.isUseIntegrator(),
+           orientationConfiguration.isUseIntegrator(), positionConfiguration.getGains(), orientationConfiguration.getGains(), registry);
    }
 
    /**
-    * Will create a new set of gains will the specified coupling and integration setting for
+    * Will create a new set of gains with the specified coupling and integration setting for
     * both, position and orientation.
     *
     * @param suffix the name of the gains will be attached to all YoVariables.
@@ -74,25 +70,27 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     */
    public DefaultYoPIDSE3Gains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
    {
-      this(suffix, gainCoupling, gainCoupling, useIntegrator, useIntegrator, registry);
+      this(suffix, gainCoupling, gainCoupling, useIntegrator, useIntegrator, null, null, registry);
    }
 
    /**
-    * Will create a new set of gains will the specified coupling and integration setting for
-    * position and orientation.
+    * Will create a new set of gains with the specified coupling and integration setting for
+    * position and orientation. Will set the new gains to the provided initial values.
     *
     * @param suffix the name of the gains will be attached to all YoVariables.
     * @param gainCouplingPosition the gain coupling for the position gains.
     * @param gainCouplingOrientation the gain coupling for the orientation gains.
     * @param useIntegratorPosition whether the position gains will use an integrator.
     * @param useIntegratorOrientation whether the orientation gains will use an integrator.
+    * @param positionGains the initial values for the position gains.
+    * @param orientationGains the initial values for the orientation gains.
     * @param registry the registry to which the tuning variables are attached.
     */
    public DefaultYoPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
-                               boolean useIntegratorOrientation, YoVariableRegistry registry)
+                               boolean useIntegratorOrientation, PID3DGainsReadOnly positionGains, PID3DGainsReadOnly orientationGains, YoVariableRegistry registry)
    {
-      positionGains = new DefaultYoPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, registry);
-      orientationGains = new DefaultYoPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, registry);
+      this.positionGains = new DefaultYoPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, positionGains, registry);
+      this.orientationGains = new DefaultYoPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, orientationGains, registry);
    }
 
    @Override

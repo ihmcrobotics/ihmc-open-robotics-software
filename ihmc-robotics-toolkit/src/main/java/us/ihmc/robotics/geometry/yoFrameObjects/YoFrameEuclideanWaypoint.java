@@ -11,15 +11,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWaypoint, FrameEuclideanWaypoint, EuclideanWaypoint>
       implements EuclideanWaypointInterface<YoFrameEuclideanWaypoint>
 {
-   private final YoFramePoint position;
-   private final YoFrameVector linearVelocity;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D linearVelocity;
 
    public YoFrameEuclideanWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -29,9 +29,9 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
       linearVelocity = createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
    }
 
-   public static YoFramePoint createYoPosition(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public static YoFramePoint3D createYoPosition(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      return new YoFramePoint(createName(namePrefix, "position", ""), nameSuffix, null, registry)
+      return new YoFramePoint3D(createName(namePrefix, "position", ""), nameSuffix, null, registry)
       {
          @Override
          public ReferenceFrame getReferenceFrame()
@@ -41,9 +41,9 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
       };
    }
 
-   public static YoFrameVector createYoLinearVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public static YoFrameVector3D createYoLinearVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
-      return new YoFrameVector(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
+      return new YoFrameVector3D(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
       {
          @Override
          public ReferenceFrame getReferenceFrame()
@@ -98,20 +98,20 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    @Override
    public void getPosition(Point3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionToPack.set(position);
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
       EuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      simpleWaypoint.set(position.getFrameTuple().getPoint(), linearVelocity.getFrameTuple().getVector());
+      simpleWaypoint.set(position, linearVelocity);
    }
 
    @Override

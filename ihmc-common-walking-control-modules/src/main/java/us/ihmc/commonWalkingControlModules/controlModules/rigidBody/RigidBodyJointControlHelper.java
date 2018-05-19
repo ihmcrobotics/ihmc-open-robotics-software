@@ -246,7 +246,7 @@ public class RigidBodyJointControlHelper
       return false;
    }
 
-   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
       if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {

@@ -27,6 +27,8 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
+   private boolean useConstrainedWholeBodyPlanningToolbox;
+   private boolean useConstrainedWholeBodyPlanningToolboxVisualizer;
    private boolean useKinematicsToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
@@ -36,6 +38,8 @@ public class DRCNetworkModuleParameters
    private boolean useHeightQuadTreeToolbox;
    private boolean useRemoteObjectDetectionFeedback;
    private boolean useLidarScanLogger;
+   private boolean filterControllerInputMessages;
+   private boolean enableJoystickBasedStepping;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -63,6 +67,11 @@ public class DRCNetworkModuleParameters
    {
       return useBehaviorVisualizer;
    }
+   
+   public boolean isConstrainedWholeBodyPlanningToolboxEnabled()
+   {
+      return useConstrainedWholeBodyPlanningToolbox;
+   }
 
    public boolean isKinematicsToolboxEnabled()
    {
@@ -77,6 +86,11 @@ public class DRCNetworkModuleParameters
    public boolean isKinematicsToolboxVisualizerEnabled()
    {
       return useKinematicsToolboxVisualizer;
+   }
+   
+   public boolean isConstrainedWholeBodyToolboxVisualizerEnabled()
+   {
+      return useConstrainedWholeBodyPlanningToolboxVisualizer;
    }
 
    public boolean isFootstepPlanningToolboxVisualizerEnabled()
@@ -157,7 +171,12 @@ public class DRCNetworkModuleParameters
    {
       this.useKinematicsToolbox = useKinematicsToolbox;
    }
-
+   
+   public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
+   {
+      this.useConstrainedWholeBodyPlanningToolbox = useConstrainedWholeBodyPlanningToolbox;
+   }
+   
    public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
    {
       this.useFootstepPlanningToolbox = useFootstepPlanningToolbox;
@@ -166,6 +185,11 @@ public class DRCNetworkModuleParameters
    public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
    {
       this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
+   }
+   
+   public void enableConstrainedWholeBodyPlanningToolboxVisualizer(boolean useConstrainedWholeBodyPlanningToolboxVisualizer)
+   {
+      this.useConstrainedWholeBodyPlanningToolboxVisualizer = useConstrainedWholeBodyPlanningToolboxVisualizer;
    }
 
    public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
@@ -369,5 +393,25 @@ public class DRCNetworkModuleParameters
    public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
    {
       return extraIntraProcessCommunicatorPorts;
+   }
+
+   public boolean isFilterControllerInputMessages()
+   {
+      return filterControllerInputMessages;
+   }
+
+   public void setFilterControllerInputMessages(boolean filterControllerInputMessages)
+   {
+      this.filterControllerInputMessages = filterControllerInputMessages;
+   }
+
+   public boolean isEnableJoystickBasedStepping()
+   {
+      return enableJoystickBasedStepping;
+   }
+
+   public void setEnableJoystickBasedStepping(boolean enableJoystickBasedStepping)
+   {
+      this.enableJoystickBasedStepping = enableJoystickBasedStepping;
    }
 }

@@ -23,7 +23,7 @@ import us.ihmc.commons.MutationTestFacilitator;
            CoMIntegrationToolsTest.class,
            SmoothCapturePointAdjustmentToolboxTest.class,
            CoPPointsInFootTest.class,
-           ReferenceCenterOfPressureWaypointCalculatorTest.class,
+           ReferenceCoPTrajectoryGeneratorTest.class,
            CapturePointToolsTest.class,
            ReferenceICPTrajectoryGeneratorTest.class,
            SmoothCapturePointAdjustmentToolboxTest.class,

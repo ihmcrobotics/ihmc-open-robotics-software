@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -99,6 +101,30 @@ public class GroundContactForceQPSolver
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
    }
 
+   public void addMotionInput(MotionQPInput input)
+   {
+      switch (input.getConstraintType())
+      {
+      case OBJECTIVE:
+         if (input.useWeightScalar())
+            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+         else
+            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+         break;
+      case EQUALITY:
+         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case LEQ_INEQUALITY:
+         addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case GEQ_INEQUALITY:
+         addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      default:
+         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+      }
+   }
+
    public void addMomentumTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
@@ -110,6 +136,60 @@ public class GroundContactForceQPSolver
       addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
+   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
+   {
+      int taskSize = taskJ.getNumRows();
+
+      // J^T W
+      tempJtW.reshape(rhoSize, taskSize);
+      CommonOps.transpose(taskJ, tempJtW);
+
+      addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
+   }
+
+   /**
+    * Sets up a motion objective for the joint accelerations (qddot).
+    * <p>
+    *    min (J qddot - b)^T * W * (J qddot - b)
+    * </p>
+    * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
+   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      int taskSize = taskJacobian.getNumRows();
+
+      // J^T W
+      tempJtW.reshape(rhoSize, taskSize);
+      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
+
+      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
+   }
+
+   // new, and hopefully faster
+   private void addMotionTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      // Compute: H += J^T W J
+      CommonOps.multInner(taskJacobian, tempRhoTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, weight);
+
+      // Compute: f += - J^T W Objective
+      CommonOps.mult(taskJt, taskObjective, tempRhoTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -weight);
+   }
+
+   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      // Compute: H += J^T W J
+      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+
+      // Compute: f += - J^T W Objective
+      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+   }
+
    public void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
@@ -119,6 +199,43 @@ public class GroundContactForceQPSolver
       // Compute f += -J^T W Objective
       CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+   }
+
+
+   public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int previousSize = solverInput_beq.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Aeq.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_beq.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+   }
+
+   public void addMotionLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
+   }
+
+   private void addMotionInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int previousSize = solverInput_bin.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Ain.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_bin.reshape(previousSize + taskSize, 1, true);
+
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, rhoSize, sign);
+      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.commons.MathTools;
 
 public class RotationTools
 {
@@ -350,7 +350,7 @@ public class RotationTools
    public static void integrateAngularVelocity(FrameVector3D angularVelocityToIntegrate, double integrationTime, FrameQuaternion orientationResultToPack)
    {
       AxisAngle axisAngleResult = axisAngleForIntegrator.get();
-      integrateAngularVelocity(angularVelocityToIntegrate.getVector(), integrationTime, axisAngleResult);
+      integrateAngularVelocity(angularVelocityToIntegrate, integrationTime, axisAngleResult);
       orientationResultToPack.setIncludingFrame(angularVelocityToIntegrate.getReferenceFrame(), axisAngleResult);
    }
 
@@ -383,6 +383,26 @@ public class RotationTools
     * yaw-pitch-roll angles.
     * </p>
     * 
+    * @param yawPitchRoll array containing in order the current yaw, pitch, and roll rotation
+    *           angles, i.e. around the z, y, and x axes respectively.
+    * @param yawPitchRollRates the rates of change of in order the yaw, pitch, and roll angles.
+    * @param angularVelocityToPack the angular velocity from the yaw-pitch-roll angles rate.
+    *           Modified.
+    */
+   public static void computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(double[] yawPitchRoll, double[] yawPitchRollRates,
+                                                                                   Vector3DBasics angularVelocityToPack)
+   {
+      computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2], yawPitchRollRates[0],
+                                                                   yawPitchRollRates[1], yawPitchRollRates[2], angularVelocityToPack);
+   }
+
+   /**
+    * Computes the angular velocity vector from the time derivatives of the yaw-pitch-roll angles.
+    * <p>
+    * The resulting velocity is expressed in the local coordinate system described by the
+    * yaw-pitch-roll angles.
+    * </p>
+    * 
     * @param yaw the current rotation angle about the z-axis.
     * @param pitch the current rotation angle about the y-axis.
     * @param roll the current rotation angle about the x-axis.
@@ -403,6 +423,26 @@ public class RotationTools
       angularVelocityToPack.setX(rollRate - yawRate * sPitch);
       angularVelocityToPack.setY(yawRate * cPitch * sRoll + pitchRate * cRoll);
       angularVelocityToPack.setZ(yawRate * cPitch * cRoll - pitchRate * sRoll);
+   }
+
+   /**
+    * Computes the angular velocity vector from the time derivatives of the yaw-pitch-roll angles.
+    * <p>
+    * The resulting velocity is expressed in the world coordinate system, i.e. the coordinate system
+    * before the yaw-pitch-roll angles.
+    * </p>
+    * 
+    * @param yawPitchRoll array containing in order the current yaw, pitch, and roll rotation
+    *           angles, i.e. around the z, y, and x axes respectively.
+    * @param yawPitchRollRates the rates of change of in order the yaw, pitch, and roll angles.
+    * @param angularVelocityToPack the angular velocity from the yaw-pitch-roll angles rate.
+    *           Modified.
+    */
+   public static void computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(double[] yawPitchRoll, double[] yawPitchRollRates,
+                                                                                   Vector3DBasics angularVelocityToPack)
+   {
+      computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2], yawPitchRollRates[0],
+                                                                   yawPitchRollRates[1], yawPitchRollRates[2], angularVelocityToPack);
    }
 
    /**

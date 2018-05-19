@@ -50,7 +50,6 @@ import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
@@ -81,7 +80,8 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
    public static final SideDependentList<String> handNames = new SideDependentList<>();
-   public static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "foot", getRobotSidePrefix(RobotSide.RIGHT) + "foot");
+   public static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "foot",
+                                                                                     getRobotSidePrefix(RobotSide.RIGHT) + "foot");
 
    private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
    private final ArmJointName[] armJoints;
@@ -283,11 +283,13 @@ public class AtlasJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
    }
 
+   @Override
    public String getFootName(RobotSide robotSide)
    {
       return footNames.get(robotSide);
@@ -376,7 +378,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
-      RigidBodyTransform attachmentPlateToPalm = JMEDataTypeUtils.jmeTransformToTransform3D(atlasVersion.getOffsetFromAttachmentPlate(robotSide));
+      RigidBodyTransform attachmentPlateToPalm = atlasVersion.getOffsetFromAttachmentPlate(robotSide);
       RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
       handControlFrameToWristTranform.set(attachmentPlateToWrist);
@@ -433,13 +435,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
-   {
-      return RobotSide.values;
-   }
-
-   @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotSide getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

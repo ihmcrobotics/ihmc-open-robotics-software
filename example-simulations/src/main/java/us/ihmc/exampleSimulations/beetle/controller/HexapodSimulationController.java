@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,11 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -35,12 +31,16 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class HexapodSimulationController implements RobotController
 {
@@ -75,11 +75,11 @@ public class HexapodSimulationController implements RobotController
       this.fullRobotModel = fullRobotModel;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
-      this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
       setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
 
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
+      this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, lowLevelControllerCoreOutput);
       
       highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
@@ -150,12 +150,12 @@ public class HexapodSimulationController implements RobotController
          controlledBodies[i] = endEffector;
          i++;
       }
-      controlledBodies[i] = fullRobotModel.getPelvis();
+      controlledBodies[i] = fullRobotModel.getRootBody();
 
       //Joints to Control
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
 
-      MomentumOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
+      ControllerCoreOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
@@ -165,12 +165,12 @@ public class HexapodSimulationController implements RobotController
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       toolbox.setupForInverseDynamicsSolver(footContactableBodies);
       toolbox.setupForInverseKinematicsSolver();
-      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, footContactableBodies);
+      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getRootBody(), footContactableBodies);
 
       return toolbox;
    }
 
-   private MomentumOptimizationSettings getMomentumOptimizationSettings()
+   private ControllerCoreOptimizationSettings getMomentumOptimizationSettings()
    {
       return new HexapodMomentumOptimizationSettings();
    }

@@ -6,6 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -17,17 +20,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -37,6 +36,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
@@ -295,8 +296,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015 , 0.015);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 27.3)
-	@Test(timeout = 140000)
+	@ContinuousIntegrationTest(estimatedDuration = 24.5)
+	@Test(timeout = 120000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -371,7 +372,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -437,7 +438,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -503,7 +504,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -571,7 +572,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -638,7 +639,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -707,7 +708,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);

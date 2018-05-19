@@ -3,6 +3,8 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class Ray3d 
 {
@@ -19,10 +21,10 @@ public class Ray3d
       return new Ray3d(transformedPoint, transformedVector);
    }
 
-   public Ray3d(Point3D point, Vector3D vector)
+   public Ray3d(Point3DReadOnly point, Vector3DReadOnly vector)
    {
-      this.point = point;
-      this.vector = vector;
+      this.point = new Point3D(point);
+      this.vector = new Vector3D(vector);
    }
 
    public Point3D getPoint()

@@ -1,115 +1,92 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT_VARIATION;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_SIZE;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_X;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_Y;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import java.io.IOException;
+
 import org.junit.Before;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldWithFiducialEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldWithFiducialEnvironment.FiducialType;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
-   private DRCRobotModel drcRobotModel;
-
-   @Before
-   public void showMemoryUsageBeforeTest()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-   }
-
-   @After
-   public void destroySimulationAndRecycleMemory()
-   {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
-      // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
-      {
-         drcBehaviorTestHelper.closeAndDispose();
-         drcBehaviorTestHelper = null;
-      }
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-   }
-
-   @AfterClass
-   public static void printMemoryUsageAfterClass()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCWalkToLocationBehaviorTest.class + " after class.");
-   }
+   private DRCSimulationTestHelper simulationTestHelper;
+   private PlanarRegionsList cinderBlockField;
 
    @Before
    public void setUp()
    {
-      drcRobotModel = getRobotModel();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(new CinderBlockFieldWithFiducialEnvironment(FiducialType.FIDUCIAL_50), getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, drcRobotModel);
+      cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
+                                                                            CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
+                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03);
+
+      SimulationTestingParameters parameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestHelper = new DRCSimulationTestHelper(parameters, getRobotModel(), createCommonAvatarInterface(cinderBlockField));
    }
 
-   public void testWalkOverCinderBlocks() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   private static CommonAvatarEnvironmentInterface createCommonAvatarInterface(PlanarRegionsList planarRegionsList)
    {
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      double allowablePenetrationThickness = 0.05;
+      boolean generateGroundPlane = false;
+      return new PlanarRegionsListDefinedEnvironment("testEnvironment", planarRegionsList,
+                                                     allowablePenetrationThickness, generateGroundPlane);
+   }
+
+   public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
+      networkModuleParameters.enableLocalControllerCommunicator(true);
+      networkModuleParameters.enableBehaviorModule(true);
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
+      simulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
+
+      simulationTestHelper.createSimulation(getClass().getSimpleName(), !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(), true);
+
+      PacketCommunicator behaviorCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicator.connect();
+
+      PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      controllerCommunicator.connect();
+
+      double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
+      Point3D goalPosition = new Point3D(courseLength, 0.0, 0.0);
+
+      behaviorCommunicator.send(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField));
+      behaviorCommunicator.send(HumanoidMessageTools.createWalkOverTerrainGoalPacket(goalPosition, new Quaternion()));
+      behaviorCommunicator.send(HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_OVER_TERRAIN));
+
+      FloatingJoint pelvisJoint = simulationTestHelper.getRobot().getRootJoint();
+      Point3D pelvisPosition = new Point3D();
+      while(pelvisPosition.distanceXY(goalPosition) > 0.1)
       {
-         simulationTestingParameters.setKeepSCSUp(true);
+         simulationTestHelper.simulateAndBlock(2.0);
+         pelvisJoint.getPosition(pelvisPosition);
       }
-
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-
-      CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
-      YoDouble yoTime = drcBehaviorTestHelper.getYoTime();
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, yoGraphicsListRegistry);
-      fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      YoVariableRegistry scsRootRegistry = drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry();
-
-      AtlasPrimitiveActions primitiveActions = new AtlasPrimitiveActions(communicationBridge, fullRobotModel, drcRobotModel, referenceFrames, yoTime, drcRobotModel, scsRootRegistry);
-
-      LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
-
-      WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, primitiveActions,
-            logModelProvider, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
-      walkOverTerrainBehavior.initialize();
-      drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
-
-      drcBehaviorTestHelper.addChildRegistry(fiducialDetectorBehaviorService.getYoVariableRegistry());
-      drcBehaviorTestHelper.addChildRegistry(walkOverTerrainBehavior.getYoVariableRegistry());
-
-      drcBehaviorTestHelper.getAvatarSimulation().start();
-//      drcBehaviorTestHelper.getAvatarSimulation().simulate();
-
-      assertTrue(drcBehaviorTestHelper.executeBehaviorUntilDone(walkOverTerrainBehavior));
-      assertTrue(walkOverTerrainBehavior.isDone());
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 }

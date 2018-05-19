@@ -22,8 +22,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    private final YoDouble masterGain;
 
    private final YoDouble velocityScaling;
-   private final YoDouble velocityIntegrationLeakRate;
-   private final YoDouble positionIntegrationLeakRate;
+   private final YoDouble velocityIntegrationBreakFrequency;
+   private final YoDouble positionIntegrationBreakFrequency;
+   private final YoDouble maxPositionError;
+   private final YoDouble maxVelocityError;
 
    public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -41,8 +43,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       masterGain = new YoDouble(namePrefix + "MasterGain" + suffixString, registry);
 
       velocityScaling = new YoDouble(namePrefix + "VelocityScaling" + suffixString, registry);
-      velocityIntegrationLeakRate = new YoDouble(namePrefix + "VelocityIntegrationLeakRate" + suffixString, registry);
-      positionIntegrationLeakRate = new YoDouble(namePrefix + "PositionIntegrationLeakRate" + suffixString, registry);
+      velocityIntegrationBreakFrequency = new YoDouble(namePrefix + "VelocityIntegrationBreakFrequency" + suffixString, registry);
+      positionIntegrationBreakFrequency = new YoDouble(namePrefix + "PositionIntegrationBreakFrequency" + suffixString, registry);
+      maxPositionError = new YoDouble(namePrefix + "MaxPositionError" + suffixString, registry);
+      maxVelocityError = new YoDouble(namePrefix + "MaxVelocityError" + suffixString, registry);
 
       clear();
    }
@@ -58,8 +62,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       damping.set(Double.NaN);
       masterGain.set(Double.NaN);
       velocityScaling.set(Double.NaN);
-      velocityIntegrationLeakRate.set(Double.NaN);
-      positionIntegrationLeakRate.set(Double.NaN);
+      velocityIntegrationBreakFrequency.set(Double.NaN);
+      positionIntegrationBreakFrequency.set(Double.NaN);
+      maxPositionError.set(Double.NaN);
+      maxVelocityError.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -75,8 +81,10 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
       damping.set(other.getDamping());
       masterGain.set(other.getMasterGain());
       velocityScaling.set(other.getVelocityScaling());
-      velocityIntegrationLeakRate.set(other.getVelocityIntegrationLeakRate());
-      positionIntegrationLeakRate.set(other.getPositionIntegrationLeakRate());
+      velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
+      positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
+      maxPositionError.set(other.getMaxPositionError());
+      maxVelocityError.set(other.getMaxVelocityError());
    }
 
    /**
@@ -105,10 +113,14 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
          masterGain.set(other.getMasterGain());
       if(!hasVelocityScaling())
          velocityScaling.set(other.getVelocityScaling());
-      if(!hasVelocityIntegrationLeakRate())
-         velocityIntegrationLeakRate.set(other.getVelocityIntegrationLeakRate());
-      if(!hasPositionIntegrationLeakRate())
-         positionIntegrationLeakRate.set(other.getPositionIntegrationLeakRate());
+      if(!hasVelocityIntegrationBreakFrequency())
+         velocityIntegrationBreakFrequency.set(other.getVelocityIntegrationBreakFrequency());
+      if(!hasPositionIntegrationBreakFrequency())
+         positionIntegrationBreakFrequency.set(other.getPositionIntegrationBreakFrequency());
+      if(!hasMaxPositionError())
+         maxPositionError.set(other.getMaxPositionError());
+      if(!hasMaxVelocityError())
+         maxVelocityError.set(other.getMaxVelocityError());
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -284,36 +296,70 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    }
 
    @Override
-   public boolean hasVelocityIntegrationLeakRate()
+   public boolean hasVelocityIntegrationBreakFrequency()
    {
-      return !velocityIntegrationLeakRate.isNaN();
+      return !velocityIntegrationBreakFrequency.isNaN();
    }
 
    @Override
-   public double getVelocityIntegrationLeakRate()
+   public double getVelocityIntegrationBreakFrequency()
    {
-      return velocityIntegrationLeakRate.getDoubleValue();
+      return velocityIntegrationBreakFrequency.getDoubleValue();
    }
 
-   public void setVelocityIntegrationLeakRate(double velocityIntegrationLeakRate)
+   public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
    {
-      this.velocityIntegrationLeakRate.set(velocityIntegrationLeakRate);
-   }
-
-   @Override
-   public boolean hasPositionIntegrationLeakRate()
-   {
-      return !positionIntegrationLeakRate.isNaN();
+      this.velocityIntegrationBreakFrequency.set(velocityIntegrationBreakFrequency);
    }
 
    @Override
-   public double getPositionIntegrationLeakRate()
+   public boolean hasPositionIntegrationBreakFrequency()
    {
-      return positionIntegrationLeakRate.getDoubleValue();
+      return !positionIntegrationBreakFrequency.isNaN();
    }
 
-   public void setPositionIntegrationLeakRate(double positionIntegrationLeakRate)
+   @Override
+   public double getPositionIntegrationBreakFrequency()
    {
-      this.positionIntegrationLeakRate.set(positionIntegrationLeakRate);
+      return positionIntegrationBreakFrequency.getDoubleValue();
+   }
+
+   public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
+   {
+      this.positionIntegrationBreakFrequency.set(positionIntegrationBreakFrequency);
+   }
+
+   @Override
+   public boolean hasMaxPositionError()
+   {
+      return maxPositionError.isNaN();
+   }
+
+   @Override
+   public double getMaxPositionError()
+   {
+      return maxPositionError.getDoubleValue();
+   }
+
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError.set(maxPositionError);
+   }
+
+   @Override
+   public boolean hasMaxVelocityError()
+   {
+      return maxVelocityError.isNaN();
+   }
+
+   @Override
+   public double getMaxVelocityError()
+   {
+      return maxVelocityError.getDoubleValue();
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.maxVelocityError.set(maxVelocityError);
    }
 }

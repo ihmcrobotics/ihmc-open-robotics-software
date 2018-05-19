@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -27,7 +28,6 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -41,8 +41,8 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    private final WaypointDefinedBodyPathPlan bodyPath;
    private final FootstepPlanner footstepPlanner;
 
-   private final FramePose bodyStart = new FramePose();
-   private final FramePose bodyGoal = new FramePose();
+   private final FramePose3D bodyStart = new FramePose3D();
+   private final FramePose3D bodyGoal = new FramePose3D();
 
    private static final int numberOfPoints = 5;
    private final List<Point2D> waypoints = new ArrayList<>();
@@ -72,7 +72,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
+   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
@@ -82,7 +82,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       bodyStart.setToZero(ReferenceFrame.getWorldFrame());
       bodyStart.setPosition(bodyStartPoint.getX(), bodyStartPoint.getY(), 0.0);
-      bodyStart.setYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
+      bodyStart.setOrientationYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
 
       footstepPlanner.setInitialStanceFoot(stanceFootPose, side);
    }
@@ -91,7 +91,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    public void setGoal(FootstepPlannerGoal goal)
    {
       AStarFootstepPlanner.checkGoalType(goal);
-      FramePose goalPose = goal.getGoalPoseBetweenFeet();
+      FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
       bodyGoal.setIncludingFrame(goalPose);
    }
 
@@ -132,9 +132,9 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
       double alpha = MathTools.clamp(horizon / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
 
-      FramePose footstepPlannerGoal = new FramePose();
+      FramePose3D footstepPlannerGoal = new FramePose3D();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      footstepPlannerGoal.setYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);

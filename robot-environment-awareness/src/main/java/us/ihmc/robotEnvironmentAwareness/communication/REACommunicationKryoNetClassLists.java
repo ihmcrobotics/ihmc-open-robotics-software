@@ -2,23 +2,41 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.BoundingBox3DMessage;
+import controller_msgs.msg.dds.BoundingBox3DMessagePubSubType;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanMessagePubSubType;
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionMessagePubSubType;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
+import controller_msgs.msg.dds.Polygon2DMessage;
+import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessagePubSubType;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
+import geometry_msgs.msg.dds.PointPubSubType;
+import geometry_msgs.msg.dds.QuaternionPubSubType;
+import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.APIElementId;
+import us.ihmc.javaFXToolkit.messager.Message;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicID;
+import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
@@ -26,6 +44,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessa
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -38,8 +57,7 @@ public class REACommunicationKryoNetClassLists
    private static final NetClassList privateNetClassList = new NetClassList();
    static
    {
-      privateNetClassList.registerPacketClass(Packet.class);
-      privateNetClassList.registerPacketClass(REAMessage.class);
+      privateNetClassList.registerPacketClass(Message.class);
       privateNetClassList.registerPacketField(PacketDestination.class);
       privateNetClassList.registerPacketField(Boolean.class);
       privateNetClassList.registerPacketField(Double.class);
@@ -49,15 +67,16 @@ public class REACommunicationKryoNetClassLists
       privateNetClassList.registerPacketField(ArrayList.class);
       privateNetClassList.registerPacketField(Point3D.class);
       privateNetClassList.registerPacketField(Point3D32.class);
-      privateNetClassList.registerPacketField(Point2D32.class);
+      privateNetClassList.registerPacketField(Point2D.class);
+      privateNetClassList.registerPacketField(Vector3D.class);
       privateNetClassList.registerPacketField(Vector3D32.class);
       privateNetClassList.registerPacketField(Quaternion.class);
-      privateNetClassList.registerPacketField(Quaternion32.class);
+      privateNetClassList.registerPacketField(Point3D[].class);
       privateNetClassList.registerPacketField(Point3D32[].class);
-      privateNetClassList.registerPacketField(Point2D32[].class);
+      privateNetClassList.registerPacketField(Point2D[].class);
       privateNetClassList.registerPacketField(LineSegment3DMessage.class);
       privateNetClassList.registerPacketField(LineSegment3DMessage[].class);
-      privateNetClassList.registerPacketField(APIElementId.class);
+      privateNetClassList.registerPacketField(TopicID.class);
       privateNetClassList.registerPacketField(LidarScanMessage.class);
       privateNetClassList.registerPacketField(BoxMessage.class);
       privateNetClassList.registerPacketField(BoundingBoxParametersMessage.class);
@@ -73,7 +92,32 @@ public class REACommunicationKryoNetClassLists
       privateNetClassList.registerPacketField(PlanarRegionSegmentationMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionSegmentationMessage[].class);
       privateNetClassList.registerPacketField(PlanarRegionsListMessage.class);
+      privateNetClassList.registerPacketField(Polygon2DMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionMessage.class);
+      privateNetClassList.registerPacketField(ConcaveHullFactoryParameters.class);
+
+      privateNetClassList.registerPacketField(Vector3PubSubType.class);
+      privateNetClassList.registerPacketField(PointPubSubType.class);
+      privateNetClassList.registerPacketField(QuaternionPubSubType.class);
+      privateNetClassList.registerPacketField(Polygon2DMessagePubSubType.class);
+      privateNetClassList.registerPacketField(BoundingBox3DMessagePubSubType.class);
+      privateNetClassList.registerPacketField(RequestPlanarRegionsListMessagePubSubType.class);
+      privateNetClassList.registerPacketField(RequestLidarScanMessagePubSubType.class);
+      privateNetClassList.registerPacketField(PlanarRegionsListMessagePubSubType.class);
+      privateNetClassList.registerPacketField(LidarScanMessagePubSubType.class);
+      privateNetClassList.registerPacketField(PlanarRegionMessagePubSubType.class);
+
+      privateNetClassList.registerPacketField(IDLSequence.Object.class);
+      privateNetClassList.registerPacketField(IDLSequence.Float.class);
+      privateNetClassList.registerPacketField(IDLSequence.Boolean.class);
+      privateNetClassList.registerPacketField(IDLSequence.Double.class);
+      privateNetClassList.registerPacketField(IDLSequence.Integer.class);
+      privateNetClassList.registerPacketField(IDLSequence.Byte.class);
+      privateNetClassList.registerPacketField(IDLSequence.Long.class);
+      privateNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
+      privateNetClassList.registerPacketField(TopicDataType.class);
+      privateNetClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      privateNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
    }
 
    private static final NetClassList publicNetClassList = new NetClassList();
@@ -90,14 +134,42 @@ public class REACommunicationKryoNetClassLists
 
       publicNetClassList.registerPacketField(float[].class);
       publicNetClassList.registerPacketField(ArrayList.class);
+      publicNetClassList.registerPacketField(Vector3D.class);
+      publicNetClassList.registerPacketField(Point3D.class);
       publicNetClassList.registerPacketField(Point3D32.class);
       publicNetClassList.registerPacketField(Point2D32.class);
       publicNetClassList.registerPacketField(Vector3D32.class);
       publicNetClassList.registerPacketField(Quaternion32.class);
+      publicNetClassList.registerPacketField(Quaternion.class);
       publicNetClassList.registerPacketField(Point2D32[].class);
-      publicNetClassList.registerPacketField(RequestType.class);
+      publicNetClassList.registerPacketField(PlanarRegionsRequestType.class);
 
+      publicNetClassList.registerPacketField(Polygon2DMessage.class);
       publicNetClassList.registerPacketField(PlanarRegionMessage.class);
+      publicNetClassList.registerPacketField(BoundingBox3DMessage.class);
+
+      publicNetClassList.registerPacketField(Vector3PubSubType.class);
+      publicNetClassList.registerPacketField(PointPubSubType.class);
+      publicNetClassList.registerPacketField(QuaternionPubSubType.class);
+      publicNetClassList.registerPacketField(Polygon2DMessagePubSubType.class);
+      publicNetClassList.registerPacketField(BoundingBox3DMessagePubSubType.class);
+      publicNetClassList.registerPacketField(RequestPlanarRegionsListMessagePubSubType.class);
+      publicNetClassList.registerPacketField(RequestLidarScanMessagePubSubType.class);
+      publicNetClassList.registerPacketField(PlanarRegionsListMessagePubSubType.class);
+      publicNetClassList.registerPacketField(LidarScanMessagePubSubType.class);
+      publicNetClassList.registerPacketField(PlanarRegionMessagePubSubType.class);
+
+      publicNetClassList.registerPacketField(IDLSequence.Object.class);
+      publicNetClassList.registerPacketField(IDLSequence.Float.class);
+      publicNetClassList.registerPacketField(IDLSequence.Boolean.class);
+      publicNetClassList.registerPacketField(IDLSequence.Double.class);
+      publicNetClassList.registerPacketField(IDLSequence.Integer.class);
+      publicNetClassList.registerPacketField(IDLSequence.Byte.class);
+      publicNetClassList.registerPacketField(IDLSequence.Long.class);
+      publicNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
+      publicNetClassList.registerPacketField(TopicDataType.class);
+      publicNetClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      publicNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
    }
 
    public static NetClassList getPublicNetClassList()

@@ -6,6 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -47,10 +48,11 @@ public class PolygonWiggler
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2D bestMatch = null;
       double overlap = 0.0;
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         ConvexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
+         convexPolygonTools.computeIntersectionOfPolygons(regionToWiggleInto.getConvexPolygon(i), polygonToWiggleInRegionFrame, intersection);
          if (intersection.getArea() > overlap)
          {
             overlap = intersection.getArea();
@@ -80,7 +82,7 @@ public class PolygonWiggler
       RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
       if (wiggleTransform == null)
          return null;
-      wiggledPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
+      wiggledPolygon.applyTransform(wiggleTransform, false);
       return wiggledPolygon;
    }
 
@@ -205,7 +207,7 @@ public class PolygonWiggler
     * @param A
     * @param b
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
 
@@ -217,7 +219,7 @@ public class PolygonWiggler
          convertToInequalityConstraintsPoint(polygon, A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -239,7 +241,7 @@ public class PolygonWiggler
       b.set(3, 0, -point.getY());
    }
 
-   public static void convertToInequalityConstraintsLine(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -276,31 +278,64 @@ public class PolygonWiggler
       b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
    }
 
-   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
-
-      Vector2D tempVector = new Vector2D();
 
       for (int i = 0; i < constraints; i++)
       {
          Point2DReadOnly firstPoint = polygon.getVertex(i);
          Point2DReadOnly secondPoint = polygon.getNextVertex(i);
 
+         double x = secondPoint.getX() - firstPoint.getX();
+         double y = secondPoint.getY() - firstPoint.getY();
+         double norm = Math.sqrt(x * x + y * y);
+         x = x / norm;
+         y = y / norm;
+
+         A.set(i, 0, -y);
+         A.set(i, 1, x);
+         b.set(i, -deltaInside + firstPoint.getY() * x - firstPoint.getX() * y);
+
+         //         A.set(i, 0, firstPoint.y - secondPoint.y);
+         //         A.set(i, 1, -firstPoint.x + secondPoint.x);
+         //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+      }
+   }
+
+   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      int constraints = polygonExteriorInWorld.getNumberOfVertices();
+      A.reshape(constraints, 2);
+      b.reshape(constraints, 1);
+
+      Vector2D tempVector = new Vector2D();
+
+      for (int exteriorVertexIndex = 0; exteriorVertexIndex < constraints; exteriorVertexIndex++)
+      {
+         Point2DReadOnly firstPoint = polygonExteriorInWorld.getVertex(exteriorVertexIndex);
+         Point2DReadOnly secondPoint = polygonExteriorInWorld.getNextVertex(exteriorVertexIndex);
+
          tempVector.set(secondPoint);
          tempVector.sub(firstPoint);
 
          tempVector.normalize();
 
-         A.set(i, 0, -tempVector.getY());
-         A.set(i, 1, tempVector.getX());
-         b.set(i, -deltaInside + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
+         A.set(exteriorVertexIndex, 0, -tempVector.getY());
+         A.set(exteriorVertexIndex, 1, tempVector.getX());
 
-         //         A.set(i, 0, firstPoint.y - secondPoint.y);
-         //         A.set(i, 1, -firstPoint.x + secondPoint.x);
-         //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+         double additionalDistanceInside = 0.0;
+         for (int interiorVertexIndex = 0; interiorVertexIndex < polygonInteriorRelative.getNumberOfVertices(); interiorVertexIndex++)
+         {
+            Point2DReadOnly interiorVertex = polygonInteriorRelative.getVertex(interiorVertexIndex);
+            additionalDistanceInside = Math.max(additionalDistanceInside, tempVector.getY() * interiorVertex.getX() - tempVector.getX() * interiorVertex.getY());
+         }
+
+         A.set(exteriorVertexIndex, 0, -tempVector.getY());
+         A.set(exteriorVertexIndex, 1, tempVector.getX());
+         b.set(exteriorVertexIndex, -(deltaInside + additionalDistanceInside) + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
       }
    }
 

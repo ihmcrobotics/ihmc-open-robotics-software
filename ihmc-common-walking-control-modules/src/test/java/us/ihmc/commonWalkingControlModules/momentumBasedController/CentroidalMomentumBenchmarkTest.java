@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 public class CentroidalMomentumBenchmarkTest
@@ -41,8 +41,8 @@ public class CentroidalMomentumBenchmarkTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.9)
+   @Test(timeout = 240000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

@@ -53,9 +53,9 @@ public abstract class  RosImuSubscriber extends AbstractRosTopicSubscriber<senso
       this.timeStamp = message.getHeader().getStamp().totalNsecs();
       this.seq_id = message.getHeader().getSeq();
       this.frameId = message.getHeader().getFrameId();
-      RosTools.packRosQuaternionToQuat4d(message.getOrientation(), this.orientationEstimate);
-      RosTools.packRosVector3ToVector3d(message.getAngularVelocity(), this.angularVelocity);
-      RosTools.packRosVector3ToVector3d(message.getLinearAcceleration(), this.linearAcceleration);
+      RosTools.packRosQuaternionToEuclidQuaternion(message.getOrientation(), this.orientationEstimate);
+      RosTools.packRosVector3ToEuclidTuple3D(message.getAngularVelocity(), this.angularVelocity);
+      RosTools.packRosVector3ToEuclidTuple3D(message.getLinearAcceleration(), this.linearAcceleration);
       onNewMessage(timeStamp, seq_id, orientationEstimate, angularVelocity, linearAcceleration);
    }
    

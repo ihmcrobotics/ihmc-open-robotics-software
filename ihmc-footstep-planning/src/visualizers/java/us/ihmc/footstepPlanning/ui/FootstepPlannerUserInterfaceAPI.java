@@ -1,16 +1,17 @@
 package us.ihmc.footstepPlanning.ui;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.*;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
+import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlannerUserInterfaceAPI
 {
-   private static final APIFactory apiFactory = new APIFactory();
+   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
@@ -19,6 +20,7 @@ public class FootstepPlannerUserInterfaceAPI
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
+   private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -31,9 +33,14 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
 
+   private static final TypedTopicTheme<Double> NodeCheckerCliffHeight = apiFactory.createTypedTopicTheme("NodeCheckerCliffHeight");
+   private static final TypedTopicTheme<Double> NodeCheckerCliffMinDistance = apiFactory.createTypedTopicTheme("NodeCheckerCliffMinDistance");
+   private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
+   private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
+
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
-   private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
+   private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
 
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
@@ -56,5 +63,13 @@ public class FootstepPlannerUserInterfaceAPI
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
 
-   public static final API API = apiFactory.getAPIAndCloseFactory();
+   public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
+   public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
+   public static final Topic<Double> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
+   public static final Topic<Double> CliffHeight = Root.child(NodeChecking).topic(NodeCheckerCliffHeight);
+   public static final Topic<Double> MinDistanceToCliff = Root.child(NodeChecking).topic(NodeCheckerCliffMinDistance);
+   public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);
+   public static final Topic<Pose3D> FootstepPoseTopic = Root.child(NodeChecking).topic(FootstepPose);
+
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

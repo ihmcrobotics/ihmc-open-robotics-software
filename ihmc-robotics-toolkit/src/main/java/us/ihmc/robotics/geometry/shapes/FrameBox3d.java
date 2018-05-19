@@ -2,14 +2,15 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 {
@@ -65,7 +66,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
    public void getCenter(FramePoint3D pointToPack)
    {
       pointToPack.setToZero(referenceFrame);
-      box3d.getCenter(pointToPack.getPoint());
+      box3d.getCenter(pointToPack);
    }
 
    public FramePoint3D getCenterCopy()
@@ -107,7 +108,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
       box3d.setPose(position, orientation);
    }
    
-   public void setPose(Pose3D pose)
+   public void setPose(Pose3DReadOnly pose)
    {
       box3d.setPose(pose.getPosition(), pose.getOrientation());
    }
@@ -117,10 +118,10 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
       box3d.setPose(transform3D);
    }
 
-   public void getFramePose(FramePose framePoseToPack)
+   public void getFramePose(FramePose3D framePoseToPack)
    {
       framePoseToPack.setToZero(referenceFrame);
-      box3d.getPose(framePoseToPack.getGeometryObject());
+      box3d.getPose(framePoseToPack);
    }
 
    public void scale(double scale)

@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
@@ -48,7 +48,7 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
       }
    }
 
-   public void addGraphicsUpdateable(GraphicsRobot updateable)
+   public void addGraphicsUpdateable(GraphicsUpdatable updateable)
    {
       graphicsToUpdate.add(updateable);
    }
@@ -71,7 +71,8 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
                      OneDoFJoint oneDoFJoint = joints.get(jointName);
                      if (oneDoFJoint != null)
                      {
-                        oneDoFJoint.setQ(handJointAngles.getJointAngle(jointName));
+                        double jointAngle = HumanoidMessageTools.unpackJointAngle(handJointAngles, jointName);
+                        oneDoFJoint.setQ(jointAngle);
                      }
                   }
                }
@@ -92,6 +93,6 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    {
 
       if (handModel != null)
-         packets.get(object.robotSide).set(object);
+         packets.get(RobotSide.fromByte(object.getRobotSide())).set(object);
    }
 }

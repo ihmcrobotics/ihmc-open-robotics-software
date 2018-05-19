@@ -21,8 +21,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -30,6 +28,8 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class PlaneContactStateToWrenchMatrixHelper
 {
@@ -74,13 +74,13 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame planeFrame;
 
-   private final YoFramePoint desiredCoP;
-   private final YoFramePoint previousCoP;
+   private final YoFramePoint3D desiredCoP;
+   private final YoFramePoint3D previousCoP;
 
    private final YoBoolean hasReceivedCenterOfPressureCommand;
    private final YoBoolean isFootholdAreaLargeEnough;
    private final YoBoolean deactivateRhoWhenNotInContact;
-   private final YoFramePoint2d desiredCoPCommandInSoleFrame;
+   private final YoFramePoint2D desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
@@ -149,7 +149,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReceivedCenterOfPressureCommand = new YoBoolean(namePrefix + "HasReceivedCoPCommand", registry);
       isFootholdAreaLargeEnough = new YoBoolean(namePrefix + "isFootholdAreaLargeEnough", registry);
-      desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
+      desiredCoPCommandInSoleFrame = new YoFramePoint2D(namePrefix + "DesiredCoPCommand", planeFrame, registry);
 
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
 
@@ -159,8 +159,8 @@ public class PlaneContactStateToWrenchMatrixHelper
          basisVectorsOrigin.add(new FramePoint3D(centerOfMassFrame));
       }
 
-      desiredCoP = new YoFramePoint(namePrefix + "DesiredCoP", planeFrame, registry);
-      previousCoP = new YoFramePoint(namePrefix + "PreviousCoP", planeFrame, registry);
+      desiredCoP = new YoFramePoint3D(namePrefix + "DesiredCoP", planeFrame, registry);
+      previousCoP = new YoFramePoint3D(namePrefix + "PreviousCoP", planeFrame, registry);
       ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
       wrenchFromRho.setToZero(bodyFixedFrame, centerOfMassFrame);
 
@@ -340,7 +340,7 @@ public class PlaneContactStateToWrenchMatrixHelper
          copJacobianMatrix.set(row, rhoIndex, 0.0);
 
       rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
-      rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0);
+      rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0); // FIXME why is this setting to 1.0????
       rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
    }
 
@@ -384,7 +384,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
       contactNormalVector.normalize();
-      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector.getVector(), normalContactVectorRotation);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector, normalContactVectorRotation);
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
@@ -397,7 +397,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorToPack.setIncludingFrame(planeFrame, Math.cos(angle) * mu, Math.sin(angle) * mu, 1.0);
 
       // Transforming the result to consider the actual normal contact vector
-      normalContactVectorRotationMatrix.transform(basisVectorToPack.getVector());
+      normalContactVectorRotationMatrix.transform(basisVectorToPack);
       basisVectorToPack.normalize();
    }
 

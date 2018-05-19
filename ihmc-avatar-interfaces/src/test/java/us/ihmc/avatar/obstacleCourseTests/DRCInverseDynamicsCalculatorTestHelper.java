@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,11 +27,11 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -43,6 +42,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
@@ -50,11 +50,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    private final YoVariableRegistry registry = new YoVariableRegistry("InverseDynamicsCalculatorTestHelper");
 
-   private final YoFrameVector computedRootJointForces = new YoFrameVector("tau_computed_root_force_", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector computedRootJointTorques = new YoFrameVector("tau_computed_root_torques_", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D computedRootJointForces = new YoFrameVector3D("tau_computed_root_force_", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D computedRootJointTorques = new YoFrameVector3D("tau_computed_root_torques_", ReferenceFrame.getWorldFrame(), registry);
 
-   private final YoFrameVector leftFootComputedWrenchForce = new YoFrameVector("wrench_computed_leftFootForce", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector rightFootComputedWrenchForce = new YoFrameVector("wrench_computed_rightFootForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D leftFootComputedWrenchForce = new YoFrameVector3D("wrench_computed_leftFootForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D rightFootComputedWrenchForce = new YoFrameVector3D("wrench_computed_rightFootForce", ReferenceFrame.getWorldFrame(), registry);
 
    private final HumanoidFloatingRootJointRobot robot;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -65,8 +65,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, YoDouble>();
    private final LinkedHashMap<OneDoFJoint, YoDouble> differenceJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
-   private final YoFrameVector computedRootJointLinearAcceleration = new YoFrameVector("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector computedRootJointAngularAcceleration;
+   private final YoFrameVector3D computedRootJointLinearAcceleration = new YoFrameVector3D("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D computedRootJointAngularAcceleration;
 
    private final ExternalForcePoint rootJointExternalForcePoint;
 
@@ -100,7 +100,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       feetExternalForcePoints = new SideDependentList<ExternalForcePoint>(leftFootExternalForcePoint, rightFootExternalForcePoint);
 
-      computedRootJointAngularAcceleration = new YoFrameVector("qdd_computed_root_angular", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
+      computedRootJointAngularAcceleration = new YoFrameVector3D("qdd_computed_root_angular", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -484,8 +484,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          if (groundContactPointBasedWrenchCalculator instanceof GroundContactPointBasedWrenchCalculator)
          {
-            OneDegreeOfFreedomJoint joint = groundContactPointBasedWrenchCalculator.getJoint();
-            OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
+            Joint joint = groundContactPointBasedWrenchCalculator.getJoint();
+            OneDoFJoint oneDoFJoint;
+            if (joint instanceof OneDegreeOfFreedomJoint)
+               oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
+            else
+               throw new RuntimeException("Force sensor is only supported for OneDegreeOfFreedomJoint.");
 
             RigidBody rigidBodyToApplyWrenchTo = oneDoFJoint.getSuccessor();
             ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
@@ -562,7 +566,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       linearVelocityFrameVector.changeFrame(bodyFrame);
       floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector, angularVelocityFrameVector);
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 
@@ -810,8 +814,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
-      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(elevatorFrame);
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
@@ -832,8 +836,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
-      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(elevatorFrame);
 
       //TODO: These should be from the inverse dynamics to the SCS frames...

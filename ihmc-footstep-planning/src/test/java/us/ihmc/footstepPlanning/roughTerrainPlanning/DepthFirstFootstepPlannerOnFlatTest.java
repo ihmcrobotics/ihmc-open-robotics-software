@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private YoVariableRegistry registry;
@@ -74,8 +74,8 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testRandomPoses()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);

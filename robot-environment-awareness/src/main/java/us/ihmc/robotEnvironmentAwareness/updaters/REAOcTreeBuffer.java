@@ -3,12 +3,12 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -33,9 +33,9 @@ public class REAOcTreeBuffer
 
    private final REAModuleStateReporter moduleStateReporter;
 
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
 
-   public REAOcTreeBuffer(double octreeResolution, REAMessager reaMessager, REAModuleStateReporter moduleStateReporter, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter, PacketCommunicator publicPacketCommunicator)
    {
       this.octreeResolution = octreeResolution;
       this.reaMessager = reaMessager;
@@ -141,7 +141,7 @@ public class REAOcTreeBuffer
       ScanCollection scanCollection = new ScanCollection();
       newFullScanReference.set(scanCollection);
       scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
-      scanCollection.addScan(lidarScanMessage.scan, lidarScanMessage.lidarPosition);
+      scanCollection.addScan(lidarScanMessage.getScan().toArray(), lidarScanMessage.getLidarPosition());
    }
 
    private void handlePacket(LidarScanMessage packet)

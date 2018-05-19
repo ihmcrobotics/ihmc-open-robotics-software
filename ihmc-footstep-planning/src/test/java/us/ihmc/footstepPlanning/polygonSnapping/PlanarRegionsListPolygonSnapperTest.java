@@ -119,7 +119,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testRandomPlanarRegions()
    {
@@ -147,7 +147,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBumpyGround()
    {
@@ -196,7 +196,7 @@ public class PlanarRegionsListPolygonSnapperTest
          nonSnappedTransform = new RigidBodyTransform();
          nonSnappedTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, xyYaw[2]);
          nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
-         polygonToSnap.applyTransformAndProjectToXYPlane(nonSnappedTransform);
+         polygonToSnap.applyTransform(nonSnappedTransform, false);
 
          PlanarRegion planarRegionIntersection = new PlanarRegion();
          RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegionIntersection);

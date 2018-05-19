@@ -7,7 +7,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -45,12 +46,14 @@ public class SmoothCapturePointAdjustmentToolbox
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<FrameTrajectory3D> copPolynomials3D,
-                                                              List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList,
-                                                              List<FramePoint3D> entryCornerPointsToPack, List<FramePoint3D> exitCornerPointsToPack)
+                                                              List<? extends FrameTuple3DReadOnly> icpQuantityInitialConditionList,
+                                                              List<? extends FixedFramePoint3DBasics> entryCornerPointsToPack,
+                                                              List<? extends FixedFramePoint3DBasics> exitCornerPointsToPack)
    {
       FrameTrajectory3D cmpPolynomial3DSegment1 = copPolynomials3D.get(0);
       FrameTrajectory3D cmpPolynomial3DSegment2 = copPolynomials3D.get(1);
-      FramePoint3D icpPositionFinalSegment2 = exitCornerPointsToPack.get(1);
+      FixedFramePoint3DBasics icpPositionFinalSegment2 = exitCornerPointsToPack.get(1);
+
       for (Axis axis : Axis.values)
       {
          Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(axis);
@@ -79,7 +82,7 @@ public class SmoothCapturePointAdjustmentToolbox
 
    private void populateBoundaryConditionMatrices1D(double omega0, Axis axis, int numberOfCoefficients, int numberOfConstrainedDerivatives,
                                                     Trajectory cmpPolynomialSegment1, Trajectory cmpPolynomialSegment2,
-                                                    List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList, double icpPositionFinalSegment2Scalar)
+                                                    List<? extends FrameTuple3DReadOnly> icpQuantityInitialConditionList, double icpPositionFinalSegment2Scalar)
    {
       calculateGeneralizedICPMatricesOnCMPSegment2(omega0, cmpPolynomialSegment2);
 

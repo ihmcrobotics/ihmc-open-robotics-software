@@ -2,29 +2,29 @@ package us.ihmc.avatar.angularMomentumTest;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInterface
 {
@@ -101,12 +101,12 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
                             FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(orient);
-      footstepData.setRobotSide(robotSide);
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(orient);
+      footstepData.setRobotSide(robotSide.toByte());
       footstepData.setSwingDuration(swingTime);
       footstepData.setTransferDuration(transferTime);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    protected double getStepLength()
@@ -130,8 +130,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       Vector3D comAngMom = new Vector3D();
       Vector3D comLinMom = new Vector3D();
       Point3D comPoint = new Point3D();
-      YoFrameVector comAngularMomentum;
-      YoFrameVector comEstimatedAngularMomentum;
+      YoFrameVector3D comAngularMomentum;
+      YoFrameVector3D comEstimatedAngularMomentum;
       FloatingJoint rootJoint;
       Quaternion rootOrientation = new Quaternion();
       RigidBodyTransform rootJointTransform = new RigidBodyTransform();
@@ -162,8 +162,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
          floatingRootJointModel = drcSimulationTestHelper.getRobot();
          rootJoint = floatingRootJointModel.getRootJoint();
-         comAngularMomentum = new YoFrameVector("CoMAngularMomentum", worldFrame, scsRegistry);
-         comEstimatedAngularMomentum = new YoFrameVector("CoMEstimatedAngularMomentum", worldFrame, scsRegistry);
+         comAngularMomentum = new YoFrameVector3D("CoMAngularMomentum", worldFrame, scsRegistry);
+         comEstimatedAngularMomentum = new YoFrameVector3D("CoMEstimatedAngularMomentum", worldFrame, scsRegistry);
          scs = drcSimulationTestHelper.getSimulationConstructionSet();
          swTraj = new YoPolynomial3D("SwingFootTraj", 4, scsRegistry);
          comTraj = new YoPolynomial3D("CoMTraj", 4, scsRegistry);
@@ -208,7 +208,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
             fromPoint = footstepList.get(index - 2).getLocation();
             toPoint = footstepList.get(index).getLocation();
             supportPoint = footstepList.get(index - 1).getLocation();
-            robotSide = footstepList.get(index).getRobotSide();
+            robotSide = RobotSide.fromByte(footstepList.get(index).getRobotSide());
             entryFootCMP.set(entryCMP.getX(), robotSide.negateIfLeftSide(entryCMP.getY()), entryCMP.getZ());
             exitFootCMP.set(exitCMP.getX(), robotSide.negateIfLeftSide(exitCMP.getY()), exitCMP.getZ());
             
@@ -307,7 +307,9 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       public void setFootstepList(FootstepDataListMessage footMessage)
       {
          this.footstepListMessage = footMessage;
-         this.footstepList = this.footstepListMessage.getDataList();
+         this.footstepList = new ArrayList<>();
+         for (int i = 0; i < this.footstepListMessage.getFootstepDataList().size(); i++)
+            footstepList.add(this.footstepListMessage.getFootstepDataList().get(i));
       }
    }
 }

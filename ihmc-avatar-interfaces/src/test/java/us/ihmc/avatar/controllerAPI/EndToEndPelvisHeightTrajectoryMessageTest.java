@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -16,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajec
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -59,9 +60,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
-      Point3D desiredPosition = new Point3D();
+      Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
 
-      desiredRandomPelvisPosition.get(desiredPosition);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -69,13 +69,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       desiredRandomPelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPosition.get(desiredPosition);
+      desiredPosition.set(desiredRandomPelvisPosition);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
       }
 
-      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
 
       drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
 
@@ -124,17 +124,16 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
-      Point3D desiredPosition = new Point3D();
+      Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
 
-      desiredRandomPelvisPosition.get(desiredPosition);
       System.out.println(desiredPosition);
 
       desiredRandomPelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPosition.get(desiredPosition);
+      desiredPosition.set(desiredRandomPelvisPosition);
       System.out.println(desiredPosition);
 
-      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
 
       pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
       drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
@@ -171,7 +170,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double initialPelvisHeight = pelvisPosition.getZ();
 
       Random random = new Random(4929L);
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 5; i++)
       {
          double offset1 = 0.06 * 2.0 * (random.nextDouble() - 0.5);
          double offset2 = 0.06 * 2.0 * (random.nextDouble() - 0.5);
@@ -185,7 +184,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
          // Move pelvis through message
          double desiredHeight = initialPelvisHeight + offset2;
-         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(0.5, desiredHeight);
+         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight);
          drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);

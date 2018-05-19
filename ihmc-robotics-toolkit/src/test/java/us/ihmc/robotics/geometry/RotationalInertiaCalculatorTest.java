@@ -8,10 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.commons.MathTools;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RotationalInertiaCalculatorTest
 {
    private static final double DELTA = 1e-3;

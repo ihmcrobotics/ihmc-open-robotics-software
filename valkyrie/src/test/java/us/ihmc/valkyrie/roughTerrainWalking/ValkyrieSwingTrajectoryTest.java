@@ -27,8 +27,8 @@ public class ValkyrieSwingTrajectoryTest extends DRCSwingTrajectoryTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 150.4)
+   @Test(timeout = 750000)
    public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
    {
       super.testSelfCollisionAvoidance();

@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -16,7 +17,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
-   public static boolean isPolygonInside(ConvexPolygon2D polygonToTest, double epsilon, ConvexPolygon2D polygon)
+   public static boolean isPolygonInside(ConvexPolygon2DReadOnly polygonToTest, double epsilon, ConvexPolygon2DReadOnly polygon)
    {
       for (int i = 0; i < polygonToTest.getNumberOfVertices(); i++)
       {
@@ -30,7 +31,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the polygonToTest is inside the convex polygon.
     */
-   public static boolean isPolygonInside(ConvexPolygon2D polygonToTest, ConvexPolygon2D polygon)
+   public static boolean isPolygonInside(ConvexPolygon2DReadOnly polygonToTest, ConvexPolygon2DReadOnly polygon)
    {
       return isPolygonInside(polygonToTest, 0.0, polygon);
    }
@@ -40,7 +41,7 @@ public class ConvexPolygon2dCalculator
     * E.g. in a polygon with 6 vertices given indices 0 and 2 (in this order) the method will return the
     * middle of the range [0 5 4 3 2]: 4
     */
-   public static int getMiddleIndexCounterClockwise(int firstIndex, int secondIndex, ConvexPolygon2D polygon)
+   public static int getMiddleIndexCounterClockwise(int firstIndex, int secondIndex, ConvexPolygon2DReadOnly polygon)
    {
       int numberOfVertices = polygon.getNumberOfVertices();
       if (secondIndex >= firstIndex)
@@ -52,7 +53,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs a vector that is orthogonal to the given edge, facing towards the outside of the polygon
     */
-   public static void getEdgeNormal(int edgeIndex, Vector2DBasics normalToPack, ConvexPolygon2D polygon)
+   public static void getEdgeNormal(int edgeIndex, Vector2DBasics normalToPack, ConvexPolygon2DReadOnly polygon)
    {
       Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
       Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
@@ -70,7 +71,7 @@ public class ConvexPolygon2dCalculator
     * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
     * only pack the edge before the vertex, not both edges.
     */
-   public static int getIntersectingEdges(Line2D line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2D polygon)
+   public static int getIntersectingEdges(Line2DReadOnly line, LineSegment2DBasics edgeToPack1, LineSegment2DBasics edgeToPack2, ConvexPolygon2DReadOnly polygon)
    {
       if (polygon.getNumberOfVertices() == 1)
          return 0;
@@ -113,7 +114,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Checks if a line intersects the edge with the given index.
     */
-   public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2D polygon)
+   public static boolean doesLineIntersectEdge(Line2DReadOnly line, int edgeIndex, ConvexPolygon2DReadOnly polygon)
    {
       if (polygon.getNumberOfVertices() < 2)
          return false;
@@ -133,7 +134,7 @@ public class ConvexPolygon2dCalculator
    }
 
    // --- Methods that generate garbage ---
-   public static LineSegment2D[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2D polygon)
+   public static LineSegment2D[] getIntersectingEdgesCopy(Line2DReadOnly line, ConvexPolygon2DReadOnly polygon)
    {
       LineSegment2D edge1 = new LineSegment2D();
       LineSegment2D edge2 = new LineSegment2D();

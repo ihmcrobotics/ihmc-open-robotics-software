@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.frames;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -12,7 +13,7 @@ public class YoWrench extends YoSpatialVector
    /** Redundant but allows to make sure the frame isn't changed. */
    protected final ReferenceFrame bodyFrame;
    
-   public YoWrench(YoFrameVector yoForce, YoFrameVector yoTorque, ReferenceFrame bodyFrame)
+   public YoWrench(YoFrameVector3D yoForce, YoFrameVector3D yoTorque, ReferenceFrame bodyFrame)
    {
       super(yoForce, yoTorque);
       this.bodyFrame = bodyFrame;
@@ -39,8 +40,8 @@ public class YoWrench extends YoSpatialVector
    protected void putYoValuesIntoWrench()
    {
       wrench.setToZero(bodyFrame, expressedInFrame);
-      wrench.setLinearPart(linearPart.getFrameTuple());
-      wrench.setAngularPart(angularPart.getFrameTuple());
+      wrench.setLinearPart(linearPart);
+      wrench.setAngularPart(angularPart);
    }
    
    protected void getYoValuesFromWrench()

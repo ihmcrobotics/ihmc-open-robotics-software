@@ -2,13 +2,13 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -16,7 +16,7 @@ public class GoHomeBehavior extends AbstractBehavior
 {
    private static final boolean DEBUG = false;
 
-   protected BodyPart bodyPart;
+   protected HumanoidBodyPart bodyPart;
 
    protected GoHomeMessage outgoingMessage;
 
@@ -56,7 +56,7 @@ public class GoHomeBehavior extends AbstractBehavior
    {
       outgoingMessage = goHomeMessage;
 
-      bodyPart = goHomeMessage.getBodyPart();
+      bodyPart = HumanoidBodyPart.fromByte(goHomeMessage.getHumanoidBodyPart());
       startTime.set(yoTime.getDoubleValue());
       trajectoryTime.set(goHomeMessage.getTrajectoryTime());
 
@@ -87,7 +87,7 @@ public class GoHomeBehavior extends AbstractBehavior
       
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingMessage.setDestination(PacketDestination.BROADCAST);
+         outgoingMessage.setDestination(PacketDestination.BROADCAST.ordinal());
 
          sendPacketToController(outgoingMessage);
          sendPacket(outgoingMessage);
@@ -104,7 +104,7 @@ public class GoHomeBehavior extends AbstractBehavior
       if (outgoingMessage != null)
       {
          StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER);
+         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
          sendPacketToController(pausePacket);
       }
    }

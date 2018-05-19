@@ -9,7 +9,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class LinearRegressionTest
 {
    private static final boolean VERBOSE = false;

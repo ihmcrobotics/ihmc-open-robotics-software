@@ -2,20 +2,20 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 
 public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    
-   private final YoFramePoint yoSmoothedPosition;
-   private final YoFrameVector yoSmoothedVelocity;
-   private final YoFrameVector yoSmoothedAcceleration;
+   private final YoFramePoint3D yoSmoothedPosition;
+   private final YoFrameVector3D yoSmoothedVelocity;
+   private final YoFrameVector3D yoSmoothedAcceleration;
 
    private final FramePoint3D smoothedPosition = new FramePoint3D();
    private final FrameVector3D smoothedVelocity = new FrameVector3D();
@@ -55,9 +55,9 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       positionTrajectoryInput.getLinearData(smoothedPosition, smoothedVelocity, smoothedAcceleration);
       trajectoryReferenceFrame = smoothedPosition.getReferenceFrame();
 
-      yoSmoothedPosition = new YoFramePoint(namePrefix + "SmoothedPosition", trajectoryReferenceFrame, registry);
-      yoSmoothedVelocity = new YoFrameVector(namePrefix + "SmoothedVelocity", trajectoryReferenceFrame, registry);
-      yoSmoothedAcceleration = new YoFrameVector(namePrefix + "SmoothedAcceleration", trajectoryReferenceFrame, registry);
+      yoSmoothedPosition = new YoFramePoint3D(namePrefix + "SmoothedPosition", trajectoryReferenceFrame, registry);
+      yoSmoothedVelocity = new YoFrameVector3D(namePrefix + "SmoothedVelocity", trajectoryReferenceFrame, registry);
+      yoSmoothedAcceleration = new YoFrameVector3D(namePrefix + "SmoothedAcceleration", trajectoryReferenceFrame, registry);
 
       positionGain = new YoDouble(namePrefix + "PositionGain", registry);
       velocityGain = new YoDouble(namePrefix + "VelocityGain", registry);
@@ -177,17 +177,17 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(yoSmoothedPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      yoSmoothedVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(yoSmoothedVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      yoSmoothedAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(yoSmoothedAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

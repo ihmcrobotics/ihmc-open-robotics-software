@@ -3,17 +3,18 @@ package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class LocateGoalBehavior extends AbstractBehavior
 {
    private final GoalDetectorBehaviorService detectorBehaviorService;
    private final AtomicBoolean done = new AtomicBoolean(false);
-   private final FramePose foundFiducialPose = new FramePose();
+   private final FramePose3D foundFiducialPose = new FramePose3D();
    private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
    public LocateGoalBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService detectorBehaviorService)
@@ -30,8 +31,7 @@ public class LocateGoalBehavior extends AbstractBehavior
       if (detectorBehaviorService.getGoalHasBeenLocated())
       {
          detectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
-         Point3D position = new Point3D();
-         foundFiducialPose.getPosition(position);
+         Point3D position = new Point3D(foundFiducialPose.getPosition());
 
          double x = position.getX(), y = position.getY(), z = position.getZ();
          double yaw = Math.toDegrees(foundFiducialPose.getYaw()), pitch = Math.toDegrees(foundFiducialPose.getPitch()), roll = Math.toDegrees(foundFiducialPose.getRoll());
@@ -54,12 +54,12 @@ public class LocateGoalBehavior extends AbstractBehavior
 
    private void sendTextToSpeechPacket(String message)
    {
-      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
-      textToSpeechPacket.setbeep(false);
+      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
+      textToSpeechPacket.setBeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 
-   public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedGoalPoseWorldFrame(FramePose3D framePoseToPack)
    {
       framePoseToPack.setIncludingFrame(foundFiducialPose);
    }

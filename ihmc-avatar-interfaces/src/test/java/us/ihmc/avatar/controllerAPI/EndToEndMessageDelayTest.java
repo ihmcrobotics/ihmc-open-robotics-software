@@ -3,26 +3,24 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.ClearDelayQueueMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -31,7 +29,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterface
@@ -50,8 +47,6 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       
-      Random random = new Random(564574L);
-      
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -61,8 +56,6 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-      
-      MessageOfMessages messageOfMessages = new MessageOfMessages();
       
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -89,34 +82,36 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ChestTrajectoryMessage lookStraightAheadMessage = new ChestTrajectoryMessage(trajectoryTime, lookStraightAhead.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookStraightAheadMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
-      ChestTrajectoryMessage lookLeftMessage = new ChestTrajectoryMessage(trajectoryTime, lookLeft.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookLeftMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      lookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
-      ChestTrajectoryMessage lookRightMessage = new ChestTrajectoryMessage(trajectoryTime, lookRight.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookRightMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookRightMessage);
 
       SpineJointName[] spineJointNames = jointMap.getSpineJointNames();
-      SpineTrajectoryMessage zeroSpineJointMessage = new SpineTrajectoryMessage(spineJointNames.length, 1);
-      zeroSpineJointMessage.setExecutionDelayTime(5.0);
+      SpineTrajectoryMessage zeroSpineJointMessage = new SpineTrajectoryMessage();
+      zeroSpineJointMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionDelayTime(5.0);
       for(int i = 0; i < spineJointNames.length; i++)
       {
-         zeroSpineJointMessage.setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(1.0, 0.0));
+         zeroSpineJointMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(1.0, 0.0));
       }
       drcSimulationTestHelper.send(zeroSpineJointMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT() * 3.0));
       assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
       
-      ClearDelayQueueMessage clearMessage = new ClearDelayQueueMessage();
-      clearMessage.setClassToClear(SpineTrajectoryMessage.class);
+      ClearDelayQueueMessage clearMessage = HumanoidMessageTools.createClearDelayQueueMessage(SpineTrajectoryMessage.class);
       drcSimulationTestHelper.send(clearMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));

@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -12,13 +14,13 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehavior<WalkState>
 {
@@ -36,9 +38,9 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final double standingDistance = 0.4;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames,
-         CommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
+                                                    WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
+                                                    AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("WalkState", WalkState.class, yoTime, outgoingCommunicationBridge);
 
@@ -47,25 +49,22 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
-            wholeBodyControllerParameters.getWalkingControllerParameters());
-
+                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
       setupStateMachine();
    }
 
-   private void setupStateMachine()
+   @Override
+   protected WalkState configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkState, BehaviorAction> factory)
    {
-
       double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
             -0.4780687104960028, -0.24919417978503655};
 
-      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
+      ArmTrajectoryMessage widerHome = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
 
-      ArmTrajectoryTask<WalkState> rightArmHomeTask = new ArmTrajectoryTask<WalkState>(WalkState.GET_READY_TO_WALK, widerHome,
-            atlasPrimitiveActions.rightArmTrajectoryBehavior);
+      ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, atlasPrimitiveActions.rightArmTrajectoryBehavior);
 
-      BehaviorAction<WalkState> walkToBallTask = new BehaviorAction<WalkState>(WalkState.WALK, walkToLocationBehavior)
+      BehaviorAction walkToBallTask = new BehaviorAction(walkToLocationBehavior)
       {
-
          @Override
          protected void setBehaviorInput()
          {
@@ -73,12 +72,13 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
          }
       };
 
-      statemachine.addStateWithDoneTransition(rightArmHomeTask, WalkState.WALK);
-      statemachine.addState(walkToBallTask);
-      statemachine.setStartState(WalkState.GET_READY_TO_WALK);
+      factory.addStateAndDoneTransition(WalkState.GET_READY_TO_WALK, rightArmHomeTask, WalkState.WALK);
+      factory.addState(WalkState.WALK, walkToBallTask);
+
+      return WalkState.GET_READY_TO_WALK;
    }
 
-   private FramePose2d getoffsetPoint()
+   private FramePose2D getoffsetPoint()
    {
 
       FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), pickUpLocation.getX(), pickUpLocation.getY());
@@ -99,7 +99,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       double newX = ballPosition2d.getX() + (x - ballPosition2d.getX()) * Math.cos(rotationAngle) - (y - ballPosition2d.getY()) * Math.sin(rotationAngle);
       double newY = ballPosition2d.getY() + (x - ballPosition2d.getX()) * Math.sin(rotationAngle) + (y - ballPosition2d.getY()) * Math.cos(rotationAngle);
 
-      FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(newX, newY), walkingYaw);
+      FramePose2D poseToWalkTo = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(newX, newY), walkingYaw);
       return poseToWalkTo;
    }
 

@@ -8,12 +8,12 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -78,8 +78,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 //         FramePoint 
 //            leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,+0.01, 0.13,0),
 //            rightEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),+0.01,-0.13,0);
-         FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.01, +0.13, 0), CalibUtil.quat0);
-         FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.01, -0.13, 0), CalibUtil.quat0);
+         FramePose3D leftEE = new FramePose3D(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.01, +0.13, 0), CalibUtil.quat0);
+         FramePose3D rightEE = new FramePose3D(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.01, -0.13, 0), CalibUtil.quat0);
          leftEE.prependTranslation(constantOffset);
 
          leftEE.changeFrame(ReferenceFrame.getWorldFrame());
@@ -94,10 +94,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             double scaleRadToCM = 0.01 / (Math.PI / 8); //30deg -> 1cm
             if (QUAT_DIFF)
             {
-               Quaternion leftEEQuat = new Quaternion();
-               Quaternion rightEEQuat = new Quaternion();
-               leftEE.getOrientation(leftEEQuat);
-               rightEE.getOrientation(rightEEQuat);
+               Quaternion leftEEQuat = new Quaternion(leftEE.getOrientation());
+               Quaternion rightEEQuat = new Quaternion(rightEE.getOrientation());
                Quaternion qErr = new Quaternion(leftEEQuat);
                qErr.inverse();
                qErr.multiply(rightEEQuat);
@@ -111,10 +109,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             else
             {
                assert (leftEE.getReferenceFrame() == rightEE.getReferenceFrame());
-               RotationMatrix mLeft = new RotationMatrix();
-               RotationMatrix mRight = new RotationMatrix();
-               leftEE.getOrientation(mLeft);
-               rightEE.getOrientation(mRight);
+               RotationMatrix mLeft = new RotationMatrix(leftEE.getOrientation());
+               RotationMatrix mRight = new RotationMatrix(rightEE.getOrientation());
                Vector3D vDiff = CalibUtil.rotationDiff(mLeft, mRight);
                output[outputCounter++] = scaleRadToCM * vDiff.getX();
                output[outputCounter++] = scaleRadToCM * vDiff.getY();

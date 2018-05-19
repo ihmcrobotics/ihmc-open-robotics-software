@@ -36,10 +36,59 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     * @param registry the registry to which the tuning variables are attached.
     */
    public ParameterizedPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
-                               boolean useIntegratorOrientation, YoVariableRegistry registry)
+                                   boolean useIntegratorOrientation, YoVariableRegistry registry)
    {
-      positionGains = new ParameterizedPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, registry);
-      orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, registry);
+      this(suffix, gainCouplingPosition, gainCouplingOrientation, useIntegratorPosition, useIntegratorOrientation, null, null, registry);
+   }
+
+   /**
+    * Will create a new set of gain parameters according to the provided configuration.
+    *
+    * @param suffix the name of the gains will be attached to all parameters.
+    * @param configuration and default values for the gains.
+    * @param registry the registry to which the tuning variables are attached.
+    */
+   public ParameterizedPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoVariableRegistry registry)
+   {
+      this(suffix, configuration.getPositionConfiguration(), configuration.getOrientationConfiguration(), registry);
+   }
+
+   /**
+    * Will create a new set of gain parameters according to the provided configurations for position and orientation
+    * gains.
+    *
+    * @param suffix the name of the gains will be attached to all parameters.
+    * @param positionConfiguration configuration and default values for the position part of these gains.
+    * @param orientationConfiguration configuration and default values for the orientation part of these gains.
+    * @param registry the registry to which the tuning variables are attached.
+    */
+   public ParameterizedPIDSE3Gains(String suffix, PID3DConfiguration positionConfiguration, PID3DConfiguration orientationConfiguration,
+                                   YoVariableRegistry registry)
+   {
+      this(suffix, positionConfiguration.getGainCoupling(), orientationConfiguration.getGainCoupling(), positionConfiguration.isUseIntegrator(),
+           orientationConfiguration.isUseIntegrator(), positionConfiguration.getGains(), orientationConfiguration.getGains(), registry);
+   }
+
+   /**
+    * Will create a new set of gains will the specified coupling and integration setting for
+    * position and orientation. Will use the provided gains as default values for the parameters.
+    *
+    * @param suffix the name of the gains will be attached to all parameters.
+    * @param gainCouplingPosition the gain coupling for the position gains.
+    * @param gainCouplingOrientation the gain coupling for the orientation gains.
+    * @param useIntegratorPosition whether the position gains will use an integrator.
+    * @param useIntegratorOrientation whether the orientation gains will use an integrator.
+    * @param defaultPositionGains the default values for the position gains.
+    * @param defaultOrientationGains the default values for the orientation gains.
+    * @param registry the registry to which the tuning variables are attached.
+    */
+   public ParameterizedPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
+                                   boolean useIntegratorOrientation, PID3DGainsReadOnly defaultPositionGains, PID3DGainsReadOnly defaultOrientationGains,
+                                   YoVariableRegistry registry)
+   {
+      positionGains = new ParameterizedPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, defaultPositionGains, registry);
+      orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, defaultOrientationGains,
+                                                     registry);
    }
 
    @Override

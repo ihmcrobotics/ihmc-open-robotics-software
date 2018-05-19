@@ -6,33 +6,15 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.IndexFingerPitch1;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.IndexFingerPitch2;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.IndexFingerPitch3;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.MiddleFingerPitch1;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.MiddleFingerPitch2;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.MiddleFingerPitch3;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.PinkyPitch1;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.PinkyPitch2;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.PinkyPitch3;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.ThumbPitch1;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.ThumbPitch2;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.ThumbPitch3;
-import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.ThumbRoll;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,13 +25,14 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
    private static final boolean DEBUG_VELOCITY_WITH_FD = false;
-   private static final String FINGER_TRANSMISSION_FILE = System.getProperty("user.home") + File.separator + "valkyrie/ValkyrieFingerJointTransmissionCoeffs.yaml";
 
    private final boolean runningOnRealRobot;
 
@@ -64,6 +47,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    private final double lowerBodyJointPositionFilterFrequencyHz;
    private final double jointOutputEncoderVelocityFilterFrequencyHz;
    private final double lowerBodyJointVelocityFilterFrequencyHz;
+   private final double fingerPositionFilterFrequencyHz;
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
@@ -107,12 +91,13 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      fingerPositionFilterFrequencyHz = runningOnRealRobot ? 2.5 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward.
       // I still don't quite get it. Sylvain
       orientationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.03;
       armJointVelocityBacklashSlopTime = 0.03;
@@ -141,34 +126,33 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlpha, true);
       }
 
-      YoDouble orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
-      YoDouble angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
-      YoDouble linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
+      DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
+      DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
+      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
       // Lower body: For the joints using the output encoders: Compute velocity from the joint position using finite difference.
-      YoDouble jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter",
-                                                                                          jointOutputEncoderVelocityFilterFrequencyHz);
+      DoubleProvider jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter",
+                                                                                                jointOutputEncoderVelocityFilterFrequencyHz);
       sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false,
                                                                                       namesOfJointsUsingOutputEncoder);
 
       // Lower body: Then apply for all velocity: 1- alpha filter 2- backlash compensator 3- elasticity compensation.
-      YoDouble lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter",
+      DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter",
                                                                                       lowerBodyJointVelocityFilterFrequencyHz);
-      YoDouble lowerBodyJointVelocitySlopTime = new YoDouble("lowerBodyJointVelocityBacklashSlopTime", registry);
-      lowerBodyJointVelocitySlopTime.set(lowerBodyJointVelocityBacklashSlopTime);
+      DoubleProvider lowerBodyJointVelocitySlopTime = new DoubleParameter("lowerBodyJointVelocityBacklashSlopTime", registry, lowerBodyJointVelocityBacklashSlopTime);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
       sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
 
       // Lower body: Apply an alpha filter on the position to be in phase with the velocity
-      YoDouble lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionAlphaFilter",
-                                                                                      lowerBodyJointPositionFilterFrequencyHz);
+      DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionAlphaFilter",
+                                                                                            lowerBodyJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
       if (doElasticityCompensation)
       {
-         YoDouble elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
-         YoDouble maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-         Map<OneDoFJoint, YoDouble> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+         DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
+         DoubleProvider maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
+         Map<OneDoFJoint, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
          Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
          sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false,
@@ -178,182 +162,21 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       }
 
       // Arm joints: Apply for all velocity: 1- backlash compensator.
-      YoDouble armJointVelocitySlopTime = new YoDouble("armJointVelocityBacklashSlopTime", registry);
-      armJointVelocitySlopTime.set(armJointVelocityBacklashSlopTime);
+      DoubleProvider armJointVelocitySlopTime = new DoubleParameter("armJointVelocityBacklashSlopTime", registry, armJointVelocityBacklashSlopTime);
       sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
 
       // Arm joints: Apply an alpha filter on the position to be in phase with the velocity
-      YoDouble armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
+      DoubleProvider armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(armJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
+
+      // Filter the finger joint position a lot as they're super noisy.
+      DoubleProvider fingerPositionAlphaFilter = sensorProcessing.createAlphaFilter("fingerPositionAlphaFilter", fingerPositionFilterFrequencyHz);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(fingerPositionAlphaFilter, false, JOINT_POSITION, createArrayWithFingerJointNames());
 
       //imu
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
-
-      if (runningOnRealRobot)
-         configureFingerProcessing(sensorProcessing);
-   }
-
-   private void configureFingerProcessing(SensorProcessing sensorProcessing)
-   {
-      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
-      
-      SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-      SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-      
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
-         EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
-         
-         for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
-         {
-            YoDouble scale = new YoDouble("scale" + fingerJoint.getPascalCaseJointName(robotSide), registry);
-            YoDouble bias = new YoDouble("bias" + fingerJoint.getPascalCaseJointName(robotSide), registry);
-            scales.put(fingerJoint, scale);
-            biases.put(fingerJoint, bias);
-         }
-      }
-
-      Yaml yaml = new Yaml();
-      File coeffFile = new File(FINGER_TRANSMISSION_FILE);
-
-      boolean areCoeffsLoaded = false;
-
-      if (coeffFile.exists())
-      {
-         try
-         {
-            FileInputStream fileInputStream = new FileInputStream(coeffFile);
-            @SuppressWarnings("unchecked")
-            Map<String, Map<String, Double>> coeffs = (Map<String, Map<String, Double>>) yaml.load(fileInputStream);
-
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
-               EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
-
-               for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
-               {
-                  Map<String, Double> jointCoeffs = coeffs.get(jointEnum.getJointName(robotSide));
-
-                  scales.get(jointEnum).set(jointCoeffs.getOrDefault("scale", 0.0));
-                  biases.get(jointEnum).set(jointCoeffs.getOrDefault("bias", 0.0));
-               }
-            }
-            areCoeffsLoaded = true;
-         }
-         catch (FileNotFoundException | NullPointerException e)
-         {
-            e.printStackTrace();
-            System.err.println("Setting to default coeffs.");
-         }
-      }
-      else
-      {
-         PrintTools.info(this, "Did not find: \"" + FINGER_TRANSMISSION_FILE + "\", setting coeffs to default.");
-      }
-
-      if (!areCoeffsLoaded)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
-            EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
-            
-            boolean isLeftSide = robotSide == RobotSide.LEFT;
-            
-            scales.get(ThumbRoll         ).set(isLeftSide ? -1.00 : 1.00);
-            scales.get(ThumbPitch1       ).set(isLeftSide ? -1.00 : 1.00);
-            scales.get(IndexFingerPitch1 ).set(isLeftSide ? -0.75 : 0.60);
-            scales.get(MiddleFingerPitch1).set(isLeftSide ? -0.75 : 0.75);
-            scales.get(PinkyPitch1       ).set(isLeftSide ? -0.70 : 0.60);
-            
-            scales.get(ThumbPitch2       ).set(isLeftSide ?-0.50 : 0.40);
-            scales.get(IndexFingerPitch2 ).set(isLeftSide ? 0.62 : 0.70);
-            scales.get(MiddleFingerPitch2).set(isLeftSide ? 0.42 : 0.60);
-            scales.get(PinkyPitch2       ).set(isLeftSide ? 0.50 : 0.65);
-            
-            scales.get(ThumbPitch3       ).set(isLeftSide ? 0.30 : 0.30);
-            scales.get(IndexFingerPitch3 ).set(isLeftSide ? 0.30 : 0.40);
-            scales.get(MiddleFingerPitch3).set(isLeftSide ? 0.30 : 0.30);
-            scales.get(PinkyPitch3       ).set(isLeftSide ? 0.30 : 0.30);
-            
-            biases.get(ThumbRoll         ).set(1.57); // TODO at the same I added these, the thumb roll did not work.
-            biases.get(ThumbPitch1       ).set(isLeftSide ?-0.20 :-1.10);
-            biases.get(IndexFingerPitch1 ).set(isLeftSide ? 0.82 :-0.60);
-            biases.get(MiddleFingerPitch1).set(isLeftSide ? 1.30 : 0.00);
-            biases.get(PinkyPitch1       ).set(isLeftSide ? 1.40 :-0.50);
-            
-            biases.get(ThumbPitch2       ).set(isLeftSide ? 0.00 : 0.40);
-            biases.get(IndexFingerPitch2 ).set(isLeftSide ?-0.60 : 0.40);
-            biases.get(MiddleFingerPitch2).set(isLeftSide ?-0.80 :-0.20);
-            biases.get(PinkyPitch2       ).set(isLeftSide ?-0.63 : 0.30);
-            
-            biases.get(ThumbPitch3       ).set(isLeftSide ? 0.00 : 0.00);
-            biases.get(IndexFingerPitch3 ).set(isLeftSide ?-0.40 : 0.20);
-            biases.get(MiddleFingerPitch3).set(isLeftSide ?-0.40 : 0.30);
-            biases.get(PinkyPitch3       ).set(isLeftSide ?-0.40 : 0.10);
-         }
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         { // Doing the thumb separately
-            ValkyrieHandJointName[] thumbBaseJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2};
-            for (ValkyrieHandJointName joint : thumbBaseJoints)
-            {
-               YoDouble scale = sideDependentScales.get(robotSide).get(joint);
-               YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
-               String jointName = joint.getCamelCaseJointName(robotSide);
-               sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(scale, bias, false, jointName);
-            }
-            {
-               ValkyrieHandJointName slaveJoint = ThumbPitch3;
-               YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
-               YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-               String masterJointName = ThumbPitch2.getCamelCaseJointName(robotSide);
-               String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
-               sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
-            }
-         }
-
-         ValkyrieHandJointName[] masterJoints = {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
-         ValkyrieHandJointName[] slaveJoints2 = {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2};
-         ValkyrieHandJointName[] slaveJoints3 = {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3};
-
-         for (ValkyrieHandJointName joint : masterJoints)
-         {
-            YoDouble scale = sideDependentScales.get(robotSide).get(joint);
-            YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
-            String jointName = joint.getCamelCaseJointName(robotSide);
-            sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(scale, bias, false, jointName);
-         }
-
-         for (int i = 0; i < 3; i++)
-         {
-            ValkyrieHandJointName masterJoint = masterJoints[i];
-
-            {
-               ValkyrieHandJointName slaveJoint = slaveJoints2[i];
-               YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
-               YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-               String masterJointName = masterJoint.getCamelCaseJointName(robotSide);
-               String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
-               sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
-            }
-
-            {
-               ValkyrieHandJointName slaveJoint = slaveJoints3[i];
-               YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
-               YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-               String masterJointName = masterJoint.getCamelCaseJointName(robotSide);
-               String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
-               sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
-            }
-         }
-      }
    }
 
    private String[] createArrayWithArmJointNames()
@@ -365,6 +188,21 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          for (ArmJointName armJointName : jointMap.getArmJointNames())
          {
             nameList.add(jointMap.getArmJointName(robotSide, armJointName));
+         }
+      }
+
+      return nameList.toArray(new String[0]);
+   }
+
+   private String[] createArrayWithFingerJointNames()
+   {
+      List<String> nameList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+         {
+            nameList.add(jointName.getJointName(robotSide));
          }
       }
 
@@ -508,9 +346,9 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   public double getBreakFrequencyForSpineJointVelocityEstimation()
    {
-      return 0.95; // 35 Hz
+      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.002);
    }
 
    /**

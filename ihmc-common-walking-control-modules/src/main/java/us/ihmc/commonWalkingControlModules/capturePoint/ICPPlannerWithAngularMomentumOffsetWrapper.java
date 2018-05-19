@@ -7,13 +7,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithAngularMomentumOffsetInterface
 {
@@ -23,14 +24,14 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private final YoBoolean modifyICPPlanByAngularMomentum;
 
-   private final YoFrameVector modifiedICPVelocity;
-   private final YoFrameVector modifiedICPAcceleration;
+   private final YoFrameVector3D modifiedICPVelocity;
+   private final YoFrameVector3D modifiedICPAcceleration;
 
-   private final YoFramePoint modifiedCMPPosition;
-   private final YoFrameVector modifiedCMPVelocity;
+   private final YoFramePoint3D modifiedCMPPosition;
+   private final YoFrameVector3D modifiedCMPVelocity;
 
    private final FrameVector3D cmpOffsetFromCoP = new FrameVector3D();
-   private final YoFrameVector cmpOffset;
+   private final YoFrameVector3D cmpOffset;
    private final AlphaFilteredYoFrameVector filteredCMPOffset;
 
    private final YoDouble modifiedTimeInCurrentState;
@@ -51,15 +52,15 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
       modifyICPPlanByAngularMomentum = new YoBoolean(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
 
-      modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
-      modifiedICPAcceleration = new YoFrameVector(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
+      modifiedICPVelocity = new YoFrameVector3D(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
+      modifiedICPAcceleration = new YoFrameVector3D(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
 
-      modifiedCMPPosition = new YoFramePoint(namePrefix + "ModifiedCMPPosition", worldFrame, registry);
-      modifiedCMPVelocity = new YoFrameVector(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
+      modifiedCMPPosition = new YoFramePoint3D(namePrefix + "ModifiedCMPPosition", worldFrame, registry);
+      modifiedCMPVelocity = new YoFrameVector3D(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
 
       cmpOffsetAlphaFilter = new YoDouble(namePrefix + "CMPOffsetAlphaFilter", registry);
 
-      cmpOffset = new YoFrameVector(namePrefix + "CMPOffset", worldFrame, registry);
+      cmpOffset = new YoFrameVector3D(namePrefix + "CMPOffset", worldFrame, registry);
       filteredCMPOffset = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredCMPOffset", "", registry,
                                                                                       cmpOffsetAlphaFilter, cmpOffset);
 
@@ -144,7 +145,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
          modifiedCMPPosition.set(desiredCMPPosition);
          modifiedCMPPosition.add(filteredCMPOffset);
 
-         estimateCurrentTimeWithModifiedCMP(modifiedCMPPosition.getFrameTuple());
+         estimateCurrentTimeWithModifiedCMP(modifiedCMPPosition);
 
          double omega0 = super.getOmega0();
          modifiedICPVelocity.set(desiredICPPosition);
@@ -156,10 +157,10 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
-   private void estimateCurrentTimeWithModifiedCMP(FramePoint3D desiredCoPFromAngularMomentum)
+   private void estimateCurrentTimeWithModifiedCMP(FramePoint3DReadOnly desiredCoPFromAngularMomentum)
    {
       double copCMPDistance = desiredCMPPosition.distanceXY(desiredCoPFromAngularMomentum);
-      double distanceFromCMP = desiredICPPosition.distanceXY(modifiedCMPPosition.getFrameTuple());
+      double distanceFromCMP = desiredICPPosition.distanceXY(modifiedCMPPosition);
 
       double modifiedTimeInState = 1.0 / super.getOmega0() * Math.log(distanceFromCMP / copCMPDistance);
       modifiedTimeInCurrentState.set(modifiedTimeInState);
@@ -170,19 +171,19 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    @Override
    public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
-      modifiedICPVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
+      desiredCapturePointVelocityToPack.setIncludingFrame(modifiedICPVelocity);
    }
 
    /** {@inheritDoc} */
    @Override
    public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
-      modifiedICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+      desiredCapturePointVelocityToPack.setIncludingFrame(modifiedICPVelocity);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.set(modifiedICPVelocity);
    }
@@ -191,28 +192,28 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    @Override
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
-      modifiedCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(modifiedCMPPosition);
    }
 
    /** {@inheritDoc} */
    @Override
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
-      modifiedCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(modifiedCMPPosition);
    }
 
    /** {@inheritDoc} */
    @Override
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
-      modifiedCMPVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+      desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(modifiedCMPVelocity);
    }
 
    /** {@inheritDoc} */
    @Override
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
-      modifiedCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+      desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(modifiedCMPVelocity);
    }
 
    /** {@inheritDoc} */

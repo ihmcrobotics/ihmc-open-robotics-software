@@ -8,8 +8,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
@@ -27,8 +27,8 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 95.7)
-   @Test(timeout = 520000)
+   @ContinuousIntegrationTest(estimatedDuration = 182.6)
+   @Test(timeout = 910000)
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -44,8 +44,8 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       super.testDRCOverRandomBlocks();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 71.3)
-   @Test(timeout = 420000)
+   @ContinuousIntegrationTest(estimatedDuration = 129.0)
+   @Test(timeout = 650000)
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

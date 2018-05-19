@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -95,7 +96,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
          computeToeOffContactLine(null, trailingLeg);

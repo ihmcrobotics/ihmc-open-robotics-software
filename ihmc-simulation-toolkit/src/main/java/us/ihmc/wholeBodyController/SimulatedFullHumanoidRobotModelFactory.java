@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
 public interface SimulatedFullHumanoidRobotModelFactory extends FullHumanoidRobotModelFactory
 {

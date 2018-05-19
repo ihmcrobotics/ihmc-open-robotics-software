@@ -3,17 +3,18 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class WalkingState extends FinishableState<WalkingStateEnum>
+public abstract class WalkingState implements State
 {
    protected final YoVariableRegistry registry;
+   private final WalkingStateEnum walkingStateEnum;
+   private WalkingStateEnum previousWalkingStateEnum = null;
 
    public WalkingState(WalkingStateEnum stateEnum, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum);
-
+      this.walkingStateEnum = stateEnum;
       registry = new YoVariableRegistry(FormattingTools.underscoredToCamelCase(stateEnum.toString(), true));
       parentRegistry.addChild(registry);
    }
@@ -33,6 +34,11 @@ public abstract class WalkingState extends FinishableState<WalkingStateEnum>
       return getStateEnum().getSupportSide();
    }
 
+   public RobotSide getTransferToSide()
+   {
+      return getStateEnum().getTransferToSide();
+   }
+
    public void handleFootLoadBearingCommand(FootLoadBearingCommand command)
    {
       // Override in state that can handle EndEffectorLoadBearingCommand
@@ -46,6 +52,21 @@ public abstract class WalkingState extends FinishableState<WalkingStateEnum>
    public boolean isStateSafeToConsumeManipulationCommands()
    {
       return false;
+   }
+
+   public WalkingStateEnum getStateEnum()
+   {
+      return walkingStateEnum;
+   }
+
+   public void setPreviousWalkingStateEnum(WalkingStateEnum previousWalkingStateEnum)
+   {
+      this.previousWalkingStateEnum = previousWalkingStateEnum;
+   }
+
+   public WalkingStateEnum getPreviousWalkingStateEnum()
+   {
+      return previousWalkingStateEnum;
    }
 
    public YoVariableRegistry getRegistry()

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -52,6 +53,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       case STAND_PREP_STATE:
       case STAND_READY:
       case STAND_TRANSITION_STATE:
+      case EXIT_WALKING:
       case CALIBRATION:
          return getDesiredJointBehaviorForHangingAround();
       default:
@@ -251,14 +253,15 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
       for (LegJointName legJointName : new LegJointName[]{LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
       { // Hip joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphas(0.9992, 0.85);
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9992, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.004));
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
@@ -277,7 +280,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       for (SpineJointName spineJointName : jointMap.getSpineJointNames())
       { // Spine joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphas(0.9996, 0.85);
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.004));
          List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
          ret.add(new GroupParameter<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
       }
@@ -285,8 +289,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.ELBOW_ROLL})
       { // Forearm elbow joint
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9998);
-         parameters.setAlphaVelocity(0.84);
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9998, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.84, 0.004));
          parameters.setMaxPositionError(0.2);
          parameters.setMaxVelocity(2.0);
          List<String> jointNames = new ArrayList<>();
@@ -298,8 +302,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL})
       { // Forearm wrist joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9995);
-         parameters.setAlphaVelocity(0.83);
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9995, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.83, 0.004));
          parameters.setMaxPositionError(0.2);
          parameters.setMaxVelocity(2.0);
          List<String> jointNames = new ArrayList<>();
@@ -311,8 +315,8 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       for (NeckJointName neckJointName : jointMap.getNeckJointNames())
       { // Neck joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9996);
-         parameters.setAlphaVelocity(0.95);
+         parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
+         parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
          parameters.setMaxPositionError(0.2);
          parameters.setMaxVelocity(2.0);
          List<String> jointNames = Collections.singletonList(jointMap.getNeckJointName(neckJointName));

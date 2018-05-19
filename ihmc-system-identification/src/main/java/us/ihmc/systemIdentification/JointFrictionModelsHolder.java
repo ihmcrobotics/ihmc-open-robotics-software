@@ -155,17 +155,6 @@ public abstract class JointFrictionModelsHolder
    }
    
    /**
-    * Use this method to adjust the exponential smoothing factor 'alpha' for the equivalent velocity.
-    * Increasing this number makes more smooth the transition between different 'FrictionState'.
-    * 
-    * @param alpha - smoothing factor
-    */
-   public void setSmoothFactorForEquivalentVelocity(double alpha)
-   {
-      velocityForFrictionCalculation.setAlpha(alpha);
-   }
-
-   /**
     * Use this method to select the effectiveness of the friction compensation.
     * The predicted friction force is increased or reduced by multiplying it with the effectiveness parameter.
     * 

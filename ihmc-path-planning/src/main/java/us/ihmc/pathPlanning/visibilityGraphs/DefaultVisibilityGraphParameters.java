@@ -25,7 +25,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getExtrusionDistanceIfNotTooHighToStep()
    {
-      return 0.1;
+      return 0.05;
    }
 
    @Override

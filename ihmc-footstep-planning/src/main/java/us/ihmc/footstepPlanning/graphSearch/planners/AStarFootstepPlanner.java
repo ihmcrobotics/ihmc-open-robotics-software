@@ -1,24 +1,15 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-
 import org.apache.commons.math3.util.Precision;
-
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
@@ -32,7 +23,6 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,6 +31,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
@@ -56,6 +51,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
+   private PlanarRegionsList planarRegionsList;
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
@@ -110,10 +106,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
+   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
-      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       nodeChecker.addStartNode(startNode, startNodeSnapTransform);
    }
@@ -122,13 +118,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setGoal(FootstepPlannerGoal goal)
    {
       checkGoalType(goal);
-      FramePose goalPose = goal.getGoalPoseBetweenFeet();
+      FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
       ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
       goalNodes = new SideDependentList<FootstepNode>();
 
       for (RobotSide side : RobotSide.values)
       {
-         FramePose goalNodePose = new FramePose(goalFrame);
+         FramePose3D goalNodePose = new FramePose3D(goalFrame);
          goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
@@ -139,6 +135,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
+      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
    }
@@ -184,7 +181,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
-         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+         plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
 
          ConvexPolygon2D foothold = snapData.getCroppedFoothold();
          if (!foothold.isEmpty())
@@ -214,6 +211,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
+
+//      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
+//      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();
@@ -364,7 +364,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, footPolygons);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       FootstepNodeCheckerOfCheckers checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);

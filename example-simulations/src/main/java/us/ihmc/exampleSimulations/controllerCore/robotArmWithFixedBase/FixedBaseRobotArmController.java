@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,11 +29,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -42,10 +39,13 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class FixedBaseRobotArmController implements RobotController
 {
@@ -81,9 +81,9 @@ public class FixedBaseRobotArmController implements RobotController
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
    private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
-   private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
+   private final YoFramePoint3D handTargetPosition = new YoFramePoint3D("handTarget", worldFrame, registry);
 
-   private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
+   private final YoFrameYawPitchRoll handTargetOrientation = new YoFrameYawPitchRoll("handTarget", worldFrame, registry);
    private final YoBoolean goToTarget = new YoBoolean("goToTarget", registry);
    private final YoDouble trajectoryDuration = new YoDouble("handTrajectoryDuration", registry);
    private final YoDouble trajectoryStartTime = new YoDouble("handTrajectoryStartTime", registry);
@@ -177,8 +177,8 @@ public class FixedBaseRobotArmController implements RobotController
       FrameQuaternion initialOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
       initialOrientation.changeFrame(worldFrame);
 
-      handTargetPosition.setAndMatchFrame(initialPosition);
-      handTargetOrientation.setAndMatchFrame(initialOrientation);
+      handTargetPosition.setMatchingFrame(initialPosition);
+      handTargetOrientation.setMatchingFrame(initialOrientation);
 
       trajectoryDuration.set(0.5);
       trajectory.setInitialPose(initialPosition, initialOrientation);
@@ -254,30 +254,33 @@ public class FixedBaseRobotArmController implements RobotController
 
    public void updateFeedbackCommands()
    {
-      FramePose controlFramePose = new FramePose(robotArm.getHandControlFrame());
+      FramePose3D controlFramePose = new FramePose3D(robotArm.getHandControlFrame());
       controlFramePose.changeFrame(robotArm.getHand().getBodyFixedFrame());
 
       trajectory.getAngularData(orientation, angularVelocity, angularAcceleration);
       trajectory.getLinearData(position, linearVelocity, linearAcceleration);
 
-      handPointCommand.setBodyFixedPointToControl(controlFramePose.getFramePointCopy());
+      handPointCommand.setBodyFixedPointToControl(controlFramePose.getPosition());
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
       handPointCommand.setGains(handPositionGains);
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());
-      handPointCommand.set(position, linearVelocity, linearAcceleration);
+      handPointCommand.set(position, linearVelocity);
+      handPointCommand.setFeedForwardAction(linearAcceleration);
 
       handOrientationCommand.setWeightForSolver(handWeight.getDoubleValue());
       handOrientationCommand.setGains(handOrientationGains);
       handOrientationCommand.setSelectionMatrix(computeAngularSelectionMatrix());
-      handOrientationCommand.set(orientation, angularVelocity, angularAcceleration);
+      handOrientationCommand.set(orientation, angularVelocity);
+      handOrientationCommand.setFeedForwardAction(angularAcceleration);
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
       handSpatialCommand.setPositionGains(handPositionGains);
       handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
-      handSpatialCommand.set(position, linearVelocity, linearAcceleration);
-      handSpatialCommand.set(orientation, angularVelocity, angularAcceleration);
+      handSpatialCommand.set(position, linearVelocity);
+      handSpatialCommand.set(orientation, angularVelocity);
+      handSpatialCommand.changeFrameAndSetFeedForward(angularAcceleration, linearAcceleration);
    }
 
    public void updateTrajectory()
@@ -289,9 +292,8 @@ public class FixedBaseRobotArmController implements RobotController
          FrameQuaternion initialOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
-         FramePoint3D finalPosition = new FramePoint3D();
+         FramePoint3D finalPosition = new FramePoint3D(handTargetPosition);
          FrameQuaternion finalOrientation = new FrameQuaternion();
-         handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);
          trajectory.setFinalPose(finalPosition, finalOrientation);
          trajectory.setTrajectoryTime(trajectoryDuration.getDoubleValue());
@@ -358,12 +360,12 @@ public class FixedBaseRobotArmController implements RobotController
       return name;
    }
 
-   public YoFramePoint getHandTargetPosition()
+   public YoFramePoint3D getHandTargetPosition()
    {
       return handTargetPosition;
    }
 
-   public YoFrameOrientation getHandTargetOrientation()
+   public YoFrameYawPitchRoll getHandTargetOrientation()
    {
       return handTargetOrientation;
    }

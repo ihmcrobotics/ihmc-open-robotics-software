@@ -104,7 +104,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
-      String namespace = HighLevelControlManagerFactory.class.getSimpleName();
+      String namespace = HighLevelControlManagerFactory.rigidBodyGainRegistryName;
       YoDouble kpPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "kpXYPelvisOrientation");
       YoDouble zetaPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "zetaXYPelvisOrientation");
 

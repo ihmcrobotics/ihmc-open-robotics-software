@@ -63,7 +63,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
@@ -88,9 +88,9 @@ public class StandPrepControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToPrepareForStanding.getDoubleValue());
+      double timeInTrajectory = MathTools.clamp(timeInState, 0.0, timeToPrepareForStanding.getDoubleValue());
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
@@ -114,16 +114,16 @@ public class StandPrepControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       // Do nothing
 
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      return getTimeInCurrentState() > (timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue());
+      return timeInState > (timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue());
    }
 
    @Override

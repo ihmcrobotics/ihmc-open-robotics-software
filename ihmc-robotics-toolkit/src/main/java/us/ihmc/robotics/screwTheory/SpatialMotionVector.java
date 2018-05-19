@@ -2,14 +2,15 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public abstract class SpatialMotionVector implements Clearable
@@ -68,7 +69,7 @@ public abstract class SpatialMotionVector implements Clearable
     * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in
     *            the same reference frame.
     */
-   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3D linearPart, FrameVector3D angularPart)
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly linearPart, FrameVector3DReadOnly angularPart)
    {
       linearPart.checkReferenceFrameMatch(angularPart);
 
@@ -158,10 +159,10 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets the angular velocity part of the spatial motion vector
     */
-   public void setAngularPart(FrameVector3D newAngularVelocity)
+   public void setAngularPart(FrameVector3DReadOnly newAngularVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newAngularVelocity.getReferenceFrame());
-      angularPart.set(newAngularVelocity.getVector());
+      angularPart.set(newAngularVelocity);
    }
 
    /**
@@ -231,10 +232,10 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets the linear velocity part of the spatial motion vector
     */
-   public void setLinearPart(FrameVector3D newLinearVelocity)
+   public void setLinearPart(FrameVector3DReadOnly newLinearVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newLinearVelocity.getReferenceFrame());
-      linearPart.set(newLinearVelocity.getVector());
+      linearPart.set(newLinearVelocity);
    }
 
    /**
@@ -303,7 +304,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3D linearPart, FrameVector3D angularPart)
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3DReadOnly linearPart, FrameVector3DReadOnly angularPart)
    {
       linearPart.checkReferenceFrameMatch(expressedInFrame);
       angularPart.checkReferenceFrameMatch(expressedInFrame);
@@ -312,8 +313,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      linearPart.get(this.linearPart);
-      angularPart.get(this.angularPart);
+      this.linearPart.set(linearPart);
+      this.angularPart.set(angularPart);
    }
 
    public void set(DenseMatrix64F matrix)
@@ -516,7 +517,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Packs an existing FrameVector with the angular velocity part
     */
-   public void getAngularPart(FrameVector3D vectorToPack)
+   public void getAngularPart(FrameVector3DBasics vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.angularPart);
    }
@@ -524,7 +525,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Packs an existing FrameVector with the linear velocity part
     */
-   public void getLinearPart(FrameVector3D vectorToPack)
+   public void getLinearPart(FrameVector3DBasics vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.linearPart);
    }

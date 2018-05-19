@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.contactPoints;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -16,7 +17,7 @@ public class CenteredFrictionConeCalculator implements FrictionConeRotationCalcu
    @Override
    public double computeYawOffset(List<Point2D> contactPoints, int contactIdx, int vectors, int vectorIdx)
    {
-      supportPolygon.setAndUpdate(contactPoints, contactPoints.size());
+      supportPolygon.set(Vertex2DSupplier.asVertex2DSupplier(contactPoints));
       Point2DReadOnly centroid = supportPolygon.getCentroid();
       Point2D contactPoint = contactPoints.get(contactIdx);
       centroidToPoint.sub(contactPoint, centroid);

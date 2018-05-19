@@ -8,9 +8,9 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfile;
 
 public class DRCDoubleElevationChangeSimulation
@@ -41,8 +41,8 @@ public class DRCDoubleElevationChangeSimulation
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, 
                                                                useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
       
-      ((YoBoolean) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
-      ((YoDouble) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);
+      ((YoBoolean) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walkCSG")).set(true);
+      ((YoDouble) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityCSGX")).set(1.0);
    }
 
    

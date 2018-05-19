@@ -5,19 +5,19 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class SimulatedRobotCenterOfMassVisualizer implements RobotController
 {
    private final Robot robot;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ExactCoMCalcualtor");
-   private final YoFramePoint exactCenterOfMassPosition = new YoFramePoint("exactCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector exactCenterOfMassVelocity = new YoFrameVector("exactCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D exactCenterOfMassPosition = new YoFramePoint3D("exactCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D exactCenterOfMassVelocity = new YoFrameVector3D("exactCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final FilteredVelocityYoFrameVector exactCenterOfMassAcceleration;
    
    

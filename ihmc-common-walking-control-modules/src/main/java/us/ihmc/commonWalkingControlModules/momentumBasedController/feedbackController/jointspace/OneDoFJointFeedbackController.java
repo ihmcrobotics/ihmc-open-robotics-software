@@ -2,19 +2,21 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
    private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
+   private final JointTorqueCommand virtualModelControlOutput = new JointTorqueCommand();
 
    private final OneDoFJoint joint;
 
@@ -39,6 +41,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final RateLimitedYoVariable qDDFeedbackRateLimited;
    private final YoDouble qDDDesired;
    private final YoDouble qDDAchieved;
+
+   private final YoDouble tauFeedback;
+   private final RateLimitedYoVariable tauFeedbackRateLimited;
+   private final YoDouble tauDesired;
 
    private final YoDouble qDFeedback;
    private final RateLimitedYoVariable qDFeedbackRateLimited;
@@ -84,6 +90,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
          qDDDesired = new YoDouble("qdd_d_" + jointName, registry);
          qDDAchieved = new YoDouble("qdd_achieved_" + jointName, registry);
+
       }
       else
       {
@@ -104,7 +111,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFeedforward = new YoDouble("qd_ff_" + jointName, registry);
 
          qDFeedback = new YoDouble("qd_fb_" + jointName, registry);
-         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
+         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDFeedback, dt);
       }
       else
       {
@@ -114,11 +121,27 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFeedbackRateLimited = null;
       }
 
+      if (virtualModelControlEnabled)
+      {
+         tauFeedback = new YoDouble("tau_fb_" + jointName, registry);
+         tauFeedbackRateLimited = new RateLimitedYoVariable("tau_fb_rl_" + jointName, registry, maxFeedbackRate, tauFeedback, dt);
+
+         tauDesired = new YoDouble("tau_d_" + jointName, registry);
+      }
+      else
+      {
+         tauFeedback = null;
+         tauFeedbackRateLimited = null;
+
+         tauDesired = null;
+      }
+
       weightForSolver = new YoDouble("weight_" + jointName, registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
       inverseDynamicsOutput.addJoint(joint, Double.NaN);
       inverseKinematicsOutput.addJoint(joint, Double.NaN);
+      virtualModelControlOutput.addJoint(joint, Double.NaN);
 
       parentRegistry.addChild(registry);
    }
@@ -203,7 +226,23 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    @Override
    public void computeVirtualModelControl()
    {
-      computeInverseDynamics();
+      if (!isEnabled.getBooleanValue())
+         return;
+
+      qCurrent.set(joint.getQ());
+      qDCurrent.set(joint.getQd());
+
+      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
+      qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
+
+      double tau_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
+      tau_fb = MathTools.clamp(tau_fb, maxFeedback.getDoubleValue());
+      tauFeedback.set(tau_fb);
+      tauFeedbackRateLimited.update();
+
+      tauDesired.set(tauFeedbackRateLimited.getDoubleValue());
+
+      virtualModelControlOutput.setOneDoFJointDesiredTorque(0, tauDesired.getDoubleValue());
    }
 
    @Override
@@ -245,8 +284,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public JointspaceAccelerationCommand getVirtualModelControlOutput()
+   public JointTorqueCommand getVirtualModelControlOutput()
    {
-      return getInverseDynamicsOutput();
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      return virtualModelControlOutput;
    }
 }

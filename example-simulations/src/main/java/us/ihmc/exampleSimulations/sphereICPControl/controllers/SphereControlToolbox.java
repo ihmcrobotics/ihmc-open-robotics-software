@@ -7,18 +7,23 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,14 +41,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -55,6 +53,12 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SphereControlToolbox
@@ -75,17 +79,19 @@ public class SphereControlToolbox
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFramePoint eCMP = new YoFramePoint("eCMP", worldFrame, registry);
-   private final YoFramePoint desiredICP = new YoFramePoint("desiredICP", worldFrame, registry);
-   private final YoFrameVector desiredICPVelocity = new YoFrameVector("desiredICPVelocity", worldFrame, registry);
-   private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", worldFrame, registry);
+   private final YoFramePoint3D eCMP = new YoFramePoint3D("eCMP", worldFrame, registry);
+   private final YoFramePoint3D desiredICP = new YoFramePoint3D("desiredICP", worldFrame, registry);
+   private final YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D desiredCMP = new YoFramePoint3D("desiredCMP", worldFrame, registry);
 
-   private final YoFramePoint icp = new YoFramePoint("icp", worldFrame, registry);
+   private final YoFramePoint3D icp = new YoFramePoint3D("icp", worldFrame, registry);
+   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
 
-   private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
-   private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("centerOfMassVelocity", worldFrame, registry);
-   private final YoFramePoint2d yoCenterOfMass2d = new YoFramePoint2d("centerOfMass2d", worldFrame, registry);
-   private final YoFrameVector2d yoCenterOfMassVelocity2d = new YoFrameVector2d("centerOfMassVelocity2d", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint2D yoCenterOfMass2d = new YoFramePoint2D("centerOfMass2d", worldFrame, registry);
+   private final YoFrameVector2D yoCenterOfMassVelocity2d = new YoFrameVector2D("centerOfMassVelocity2d", worldFrame, registry);
 
    private final YoBoolean sendFootsteps = new YoBoolean("sendFootsteps", registry);
    private final YoBoolean hasFootsteps = new YoBoolean("hasFootsteps", registry);
@@ -104,8 +110,8 @@ public class SphereControlToolbox
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
 
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<FramePose>(new FramePose(), new FramePose());
-   private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private BipedSupportPolygons bipedSupportPolygons;
@@ -114,12 +120,12 @@ public class SphereControlToolbox
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<Footstep> footsteps = new ArrayList<>();
 
-   private final YoFramePose yoNextFootstepPose = new YoFramePose("nextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextFootstepPose = new YoFramePose("nextNextFootstepPose", worldFrame, registry);
-   private final YoFramePose yoNextNextNextFootstepPose = new YoFramePose("nextNextNextFootstepPose", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoNextFootstepPolygon = new YoFrameConvexPolygon2d("nextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
 
    private final double controlDT;
    private final double desiredHeight;
@@ -154,6 +160,9 @@ public class SphereControlToolbox
       omega0.set(omega);
 
       setupFeetFrames(gravity, yoGraphicsListRegistry);
+
+      capturePointVelocityAlpha.set(0.5);
+      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -229,13 +238,13 @@ public class SphereControlToolbox
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
+         FramePose3D startingPose = footPosesAtTouchdown.get(robotSide);
          startingPose.setToZero(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.15));
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
 
-         currentFootPoses.put(robotSide, new YoFramePose(sidePrefix + "FootPose", worldFrame, registry));
+         currentFootPoses.put(robotSide, new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootPose", worldFrame, registry));
 
          Graphics3DObject footGraphics = new Graphics3DObject();
          AppearanceDefinition footColor = robotSide == RobotSide.LEFT ? YoAppearance.Color(defaultLeftColor) : YoAppearance.Color(defaultRightColor);
@@ -311,12 +320,12 @@ public class SphereControlToolbox
       return centerOfMassFrame;
    }
 
-   public YoFramePoint getCenterOfMass()
+   public YoFramePoint3D getCenterOfMass()
    {
       return yoCenterOfMass;
    }
 
-   public YoFrameVector getCenterOfMassVelocity()
+   public YoFrameVector3D getCenterOfMassVelocity()
    {
       return yoCenterOfMassVelocity;
    }
@@ -346,7 +355,7 @@ public class SphereControlToolbox
       return contactStates;
    }
 
-   public SideDependentList<FramePose> getFootPosesAtTouchdown()
+   public SideDependentList<FramePose3D> getFootPosesAtTouchdown()
    {
       return footPosesAtTouchdown;
    }
@@ -381,24 +390,29 @@ public class SphereControlToolbox
       return yoTime;
    }
 
-   public YoFramePoint getDesiredCMP()
+   public YoFramePoint3D getDesiredCMP()
    {
       return desiredCMP;
    }
 
-   public YoFramePoint getDesiredICP()
+   public YoFramePoint3D getDesiredICP()
    {
       return desiredICP;
    }
 
-   public YoFrameVector getDesiredICPVelocity()
+   public YoFrameVector3D getDesiredICPVelocity()
    {
       return desiredICPVelocity;
    }
 
-   public YoFramePoint getICP()
+   public YoFramePoint3D getICP()
    {
       return icp;
+   }
+
+   public YoFrameVector3D getICPVelocity()
+   {
+      return icpVelocity;
    }
 
    public FramePoint2D getCapturePoint2d()
@@ -438,7 +452,7 @@ public class SphereControlToolbox
       {
          if (contactStates.get(robotSide).inContact())
          {
-            FramePose footPose = new FramePose(contactableFeet.get(robotSide).getSoleFrame());
+            FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getSoleFrame());
             footPose.changeFrame(worldFrame);
             currentFootPoses.get(robotSide).set(footPose);
          }
@@ -472,8 +486,8 @@ public class SphereControlToolbox
          return footsteps.get(i);
    }
 
-   private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D footstepPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D tempFootstepPolygonForShrinking = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    public void updateUpcomingFootstepsViz(Footstep nextFootstep, Footstep nextNextFootstep, Footstep nextNextNextFootstep)
@@ -483,9 +497,9 @@ public class SphereControlToolbox
          yoNextFootstepPose.setToNaN();
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextFootstepPolygon.hide();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextFootstepPolygon.clear();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
@@ -494,54 +508,54 @@ public class SphereControlToolbox
 
       double polygonShrinkAmount = 0.005;
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), nextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextFootstepPolygon.set(footstepPolygon);
 
-      FramePose nextFootstepPose = new FramePose(nextFootstep.getSoleReferenceFrame());
-      yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
+      FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
+      yoNextFootstepPose.setMatchingFrame(nextFootstepPose);
 
       if (nextNextFootstep == null)
       {
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
       if (nextNextFootstep.getPredictedContactPoints() == null)
          nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextFootstep.getSoleReferenceFrame(), nextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextFootstepPolygon.set(footstepPolygon);
 
-      FramePose nextNextFootstepPose = new FramePose(nextNextFootstep.getSoleReferenceFrame());
-      yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
+      FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
+      yoNextNextFootstepPose.setMatchingFrame(nextNextFootstepPose);
 
       if (nextNextNextFootstep == null)
       {
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
       if (nextNextNextFootstep.getPredictedContactPoints() == null)
          nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextNextFootstep.getSoleReferenceFrame(), nextNextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrame(nextNextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextNextFootstepPolygon.set(footstepPolygon);
 
-      FramePose nextNextNextFootstepPose = new FramePose(nextNextNextFootstep.getSoleReferenceFrame());
-      yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
+      FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
+      yoNextNextNextFootstepPose.setMatchingFrame(nextNextNextFootstepPose);
    }
 
    private void callUpdatables()
@@ -702,12 +716,6 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
-         public int numberOfFootstepsToConsider()
-         {
-            return 4;
-         }
-
-         @Override
          public double getForwardFootstepWeight()
          {
             return 20.0;
@@ -720,7 +728,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFootstepRegularizationWeight()
+         public double getFootstepRateWeight()
          {
             return 0.001;
          }
@@ -738,21 +746,18 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFeedbackRegularizationWeight()
+         public double getFeedbackRateWeight()
          {
             return 0.0001;
          }
 
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return 3.0;
-         }
-
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return 2.5;
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpOrthogonalToMotion(2.5);
+            gains.setKpParallelToMotion(3.0);
+            return gains;
          }
 
          @Override
@@ -774,7 +779,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleStepRegularizationWeightWithTime()
+         public boolean scaleStepRateWeightWithTime()
          {
             return false;
          }
@@ -786,13 +791,13 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean useFeedbackRegularization()
+         public boolean useFeedbackRate()
          {
             return true;
          }
 
          @Override
-         public boolean useStepAdjustment()
+         public boolean allowStepAdjustment()
          {
             return true;
          }
@@ -804,7 +809,7 @@ public class SphereControlToolbox
          }
 
         @Override
-         public boolean useFootstepRegularization()
+         public boolean useFootstepRate()
          {
             return true;
          }

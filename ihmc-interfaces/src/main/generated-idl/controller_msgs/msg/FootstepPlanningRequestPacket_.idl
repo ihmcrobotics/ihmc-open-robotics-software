@@ -1,0 +1,65 @@
+#ifndef __controller_msgs__msg__FootstepPlanningRequestPacket__idl__
+#define __controller_msgs__msg__FootstepPlanningRequestPacket__idl__
+
+#include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      const octet FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL =
+      0;
+
+      const octet FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP =
+      1;
+
+      const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
+      2;
+
+      const octet FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH =
+      3;
+
+      const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR =
+      4;
+
+      const long NO_PLAN_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningRequestPacket_")
+      struct FootstepPlanningRequestPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet initial_stance_robot_side;
+        geometry_msgs::msg::dds::Point stance_foot_position_in_world;
+        geometry_msgs::msg::dds::Quaternion stance_foot_orientation_in_world;
+        geometry_msgs::msg::dds::Point goal_position_in_world;
+        geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        @defaultValue(value=255)
+        octet requested_footstep_planner_type;
+        double timeout;
+        controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
+        @defaultValue(value=-1)
+        long planner_request_id;
+      };
+    };
+  };
+};
+
+#endif

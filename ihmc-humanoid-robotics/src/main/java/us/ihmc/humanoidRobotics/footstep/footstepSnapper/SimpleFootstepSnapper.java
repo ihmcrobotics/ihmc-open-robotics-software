@@ -3,8 +3,11 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,17 +15,16 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
  * Created by agrabertilton on 1/14/15.
@@ -43,7 +45,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
-      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
+      FramePose2D footPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
 
       Footstep footstep = generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
       double z = footstep.getZ();
@@ -72,24 +74,24 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
+      FootstepDataMessage originalFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep);
 
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
-      originalFootstep.setOrientation(orientation.getQuaternion());
+      originalFootstep.getLocation().set(position);
+      originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       footstep.setFootstepType(type);
-      FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
+      FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
-      footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
+      footstep.setTrajectoryType(TrajectoryType.fromByte(originalFootstep.getTrajectoryType()));
 
       return type;
    }
@@ -135,7 +137,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -190,7 +192,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FramePose footstepPose = new FramePose();
+      FramePose3D footstepPose = new FramePose3D();
       footstep.getPose(footstepPose);
 
       Point3D position = new Point3D(footstepPose.getPosition());
@@ -200,12 +202,12 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
       position.setZ(height);
 
-      footstepPose.setPose(new Point3D(position), orientation);
+      footstepPose.set(new Point3D(position), orientation);
       footstep.setPose(footstepPose);
    }
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
            Vector3D planeNormal)
    {
       double yaw = footPose2d.getYaw();
@@ -213,7 +215,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
-      FramePose solePose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      FramePose3D solePose = new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
       Footstep footstep = new Footstep(robotSide, solePose);
 
       return footstep;

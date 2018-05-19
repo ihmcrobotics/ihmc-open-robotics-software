@@ -8,10 +8,11 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -62,7 +63,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
       }
 
-      NeckTrajectoryMessage armTrajectoryMessage = new NeckTrajectoryMessage(trajectoryTime, desiredJointPositions);
+      NeckTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, desiredJointPositions);
 
       if (DEBUG)
       {

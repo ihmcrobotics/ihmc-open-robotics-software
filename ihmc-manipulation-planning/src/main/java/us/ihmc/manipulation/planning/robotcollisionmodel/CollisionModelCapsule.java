@@ -61,7 +61,7 @@ public class CollisionModelCapsule extends AbstractCollisionModel
       Vector3D centerXAxis = new Vector3D();
       Vector3D centerYAxis = new Vector3D();
       Vector3D centerZAxis = new Vector3D();
-      Vector3D rotationAxis = currentJoint.getJointAxis().getVector();
+      Vector3D rotationAxis = new Vector3D(currentJoint.getJointAxis());
       if (rotationAxis.getX() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(0, centerXAxis);

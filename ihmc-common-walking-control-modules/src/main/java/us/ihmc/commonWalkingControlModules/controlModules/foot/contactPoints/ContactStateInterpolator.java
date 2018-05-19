@@ -6,10 +6,10 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameLineSegment;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,7 +24,7 @@ public class ContactStateInterpolator
    private final YoVariableRegistry registry;
    
    private final List<YoContactPoint> contactPoints;
-   private final FrameLineSegment2d contactLine2D = new FrameLineSegment2d();
+   private final FrameLineSegment2D contactLine2D = new FrameLineSegment2D();
 
    private final YoPlaneContactState contactState;
    private final boolean[] contactPointInterpolationActivated;
@@ -79,10 +79,10 @@ public class ContactStateInterpolator
     * @param duration - the time it takes to interpolate the contact points from the line to their original position
     * @param contactLine the line formed by two contact points in contact
     */
-   public void initialize(double duration, FrameLineSegment contactLine)
+   public void initialize(double duration, FrameLineSegment3D contactLine)
    {
       contactLine.changeFrame(planeFrame);
-      contactLine.getIncludingFrame(contactLine2D);
+      contactLine2D.setIncludingFrame(contactLine);
       
       this.duration.set(duration);
       timeInTrajectory.set(0.0);

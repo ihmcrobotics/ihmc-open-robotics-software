@@ -21,7 +21,7 @@ public class PrismaticJoint extends OneDoFJoint
    @Override
    protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      jointAxis.get(translation);
+      translation.set(jointAxis);
       translation.scale(getQ());
       jointTransform.setTranslationAndIdentityRotation(translation);
    }
@@ -34,7 +34,7 @@ public class PrismaticJoint extends OneDoFJoint
       ReferenceFrame predecessorFrame = getPredecessor().getBodyFixedFrame();
       ReferenceFrame successorFrame = getSuccessor().getBodyFixedFrame();
 
-      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis, new Vector3D());
 
       unitSuccessorTwist = new Twist(unitJointTwist);
       unitSuccessorTwist.changeBaseFrameNoRelativeTwist(predecessorFrame);
@@ -45,7 +45,7 @@ public class PrismaticJoint extends OneDoFJoint
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessorFrame);
 
-      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
+      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis, new Vector3D());
 
       unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
       unitSuccessorAcceleration.changeBaseFrameNoRelativeAcceleration(predecessorFrame);

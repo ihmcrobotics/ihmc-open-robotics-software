@@ -19,8 +19,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -54,8 +54,8 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test(timeout = 80000)
+   @ContinuousIntegrationTest(estimatedDuration = 80.3)
+   @Test(timeout = 400000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithLowPelvisOrientationGains();

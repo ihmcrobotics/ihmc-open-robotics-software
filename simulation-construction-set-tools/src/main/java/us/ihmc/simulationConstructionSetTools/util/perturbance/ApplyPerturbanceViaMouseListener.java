@@ -8,10 +8,10 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -23,8 +23,8 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
    private final ArrayList<LaunchedBall> poolOfBalls;
    private int nextBallIndex = 0;
 
-   private final YoFramePoint ballTarget;
-   private final YoFrameVector ballTargetVelocity;
+   private final YoFramePoint3D ballTarget;
+   private final YoFrameVector3D ballTargetVelocity;
    private final DirectedPerturbance directedPerturbance;
 
    private boolean mouseClicked = false;
@@ -33,7 +33,7 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
 
    private Point3D tempPoint = new Point3D();
 
-   public ApplyPerturbanceViaMouseListener(Robot launchedBallsRobot, YoFramePoint ballTarget, YoFrameVector ballTargetVelocity,
+   public ApplyPerturbanceViaMouseListener(Robot launchedBallsRobot, YoFramePoint3D ballTarget, YoFrameVector3D ballTargetVelocity,
                                            DirectedPerturbance directedPerturbance, int numberOfBallsAvailable)
    {
       this.ballTarget = ballTarget;
@@ -94,7 +94,7 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
       double distance = initialPosition.distance(tempPoint);
       double estimatedCollisionTime = distance / ballVelocityMagnitude;
 
-      Point3D ret = new Point3D(ballTargetVelocity.getFrameVectorCopy().getVector());
+      Point3D ret = new Point3D(ballTargetVelocity);
       ret.scale(estimatedCollisionTime);
       ret.add(tempPoint);
       return ret;

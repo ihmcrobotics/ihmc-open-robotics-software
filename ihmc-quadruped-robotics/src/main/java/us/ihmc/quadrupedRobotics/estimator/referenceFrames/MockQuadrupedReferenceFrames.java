@@ -1,23 +1,25 @@
 package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.partNames.LegJointName;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.EndDependentList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.*;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
+import java.util.EnumMap;
+
+public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 {
-   private final QuadrantDependentList<FramePose> footPoses = new QuadrantDependentList<FramePose>();
-   private final QuadrantDependentList<PoseReferenceFrame> soleFrames = new QuadrantDependentList<PoseReferenceFrame>();
+   private final QuadrantDependentList<FramePose3D> footPoses = new QuadrantDependentList<FramePose3D>();
+   private final QuadrantDependentList<PoseReferenceFrame> soleFrames = new QuadrantDependentList<>();
+   private final QuadrantDependentList<MovingReferenceFrame> movingSoleFrames = new QuadrantDependentList<>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
    private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
 
@@ -25,9 +27,11 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footPoses.set(robotQuadrant, new FramePose(ReferenceFrame.getWorldFrame()));
+         footPoses.set(robotQuadrant, new FramePose3D(ReferenceFrame.getWorldFrame()));
          soleFrames.set(robotQuadrant,
                new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "soleFrame", footPoses.get(robotQuadrant)));
+         movingSoleFrames.set(robotQuadrant, MovingReferenceFrame.constructFrameFixedInParent(robotQuadrant.getCamelCaseName() + "MovingSoleFrame",
+                                                                                              soleFrames.get(robotQuadrant), new RigidBodyTransform()));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -53,13 +57,14 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       initializeCommonValues();
    }
 
-   public void update(QuadrantDependentList<YoFramePoint> yoFootPositions)
+   public void update(QuadrantDependentList<YoFramePoint3D> yoFootPositions)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePose footPose = footPoses.get(robotQuadrant);
-         footPose.setPosition(yoFootPositions.get(robotQuadrant).getFramePointCopy());
+         FramePose3D footPose = footPoses.get(robotQuadrant);
+         footPose.setPosition(yoFootPositions.get(robotQuadrant));
          soleFrames.get(robotQuadrant).setPoseAndUpdate(footPose);
+         movingSoleFrames.get(robotQuadrant).update();
       }
       for (RobotEnd robotEnd : RobotEnd.values)
       {
@@ -108,17 +113,71 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    }
 
    @Override
-   public QuadrantDependentList<ReferenceFrame> getFootReferenceFrames()
+   public SegmentDependentList<RobotQuadrant, MovingReferenceFrame> getAnkleZUpReferenceFrames()
    {
       return null;
    }
 
    @Override
-   public ReferenceFrame getFootFrame(RobotQuadrant robotQuadrant)
+   public SegmentDependentList<RobotQuadrant, MovingReferenceFrame> getFootReferenceFrames()
    {
-      return soleFrames.get(robotQuadrant);
+      return null;
    }
-   
+
+   @Override
+   public SegmentDependentList<RobotQuadrant, MovingReferenceFrame> getSoleFrames()
+   {
+      return movingSoleFrames;
+   }
+
+   @Override
+   public MovingReferenceFrame getAnkleZUpFrame(RobotQuadrant robotSegment)
+   {
+      return null;
+   }
+
+   @Override
+   public MovingReferenceFrame getFootFrame(RobotQuadrant robotQuadrant)
+   {
+      return null;
+   }
+
+   @Override
+   public MovingReferenceFrame getLegJointFrame(RobotQuadrant robotSegment, LegJointName legJointName)
+   {
+      return null;
+   }
+
+   @Override
+   public EnumMap<LegJointName, MovingReferenceFrame> getLegJointFrames(RobotQuadrant robotSegment)
+   {
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getIMUFrame()
+   {
+      return null;
+   }
+
+   @Override
+   public MovingReferenceFrame getSoleFrame(RobotQuadrant robotSegment)
+   {
+      return movingSoleFrames.get(robotSegment);
+   }
+
+   @Override
+   public MovingReferenceFrame getSoleZUpFrame(RobotQuadrant robotSegment)
+   {
+      return null;
+   }
+
+   @Override
+   public SegmentDependentList<RobotQuadrant, MovingReferenceFrame> getSoleZUpFrames()
+   {
+      return null;
+   }
+
    @Override
    public ReferenceFrame getCenterOfMassFrame()
    {

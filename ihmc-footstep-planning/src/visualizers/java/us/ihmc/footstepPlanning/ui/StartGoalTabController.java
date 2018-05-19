@@ -1,15 +1,19 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GlobalResetTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalOrientationTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalPositionTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartOrientationTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartPositionTopic;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
-
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public class StartGoalTabController
 {
@@ -41,14 +45,14 @@ public class StartGoalTabController
    @FXML
    private Spinner<Double> goalYawSpinner;
 
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
 
    private final SimpleObjectProperty<Double> startRotationProperty = new SimpleObjectProperty<>(this, "startRotationProperty", 0.0);
    private final SimpleObjectProperty<Double> goalRotationProperty = new SimpleObjectProperty<>(this, "goalRotationProperty", 0.0);
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }

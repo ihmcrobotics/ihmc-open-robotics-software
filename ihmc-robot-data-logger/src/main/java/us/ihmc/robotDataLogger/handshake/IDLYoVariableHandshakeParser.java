@@ -9,11 +9,10 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.idl.serializers.extra.AbstractSerializer;
@@ -28,17 +27,21 @@ import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.parameters.LongParameter;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
+import us.ihmc.yoVariables.parameters.SingleParameterReader;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Class to decode variable data from handshakes
@@ -49,7 +52,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 {
    private final AbstractSerializer<Handshake> serializer;
-   
+
    private TIntIntHashMap variableOffsets = new TIntIntHashMap();
 
    public IDLYoVariableHandshakeParser(HandshakeFileType type)
@@ -77,9 +80,10 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       return 1 + handShake.getVariables().size() + jointStateVariables;
    }
 
+   @Override
    public void parseFrom(byte[] data) throws IOException
    {
-      if(serializer == null)
+      if (serializer == null)
       {
          throw new RuntimeException();
       }
@@ -87,6 +91,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       parseFrom(handshake);
    }
 
+   @Override
    public void parseFrom(Handshake handshake)
    {
       this.dt = handshake.getDt();
@@ -105,9 +110,6 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       addJointStates(handshake);
       addGraphicObjects(handshake);
 
-      DefaultParameterReader parameterReader = new DefaultParameterReader();
-      parameterReader.readParametersInRegistry(regs.get(0));
-      
       this.numberOfVariables = handshake.getVariables().size();
       this.numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
@@ -131,7 +133,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
       return registryList;
    }
-   
+
    public int getVariableOffset(int registryIndex)
    {
       return variableOffsets.get(registryIndex);
@@ -149,17 +151,17 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          String description = yoVariableDefinition.getDescriptionAsString();
          int registryIndex = yoVariableDefinition.getRegistry();
          YoVariableRegistry parent = registryList.get(registryIndex);
-         
+
          double min = yoVariableDefinition.getMin();
          double max = yoVariableDefinition.getMax();
-         
-         if(!variableOffsets.contains(registryIndex))
+
+         if (!variableOffsets.contains(registryIndex))
          {
             variableOffsets.put(registryIndex, i);
          }
 
          YoType type = yoVariableDefinition.getType();
-         if(yoVariableDefinition.getIsParameter())
+         if (yoVariableDefinition.getIsParameter())
          {
             YoParameter<?> newParameter;
             switch (type)
@@ -167,39 +169,62 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             case DoubleYoVariable:
                newParameter = new DoubleParameter(name, description, parent, min, max);
                break;
-   
+
             case IntegerYoVariable:
                newParameter = new IntegerParameter(name, description, parent, (int) min, (int) max);
                break;
-   
+
             case BooleanYoVariable:
                newParameter = new BooleanParameter(name, description, parent);
                break;
-   
+
             case LongYoVariable:
                newParameter = new LongParameter(name, description, parent, (long) min, (long) max);
                break;
-   
+
             case EnumYoVariable:
                EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
                String[] names = enumType.getEnumValues().toStringArray();
                boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
                newParameter = new EnumParameter<>(name, description, parent, allowNullValues, names);
                break;
-   
+
             default:
                throw new RuntimeException("Unknown YoVariable type: " + type.name());
             }
-            
+
+            //This is the case for some logs. A special enum may need to be used here. I'm not sure these matter at all for a log?
+            if (yoVariableDefinition.getLoadStatus() == null)
+            {
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
+            }
+            else
+            {
+               switch (yoVariableDefinition.getLoadStatus())
+               {
+               case Unloaded:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.UNLOADED);
+                  break;
+               case Default:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.DEFAULT);
+                  break;
+               case Loaded:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
+                  break;
+               default:
+                  throw new RuntimeException("Unknown load status: " + yoVariableDefinition.getLoadStatus());
+               }
+
+            }
             YoVariable<?> newVariable = parent.getYoVariable(parent.getNumberOfYoVariables() - 1);
-            
+
             // Test if this is the correct variable
-            if(newParameter != newVariable.getParameter())
+            if (newParameter != newVariable.getParameter())
             {
                throw new RuntimeException("Last variable index in the registry is not the parameter just added.");
             }
             variableList.add(newVariable);
-            
+
          }
          else
          {
@@ -209,26 +234,26 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             case DoubleYoVariable:
                newVariable = new YoDouble(name, description, parent);
                break;
-   
+
             case IntegerYoVariable:
                newVariable = new YoInteger(name, description, parent);
                break;
-   
+
             case BooleanYoVariable:
                newVariable = new YoBoolean(name, description, parent);
                break;
-   
+
             case LongYoVariable:
                newVariable = new YoLong(name, description, parent);
                break;
-   
+
             case EnumYoVariable:
                EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
                String[] names = enumType.getEnumValues().toStringArray();
                boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
                newVariable = new YoEnum(name, description, parent, allowNullValues, names);
                break;
-   
+
             default:
                throw new RuntimeException("Unknown YoVariable type: " + type.name());
             }
@@ -290,6 +315,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          catch (Exception e)
          {
             PrintTools.error(this, "Got exception: " + e.getClass().getSimpleName() + " when loading a YoGraphic.");
+            e.printStackTrace();
          }
       }
 
@@ -315,7 +341,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
    private RemoteYoGraphic getRemoteGraphic(GraphicObjectMessage graphicObjectMessage)
    {
-      RemoteGraphicType type = RemoteGraphicType.values()[graphicObjectMessage.getType()];
+      int registrationID = graphicObjectMessage.getRegistrationID();
 
       String name = graphicObjectMessage.getNameAsString();
       YoVariable<?>[] vars = new YoVariable[graphicObjectMessage.getYoVariableIndex().size()];
@@ -324,9 +350,11 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
 
       double[] consts = graphicObjectMessage.getConstants().toArray();
 
-      AppearanceDefinition appearance = new YoAppearanceRGBColor(new MutableColor((float) graphicObjectMessage.getAppearance().getR(), (float) graphicObjectMessage.getAppearance().getG(), (float) graphicObjectMessage.getAppearance().getB()),
-            graphicObjectMessage.getAppearance().getTransparency());
+      AppearanceDefinition appearance = new YoAppearanceRGBColor(new MutableColor((float) graphicObjectMessage.getAppearance().getR(),
+                                                                                  (float) graphicObjectMessage.getAppearance().getG(),
+                                                                                  (float) graphicObjectMessage.getAppearance().getB()),
+                                                                 graphicObjectMessage.getAppearance().getTransparency());
 
-      return YoGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
+      return yoGraphicFromMessage(registrationID, name, vars, consts, appearance);
    }
 }

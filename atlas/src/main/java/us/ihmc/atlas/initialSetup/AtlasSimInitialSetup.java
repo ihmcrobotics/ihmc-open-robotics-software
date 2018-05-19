@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -51,12 +51,12 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(robotSide.negateIfRightSide(-0.062)); //leg_akx
 
             setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SHOULDER_YAW, robotSide.negateIfRightSide(0.785398)); //arm_shz
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(-0.1)); //arm_shx
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_PITCH, 3.00); //arm_ely
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_ROLL, robotSide.negateIfRightSide(1.8)); //arm_elx
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.FIRST_WRIST_PITCH, -0.30); //arm_wry
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.WRIST_ROLL, robotSide.negateIfRightSide(0.70)); //arm_wrx
-            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SECOND_WRIST_PITCH, 0.15); //arm_wry2
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(-0.52379)); //arm_shx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_PITCH, 2.33708); //arm_ely
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_ROLL, robotSide.negateIfRightSide(2.35619)); //arm_elx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.FIRST_WRIST_PITCH, -0.337807); //arm_wry
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.WRIST_ROLL, robotSide.negateIfRightSide(0.207730)); //arm_wrx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SECOND_WRIST_PITCH, -0.026599); //arm_wry2
          }
 
          robot.update();
@@ -83,8 +83,12 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
             }
          }
 
-         double pelvisToFoot = positionInWorld.getZ() - lowestGroundContactPoint.getPositionPoint().getZ();
-
+         double pelvisToFoot;
+         if(lowestGroundContactPoint == null)
+            pelvisToFoot = 0.9286147465454951;
+         else
+            pelvisToFoot = positionInWorld.getZ() - lowestGroundContactPoint.getPositionPoint().getZ();   
+         
          // Hardcoded for gazebo integration
          //      double pelvisToFoot = 0.887;
 

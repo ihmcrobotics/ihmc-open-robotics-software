@@ -14,18 +14,22 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -41,10 +45,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,10 +53,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmoothCMPBasedICPPlannerTest
@@ -89,7 +90,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final double coefficientOfFriction = 0.1;
 
    // Robot parameters
-   private final FramePose initialPose = new FramePose(worldFrame, new Point3D(0.0, 0.0, 0.0), new Quaternion());
+   private final FramePose3D initialPose = new FramePose3D(worldFrame, new Point3D(0.0, 0.0, 0.0), new Quaternion());
 
    // Planning parameters
    private final double defaultSwingTime = 0.6;
@@ -155,8 +156,8 @@ public class SmoothCMPBasedICPPlannerTest
    private double footstepHeight = 0.02;
    private BagOfBalls comTrack, icpTrack, cmpTrack, copTrack;
    private BagOfBalls comInitialCornerPoints, icpInitialCornerPoints, comFinalCornerPoints, icpFinalCornerPoints, copCornerPoints;
-   private List<YoFramePose> nextFootstepPoses;
-   private SideDependentList<YoFramePose> currentFootLocations;
+   private List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses;
+   private SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootLocations;
    private YoGraphicPosition comPositionGraphic, icpPositionGraphic, cmpPositionGraphic, copPositionGraphic;
    private SimulationConstructionSet scs;
    private int SCS_BUFFER_SIZE = 100000;
@@ -186,7 +187,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          String footName = side.getCamelCaseName();
          FootSpoof foot = new FootSpoof(footName + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInFootFrame, coefficientOfFriction);
-         FramePose footPose = new FramePose(initialPose);
+         FramePose3D footPose = new FramePose3D(initialPose);
          footPose.appendTranslation(0.0, side.negateIfRightSide(stepWidth / 2.0), 0.0);
          foot.setSoleFrame(footPose);
 
@@ -265,16 +266,16 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void setupPositionGraphics()
    {
-      YoFramePoint yoCoMPosition = new YoFramePoint("CoMPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCoMPosition = new YoFramePoint3D("CoMPositionForViz", worldFrame, registry);
       comPositionGraphic = new YoGraphicPosition("CoMPositionGraphic", yoCoMPosition, trackBallSize * 2, new YoAppearanceRGBColor(comPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoICPPosition = new YoFramePoint("ICPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoICPPosition = new YoFramePoint3D("ICPPositionForViz", worldFrame, registry);
       icpPositionGraphic = new YoGraphicPosition("ICPPositionGraphic", yoICPPosition, trackBallSize * 2, new YoAppearanceRGBColor(icpPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoCMPPosition = new YoFramePoint("CMPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCMPPosition = new YoFramePoint3D("CMPPositionForViz", worldFrame, registry);
       cmpPositionGraphic = new YoGraphicPosition("CMPPositionGraphic", yoCMPPosition, trackBallSize * 2, new YoAppearanceRGBColor(cmpPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoCoPPosition = new YoFramePoint("CoPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCoPPosition = new YoFramePoint3D("CoPPositionForViz", worldFrame, registry);
       copPositionGraphic = new YoGraphicPosition("CoPPositionGraphic", yoCoPPosition, trackBallSize * 2, new YoAppearanceRGBColor(copPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
       graphicsListRegistry.registerYoGraphic("GraphicPositions", comPositionGraphic);
@@ -294,7 +295,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          Graphics3DObject footstepGraphic = new Graphics3DObject();
          footstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, side == RobotSide.LEFT ? leftFootstepColor : rightFootstepColor);
-         YoFramePose footPose = new YoFramePose(side.getCamelCaseName() + "FootPose", worldFrame, registry);
+         YoFramePoseUsingYawPitchRoll footPose = new YoFramePoseUsingYawPitchRoll(side.getCamelCaseName() + "FootPose", worldFrame, registry);
          currentFootLocations.put(side, footPose);
          graphicsListRegistry.registerYoGraphic("currentFootPose", new YoGraphicShape(side.getCamelCaseName() + "FootViz", footstepGraphic, footPose, 1.0));
       }
@@ -307,7 +308,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          Graphics3DObject nextFootstepGraphic = new Graphics3DObject();
          nextFootstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, nextFootstepColor);
-         YoFramePose nextFootstepPose = new YoFramePose("NextFootstep" + i + "Pose", worldFrame, registry);
+         YoFramePoseUsingYawPitchRoll nextFootstepPose = new YoFramePoseUsingYawPitchRoll("NextFootstep" + i + "Pose", worldFrame, registry);
          nextFootstepPoses.add(nextFootstepPose);
          graphicsListRegistry.registerYoGraphic("UpcomingFootsteps",
                                                 new YoGraphicShape("NextFootstep" + i + "Viz", nextFootstepGraphic, nextFootstepPose, 1.0));
@@ -343,7 +344,7 @@ public class SmoothCMPBasedICPPlannerTest
          scs.closeAndDispose();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithoutAngularMomentum()
    {
@@ -352,7 +353,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithAngularMomentum()
    {
@@ -361,7 +362,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithoutAngularMomentum()
    {
@@ -370,7 +371,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(false, true, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {
@@ -400,6 +401,7 @@ public class SmoothCMPBasedICPPlannerTest
       this.planner.initializeParameters(plannerParameters);
       this.planner.setFinalTransferDuration(defaultFinalTransferTime);
       this.planner.setOmega0(omega);
+      this.planner.ensureContinuityEnteringEachTransfer(true);
    }
 
    // Variables for storing values 
@@ -474,10 +476,10 @@ public class SmoothCMPBasedICPPlannerTest
    private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
       List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getCoPWaypoints();
-      List<FramePoint3D> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
-      List<FramePoint3D> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
-      List<FramePoint3D> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
-      List<FramePoint3D> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
 
       if (!newTestStartConsistency)
       {
@@ -496,8 +498,8 @@ public class SmoothCMPBasedICPPlannerTest
       updateCoMsForConsistencyCheck(isDoubleSupport, comInitialCornerPointsFromPlanner, comFinalCornerPointsFromPlanner);
    }
 
-   private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<FramePoint3D> icpInitialCornerPointsFromPlanner,
-                                              List<FramePoint3D> icpFinalCornerPointsFromPlanner)
+   private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
+                                              List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner)
    {
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
       icpCornerPointsFromPreviousPlan.get(0).set(icpInitialCornerPointsFromPlanner.get(indexDifference));
@@ -507,8 +509,8 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void updateCoMsForConsistencyCheck(boolean isDoubleSupport, List<FramePoint3D> comInitialCornerPointsFromPlanner,
-                                              List<FramePoint3D> comFinalCornerPointsFromPlanner)
+   private void updateCoMsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
+                                              List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner)
    {
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
       comCornerPointsFromPreviousPlan.get(0).set(comInitialCornerPointsFromPlanner.get(indexDifference));
@@ -518,8 +520,8 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void testICPConsistency(int stepNumber, List<FramePoint3D> icpInitialCornerPointsFromPlanner, List<FramePoint3D> icpFinalCornerPointsFromPlanner,
-                                   int numberOfStepsToCheck)
+   private void testICPConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
+                                   List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
       assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + icpCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
             + icpInitialCornerPointsFromPlanner.get(0).toString(),
@@ -542,8 +544,8 @@ public class SmoothCMPBasedICPPlannerTest
                                                                     spatialEpsilonForPlanningConsistency));
    }
 
-   private void testCoMConsistency(int stepNumber, List<FramePoint3D> comInitialCornerPointsFromPlanner, List<FramePoint3D> comFinalCornerPointsFromPlanner,
-                                   int numberOfStepsToCheck)
+   private void testCoMConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
+                                   List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
       assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + comCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
             + comInitialCornerPointsFromPlanner.get(0).toString(),
@@ -696,7 +698,7 @@ public class SmoothCMPBasedICPPlannerTest
    {
       for (RobotSide side : RobotSide.values)
       {
-         YoFramePose footPose = currentFootLocations.get(side);
+         YoFramePoseUsingYawPitchRoll footPose = currentFootLocations.get(side);
          if (contactStates.get(side).inContact())
          {
             footPose.setFromReferenceFrame(feet.get(side).getSoleFrame());
@@ -708,7 +710,7 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   FrameConvexPolygon2d tempConvexPolygon = new FrameConvexPolygon2d();
+   FrameConvexPolygon2D tempConvexPolygon = new FrameConvexPolygon2D();
 
    private void updateNextFootsteps(int stepIndex)
    {
@@ -728,8 +730,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMCornerPoints()
    {
-      List<FramePoint3D> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
-      List<FramePoint3D> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
       comInitialCornerPoints.reset();
       for (int i = 0; i < comInitialDesiredPositions.size(); i++)
       {
@@ -744,8 +746,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateICPCornerPoints()
    {
-      List<FramePoint3D> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
-      List<FramePoint3D> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
       icpInitialCornerPoints.reset();
       for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
       {
@@ -770,8 +772,7 @@ public class SmoothCMPBasedICPPlannerTest
          CoPPointsInFoot copPoints = copCornerPointPositions.get(i);
          for (int j = 0; j < copPoints.getCoPPointList().size(); j++)
          {
-            copPoints.getWaypointInWorldFrameReadOnly(j).getFrameTuple(tempFramePoint1);
-            copCornerPoints.setBall(tempFramePoint1);
+            copCornerPoints.setBall(copPoints.getWaypointInWorldFrameReadOnly(j));
          }
       }
    }

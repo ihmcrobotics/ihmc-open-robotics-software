@@ -13,6 +13,11 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
@@ -25,25 +30,20 @@ import us.ihmc.avatar.ros.RosSCSLidarPublisher;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.avatar.ros.subscriber.RequestControllerStopSubscriber;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -249,8 +249,8 @@ public class ThePeoplesGloriousNetworkProcessor
          @Override
          public void receivedPacket(InvalidPacketNotificationPacket packet)
          {
-            System.err.println("Controller recieved invalid packet of type " + packet.packetClass);
-            System.err.println("Message: " + packet.errorMessage);
+            System.err.println("Controller recieved invalid packet of type " + packet.getPacketClassSimpleNameAsString());
+            System.err.println("Message: " + packet.getErrorMessageAsString());
          }
       });
 
@@ -259,8 +259,8 @@ public class ThePeoplesGloriousNetworkProcessor
          @Override
          public void receivedPacket(ControllerCrashNotificationPacket packet)
          {
-            System.err.println("Controller crashed at " + packet.location);
-            System.err.println("StackTrace: " + packet.stacktrace);
+            System.err.println("Controller crashed at " + packet.getControllerCrashLocation());
+            System.err.println("StackTrace: " + packet.getStacktraceAsString());
          }
       });
    }

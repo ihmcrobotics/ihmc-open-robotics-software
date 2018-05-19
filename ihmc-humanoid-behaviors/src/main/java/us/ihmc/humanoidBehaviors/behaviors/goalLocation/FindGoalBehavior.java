@@ -1,8 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,15 +13,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.time.YoStopwatch;
 
 public class FindGoalBehavior extends AbstractBehavior
 {
@@ -35,8 +37,8 @@ public class FindGoalBehavior extends AbstractBehavior
    private final YoDouble headPitchToFindFucdicial = new YoDouble(prefix + "HeadPitchToFindFucdicial", registry);
    private final YoDouble headPitchToCenterFucdicial = new YoDouble(prefix + "HeadPitchToCenterFucdicial", registry);
 
-   private final YoFramePoseUsingQuaternions foundFiducialYoFramePose;
-   private final FramePose foundFiducialPose = new FramePose();
+   private final YoFramePose3D foundFiducialYoFramePose;
+   private final FramePose3D foundFiducialPose = new FramePose3D();
 
    public FindGoalBehavior(YoDouble yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
                            GoalDetectorBehaviorService fiducialDetectorBehaviorService)
@@ -46,7 +48,7 @@ public class FindGoalBehavior extends AbstractBehavior
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
-      foundFiducialYoFramePose = new YoFramePoseUsingQuaternions(prefix + "FoundGoalPose", ReferenceFrame.getWorldFrame(), registry);
+      foundFiducialYoFramePose = new YoFramePose3D(prefix + "FoundGoalPose", ReferenceFrame.getWorldFrame(), registry);
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       addBehaviorService(fiducialDetectorBehaviorService);
 
@@ -68,8 +70,7 @@ public class FindGoalBehavior extends AbstractBehavior
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
          foundFiducialYoFramePose.set(foundFiducialPose);
          foundFiducial.set(true);
-         Point3D position = new Point3D();
-         foundFiducialPose.getPosition(position);
+         Point3D position = new Point3D(foundFiducialPose.getPosition());
          sendTextToSpeechPacket("Target object located at " + position);
       } else {
          sendTextToSpeechPacket("Target object not located");
@@ -85,20 +86,20 @@ public class FindGoalBehavior extends AbstractBehavior
 
    }
 
-   public void getFiducialPose(FramePose framePoseToPack)
+   public void getFiducialPose(FramePose3D framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(foundFiducialPose);
+      framePoseToPack.setIncludingFrame(foundFiducialPose);
    }
 
-   public void getGoalPose(FramePose framePoseToPack)
+   public void getGoalPose(FramePose3D framePoseToPack)
    {
       getFiducialPose(framePoseToPack);
    }
 
    private void sendTextToSpeechPacket(String message)
    {
-      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
-      textToSpeechPacket.setbeep(false);
+      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
+      textToSpeechPacket.setBeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 
@@ -125,12 +126,12 @@ public class FindGoalBehavior extends AbstractBehavior
    private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
-      headTrajectoryMessage.setDestination(PacketDestination.UI);
+      headTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(headTrajectoryMessage);
 
-      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
+      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(headTrajectoryMessage);
 
       headTrajectorySentTimer.reset();

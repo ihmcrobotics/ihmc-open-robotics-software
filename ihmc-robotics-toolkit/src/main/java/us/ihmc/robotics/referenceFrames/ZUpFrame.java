@@ -44,7 +44,7 @@ public class ZUpFrame extends ReferenceFrame
       euler.set(0.0, 0.0, yaw);
       transformToParent.setRotationEulerAndZeroTranslation(euler);
 
-      originPoint3d.set(origin.getPoint());
+      originPoint3d.set(origin);
       nonZUpToWorld.transform(originPoint3d);
       translation.set(originPoint3d);
       transformToParent.setTranslation(translation);

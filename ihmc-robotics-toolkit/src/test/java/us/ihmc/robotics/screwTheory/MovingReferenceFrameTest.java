@@ -5,12 +5,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class MovingReferenceFrameTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithPrismaticChainRobot() throws Exception
    {
@@ -44,6 +46,7 @@ public class MovingReferenceFrameTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithChainRobot() throws Exception
    {
@@ -77,6 +80,7 @@ public class MovingReferenceFrameTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithTreeRobot() throws Exception
    {

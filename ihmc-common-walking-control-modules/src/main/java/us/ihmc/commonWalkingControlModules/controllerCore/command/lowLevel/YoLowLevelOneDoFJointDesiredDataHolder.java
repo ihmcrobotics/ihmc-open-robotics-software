@@ -21,8 +21,12 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
 
    public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry)
    {
+      this("", controlledJoints, parentRegistry);
+   }
 
-      YoVariableRegistry registry = new YoVariableRegistry("LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
+   public YoLowLevelOneDoFJointDesiredDataHolder(String prefix, OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(prefix + "LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
       parentRegistry.addChild(registry);
 
       int capacity = controlledJoints.length;

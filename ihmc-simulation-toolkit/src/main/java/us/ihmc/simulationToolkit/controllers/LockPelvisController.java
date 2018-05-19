@@ -7,15 +7,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class LockPelvisController implements RobotController
 {
@@ -37,7 +38,7 @@ public class LockPelvisController implements RobotController
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel fullRobotModel, double desiredHeight)
+   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel, double desiredHeight)
    {
       this.robot = robot;
       robotMass = robot.computeCenterOfMass(new Point3D());
@@ -89,7 +90,7 @@ public class LockPelvisController implements RobotController
       robot.update();
       for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
       {
-         externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
+         initialPositions.get(i).set(externalForcePoints.get(i).getYoPosition());
          desiredHeight.add(initialPositions.get(i).getZ() / initialPositions.size());
          efp_positionViz.get(i).update();
       }
@@ -112,12 +113,12 @@ public class LockPelvisController implements RobotController
          initialPositions.get(i).setZ(desiredHeight.getDoubleValue());
 
          ExternalForcePoint efp = externalForcePoints.get(i);
-         efp.getYoPosition().get(proportionalTerm);
+         proportionalTerm.set(efp.getYoPosition());
          proportionalTerm.sub(initialPositions.get(i));
          proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
 //         proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
 
-         efp.getYoVelocity().get(derivativeTerm);
+         derivativeTerm.set(efp.getYoVelocity());
          derivativeTerm.scale(-holdPelvisKv.getDoubleValue());
 
          pdControlOutput.add(proportionalTerm, derivativeTerm);

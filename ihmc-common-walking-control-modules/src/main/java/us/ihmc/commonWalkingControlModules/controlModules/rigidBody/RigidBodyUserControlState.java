@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,7 +51,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       abortUserControlMode = new YoBoolean(prefix + "Abort", registry);
    }
 
-   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
+   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
       if (!hasWeights.getBooleanValue())
       {
@@ -76,7 +76,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       if (getTimeInTrajectory() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
       {
@@ -113,12 +113,12 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       abortUserControlMode.set(false);
    }
@@ -160,11 +160,4 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       // this control mode does not support command queuing
       return 0.0;
    }
-
-   @Override
-   public void clear()
-   {
-
-   }
-
 }

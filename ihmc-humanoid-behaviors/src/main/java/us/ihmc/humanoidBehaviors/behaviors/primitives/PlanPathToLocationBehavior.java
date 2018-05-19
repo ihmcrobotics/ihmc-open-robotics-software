@@ -1,10 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -13,13 +18,10 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
@@ -27,10 +29,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final boolean DEBUG = false;
    private boolean planningSuccess = false;
    private PipeLine pipeLine = new PipeLine();
-   private FramePose goalPose = null;
+   private FramePose3D goalPose = null;
    private double timeout = 5.0;
    private final SleepBehavior sleepBehavior;
-   private final FramePose initialStanceFootPose = new FramePose();
+   private final FramePose3D initialStanceFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
@@ -47,7 +49,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
 
-   public void setInputs(FramePose goalPose, FramePose initialStanceFootPose, RobotSide initialStanceSide)
+   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
       this.goalPose = goalPose;
       this.initialStanceSide = initialStanceSide;
@@ -82,10 +84,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               TextToSpeechPacket p1 = new TextToSpeechPacket("Telling Planner To Wake Up");
+               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Telling Planner To Wake Up");
                sendPacket(p1);
             }
-            ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+            ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
             sendPackageToPlanner(wakeUp);
 
          }
@@ -98,10 +100,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               TextToSpeechPacket p1 = new TextToSpeechPacket("Requesting Plan");
+               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Requesting Plan");
                sendPacket(p1);
             }
-            FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose);
+            FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose);
             sendPackageToPlanner(request);
          }
       };
@@ -112,7 +114,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             
-               TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For Plan");
+               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Waiting For Plan");
                sendPacket(p1);
            
             sleepBehavior.setSleepTime(timeout);
@@ -134,11 +136,11 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             if (footPlanStatusQueue.isNewPacketAvailable())
             {
                footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
-               if (footstepPlanningToolboxOutputStatus.planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION
-                     || footstepPlanningToolboxOutputStatus.planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
+               if (footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
+                     || footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
                {
                   planningSuccess = true;
-                  footstepDataListMessage = footstepPlanningToolboxOutputStatus.footstepDataList;
+                  footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
                else
                   planningSuccess = false;
@@ -152,13 +154,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             {
                if (DEBUG)
                {
-                  TextToSpeechPacket p1 = new TextToSpeechPacket("Processing Plan");
+                  TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Processing Plan");
                   sendPacket(p1);
                }
             }
             else if (DEBUG)
             {
-               TextToSpeechPacket p1 = new TextToSpeechPacket("Plan Failed");
+               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Plan Failed");
                sendPacket(p1);
             }
 
@@ -176,7 +178,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private void sendPackageToPlanner(Packet<?> packet)
    {
-      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
       communicationBridge.sendPacket(packet);
    }
 

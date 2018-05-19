@@ -44,7 +44,7 @@ public class SphericalLinearResolutionProvider implements ResolutionProvider
 
       centerInWorldTemp.setIncludingFrame(center);
       centerInWorldTemp.changeFrame(worldFrame);
-      centerInWorldTemp.getPoint().get(tempCenter);
+      centerInWorldTemp.get(tempCenter);
 
       for (int i = 0; i < location.length; i++)
       {

@@ -10,6 +10,7 @@ import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -83,7 +84,7 @@ public class ConcaveHullDecomposition
          // The concave hull is actually convex, end of recursion
          if (ConcaveHullTools.isHullConvex(concaveHullVertices))
          {
-            convexPolygonsToPack.add(new ConvexPolygon2D(concaveHullVertices));
+            convexPolygonsToPack.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices)));
             return;
          }
 

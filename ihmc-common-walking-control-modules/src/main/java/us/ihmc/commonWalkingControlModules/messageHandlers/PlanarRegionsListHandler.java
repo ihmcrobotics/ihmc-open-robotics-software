@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -24,20 +25,22 @@ public class PlanarRegionsListHandler
    private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
 
    private final StatusMessageOutputManager statusOutputManager;
-   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
+   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
 
    public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = requestOutputManager;
 
       planarRegions.clear();
-      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER);
+      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
 
       parentRegistry.addChild(registry);
    }
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
    {
+      planarRegions.clear();
+
       for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
       {
          planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
@@ -54,6 +57,11 @@ public class PlanarRegionsListHandler
       waitingOnNewPlanarRegions.set(true);
    }
 
+   public boolean hasNewPlanarRegions()
+   {
+      return hasNewPlanarRegionsList.getBooleanValue();
+   }
+
    public boolean pollHasNewPlanarRegionsList(PlanarRegionsList planarRegionsListToPack)
    {
       if (!hasNewPlanarRegionsList.getBooleanValue())
@@ -67,5 +75,11 @@ public class PlanarRegionsListHandler
       planarRegions.clear();
 
       return true;
+   }
+
+   public RecyclingArrayList<PlanarRegion> pollHasNewPlanarRegionsList()
+   {
+      hasNewPlanarRegionsList.set(false);
+      return planarRegions;
    }
 }

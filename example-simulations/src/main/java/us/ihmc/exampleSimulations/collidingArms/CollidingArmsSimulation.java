@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 
 public class CollidingArmsSimulation
 {
@@ -116,13 +116,11 @@ public class CollidingArmsSimulation
       PinJoint shoulderTwo = (PinJoint) armTwo.getRootJoints().get(0).getChildrenJoints().get(0);
       shoulderTwo.setInitialState(-0.1, 0.0);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, scs, 1000);
-      //      DefaultCollisionVisualizer collisionVisualizer = null;
-
       double coefficientOfRestitution = 0.3;
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
 
       scs.setDT(dt, 1);
       scs.setFastSimulate(true);
