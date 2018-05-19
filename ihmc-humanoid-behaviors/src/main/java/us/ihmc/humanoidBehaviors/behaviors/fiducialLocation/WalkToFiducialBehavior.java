@@ -1,17 +1,19 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WalkToFiducialBehavior extends AbstractBehavior
 {
@@ -19,7 +21,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    private final YoBoolean recievedPlan = new YoBoolean("RecievedPlan", registry);
    private final YoBoolean planValid = new YoBoolean("PlanValid", registry);
 
-   private final FramePose goalPose = new FramePose();
+   private final FramePose3D goalPose = new FramePose3D();
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);
 
    private final FootstepPlannerType plannerToUse = FootstepPlannerType.PLANAR_REGION_BIPEDAL;
@@ -35,20 +37,19 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    {
       if (!sentPlanningRequest.getBooleanValue())
       {
-         FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-         request.set(new FramePose(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
-         request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
+         request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
          sendPacket(request);
       }
 
       if (!recievedPlan.getBooleanValue() && footstepPlanQueue.isNewPacketAvailable())
       {
          FootstepPlanningToolboxOutputStatus latestPacket = footstepPlanQueue.getLatestPacket();
-         planValid.set(latestPacket.planningResult.validForExecution());
+         planValid.set(FootstepPlanningResult.fromByte(latestPacket.getFootstepPlanningResult()).validForExecution());
 
          if (planValid.getBooleanValue())
          {
-            FootstepDataListMessage footstepDataList = latestPacket.footstepDataList;
+            FootstepDataListMessage footstepDataList = latestPacket.getFootstepDataList();
             sendPacketToUI(footstepDataList);
          }
 
@@ -71,7 +72,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       planValid.set(false);
    }
 
-   public void setGoalPose(FramePose goalPose)
+   public void setGoalPose(FramePose3D goalPose)
    {
       goalPose.setIncludingFrame(goalPose);
    }

@@ -2,12 +2,13 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class SimpleFootstepMask implements InclusionFunction<Point3D>
@@ -15,7 +16,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
    private final static boolean DEBUG = false;
    private ReferenceFrame yawFrame2d;
    private double safetyBuffer;
-   private FrameConvexPolygon2d footPolygon;
+   private FrameConvexPolygon2D footPolygon;
 
    public SimpleFootstepMask(ReferenceFrame yawFrame2D, ContactablePlaneBody foot, double footKernelMaskSafetyBuffer)
    {
@@ -27,7 +28,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
          contactPoints.add(new FramePoint2D(yawFrame2D, inflate(point.getX()), inflate(point.getY())));
       }
 
-      footPolygon = new FrameConvexPolygon2d(contactPoints);
+      footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactPoints));
       if (DEBUG)
          System.out.println("SimpleFootstepMask: footPolygon is \n" + footPolygon + " \nand yawFrame2d = \n"
                             + yawFrame2d.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));

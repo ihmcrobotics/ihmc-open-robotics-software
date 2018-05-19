@@ -13,8 +13,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -32,7 +34,8 @@ public class PlanarRegionToolsTest
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
 
-   @Test(timeout = 10000)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testTruncatePlanarRegionIfIntersectingWithPlane() throws Exception
    {
       Point3D groundOrigin = new Point3D();
@@ -47,7 +50,7 @@ public class PlanarRegionToolsTest
 
       Point2D[] concaveHullVertices = {new Point2D(0.0, 0.0), new Point2D(0.0, squareSide), new Point2D(squareSide, squareSide), new Point2D(squareSide, 0.0)};
       List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
-      convexPolygons.add(new ConvexPolygon2D(concaveHullVertices));
+      convexPolygons.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices)));
       PlanarRegion verticalSquare = new PlanarRegion(squarePose, concaveHullVertices, convexPolygons);
 
       Point3D[] expectedVerticesInWorld = Arrays.stream(concaveHullVertices).map(p -> toWorld(p, squarePose)).toArray(Point3D[]::new);
@@ -74,7 +77,8 @@ public class PlanarRegionToolsTest
       return inWorld;
    }
 
-   @Test(timeout = 10000)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    public void testIsInsidePolygon() throws Exception
    {
       Random random = new Random(324534L);
@@ -111,7 +115,8 @@ public class PlanarRegionToolsTest
       }
    }
 
-   @Test(timeout = 10000)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testIsInsidePolygonBug1() throws Exception
    {
       Point2D[] polygon = {new Point2D(-0.3, 0.5), new Point2D(0.3, 0.5), new Point2D(0.3, -0.5), new Point2D(-0.3, -0.5)};

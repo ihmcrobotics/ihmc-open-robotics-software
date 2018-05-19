@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -39,24 +39,24 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.setTrajectoryTime(duration);
    }
 
-   public void setInitialConditions(YoFramePoint initialPosition, YoFrameVector initialVelocity, ReferenceFrame attachedFrame)
+   public void setInitialConditions(YoFramePoint3D initialPosition, YoFrameVector3D initialVelocity, ReferenceFrame attachedFrame)
    {
-      initialPosition.getFrameTupleIncludingFrame(initialPositionInSpecificFrame);
-      initialVelocity.getFrameTupleIncludingFrame(initialVelocityInSpecificFrame);
+      initialPositionInSpecificFrame.setIncludingFrame(initialPosition);
+      initialVelocityInSpecificFrame.setIncludingFrame(initialVelocity);
       initialPositionInSpecificFrame.changeFrame(attachedFrame);
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void setInitialCoMPosition(YoFramePoint initialCoMPosition, ReferenceFrame attachedFrame)
+   public void setInitialCoMPosition(YoFramePoint3D initialCoMPosition, ReferenceFrame attachedFrame)
    {
-      initialCoMPosition.getFrameTupleIncludingFrame(initialCoMPositionInSpecificFrame);
+      initialCoMPositionInSpecificFrame.setIncludingFrame(initialCoMPosition);
       initialCoMPositionInSpecificFrame.changeFrame(attachedFrame);
    }
    
-   public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity, ReferenceFrame attachedFrame)
+   public void setFinalConditions(YoFramePoint3D finalPosition, YoFrameVector3D finalVelocity, ReferenceFrame attachedFrame)
    {
-      finalPosition.getFrameTupleIncludingFrame(finalPositionInSpecificFrame);
-      finalVelocity.getFrameTupleIncludingFrame(finalVelocityInSpecificFrame);
+      finalPositionInSpecificFrame.setIncludingFrame(finalPosition);
+      finalVelocityInSpecificFrame.setIncludingFrame(finalVelocity);
       finalPositionInSpecificFrame.changeFrame(attachedFrame);
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
@@ -113,7 +113,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getPosition(positionToPack);
    }
 
-   public void get(YoFramePoint positionToPack)
+   public void get(YoFramePoint3D positionToPack)
    {
       doubleSupportCapturePointTrajectory.get(positionToPack);
    }
@@ -125,7 +125,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
@@ -136,7 +136,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
 
-   public void getAcceleration(YoFrameVector accelerationToPack)
+   public void getAcceleration(YoFrameVector3D accelerationToPack)
    {
       doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
@@ -147,12 +147,12 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
    {
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
-   public void getCoMPosition(YoFramePoint positionToPack)
+   public void getCoMPosition(YoFramePoint3D positionToPack)
    {
       positionToPack.set(desiredCoMPosition);
    }

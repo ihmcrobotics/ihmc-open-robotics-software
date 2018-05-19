@@ -12,14 +12,16 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
@@ -32,7 +34,7 @@ public class FrameEuclideanTrajectoryPointTest
    public void testCommonUsageExample()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
+      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
 
       FramePoint3D poseFramePosition = new FramePoint3D(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
@@ -123,8 +125,8 @@ public class FrameEuclideanTrajectoryPointTest
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
-      expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition.getPoint());
-      expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
+      expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition);
+      expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
 
       testedFrameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(expectedFinalFrame, expectedEuclideanTrajectoryPoint);
 
@@ -165,7 +167,7 @@ public class FrameEuclideanTrajectoryPointTest
       expectedPosition = EuclidFrameRandomTools.nextFramePoint3D(random, expectedFrame, 10.0, 10.0, 10.0);
       expectedLinearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFrame);
 
-      testedFrameEuclideanTrajectoryPoint.set(expectedTime, expectedPosition.getPoint(), expectedLinearVelocity.getVector());
+      testedFrameEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity, testedFrameEuclideanTrajectoryPoint, epsilon);
 
@@ -207,8 +209,8 @@ public class FrameEuclideanTrajectoryPointTest
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
-      expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition.getPoint());
-      expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
+      expectedEuclideanTrajectoryPoint.setPosition(expectedFinalPosition);
+      expectedEuclideanTrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
 
       testedFrameEuclideanTrajectoryPoint.setIncludingFrame(expectedFinalFrame, expectedEuclideanTrajectoryPoint);
 
@@ -308,8 +310,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(testedFrameEuclideanTrajectoryPoint.containsNaN());
    }
 
-   static void assertTrajectoryPointContainsExpectedData(ReferenceFrame expectedFrame, double expectedTime, FramePoint3D expectedPosition,
-         FrameVector3D expectedLinearVelocity, FrameEuclideanTrajectoryPoint testedFrameEuclideanTrajectoryPoint, double epsilon)
+   static void assertTrajectoryPointContainsExpectedData(ReferenceFrame expectedFrame, double expectedTime, FramePoint3DReadOnly expectedPosition,
+         FrameVector3DReadOnly expectedLinearVelocity, FrameEuclideanTrajectoryPoint testedFrameEuclideanTrajectoryPoint, double epsilon)
    {
       assertTrue(expectedFrame == testedFrameEuclideanTrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameEuclideanTrajectoryPoint.getTime(), epsilon);
@@ -370,8 +372,8 @@ public class FrameEuclideanTrajectoryPointTest
       FrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocityForVerification);
 
       assertEquals(time, FrameEuclideanTrajectoryPoint.getTime(), 1e-10);
-      assertTrue(pointForVerification.getPoint().epsilonEquals(position, 1e-10));
-      assertTrue(linearVelocityForVerification.getVector().epsilonEquals(linearVelocity, 1e-10));
+      assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
+      assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
 
       // Check NaN calls:
       assertFalse(FrameEuclideanTrajectoryPoint.containsNaN());
@@ -396,8 +398,8 @@ public class FrameEuclideanTrajectoryPointTest
       linearVelocityForVerification.set(8.8, 1.4, 9.22);
 
       assertFalse(Math.abs(FrameEuclideanTrajectoryPoint.getTime() - time) < 1e-7);
-      assertFalse(pointForVerification.getPoint().epsilonEquals(position, 1e-7));
-      assertFalse(linearVelocityForVerification.getVector().epsilonEquals(linearVelocity, 1e-7));
+      assertFalse(pointForVerification.epsilonEquals(position, 1e-7));
+      assertFalse(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-7));
 
       FrameEuclideanTrajectoryPoint.set(time, pointForVerification, linearVelocityForVerification);
 
@@ -405,8 +407,8 @@ public class FrameEuclideanTrajectoryPointTest
       FrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
 
       assertEquals(time, FrameEuclideanTrajectoryPoint.getTime(), 1e-10);
-      assertTrue(pointForVerification.getPoint().epsilonEquals(position, 1e-10));
-      assertTrue(linearVelocityForVerification.getVector().epsilonEquals(linearVelocity, 1e-10));
+      assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
+      assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
 
       FrameEuclideanTrajectoryPoint FrameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(worldFrame);
 
@@ -453,7 +455,7 @@ public class FrameEuclideanTrajectoryPointTest
       frameEuclideanTrajectoryPoint.setPosition(position);
       frameEuclideanTrajectoryPoint.setLinearVelocity(linearVelocity);
 
-      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
+      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
 
       FramePoint3D poseFramePosition = new FramePoint3D(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);

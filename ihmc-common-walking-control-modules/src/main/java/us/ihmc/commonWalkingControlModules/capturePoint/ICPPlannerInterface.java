@@ -7,10 +7,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public interface ICPPlannerInterface
 {
@@ -221,7 +221,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   void getDesiredCapturePointPosition(YoFramePoint desiredCapturePointPositionToPack);
+   void getDesiredCapturePointPosition(YoFramePoint3D desiredCapturePointPositionToPack);
 
    /**
     * Gets the current CoM position.
@@ -243,7 +243,7 @@ public interface ICPPlannerInterface
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack);
+   void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -276,7 +276,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack);
+   void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack);
 
    /**
     * Gets the current ICP acceleration.
@@ -332,6 +332,50 @@ public interface ICPPlannerInterface
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
    void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack);
+
+   /**
+    * Gets the current CoP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressurePositionToPack the current CoP position. Modified.
+    */
+   void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack);
+
+   /**
+    * Gets the current CoP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressurePositionToPack the current CoP position. Modified.
+    */
+   void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack);
+
+   /**
+    * Gets the current CoP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressureVelocityToPack the current CoP velocity. Modified.
+    */
+   void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack);
+
+   /**
+    * Gets the current CoP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressureVelocityToPack the current CoP velocity. Modified.
+    */
+   void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack);
 
    /**
     * Gets the time relative to the beginning of the current state.
@@ -451,7 +495,7 @@ public interface ICPPlannerInterface
     * 
     * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack);
+   void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack);
 
    /**
     * Retrieves the desired CoM position at the end of the current step.

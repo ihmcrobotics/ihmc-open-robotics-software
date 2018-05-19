@@ -1,7 +1,7 @@
 package us.ihmc.ihmcPerception.time;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {

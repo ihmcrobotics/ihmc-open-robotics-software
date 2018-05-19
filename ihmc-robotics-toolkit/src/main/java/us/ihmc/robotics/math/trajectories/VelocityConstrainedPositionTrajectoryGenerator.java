@@ -8,15 +8,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -26,15 +26,15 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
 
-   private final YoFramePoint initialPosition;
-   private final YoFrameVector initialVelocity;
+   private final YoFramePoint3D initialPosition;
+   private final YoFrameVector3D initialVelocity;
 
-   private final YoFramePoint finalPosition;
-   private final YoFrameVector finalVelocity;
+   private final YoFramePoint3D finalPosition;
+   private final YoFrameVector3D finalVelocity;
 
-   private final YoFramePoint currentPosition;
-   private final YoFrameVector currentVelocity;
-   private final YoFrameVector currentAcceleration;
+   private final YoFramePoint3D currentPosition;
+   private final YoFrameVector3D currentVelocity;
+   private final YoFrameVector3D currentAcceleration;
 
    public VelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -78,15 +78,15 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       }
       else
       {
-         initialPosition = new YoFramePoint(initialPositionName, referenceFrame, registry);
-         initialVelocity = new YoFrameVector(initialVelocityName, referenceFrame, registry);
+         initialPosition = new YoFramePoint3D(initialPositionName, referenceFrame, registry);
+         initialVelocity = new YoFrameVector3D(initialVelocityName, referenceFrame, registry);
 
-         finalPosition = new YoFramePoint(finalPositionName, referenceFrame, registry);
-         finalVelocity = new YoFrameVector(finalVelocityName, referenceFrame, registry);
+         finalPosition = new YoFramePoint3D(finalPositionName, referenceFrame, registry);
+         finalVelocity = new YoFrameVector3D(finalVelocityName, referenceFrame, registry);
 
-         currentPosition = new YoFramePoint(currentPositionName, referenceFrame, registry);
-         currentVelocity = new YoFrameVector(currentVelocityName, referenceFrame, registry);
-         currentAcceleration = new YoFrameVector(currentAccelerationName, referenceFrame, registry);
+         currentPosition = new YoFramePoint3D(currentPositionName, referenceFrame, registry);
+         currentVelocity = new YoFrameVector3D(currentVelocityName, referenceFrame, registry);
+         currentAcceleration = new YoFrameVector3D(currentAccelerationName, referenceFrame, registry);
       }
 
       currentTime = new YoDouble(name + "CurrentTime", registry);
@@ -106,38 +106,38 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
-      this.initialVelocity.setAndMatchFrame(initialVelocity);
+      this.initialPosition.setMatchingFrame(initialPosition);
+      this.initialVelocity.setMatchingFrame(initialVelocity);
    }
 
-   public void setInitialConditions(YoFramePoint initialPosition, YoFrameVector initialVelocity)
+   public void setInitialConditions(YoFramePoint3D initialPosition, YoFrameVector3D initialVelocity)
    {
       this.initialPosition.set(initialPosition);
       this.initialVelocity.set(initialVelocity);
    }
 
-   public void setInitialConditions(YoFramePoint initialPosition, FrameVector3D initialVelocity)
+   public void setInitialConditions(YoFramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.set(initialPosition);
-      this.initialVelocity.setAndMatchFrame(initialVelocity);
+      this.initialVelocity.setMatchingFrame(initialVelocity);
    }
 
    public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
-   public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity)
+   public void setFinalConditions(YoFramePoint3D finalPosition, YoFrameVector3D finalVelocity)
    {
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setFinalConditions(YoFramePoint finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(YoFramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.set(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
    public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, FrameVector3D initialVelocity, FramePoint3D finalPosition, FrameVector3D finalVelocity)
@@ -279,54 +279,54 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
-   public void get(YoFramePoint positionToPack)
+   public void get(YoFramePoint3D positionToPack)
    {
       positionToPack.set(currentPosition);
    }
 
-   public void getProjectedOntoXYPlane(YoFramePoint2d positionToPack)
+   public void getProjectedOntoXYPlane(YoFramePoint2D positionToPack)
    {
       positionToPack.set(currentPosition.getX(), currentPosition.getY());
    }
 
    public void get(Point3D positionToPack)
    {
-      currentPosition.get(positionToPack);
+      positionToPack.set(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
-   public void getVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector3D velocityToPack)
    {
       velocityToPack.set(currentVelocity);
    }
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      currentVelocity.get(velocityToPack);
+      velocityToPack.set(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
-   public void getAcceleration(YoFrameVector accelerationToPack)
+   public void getAcceleration(YoFrameVector3D accelerationToPack)
    {
       accelerationToPack.set(currentAcceleration);
    }
 
    public void getAcceleration(Vector3D accelerationToPack)
    {
-      currentAcceleration.get(accelerationToPack);
+      accelerationToPack.set(currentAcceleration);
    }
 
    @Override
@@ -337,7 +337,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint3D positionToPack, YoFrameVector3D velocityToPack, YoFrameVector3D accelerationToPack)
    {
       positionToPack.set(currentPosition);
       velocityToPack.set(currentVelocity);
@@ -346,25 +346,25 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getFinalPosition(FramePoint3D finalPosition)
    {
-      this.finalPosition.getFrameTuple(finalPosition);
+      finalPosition.set(this.finalPosition);
    }
 
-   public YoFramePoint getFinalPosition()
+   public YoFramePoint3D getFinalPosition()
    {
       return finalPosition;
    }
 
-   public YoFramePoint getInitialPosition()
+   public YoFramePoint3D getInitialPosition()
    {
       return initialPosition;
    }
 
-   public YoFrameVector getInitialVelocity()
+   public YoFrameVector3D getInitialVelocity()
    {
       return initialVelocity;
    }
 
-   public YoFrameVector getFinalVelocity()
+   public YoFrameVector3D getFinalVelocity()
    {
       return finalVelocity;
    }

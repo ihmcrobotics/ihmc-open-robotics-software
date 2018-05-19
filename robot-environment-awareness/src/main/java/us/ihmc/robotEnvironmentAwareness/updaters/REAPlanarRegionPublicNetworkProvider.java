@@ -5,12 +5,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 
 public class REAPlanarRegionPublicNetworkProvider
 {
@@ -42,7 +42,7 @@ public class REAPlanarRegionPublicNetworkProvider
          for (PacketDestination packetDestination : listenersForContinuousUpdate)
          {
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-            planarRegionsListMessage.setDestination(packetDestination);
+            planarRegionsListMessage.setDestination(packetDestination.ordinal());
             publicPacketCommunicator.send(planarRegionsListMessage);
          }
       }
@@ -50,7 +50,7 @@ public class REAPlanarRegionPublicNetworkProvider
       for (PacketDestination packetDestination : listenersForSingleUpdate)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-         planarRegionsListMessage.setDestination(packetDestination);
+         planarRegionsListMessage.setDestination(packetDestination.ordinal());
          publicPacketCommunicator.send(planarRegionsListMessage);
       }
 
@@ -63,7 +63,7 @@ public class REAPlanarRegionPublicNetworkProvider
       {
          RequestPlanarRegionsListMessage request = requestsToProcess.poll();
          PacketDestination source = PacketDestination.fromOrdinal(request.getSource());
-         RequestType requestType = request.getRequestType();
+         PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(request.getPlanarRegionsRequestType());
          switch (requestType)
          {
          case CONTINUOUS_UPDATE:

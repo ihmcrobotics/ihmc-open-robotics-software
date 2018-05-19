@@ -57,7 +57,7 @@ public class PointJacobianTest
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
       FrameVector3D pointVelocityFromJacobian = new FrameVector3D(pointJacobian.getFrame());
-      pointVelocityFromJacobian.getVector().set(pointVelocityFromJacobianMatrix);
+      pointVelocityFromJacobian.set(pointVelocityFromJacobianMatrix);
 
       FramePoint3D point2 = new FramePoint3D(point);
       point2.changeFrame(endEffector.getBodyFixedFrame());

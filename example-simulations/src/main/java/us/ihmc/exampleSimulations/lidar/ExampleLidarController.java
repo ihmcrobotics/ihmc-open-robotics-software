@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.lidar;
 
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -10,15 +11,14 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
-import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class ExampleLidarController implements RobotController
 {
@@ -27,13 +27,13 @@ public class ExampleLidarController implements RobotController
    private final SimulationConstructionSet scs;
    private final LidarScanParameters lidarScanParameters;
    private GPULidar gpuLidar;
-   private GPULidarScanBuffer gpuLidarScanBuffer;
+   private LinkedBlockingQueue<LidarScan> gpuLidarScanBuffer = new LinkedBlockingQueue<>();
    private YoDouble tauLidarZ;
    private YoDouble tauLidarX;
    private YoDouble qLidarZ;
    private YoDouble qLidarX;
 
-   private final YoFramePoint point = new YoFramePoint("point", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D point = new YoFramePoint3D("point", ReferenceFrame.getWorldFrame(), registry);
    private final BagOfBalls bagOfBalls;
 
    private PDController pdControllerZ;
@@ -83,9 +83,12 @@ public class ExampleLidarController implements RobotController
 
    private void startGPULidar()
    {
-      gpuLidar = scs.getGraphics3dAdapter().createGPULidar(lidarScanParameters);
-      gpuLidarScanBuffer = new GPULidarScanBuffer(lidarScanParameters);
-      gpuLidar.addGPULidarListener(gpuLidarScanBuffer);
+      gpuLidar = scs.getGraphics3dAdapter().createGPULidar(lidarScanParameters.getPointsPerSweep(), lidarScanParameters.getScanHeight(),
+                                                           lidarScanParameters.getFieldOfView(), lidarScanParameters.getMinRange(),
+                                                           lidarScanParameters.getMaxRange());
+      gpuLidar.addGPULidarListener((scan, currentTransform,
+                                    time) -> gpuLidarScanBuffer.add(new LidarScan(lidarScanParameters, new RigidBodyTransform(currentTransform),
+                                                                                  new RigidBodyTransform(currentTransform), scan)));
    }
 
    public YoVariableRegistry getYoVariableRegistry()

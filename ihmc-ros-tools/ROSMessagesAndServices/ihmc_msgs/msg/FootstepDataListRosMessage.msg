@@ -14,7 +14,7 @@ ihmc_msgs/FootstepDataRosMessage[] footstep_data_list
 # and touchdown and attempt to start a footstep  at that time. If a footstep touches down early, the
 # following transfer will be extended to make up for this  time difference and the footstep plan will
 # finish at the expected time.
-uint8 execution_timing
+int8 execution_timing
 
 # The swingDuration is the time a foot is not in ground contact during a step. Each step in a list of
 # footsteps might have a different swing duration. The value specified here is a default value, used
@@ -30,21 +30,17 @@ float64 default_transfer_duration
 # list is finished. If the value is negative the defaultTransferDuration will be used.
 float64 final_transfer_duration
 
-# When OVERRIDE is chosen:  - The time of the first trajectory point can be zero, in which case the
-# controller will start directly at the first trajectory point. Otherwise the controller will prepend
-# a first trajectory point at the current desired position.  When QUEUE is chosen:  - The message must
-# carry the ID of the message it should be queued to.  - The very first message of a list of queued
-# messages has to be an OVERRIDE message.  - The trajectory point times are relative to the the last
-# trajectory point time of the previous message.  - The controller will queue the joint trajectory
-# messages as a per joint basis. The first trajectory point has to be greater than zero.
-uint8 execution_mode
+# If false the controller adjust each footstep height to be at the support sole height.
+bool trust_height_of_footsteps
 
-# Only needed when using QUEUE mode, it refers to the message Id to which this message should be
-# queued to. It is used by the controller to ensure that no message has been lost on the way. If a
-# message appears to be missing (previousMessageId different from the last message ID received by the
-# controller), the motion is aborted. If previousMessageId == 0, the controller will not check for the
-# ID of the last received message.
-int64 previous_message_id
+# Contains information on whether the robot can automatically adjust its footsteps to retain balance.
+bool are_footsteps_adjustable
+
+# If true the controller will adjust upcoming footsteps with the location error of previous steps.
+bool offset_footsteps_with_execution_error
+
+# Properties for queueing footstep lists.
+ihmc_msgs/QueueableRosMessage queueing_properties
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use
@@ -52,14 +48,4 @@ int64 previous_message_id
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
-
-# This message utilizes "enums". Enum value information for this message follows.
-
-# "execution_mode" enum values:
-uint8 OVERRIDE=0 # This message will override the previous.
-uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
-
-# "execution_timing" enum values:
-uint8 CONTROL_DURATIONS=0 # During the execution of this message the controller will attempt to achieve the given durations for segments of the whole trajectory.
-uint8 CONTROL_ABSOLUTE_TIMINGS=1 # During the execution of this message the controller will attempt to achieve the absolute timings at the knot points relative to the start of execution.
 

@@ -1,14 +1,17 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class VisibilityGraphsDataExporterAnchorPaneController
@@ -16,16 +19,26 @@ public class VisibilityGraphsDataExporterAnchorPaneController
    private final DirectoryChooser directoryChooser = new DirectoryChooser();
    private final File defaultDataFolder;
    private Window ownerWindow;
-   private SimpleUIMessager messager;
+   private JavaFXMessager messager;
 
    @FXML
    private TextField currentPlanarRegionDataFolderTextField;
 
    public VisibilityGraphsDataExporterAnchorPaneController()
    {
-      File file = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
-      if (!file.exists())
-         file = new File(".");
+      File file = new File(".");
+
+      try
+      {
+         URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
+         file = new File(testDataFolderURL.toURI());
+      }
+      catch(URISyntaxException e)
+      {
+         PrintTools.error("Could not load test data folder with URL: " + VisibilityGraphsIOTools.TEST_DATA_URL);
+         e.printStackTrace();
+      }
+
       defaultDataFolder = file;
    }
 
@@ -34,7 +47,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
       this.ownerWindow = ownerWindow;
    }
 
-   public void attachMessager(SimpleUIMessager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
       currentPlanarRegionDataFolderTextField.setText(defaultDataFolder.getAbsolutePath());

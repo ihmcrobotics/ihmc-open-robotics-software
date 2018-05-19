@@ -1,29 +1,25 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
-   private final Vector3D tempVector = new Vector3D();
-   private final Quaternion tempQuaternion = new Quaternion();
-   private final YoFrameVector translationToParent;
+   private final YoFrameVector3D translationToParent;
    private final YoFrameQuaternion rotationToParent;
 
    /**
     * Creates a new reference frame with a mutable offset to its parent frame.
     * <p>
-    * The offset to the parent frame is backed by a {@link YoFrameVector} and a
+    * The offset to the parent frame is backed by a {@link YoFrameVector3D} and a
     * {@link YoFrameQuaternion} internally.
     * </p>
     * 
@@ -35,7 +31,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    {
       super(frameName, parentFrame);
 
-      translationToParent = new YoFrameVector(frameName, parentFrame, registry);
+      translationToParent = new YoFrameVector3D(frameName, parentFrame, registry);
       rotationToParent = new YoFrameQuaternion(frameName, parentFrame, registry);
    }
 
@@ -50,7 +46,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParentToTranslationOnly(FrameTuple3D<?, ?> translationToParent)
+   public void setOffsetToParentToTranslationOnly(FrameTuple3DReadOnly translationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.setToZero();
@@ -67,7 +63,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParent(FrameTuple3D<?, ?> translationToParent, FrameQuaternion rotationToParent)
+   public void setOffsetToParent(FrameTuple3DReadOnly translationToParent, FrameQuaternionReadOnly rotationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.set(rotationToParent);
@@ -86,9 +82,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      translationToParent.get(tempVector);
-      rotationToParent.get(tempQuaternion);
-      transformToParent.set(tempQuaternion, tempVector);
+      transformToParent.set(rotationToParent, translationToParent);
    }
 
    @Override

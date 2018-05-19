@@ -18,14 +18,14 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasDrivingInitialSetupTest
 {
    private static final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    
-	@ContinuousIntegrationTest(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testLoadFile()
    {

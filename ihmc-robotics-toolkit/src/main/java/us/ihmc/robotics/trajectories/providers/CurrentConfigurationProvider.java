@@ -1,9 +1,9 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class CurrentConfigurationProvider implements SE3ConfigurationProvider
 {
@@ -26,7 +26,7 @@ public class CurrentConfigurationProvider implements SE3ConfigurationProvider
       orientationToPack.setToZero(endEffectorFrame);
    }
 
-   public void getPose(FramePose lastFootstepPose)
+   public void getPose(FramePose3D lastFootstepPose)
    {
       lastFootstepPose.setToZero(endEffectorFrame);
    }

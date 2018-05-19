@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.Straight
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -53,7 +53,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       this.minimumWalkingStepWidth.set(translationalPathType.getMinimumStepWidth());
    }
 
-   protected void initialize(FramePose2d startPose)
+   protected void initialize(FramePose2D startPose)
    {
       this.footstepPath = new StraightLineOverheadPath(startPose, endPoint);
    }
@@ -74,11 +74,9 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 
       double totalDistance = footstepPath.getDistance();
 
-      FramePose2d poseAtS0 = footstepPath.getPoseAtS(0);
-      FramePoint2D position = new FramePoint2D();
-      poseAtS0.getPositionIncludingFrame(position);
-      FramePoint2D position2 = new FramePoint2D();
-      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position2);
+      FramePose2D poseAtS0 = footstepPath.getPoseAtS(0);
+      FramePoint2D position = new FramePoint2D(poseAtS0.getPosition());
+      FramePoint2D position2 = new FramePoint2D(footstepPath.getPoseAtS(1).getPosition());
       position2.sub(position);
       double pathAngle = Math.atan2(position2.getY(), position2.getX());
       double yaw = poseAtS0.getYaw();
@@ -193,8 +191,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 
       // Do two square up steps
       //    stepWidth = nominalStepWidth;//Changing to nominal at end can cause overstep if stepWidth is smaller than stepWidth for the rest of the path.
-      FramePoint2D position3 = new FramePoint2D();
-      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position3);
+      FramePoint2D position3 = new FramePoint2D(footstepPath.getPoseAtS(1).getPosition());
       addFootstep(ret, position3, stepWidth, yaw);
       addFootstep(ret, position3, stepWidth, yaw);
    }
@@ -242,7 +239,8 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    {
       double footHeading = yaw;
       FramePoint2D footstepPosition = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
-      FramePose2d footstepPose2d = new FramePose2d(WORLD_FRAME, footstepPosition.getPoint(), yaw);
+      footstepPosition.checkReferenceFrameMatch(WORLD_FRAME);
+      FramePose2D footstepPose2d = new FramePose2D(WORLD_FRAME, footstepPosition, yaw);
 
       return createFootstep(currentFootstepSide, footstepPose2d);
    }

@@ -2,15 +2,18 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class FootstepDataMessageConverter
 {
@@ -28,14 +31,12 @@ public class FootstepDataMessageConverter
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-         FramePose footstepPose = new FramePose();
+         FramePose3D footstepPose = new FramePose3D();
          footstep.getSoleFramePose(footstepPose);
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         footstepPose.getPosition(location);
-         footstepPose.getOrientation(orientation);
+         Point3D location = new Point3D(footstepPose.getPosition());
+         Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), location, orientation);
 
          if (footstep.hasFoothold())
          {
@@ -48,13 +49,12 @@ public class FootstepDataMessageConverter
             ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
-            footstepData.setPredictedContactPoints(contactPoints);
+            HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
-         footstepDataListMessage.add(footstepData);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepData);
       }
 
-      footstepDataListMessage.setExecutionMode(executionMode);
       return footstepDataListMessage;
    }
    
@@ -64,14 +64,12 @@ public class FootstepDataMessageConverter
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-         FramePose footstepPose = new FramePose();
+         FramePose3D footstepPose = new FramePose3D();
          footstep.getSoleFramePose(footstepPose);
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         footstepPose.getPosition(location);
-         footstepPose.getOrientation(orientation);
+         Point3D location = new Point3D(footstepPose.getPosition());
+         Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), location, orientation);
 
          if (footstep.hasFoothold())
          {
@@ -84,10 +82,10 @@ public class FootstepDataMessageConverter
             ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
-            footstepData.setPredictedContactPoints(contactPoints);
+            HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
-         footstepDataListMessage.add(footstepData);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepData);
       }
    }
 }

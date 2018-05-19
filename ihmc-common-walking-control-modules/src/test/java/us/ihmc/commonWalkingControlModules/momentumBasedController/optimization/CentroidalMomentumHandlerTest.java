@@ -52,7 +52,7 @@ public class CentroidalMomentumHandlerTest
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);
          expectedCenterOfMassVelocity.changeFrame(worldFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedCenterOfMassVelocity.getVector(), actualCenterOfMassVelocity.getVector(), 1.0e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(expectedCenterOfMassVelocity, actualCenterOfMassVelocity, 1.0e-12);
       }
    }
 
@@ -85,7 +85,7 @@ public class CentroidalMomentumHandlerTest
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);
          expectedCenterOfMassVelocity.changeFrame(worldFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedCenterOfMassVelocity.getVector(), actualCenterOfMassVelocity.getVector(), 1.0e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(expectedCenterOfMassVelocity, actualCenterOfMassVelocity, 1.0e-12);
       }
    }
 

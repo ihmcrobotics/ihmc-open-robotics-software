@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -17,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 {
    protected final YoVariableRegistry registry;
-   private YoFramePoint yoFramePointInWorld;
+   private YoFramePoint3D yoFramePointInWorld;
 
    public CoPTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame[] referenceFrames)
    {
@@ -33,12 +34,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       putYoValuesIntoFrameWaypoint();
    }
 
-   public FrameTuple3D getFrameTuple()
-   {
-      return yoFramePointInWorld.getFrameTuple();
-   }
-
-   public boolean epsilonEquals(FramePoint2D point, double threshold)
+   public boolean epsilonEquals(FramePoint2DReadOnly point, double threshold)
    {
       getPosition().checkReferenceFrameMatch(point);
       if (!MathTools.epsilonEquals(getPosition().getX(), point.getX(), threshold))
@@ -57,13 +53,13 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       return "Time: " + getTime() + " Location: " + getPosition().toString();
    }
 
-   public YoFramePoint buildUpdatedYoFramePointForVisualizationOnly()
+   public YoFramePoint3D buildUpdatedYoFramePointForVisualizationOnly()
    {
       if(yoFramePointInWorld == null)
       {
          if (!isReferenceFrameRegistered(ReferenceFrame.getWorldFrame()))
             registerReferenceFrame(ReferenceFrame.getWorldFrame());
-         yoFramePointInWorld = new YoFramePoint(super.getNamePrefix() + "Viz", getReferenceFrame(), registry);
+         yoFramePointInWorld = new YoFramePoint3D(super.getNamePrefix() + "Viz", getReferenceFrame(), registry);
          getPosition().attachVariableChangedListener(new VariableChangedListener()
          {
             private final FramePoint3D localFramePoint = new FramePoint3D();
@@ -71,8 +67,8 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getPosition().getFrameTupleIncludingFrame(localFramePoint);
-               yoFramePointInWorld.setAndMatchFrame(localFramePoint);
+               localFramePoint.setIncludingFrame(getPosition());
+               yoFramePointInWorld.setMatchingFrame(localFramePoint);
             }
          });
          

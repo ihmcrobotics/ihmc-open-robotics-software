@@ -22,12 +22,10 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -35,15 +33,18 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DiagnosticsWhenHangingControllerState extends HighLevelControllerState implements RobotController, JointTorqueOffsetEstimator
 {
@@ -51,22 +52,22 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    private JointTorqueOffsetProcessor jointTorqueOffsetProcessor;
 
-   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+   private final ArrayList<Updatable> updatables = new ArrayList<>();
 
    private FullHumanoidRobotModel fullRobotModel;
-   private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
+   private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<>();
 
-   private final LinkedHashMap<OneDoFJoint, PDController> pdControllers = new LinkedHashMap<OneDoFJoint, PDController>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> initialPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> finalPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory> transitionSplines = new LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory>();
+   private final LinkedHashMap<OneDoFJoint, PDController> pdControllers = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> initialPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> finalPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoMinimumJerkTrajectory> transitionSplines = new LinkedHashMap<>();
 
    private final YoBoolean manualMode = new YoBoolean("diagnosticsWhenHangingManualMode", registry);
-   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
-   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredVelocities = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> desiredVelocities = new LinkedHashMap<>();
 
-   private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
-   private final LinkedHashMap<OneDoFJoint, Double> torqueOffsetSigns = new LinkedHashMap<OneDoFJoint, Double>();
+   private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, Double> torqueOffsetSigns = new LinkedHashMap<>();
 
    private YoDouble yoTime;
 
@@ -86,18 +87,18 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final YoBoolean printTorqueOffsets = new YoBoolean("printTorqueOffsets", registry);
    private final YoBoolean transferTorqueOffsets = new YoBoolean("transferTorqueOffsets", registry);
 
-   private StateMachine<DiagnosticsWhenHangingState> stateMachine;
+   private final StateMachine<DiagnosticsWhenHangingState, State> stateMachine;
 
    private final boolean useArms;
 
    private final YoBoolean updateFootForceSensorOffsets = new YoBoolean("updateFootForceSensorOffsets", registry);
    private final YoBoolean printForceSensorsOffsets = new YoBoolean("printForceSensorsOffsets", registry);
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   private final SideDependentList<YoFrameVector> footForcesRaw = new SideDependentList<YoFrameVector>();
-   private final SideDependentList<YoFrameVector> footTorquesRaw = new SideDependentList<YoFrameVector>();
+   private final SideDependentList<YoFrameVector3D> footForcesRaw = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector3D> footTorquesRaw = new SideDependentList<>();
    private final YoDouble alphaFootForce = new YoDouble("alphaDiagFootForce", registry);
-   private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
-   private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<AlphaFilteredYoFrameVector>();
+   private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<>();
+   private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<>();
 
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
@@ -110,14 +111,14 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    public DiagnosticsWhenHangingControllerState(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
-                                                HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                                TorqueOffsetPrinter torqueOffsetPrinter)
+                                                HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
-      this.footContactStates = controllerToolbox.getFootContactStates();
+      bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
+      footContactStates = controllerToolbox.getFootContactStates();
       this.controllerToolbox = controllerToolbox;
       humanoidJointPoseList.setParentRegistry(registry);
 
@@ -137,8 +138,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       adaptTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
 
-      this.yoTime = controllerToolbox.getYoTime();
-      this.fullRobotModel = controllerToolbox.getFullRobotModel();
+      yoTime = controllerToolbox.getYoTime();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
       OneDoFJoint[] jointArray = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
@@ -174,38 +175,17 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       createHelpers(robotIsHanging);
       setTransitionSplines();
 
-      stateMachine = new StateMachine<DiagnosticsWhenHangingState>("DiagnosticsState", "DiagnosticsSwitchTime", DiagnosticsWhenHangingState.class, yoTime,
-            registry);
+      StateMachineFactory<DiagnosticsWhenHangingState, State> factory = new StateMachineFactory<>(DiagnosticsWhenHangingState.class);
+      factory.setNamePrefix("DiagnosticState").setRegistry(registry).buildYoClock(yoTime);
 
-      InitializeState initializeState = new InitializeState(DiagnosticsWhenHangingState.INITIALIZE);
-      initializeState.setDefaultNextState(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
-      stateMachine.addState(initializeState);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.INITIALIZE, new InitializeState(), DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS, new SplineBetweenPositionsState(), DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS, new CheckDiagnosticsState(), DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
 
-      SplineBetweenPositionsState splineBetweenPositionsState = new SplineBetweenPositionsState(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
-      splineBetweenPositionsState.setDefaultNextState(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
-      stateMachine.addState(splineBetweenPositionsState);
-
-      CheckDiagnosticsState checkDiagnosticsState = new CheckDiagnosticsState(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
-      checkDiagnosticsState.setDefaultNextState(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
-
-      StateTransitionCondition finishedTransitionCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return finishedDiagnostics.getBooleanValue();
-         }
-      };
-
-      StateTransition<DiagnosticsWhenHangingState> transitionToFinished = new StateTransition<DiagnosticsWhenHangingState>(DiagnosticsWhenHangingState.FINISHED,
-                                                                                                                           finishedTransitionCondition);
-      checkDiagnosticsState.addStateTransition(transitionToFinished);
-
-      stateMachine.addState(checkDiagnosticsState);
-
-      FinishedState finishedState = new FinishedState(DiagnosticsWhenHangingState.FINISHED);
-      finishedState.setDefaultNextState(DiagnosticsWhenHangingState.INITIALIZE);
-      stateMachine.addState(finishedState);
+      StateTransitionCondition finishedTransitionCondition = timeInState -> finishedDiagnostics.getBooleanValue();
+      factory.addTransition(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS, DiagnosticsWhenHangingState.FINISHED, finishedTransitionCondition);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.FINISHED, new FinishedState(), DiagnosticsWhenHangingState.INITIALIZE);
+      stateMachine = factory.build(DiagnosticsWhenHangingState.INITIALIZE);
 
       // Foot force sensors tarring stuff
       footSwitches = controllerToolbox.getFootSwitches();
@@ -217,18 +197,19 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          ReferenceFrame footSensorFrame = footSwitches.get(robotSide).getMeasurementFrame();
 
-         YoFrameVector footForceRaw = new YoFrameVector(sidePrefix + "DiagFootForceRaw", footSensorFrame, registry);
+         YoFrameVector3D footForceRaw = new YoFrameVector3D(sidePrefix + "DiagFootForceRaw", footSensorFrame, registry);
          footForcesRaw.put(robotSide, footForceRaw);
 
-         YoFrameVector footTorqueRaw = new YoFrameVector(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
+         YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
          AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
-               registry, alphaFootForce, footForceRaw);
+                                                                                                                       registry, alphaFootForce, footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
          AlphaFilteredYoFrameVector footTorqueRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
-               "", registry, alphaFootForce, footTorqueRaw);
+                                                                                                                        "", registry, alphaFootForce,
+                                                                                                                        footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);
       }
    }
@@ -287,7 +268,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       updatePDControllers();
       if (updateFootForceSensorOffsets.getBooleanValue())
          updateFootSensorRawMeasurement();
-      stateMachine.checkTransitionConditions();
+      stateMachine.doTransitions();
 
       if (transferTorqueOffsets.getBooleanValue())
       {
@@ -392,7 +373,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    {
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         updatePDController(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
+         updatePDController(oneDoFJoints.get(i), stateMachine.getTimeInCurrentState());
       }
    }
 
@@ -436,58 +417,49 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
    }
 
-   private class InitializeState extends State<DiagnosticsWhenHangingState>
+   private class InitializeState implements State
    {
-      public InitializeState(DiagnosticsWhenHangingState stateEnum)
-      {
-         super(stateEnum);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         if (startDiagnostics.getBooleanValue())
-            this.transitionToDefaultNextState();
-
          for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            updateTrajectory(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
+            updateTrajectory(oneDoFJoints.get(i), timeInState);
          }
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          humanoidJointPoseList.reset();
          finishedDiagnostics.set(false);
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          //       startDiagnostics.set(false);
       }
-   }
-
-   private class SplineBetweenPositionsState extends State<DiagnosticsWhenHangingState>
-   {
-      public SplineBetweenPositionsState(DiagnosticsWhenHangingState stateEnum)
-      {
-         super(stateEnum);
-      }
 
       @Override
-      public void doAction()
+      public boolean isDone(double timeInState)
+      {
+         return startDiagnostics.getBooleanValue();
+      }
+   }
+
+   private class SplineBetweenPositionsState implements State
+   {
+      @Override
+      public void doAction(double timeInState)
       {
          for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            updateTrajectory(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
+            updateTrajectory(oneDoFJoints.get(i), timeInState);
          }
 
          if (pauseDiagnostics.getBooleanValue())
             return;
-         if (splinesAreFinished(stateMachine.timeInCurrentState()))
-            this.transitionToDefaultNextState();
       }
 
       private boolean splinesAreFinished(double timeInCurrentState)
@@ -503,7 +475,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          copyFinalDesiredPositionsToInitialDesired();
          setDesiredPositionsFromPoseList(finalPositions);
@@ -511,69 +483,70 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          humanoidJointPoseList.next();
       }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return splinesAreFinished(timeInState);
+      }
    }
 
-   private class CheckDiagnosticsState extends State<DiagnosticsWhenHangingState>
+   private class CheckDiagnosticsState implements State
    {
-      public CheckDiagnosticsState(DiagnosticsWhenHangingState stateEnum)
-      {
-         super(stateEnum);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         if (stateMachine.timeInCurrentState() > 1.0)
+         if (timeInState > 1.0)
          {
-            if (!humanoidJointPoseList.isDone())
-               this.transitionToDefaultNextState();
-            else
+            if (humanoidJointPoseList.isDone())
                finishedDiagnostics.set(true);
          }
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return timeInState > 1.0 && !humanoidJointPoseList.isDone();
+      }
    }
 
-   private class FinishedState extends State<DiagnosticsWhenHangingState>
+   private class FinishedState implements State
    {
-      public FinishedState(DiagnosticsWhenHangingState stateEnum)
+      @Override
+      public void doAction(double timeInState)
       {
-         super(stateEnum);
       }
 
       @Override
-      public void doAction()
-      {
-         if ((stateMachine.timeInCurrentState() > 5.0) && startDiagnostics.getBooleanValue())
-            this.transitionToDefaultNextState();
-      }
-
-      @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          zeroAllTorques();
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return timeInState > 5.0 && startDiagnostics.getBooleanValue();
+      }
    }
 
    private void updatePDController(OneDoFJoint oneDoFJoint, double timeInCurrentState)
@@ -680,7 +653,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          makeArmJointHelper(RobotSide.RIGHT, -1.0, true, ArmJointName.ELBOW_PITCH);
       }
 
-      SideDependentList<InverseDynamicsJoint> topLegJoints = new SideDependentList<InverseDynamicsJoint>();
+      SideDependentList<InverseDynamicsJoint> topLegJoints = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
@@ -742,7 +715,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       double ankleRollTorqueOffset = helpers.get(ankleRoll).getTorqueOffset();
       double ankleRollTorqueOffsetSign = torqueOffsetSigns.get(ankleRoll);
 
-      return new double[] { anklePitchTorqueOffset * anklePitchTorqueOffsetSign, ankleRollTorqueOffset * ankleRollTorqueOffsetSign };
+      return new double[] {anklePitchTorqueOffset * anklePitchTorqueOffsetSign, ankleRollTorqueOffset * ankleRollTorqueOffsetSign};
    }
 
    public double[] getWaistTorqueOffsets()
@@ -756,12 +729,12 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       double waistRollTorqueOffset = helpers.get(waistRoll).getTorqueOffset();
       double waistRollTorqueOffsetSign = torqueOffsetSigns.get(waistRoll);
 
-      return new double[] { waistPitchTorqueOffset * waistPitchTorqueOffsetSign, waistRollTorqueOffset * waistRollTorqueOffsetSign };
+      return new double[] {waistPitchTorqueOffset * waistPitchTorqueOffsetSign, waistRollTorqueOffset * waistRollTorqueOffsetSign};
    }
 
    public ArrayList<YoDouble> getTorqueOffsetVariables()
    {
-      ArrayList<YoDouble> torqueOffsetVariables = new ArrayList<YoDouble>();
+      ArrayList<YoDouble> torqueOffsetVariables = new ArrayList<>();
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -846,7 +819,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    public void addUpdatable(Updatable updatable)
    {
-      this.updatables.add(updatable);
+      updatables.add(updatable);
    }
 
    public void addUpdatables(ArrayList<Updatable> updatables)
@@ -855,19 +828,19 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       doControl();
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       initialize();
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 

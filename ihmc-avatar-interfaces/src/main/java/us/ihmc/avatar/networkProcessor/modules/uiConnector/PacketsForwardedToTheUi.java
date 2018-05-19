@@ -2,57 +2,50 @@ package us.ihmc.avatar.networkProcessor.modules.uiConnector;
 
 import java.util.HashMap;
 
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.StereoVisionPointCloudMessage;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.UIPositionCheckerPacket;
-import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.BDIBehaviorStatusPacket;
+import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import controller_msgs.msg.dds.BehaviorStatusPacket;
+import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.DetectedObjectPacket;
+import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.DrillDetectionPacket;
+import controller_msgs.msg.dds.FisheyePacket;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.HeightQuadTreeMessage;
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LocalizationPointMapPacket;
+import controller_msgs.msg.dds.ManipulationAbortedStatus;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PointCloudWorldPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.SnapFootstepPacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.ValveLocationPacket;
+import controller_msgs.msg.dds.VideoPacket;
+import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 
 public class PacketsForwardedToTheUi
 {
@@ -60,13 +53,11 @@ public class PacketsForwardedToTheUi
    public static final long UI_WRIST_FEET_SENSORS_UPDATE_MILLIS = 500l;
    public static final long UI_MULTISENSE_IMU_CHECK_MILLIS=5000l;
 
-   public static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
-      FootstepStatus.class,
-      ScriptBehaviorStatusPacket.class,
+   public final static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
+      FootstepStatusMessage.class,
       PelvisPoseErrorPacket.class,
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,
-      ControlStatusPacket.class,
       FootstepDataListMessage.class,
       PelvisHeightTrajectoryMessage.class,
       HeadTrajectoryMessage.class,
@@ -78,27 +69,23 @@ public class PacketsForwardedToTheUi
       VideoPacket.class,
       HandTrajectoryMessage.class,
       ArmTrajectoryMessage.class,
-      HandRotateAboutAxisPacket.class,
-      DepthDataClearCommand.class,
       ValveLocationPacket.class,
       BehaviorStatusPacket.class,
       DoorLocationPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
       WholeBodyTrajectoryMessage.class,
-      JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
       DetectedObjectPacket.class,
-      MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
       SimpleCoactiveBehaviorDataPacket.class,
-//      HandPoseStatus.class,
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,
       ManipulationAbortedStatus.class,
       KinematicsToolboxOutputStatus.class,
+      WholeBodyTrajectoryToolboxOutputStatus.class,
       FootstepPlanningToolboxOutputStatus.class,
       TextToSpeechPacket.class,
       UIPositionCheckerPacket.class,
@@ -116,8 +103,6 @@ public class PacketsForwardedToTheUi
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
-      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HeadPosePacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
-      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RawIMUPacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
    }
 
 

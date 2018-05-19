@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -57,6 +58,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       unitSquare.update();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIdentity()
    {
@@ -69,6 +71,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testVerticalTranslation()
    {
@@ -82,6 +85,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleRotation()
    {
@@ -95,6 +99,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleTranslationAndRotation()
    {
@@ -109,6 +114,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimplePartialFoothold()
    {
@@ -140,6 +146,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(), transformToWorld);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomFullFootholds()
    {
@@ -166,7 +173,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
       ConvexPolygon2D footholdPolygon = new ConvexPolygon2D(unitSquare);
-      footholdPolygon.applyTransformAndProjectToXYPlane(nodeTransform);
+      footholdPolygon.applyTransform(nodeTransform, false);
 
       PlanarRegion planarRegion = createPlanarRegion(regionToWorldFrameTransform, footholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);

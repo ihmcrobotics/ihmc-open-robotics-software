@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
@@ -58,7 +58,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
       waypoints.add(firstIntermediatePosition);
       waypoints.add(secondIntermediatePosition);
 
-      YoFramePoint finalPosition = new YoFramePoint("", worldFrame, new YoVariableRegistry(""));
+      YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoVariableRegistry(""));
       finalPosition.set(new FramePoint3D(worldFrame, new double[] {0.2, 2.35, 0.03}));
       YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
       VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.1, 0.01, -0.02}));

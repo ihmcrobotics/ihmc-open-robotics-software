@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+
 /**
  * Parameters to tune the ICP Optimization based controller for each robot.
  * The ICP Optimization based controller encodes the ICP plan based on the upcoming footsteps, and can either do control
@@ -7,13 +9,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
  */
 public abstract class ICPOptimizationParameters
 {
-   /**
-    * How many footsteps the optimization considers for adjustment.
-    * 1 footstep seems to be good.
-    * With a penalization on the dynamics themselves, future steps show little effect on the current dynamics.
-    */
-   public abstract int numberOfFootstepsToConsider();
-
    /**
     * Specifies a scaling factor on the amount of footstep adjustment. By increasing this past 1.0, the footstep will be adjusted more than explicitly necessary.
     */
@@ -38,7 +33,7 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes in the footstep location solution between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFootstepRegularizationWeight();
+   public abstract double getFootstepRateWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
@@ -58,18 +53,29 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes feedback CMP between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFeedbackRegularizationWeight();
+   public abstract double getFeedbackRateWeight();
 
    /**
-    * Feedback gain for ICP error parallel to the desired ICP dynamics.
+    * Gains for the proportional ICP controller that is encoded into the optimization. Also includes gains for the smart
+    * integrator that is used when the controller is stuck.
     */
-   public abstract double getFeedbackParallelGain();
+   public abstract ICPControlGainsReadOnly getICPFeedbackGains();
 
    /**
-    * Feedback gain for ICP error orthogonal to the desired ICP dynamics.
-    * When the desired ICP dynamics are zero, this is the gain that is used for all directions.
+    * Sets whether the integration gains returned by {@link #getICPFeedbackGains()} is used to perform a smart integration when the robot is stuck.
     */
-   public abstract double getFeedbackOrthogonalGain();
+   public boolean useSmartICPIntegrator()
+   {
+      return false;
+   }
+
+   /**
+    * Sets the maximum ICP velocity for it to be considered "stuck".
+    */
+   public double getICPVelocityThresholdForStuck()
+   {
+      return 0.01;
+   }
 
    /**
     * Weight on the slack variable introduced for the ICP dynamics.
@@ -77,7 +83,6 @@ public abstract class ICPOptimizationParameters
     * and the step lengths to be constrained when allowing step adjustment.
     */
    public abstract double getDynamicsObjectiveWeight();
-
 
    /**
     * Modifier to reduce the dynamic relaxation penalization when in double support.
@@ -92,10 +97,10 @@ public abstract class ICPOptimizationParameters
    public abstract double getAngularMomentumMinimizationWeight();
 
    /**
-    * Enabling this boolean causes the {@link #getFootstepRegularizationWeight()} to be increased when approaching the end of the step.
+    * Enabling this boolean causes the {@link #getFootstepRateWeight()} to be increased when approaching the end of the step.
     * This acts as a way to cause the solution to "lock in" near the step end.
     */
-   public abstract boolean scaleStepRegularizationWeightWithTime();
+   public abstract boolean scaleStepRateWeightWithTime();
 
    /**
     * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be decreased
@@ -105,14 +110,22 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleFeedbackWeightWithGain();
 
    /**
-    * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
+    * Enabling this boolean enables the use of feedback rate, found in {@link #getFeedbackRateWeight()}.
     */
-   public abstract boolean useFeedbackRegularization();
+   public abstract boolean useFeedbackRate();
 
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
     */
-   public abstract boolean useStepAdjustment();
+   public abstract boolean allowStepAdjustment();
+
+   /**
+    * Enabling this boolean allows modifying the CMP offset from the CoP in the optimization.
+    */
+   public boolean useCMPFeedback()
+   {
+      return true;
+   }
 
    /**
     * Enabling this boolean allows the CMP to exit the support polygon.
@@ -121,9 +134,9 @@ public abstract class ICPOptimizationParameters
    public abstract boolean useAngularMomentum();
 
    /**
-    * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
+    * Enabling this boolean enables the use of step adjustment rate, found in {@link #getFootstepRateWeight()}.
     */
-   public abstract boolean useFootstepRegularization();
+   public abstract boolean useFootstepRate();
 
    /**
     * The minimum value to allow the footstep weight {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be set to.
@@ -152,7 +165,7 @@ public abstract class ICPOptimizationParameters
 
    /**
     * This method sets what the minimum change in the current footstep is allowed to be.
-    * Works in tandem with the footstep regularization parameter.
+    * Works in tandem with the footstep rate parameter.
     */
    public double getFootstepSolutionResolution()
    {
@@ -168,44 +181,11 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * @return The maximum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityOuterLimit()
-   {
-      return 0.5;
-   }
-
-   /**
-    * @return The minimum lateral limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getLateralReachabilityInnerLimit()
-   {
-      return 0.1;
-   }
-
-   /**
-    * @return The forward limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getForwardReachabilityLimit()
-   {
-      return 0.5;
-   }
-
-   /**
     * @return The backward limit that the swing foot can reach w.r.t. the stance foot.
     */
    public double getBackwardReachabilityLimit()
    {
       return -0.3;
-   }
-
-   /**
-    * Sets whether or not to use a warm start in the active set solver. This exploits that the active set doesn't change often.
-    * @return Whether or not to use a warm start in the solver
-    */
-   public boolean useWarmStartInSolver()
-   {
-      return false;
    }
 
    /**
@@ -221,7 +201,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean getLimitReachabilityFromAdjustment()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -261,13 +241,29 @@ public abstract class ICPOptimizationParameters
     */
    public boolean considerAngularMomentumInAdjustment()
    {
-      return true;
+      return false;
    }
 
    /**
     * Sets whether or not to account for the used CoP feedback when computing the amount of step adjustment.
     */
    public boolean considerFeedbackInAdjustment()
+   {
+      return true;
+   }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will consider planar regions.
+    */
+   public boolean usePlanarRegionConstraints()
+   {
+      return false;
+   }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
+    */
+   public boolean switchPlanarRegionConstraintsAutomatically()
    {
       return true;
    }

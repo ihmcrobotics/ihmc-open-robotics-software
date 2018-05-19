@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Modifies the derivative gain matrix to reduce the amount of derivative action along the main line of action for the feedback controller when there
@@ -43,7 +43,7 @@ public class EuclideanTangentialDampingCalculator
          {
             positionError.changeFrame(bodyFrame);
 
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError.getVector(), rotationToControlFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError, rotationToControlFrame);
 
             transformToParent.setRotationAndZeroTranslation(rotationToControlFrame);
          }
@@ -58,9 +58,9 @@ public class EuclideanTangentialDampingCalculator
     * @param positionError current position error being used by the feedback control
     * @param derivativeGainsToPack derivative gain matrix to use with less damping in the main direction of motion
     */
-   public void compute(YoFrameVector positionError, Matrix3D derivativeGainsToPack)
+   public void compute(YoFrameVector3D positionError, Matrix3D derivativeGainsToPack)
    {
-      this.positionError.setIncludingFrame(positionError.getFrameTuple());
+      this.positionError.setIncludingFrame(positionError);
 
       if (positionError.length() > tangentialDampingGains.getParallelDampingDeadband())
       {

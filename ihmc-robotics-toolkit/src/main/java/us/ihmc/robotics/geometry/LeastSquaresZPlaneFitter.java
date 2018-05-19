@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 /**
  * Created by agrabertilton on 11/13/14.
@@ -57,9 +58,11 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       return true;
    }
 
-   public double fitPlaneToPoints(Point2DBasics center, List<Point3D> pointList, Plane3D planeToPack)
+   public double fitPlaneToPoints(Point2DBasics center, List<? extends Point3DReadOnly> pointList, Plane3D planeToPack)
    {
       double squareError = fitPlaneToPoints(pointList, planeToPack);
+      if (planeToPack.containsNaN())
+         return Double.POSITIVE_INFINITY;
 
       double centerZ = planeToPack.getZOnPlane(center.getX(), center.getY());
       Point3D planePoint = new Point3D(center.getX(), center.getY(), centerZ);
@@ -68,7 +71,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    }
    
    @Override
-   public double fitPlaneToPoints(List<Point3D> pointList, Plane3D planeToPack)
+   public double fitPlaneToPoints(List<? extends Point3DReadOnly> pointList, Plane3D planeToPack)
    {
       // Given plane equation Ax+By+z +C = 0
       // find coefficients of plane that best fits the points using least squared in the z direction
@@ -93,7 +96,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
 
       for (int i = 0; i < pointList.size(); i++)
       {
-         Point3D point3d = pointList.get(i);
+         Point3DReadOnly point3d = pointList.get(i);
          n++;
          x += point3d.getX();
          y += point3d.getY();

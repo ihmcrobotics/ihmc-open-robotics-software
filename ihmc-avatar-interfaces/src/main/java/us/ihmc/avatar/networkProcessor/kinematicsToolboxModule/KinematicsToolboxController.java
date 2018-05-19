@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -25,8 +28,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessage;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -45,7 +47,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -231,7 +232,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
-      inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
+      inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
       gains.setProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
@@ -426,10 +427,11 @@ public class KinematicsToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
+      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints, false);
+      inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+
       if (tickCount++ == numberOfTicksToSendSolution)
       { // Packing and sending the solution every N control ticks, with N = numberOfTicksToSendSolution.
-         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
-         inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
          reportMessage(inverseKinematicsSolution);
          tickCount = 0;
       }
@@ -562,7 +564,7 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
 
-   void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }

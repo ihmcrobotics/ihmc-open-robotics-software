@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
+import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
@@ -41,6 +42,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -69,8 +71,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -92,7 +94,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
    private static final double ESTIMATOR_DT = Conversions.nanosecondsToSeconds(ESTIMATOR_DT_IN_NS);
-   private static final double CONTROL_DT = 0.004;    // 0.006;
+   private static final double CONTROL_DT = 0.004; // 0.006;
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
@@ -110,30 +112,45 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
+   private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
+
+   private boolean useShapeCollision = false;
 
    private final RobotDescription robotDescription;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
    {
-      this(atlasVersion, target, headless, null, false);
+      this(atlasVersion, target, headless, null, false, false);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
    {
-      this(atlasVersion, target, headless, null, createAdditionalContactPoints);
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints,
+                          boolean useShapeCollision)
+   {
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
-      this(atlasVersion, target, headless, simulationContactPoints, false);
+      this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
-         boolean createAdditionalContactPoints)
+                          boolean createAdditionalContactPointsn)
+   {
+      this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+                          boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
       {
-         atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
+         atlasPhysicalProperties = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
       }
       else
       {
@@ -145,7 +162,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean createFootContactPoints = true;
       contactPointParameters = new AtlasContactPointParameters(jointMap, atlasVersion, createFootContactPoints, simulationContactPoints,
-            createAdditionalContactPoints);
+                                                               createAdditionalContactPoints);
 
       this.target = target;
 
@@ -170,19 +187,38 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
+      collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
 
+      this.useShapeCollision = useShapeCollision;
       robotDescription = createRobotDescription();
    }
 
    private RobotDescription createRobotDescription()
    {
-      boolean useCollisionMeshes = true;
+      boolean useCollisionMeshes = false;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
-            useCollisionMeshes);
+      RobotDescription robotDescription;
+      if (useShapeCollision)
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useShapeCollision);
+         collisionMeshDefinitionDataHolder.setVisible(false);
+
+         robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
+      }
+      else
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+      }
+
       return robotDescription;
+   }
+
+   @Override
+   public boolean useShapeCollision()
+   {
+      return useShapeCollision;
    }
 
    @Override
@@ -228,7 +264,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
-      return selectedVersion.getOffsetFromAttachmentPlate(side);
+      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
+      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
+      return jmeAttachmentPlateToPalm;
    }
 
    @Override
@@ -273,7 +311,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FullHumanoidRobotModel createFullRobotModel()
    {
       RobotDescription robotDescription = loader.createRobotDescription(getJointMap(), getContactPointParameters());
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription, getJointMap(), sensorInformation.getSensorFramesToTrack());
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription, getJointMap(),
+                                                                                        sensorInformation.getSensorFramesToTrack());
       for (RobotSide robotSide : RobotSide.values())
       {
          ArmJointName[] armJointNames = new ArmJointName[] {ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};
@@ -294,14 +333,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                double safeLowerBound = lowerLimit + HARDSTOP_RESTRICTION_ANGLE;
                double safeUpperBound = upperLimit - HARDSTOP_RESTRICTION_ANGLE;
 
-
                armJoint.setJointLimitLower(safeLowerBound);
                armJoint.setJointLimitUpper(safeUpperBound);
             }
             else
             {
                System.out.println(this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side="
-                                  + robotSide.getLowerCaseName() + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
+                     + robotSide.getLowerCaseName() + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
             }
          }
       }
@@ -313,7 +351,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping,
+                                                                                                         enableTorqueVelocityLimits);
       return humanoidFloatingRootJointRobot;
    }
 
@@ -359,8 +398,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-                                         target);
+      return new AtlasSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(),
+                                         getPhysicalProperties(), target);
    }
 
    @Override
@@ -376,16 +415,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
-           HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
+                                                                         ThreadDataSynchronizerInterface threadDataSynchronizer,
+                                                                         HumanoidGlobalDataProducer globalDataProducer,
+                                                                         CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       switch (selectedVersion.getHandModel())
       {
-         case ROBOTIQ :
-            return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer, closeableAndDisposableRegistry);
+      case ROBOTIQ:
+         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer, closeableAndDisposableRegistry);
 
-         default :
-            return null;
+      default:
+         return null;
       }
    }
 
@@ -407,11 +448,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       switch (target)
       {
-      case REAL_ROBOT :
-            return LogSettings.ATLAS_IAN;
-      case GAZEBO :
+      case REAL_ROBOT:
+         return LogSettings.ATLAS_IAN;
+      case GAZEBO:
       case SCS:
-      default :
+      default:
          return LogSettings.SIMULATION;
       }
    }
@@ -438,7 +479,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
@@ -447,21 +488,21 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
          List<SDFVisual> visuals = linkHolder.getVisuals();
-         if(visuals != null)
+         if (visuals != null)
          {
             for (SDFVisual sdfVisual : visuals)
             {
                SDFGeometry geometry = sdfVisual.getGeometry();
-               if(geometry != null)
+               if (geometry != null)
                {
                   SDFGeometry.Mesh mesh = geometry.getMesh();
-                  if(mesh != null)
+                  if (mesh != null)
                   {
                      String meshUri = mesh.getUri();
-                     if(meshUri.contains("meshes_unplugged"))
+                     if (meshUri.contains("meshes_unplugged"))
                      {
                         String replacedURI = meshUri.replace(".dae", ".obj");
                         mesh.setUri(replacedURI);
@@ -472,7 +513,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
             }
          }
 
-         switch(linkHolder.getName())
+         switch (linkHolder.getName())
          {
          case "pelvis":
             addAdditionalPelvisImuInImuFrame(linkHolder);
@@ -593,14 +634,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
-         if(sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
+         if (sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
          {
             sensor.setName("imu_sensor_at_pelvis_frame");
          }
 
-         if(sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
+         if (sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
          {
             sensor.getRay().getScan().getHorizontal().setSamples("720");
             sensor.getRay().getScan().getHorizontal().setMinAngle("-1.5708");
@@ -612,7 +653,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
@@ -621,13 +662,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
 
       }
    }
 
-   @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
+   @Override
+   public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
    {
       if (this.jointMap.getModelName().equals(model.getName()))
       {
@@ -675,8 +717,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       chestIMU.setType("imu");
 
       // Position only approximate. If we start using the acceleration measurements this will have to be fixed.
-      String piHalf = String.valueOf(Math.PI/2.0);
-      String negativePiHalf = String.valueOf(-Math.PI/2.0);
+      String piHalf = String.valueOf(Math.PI / 2.0);
+      String negativePiHalf = String.valueOf(-Math.PI / 2.0);
       chestIMU.setPose("-0.15 0.0 0.3 " + piHalf + " 0.0 " + negativePiHalf);
 
       SDFSensor.IMU imu = new SDFSensor.IMU();
@@ -728,11 +770,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       modifyLinkMass(linkHolder, 2.7);
       modifyLinkInertialPose(linkHolder, "-0.0 0.04 0.0 0 -0 0");
       List<SDFVisual> visuals = linkHolder.getVisuals();
-      if(visuals != null)
+      if (visuals != null)
       {
          for (SDFVisual sdfVisual : visuals)
          {
-            if(sdfVisual.getName().equals("l_hand_visual"))
+            if (sdfVisual.getName().equals("l_hand_visual"))
             {
                sdfVisual.setPose("-0.00179 0.126 0 0 -1.57079 0");
             }
@@ -746,11 +788,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       modifyLinkInertialPose(linkHolder, "-0.0 -0.04 0.0 0 -0 0");
       List<SDFVisual> visuals = linkHolder.getVisuals();
 
-      if(visuals != null)
+      if (visuals != null)
       {
          for (SDFVisual sdfVisual : visuals)
          {
-            if(sdfVisual.getName().equals("r_hand_visual"))
+            if (sdfVisual.getName().equals("r_hand_visual"))
             {
                sdfVisual.setPose("-0.00179 -0.126 0 3.14159 -1.57079 0");
 
@@ -829,10 +871,25 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
+   public static String getParameterResourceName()
+   {
+      return "/us/ihmc/atlas/parameters/controller.xml";
+   }
+
+   @Override
+   public InputStream getParameterOverwrites()
+   {
+      if (target == RobotTarget.REAL_ROBOT)
+      {
+         return getClass().getResourceAsStream("/us/ihmc/atlas/parameters/real_robot.xml");
+      }
+      return null;
+   }
+
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream("/us/ihmc/atlas/parameters/controller.xml");
+      return getClass().getResourceAsStream(getParameterResourceName());
    }
-   
+
 }

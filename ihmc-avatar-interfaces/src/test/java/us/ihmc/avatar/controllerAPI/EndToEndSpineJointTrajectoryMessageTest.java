@@ -12,29 +12,26 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -45,7 +42,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -134,7 +135,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double totalTime = 10.0;
       int waypoints = 20;
 
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
       {
          double timeAtWaypoint = totalTime * waypoint / waypoints;
@@ -146,10 +150,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
+            OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx);
             if (jointIdx == 0)
-               message.setTrajectoryPoint(jointIdx, waypoint, timeAtWaypoint, desiredPosition, desiredVelocity);
+               jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(timeAtWaypoint, desiredPosition, desiredVelocity));
             else
-               message.setTrajectoryPoint(jointIdx, waypoint, timeAtWaypoint, 0.0, 0.0);
+               jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(timeAtWaypoint, 0.0, 0.0));
          }
       }
 
@@ -169,10 +174,16 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       setupTest();
 
       int waypoints = 100;
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
-      for (int waypoint = 0; waypoint < waypoints; waypoint++)
-         for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-            message.setTrajectoryPoint(jointIdx, waypoint, 0.1 * waypoint, 0.0, 0.0);
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+
+         for (int waypoint = 0; waypoint < waypoints; waypoint++)
+         {
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.1 * waypoint, 0.0, 0.0));
+         }
+      }
       executeMessage(message);
 
       assertControlWasConsistent(controllerSpy);
@@ -202,8 +213,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage[] messages = new SpineTrajectoryMessage[numberOfMessages];
       for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
       {
-         SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, numberOfPoints);
+         SpineTrajectoryMessage message = new SpineTrajectoryMessage();
          double timeInMessage = timePerWaypoint;
+
+         for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+            message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
 
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -216,15 +230,23 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                desiredVelocity = 0.0;
 
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-               message.setTrajectoryPoint(jointIdx, pointIdx, timeInMessage, desiredPosition, desiredVelocity);
+            {
+               message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx).getTrajectoryPoints().add()
+                                                                                                  .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(timeInMessage,
+                                                                                                                                                           desiredPosition,
+                                                                                                                                                           desiredVelocity));
+            }
 
             totalTime += timePerWaypoint;
             timeInMessage += timePerWaypoint;
          }
 
-         message.setUniqueId(msgIdx + 1);
+         message.getJointspaceTrajectory().getQueueingProperties().setMessageId(msgIdx + 1);
          if (msgIdx != 0)
-            message.setExecutionMode(ExecutionMode.QUEUE, msgIdx);
+         {
+            message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+            message.getJointspaceTrajectory().getQueueingProperties().setPreviousMessageId((long) msgIdx);
+         }
 
          messages[msgIdx] = message;
       }
@@ -273,21 +295,21 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          trajectoryTime[jointIdx] = random.nextDouble() * maxTime;
       }
 
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints);
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          int numberOfPoinsForJoint = numberOfPoints[jointIdx];
          double timePerPoint = trajectoryTime[jointIdx] / numberOfPoinsForJoint;
          double time = timePerPoint;
 
-         OneDoFJointTrajectoryMessage jointTrajectoryMessage = new OneDoFJointTrajectoryMessage(numberOfPoinsForJoint);
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = new OneDoFJointTrajectoryMessage();
          for (int pointIdx = 0; pointIdx < numberOfPoinsForJoint; pointIdx++)
          {
             double position = getRandomJointAngleInRange(random, spineJoints[jointIdx]);
-            jointTrajectoryMessage.setTrajectoryPoint(pointIdx, time, position, 0.0);
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(time, position, 0.0));
             time += timePerPoint;
          }
-         message.setTrajectory1DMessage(jointIdx, jointTrajectoryMessage);
+         message.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(jointTrajectoryMessage);
       }
 
       // send message
@@ -364,7 +386,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          double desired = getRandomJointAngleInRange(random, joint);
          jointDesireds[jointIdx] = desired;
       }
-      return new SpineTrajectoryMessage(trajectoryTime, jointDesireds);
+      return HumanoidMessageTools.createSpineTrajectoryMessage(trajectoryTime, jointDesireds);
    }
 
    private double getRandomJointAngleInRange(Random random, OneDoFJoint joint)
@@ -386,7 +408,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      return HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
    }
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)
@@ -409,8 +431,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double trajectoryTime = 0.0;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
-         double jointTrajectoryTime = jointTrajectory.getLastTrajectoryPoint().getTime();
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx);
+         double jointTrajectoryTime = jointTrajectory.getTrajectoryPoints().getLast().getTime();
          if (jointTrajectoryTime > trajectoryTime)
             trajectoryTime = jointTrajectoryTime;
       }
@@ -422,8 +444,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       for (int jointIdx = 0; jointIdx < spineJoints.length; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
-         double desired = jointTrajectory.getLastTrajectoryPoint().getPosition();
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(jointIdx);
+         double desired = jointTrajectory.getTrajectoryPoints().getLast().getPosition();
          OneDoFJoint joint = spineJoints[jointIdx];
          assertJointDesired(scs, joint, desired);
       }
@@ -434,11 +456,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double controllerDT = getRobotModel().getControllerDT();
       drcSimulationTestHelper.send(message);
 
-      double trajectoryTime = message.getLastTrajectoryPoint().getTime();
+      double trajectoryTime = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));
 
-      Quaternion desired = new Quaternion();
-      message.getLastTrajectoryPoint().getOrientation(desired);
+      Quaternion desired = new Quaternion(message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
       assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired, chest);
    }
 
@@ -631,12 +652,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          if (!currentDesiredOrientation.containsNaN() && !previousDesiredOrientation.containsNaN())
          {
-            Quaternion previous = previousDesiredOrientation.getQuaternionCopy();
-            Quaternion current = currentDesiredOrientation.getQuaternionCopy();
             Vector4D derivative = new Vector4D();
-            quaternionCalculus.computeQDotByFiniteDifferenceCentral(previous, current, controllerDT, derivative);
+            quaternionCalculus.computeQDotByFiniteDifferenceCentral(previousDesiredOrientation, currentDesiredOrientation, controllerDT, derivative);
             Vector3D angularVelocity = new Vector3D();
-            quaternionCalculus.computeAngularVelocityInWorldFrame(current, derivative, angularVelocity);
+            quaternionCalculus.computeAngularVelocityInWorldFrame(currentDesiredOrientation, derivative, angularVelocity);
             double speed = angularVelocity.length();
             if (speed > maxSpeed.getDoubleValue())
                maxSpeed.set(speed);

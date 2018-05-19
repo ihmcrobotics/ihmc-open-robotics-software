@@ -72,7 +72,7 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
       {
          transformToRoot.get(rotation, translation);
          rotation.multiplyConjugateOther(previousRotation);
-         rotation.get(angularVelocity);
+         rotation.getRotationVector(angularVelocity);
          angularVelocity.scale(1.0 / updateDT);
          linearVelocity.sub(translation, previousTranslation);
          linearVelocity.scale(1.0 / updateDT);

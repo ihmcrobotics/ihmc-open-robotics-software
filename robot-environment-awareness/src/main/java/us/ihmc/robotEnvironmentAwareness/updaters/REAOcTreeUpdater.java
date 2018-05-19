@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -16,14 +16,15 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class REAOcTreeUpdater
 {
-   private final REAMessager reaMessager;
+   private final Messager reaMessager;
    private final NormalOcTree referenceOctree;
    private final REAOcTreeBuffer reaOcTreeBuffer;
 
@@ -41,7 +42,7 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, REAMessager reaMessager, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, Messager reaMessager, PacketCommunicator publicPacketCommunicator)
    {
       this.referenceOctree = octree;
       reaOcTreeBuffer = buffer;
@@ -55,7 +56,7 @@ public class REAOcTreeUpdater
       minRange = reaMessager.createInput(REAModuleAPI.LidarMinRange, 0.2);
       maxRange = reaMessager.createInput(REAModuleAPI.LidarMaxRange, 5.0);
       useBoundingBox = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxEnable, true);
-      atomicBoundingBoxParameters = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters, new BoundingBoxParametersMessage(0.0f, -2.0f, -3.0f, 5.0f, 2.0f, 0.5f));
+      atomicBoundingBoxParameters = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters, BoundingBoxMessageConverter.createBoundingBoxParametersMessage(0.0f, -2.0f, -3.0f, 5.0f, 2.0f, 0.5f));
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
@@ -93,7 +94,7 @@ public class REAOcTreeUpdater
          useBoundingBox.set(useBoundingBoxFile);
       String boundingBoxParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.OcTreeBoundingBoxParameters.getName());
       if (boundingBoxParametersFile != null)
-         atomicBoundingBoxParameters.set(BoundingBoxParametersMessage.parse(boundingBoxParametersFile));
+         atomicBoundingBoxParameters.set(BoundingBoxMessageConverter.parse(boundingBoxParametersFile));
       Double minRangeFile = filePropertyHelper.loadDoubleProperty(REAModuleAPI.LidarMinRange.getName());
       if (minRangeFile != null)
          minRange.set(minRangeFile);
@@ -192,6 +193,6 @@ public class REAOcTreeUpdater
 
    private void handlePacket(LidarScanMessage lidarScanMessage)
    {
-      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.lidarPosition, lidarScanMessage.lidarOrientation));
+      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.getLidarPosition(), lidarScanMessage.getLidarOrientation()));
    }
 }

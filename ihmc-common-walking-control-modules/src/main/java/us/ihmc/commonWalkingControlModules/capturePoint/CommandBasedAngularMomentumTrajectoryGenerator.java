@@ -3,21 +3,19 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumSplineType;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectoryGeneratorInterface;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectoryInterface;
+import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -33,7 +31,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final YoInteger numberOfWaypointsToUseForSwing;
    private final YoEnum<AngularMomentumSplineType> trajectoryType;
    private final YoInteger numberOfFootstepsToPlan;
-   private RecyclingArrayList<TrajectoryPoint3D> waypoints;
+   private RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints;
    private final List<YoDouble> transferDurations;
    private final List<YoDouble> swingDurations;
 
@@ -67,7 +65,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.numberOfFootstepsToPlan.set(smoothCMPPlannerParameters.getNumberOfFootstepsToConsider());
 
       this.waypoints = new RecyclingArrayList<>(Math.max(numberOfWaypointsToUseForSwing.getIntegerValue(), numberOfWaypointsToUseForTransfer.getIntegerValue()),
-                                                TrajectoryPoint3D.class);
+                                                SimpleEuclideanTrajectoryPoint.class);
       this.waypoints.clear();
 
       this.transferDurations = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue() + 1);
@@ -77,7 +75,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue() + 1; i++)
       {
-         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
+         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
                                                                                       trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDurationStep" + i, registry);
          transferTrajectories.add(transferTrajectory);
@@ -85,7 +83,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue(); i++)
       {
-         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
+         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
                                                                                    trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDurationStep" + i, registry);
          swingTrajectories.add(swingTrajectory);
@@ -105,16 +103,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
          this.swingDurations.get(index).set(swingDurations.get(index));
       for (; index < this.swingDurations.size(); index++)
          this.swingDurations.get(index).setToNaN();
-   }
-
-   @Override
-   public void updateListeners()
-   {
-   }
-
-   @Override
-   public void createVisualizerForConstantAngularMomentum(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
-   {
    }
 
    @Override
@@ -140,33 +128,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack)
-   {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack)
-   {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-      desiredTorqueToPack.setIncludingFrame(desiredTorque);
-   }
-
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
-   {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-      desiredTorqueToPack.setIncludingFrame(desiredTorque);
-      desiredRotatumToPack.setIncludingFrame(desiredRotatum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack)
-   {
-      desiredAngMomToPack.set(desiredAngularMomentum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack, YoFrameVector desiredTorqueToPack)
+   public void getDesiredAngularMomentum(FixedFrameVector3DBasics desiredAngMomToPack, FixedFrameVector3DBasics desiredTorqueToPack)
    {
       desiredAngMomToPack.set(desiredAngularMomentum);
       desiredTorqueToPack.set(desiredTorque);
@@ -227,8 +189,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       momentumWaypointSource.getAngularMomentumTrajectory(initialTime, initialTime + stateDuration, numberOfSamples, waypoints);
       for (int j = 0; j < numberOfSamples - 1; j++)
       {
-         tempFramePoint1.set(waypoints.get(j).getPosition());
-         tempFramePoint2.set(waypoints.get(j + 1).getPosition());
+         tempFramePoint1.set(waypoints.get(j).getEuclideanWaypoint().getPosition());
+         tempFramePoint2.set(waypoints.get(j + 1).getEuclideanWaypoint().getPosition());
          transferTrajectories.get(footstepIndex).set(0.0, stateDuration, tempFramePoint1, tempFramePoint2);
       }
    }

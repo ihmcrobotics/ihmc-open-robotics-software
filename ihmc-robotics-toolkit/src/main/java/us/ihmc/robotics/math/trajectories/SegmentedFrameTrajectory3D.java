@@ -22,7 +22,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
  * <li> currentSegmentIndex: YoInteger indicating the segment index that is used for computation 
  * <li> currentSegment: Reference to the current segment used for computation
  */
-public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
+public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -35,7 +35,6 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
 
    protected FrameTrajectory3D currentSegment;
    protected double[] nodeTime;
-
 
    public SegmentedFrameTrajectory3D(int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
@@ -136,6 +135,11 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
          FrameTrajectory3D segment = segments.add();
          segment.set(other.getSegment(segmentIndex));
       }
+   }
+
+   public double getFinalTime()
+   {
+      return segments.getLast().getFinalTime();
    }
 
    public FrameTrajectory3D add()

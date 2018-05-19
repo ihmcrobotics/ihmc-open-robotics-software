@@ -9,44 +9,40 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -273,7 +269,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-//	      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//	      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -371,7 +367,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
@@ -398,8 +394,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quaternion(0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quaternion(-0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
-        chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
-        chestCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+        chestCommand.getSO3Trajectory().setTrajectoryPointList(chestTrajectoryPointList);
+        chestCommand.getSO3Trajectory().setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:
@@ -441,9 +437,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(1.0, new Point3D(1.1, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(2.0, new Point3D(1.1, -0.2, 0.35), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
-        footTrajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(footTrajectoryCommand);
 
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -479,7 +475,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
 
-//      YoBoolean walk = (YoBoolean) robot.getVariable("walk");
+//      YoBoolean walk = (YoBoolean) robot.getVariable("walkCSG");
 //      walk.set(true);
 
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
@@ -490,7 +486,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 
@@ -505,7 +501,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.1, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.1, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 
@@ -904,7 +900,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
-      FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
@@ -978,16 +974,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
-   }
-
-   private Handstep createHandstepForTesting(ScriptedHandstepGenerator scriptedHandstepGenerator)
-   {
-      RobotSide robotSide = RobotSide.LEFT;
-      Tuple3DBasics position = new Point3D(0.6, 0.3, 1.0);
-      Vector3D surfaceNormal = new Vector3D(-1.0, 0.0, 0.0);
-      double rotationAngleAboutNormal = 0.0;
-      double swingTrajectoryTime = 1.0;
-      return scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
    }
 
    private FootstepDataListMessage createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
@@ -1178,7 +1164,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
 
-   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullRobotModel fullRobotModel)
+   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel)
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
       String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();

@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
@@ -21,8 +20,8 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
-   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
+   private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
+   private final Vector3D footLinearWeight = new Vector3D(30.0, 30.0, 30.0);
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
@@ -87,13 +86,12 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
       taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
 
-      List<String> handNames = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handNames.add(jointMap.getHandName(robotSide));
-      }
+      List<String> handNames = jointMap.getHandNames();
+      List<String> footNames = jointMap.getFootNames();
       taskspaceAngularWeights.add(new GroupParameter<>("Hand", handAngularWeight, handNames));
       taskspaceLinearWeights.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
+      taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
    }
 
    private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, DRCRobotJointMap jointMap, ArmJointName jointName, double weight)
@@ -199,28 +197,14 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    /** @inheritDoc */
    @Override
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return defaultLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultAngularFootWeight()
-   {
-      return defaultAngularFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighLinearFootWeight()
+   public Vector3D getLoadedFootLinearWeight()
    {
       return highLinearFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3D getHighAngularFootWeight()
+   public Vector3D getLoadedFootAngularWeight()
    {
       return highAngularFootWeight;
    }
@@ -244,13 +228,6 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    public int getNumberOfContactableBodies()
    {
       return nContactableBodies;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public int getRhoSize()
-   {
-      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
    }
 
    /** @inheritDoc */

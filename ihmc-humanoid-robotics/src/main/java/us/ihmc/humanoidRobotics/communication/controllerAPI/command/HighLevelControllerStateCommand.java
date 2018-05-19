@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 public class HighLevelControllerStateCommand implements Command<HighLevelControllerStateCommand, HighLevelStateMessage>
@@ -23,7 +23,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    @Override
    public void set(HighLevelStateMessage message)
    {
-      highLevelControllerName = message.getHighLevelControllerName();
+      highLevelControllerName = HighLevelControllerName.fromByte(message.getHighLevelControllerName());
    }
 
    public void setHighLevelControllerName(HighLevelControllerName highLevelControllerName)

@@ -1,10 +1,11 @@
 package us.ihmc.robotics.partNames;
 
+import us.ihmc.robotics.robotSide.RobotSegment;
+
 import java.util.Set;
 
-public interface JointNameMap extends RobotSpecificJointNames
+public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends RobotSpecificJointNames
 {
-
    String getModelName();
 
    default double getModelScale()
@@ -41,11 +42,9 @@ public interface JointNameMap extends RobotSpecificJointNames
 
    SpineJointName getSpineJointName(String jointName);
 
-   String getPelvisName();
+   String getRootBodyName();
 
    String getUnsanitizedRootJointInSdf();
-
-   String getChestName();
 
    String getHeadName();
 
@@ -60,8 +59,8 @@ public interface JointNameMap extends RobotSpecificJointNames
 
    String[] getJointNamesBeforeFeet();
 
-   Enum<?>[] getRobotSegments();
+   E[] getRobotSegments();
 
-   Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector);
+   E getEndEffectorsRobotSegment(String jointNameBeforeEndEffector);
 
 }

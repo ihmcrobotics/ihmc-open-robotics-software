@@ -23,7 +23,7 @@ public class JointAnglesWriter
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> oneDoFJointPairList = new ArrayList<>();
    private final ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
 
-   public JointAnglesWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
+   public JointAnglesWriter(Robot robot, FullRobotModel fullRobotModel)
    {
       this(robot, fullRobotModel.getRootJoint(), fullRobotModel.getOneDoFJoints());
    }

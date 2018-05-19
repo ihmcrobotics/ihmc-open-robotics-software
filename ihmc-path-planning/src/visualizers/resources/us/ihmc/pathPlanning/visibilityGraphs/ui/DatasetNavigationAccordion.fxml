@@ -32,7 +32,19 @@
                         </AnchorPane>
                   </content>
                 </TitledPane>
-                <TitledPane fx:id="customDataFolder" maxHeight="1.7976931348623157E308" text="Custom">
+
+                  <TitledPane fx:id="inDevelopmentTestDataFolder" maxHeight="1.7976931348623157E308" text="Test data (in development)">
+                      <content>
+                          <AnchorPane maxHeight="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                              <children>
+                                  <ListView fx:id="inDevelopmentTestDataListView" onMouseClicked="#requestNewInDevelopmentTestData" prefHeight="261.0" prefWidth="515.0"
+                                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                              </children>
+                          </AnchorPane>
+                      </content>
+                  </TitledPane>
+
+                  <TitledPane fx:id="customDataFolder" maxHeight="1.7976931348623157E308" text="Custom">
                   <content>
                     <AnchorPane maxHeight="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>

@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -19,10 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -37,7 +37,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewinda
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
 {
@@ -171,7 +170,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
+      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
       drcSimulationTestHelper.send(message);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
@@ -182,7 +181,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
 
       Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
@@ -410,7 +409,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Quaternion desiredChestQuat = new Quaternion(desiredChestFrameOrientation);
 
       double trajectoryTime = 0.5;
-      drcSimulationTestHelper.send(new ChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
+      drcSimulationTestHelper.send(HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
@@ -483,14 +482,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.418, -5.012, 0.156), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.238, -4.832, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.388, -4.982, 0.156), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.858, -5.452, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-3.418, -5.012, 0.156), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.238, -4.832, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.388, -4.982, 0.156), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.518, -5.112, 0.156), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-3.858, -5.452, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.688, -5.282, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 
@@ -500,14 +499,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.198, -3.792, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.728, -4.322, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.858, -4.452, 0.0), new Quaternion(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.688, -4.282, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.198, -3.792, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.318, -3.912, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-4.728, -4.322, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.598, -4.192, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-4.858, -4.452, 0.0), new Quaternion(orientation)));
+      footstepDataList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.688, -4.282, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 
@@ -532,10 +531,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
       FootstepDataListMessage desiredFootsteps = scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
-      double zClearHeight = desiredFootsteps.get(0).getLocation().getZ() + 0.07;
-      double swingHeightForClear = zClearHeight - desiredFootsteps.get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
-      desiredFootsteps.get(1).setSwingHeight(swingHeightForClear);
-      desiredFootsteps.get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      double zClearHeight = desiredFootsteps.getFootstepDataList().get(0).getLocation().getZ() + 0.07;
+      double swingHeightForClear = zClearHeight - desiredFootsteps.getFootstepDataList().get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
+      desiredFootsteps.getFootstepDataList().get(1).setSwingHeight(swingHeightForClear);
+      desiredFootsteps.getFootstepDataList().get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       return desiredFootsteps;
    }
 

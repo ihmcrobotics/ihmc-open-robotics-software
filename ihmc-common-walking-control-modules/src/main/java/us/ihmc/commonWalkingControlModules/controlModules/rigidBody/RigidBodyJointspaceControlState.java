@@ -103,13 +103,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       double timeInTrajectory = getTimeInTrajectory();
       trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
    }
 
-   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
       if (!handleCommandInternal(command))
       {
@@ -142,12 +142,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 
@@ -167,10 +167,5 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
-   }
-
-   @Override
-   public void clear()
-   {
    }
 }

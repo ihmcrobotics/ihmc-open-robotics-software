@@ -3,30 +3,21 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
 public class AngularMomentumTrajectory extends SegmentedFrameTrajectory3D implements AngularMomentumTrajectoryInterface
 {
-   private FrameVector3D momentum;
-   private FrameVector3D torque;
-   private FrameVector3D rotatum;
-
-   public AngularMomentumTrajectory(ReferenceFrame referenceFrame, int maxNumberOfSegments, int maxNumberOfCoefficients)
+   public AngularMomentumTrajectory(int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
       super(maxNumberOfSegments, maxNumberOfCoefficients);
-      momentum = new FrameVector3D(referenceFrame);
-      torque = new FrameVector3D(referenceFrame);
-      rotatum = new FrameVector3D(referenceFrame);
    }
 
    @Override
    public void reset()
    {
       super.reset();
-      momentum.setToNaN();
-      torque.setToNaN();
-      rotatum.setToNaN();
    }
 
    @Override

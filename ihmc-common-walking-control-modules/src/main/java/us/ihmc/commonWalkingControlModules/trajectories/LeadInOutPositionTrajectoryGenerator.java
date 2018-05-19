@@ -3,8 +3,11 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,10 +22,9 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -58,9 +60,9 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
     * The trajectory is first created in 2D in the distortedPlane. The plane is then distorted to obtain the desired 3D trajectory.
     */
    private final ReferenceFrame distortedPlane;
-   private final FramePose currentDistortionPose = new FramePose();
-   private final FramePose initialDistortionPose = new FramePose();
-   private final FramePose finalDistortionPose = new FramePose();
+   private final FramePose3D currentDistortionPose = new FramePose3D();
+   private final FramePose3D initialDistortionPose = new FramePose3D();
+   private final FramePose3D finalDistortionPose = new FramePose3D();
 
    // For viz
    private final boolean visualize;
@@ -68,7 +70,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
-   private final YoFramePose distortedPlanePose;
+   private final YoFramePoseUsingYawPitchRoll distortedPlanePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final YoBoolean showViz;
@@ -107,7 +109,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             currentDistortionPose.changeFrame(parentFrame);
-            currentDistortionPose.getPose(transformToParent);
+            currentDistortionPose.get(transformToParent);
          }
       };
 
@@ -139,7 +141,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
          final YoGraphicVector finalDirectionViz = new YoGraphicVector(namePrefix + "FinalDirection",
                finalPosition.buildUpdatedYoFramePointForVisualizationOnly(), finalDirection.buildUpdatedYoFrameVectorForVisualizationOnly(), 0.2,
                YoAppearance.Red());
-         distortedPlanePose = new YoFramePose(namePrefix + "DistortedPlane", ReferenceFrame.getWorldFrame(), registry);
+         distortedPlanePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "DistortedPlane", ReferenceFrame.getWorldFrame(), registry);
          final YoGraphicCoordinateSystem distortedPlaneViz = new YoGraphicCoordinateSystem(namePrefix + "DistortedPlan", distortedPlanePose, 0.1);
          YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "FinalApproachTraj");
          yoGraphicsList.add(currentPositionViz);
@@ -183,12 +185,12 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final Vector3D tempVector = new Vector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public void setInitialLeadOut(FramePoint3D initialPosition, FrameVector3D initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialDirection, double leaveDistance)
    {
       this.initialPosition.set(initialPosition);
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
-      this.initialDirection.get(tempVector);
+      tempVector.set(this.initialDirection);
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       initialDistortionPose.setToZero(this.initialPosition.getReferenceFrame());
@@ -198,12 +200,12 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.leaveDistance.set(leaveDistance);
    }
 
-   public void setFinalLeadIn(FramePoint3D finalPosition, FrameVector3D finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalDirection, double approachDistance)
    {
       this.finalPosition.set(finalPosition);
       this.finalDirection.set(finalDirection);
       this.finalDirection.normalize();
-      this.finalDirection.get(tempVector);
+      tempVector.set(this.finalDirection);
       tempVector.negate();
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
@@ -246,7 +248,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       //      xyPolynomial.setCubic(t1, t2, 0.0, 0.0, 1.0, 0.0);
       xyPolynomial.setQuintic(t1, t2, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
-      currentDistortionPose.setPoseIncludingFrame(initialDistortionPose);
+      currentDistortionPose.setIncludingFrame(initialDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 
@@ -254,7 +256,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double z1 = initialPosition.getZ() + leaveDistance.getDoubleValue();
 
       changeFrame(currentTrajectoryFrame, false);
-      currentDistortionPose.setPoseIncludingFrame(finalDistortionPose);
+      currentDistortionPose.setIncludingFrame(finalDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 
@@ -287,7 +289,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       xyPolynomial.compute(MathTools.clamp(time, t1, t2));
 
       currentDistortionPose.interpolate(initialDistortionPose, finalDistortionPose, xyPolynomial.getPosition());
-      distortedPlanePose.setAndMatchFrame(currentDistortionPose);
+      distortedPlanePose.setMatchingFrame(currentDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 
@@ -316,7 +318,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       {
          double t = i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
-         currentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -343,19 +345,19 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    @Override

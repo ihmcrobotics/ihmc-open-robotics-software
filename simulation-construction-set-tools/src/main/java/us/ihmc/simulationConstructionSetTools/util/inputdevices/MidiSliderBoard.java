@@ -12,15 +12,15 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.sliderboardVisualizer.MidiSliderBoardConfigurationVisualizer;
+import us.ihmc.simulationconstructionset.ExitActionListener;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.ExitActionListener;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.inputdevices.sliderboardVisualizer.MidiSliderBoardConfigurationVisualizer;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposable
 {
@@ -29,7 +29,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    private enum Devices
    {
-      VIRTUAL, MOTORIZED, GENERIC
+      VIRTUAL, BCF2000, XTOUCH_COMPACT, GENERIC
    }
 
    public static final int CHECK_TIME = 10;
@@ -47,7 +47,6 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private int preferdDeviceNumber = -1;
 
    private static final boolean DEBUG = false;
-   private static final boolean DEBUG_CLOSE_AND_DISPOSE = true;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;
@@ -56,6 +55,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private MidiSliderBoardConfigurationVisualizer visualizer;
    private VariableChangedListener listener;
    private YoVariableHolder holder;
+   
+   private MidiChannelMapper channelMapper = new GenericChannelMapper();
 
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -114,9 +115,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          }
 
          // if a motorized slider board is found
-         if (preferedDevice.equals(Devices.MOTORIZED))
+         if (preferedDevice.equals(Devices.BCF2000))
          {
             PrintTools.info("Setting Up Motorized Slider Board");
+            channelMapper = new BCF2000ChannelMapper();
 
             // sliderOffset = 80;
             sliderBoardMax = 127;
@@ -167,6 +169,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             // sliderOffset = -1;
 
             System.out.println("Setting Up Physical Slider Board");
+            channelMapper = new BCF2000ChannelMapper(); // Code was the same when making this
             sliderBoardMax = 127;
 
             try
@@ -178,6 +181,51 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                if (DEBUG)
                   System.err.println("Exception when trying to get MIDI transmitter 1: " + e);
             }
+         }
+         else if (preferedDevice.equals(Devices.XTOUCH_COMPACT))
+         {
+            PrintTools.info("Setting Up XTouch Slider Board");
+            channelMapper = new XTouchChannelMapper();
+
+            // sliderOffset = 80;
+            sliderBoardMax = 127;
+
+            try
+            {
+               inDevice.getTransmitter().setReceiver(new XTouchCompactReceiver(controlsHashTable, internalListeners, variableChangedListeners, sliderBoardMax, this));
+
+               transmitter = new XTouchCompactTransmitter(midiOut, sliderBoardMax);
+            }
+            catch (Exception e)
+            {
+               if (DEBUG)
+                  System.err.println("Exception when trying to get MIDI transmitter 1: " + e);
+            }
+
+            final Object self = this;
+            listener = new VariableChangedListener()
+            {
+               @Override
+               public void notifyOfVariableChange(YoVariable<?> v)
+               {
+                  synchronized (self)
+                  {
+                     for (MidiControl tmpControl : controlsHashTable.values())
+                     {
+                        if (tmpControl.var.equals(v))
+                        {
+                           double value = 0.0;
+                           value = (tmpControl).var.getValueAsDouble();
+                           yoVariableChanged((tmpControl).mapping, value);
+
+                           if (visualizer != null)
+                              visualizer.updateValue(tmpControl, value);
+                        }
+                     }
+                  }
+               }
+            };
+
          }
 
          addListener(new SliderListener()
@@ -364,7 +412,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          else if (name.contains("BCF2000") || description.contains("BCF2000"))
          {
             preferdDeviceNumber = i;
-            preferedDevice = Devices.MOTORIZED;
+            preferedDevice = Devices.BCF2000;
             if (DEBUG)
                System.out.println("Found motorizedSliderBoard");
 
@@ -473,6 +521,118 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                rc += 1;
             }
          }
+         else if (description.contains("X-TOUCH COMPACT"))
+         {
+            preferdDeviceNumber = i;
+            preferedDevice = Devices.XTOUCH_COMPACT;
+            if (DEBUG)
+               System.out.println("Found X-Touch motorizedSliderBoard");
+
+            try
+            {
+               current = MidiSystem.getMidiDevice(infos[i]);
+            }
+            catch (MidiUnavailableException e)
+            {
+               if (DEBUG)
+               {
+                  System.out.println("   - Unable to get a handle to this Midi Device.");
+                  e.printStackTrace();
+               }
+
+               continue;
+            }
+
+            if ((outDevice == null) && (current.getMaxReceivers() != 0))
+            {
+               outDevice = current;
+
+               if (!outDevice.isOpen())
+               {
+                  if (DEBUG)
+                     System.out.println("   - Opening Output Device");
+
+                  try
+                  {
+                     outDevice.open();
+                  }
+                  catch (MidiUnavailableException e)
+                  {
+                     outDevice = null;
+
+                     if (DEBUG)
+                     {
+                        System.out.println("   - Unable to open device.");
+                        e.printStackTrace();
+                     }
+
+                     continue;
+                  }
+               }
+
+               if (DEBUG)
+                  System.out.println("   - Device is Now open trying to obtain the receiver.");
+
+               try
+               {
+                  midiOut = outDevice.getReceiver();
+               }
+               catch (MidiUnavailableException e)
+               {
+                  outDevice = null;
+                  midiOut = null;
+
+                  if (DEBUG)
+                  {
+                     System.out.println("   - Error getting the device's receiver.");
+                     e.printStackTrace();
+                  }
+
+                  continue;
+               }
+
+               if (DEBUG)
+                  System.out.println("   - Obtained a handle to the devices receiver.");
+               rc += 2;
+            }
+
+            if ((inDevice == null) && (current.getMaxTransmitters() != 0))
+            {
+               inDevice = current;
+
+               if (DEBUG)
+               {
+                  System.out.println("\nGot device with info" + inDevice.getDeviceInfo());
+                  System.out.println("Max Receivers:" + inDevice.getMaxReceivers());
+                  System.out.println("Max Transmitters:" + inDevice.getMaxTransmitters());
+               }
+
+               if (DEBUG)
+                  System.out.println("   - Opening Input Device.");
+
+               try
+               {
+                  inDevice.open();
+               }
+               catch (MidiUnavailableException e1)
+               {
+                  inDevice = null;
+
+                  if (DEBUG)
+                  {
+                     System.out.println("   - Exception while trying to open device.");
+                     e1.printStackTrace();
+                  }
+
+                  continue;
+               }
+
+               if (DEBUG)
+                  System.out.println("   - Device is Now open trying to obtain the transmitter.");
+
+               rc += 1;
+            }
+         }         
       }
 
       return rc;
@@ -495,33 +655,18 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setButton(int channel, YoVariable<?> var)
    {
-      int offset;
-      if ((channel >= 17) && (channel <= 20))
-         offset = -8;
-      else
-         offset = -16;
-      setControl(channel + offset, var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
+ 
+      setControl(channelMapper.getButtonChannel(channel), var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setButtonEnum(int channel, YoEnum<?> yoEnum, Enum<?> enumValue)
    {
-      int offset;
-      if ((channel >= 17) && (channel <= 20))
-         offset = -8;
-      else
-         offset = -16;
-
-      setControl(channel + offset, yoEnum, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
+       setControl(channelMapper.getButtonChannel(channel), yoEnum, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
    }
 
    public void setButton(int channel, YoVariable<?> var, String name)
    {
-      int offset;
-      if ((channel >= 17) && (channel <= 20))
-         offset = -8;
-      else
-         offset = -16;
-      setControl(channel + offset, var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
+      setControl(channelMapper.getButtonChannel(channel), var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setKnobButton(int channel, String name, YoVariableHolder holder)
@@ -536,12 +681,12 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setKnobButton(int channel, YoVariable<?> var)
    {
-      setControl(channel - 48, var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
+      setControl(channelMapper.getKnobButtonChannel(channel), var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setKnobButton(int channel, YoVariable<?> var, String name)
    {
-      setControl(channel - 48, var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
+      setControl(channelMapper.getKnobButtonChannel(channel), var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setSlider(int channel, String name, YoVariableHolder holder, double min, double max)
@@ -689,7 +834,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setKnobEnum(int channel, YoEnum<?> var)
    {
-      setControl(channel - 80, var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel), var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.KNOB);
    }
 
    public void setSliderEnum(int channel, String name, YoVariableHolder holder)
@@ -704,12 +849,12 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setSliderEnum(int channel, YoEnum<?> var)
    {
-      setControl(channel, var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
    }
 
    public void setSliderEnum(int channel, YoEnum<?> var, String name)
    {
-      setControl(channel, var, name, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, name, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
    }
 
    public void setSliderBoolean(int channel, String name, YoVariableHolder holder)
@@ -724,22 +869,22 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setSliderBoolean(int channel, YoVariable<?> var)
    {
-      setControl(channel, var, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
    }
 
    public void setSliderBoolean(int channel, YoVariable<?> var, String name)
    {
-      setControl(channel, var, name, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, name, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
    }
 
    public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent)
    {
-      setControl(channel, var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
    public void setSlider(int channel, YoVariable<?> var, String name, double min, double max, double exponent)
    {
-      setControl(channel, var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
    public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
@@ -749,22 +894,22 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
          return;
       }
-      setControl(channel, var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
    public void setSlider(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires)
    {
-      setControl(channel, var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel), var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
    public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent)
    {
-      setControl(channel - 80, var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel), var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
    public void setKnob(int channel, YoVariable<?> var, String name, double min, double max, double exponent)
    {
-      setControl(channel - 80, var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel), var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
    public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
@@ -774,12 +919,12 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
          return;
       }
-      setControl(channel - 80, var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel), var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
    public void setKnob(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires)
    {
-      setControl(channel - 80, var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel), var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
    private void setControl(int channel, YoVariable<?> var, String name, double min, double max, double exponent, MidiControl.SliderType sliderType, MidiControl.ControlType controlType)

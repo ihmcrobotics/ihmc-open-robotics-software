@@ -17,9 +17,12 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -34,6 +37,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class GeometryToolsTest
 {
    private static final int ITERATIONS = 1000;
@@ -257,7 +261,7 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClipToBoundingBox()
    {
@@ -283,7 +287,7 @@ public class GeometryToolsTest
          firstList.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
 
-      ConvexPolygon2D firstPolygon = new ConvexPolygon2D(firstList);
+      ConvexPolygon2D firstPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(firstList));
 
       ArrayList<Point2D> secondList = new ArrayList<Point2D>();
       for (int i = 0; i < 200; i++)
@@ -291,7 +295,7 @@ public class GeometryToolsTest
          secondList.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
 
-      ConvexPolygon2D secondPolygon = new ConvexPolygon2D(secondList);
+      ConvexPolygon2D secondPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(secondList));
 
       ConvexPolygon2D result = new ConvexPolygon2D(firstPolygon, secondPolygon);
 
@@ -323,7 +327,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNormalizeSafeZUp() throws Exception
    {
@@ -351,7 +355,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsZero() throws Exception
    {

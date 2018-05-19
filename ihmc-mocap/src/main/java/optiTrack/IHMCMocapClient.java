@@ -2,6 +2,7 @@ package optiTrack;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -9,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 //import us.ihmc.userInterface.ThirdPersonPerspective;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 
 public class IHMCMocapClient extends MocapDataClient
@@ -107,14 +107,11 @@ public class IHMCMocapClient extends MocapDataClient
             mocapRB.update();
             mocapRBZUp.update();
 
-            FramePose rigidBodyPoseInZUp = new FramePose(mocapRBZUp, new Point3D(0, 0, 0), new Quaternion());
+            FramePose3D rigidBodyPoseInZUp = new FramePose3D(mocapRBZUp, new Point3D(0, 0, 0), new Quaternion());
             rigidBodyPoseInZUp.changeFrame(ReferenceFrame.getWorldFrame());
 
-            final Vector3D position = new Vector3D();
-            rigidBodyPoseInZUp.getPosition(position);
-
-            final Quaternion rotation = new Quaternion();
-            rigidBodyPoseInZUp.getOrientation(rotation);
+            final Vector3D position = new Vector3D(rigidBodyPoseInZUp.getPosition());
+            final Quaternion rotation = new Quaternion(rigidBodyPoseInZUp.getOrientation());
 
             listOfConvertedRigidBodies.add(new MocapRigidBody(rb.getId(), position, rotation, null, true));
 //         }

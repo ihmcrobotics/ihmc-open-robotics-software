@@ -7,6 +7,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -115,15 +115,15 @@ public class FootSpoof implements ContactablePlaneBody
    {
       position.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       orientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setSoleFrame(new FramePose(position, orientation));
+      setSoleFrame(new FramePose3D(position, orientation));
    }
 
-   public void setSoleFrame(FramePose newSolePoseInWorldFrame)
+   public void setSoleFrame(FramePose3D newSolePoseInWorldFrame)
    {
       newSolePoseInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       RigidBodyTransform transformFromSoleToWorld = new RigidBodyTransform();
-      newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
+      newSolePoseInWorldFrame.get(transformFromSoleToWorld);
 
       RigidBodyTransform transformFromShinToWorld = new RigidBodyTransform();
       transformFromShinToWorld.set(transformFromSoleToWorld);

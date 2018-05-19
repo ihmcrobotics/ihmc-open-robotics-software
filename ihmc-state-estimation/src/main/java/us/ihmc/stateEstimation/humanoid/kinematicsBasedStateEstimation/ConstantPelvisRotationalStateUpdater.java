@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -15,7 +15,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameOrientation yoRootJointFrameOrientation = new YoFrameOrientation("constantRootJoint", worldFrame, registry);
+   private final YoFrameYawPitchRoll yoRootJointFrameOrientation = new YoFrameYawPitchRoll("constantRootJoint", worldFrame, registry);
 
    private final FloatingInverseDynamicsJoint rootJoint;
 

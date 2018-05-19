@@ -585,6 +585,39 @@ public class SelectionMatrix6D
    }
 
    /**
+    * Whether the {@code axisIndex}<sup>th</sup> axis of the current selection frame has been selected.
+    * <p>
+    * For an {@code axisIndex} value going from 0 up to 5, the corresponding components are
+    * {@code angularX}, {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY}, and
+    * {@code linearZ}, respectively.
+    * </p>
+    *
+    * @param axisIndex the index of the axis to get the selection state of.
+    * @return the selection state of the chosen axis.
+    * @throws IndexOutOfBoundsException if {@code axisIndex} &notin; [0, 5].
+    */
+   public boolean isAxisSelected(int axisIndex)
+   {
+      switch (axisIndex)
+      {
+      case 0:
+         return isAngularXSelected();
+      case 1:
+         return isAngularYSelected();
+      case 2:
+         return isAngularZSelected();
+      case 3:
+         return isLinearXSelected();
+      case 4:
+         return isLinearYSelected();
+      case 5:
+         return isLinearZSelected();
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(axisIndex));
+      }
+   }
+
+   /**
     * The reference frame to which the linear axis selection is referring to.
     * <p>
     * This selection frame can be {@code null}.

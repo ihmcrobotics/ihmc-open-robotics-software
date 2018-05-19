@@ -13,16 +13,24 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.BehaviorControlModePacket;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -40,12 +48,9 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -53,26 +58,22 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
@@ -227,7 +228,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -240,7 +241,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       behaviorDispatcher.start();
 
-      HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
+      HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
       behaviorCommunicatorClient.send(requestPelvisPoseBehaviorPacket);
       PrintTools.debug(this, "Requesting PelvisPoseBehavior");
 
@@ -248,8 +249,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
-      FramePose desiredPelvisPose = new FramePose();
-      desiredPelvisPose.setOrientation(pelvisPosePacket.getLastTrajectoryPoint().orientation);
+      FramePose3D desiredPelvisPose = new FramePose3D();
+      desiredPelvisPose.setOrientation(pelvisPosePacket.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
 
       pelvisOrientationTrajectoryBehavior.initialize();
       pelvisOrientationTrajectoryBehavior.setInput(pelvisPosePacket);
@@ -270,7 +271,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -285,7 +286,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -293,7 +294,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -305,7 +306,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          Point3D footstepPositionInWorld = new Point3D();
          for (Footstep footStep : footsteps)
          {
-            FramePose footstepPose = new FramePose();
+            FramePose3D footstepPose = new FramePose3D();
             footStep.getPose(footstepPose);
             footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
             PrintTools.debug(this, footstepPose.getPosition().toString());
@@ -319,15 +320,15 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          assertTrue(success);
       }
 
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
       assertTrue(walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 283.1)
+   @Test(timeout = 1400000)
    public void testDispatchKarateKidDiagnosticBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -338,7 +339,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       YoEnum<RobotSide> supportLeg = new YoEnum<>("supportLeg", registry, RobotSide.class);
       supportLeg.set(RobotSide.LEFT);
 
-      YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
+      YoFrameConvexPolygon2D yoSupportPolygon = new YoFrameConvexPolygon2D("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
 
       WholeBodyControllerParameters wholeBodyControllerParameters = this.getRobotModel();
 
@@ -352,7 +353,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       behaviorDispatcher.start();
 
-      HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
+      HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
       behaviorCommunicatorClient.send(requestDiagnosticBehaviorPacket);
       PrintTools.debug(this, "Requesting DiagnosticBehavior");
 
@@ -371,7 +372,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       assertFalse(diagnosticBehavior.isDone());
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(32.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(36.0);
       assertTrue(success);
 
       assertTrue(diagnosticBehavior.isDone());
@@ -380,7 +381,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -395,7 +396,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -403,7 +404,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -411,15 +412,15 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      BehaviorControlModePacket stopModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.STOP);
+      BehaviorControlModePacket stopModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.STOP);
       behaviorCommunicatorClient.send(stopModePacket);
       PrintTools.debug(this, "Sending Stop Request");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseTwoSecondsAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseTwoSecondsAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterStop.getPositionDistance(poseBeforeStop);
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
@@ -429,7 +430,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -444,7 +445,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -452,7 +453,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -460,21 +461,21 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      BehaviorControlModePacket pauseModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
+      BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
       behaviorCommunicatorClient.send(pauseModePacket);
       PrintTools.debug(this, "Sending Pause Request");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseTwoSecondsAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseTwoSecondsAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterPause.getPositionDistance(poseBeforePause);
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
-      BehaviorControlModePacket resumeModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.RESUME);
+      BehaviorControlModePacket resumeModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.RESUME);
       behaviorCommunicatorClient.send(resumeModePacket);
       PrintTools.debug(this, "Sending Resume Request");
 
@@ -485,50 +486,50 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       }
 
       assertTrue(walkToLocationBehavior.isDone());
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private FramePose2d offsetCurrentRobotMidFeetZUpPose(double walkDistance)
+   private FramePose2D offsetCurrentRobotMidFeetZUpPose(double walkDistance)
    {
-      FramePose2d targetMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D targetMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       targetMidFeetPose.setX(targetMidFeetPose.getX() + walkDistance);
 
       return targetMidFeetPose;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
+   private FramePose2D getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose midFeetPose = getRobotMidFeetPose(robot);
+      FramePose3D midFeetPose = getRobotMidFeetPose(robot);
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
+   private FramePose3D getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
-      FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
+      FramePose3D leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
+      FramePose3D rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
 
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.interpolate(leftFootPose, rightFootPose, 0.5);
 
       return ret;
    }
 
-   private FramePose getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   private FramePose3D getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();
       RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
-      FramePose ret = new FramePose();
-      ret.setPose(ankleTransformToWorld);
+      FramePose3D ret = new FramePose3D();
+      ret.set(ankleTransformToWorld);
 
       return ret;
    }
@@ -539,21 +540,21 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       Quaternion desiredPelvisQuat = new Quaternion();
       desiredPelvisQuat.set(desiredPelvisAxisAngle);
 
-      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);
+      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);
       return pelvisOrientationTrajectoryMessage;
    }
 
-   private FramePose getCurrentPelvisPose()
+   private FramePose3D getCurrentPelvisPose()
    {
       fullRobotModel.updateFrames();
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d framePose1, FramePose2d framePose2)
+   private void assertPosesAreWithinThresholds(FramePose2D framePose1, FramePose2D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
@@ -572,7 +573,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
             ORIENTATION_THRESHOLD);
    }
 
-   private void assertOrientationsAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   private void assertOrientationsAreWithinThresholds(FramePose3D framePose1, FramePose3D framePose2)
    {
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
 

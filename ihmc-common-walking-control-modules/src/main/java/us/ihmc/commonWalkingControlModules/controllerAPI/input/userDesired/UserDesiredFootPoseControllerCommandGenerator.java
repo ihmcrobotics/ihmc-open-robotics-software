@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -10,9 +11,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,15 +27,15 @@ public class UserDesiredFootPoseControllerCommandGenerator
 
    private final YoEnum<RobotSide> userFootPoseSide = new YoEnum<RobotSide>("userFootPoseSide", registry, RobotSide.class);
 
-   private final YoFramePose userDesiredFootPose;
+   private final YoFramePoseUsingYawPitchRoll userDesiredFootPose;
    
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
-   private final FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
    
    public UserDesiredFootPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      userDesiredFootPose = new YoFramePose("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
+      userDesiredFootPose = new YoFramePoseUsingYawPitchRoll("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -53,7 +53,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                userDesiredFootPose.getFramePose(framePose);
                ReferenceFrame soleZUpFrame = ankleZUpFrames.get(userFootPoseSide.getEnumValue());
                soleZUpFrame.update();
-               framePose.setIncludingFrame(soleZUpFrame, framePose.getGeometryObject());
+               framePose.setIncludingFrame(soleZUpFrame, framePose);
 
                framePose.changeFrame(ReferenceFrame.getWorldFrame());
                System.out.println("framePose " + framePose);
@@ -62,12 +62,12 @@ public class UserDesiredFootPoseControllerCommandGenerator
                
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
                trajectoryPoint.setTime(userDesiredFootPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.setPosition(framePose.getFramePointCopy());
-               trajectoryPoint.setOrientation(framePose.getFrameOrientationCopy());
+               trajectoryPoint.setPosition(framePose.getPosition());
+               trajectoryPoint.setOrientation(framePose.getOrientation());
                trajectoryPoint.setLinearVelocity(new Vector3D());
                trajectoryPoint.setAngularVelocity(new Vector3D());
     
-               footTrajectoryControllerCommand.addTrajectoryPoint(trajectoryPoint);
+               footTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
                
                footTrajectoryControllerCommand.setRobotSide(userFootPoseSide.getEnumValue());
 

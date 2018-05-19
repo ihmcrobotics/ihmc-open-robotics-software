@@ -26,12 +26,13 @@
    * Upload log video to YouTube and link
 
 ## Releasing
-1. Start release with git flow.
-1. Run `gradle compositeTask -PtaskName=publish -PpublishMode=STABLE`
-1. Verify publish on Bintray, approve it.
+1. Start release with git flow
+1. Run `gradle publishAll -PpublishUrl=ihmcRelease --console=plain --continue`
+1. In `ihmc-robot-data-logger`, run `gradle publishLoggerDistributionToBintray`
+1. Verify publish on Bintray, approve it
 1. If publish fails, increment hotfix digit and try again. (e.g. `0.11.X`)
-1. Tag the release with the version number and a simple annotated message.
-1. Finish release with git flow.
+1. Tag the release with the version number and a simple annotated message
+1. Finish release with git flow
 
 ## Polishing Release
 

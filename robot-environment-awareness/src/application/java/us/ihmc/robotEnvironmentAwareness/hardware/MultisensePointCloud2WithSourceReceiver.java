@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -44,9 +45,9 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
       Quaternion lidarQuaternion = new Quaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
 
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
-      lidarScanMessage.setLidarPosition(lidarPosition);
-      lidarScanMessage.setLidarOrientation(lidarQuaternion);
-      lidarScanMessage.setScan(points);
+      lidarScanMessage.getLidarPosition().set(lidarPosition);
+      lidarScanMessage.getLidarOrientation().set(lidarQuaternion);
+      MessageTools.packScan(lidarScanMessage, points);
 
       packetCommunicator.send(lidarScanMessage);
    }

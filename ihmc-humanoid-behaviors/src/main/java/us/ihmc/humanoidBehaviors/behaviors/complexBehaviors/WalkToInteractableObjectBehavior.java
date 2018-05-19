@@ -2,9 +2,11 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import com.jme3.math.Quaternion;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,9 +18,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
 {
@@ -36,15 +37,13 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame midZupFrame;
 
-   public WalkToInteractableObjectBehavior(YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToInteractableObjectBehavior(YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("WalkState", WalkToObjectState.class, yoTime, outgoingCommunicationBridge);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
 
       reset = new ResetRobotBehavior(false, false, false, false, outgoingCommunicationBridge, yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-
       setupStateMachine();
    }
 
@@ -60,26 +59,24 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       return succeded;
    }
 
-   private void setupStateMachine()
+   @Override
+   protected WalkToObjectState configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkToObjectState, BehaviorAction> factory)
    {
-
-      BehaviorAction<WalkToObjectState> resetRobot = new BehaviorAction<WalkToObjectState>(WalkToObjectState.GET_READY_TO_WALK, reset)
+      BehaviorAction resetRobot = new BehaviorAction(reset)
       {
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Ready To Walk");
-            sendPacket(p1);
+            sendPacket(MessageTools.createTextToSpeechPacket("Getting Ready To Walk"));
          }
       };
 
-      BehaviorAction<WalkToObjectState> walkToPoint1Task = new BehaviorAction<WalkToObjectState>(WalkToObjectState.WALK_TO_POINT_1,
-            atlasPrimitiveActions.walkToLocationPlannedBehavior)
+      BehaviorAction walkToPoint1Task = new BehaviorAction(atlasPrimitiveActions.walkToLocationPlannedBehavior)
       {
 
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point One");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point One");
             sendPacket(p1);
             walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
@@ -93,20 +90,19 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
-                  JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
+            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
+                                                       JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };
 
-      BehaviorAction<WalkToObjectState> walkToPoint2Task = new BehaviorAction<WalkToObjectState>(WalkToObjectState.WALK_TO_POINT_2,
-            atlasPrimitiveActions.walkToLocationPlannedBehavior)
+      BehaviorAction walkToPoint2Task = new BehaviorAction(atlasPrimitiveActions.walkToLocationPlannedBehavior)
       {
 
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point Two");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point Two");
             sendPacket(p1);
 
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
@@ -120,65 +116,54 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
-                  JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
+            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
+                                                       JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };
 
-      BehaviorAction<WalkToObjectState> failedState = new BehaviorAction<WalkToObjectState>(WalkToObjectState.FAILED,
-            new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
       {
          protected void setBehaviorInput()
          {
             succeded = false;
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walk Failed");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Failed");
             sendPacket(p1);
          }
       };
 
-      BehaviorAction<WalkToObjectState> doneState = new BehaviorAction<WalkToObjectState>(WalkToObjectState.DONE,
-            new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
       {
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walk Complete");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Complete");
             sendPacket(p1);
          }
       };
 
-      StateTransitionCondition planFailedCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return atlasPrimitiveActions.walkToLocationPlannedBehavior.isDone() && !atlasPrimitiveActions.walkToLocationPlannedBehavior.walkSucceded();
-         }
-      };
+      factory.addStateAndDoneTransition(WalkToObjectState.GET_READY_TO_WALK, resetRobot, WalkToObjectState.WALK_TO_POINT_1);
+      factory.addState(WalkToObjectState.WALK_TO_POINT_1, walkToPoint1Task);
+      factory.addTransition(WalkToObjectState.WALK_TO_POINT_1, WalkToObjectState.WALK_TO_POINT_2, t -> isDone() && hasWalkingSucceded());
+      factory.addTransition(WalkToObjectState.WALK_TO_POINT_1, WalkToObjectState.FAILED, t -> isDone() && !hasWalkingSucceded());
 
-      StateTransitionCondition planSuccededCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return atlasPrimitiveActions.walkToLocationPlannedBehavior.isDone() && atlasPrimitiveActions.walkToLocationPlannedBehavior.walkSucceded();
-         }
-      };
+      factory.addState(WalkToObjectState.WALK_TO_POINT_2, walkToPoint2Task);
+      factory.addTransition(WalkToObjectState.WALK_TO_POINT_2, WalkToObjectState.DONE, t -> isDone() && hasWalkingSucceded());
+      factory.addTransition(WalkToObjectState.WALK_TO_POINT_2, WalkToObjectState.FAILED, t -> isDone() && !hasWalkingSucceded());
 
-      statemachine.addStateWithDoneTransition(resetRobot, WalkToObjectState.WALK_TO_POINT_1);
-      statemachine.addState(walkToPoint1Task);
-      walkToPoint1Task.addStateTransition(WalkToObjectState.FAILED, planFailedCondition);
-      walkToPoint1Task.addStateTransition(WalkToObjectState.WALK_TO_POINT_2, planSuccededCondition);
+      factory.addStateAndDoneTransition(WalkToObjectState.FAILED, failedState, WalkToObjectState.DONE);
+      factory.addState(WalkToObjectState.DONE, doneState);
 
-      statemachine.addState(walkToPoint2Task);
+      return WalkToObjectState.GET_READY_TO_WALK;
+   }
 
-      walkToPoint2Task.addStateTransition(WalkToObjectState.FAILED, planFailedCondition);
-      walkToPoint2Task.addStateTransition(WalkToObjectState.DONE, planSuccededCondition);
+   private boolean isDoneWalking()
+   {
+      return atlasPrimitiveActions.walkToLocationPlannedBehavior.isDone();
+   }
 
-      statemachine.addStateWithDoneTransition(failedState, WalkToObjectState.DONE);
-      statemachine.addState(doneState);
-
-      statemachine.setStartState(WalkToObjectState.GET_READY_TO_WALK);
+   private boolean hasWalkingSucceded()
+   {
+      return atlasPrimitiveActions.walkToLocationPlannedBehavior.walkSucceded();
    }
 
    public void setWalkPoints(FramePoint3D walkToPoint1, FramePoint3D walkToPoint2)

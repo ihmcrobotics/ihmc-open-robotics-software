@@ -10,27 +10,28 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SphereDetectionBehavior extends AbstractBehavior
 {
@@ -90,7 +91,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    {
       if (pointCloudQueue.isNewPacketAvailable())
       {
-         findBallsAndSaveResult(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
+         findBallsAndSaveResult(HumanoidMessageTools.getDecayingWorldScan(pointCloudQueue.getLatestPacket()));
       }
    }
 
@@ -105,9 +106,9 @@ public class SphereDetectionBehavior extends AbstractBehavior
       for (Sphere3D_F64 ball : balls)
       {
          id++;
-         RigidBodyTransform t = new RigidBodyTransform();
-         t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
-         sendPacket(new DetectedObjectPacket(t, 4));
+         Pose3D t = new Pose3D();
+         t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         sendPacket(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 
       if (balls.size() > 0)
@@ -128,17 +129,17 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
 
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
-      pointCloudWorldPacket.setDestination(PacketDestination.UI);
+      pointCloudWorldPacket.setDestination(PacketDestination.UI.ordinal());
       pointCloudWorldPacket.setTimestamp(System.nanoTime());
       Point3D[] points3d = new Point3D[points.length];
       for (int i = 0; i < points.length; i++)
       {
          points3d[i] = new Point3D(points[i]);
       }
-      pointCloudWorldPacket.setDecayingWorldScan(points3d);
+      HumanoidMessageTools.setDecayingWorldScan(points3d, pointCloudWorldPacket);
       Point3D[] groundQuadTree = new Point3D[1];
       groundQuadTree[0] = new Point3D();
-      pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
+      HumanoidMessageTools.setGroundQuadTreeSupport(groundQuadTree, pointCloudWorldPacket);
 
       sendPacket(pointCloudWorldPacket);
    }

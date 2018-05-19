@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -28,6 +29,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
@@ -37,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
    private final boolean visualize = false;
@@ -82,7 +84,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createFootPolygons(footLength, footWidth);
-      PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, footPolygons);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       avoider.setPlanarRegions(planarRegionsList);
 
       SimulationConstructionSet scs = null;
@@ -93,7 +96,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          staticLinkGraphics.addCoordinateSystem(1.0);
-         staticLinkGraphics.addPlanarRegionsList(planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
+         Graphics3DObjectTools.addPlanarRegionsList(staticLinkGraphics, planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
          scs.addStaticLinkGraphics(staticLinkGraphics);
          scs.startOnAThread();
          ThreadTools.sleepForever();
@@ -142,7 +145,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       });
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createFootPolygons(footLength, footWidth);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, footPolygons);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
       double centerX = 1.0;
       double centerY = 1.0;

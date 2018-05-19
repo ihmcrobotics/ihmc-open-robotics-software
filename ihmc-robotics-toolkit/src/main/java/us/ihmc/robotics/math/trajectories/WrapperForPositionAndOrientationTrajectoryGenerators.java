@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 
 public class WrapperForPositionAndOrientationTrajectoryGenerators implements PoseTrajectoryGenerator
@@ -77,7 +77,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
    
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());

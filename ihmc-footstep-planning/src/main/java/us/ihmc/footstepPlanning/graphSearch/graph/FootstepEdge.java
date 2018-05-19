@@ -5,10 +5,14 @@ public class FootstepEdge
    private final FootstepNode startNode;
    private final FootstepNode endNode;
 
+   private final int hashCode;
+
    public FootstepEdge(FootstepNode startNode, FootstepNode endNode)
    {
       this.startNode = startNode;
       this.endNode = endNode;
+
+      hashCode = computeHashCode(this);
    }
 
    public FootstepNode getStartNode()
@@ -24,10 +28,15 @@ public class FootstepEdge
    @Override
    public int hashCode()
    {
+      return hashCode;
+   }
+
+   private static int computeHashCode(FootstepEdge edge)
+   {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((endNode == null) ? 0 : endNode.hashCode());
-      result = prime * result + ((startNode == null) ? 0 : startNode.hashCode());
+      result = prime * result + ((edge.endNode == null) ? 0 : edge.endNode.hashCode());
+      result = prime * result + ((edge.startNode == null) ? 0 : edge.startNode.hashCode());
       return result;
    }
 

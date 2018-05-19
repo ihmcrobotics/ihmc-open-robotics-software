@@ -5,6 +5,10 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+/**
+ * @deprecated This is not working anymore. See {@link ClearLidarBehavior}.
+ *
+ */
 public class SetLidarParametersBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
@@ -34,7 +38,7 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacket(lidarParamPacket);
+//         sendPacket(lidarParamPacket);
          packetHasBeenSent.set(true);
       }
    }

@@ -18,13 +18,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FlatGroundContactForceOptimizer
@@ -40,14 +40,14 @@ public class FlatGroundContactForceOptimizer
    private final YoDouble regWeight = new YoDouble("RegWeight", registry);
 
    private final List<List<FrameVector3D>> forceVectors = new ArrayList<>();
-   private final List<List<YoFrameVector>> yoGRFVectors = new ArrayList<>();
+   private final List<List<YoFrameVector3D>> yoGRFVectors = new ArrayList<>();
 
-   private final List<YoFramePoint> yoContactPoints = new ArrayList<>();
-   private final YoFramePoint yoCenterOfMass;
-   private final YoFrameVector yoForce;
-   private final YoFrameVector yoAchievedForce;
-   private final YoFrameVector yoTorque;
-   private final YoFrameVector yoAchievedTorque;
+   private final List<YoFramePoint3D> yoContactPoints = new ArrayList<>();
+   private final YoFramePoint3D yoCenterOfMass;
+   private final YoFrameVector3D yoForce;
+   private final YoFrameVector3D yoAchievedForce;
+   private final YoFrameVector3D yoTorque;
+   private final YoFrameVector3D yoAchievedTorque;
 
    private final QuadProgSolver solver = new QuadProgSolver();
 
@@ -65,12 +65,12 @@ public class FlatGroundContactForceOptimizer
 
       for (int n = 0; n < maxContactPointsForViz; n++)
       {
-         YoFramePoint yoContactPoint = new YoFramePoint("ContactPointPosition" + n, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D yoContactPoint = new YoFramePoint3D("ContactPointPosition" + n, ReferenceFrame.getWorldFrame(), registry);
          yoContactPoints.add(yoContactPoint);
 
          List<FrameVector3D> forceVectors = new ArrayList<>();
-         List<YoFrameVector> yoForceVectors = new ArrayList<>();
-         List<YoFrameVector> yoGRFVectors = new ArrayList<>();
+         List<YoFrameVector3D> yoForceVectors = new ArrayList<>();
+         List<YoFrameVector3D> yoGRFVectors = new ArrayList<>();
 
          for (int i = 0; i < vectorsPerContact; i++)
          {
@@ -80,8 +80,8 @@ public class FlatGroundContactForceOptimizer
             FrameVector3D vector = new FrameVector3D(ReferenceFrame.getWorldFrame(), x, y, 1.0);
             vector.normalize();
             forceVectors.add(vector);
-            YoFrameVector yoVector = new YoFrameVector("ForceVector" + i + "Contact" + n, ReferenceFrame.getWorldFrame(), registry);
-            YoFrameVector yoGRFVector = new YoFrameVector("GRFVector" + i + "Contact" + n, ReferenceFrame.getWorldFrame(), registry);
+            YoFrameVector3D yoVector = new YoFrameVector3D("ForceVector" + i + "Contact" + n, ReferenceFrame.getWorldFrame(), registry);
+            YoFrameVector3D yoGRFVector = new YoFrameVector3D("GRFVector" + i + "Contact" + n, ReferenceFrame.getWorldFrame(), registry);
             yoForceVectors.add(yoVector);
             yoGRFVectors.add(yoGRFVector);
             yoVector.set(vector);
@@ -96,23 +96,23 @@ public class FlatGroundContactForceOptimizer
          this.forceVectors.add(forceVectors);
       }
 
-      yoCenterOfMass = new YoFramePoint("CenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+      yoCenterOfMass = new YoFramePoint3D("CenterOfMass", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicPosition comViz = new YoGraphicPosition("Center of Mass", yoCenterOfMass, 0.03, YoAppearance.Black());
       graphicsListRegistry.registerYoGraphic("Center of Mass", comViz);
 
-      yoForce = new YoFrameVector("force", ReferenceFrame.getWorldFrame(), registry);
+      yoForce = new YoFrameVector3D("force", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicVector forceViz = new YoGraphicVector("Desired Linear Momentum Rate", yoCenterOfMass, yoForce, 1.0, YoAppearance.Blue());
       graphicsListRegistry.registerYoGraphic("Desired Linear Momentum Rate", forceViz);
 
-      yoAchievedForce = new YoFrameVector("achievedForce", ReferenceFrame.getWorldFrame(), registry);
+      yoAchievedForce = new YoFrameVector3D("achievedForce", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicVector achievedForceViz = new YoGraphicVector("Achieved Linear Momentum Rate", yoCenterOfMass, yoAchievedForce, 1.0, transparentBlue);
       graphicsListRegistry.registerYoGraphic("Achieved Linear Momentum Rate", achievedForceViz);
 
-      yoTorque = new YoFrameVector("torque", ReferenceFrame.getWorldFrame(), registry);
+      yoTorque = new YoFrameVector3D("torque", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicVector torqueViz = new YoGraphicVector("Desired Angular Momentum Rate", yoCenterOfMass, yoTorque, 1.0, YoAppearance.Red());
       graphicsListRegistry.registerYoGraphic("Desired Angular Momentum Rate", torqueViz);
 
-      yoAchievedTorque = new YoFrameVector("achievedTorque", ReferenceFrame.getWorldFrame(), registry);
+      yoAchievedTorque = new YoFrameVector3D("achievedTorque", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicVector achievedTorqueViz = new YoGraphicVector("Achieved Angular Momentum Rate", yoCenterOfMass, yoAchievedTorque, 1.0, transparentRed);
       graphicsListRegistry.registerYoGraphic("Achieved Angular Momentum Rate", achievedTorqueViz);
 
@@ -184,14 +184,14 @@ public class FlatGroundContactForceOptimizer
          {
             int index = pointIdx + indexOffset;
             FrameVector3D contactForce = contactForces.get(index);
-            offset.sub(planeCenter.getPoint(), contactPoints.get(index).getPoint());
+            offset.sub(planeCenter, contactPoints.get(index));
             torqueVector.cross(forceVector, offset);
             resultForce.add(contactForce);
             resultTorque.add(torqueVector);
          }
          indexOffset += contactPointsInPlane;
 
-         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce.getVector(), resultTorque.getVector());
+         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce, resultTorque);
          wrenches.add(wrench);
       }
 
@@ -252,11 +252,11 @@ public class FlatGroundContactForceOptimizer
       for (int contactIdx = 0; contactIdx < contactPoints.size(); contactIdx++)
       {
          // vector from contact to center of mass
-         offset.sub(centerOfMass.getPoint(), contactPoints.get(contactIdx).getPoint());
+         offset.sub(centerOfMass, contactPoints.get(contactIdx));
 
          for (int vectorIdx = 0; vectorIdx < vectorsPerPoint; vectorIdx++)
          {
-            unitForce.set(forceVectors.get(contactIdx).get(vectorIdx).getVector());
+            unitForce.set(forceVectors.get(contactIdx).get(vectorIdx));
             unitTorque.cross(unitForce, offset);
 
             J.set(0, contactIdx * vectorsPerPoint + vectorIdx, unitTorque.getX());
@@ -318,11 +318,11 @@ public class FlatGroundContactForceOptimizer
          contactForce.setToZero();
          for (int vectorIdx = 0; vectorIdx < vectorsPerPoint; vectorIdx++)
          {
-            forceVector.set(forceVectors.get(contactIdx).get(vectorIdx).getVector());
+            forceVector.set(forceVectors.get(contactIdx).get(vectorIdx));
             forceVector.scale(x.get(contactIdx * vectorsPerPoint + vectorIdx));
             yoGRFVectors.get(contactIdx).get(vectorIdx).set(forceVector);
 
-            offset.sub(centerOfMass.getPoint(), contactPoints.get(contactIdx).getPoint());
+            offset.sub(centerOfMass, contactPoints.get(contactIdx));
             torqueVector.cross(forceVector, offset);
 
             contactForce.add(forceVector);
@@ -343,8 +343,8 @@ public class FlatGroundContactForceOptimizer
 
    public void getAchievedMomentumRate(FrameVector3D angularMomentumRateToPack, FrameVector3D linearMomentumRateToPack)
    {
-      yoAchievedTorque.getFrameTuple(angularMomentumRateToPack);
-      yoAchievedForce.getFrameTuple(linearMomentumRateToPack);
+      angularMomentumRateToPack.set(yoAchievedTorque);
+      linearMomentumRateToPack.set(yoAchievedForce);
    }
 
    private void hide()

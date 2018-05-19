@@ -2,9 +2,9 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
@@ -27,5 +27,5 @@ public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
 
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs();
 
-   public AuxiliaryRobotData getAuxiliaryRobotData();
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData();
 }

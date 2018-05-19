@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -30,7 +30,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -91,6 +91,7 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
+      parameters.setEnableJoystickBasedStepping(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
@@ -100,7 +101,7 @@ public class KinematicToolboxDiagnosticEnvironment
       {
 
          @Override
-         public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+         public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
          {
             return null;
          }
@@ -167,7 +168,7 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public AuxiliaryRobotData getAuxiliaryRobotData()
+         public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
          {
             return null;
          }

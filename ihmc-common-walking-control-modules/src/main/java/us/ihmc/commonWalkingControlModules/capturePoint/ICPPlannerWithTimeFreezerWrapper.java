@@ -9,13 +9,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreezerInterface
 {
@@ -199,7 +199,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointPosition(YoFramePoint desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(YoFramePoint3D desiredCapturePointPositionToPack)
    {
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePointPositionToPack);
    }
@@ -213,7 +213,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack)
    {
       icpPlanner.getDesiredCenterOfMassPosition(desiredCenterOfMassPositionToPack);
    }
@@ -234,7 +234,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack)
    {
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocityToPack);
    }
@@ -272,6 +272,34 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       icpPlanner.getDesiredCentroidalMomentumPivotVelocity(desiredCentroidalMomentumPivotVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressurePosition(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressurePosition(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressureVelocity(desiredCenterOfPressureVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressureVelocity(desiredCenterOfPressureVelocityToPack);
    }
 
    /** {@inheritDoc} */
@@ -421,7 +449,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack)
    {
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredCapturePointPositionToPack);
    }

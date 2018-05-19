@@ -27,8 +27,9 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  * acceleration of any rigid-body with respect to the {@code inertialFrame}.
  * <li>{@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAccelerationVector)} provides
  * the spatial acceleration of any rigid-body with respect to another rigid-body of the same system.
- * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)} provides
- * the linear acceleration of a point of a rigid-body with respect to the {@code inertialFrame}.
+ * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}
+ * provides the linear acceleration of a point of a rigid-body with respect to the
+ * {@code inertialFrame}.
  * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
  * provides the linear acceleration of a point of a rigid-body with respect to another rigid-body of
  * the same system.
@@ -41,12 +42,6 @@ public class SpatialAccelerationCalculator
     * The root body of the system for which this {@code SpatialAccelerationCalculator} is available.
     */
    private final RigidBody rootBody;
-   /**
-    * The spatial acceleration of the root body. Even assuming that the root is fixed in world,
-    * root's acceleration is usually set to be the opposite of the gravitational acceleration, such
-    * that the effect of the gravity is naturally propagated to the entire system.
-    */
-   private final SpatialAccelerationVector rootAcceleration;
    /**
     * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are
     * considered or ignored.
@@ -77,6 +72,12 @@ public class SpatialAccelerationCalculator
    /**
     * The list of up-to-date accelerations assigned to rigid-bodies. The association acceleration
     * <-> rigid-body can be retrieved using the map {@code rigidBodyToAssignedAccelerationIndex}.
+    * <p>
+    * The first element of this list is always for the spatial acceleration of the root body. Even
+    * assuming that the root is fixed in world, root's acceleration is usually set to be the
+    * opposite of the gravitational acceleration, such that the effect of the gravity is naturally
+    * propagated to the entire system.
+    * </p>
     */
    private final List<SpatialAccelerationVector> assignedAccelerations;
    /**
@@ -144,8 +145,6 @@ public class SpatialAccelerationCalculator
    {
       this.inertialFrame = rootAcceleration.getBaseFrame();
       this.rootBody = ScrewTools.getRootBody(body);
-      this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
-      setRootAcceleration(rootAcceleration);
       this.doVelocityTerms = doVelocityTerms;
       this.doAccelerationTerms = doAccelerationTerms;
       this.useDesiredAccelerations = useDesiredAccelerations;
@@ -153,10 +152,11 @@ public class SpatialAccelerationCalculator
       int numberOfRigidBodies = ScrewTools.computeSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
       while (unnassignedAccelerations.size() < numberOfRigidBodies)
          unnassignedAccelerations.add(new SpatialAccelerationVector());
-      assignedAccelerations = new ArrayList<>(numberOfRigidBodies);
       rigidBodiesWithAssignedAcceleration = new ArrayList<>(numberOfRigidBodies);
 
-      assignedAccelerations.add(rootAcceleration);
+      assignedAccelerations = new ArrayList<>(numberOfRigidBodies);
+      assignedAccelerations.add(new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame()));
+      setRootAcceleration(rootAcceleration);
       rigidBodiesWithAssignedAcceleration.add(rootBody);
       rigidBodyToAssignedAccelerationIndex.put(rootBody, new MutableInt(0));
    }
@@ -174,8 +174,8 @@ public class SpatialAccelerationCalculator
    public void setRootAcceleration(SpatialAccelerationVector newRootAcceleration)
    {
       ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
-      rootAcceleration.checkReferenceFramesMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
-      this.rootAcceleration.set(newRootAcceleration);
+      newRootAcceleration.checkReferenceFramesMatch(rootBodyFrame, inertialFrame, rootBodyFrame);
+      assignedAccelerations.get(0).set(newRootAcceleration);
    }
 
    /**
@@ -299,20 +299,20 @@ public class SpatialAccelerationCalculator
    /**
     * Temporary acceleration used for intermediate garbage free operations. To use only in the
     * method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
     */
    private final SpatialAccelerationVector accelerationForGetLinearAccelerationOfBodyFixedPoint = new SpatialAccelerationVector();
    /**
     * Temporary point used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
     */
    private final FramePoint3D pointForGetLinearAccelerationOfBodyFixedPoint = new FramePoint3D();
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint3D, FrameVector3D)}
+    * and {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint3D, FrameVector3D)}.
     */
    private final Twist twistForGetLinearAccelerationOfBodyFixedPoint = new Twist();
 

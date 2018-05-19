@@ -28,7 +28,7 @@ public class SmoothCapturePointToolboxTest
    private static final double omega0 = 3.4;
    private static final double EPSILON = 10e-6;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private Random random = new Random();
+   private Random random = new Random(5165415);
    
    YoVariableRegistry registry = new YoVariableRegistry("");
    String namePrefix = "SmoothCapturePointToolboxTest";
@@ -154,15 +154,15 @@ public class SmoothCapturePointToolboxTest
       
       for(int i = 0; i < nTests; i++)
       {
-         double scaleTFinal = 1.0 / Math.random();
-         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+         double scaleTFinal = 1.0 / random.nextDouble();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * random.nextDouble();
                     
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
-         double time = t0 + Math.random() * (tFinal - t0);
+         double time = t0 + random.nextDouble() * (tFinal - t0);
          
          DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
@@ -221,8 +221,8 @@ public class SmoothCapturePointToolboxTest
       
       for(int i = 0; i < nTests; i++)
       {
-         double scaleTFinal = 1.0 / Math.random();
-         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+         double scaleTFinal = 1.0 / random.nextDouble();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * random.nextDouble();
                     
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -232,7 +232,7 @@ public class SmoothCapturePointToolboxTest
          
          cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal,cmpDFinal);
          
-         double time = t0 + Math.random() * (tFinal - t0);
+         double time = t0 + random.nextDouble() * (tFinal - t0);
          
          DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
@@ -291,17 +291,17 @@ public class SmoothCapturePointToolboxTest
       
       for(int i = 0; i < nTests; i++)
       {
-         double scaleTFinal = 1.0 / Math.random();
-         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+         double scaleTFinal = 1.0 / random.nextDouble();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * random.nextDouble();
                     
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
-         double time = t0 + Math.random() * (tFinal - t0);
+         double time = t0 + random.nextDouble() * (tFinal - t0);
                   
-         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal);
          
          // Position
          FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
@@ -313,7 +313,7 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
 //         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
 
-         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent, icpPositionDesiredCurrentByHand, EPSILON);
          
          //Velocity
          FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
@@ -350,8 +350,8 @@ public class SmoothCapturePointToolboxTest
       
       for(int i = 0; i < nTests; i++)
       {
-         double scaleTFinal = 1.0 / Math.random();
-         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+         double scaleTFinal = 1.0 / random.nextDouble();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * random.nextDouble();
                     
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -362,9 +362,9 @@ public class SmoothCapturePointToolboxTest
          
          cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal, cmpDFinal);
          
-         double time = t0 + Math.random() * (tFinal - t0);
+         double time = t0 + random.nextDouble() * (tFinal - t0);
                   
-         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal);
          
          // Position
          FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
@@ -376,7 +376,7 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
 //         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
 
-         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent, icpPositionDesiredCurrentByHand, EPSILON);
          
          // Velocity
          FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
@@ -489,9 +489,9 @@ public class SmoothCapturePointToolboxTest
       double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
       
       icpVelocityDesiredCurrent.setToZero();
-      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit.getPoint()             , icpVelocityDesiredCurrent);
-      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal.getPoint()             , icpVelocityDesiredCurrent);
-      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal.getPoint(), icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
    }
    
    public static double calculateSigmaLinear(double t, double T, double omega0)

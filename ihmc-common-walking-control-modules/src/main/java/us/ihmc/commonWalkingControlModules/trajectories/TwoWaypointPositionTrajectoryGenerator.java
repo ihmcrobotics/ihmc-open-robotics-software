@@ -3,26 +3,26 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoConcatenatedSplines;
 import us.ihmc.robotics.trajectories.TwoWaypointTrajectoryGeneratorParameters;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -56,15 +56,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final YoBoolean setInitialSwingVelocityToZero;
 
-   private final YoFramePoint desiredPosition;
-   private final YoFrameVector desiredVelocity;
-   private final YoFrameVector desiredAcceleration;
+   private final YoFramePoint3D desiredPosition;
+   private final YoFrameVector3D desiredVelocity;
+   private final YoFrameVector3D desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
    private final YoDouble[] allTimes = new YoDouble[6];
-   protected final YoFramePoint[] allPositions = new YoFramePoint[6];
-   protected final YoFramePoint stancePosition;
-   private final YoFrameVector[] allVelocities = new YoFrameVector[6];
+   protected final YoFramePoint3D[] allPositions = new YoFramePoint3D[6];
+   protected final YoFramePoint3D stancePosition;
+   private final YoFrameVector3D[] allVelocities = new YoFrameVector3D[6];
 
    private final TrajectoryParametersProvider trajectoryParametersProvider;
    protected TrajectoryParameters trajectoryParameters;
@@ -128,9 +128,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
-      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
-      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+      desiredPosition = new YoFramePoint3D(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector3D(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector3D(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
       linearSplineLengthFactor = new YoDouble(namePrefix + "LinearSplineLengthFactor", registry);
 
@@ -139,10 +139,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 6; i++)
       {
          allTimes[i] = new YoDouble(namePrefix + "FixedPointTime" + i, registry);
-         allPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
-         allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
+         allPositions[i] = new YoFramePoint3D(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
+         allVelocities[i] = new YoFrameVector3D(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
-      stancePosition = new YoFramePoint(namePrefix + "StancePosition", referenceFrame, registry);
+      stancePosition = new YoFramePoint3D(namePrefix + "StancePosition", referenceFrame, registry);
 
       concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame,
             arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
@@ -181,17 +181,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAcceleration);
    }
 
    private void setStepTime()
@@ -361,23 +361,23 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          oppositeWaypointToEndpoint.normalize();
          oppositeWaypointToEndpoint.scale(scaleFactor);
 
-         allPositions[accelerationEndpointIndices[i]].set(allPositions[waypointIndices[i]].getFramePointCopy());
+         allPositions[accelerationEndpointIndices[i]].set(allPositions[waypointIndices[i]]);
          allPositions[accelerationEndpointIndices[i]].add(oppositeWaypointToEndpoint);
       }
    }
 
    private FrameVector3D getOppositeWaypointToEndpoint(int i)
    {
-      FrameVector3D oppositeWaypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
-      oppositeWaypointToEndpoint.sub(allPositions[oppositeWaypointIndices[i]].getFrameVectorCopy());
+      FrameVector3D oppositeWaypointToEndpoint = new FrameVector3D(allPositions[endpointIndices[i]]);
+      oppositeWaypointToEndpoint.sub(allPositions[oppositeWaypointIndices[i]]);
 
       return oppositeWaypointToEndpoint;
    }
 
    private FrameVector3D getWaypointToEndpoint(int i)
    {
-      FrameVector3D waypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
-      waypointToEndpoint.sub(allPositions[waypointIndices[i]].getFrameVectorCopy());
+      FrameVector3D waypointToEndpoint = new FrameVector3D(allPositions[endpointIndices[i]]);
+      waypointToEndpoint.sub(allPositions[waypointIndices[i]]);
 
       return waypointToEndpoint;
    }
@@ -453,8 +453,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       if (waypointsAreCloseTogether())
       {
-         FramePoint3D midpoint = allPositions[waypointIndices[0]].getFramePointCopy();
-         midpoint.add(allPositions[waypointIndices[1]].getFramePointCopy());
+         FramePoint3D midpoint = new FramePoint3D(allPositions[waypointIndices[0]]);
+         midpoint.add(allPositions[waypointIndices[1]]);
          midpoint.scale(0.5);
 
          for (int i = 0; i < 2; i++)
@@ -501,8 +501,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private List<FramePoint3D> getWaypointsForObstacleClearance(double swingHeight)
    {
       List<FramePoint3D> waypoints = new ArrayList<FramePoint3D>();
-      waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
-      waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
+      waypoints.add(new FramePoint3D(allPositions[endpointIndices[0]]));
+      waypoints.add(new FramePoint3D(allPositions[endpointIndices[1]]));
 
       double zSwingHeight = waypoints.get(0).getZ() + swingHeight;
 
@@ -514,8 +514,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoint.setZ(zSwingHeight);
       }
 
-      FrameVector3D planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
-      planarEndpointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
+      FrameVector3D planarEndpointOffset = new FrameVector3D(allPositions[endpointIndices[1]]);
+      planarEndpointOffset.sub(allPositions[endpointIndices[0]]);
       planarEndpointOffset.setZ(0.0);
 
       double[] fractionsOfStepDistanceToMoveWaypointForStepOnOrOff = TwoWaypointTrajectoryGeneratorParameters
@@ -548,8 +548,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint3D> getWaypointsAtGroundClearance(double groundClearance, double[] proportionsThroughTrajectoryForGroundClearance)
    {
-      FramePoint3D initialPosition = allPositions[0].getFramePointCopy();
-      FramePoint3D finalPosition = allPositions[3].getFramePointCopy();
+      FramePoint3D initialPosition = new FramePoint3D(allPositions[0]);
+      FramePoint3D finalPosition = new FramePoint3D(allPositions[3]);
       positionSources[0].getPosition(initialPosition);
       positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
@@ -587,8 +587,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint3D> getWaypointsAtGroundClearances(double[] groundClearances, double[] proportionsThroughTrajectoryForGroundClearance)
    {
-      FramePoint3D initialPosition = allPositions[0].getFramePointCopy();
-      FramePoint3D finalPosition = allPositions[3].getFramePointCopy();
+      FramePoint3D initialPosition = new FramePoint3D(allPositions[0]);
+      FramePoint3D finalPosition = new FramePoint3D(allPositions[3]);
       positionSources[0].getPosition(initialPosition);
       positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
@@ -625,8 +625,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 4; i++)
       {
          nonAccelerationEndpointTimes[i] = allTimes[nonAccelerationEndpointIndices[i]].getDoubleValue();
-         nonAccelerationEndpointPositions[i] = allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy();
-         nonAccelerationEndpointVelocities[i] = allVelocities[nonAccelerationEndpointIndices[i]].getFrameVectorCopy();
+         nonAccelerationEndpointPositions[i] = new FramePoint3D(allPositions[nonAccelerationEndpointIndices[i]]);
+         nonAccelerationEndpointVelocities[i] = new FrameVector3D(allVelocities[nonAccelerationEndpointIndices[i]]);
       }
 
       for (int i = 0; i < 2; i++)
@@ -650,12 +650,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
          t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
          compute(t);
-         trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+         trajectoryBagOfBalls.setBall(desiredPosition, i);
       }
 
       for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
       {
-         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
+         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]], YoAppearance.AliceBlue(), i);
       }
    }
 
@@ -684,8 +684,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public void informDone()
    {
-      desiredPosition.setToZero(true);
-      desiredVelocity.setToZero(true);
-      desiredAcceleration.setToZero(true);
+      desiredPosition.setToZero();
+      desiredVelocity.setToZero();
+      desiredAcceleration.setToZero();
    }
 }

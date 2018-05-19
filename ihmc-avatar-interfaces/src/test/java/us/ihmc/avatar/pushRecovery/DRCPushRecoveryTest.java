@@ -8,29 +8,30 @@ import java.io.InputStream;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -281,14 +282,14 @@ public abstract class DRCPushRecoveryTest
       setupTest(null, false, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
-      FramePose footPose = new FramePose(
+      FramePose3D footPose = new FramePose3D(
             drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
       footPose.prependTranslation(0.0, 0.0, 0.2);
       Point3D desiredFootPosition = new Point3D();
       Quaternion desiredFootOrientation = new Quaternion();
-      footPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootTrajectoryMessage footPosePacket = new FootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
+      footPose.get(desiredFootPosition, desiredFootOrientation);
+      FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
       drcSimulationTestHelper.send(footPosePacket);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
@@ -336,10 +337,10 @@ public abstract class DRCPushRecoveryTest
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+               footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
          final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+               "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -367,7 +368,7 @@ public abstract class DRCPushRecoveryTest
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -386,7 +387,7 @@ public abstract class DRCPushRecoveryTest
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

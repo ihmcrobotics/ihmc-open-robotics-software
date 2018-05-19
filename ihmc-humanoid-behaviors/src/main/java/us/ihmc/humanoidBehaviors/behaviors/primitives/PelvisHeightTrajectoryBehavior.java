@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -31,7 +31,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
       this.outgoingPelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessage;
-         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getLastTrajectoryPoint().getZ());
+         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().getLast().getPosition().getZ());
       hasInputBeenSet.set(true);
    }
 
@@ -48,12 +48,12 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
-         outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
+         outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
          sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
       }
    }
 

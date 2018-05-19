@@ -21,7 +21,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.2)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -68,13 +68,13 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
             traj.compute(time);
             traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-            currentAngularVelocity.get(angularVelocityVector);
+            angularVelocityVector.set(currentAngularVelocity);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
             quaternionFromIntegration.set(orientationFromIntegration);
             quaternionFromIntegration.multiply(integratedAngularVelocity, quaternionFromIntegration);
             orientationFromIntegration.set(quaternionFromIntegration);
 
-            currentAngularAcceleration.get(integratedAngularAcceleration);
+            integratedAngularAcceleration.set(currentAngularAcceleration);
             integratedAngularAcceleration.scale(dt);
             angularVelocityFromIntegration.add(integratedAngularAcceleration);
 
@@ -84,7 +84,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
@@ -145,7 +145,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
@@ -247,7 +247,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {

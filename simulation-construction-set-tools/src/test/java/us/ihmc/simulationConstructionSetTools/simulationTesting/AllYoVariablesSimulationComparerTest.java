@@ -156,7 +156,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertEquals(yoDouble4, differences.get(0)[1]);
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testWithLowEpsilon()
 	{
@@ -185,7 +185,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
 	public void testWithHighEpsilon()
 	{

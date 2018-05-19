@@ -417,7 +417,6 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twist1 = new Twist(frameB, frameA, frameB, linearVelocity1, angularVelocity1);
 
       FrameVector3D expectedFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      Vector3D expected = expectedFrameVector.getVector();
       twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
 
       FrameVector3D actual = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -426,12 +425,13 @@ public class TwistTest extends SpatialMotionVectorTest
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, actual, 1e-6);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedFrameVector, actual, 1e-6);
    }
 
    /**
     * This test is used to prove that the reference frame in which the linear velocity of a body fixed point in computed in does not matter.
     */
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetLinearVelocityOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
    {
@@ -465,7 +465,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
          // Verify that they are the same
          bodyFixedPointLinearVelocityInBody.changeFrame(baseFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase.getVector(), bodyFixedPointLinearVelocityInBody.getVector(), 1.0e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase, bodyFixedPointLinearVelocityInBody, 1.0e-12);
       }
    }
 
@@ -501,7 +501,7 @@ public class TwistTest extends SpatialMotionVectorTest
       Vector3D velocityNumerical = new Vector3D(newPosition);
       velocityNumerical.sub(oldPosition);
       velocityNumerical.scale(1.0 / dt);
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, bodyOriginLinearPart.getVector(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, bodyOriginLinearPart, 1e-5);
 
       Matrix3D angularVelocityMatrix = new Matrix3D(newRotation);
       angularVelocityMatrix.sub(oldRotation);
@@ -537,7 +537,7 @@ public class TwistTest extends SpatialMotionVectorTest
       twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
 
       double delta = 1e-15;
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), velocityOfStationaryPoint.getVector(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), velocityOfStationaryPoint, delta);
    }
 
    /**

@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,7 +29,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide stanceSide)
+   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
    {
       internalPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
    }
@@ -65,7 +65,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
          try
          {
-            FramePose solePose = new FramePose();
+            FramePose3D solePose = new FramePose3D();
             footstep.getSoleFramePose(solePose);
             ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()));
             footstep.setSoleFramePose(solePose);

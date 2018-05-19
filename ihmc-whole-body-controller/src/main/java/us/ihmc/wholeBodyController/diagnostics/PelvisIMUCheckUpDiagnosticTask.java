@@ -20,7 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -55,7 +55,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    private final YoFunctionGenerator functionGenerator;
    private final YoDouble checkUpDuration;
 
-   private final YoFrameVector imuAngularVelocityInPelvis;
+   private final YoFrameVector3D imuAngularVelocityInPelvis;
    private final EnumMap<Axis, YoDouble> meanOfJointVelocities = new EnumMap<>(Axis.class);
 
    private final YoDouble rampDuration;
@@ -124,7 +124,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-      imuAngularVelocityInPelvis = new YoFrameVector("qd_w", imuName + "PelvisFrame", pelvisFrame, registry);
+      imuAngularVelocityInPelvis = new YoFrameVector3D("qd_w", imuName + "PelvisFrame", pelvisFrame, registry);
 
       checkUpDuration = new YoDouble(imuName + nameSuffix + "Duration", registry);
       checkUpDuration.set(diagnosticParameters.getJointCheckUpDuration());
@@ -296,8 +296,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       FrameVector3D tempAngularVelocity = new FrameVector3D(imuSensor.getMeasurementFrame());
-      imuSensor.getAngularVelocityMeasurement(tempAngularVelocity.getVector());
-      imuAngularVelocityInPelvis.setAndMatchFrame(tempAngularVelocity);
+      tempAngularVelocity.set(imuSensor.getAngularVelocityMeasurement());
+      imuAngularVelocityInPelvis.setMatchingFrame(tempAngularVelocity);
 
       // Really hackish, but it should work.
       // The idea is to compare the joint velocities against the IMU velocity to look for delay.
@@ -330,7 +330,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       double referenceSignalCurrentPosition = meanOfJointVelocities.get(currentAxis).getDoubleValue();
-      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.get(currentAxis);
+      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.getElement(currentAxis.ordinal());
       delayEstimator.update(referenceSignalCurrentPosition, delayedSignalCurrentPosition);
 
       if (delayEstimator.isEstimatingDelay())

@@ -3,15 +3,16 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -75,12 +76,13 @@ public class ValkyrieHandStateCommunicator implements RobotController
          HandJointAnglePacket packet = buffer.next();
          if (packet != null)
          {
-            packet.robotSide = robotSide;
+            packet.setRobotSide(robotSide.toByte());
+            packet.getJointAngles().reset();
 
             for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
             {
                double q = handJoints.get(robotSide).get(jointEnum).getQ();
-               packet.jointAngles[jointEnum.getIndex(robotSide)] = q;
+               packet.getJointAngles().add(q);
             }
             buffer.commit();
          }
@@ -137,7 +139,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
       public HandJointAnglePacket newInstance()
       {
          double[] handJoints = new double[ValkyrieHandJointName.values.length];
-         return new HandJointAnglePacket(null, false, false, handJoints);
+         return HumanoidMessageTools.createHandJointAnglePacket(null, false, false, handJoints);
       }
    }
 }

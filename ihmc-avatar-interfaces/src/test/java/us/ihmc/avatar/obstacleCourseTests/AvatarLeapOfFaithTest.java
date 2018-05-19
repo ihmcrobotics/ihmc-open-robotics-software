@@ -8,6 +8,9 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
@@ -16,9 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -62,6 +63,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+
    public void testUnknownStepDownTwoFeetOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -83,12 +85,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       // take care of steps down
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
@@ -97,14 +100,14 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          RobotSide robotSide = RobotSide.LEFT;
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          // step in place
          robotSide = robotSide.getOppositeSide();
          stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) * stepLength, 0.0, -(stepNumber + 1) * stepDownHeight);
          footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
       }
 
@@ -115,7 +118,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -124,7 +127,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       // step forward
       FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
 
@@ -134,11 +137,11 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testUnknownStepDownOneFootOnEachStepLong(double stepDownHeight) throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepLong(double stepLength, double stairLength, double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -146,9 +149,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double transferTime = 0.2;
 
       int numberOfStepsDown = 5;
-      double stepLength = 0.5;
 
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
@@ -159,82 +161,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
-
-      RobotSide robotSide = RobotSide.LEFT;
-      // take care of steps down
-      for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
-      {
-         // step forward
-         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
-         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
-         executionDuration += transferTime + swingTime;
-
-         robotSide = robotSide.getOppositeSide();
-      }
-
-      int numberOfClosingSteps = 3;
-      for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
-      {
-         // step forward
-         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
-         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
-         executionDuration += transferTime + swingTime;
-
-         robotSide = robotSide.getOppositeSide();
-      }
-
-      // step forward
-      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
-      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
-      executionDuration += transferTime + swingTime;
-
-
-      message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
-
-      double timeOverrunFactor = 1.2;
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
-
-      assertTrue(success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
-
-   public void testUnknownStepDownOneFootOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      double swingTime = 1.0;
-      double transferTime = 0.2;
-
-      int numberOfStepsDown = 5;
-      double stepLength = 0.35;
-
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
-      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
-
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-
-      setupCameraForWalkingUpToRamp();
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
-
-      double executionDuration = 0.0;
-
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -243,7 +176,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -255,7 +188,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -264,7 +197,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       // step forward
       FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
 
@@ -274,12 +207,11 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
-   public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight) throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStep(double stepLength, double stairLength, double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -287,9 +219,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double transferTime = 0.2;
 
       int numberOfStepsDown = 5;
-      double stepLength = 0.38;
 
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
@@ -300,12 +231,85 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+
+      message.setAreFootstepsAdjustable(true);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      // take care of steps down
+      for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
+      {
+         // step forward
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.getFootstepDataList().add().set(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      int numberOfClosingSteps = 3;
+      for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
+      {
+         // step forward
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.getFootstepDataList().add().set(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // step forward
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+      message.getFootstepDataList().add().set(footstepData);
+      executionDuration += transferTime + swingTime;
+
+
+      message.setOffsetFootstepsWithExecutionError(true);
+      drcSimulationTestHelper.send(message);
+
+      double timeOverrunFactor = 1.2;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
+
+      assertTrue("Robot had an exception, probably fell.", success);
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+
+   public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight, double stepLength, double stairLength) throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      double swingTime = 1.0;
+      double transferTime = 0.2;
+
+      int numberOfStepsDown = 5;
+
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
+
+      double executionDuration = 0.0;
+
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -314,7 +318,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight + RandomNumbers.nextDouble(random, 0.6 * stepDownHeight));
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -326,7 +330,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -335,7 +339,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       // step square
       FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
 
@@ -345,7 +349,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -362,26 +366,35 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double minStepLength = 0.3;
       double maxStepLength = 0.6;
       double endingStepLength = 0.3;
+      double stepFraction = 0.8;
 
       ArrayList<Double> stepHeights = new ArrayList<>();
       ArrayList<Double> stepLengths = new ArrayList<>();
+      ArrayList<Double> stairLengths = new ArrayList<>();
 
       double previousStepHeight = 0.0;
       boolean didDrop = false;
       for (int i = 0; i < numberOfSteps; i++)
       {
          double maxHeight = Math.min(previousStepHeight + maxStepIncrease, maxStepHeight);
-         double stepLength = RandomNumbers.nextDouble(random, minStepLength, maxStepLength);
-         double stepHeight;
+         double stairLength = RandomNumbers.nextDouble(random, minStepLength, maxStepLength);
+         double stepHeight, stepLength;
          if (didDrop)
+         {
             stepHeight = Math.min(0.0, maxHeight);
+            stepLength = stairLength;
+         }
          else
+         {
             stepHeight = RandomNumbers.nextDouble(random, minStepHeight, maxHeight);
+            stepLength = stepFraction * stairLength;
+         }
 
          previousStepHeight = stepHeight;
 
          stepHeights.add(stepHeight);
          stepLengths.add(stepLength);
+         stairLengths.add(stairLength);
 
          if (didDrop)
             didDrop = false;
@@ -390,7 +403,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       double starterLength = 0.35;
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, 0.0);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stairLengths, starterLength, 0.0, 0.0);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
@@ -401,13 +414,15 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
+      message.setOffsetFootstepsWithExecutionError(true);
       RobotSide robotSide = RobotSide.LEFT;
       // take care of random steps
       for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
@@ -418,7 +433,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, 0.0);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
 
          executionDuration += transferTime + swingTime;
          robotSide = robotSide.getOppositeSide();
@@ -431,7 +446,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          distanceTraveled += endingStepLength;
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -440,7 +455,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       // step forward
       FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
 
@@ -450,7 +465,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -506,7 +521,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       RobotSide robotSide = RobotSide.LEFT;
 
       int numberOfSteps = stepLengths.size();
@@ -520,7 +536,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
 
          stepHeight = stepHeights.get(stepNumber);
 
@@ -535,7 +551,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          distanceTraveled += stepLength;
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          executionDuration += transferTime + swingTime;
 
          robotSide = robotSide.getOppositeSide();
@@ -544,7 +560,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       // step forward
       FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
       drcSimulationTestHelper.send(message);
@@ -552,7 +568,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -564,9 +580,9 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(robotSide);
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;
    }

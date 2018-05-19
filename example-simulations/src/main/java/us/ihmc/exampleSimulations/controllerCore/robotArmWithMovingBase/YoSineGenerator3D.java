@@ -1,40 +1,39 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSineGenerator3D implements PositionTrajectoryGenerator
 {
-   private final YoFrameVector offset;
-   private final YoFrameVector amplitude;
-   private final YoFrameVector frequency;
-   private final YoFrameVector phase;
+   private final YoFrameVector3D offset;
+   private final YoFrameVector3D amplitude;
+   private final YoFrameVector3D frequency;
+   private final YoFrameVector3D phase;
 
-   private final YoFramePoint position;
-   private final YoFrameVector velocity;
-   private final YoFrameVector acceleration;
+   private final YoFramePoint3D position;
+   private final YoFrameVector3D velocity;
+   private final YoFrameVector3D acceleration;
 
    public YoSineGenerator3D(String namePrefix, ReferenceFrame signalFrame, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      offset = new YoFrameVector(namePrefix + "Offset", signalFrame, registry);
-      amplitude = new YoFrameVector(namePrefix + "Amplitude", signalFrame, registry);
-      frequency = new YoFrameVector(namePrefix + "Frequency", signalFrame, registry);
-      phase = new YoFrameVector(namePrefix + "Phase", signalFrame, registry);
+      offset = new YoFrameVector3D(namePrefix + "Offset", signalFrame, registry);
+      amplitude = new YoFrameVector3D(namePrefix + "Amplitude", signalFrame, registry);
+      frequency = new YoFrameVector3D(namePrefix + "Frequency", signalFrame, registry);
+      phase = new YoFrameVector3D(namePrefix + "Phase", signalFrame, registry);
 
-      position = new YoFramePoint(namePrefix + "Position", signalFrame, registry);
-      velocity = new YoFrameVector(namePrefix + "Velocity", signalFrame, registry);
-      acceleration = new YoFrameVector(namePrefix + "Acceleration", signalFrame, registry);
+      position = new YoFramePoint3D(namePrefix + "Position", signalFrame, registry);
+      velocity = new YoFrameVector3D(namePrefix + "Velocity", signalFrame, registry);
+      acceleration = new YoFrameVector3D(namePrefix + "Acceleration", signalFrame, registry);
    }
 
    public void setOffset(double x, double y, double z)
@@ -47,12 +46,7 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
       this.offset.set(offset);
    }
 
-   public void setOffset(FrameTuple3D<?, ?> offset)
-   {
-      this.offset.set(offset);
-   }
-
-   public void setOffset(YoFrameTuple<?, ?> offset)
+   public void setOffset(FrameTuple3DReadOnly offset)
    {
       this.offset.set(offset);
    }
@@ -105,19 +99,19 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      velocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(velocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      acceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(acceleration);
    }
 
    @Override

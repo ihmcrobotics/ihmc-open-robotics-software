@@ -11,11 +11,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ActualCMPComputer extends SimpleRobotController
@@ -37,10 +37,10 @@ public class ActualCMPComputer extends SimpleRobotController
    private final Point2D cmp = new Point2D();
 
    private final YoDouble alpha = new YoDouble("momentumRateAlpha", registry);
-   private final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", worldFrame, registry);
+   private final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", worldFrame, registry);
    private final FilteredVelocityYoFrameVector momentumChange;
 
-   private final YoFrameVector2d yoCmp = new YoFrameVector2d("actualCMP", worldFrame, registry);
+   private final YoFrameVector2D yoCmp = new YoFrameVector2D("actualCMP", worldFrame, registry);
 
    public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, HumanoidFloatingRootJointRobot simulatedRobot)
    {
@@ -72,7 +72,7 @@ public class ActualCMPComputer extends SimpleRobotController
       simulatedRobot.getRootJoint().physics.recursiveComputeLinearMomentum(linearMomentum);
       yoLinearMomentum.set(linearMomentum);
       momentumChange.update();
-      momentumChange.get(linearMomentumRate);
+      linearMomentumRate.set(momentumChange);
 
       // get mass and COM position from the robot
       double totalMass = simulatedRobot.computeCenterOfMass(comPosition);

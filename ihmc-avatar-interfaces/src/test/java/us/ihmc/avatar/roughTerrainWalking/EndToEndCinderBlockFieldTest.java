@@ -8,19 +8,19 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -80,7 +80,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
       double desiredHeight = pelvisPosition.getZ();
-      simulationTestHelper.send(new PelvisHeightTrajectoryMessage(0.5, desiredHeight));
+      simulationTestHelper.send(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
       simulationTestHelper.send(footsteps);
 
@@ -88,14 +88,14 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
 
    public abstract double getPelvisOffsetHeight();
 
-   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses, double zOffset)
+   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose3D>> cinderBlockPoses, double zOffset)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -103,29 +103,29 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
       int indexForLeftSide = (numberOfColumns - 1) / 2;
       int indexForRightSide = indexForLeftSide + 1;
-      SideDependentList<List<FramePose>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
+      SideDependentList<List<FramePose3D>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
 
       for (int row = 0; row < cinderBlockPoses.size(); row++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePose cinderBlockPose = columns.get(robotSide).get(row);
+            FramePose3D cinderBlockPose = columns.get(robotSide).get(row);
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
-            cinderBlockPose.getPose(location, orientation);
+            cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + zOffset);
-            FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
-            footsteps.add(footstep);
+            FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+            footsteps.getFootstepDataList().add().set(footstep);
          }
       }
 
       return footsteps;
    }
 
-   private static SideDependentList<List<FramePose>> extractColumns(List<List<FramePose>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
+   private static SideDependentList<List<FramePose3D>> extractColumns(List<List<FramePose3D>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
    {
       SideDependentList<Integer> columnIndices = new SideDependentList<Integer>(indexForLeftSide, indexForRightSide);
-      SideDependentList<List<FramePose>> sideDependentColumns = new SideDependentList<List<FramePose>>(new ArrayList<FramePose>(), new ArrayList<FramePose>());
+      SideDependentList<List<FramePose3D>> sideDependentColumns = new SideDependentList<List<FramePose3D>>(new ArrayList<FramePose3D>(), new ArrayList<FramePose3D>());
 
       for (RobotSide robotSide : RobotSide.values)
       {

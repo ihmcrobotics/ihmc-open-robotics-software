@@ -11,31 +11,45 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepDataMessagePubSubType;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.QueueableMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType;
+import geometry_msgs.msg.dds.PointPubSubType;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class DesiredFootstepTest
@@ -80,7 +94,7 @@ public class DesiredFootstepTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep);
          tcpServer.send(footstepData);
          //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
@@ -96,7 +110,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.4)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -149,7 +163,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         tcpServer.send(new PauseWalkingMessage(isPaused));
+         tcpServer.send(HumanoidMessageTools.createPauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -167,7 +181,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.6)
+   @ContinuousIntegrationTest(estimatedDuration = 2.5)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -208,7 +222,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         streamingDataTCPServer.send(new PauseWalkingMessage(isPaused));
+         streamingDataTCPServer.send(HumanoidMessageTools.createPauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -238,7 +252,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {
@@ -249,21 +263,21 @@ public class DesiredFootstepTest
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
+      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatusMessage.class, footstepStatusConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 
       // create test footsteps
-      ArrayList<FootstepStatus> sentFootstepStatus = new ArrayList<FootstepStatus>();
+      ArrayList<FootstepStatusMessage> sentFootstepStatus = new ArrayList<FootstepStatusMessage>();
       for (int i = 0; i < 50; i++)
       {
-         FootstepStatus.Status status = FootstepStatus.Status.STARTED;
+         FootstepStatus status = FootstepStatus.STARTED;
          boolean isComplete = random.nextBoolean();
          if (isComplete)
          {
-            status = FootstepStatus.Status.COMPLETED;
+            status = FootstepStatus.COMPLETED;
          }
 
-         FootstepStatus footstepStatus = new FootstepStatus(status, i);
+         FootstepStatusMessage footstepStatus = HumanoidMessageTools.createFootstepStatus(status, i);
          sentFootstepStatus.add(footstepStatus);
          tcpServer.send(footstepStatus);
       }
@@ -274,7 +288,7 @@ public class DesiredFootstepTest
       tcpClient.disconnect();
 
       // verify received correctly
-      ArrayList<FootstepStatus> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
+      ArrayList<FootstepStatusMessage> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
       compareStatusSentWithReceived(sentFootstepStatus, receivedFootsteps);
    }
 
@@ -284,18 +298,42 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(FootstepDataMessage.class);
       netClassList.registerPacketClass(FootstepDataListMessage.class);
       netClassList.registerPacketClass(PauseWalkingMessage.class);
-      netClassList.registerPacketClass(FootstepStatus.class);
-      netClassList.registerPacketClass(ExecutionMode.class);
-      netClassList.registerPacketClass(ExecutionTiming.class);
+      netClassList.registerPacketClass(FootstepStatusMessage.class);
 
+      netClassList.registerPacketField(FootstepDataMessage.class);
+      netClassList.registerPacketField(FootstepDataMessage[].class);
+      netClassList.registerPacketField(Class.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
+      netClassList.registerPacketField(QueueableMessage.class);
       netClassList.registerPacketField(ArrayList.class);
+      netClassList.registerPacketField(Vector3D.class);
+      netClassList.registerPacketField(Point2D.class);
+      netClassList.registerPacketField(Point2D[].class);
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
       netClassList.registerPacketField(PacketDestination.class);
-      netClassList.registerPacketField(FootstepStatus.Status.class);
+      netClassList.registerPacketField(FootstepStatus.class);
       netClassList.registerPacketField(TrajectoryType.class);
       netClassList.registerPacketField(RobotSide.class);
+
+      netClassList.registerPacketField(IDLSequence.Object.class);
+      netClassList.registerPacketField(IDLSequence.Float.class);
+      netClassList.registerPacketField(IDLSequence.Boolean.class);
+      netClassList.registerPacketField(IDLSequence.Double.class);
+      netClassList.registerPacketField(IDLSequence.Integer.class);
+      netClassList.registerPacketField(IDLSequence.Byte.class);
+      netClassList.registerPacketField(IDLSequence.Long.class);
+      netClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
+      netClassList.registerPacketField(TopicDataType.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(us.ihmc.idl.CDR.class);
+      netClassList.registerPacketField(PointPubSubType.class);
+      netClassList.registerPacketField(SE3TrajectoryMessagePubSubType.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessagePubSubType.class);
+      netClassList.registerPacketField(FootstepDataMessagePubSubType.class);
 
       return netClassList;
    }
@@ -309,7 +347,7 @@ public class DesiredFootstepTest
       return server;
    }
 
-   private <T extends Packet> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, NetworkPorts port) throws IOException
+   private <T extends Packet<T>> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, NetworkPorts port) throws IOException
    {
       PacketCommunicator client = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", port, getNetClassList());
       client.connect();
@@ -324,7 +362,7 @@ public class DesiredFootstepTest
 
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(footstepNumber, 0.0, 0.0),
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(footstepNumber, 0.0, 0.0),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          boolean trustHeight = true;
@@ -342,31 +380,51 @@ public class DesiredFootstepTest
          Footstep sentFootstep = sentFootsteps.get(i);
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
-         if (!sentFootstep.epsilonEquals(receivedFootstep, 1e-4))
-         {
-            System.out.println("Test Broken");
-         }
-         assertTrue(sentFootstep.epsilonEquals(receivedFootstep, 1e-4));
+         assertTrue(areFoostepsEqual(sentFootstep, receivedFootstep, 1e-4));
       }
    }
 
-   private void compareStatusSentWithReceived(ArrayList<FootstepStatus> sentFootstepStatus, ArrayList<FootstepStatus> receivedFootsteps)
+   private boolean areFoostepsEqual(Footstep sentFootstep, Footstep receivedFootstep, double epsilon)
+   {
+      boolean arePosesEqual = sentFootstep.getFootstepPose().epsilonEquals(receivedFootstep.getFootstepPose(), epsilon);
+      boolean sameRobotSide = sentFootstep.getRobotSide() == receivedFootstep.getRobotSide();
+      boolean isTrustHeightTheSame = sentFootstep.getTrustHeight() == receivedFootstep.getTrustHeight();
+      // FIXME the field is set in FootstepDataListMessage only, which makes impossible to properly convert messages to footsteps.
+      boolean isAdjustableTheSame = true; //sentFootstep.getIsAdjustable() == receivedFootstep.getIsAdjustable();
+
+      boolean sameWaypoints = sentFootstep.getCustomPositionWaypoints().size() == receivedFootstep.getCustomPositionWaypoints().size();
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < sentFootstep.getCustomPositionWaypoints().size(); i++)
+         {
+            FramePoint3D waypoint = sentFootstep.getCustomPositionWaypoints().get(i);
+            FramePoint3D otherWaypoint = receivedFootstep.getCustomPositionWaypoints().get(i);
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      boolean sameBlendDuration = MathTools.epsilonEquals(sentFootstep.getSwingTrajectoryBlendDuration(), receivedFootstep.getSwingTrajectoryBlendDuration(), epsilon);
+
+      return arePosesEqual && sameRobotSide && isTrustHeightTheSame && isAdjustableTheSame && sameWaypoints && sameBlendDuration;
+   }
+
+   private void compareStatusSentWithReceived(ArrayList<FootstepStatusMessage> sentFootstepStatus, ArrayList<FootstepStatusMessage> receivedFootsteps)
    {
       for (int i = 0; i < sentFootstepStatus.size(); i++)
       {
-         FootstepStatus footstepStatus = sentFootstepStatus.get(i);
-         FootstepStatus reconstructedFootstepStatus = receivedFootsteps.get(i);
-         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
+         FootstepStatusMessage footstepStatus = sentFootstepStatus.get(i);
+         FootstepStatusMessage reconstructedFootstepStatus = receivedFootsteps.get(i);
+         assertTrue(footstepStatus.getFootstepStatus() == reconstructedFootstepStatus.getFootstepStatus());
       }
    }
 
    private static FootstepDataListMessage convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepsData = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepsData = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.add(new FootstepDataMessage(footstep));
+         footstepsData.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(footstep));
       }
 
       return footstepsData;
@@ -379,10 +437,10 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataMessage packet)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(packet.getRobotSide(), pose, trustHeight);
+         Footstep footstep = new Footstep(RobotSide.fromByte(packet.getRobotSide()), pose, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -399,15 +457,17 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataListMessage packet)
       {
-         for (FootstepDataMessage footstepData : packet)
+         boolean adjustable = packet.getAreFootstepsAdjustable();
+         List<FootstepDataMessage> footstepDataList = packet.getFootstepDataList();
+         for (int i = 0; i < footstepDataList.size(); i++)
          {
-            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
-            if (contactPoints != null && contactPoints.size() == 0)
-               contactPoints = null;
-            FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            FootstepDataMessage footstepData = footstepDataList.get(i);
+            FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, contactPoints);
-            footstep.setTrajectoryType(footstepData.getTrajectoryType());
+            footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepData));
+               
+            footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
          }
@@ -426,7 +486,7 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(PauseWalkingMessage packet)
       {
-         reconstructedCommands.add(packet.isPaused());
+         reconstructedCommands.add(packet.getPause());
       }
 
       public ArrayList<Boolean> getReconstructedCommands()
@@ -435,17 +495,17 @@ public class DesiredFootstepTest
       }
    }
 
-   private class FootstepStatusConsumer implements PacketConsumer<FootstepStatus>
+   private class FootstepStatusConsumer implements PacketConsumer<FootstepStatusMessage>
    {
-      private final ArrayList<FootstepStatus> reconstructedFootstepStatuses = new ArrayList<FootstepStatus>();
+      private final ArrayList<FootstepStatusMessage> reconstructedFootstepStatuses = new ArrayList<FootstepStatusMessage>();
 
       @Override
-      public void receivedPacket(FootstepStatus footstepStatus)
+      public void receivedPacket(FootstepStatusMessage footstepStatus)
       {
          reconstructedFootstepStatuses.add(footstepStatus);
       }
 
-      public ArrayList<FootstepStatus> getReconstructedFootsteps()
+      public ArrayList<FootstepStatusMessage> getReconstructedFootsteps()
       {
          return reconstructedFootstepStatuses;
       }

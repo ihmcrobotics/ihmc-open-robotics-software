@@ -3,7 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch.aStar;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,8 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,6 +40,7 @@ public class AStarStartNodeInAVoidTest
       planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, null, footPolygons, expansion, registry);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testStartNodeInAVoid()
    {
@@ -53,13 +55,13 @@ public class AStarStartNodeInAVoidTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
 
       Point2D goalPosition = new Point2D(0.5, 0.0);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, 0.0);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, 0.0);
 
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(-1.2, 0.0), 0.0);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(-1.2, 0.0), 0.0);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(planner, initialStanceFootPose3d, initialStanceFootSide, goalPose3d, planarRegionsList, !visualize);
 

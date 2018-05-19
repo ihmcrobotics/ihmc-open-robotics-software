@@ -1,23 +1,23 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class Pose2dReferenceFrame extends ReferenceFrame
 {
-   private final FramePose2d originPose;
+   private final FramePose2D originPose;
 
    public Pose2dReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       super(frameName, parentFrame);
 
-      originPose = new FramePose2d(parentFrame);
+      originPose = new FramePose2D(parentFrame);
    }
 
-   public Pose2dReferenceFrame(String frameName, FramePose2d pose)
+   public Pose2dReferenceFrame(String frameName, FramePose2D pose)
    {
       this(frameName, pose.getReferenceFrame());
       setPoseAndUpdate(pose);
@@ -26,7 +26,7 @@ public class Pose2dReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      originPose.getPose(transformToParent);
+      originPose.get(transformToParent);
    }
 
    public void setPositionAndUpdate(FramePoint2D framePoint)
@@ -36,20 +36,20 @@ public class Pose2dReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setOrientationAndUpdate(FrameOrientation2d frameOrientation)
+   public void setOrientationAndUpdate(FrameOrientation2D frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(parentFrame);
       originPose.setOrientation(frameOrientation);
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePose2d pose)
+   public void setPoseAndUpdate(FramePose2D pose)
    {
       originPose.set(pose);
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePoint2D position, FrameOrientation2d orientation)
+   public void setPoseAndUpdate(FramePoint2D position, FrameOrientation2D orientation)
    {
       position.changeFrame(originPose.getReferenceFrame());
       originPose.setPosition(position);
@@ -59,9 +59,9 @@ public class Pose2dReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public FramePose2d getPoseCopy()
+   public FramePose2D getPoseCopy()
    {
-      return new FramePose2d(originPose);
+      return new FramePose2D(originPose);
    }
 
    @Override

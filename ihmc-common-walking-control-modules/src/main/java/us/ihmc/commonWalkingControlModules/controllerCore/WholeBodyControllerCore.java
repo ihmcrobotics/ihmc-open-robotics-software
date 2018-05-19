@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -24,8 +25,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyControllerCore
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry,
-                                                                                                WholeBodyControllerCoreMode.class);
+   private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final YoInteger numberOfFBControllerEnabled = new YoInteger("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
@@ -40,6 +40,11 @@ public class WholeBodyControllerCore
    private OneDoFJoint[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   {
+      this(toolbox, allPossibleCommands, null, parentRegistry);
+   }
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
                                   JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
@@ -92,7 +97,7 @@ public class WholeBodyControllerCore
       if (inverseKinematicsSolver != null)
          inverseKinematicsSolver.reset();
       if (virtualModelControlSolver != null)
-         virtualModelControlSolver.reset();
+         virtualModelControlSolver.initialize();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -116,7 +121,7 @@ public class WholeBodyControllerCore
          break;
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
-            virtualModelControlSolver.clear();
+            virtualModelControlSolver.reset();
          else
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
@@ -259,16 +264,16 @@ public class WholeBodyControllerCore
    private void doVirtualModelControl()
    {
       feedbackController.computeVirtualModelControl();
-      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getVirtualModelControlOutput();
+      VirtualModelControlCommandList feedbackControllerOutput = feedbackController.getVirtualModelControlOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();
-      feedbackController.computeAchievedAccelerations(); // FIXME
       LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
       if (yoRootJointDesiredConfigurationData != null)
          yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
+      controllerCoreOutput.setAndMatchFrameLinearMomentumRate(virtualModelControlSolver.getAchievedMomentumRateLinear());
    }
 
    private void doNothing()
@@ -283,29 +288,29 @@ public class WholeBodyControllerCore
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-//         System.out.println("Checking " + joint.getName());
+         //         System.out.println("Checking " + joint.getName());
 
          // Zero out joint for testing purposes
          joint.setqDesired(Double.NaN);
          joint.setQdDesired(Double.NaN);
          joint.setQddDesired(Double.NaN);
          joint.setTau(Double.NaN);
-         
-         if(joint.getKp() != 0.0)
+
+         if (joint.getKp() != 0.0)
          {
             throw new RuntimeException(joint.toString() + " is not zero kp " + joint.getKp() + " - function is removed");
          }
-         if(joint.getKd() != 0.0)
+         if (joint.getKd() != 0.0)
          {
             throw new RuntimeException(joint.toString() + " is not zero kd " + joint.getKd() + " - function is removed");
          }
-         
-         if(joint.isUnderPositionControl())
+
+         if (joint.isUnderPositionControl())
          {
             throw new RuntimeException(joint.toString() + " is under position control - function is removed");
          }
-         
-         if(!joint.isUseFeedBackForceControl())
+
+         if (!joint.isUseFeedBackForceControl())
          {
             throw new RuntimeException(joint.toString() + " disabled feedback force control - function is removed");
          }

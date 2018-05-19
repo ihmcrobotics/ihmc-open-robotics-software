@@ -3,34 +3,28 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.core.State;
 
-public abstract class PelvisOrientationControlState extends FinishableState<PelvisOrientationControlMode>
+public interface PelvisOrientationControlState extends State
 {
-
-   public PelvisOrientationControlState(PelvisOrientationControlMode stateEnum)
-   {
-      super(stateEnum);
-   }
-
    @Override
-   public boolean isDone()
+   default boolean isDone(double timeInState)
    {
       return true;
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   default InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return null;
    }
 
    @Override
-   public void doTransitionIntoAction()
+   default void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   default void onExit()
    {
    }
 

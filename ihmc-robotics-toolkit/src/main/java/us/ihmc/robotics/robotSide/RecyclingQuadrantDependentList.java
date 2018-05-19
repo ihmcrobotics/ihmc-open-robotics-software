@@ -123,6 +123,6 @@ public class RecyclingQuadrantDependentList<V>
    
    public boolean containsQuadrant(RobotQuadrant robotQuadrant)
    {
-      return quadrantDependentList.containsQuadrant(robotQuadrant);
+      return quadrantDependentList.containsKey(robotQuadrant);
    }
 }

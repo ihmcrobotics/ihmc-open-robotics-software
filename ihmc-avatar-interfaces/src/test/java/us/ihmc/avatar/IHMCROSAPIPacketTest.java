@@ -1,19 +1,9 @@
 package us.ihmc.avatar;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.After;
 import org.junit.Before;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -26,35 +16,48 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.RobotVisualizer;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
@@ -111,8 +114,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       Random random = new Random();
 
-      PacketCommunicator controllerCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-            new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerCommunicatorServer = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       PacketCommunicator controllerCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
 
@@ -150,7 +153,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      controllerCommunicatorServer.send(new HighLevelStateMessage(WALKING));
+      controllerCommunicatorServer.send(HumanoidMessageTools.createHighLevelStateMessage(WALKING));
 
       new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator_server, packetRouter, "/ihmc_ros/atlas");
 
@@ -246,7 +249,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      packetCommunicatorClient.send(new HighLevelStateMessage(WALKING));
+      packetCommunicatorClient.send(HumanoidMessageTools.createHighLevelStateMessage(WALKING));
 
       for (int i = 0; i < 100; i++)
       {
@@ -297,7 +300,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    }
 
    private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
-         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter, FloatingRootJointRobot sdfRobot)
+                                                            HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter,
+                                                            FloatingRootJointRobot sdfRobot)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
@@ -330,7 +334,16 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
    private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
-      ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();

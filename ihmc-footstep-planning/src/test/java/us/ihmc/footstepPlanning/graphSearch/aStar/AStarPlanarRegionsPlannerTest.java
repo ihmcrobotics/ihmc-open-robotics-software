@@ -13,6 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -34,15 +35,14 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanBasedCost;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
@@ -50,7 +50,7 @@ public class AStarPlanarRegionsPlannerTest
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testFootstepGraph()
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
@@ -105,7 +105,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testFootstepNode()
    {
       double gridX = FootstepNode.gridSizeXY;
@@ -134,7 +134,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testNodeExpansion()
    {
       if (!visualize)
@@ -150,7 +150,7 @@ public class AStarPlanarRegionsPlannerTest
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
 
-      YoFramePose originPose = new YoFramePose("OrgionPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll originPose = new YoFramePoseUsingYawPitchRoll("OrgionPose", ReferenceFrame.getWorldFrame(), registry);
       originPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
       originPose.setXYZ(node.getX(), node.getY(), 0.0);
       YoGraphicCoordinateSystem originNode = new YoGraphicCoordinateSystem("OrginNode", originPose, 0.4);
@@ -159,7 +159,7 @@ public class AStarPlanarRegionsPlannerTest
       int count = 0;
       for (FootstepNode neighbor : neighbors)
       {
-         YoFramePose pose = new YoFramePose("NeighborPose" + count, ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoseUsingYawPitchRoll pose = new YoFramePoseUsingYawPitchRoll("NeighborPose" + count, ReferenceFrame.getWorldFrame(), registry);
          pose.setYawPitchRoll(neighbor.getYaw(), 0.0, 0.0);
          pose.setXYZ(neighbor.getX(), neighbor.getY(), 0.0);
          YoGraphicCoordinateSystem neighborNode = new YoGraphicCoordinateSystem("NeighborNode" + count, pose, 0.1);
@@ -174,7 +174,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testSimpleExpansion()
    {
       // make planar regions
@@ -190,11 +190,11 @@ public class AStarPlanarRegionsPlannerTest
       // make goal and initial conditions
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       Point3D goalPosition = new Point3D(1.0, 0.0, 0.0);
       goalPose.setPosition(goalPosition);
       goal.setGoalPoseBetweenFeet(goalPose);
-      FramePose startPose = new FramePose();
+      FramePose3D startPose = new FramePose3D();
       RobotSide startSide = RobotSide.LEFT;
 
       // create planner
@@ -227,7 +227,7 @@ public class AStarPlanarRegionsPlannerTest
          assertEquals(FootstepPlanningResult.OPTIMAL_SOLUTION, planner.plan());
          FootstepPlan plan = planner.getPlan();
          SimpleFootstep lastStep = plan.getFootstep(plan.getNumberOfSteps() - 1);
-         FramePose achievedGoalPose = new FramePose();
+         FramePose3D achievedGoalPose = new FramePose3D();
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);

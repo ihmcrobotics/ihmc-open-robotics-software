@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="DRCControllerThread">
+        <registry name="DRCMomentumBasedController">
+            <registry name="HumanoidHighLevelControllerManager">
+                <registry name="HighLevelHumanoidControllerFactory">
+                    <registry name="MomentumOptimizationSettings">
+                        <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                    </registry>
+                </registry>
+            </registry>
+        </registry>
+    </registry>
+</parameters>

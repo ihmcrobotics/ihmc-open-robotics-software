@@ -32,56 +32,56 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 46.9)
+   @Test(timeout = 230000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForAHandPose();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 46.5)
+   @Test(timeout = 230000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForBothHandPoses();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 40000)
+   @ContinuousIntegrationTest(estimatedDuration = 36.6)
+   @Test(timeout = 180000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForChestAngularControl();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandAngularLinearControl();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.3)
+   @Test(timeout = 250000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandRollConstraint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 47.0)
+   @Test(timeout = 230000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandSelectionMatrix();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.8)
+   @Test(timeout = 180000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForPelvisAngularControl();

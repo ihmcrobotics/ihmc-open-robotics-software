@@ -3,12 +3,13 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 
@@ -24,8 +25,8 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    private final YoFrameQuaternion finalOrientation;
 
    private final YoFrameQuaternion currentOrientation;
-   private final YoFrameVector currentAngularVelocity;
-   private final YoFrameVector currentAngularAcceleration;
+   private final YoFrameVector3D currentAngularVelocity;
+   private final YoFrameVector3D currentAngularAcceleration;
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
@@ -69,21 +70,21 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
          initialOrientation = new YoFrameQuaternion(initialOrientationName, referenceFrame, registry);
          finalOrientation = new YoFrameQuaternion(finalOrientationName, referenceFrame, registry);
          currentOrientation = new YoFrameQuaternion(currentOrientationName, referenceFrame, registry);
-         currentAngularVelocity = new YoFrameVector(currentAngularVelocityName, referenceFrame, registry);
-         currentAngularAcceleration = new YoFrameVector(currentAngularAccelerationName, referenceFrame, registry);
+         currentAngularVelocity = new YoFrameVector3D(currentAngularVelocityName, referenceFrame, registry);
+         currentAngularAcceleration = new YoFrameVector3D(currentAngularAccelerationName, referenceFrame, registry);
       }
 
       parentRegistry.addChild(registry);
    }
 
-   public void setInitialOrientation(FrameQuaternion initialOrientation)
+   public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
    }
 
-   public void setFinalOrientation(FrameQuaternion finalOrientation)
+   public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
    }
 
    public void setTrajectoryTime(double newTrajectoryTime)
@@ -136,19 +137,19 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(currentOrientation);
    }
 
    @Override
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    @Override
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
    @Override

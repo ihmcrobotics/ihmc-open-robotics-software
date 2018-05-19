@@ -1,5 +1,26 @@
 package us.ihmc.quadrupedRobotics.input;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import net.java.games.input.Event;
+import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -7,29 +28,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import net.java.games.input.Event;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
-import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
-import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyTeleopNode implements JoystickEventListener
 {
@@ -48,31 +46,24 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private final PacketCommunicator packetCommunicator;
    private final RobotDataReceiver robotDataReceiver;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
 
-   private final QuadrupedXGaitTeleopMode xGaitTeleopMode;
    private final QuadrupedStepTeleopMode stepTeleopMode;
-   private QuadrupedTeleopMode activeTeleopMode;
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
    public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device,
-         FullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties physicalProperties) throws IOException
+                                  FullQuadrupedRobotModel fullRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                  QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
       this.device = device;
 
       this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.BEHAVIOR, DT);
-      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), new YoGraphicsListRegistry());
+      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry, null);
-      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames);
-      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames);
-
-      // Set the default teleop mode.
-      this.activeTeleopMode = xGaitTeleopMode;
+      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, physicalProperties, defaultXGaitSettings, referenceFrames, graphicsListRegistry, registry);
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
@@ -93,9 +84,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
          robotDataReceiver.updateRobotModel();
          Thread.sleep(10);
       }
-
-      activeTeleopMode.onEntry();
-
+      
       // Send packets and integrate at fixed interval.
       executor.scheduleAtFixedRate(new Runnable()
       {
@@ -132,9 +121,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    public void update()
    {
       robotDataReceiver.updateRobotModel();
-      taskSpaceEstimator.compute(taskSpaceEstimates);
 
-      activeTeleopMode.update(Collections.unmodifiableMap(channels), taskSpaceEstimates);
+      stepTeleopMode.update(Collections.unmodifiableMap(channels));
 
       server.update(robotDataReceiver.getSimTimestamp());
    }
@@ -146,21 +134,11 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
 
       // Handle events that should trigger once immediately after the event is triggered.
-      switch (XBoxOneMapping.getMapping(event))
-      {
-      case SELECT:
-         activeTeleopMode.onExit();
-         activeTeleopMode = stepTeleopMode;
-         activeTeleopMode.onEntry();
-         break;
-      case START:
-         activeTeleopMode.onExit();
-         activeTeleopMode = xGaitTeleopMode;
-         activeTeleopMode.onEntry();
-         break;
-      default:
-         // Pass any non-mode-switching events down to the active mode.
-         activeTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), taskSpaceEstimates, event);
-      }
+      stepTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), event);
+   }
+
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
    }
 }

@@ -29,11 +29,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.commons.thread.ThreadTools;
 
@@ -1066,7 +1066,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          double ballSize = resolution * 0.35;
          BagOfBalls bagOfBalls = new BagOfBalls(points.size(), ballSize, registry, yoGraphicsListRegistry);
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         YoFramePoint queryPoint = new YoFramePoint("queryPoint", worldFrame, registry);
+         YoFramePoint3D queryPoint = new YoFramePoint3D("queryPoint", worldFrame, registry);
 
          YoGraphicPosition queryViz = new YoGraphicPosition("Query", queryPoint, 1.1 * ballSize, YoAppearance.PaleGoldenRod());
          yoGraphicsListRegistry.registerYoGraphic("Query", queryViz);
@@ -1151,7 +1151,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
 
 
-      public HeightMapWithPoints createHeightMapFromAListOfPoints(YoFramePoint queryPoint, BagOfBalls bagOfBalls, SimulationConstructionSet scs,
+      public HeightMapWithPoints createHeightMapFromAListOfPoints(YoFramePoint3D queryPoint, BagOfBalls bagOfBalls, SimulationConstructionSet scs,
               ArrayList<Point3D> points, BoundingBox2D testingRange, double resolution, double heightThreshold, int maxNodes)
       {
          double minX = testingRange.getMinPoint().getX();

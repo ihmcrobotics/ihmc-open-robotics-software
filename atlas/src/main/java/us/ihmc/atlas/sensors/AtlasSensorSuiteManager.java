@@ -3,6 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.IOException;
 import java.net.URI;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -21,7 +22,6 @@ import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -86,9 +86,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
 
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
-
-      ForceSensorNoiseEstimator forceSensorNoiseEstimator = new ForceSensorNoiseEstimator(sensorSuitePacketCommunicator);
-      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, forceSensorNoiseEstimator);
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 

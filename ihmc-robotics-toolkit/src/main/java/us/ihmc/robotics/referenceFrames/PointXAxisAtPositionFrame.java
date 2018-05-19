@@ -29,7 +29,7 @@ public class PointXAxisAtPositionFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      positionToPointAt.get(xAxis);
+      xAxis.set(positionToPointAt);
       xAxis.setZ(0.0);
       xAxis.normalize();
       yAxis.cross(zAxis, xAxis);

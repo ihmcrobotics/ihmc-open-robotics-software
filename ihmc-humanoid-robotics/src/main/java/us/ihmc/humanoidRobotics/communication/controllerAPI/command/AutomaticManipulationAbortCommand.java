@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 
 public class AutomaticManipulationAbortCommand implements Command<AutomaticManipulationAbortCommand, AutomaticManipulationAbortMessage>
 {
@@ -25,7 +25,7 @@ public class AutomaticManipulationAbortCommand implements Command<AutomaticManip
    @Override
    public void set(AutomaticManipulationAbortMessage message)
    {
-      enable = message.enable;
+      enable = message.getEnable();
    }
 
    public boolean isEnable()

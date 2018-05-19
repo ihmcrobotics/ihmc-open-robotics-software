@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class PlanarRegionsList
 {
@@ -56,7 +56,7 @@ public class PlanarRegionsList
     * @return the list of planar regions intersecting with the given polygon. Returns null when no
     *         region intersects.
     */
-   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2D convexPolygon)
+   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon)
    {
       List<PlanarRegion> containers = null;
 
@@ -144,7 +144,7 @@ public class PlanarRegionsList
     * @return the list of planar regions containing the query. Returns null when no region contains
     *         the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3D point, double maximumOrthogonalDistance)
+   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3DReadOnly point, double maximumOrthogonalDistance)
    {
       List<PlanarRegion> containers = null;
 

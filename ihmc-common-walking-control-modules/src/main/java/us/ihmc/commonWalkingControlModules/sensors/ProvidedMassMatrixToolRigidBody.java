@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,8 +16,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -42,9 +41,9 @@ public class ProvidedMassMatrixToolRigidBody
    private final ReferenceFrame handFixedFrame;
    private final ReferenceFrame handControlFrame;
 
-   private final YoFramePoint objectCenterOfMass;
-   private final YoFramePoint objectCenterOfMassInWorld;
-   private final YoFrameVector objectForceInWorld;
+   private final YoFramePoint3D objectCenterOfMass;
+   private final YoFramePoint3D objectCenterOfMassInWorld;
+   private final YoFrameVector3D objectForceInWorld;
 
    private final YoDouble objectMass;
 
@@ -72,11 +71,11 @@ public class ProvidedMassMatrixToolRigidBody
       this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator());
       this.toolBody = new RigidBody(name + "Body", toolJoint, new Matrix3D(), 0.0, new RigidBodyTransform());
 
-      objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);
+      objectCenterOfMass = new YoFramePoint3D(name + "CoMOffset", handControlFrame, registry);
       objectMass = new YoDouble(name + "ObjectMass", registry);
-      objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
+      objectForceInWorld = new YoFrameVector3D(name + "Force", ReferenceFrame.getWorldFrame(), registry);
 
-      this.objectCenterOfMassInWorld = new YoFramePoint(name + "CoMInWorld", ReferenceFrame.getWorldFrame(), registry);
+      this.objectCenterOfMassInWorld = new YoFramePoint3D(name + "CoMInWorld", ReferenceFrame.getWorldFrame(), registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -105,7 +104,7 @@ public class ProvidedMassMatrixToolRigidBody
       jointsToIgnore.addAll(ScrewTools.getRootBody(toolBody).getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, spatialAccelerationCalculator);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(jointsToIgnore, spatialAccelerationCalculator);
    }
 
    private final FramePoint3D toolFramePoint = new FramePoint3D();
@@ -114,7 +113,7 @@ public class ProvidedMassMatrixToolRigidBody
    {
       toolBody.getInertia().setMass(objectMass.getDoubleValue());
 
-      temporaryPoint.setIncludingFrame(objectCenterOfMass.getFrameTuple());
+      temporaryPoint.setIncludingFrame(objectCenterOfMass);
       temporaryPoint.changeFrame(toolBody.getBodyFixedFrame());
       toolBody.setCoMOffset(temporaryPoint);
 

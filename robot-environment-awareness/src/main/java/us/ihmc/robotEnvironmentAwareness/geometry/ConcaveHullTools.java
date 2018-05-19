@@ -1,6 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.getNext;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.getPrevious;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.next;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.previous;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +16,7 @@ import java.util.Set;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -306,7 +310,7 @@ public class ConcaveHullTools
 
    public static ConcaveHullPocket findFirstConcaveHullPocketInefficient(List<? extends Point2DReadOnly> concaveHullVertices)
    {
-      ConvexPolygon2D convexHull = new ConvexPolygon2D(concaveHullVertices);
+      ConvexPolygon2D convexHull = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
 
       // Find first common vertex between the two hulls. 
       int convexStartIndex = 0;
@@ -544,7 +548,7 @@ public class ConcaveHullTools
          Point2DReadOnly next = concaveHullVertices.get(nextIndex);
 
          edge.set(current, next);
-         Point2D intersection = edge.intersectionWith(rayLine);
+         Point2DBasics intersection = edge.intersectionWith(rayLine);
 
          if (intersection != null)
          {

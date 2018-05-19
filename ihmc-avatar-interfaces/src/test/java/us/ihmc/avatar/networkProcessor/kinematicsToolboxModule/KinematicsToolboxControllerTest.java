@@ -14,19 +14,23 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -37,14 +41,14 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -106,7 +110,7 @@ public class KinematicsToolboxControllerTest
 
       RobotDescription ghostRobotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
       ghostRobotDescription.setName("Ghost");
-      recursivelyModyfyGraphics(ghostRobotDescription.getChildrenJoints().get(0));
+      recursivelyModifyGraphics(ghostRobotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = new RobotFromDescription(ghostRobotDescription);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -158,6 +162,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
@@ -179,6 +184,7 @@ public class KinematicsToolboxControllerTest
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
@@ -196,8 +202,9 @@ public class KinematicsToolboxControllerTest
          RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
          FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
          desiredPosition.changeFrame(worldFrame);
-         KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(hand, desiredPosition);
-         message.setWeight(20.0);
+         KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
+         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -211,10 +218,11 @@ public class KinematicsToolboxControllerTest
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             PrintTools.info(this, "Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-4);
+         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-3);
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
@@ -236,7 +244,8 @@ public class KinematicsToolboxControllerTest
          randomizeJointPositions(random, randomizedFullRobotModel, 0.3);
          RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
          KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(hand);
-         message.setWeight(20.0);
+         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -326,6 +335,7 @@ public class KinematicsToolboxControllerTest
             if (initializationSucceeded.getBooleanValue())
             {
                toolboxController.updateInternal();
+               PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
                jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
                numberOfIterations.increment();
             }
@@ -356,7 +366,7 @@ public class KinematicsToolboxControllerTest
       };
    }
 
-   private static void recursivelyModyfyGraphics(JointDescription joint)
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
    {
       if (joint == null)
          return;
@@ -387,21 +397,21 @@ public class KinematicsToolboxControllerTest
 
       for (JointDescription child : joint.getChildrenJoints())
       {
-         recursivelyModyfyGraphics(child);
+         recursivelyModifyGraphics(child, ghostApperance);
       }
    }
 
    private RobotConfigurationData extractRobotConfigurationData(Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> initialFullRobotModel)
    {
       OneDoFJoint[] joints = initialFullRobotModel.getRight();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(joints, new ForceSensorDefinition[0], null, new IMUDefinition[0]);
-      robotConfigurationData.setJointState(Arrays.stream(joints).collect(Collectors.toList()));
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
+      RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
 
       FloatingInverseDynamicsJoint rootJoint = initialFullRobotModel.getLeft();
       if (rootJoint != null)
       {
-         robotConfigurationData.setRootTranslation(rootJoint.getTranslationForReading());
-         robotConfigurationData.setRootOrientation(rootJoint.getRotationForReading());
+         robotConfigurationData.getRootTranslation().set(rootJoint.getTranslationForReading());
+         robotConfigurationData.getRootOrientation().set(rootJoint.getRotationForReading());
       }
       return robotConfigurationData;
    }

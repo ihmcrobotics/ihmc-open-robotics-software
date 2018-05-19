@@ -13,18 +13,18 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.RobotVisualizer;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -115,7 +115,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walk");
+      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
       YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
       YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.getVariable("userUpdateDesiredPelvisPose");
       YoBoolean userDoPelvisPose = (YoBoolean) scs.getVariable("userDoPelvisPose");
@@ -123,6 +123,9 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       YoDouble userDesiredPelvisPoseTrajectoryTime = (YoDouble) scs.getVariable("userDesiredPelvisPoseTrajectoryTime");
       YoDouble icpErrorX = (YoDouble) scs.getVariable("icpErrorX");
       YoDouble icpErrorY = (YoDouble) scs.getVariable("icpErrorY");
+
+      YoDouble controllerICPErrorX = (YoDouble) scs.getVariable("controllerICPErrorX");
+      YoDouble controllerICPErrorY = (YoDouble) scs.getVariable("controllerICPErrorY");
 
       drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
 
@@ -140,14 +143,21 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
          drcSimulationTestHelper.simulateAndBlock(yawingTimeDuration);
 
-         double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         double icpError;
+         if (icpErrorX != null && icpErrorY != null)
+            icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         else
+            icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue() + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
 
          userDesiredPelvisPoseYaw.set(startingYaw);
          userDoPelvisPose.set(true);
          drcSimulationTestHelper.simulateAndBlock(yawingTimeDuration + 0.3);
 
-         icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         if (icpErrorX != null && icpErrorY != null)
+            icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         else
+            icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue() + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
       }
 

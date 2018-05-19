@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
@@ -18,7 +18,7 @@ public class CoPTrajectory extends SegmentedFrameTrajectory3D implements CoPTraj
       this.trajectoryType = type;
    }
 
-   public void setNextSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
+   public void setNextSegment(double initialTime, double finalTime, FramePoint3DReadOnly initialPosition, FramePoint3DReadOnly finalPosition)
    {
       FrameTrajectory3D segment = segments.add();
       switch (this.splineType)

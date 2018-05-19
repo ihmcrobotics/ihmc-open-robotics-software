@@ -87,12 +87,12 @@ public class PlanarRegionIntersectionCalculator
       for (int i = 0; i < allIntersections.size(); i++)
       {
          LineSegment3D currentIntersectionSegment = allIntersections.get(i);
-         Line3D currentIntersectionLine = new Line3D(currentIntersectionSegment.getLine());
+         Line3D currentIntersectionLine = new Line3D(currentIntersectionSegment);
 
          for (int j = i + 1; j < allIntersections.size(); j++)
          {
             LineSegment3D otherIntersectionSegment = allIntersections.get(j);
-            Line3D otherIntersectionLine = new Line3D(otherIntersectionSegment.getLine());
+            Line3D otherIntersectionLine = new Line3D(otherIntersectionSegment);
 
             double distanceBetweenLines = currentIntersectionLine.closestPointsWith(otherIntersectionLine, closestPointOnCurrentLine, closestPointOnOtherLine);
 

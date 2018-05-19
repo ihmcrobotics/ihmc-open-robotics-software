@@ -1,10 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class TranslationReferenceFrame extends ReferenceFrame
 {
@@ -21,16 +21,16 @@ public class TranslationReferenceFrame extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {      
       transformToParent.setIdentity();
-      transformToParent.setTranslation(originVector.getVector());
+      transformToParent.setTranslation(originVector);
    }
 
-   public void updateTranslation(FrameTuple3D<?, ?> frameVector)
+   public void updateTranslation(FrameTuple3DReadOnly frameVector)
    {      
       originVector.set(frameVector);
       this.update();
    }
    
-   public void updateTranslation(Tuple3DBasics translation)
+   public void updateTranslation(Tuple3DReadOnly translation)
    {      
       originVector.set(translation);
       this.update();

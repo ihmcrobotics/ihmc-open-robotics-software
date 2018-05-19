@@ -1,16 +1,16 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SimpleFootstep
 {
    private RobotSide robotSide;
-   private final FramePose soleFramePose = new FramePose();
+   private final FramePose3D soleFramePose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
 
-   public SimpleFootstep(RobotSide robotSide, FramePose soleFramePose)
+   public SimpleFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
       this.robotSide = robotSide;
       this.soleFramePose.setIncludingFrame(soleFramePose);
@@ -21,7 +21,7 @@ public class SimpleFootstep
    {
       this.robotSide = other.robotSide;
       this.soleFramePose.setIncludingFrame(other.soleFramePose);
-      this.foothold.setAndUpdate(other.foothold);
+      this.foothold.set(other.foothold);
    }
 
    public RobotSide getRobotSide()
@@ -29,7 +29,7 @@ public class SimpleFootstep
       return robotSide;
    }
 
-   public void getSoleFramePose(FramePose soleFramePoseToPack)
+   public void getSoleFramePose(FramePose3D soleFramePoseToPack)
    {
       soleFramePoseToPack.setIncludingFrame(soleFramePose);
    }
@@ -39,14 +39,14 @@ public class SimpleFootstep
       this.robotSide = robotSide;
    }
 
-   public void setSoleFramePose(FramePose soleFramePose)
+   public void setSoleFramePose(FramePose3D soleFramePose)
    {
       this.soleFramePose.setIncludingFrame(soleFramePose);
    }
 
    public void setFoothold(ConvexPolygon2D foothold)
    {
-      this.foothold.setAndUpdate(foothold);
+      this.foothold.set(foothold);
    }
 
    public boolean hasFoothold()
@@ -61,7 +61,7 @@ public class SimpleFootstep
       if (!hasFoothold())
          footholdToPack.setToNaN();
       else
-         footholdToPack.setAndUpdate(foothold);
+         footholdToPack.set(foothold);
    }
 
    public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)

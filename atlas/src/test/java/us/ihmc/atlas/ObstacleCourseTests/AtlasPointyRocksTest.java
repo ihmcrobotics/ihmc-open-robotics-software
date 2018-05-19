@@ -1,15 +1,18 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -22,91 +25,112 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
+   /**
+    * Hard test: Atlas walks forward and steps on unknown contacts including lines that need to be explored.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 115.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 230000)
-   /** {@inheritDoc} */
    public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithHalfFootContactChangesStopBetweenSteps();
    }
 
+   /**
+    * Tests the foothold detection and makes sure the detected area matches the real one.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 370000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 118.6)
+   @Test(timeout = 590000)
    public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       super.testStandingWithGCPointsChangingOnTheFly();
    }
 
+   /**
+    * The robot walks continuously for a few steps with unknown half foot contacts.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 350000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 113.7)
+   @Test(timeout = 570000)
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithHalfFootContactChangesContinuousSteps();
    }
 
+   /**
+    * The robot walks forward with partial footholds. The controller knows about the foothold beforehand.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 230000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 190.5)
+   @Test(timeout = 950000)
    public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithPartialFootholdsAndStopBetweenSteps();
    }
 
+   /**
+    * This test steps in place with partial footholds. The controller knows about the foothold beforehand.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 92.2, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 460000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 184.5)
+   @Test(timeout = 920000)
    public void testTakingStepsWithActualAndPredictedFootPolygonsChanging() throws SimulationExceededMaximumTimeException
    {
       super.testTakingStepsWithActualAndPredictedFootPolygonsChanging();
    }
 
+   /**
+    * The robot takes a step while on a partial foothold and receives a push that requires the use of angular momentum to recover.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.2, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 180000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 61.2)
+   @Test(timeout = 310000)
    public void testSidePushDuringSwing() throws SimulationExceededMaximumTimeException
    {
       super.testSidePushDuringSwing();
    }
 
+   /**
+    * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
+    * and hold position. Then it takes some steps in place with the part of foot changing each step.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 77.5, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 77.5)
    @Test(timeout = 390000)
-   /** {@inheritDoc} */
+   @Ignore // is a duplicate of other tests with less asserts.
    public void testStandingAndStepsInPlaceWithHalfFootContactsChanges() throws SimulationExceededMaximumTimeException
    {
       super.testStandingAndStepsInPlaceWithHalfFootContactsChanges();
    }
 
+   /**
+    * The robot walks thinking it has small footholds but actually has full footholds.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.3, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 58.3)
    @Test(timeout = 290000)
-   /** {@inheritDoc} */
+   @Ignore // does only test stuff that is already covered by other tests in a easier setup
    public void testWalkingWithLinePredictedSupportPolygonButFullActualPolygon() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithLinePredictedSupportPolygonButFullActualPolygon();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 230000)
-   /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @Test(timeout = 400000)
+   @Ignore // not very interesting test the push does not do much
    public void testHoldPositionByStandingOnOneLegAndGettingPushedSideways() throws SimulationExceededMaximumTimeException
    {
       super.testHoldPositionByStandingOnOneLegAndGettingPushedSideways();
    }
 
+   /**
+    * Attempts to stand on a line for a while.
+    */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 300000)
-   /** {@inheritDoc} */
    public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
    {
       super.testBalanceOnLine();
@@ -147,18 +171,40 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       {
          return walkingParameters;
       }
-
    }
 
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
+      private final TestICPOptimizationParameters icpOptimizationParameters;
+
       public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
+         icpOptimizationParameters = new TestICPOptimizationParameters();
       }
 
       @Override
       public boolean createFootholdExplorationTools()
+      {
+         return true;
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
+      }
+   }
+
+   private class TestICPOptimizationParameters extends AtlasICPOptimizationParameters
+   {
+      public TestICPOptimizationParameters()
+      {
+         super(false);
+      }
+
+      @Override
+      public boolean useAngularMomentum()
       {
          return true;
       }

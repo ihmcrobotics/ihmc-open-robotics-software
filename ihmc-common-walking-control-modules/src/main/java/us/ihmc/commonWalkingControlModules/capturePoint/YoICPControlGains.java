@@ -11,7 +11,8 @@ public class YoICPControlGains implements ICPControlGainsProvider
    private final YoDouble kpParallelToMotion;
    private final YoDouble kpOrthogonalToMotion;
    private final YoDouble ki;
-   private final YoDouble kiBleedOff;
+   private final YoDouble integralLeakRatio;
+   private final YoDouble maxIntegralError;
    private YoDouble feedbackPartMaxRate;
 
    public YoICPControlGains(String suffix, YoVariableRegistry registry)
@@ -22,8 +23,10 @@ public class YoICPControlGains implements ICPControlGainsProvider
       kpParallelToMotion = new YoDouble("captureKpParallel" + suffix, registry);
       kpOrthogonalToMotion = new YoDouble("captureKpOrthogonal" + suffix, registry);
       ki = new YoDouble("captureKi" + suffix, registry);
-      kiBleedOff = new YoDouble("captureKiBleedOff" + suffix, registry);
-      kiBleedOff.set(1.0);
+      integralLeakRatio = new YoDouble("captureIntegralLeakRatio" + suffix, registry);
+      integralLeakRatio.set(1.0);
+      maxIntegralError = new YoDouble("captureMaxIntegralError" + suffix, registry);
+      maxIntegralError.set(Double.POSITIVE_INFINITY);
    }
 
    public void setKpParallelToMotion(double kpParallelToMotion)
@@ -41,9 +44,14 @@ public class YoICPControlGains implements ICPControlGainsProvider
       this.ki.set(ki);
    }
 
-   public void setKiBleedOff(double kiBleedOff)
+   public void setIntegralLeakRatio(double integralLeakRatio)
    {
-      this.kiBleedOff.set(kiBleedOff);
+      this.integralLeakRatio.set(integralLeakRatio);
+   }
+
+   public void setMaxIntegralError(double maxIntegralError)
+   {
+      this.maxIntegralError.set(maxIntegralError);
    }
 
    public void setFeedbackPartMaxRate(double maxRate)
@@ -53,57 +61,49 @@ public class YoICPControlGains implements ICPControlGainsProvider
       feedbackPartMaxRate.set(maxRate);
    }
 
+   @Override
    public YoDouble getYoKpParallelToMotion()
    {
       return kpParallelToMotion;
    }
 
+   @Override
    public YoDouble getYoKpOrthogonalToMotion()
    {
       return kpOrthogonalToMotion;
    }
 
+   @Override
    public YoDouble getYoKi()
    {
       return ki;
    }
 
-   public YoDouble getYoKiBleedOff()
+   @Override
+   public YoDouble getYoIntegralLeakRatio()
    {
-      return kiBleedOff;
+      return integralLeakRatio;
    }
 
-   public YoDouble getFeedbackPartMaxRate()
+   @Override
+   public YoDouble getYoMaxIntegralError()
+   {
+      return maxIntegralError;
+   }
+
+   @Override
+   public YoDouble getYoFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
    }
 
-   public double getKpParallelToMotion()
-   {
-      return kpParallelToMotion.getDoubleValue();
-   }
-
-   public double getKpOrthogonalToMotion()
-   {
-      return kpOrthogonalToMotion.getDoubleValue();
-   }
-
-   public double getKi()
-   {
-      return ki.getDoubleValue();
-   }
-
-   public double getKiBleedOff()
-   {
-      return kiBleedOff.getDoubleValue();
-   }
-
-   public void set(ICPControlGains icpControlGains)
+   public void set(ICPControlGainsReadOnly icpControlGains)
    {
       setKpParallelToMotion(icpControlGains.getKpParallelToMotion());
       setKpOrthogonalToMotion(icpControlGains.getKpOrthogonalToMotion());
       setKi(icpControlGains.getKi());
-      setKiBleedOff(icpControlGains.getKiBleedOff());
+      setIntegralLeakRatio(icpControlGains.getIntegralLeakRatio());
+      setMaxIntegralError(icpControlGains.getMaxIntegralError());
       setFeedbackPartMaxRate(icpControlGains.getFeedbackPartMaxRate());
    }
 }

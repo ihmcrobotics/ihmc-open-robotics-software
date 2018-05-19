@@ -31,6 +31,12 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    }
 
    @Override
+   public double getTurningStepWidth()
+   {
+      return 0.35;
+   }
+
+   @Override
    public double getDesiredStepForward()
    {
       return 0.5; // 0.35;
@@ -90,13 +96,13 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI / 4.0;
+      return Math.PI / 3.0;
    }
 
    @Override
    public double getMaxAngleTurnInwards()
    {
-      return 0;
+      return Math.toRadians(30.0);
    }
 
    @Override

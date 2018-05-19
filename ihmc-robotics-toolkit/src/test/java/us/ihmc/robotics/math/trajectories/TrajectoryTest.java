@@ -263,6 +263,7 @@ public class TrajectoryTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetDerivative()
    {

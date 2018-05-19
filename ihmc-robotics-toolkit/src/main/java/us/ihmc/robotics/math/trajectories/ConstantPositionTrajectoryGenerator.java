@@ -6,13 +6,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final YoFramePoint position;
+   private final YoFramePoint3D position;
    private final YoDouble finalTime;
    private final YoDouble time;
    private final PositionProvider positionProvider;
@@ -24,7 +24,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
 
       this.positionProvider = positionProvider;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.position = new YoFramePoint("position", referenceFrame, registry);
+      this.position = new YoFramePoint3D("position", referenceFrame, registry);
       this.finalTime = new YoDouble("finalTime", registry);
       this.time = new YoDouble("time", registry);
       this.finalTime.set(finalTime);
@@ -53,7 +53,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)

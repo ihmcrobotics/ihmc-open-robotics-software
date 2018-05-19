@@ -41,7 +41,7 @@ public class PointJacobian
     */
    public void compute()
    {
-      point.get(translation);
+      translation.set(point);
 
       int angularPartStartRow = 0;
       int linearPartStartRow = SpatialMotionVector.SIZE / 2;

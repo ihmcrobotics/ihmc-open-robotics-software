@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
@@ -17,14 +17,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 public class InverseDynamicsCalculator
 {
    private final RigidBody rootBody;
-   private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
-   private final LinkedHashMap<RigidBody, Wrench> externalWrenches;
-   private final ArrayList<InverseDynamicsJoint> jointsToIgnore;
+   private final List<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
+   private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<>();
+   private final List<InverseDynamicsJoint> jointsToIgnore;
 
-   private final ArrayList<RigidBody> allBodiesExceptRoot = new ArrayList<RigidBody>();
-   private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
-   private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final LinkedHashMap<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
+   private final List<RigidBody> allBodiesExceptRoot = new ArrayList<RigidBody>();
+   private final List<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
+   private final Map<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
+   private final Map<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
@@ -42,22 +42,20 @@ public class InverseDynamicsCalculator
    public InverseDynamicsCalculator(RigidBody body, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
    {
       this(body, ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity),
-            new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, true, true);
+            jointsToIgnore, true, true);
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
-         List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
+   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, List<InverseDynamicsJoint> jointsToIgnore,
+         boolean doVelocityTerms, boolean doAccelerationTerms)
    {
-      this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
+      this(jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
             doAccelerationTerms, true));
    }
 
-   public InverseDynamicsCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
-         SpatialAccelerationCalculator spatialAccelerationCalculator)
+   public InverseDynamicsCalculator(List<InverseDynamicsJoint> jointsToIgnore, SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
       this.rootBody = spatialAccelerationCalculator.getRootBody();
-      this.externalWrenches = new LinkedHashMap<RigidBody, Wrench>(externalWrenches);
       this.jointsToIgnore = new ArrayList<InverseDynamicsJoint>(jointsToIgnore);
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
 

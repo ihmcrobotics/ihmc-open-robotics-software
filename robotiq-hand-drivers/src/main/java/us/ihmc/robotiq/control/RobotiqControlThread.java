@@ -7,12 +7,13 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.ManualHandControlPacket;
 import us.ihmc.avatar.handControl.HandControlThread;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
@@ -71,7 +72,7 @@ public class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         handDesiredConfigurationMessageSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
+         handDesiredConfigurationMessageSubscriber.receivedPacket(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -87,7 +88,7 @@ public class RobotiqControlThread extends HandControlThread
          if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
          {
             HandDesiredConfigurationMessage packet = handDesiredConfigurationMessageSubscriber.pollMessage();
-            HandConfiguration state = packet.getHandDesiredConfiguration();
+            HandConfiguration state = HandConfiguration.fromByte(packet.getDesiredHandConfiguration());
             
             switch (state)
             {

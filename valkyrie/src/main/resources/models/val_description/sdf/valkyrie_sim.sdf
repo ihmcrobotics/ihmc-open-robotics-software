@@ -19,7 +19,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/pelvis/pelvis.dae</uri>
+            <uri>model://val_description/model/meshes/pelvis/pelvis.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -28,7 +28,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/pelvis/pelvis.dae</uri>
+            <uri>model://val_description/model/meshes/pelvis/pelvis.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -98,7 +98,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -107,7 +107,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -163,7 +163,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -172,7 +172,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -228,7 +228,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -237,7 +237,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -293,7 +293,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj4_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -302,7 +302,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj4_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -358,7 +358,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj5.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj5.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -367,7 +367,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj5.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj5.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -431,7 +431,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/foot.dae</uri>
+            <uri>model://val_description/model/meshes/legs/foot.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -495,7 +495,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -504,7 +504,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -560,7 +560,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -569,7 +569,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -625,7 +625,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -634,7 +634,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -690,7 +690,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj4_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -699,7 +699,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj4_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -755,7 +755,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj5.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj5.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -764,7 +764,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/lj5.dae</uri>
+            <uri>model://val_description/model/meshes/legs/lj5.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -828,7 +828,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/legs/foot.dae</uri>
+            <uri>model://val_description/model/meshes/legs/foot.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -892,7 +892,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torsoyaw.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torsoyaw.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -901,7 +901,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torsoyaw.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torsoyaw.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -957,7 +957,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torsopitch.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torsopitch.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -966,7 +966,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torsopitch.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torsopitch.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1022,7 +1022,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torso.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torso.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1031,7 +1031,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/torso/torso.dae</uri>
+            <uri>model://val_description/model/meshes/torso/torso.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1145,7 +1145,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1154,7 +1154,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1210,7 +1210,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1219,7 +1219,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1275,7 +1275,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1284,7 +1284,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1340,7 +1340,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj4_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1349,7 +1349,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj4_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1405,7 +1405,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj5_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj5_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1414,7 +1414,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj5_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj5_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1470,7 +1470,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj6_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj6_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1479,7 +1479,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj6_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj6_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1535,7 +1535,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/palm_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/palm_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1544,7 +1544,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/palm_left.dae</uri>
+            <uri>model://val_description/model/meshes/arms/palm_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1600,7 +1600,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1609,7 +1609,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1665,7 +1665,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1674,7 +1674,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1730,7 +1730,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1739,7 +1739,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1795,7 +1795,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1804,7 +1804,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1860,7 +1860,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1869,7 +1869,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1925,7 +1925,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1934,7 +1934,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1990,7 +1990,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1999,7 +1999,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2055,7 +2055,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2064,7 +2064,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2120,7 +2120,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2129,7 +2129,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2185,7 +2185,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj1_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2194,7 +2194,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj1_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj1_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2250,7 +2250,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj2_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2259,7 +2259,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj2_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj2_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2315,7 +2315,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj3_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2324,7 +2324,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj3_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj3_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2380,7 +2380,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj4_left.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2389,7 +2389,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj4_left.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj4_left.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2445,7 +2445,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/neckj1.dae</uri>
+            <uri>model://val_description/model/meshes/head/neckj1.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2454,7 +2454,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/neckj1.dae</uri>
+            <uri>model://val_description/model/meshes/head/neckj1.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2510,7 +2510,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/neckj2.dae</uri>
+            <uri>model://val_description/model/meshes/head/neckj2.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2519,7 +2519,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/neckj2.dae</uri>
+            <uri>model://val_description/model/meshes/head/neckj2.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2575,7 +2575,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/head_multisense_no_visor.dae</uri>
+            <uri>model://val_description/model/meshes/head/head_multisense_no_visor.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2600,7 +2600,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/head/head_multisense_no_visor.dae</uri>
+            <uri>model://val_description/model/meshes/head/head_multisense_no_visor.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2769,7 +2769,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/multisense/head_camera.dae</uri>
+            <uri>model://val_description/model/meshes/multisense/head_camera.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2850,7 +2850,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2859,7 +2859,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2915,7 +2915,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2924,7 +2924,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2980,7 +2980,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2989,7 +2989,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3045,7 +3045,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj4_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3054,7 +3054,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj4_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3110,7 +3110,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj5_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj5_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3119,7 +3119,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj5_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj5_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3175,7 +3175,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj6_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj6_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3184,7 +3184,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/aj6_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/aj6_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3240,7 +3240,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/palm_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/palm_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3249,7 +3249,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/palm_right.dae</uri>
+            <uri>model://val_description/model/meshes/arms/palm_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3305,7 +3305,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3314,7 +3314,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3370,7 +3370,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3379,7 +3379,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3435,7 +3435,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3444,7 +3444,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/indexj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/indexj3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3500,7 +3500,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3509,7 +3509,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3565,7 +3565,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3574,7 +3574,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3630,7 +3630,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3639,7 +3639,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/middlej3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/middlej3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3695,7 +3695,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3704,7 +3704,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3760,7 +3760,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3769,7 +3769,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3825,7 +3825,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3834,7 +3834,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/pinkyj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/pinkyj3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3890,7 +3890,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj1_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3899,7 +3899,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj1_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj1_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3955,7 +3955,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj2_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -3964,7 +3964,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj2_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj2_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4020,7 +4020,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj3_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -4029,7 +4029,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj3_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj3_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4085,7 +4085,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj4_right.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -4094,7 +4094,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/fingers/thumbj4_right.dae</uri>
+            <uri>model://val_description/model/meshes/fingers/thumbj4_right.obj</uri>
           </mesh>
         </geometry>
       </visual>
