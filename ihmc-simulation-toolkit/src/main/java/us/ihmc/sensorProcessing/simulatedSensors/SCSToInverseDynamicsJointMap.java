@@ -121,6 +121,17 @@ public class SCSToInverseDynamicsJointMap
    }
 
    /**
+    * Retrieves the corresponding simulated joint given an inverse dynamics joint.
+    * 
+    * @param the inverse dynamics joint. Not modified.
+    * @return the corresponding simulated joint.
+    */
+   public OneDegreeOfFreedomJoint getSimulatedOneDegreeOfFreedomJoint(OneDoFJoint inverseDynamicsJoint)
+   {
+      return oneDoFToSCSJointMap.get(inverseDynamicsJoint);
+   }
+
+   /**
     * Given a simulated and inverse dynamics robot models, this method creates map associating
     * simulated joints with inverse dynamics by name.
     * 
