@@ -13,7 +13,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,7 +26,7 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleParameter initializationDuration = new DoubleParameter("heightInitializationDuration", registry, 0.5);
 
-   private final YoDouble robotTimestamp;
+   private final YoDouble controllerTime;
 
    private final YoBoolean controlBodyHeight = new YoBoolean("controlBodyHeight", registry);
 
@@ -55,7 +54,6 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoDouble desiredVelocityInWorld;
    private final YoDouble currentVelocityInWorld;
 
-
    private final FramePoint3D nominalPosition;
    private final FrameVector3D nominalVelocity;
 
@@ -65,7 +63,7 @@ public class QuadrupedCenterOfMassHeightManager
                                              YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
+      this.controllerTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -77,11 +75,13 @@ public class QuadrupedCenterOfMassHeightManager
       defaultComPositionGains.setKp(50.0);
       defaultComPositionGains.setKd(5.0);
       comPositionGainsParameter = new ParameterizedPIDGains("_comHeight", defaultComPositionGains, registry);
-
       linearMomentumZPDController = new PIDController("linearMomentumZPDController", registry);
+
+      controlBodyHeight.set(true);
 
       nominalPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
       nominalVelocity = new FrameVector3D(supportFrame);
+
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
 
       currentHeightInWorld = new YoDouble("currentHeightInWorld", registry);
@@ -96,7 +96,7 @@ public class QuadrupedCenterOfMassHeightManager
    {
       controlBodyHeight.set(command.controlBodyHeight());
 
-      double currentTime = robotTimestamp.getDoubleValue();
+      double currentTime = controllerTime.getDoubleValue();
       double timeShift = command.isExpressedInAbsoluteTime() ? 0.0 : currentTime;
       EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
       euclideanTrajectory.getTrajectoryPointList().addTimeOffset(timeShift);
@@ -135,7 +135,7 @@ public class QuadrupedCenterOfMassHeightManager
       currentPosition.changeFrame(supportFrame);
       currentVelocity.changeFrame(supportFrame);
 
-      double startTime = robotTimestamp.getDoubleValue();
+      double startTime = controllerTime.getDoubleValue();
       double endTime = startTime + initializationDuration.getValue();
       centerOfMassHeightTrajectory.clear();
       centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
@@ -145,7 +145,7 @@ public class QuadrupedCenterOfMassHeightManager
 
    public void update()
    {
-      centerOfMassHeightTrajectory.compute(robotTimestamp.getDoubleValue());
+      centerOfMassHeightTrajectory.compute(controllerTime.getDoubleValue());
       centerOfMassHeightTrajectory.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
       desiredPosition.changeFrame(worldFrame);
