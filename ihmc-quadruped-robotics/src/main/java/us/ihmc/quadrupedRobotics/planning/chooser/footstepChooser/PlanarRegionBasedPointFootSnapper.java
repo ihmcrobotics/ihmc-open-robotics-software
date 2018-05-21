@@ -32,7 +32,6 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
 
 
    private final RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform planarRegionTransformToLocal = new RigidBodyTransform();
    private final FrameConvexPolygon2D planarRegionPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D shrunkPolygon = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
