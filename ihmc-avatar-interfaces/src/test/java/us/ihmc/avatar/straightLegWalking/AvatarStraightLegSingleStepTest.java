@@ -167,9 +167,14 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
    public void testSteppingDown(double stepDownHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
    {
+      testSteppingDown(stepDownHeight, stepDownHeight, stepLength, stanceWidth);
+   }
+
+   public void testSteppingDown(double stepDownHeight, double stepHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
+   {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      double dropHeight = -stepDownHeight;
+      double dropHeight = -stepHeight;
 
       ArrayList<Double> stepHeights = new ArrayList<>();
       ArrayList<Double> stepLengths = new ArrayList<>();
@@ -191,7 +196,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       FootstepDataListMessage message = new FootstepDataListMessage();
 
-      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, -stepDownHeight), new Quaternion()));
 
       drcSimulationTestHelper.send(message);
 

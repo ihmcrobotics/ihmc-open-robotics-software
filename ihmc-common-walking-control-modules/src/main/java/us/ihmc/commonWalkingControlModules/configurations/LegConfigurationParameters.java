@@ -20,7 +20,8 @@ public class LegConfigurationParameters
    public double getSupportKneeCollapsingDurationFractionOfStep()
    {
       return 0.5;
-//      return 0.18; for big step down
+//      return 1.0;
+//      return 0.1; // for big step down
    }
 
    /**
@@ -59,7 +60,7 @@ public class LegConfigurationParameters
    public double getDesiredFractionOfMidrangeForCollapsedAngle()
    {
       return 0.3;
-//      return 1.8; for big step down
+//      return 1.8; // for big step down
    }
 
    /**
@@ -83,6 +84,7 @@ public class LegConfigurationParameters
    public double getFractionOfTransferToCollapseLeg()
    {
       return 0.7;
+//      return 1.0;
    }
 
    /**
@@ -93,7 +95,8 @@ public class LegConfigurationParameters
    public double getFractionOfSwingToCollapseStanceLeg()
    {
       return 0.55;
-//      return 0.3; for big step down
+//      return 1.0;
+//      return 0.3; //for big step down
    }
 
    /**

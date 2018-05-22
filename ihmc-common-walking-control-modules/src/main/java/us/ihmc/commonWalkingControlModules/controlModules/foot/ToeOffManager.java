@@ -457,6 +457,7 @@ public class ToeOffManager
       return true;
    }
 
+   // FIXME I think this may not be working correctly.
    private void checkECMPLocation(FramePoint2D desiredECMP)
    {
       if (toeOffParameters.checkECMPLocationToTriggerToeOff())
