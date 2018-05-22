@@ -26,7 +26,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    @Test(timeout = 70000)
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.5;
+      double stepLength = 1.75;
       double stepWidth = 0.25;
 
       super.testForwardStep(stepLength, stepWidth);
@@ -69,10 +69,11 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
    @Test(timeout = 100000)
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.4;
+      double stepDownHeight = 0.2;
+      double stepHeight = 0.4;
       double stepLength = 0.4;
       double stanceWidth = 0.25;
-      super.testSteppingDown(stepDownHeight, stepLength, stanceWidth);
+      super.testSteppingDown(/*stepDownHeight,*/ stepHeight, stepLength, stanceWidth);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
@@ -202,8 +203,8 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public double getICPPercentOfStanceForSSToeOff()
       {
-         return 0.10;
-         //         return 0.50; for big step down
+//         return 0.10;
+                  return 0.70;// for big step down
       }
 
       @Override
@@ -340,7 +341,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public double getTransferSplitFraction()
       {
-         return 0.8;
+         return 0.9;
       }
 
       @Override

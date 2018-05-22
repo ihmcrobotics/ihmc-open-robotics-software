@@ -10,6 +10,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.quadTree.QuadTreeForGroundPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -42,8 +44,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-
-   private static final String forwardFastScript = "scripts/ExerciseAndJUnitScripts/stepAdjustment_forwardWalkingFast.xml";
 
    private static double simulationTime = 10.0;
 
@@ -73,45 +73,65 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(getLongScript());
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-
-      assertTrue(success);
-   }
-
-   private void setupTest(String scriptName) throws SimulationExceededMaximumTimeException
-   {
-      this.setupTest(scriptName, ReferenceFrame.getWorldFrame());
-   }
-
-   private void setupTest(String scriptName, ReferenceFrame yawReferenceFrame) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
-      if (scriptName != null && !scriptName.isEmpty())
+      setupCamera();
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+      ThreadTools.sleep(1000);
+
+      double transferDuration = 0.2;
+      double swingDuration = 0.7;
+      double length = 0.7;
+      List<FootstepDataMessage> footsteps = getFlatGroundFootsteps(6, length, transferDuration, swingDuration);
+      FootstepDataListMessage footstepListMessage = HumanoidMessageTools
+            .createFootstepDataListMessage(footsteps, swingDuration, transferDuration, ExecutionMode.OVERRIDE);
+      footstepListMessage.setAreFootstepsAdjustable(true);
+      footstepListMessage.setOffsetFootstepsWithExecutionError(true);
+
+      drcSimulationTestHelper.send(footstepListMessage);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      assertTrue(success);
+   }
+
+   private ArrayList<FootstepDataMessage> getFlatGroundFootsteps(int numberOfSteps, double length, double transferDuration, double swingDuration)
+   {
+      ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
+      RobotSide robotSide = RobotSide.RIGHT;
+      double width = 0.22;
+      double xLocation = 0.0;
+      for (int i = 0; i < numberOfSteps; i++)
       {
-         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-         if (yawReferenceFrame != null)
-         {
-            drcSimulationTestHelper.loadScriptFile(scriptInputStream, yawReferenceFrame);
-         }
-         else
-         {
-            drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
-         }
+         xLocation += length;
+         FootstepDataMessage dataMessage = HumanoidMessageTools
+               .createFootstepDataMessage(robotSide, new Point3D(xLocation, robotSide.negateIfRightSide(width / 2.0), 0.0), new Quaternion());
+         dataMessage.setSwingDuration(swingDuration);
+         if (i > 0)
+            dataMessage.setTransferDuration(transferDuration);
+
+         footsteps.add(dataMessage);
+
+         robotSide = robotSide.getOppositeSide();
       }
 
-      setupCamera();
-      ThreadTools.sleep(1000);
+      FootstepDataMessage dataMessage = HumanoidMessageTools
+            .createFootstepDataMessage(robotSide, new Point3D(xLocation, robotSide.negateIfRightSide(width / 2.0), 0.0), new Quaternion());
+      dataMessage.setSwingDuration(swingDuration);
+      dataMessage.setTransferDuration(transferDuration);
+
+      footsteps.add(dataMessage);
+
+      return footsteps;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 167.7)
@@ -135,7 +155,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = drcSimulationTestHelper
+            .simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
@@ -163,7 +184,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = drcSimulationTestHelper
+            .simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       //success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10 * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
@@ -251,7 +273,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          stepHeights.add(currentHeight);
          stepLengths.add(stepLength);
       }
-
 
       double starterLength = 0.35;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
@@ -345,7 +366,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          stepLengths.add(stepLength);
       }
 
-
       double starterLength = 0.35;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -379,7 +399,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, instep, stepHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.getFootstepDataList().add().set(footstepData);
-
 
          robotSide = robotSide.getOppositeSide();
       }
@@ -506,7 +525,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
    private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
@@ -555,23 +573,23 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double stepWidth = 0.275;
       int numberOfStartingSteps = 3;
       double firstStepPosition = stepPoses.get(0).get(0).getX();
-      double startingLength = (firstStepPosition - 0.35)  / numberOfStartingSteps;
+      double startingLength = (firstStepPosition - 0.35) / numberOfStartingSteps;
 
       // approach the stairs
       RobotSide robotSide = RobotSide.LEFT;
       for (int stepIndex = 0; stepIndex < numberOfStartingSteps; stepIndex++)
       {
-            double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+         double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-            FramePose3D stepPose = new FramePose3D();
-            stepPose.setX(startingLength * (stepIndex + 1));
-            stepPose.setY(yPosition);
+         FramePose3D stepPose = new FramePose3D();
+         stepPose.setX(startingLength * (stepIndex + 1));
+         stepPose.setY(yPosition);
 
-            Point3D location = new Point3D();
-            Quaternion orientation = new Quaternion();
-            stepPose.get(location, orientation);
-            FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-            footsteps.getFootstepDataList().add().set(footstep);
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
+         stepPose.get(location, orientation);
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+         footsteps.getFootstepDataList().add().set(footstep);
 
          robotSide = robotSide.getOppositeSide();
       }
@@ -614,7 +632,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double platformWidth = startOfAscent - topOfStairs;
 
       int numberOfPlatformSteps = 1;
-      double platformStepLength = (platformWidth)  / numberOfPlatformSteps;
+      double platformStepLength = (platformWidth) / numberOfPlatformSteps;
 
       // approach the top of the stairs
       robotSide = RobotSide.LEFT;
@@ -635,7 +653,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
          robotSide = robotSide.getOppositeSide();
       }
-
 
       // closing step
       yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
@@ -716,7 +733,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    private static SideDependentList<List<FramePose3D>> extractColumns(List<List<FramePose3D>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
    {
       SideDependentList<Integer> columnIndices = new SideDependentList<Integer>(indexForLeftSide, indexForRightSide);
-      SideDependentList<List<FramePose3D>> sideDependentColumns = new SideDependentList<List<FramePose3D>>(new ArrayList<FramePose3D>(), new ArrayList<FramePose3D>());
+      SideDependentList<List<FramePose3D>> sideDependentColumns = new SideDependentList<List<FramePose3D>>(new ArrayList<FramePose3D>(),
+                                                                                                           new ArrayList<FramePose3D>());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -729,16 +747,10 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return sideDependentColumns;
    }
 
-
    private void setupCamera()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
       Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-   }
-
-   public String getLongScript()
-   {
-      return forwardFastScript;
    }
 }

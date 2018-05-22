@@ -134,6 +134,18 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
+      public double getMaxICPErrorBeforeSingleSupportX()
+      {
+         return 0.04;
+      }
+
+      @Override
+      public double getMaxICPErrorBeforeSingleSupportY()
+      {
+         return 0.02;
+      }
+
+      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
@@ -175,6 +187,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return new TestToeOffParameters(jointMap);
       }
 
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return new TestSteppingParameters(jointMap);
+      }
+
    }
 
    private class TestToeOffParameters extends AtlasToeOffParameters
@@ -187,7 +205,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean checkCoPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -211,7 +229,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean checkECMPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -348,6 +366,20 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public boolean putExitCoPOnToes()
       {
          return true;
+      }
+   }
+
+   private class TestSteppingParameters extends AtlasSteppingParameters
+   {
+      public TestSteppingParameters(AtlasJointMap jointMap)
+      {
+         super(jointMap);
+      }
+
+      @Override
+      public double getMaxStepLength()
+      {
+         return 1.0;
       }
    }
 
