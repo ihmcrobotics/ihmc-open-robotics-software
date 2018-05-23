@@ -139,7 +139,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       FramePoint3D goalPosition21 = new FramePoint3D(baseBlockFrame, 2.45, 0.15, 0.0);
       FramePoint3D goalPosition22 = new FramePoint3D(baseBlockFrame, 1.65, -0.2, 0.0);
       FramePoint3D goalPosition23 = new FramePoint3D(baseBlockFrame, 2.55, -0.2, 0.0);
-      FramePoint3D goalPosition24 = new FramePoint3D(baseBlockFrame, 1.7, 0.15, 0.0);
+      FramePoint3D goalPosition24 = new FramePoint3D(baseBlockFrame, 1.75, 0.15, 0.0);
 
 
 
@@ -147,7 +147,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       FramePoint3D goalPosition25 = new FramePoint3D(baseBlockFrame, 2.95, 0.10, 0.0);
       FramePoint3D goalPosition26 = new FramePoint3D(baseBlockFrame, 2.1, -0.2, 0.0);
       FramePoint3D goalPosition27 = new FramePoint3D(baseBlockFrame, 3.1, -0.15, 0.0);
-      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 2.2, 0.15, 0.0);
+      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 2.1, 0.15, 0.0);
 
       FramePoint3D goalPosition29 = new FramePoint3D(baseBlockFrame, 3.55, 0.10, 0.0);
       FramePoint3D goalPosition30 = new FramePoint3D(baseBlockFrame, 2.45, -0.15, 0.0);
