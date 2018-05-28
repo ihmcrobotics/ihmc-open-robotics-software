@@ -50,7 +50,9 @@ public class QuadrupedStepMessageHandler
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class));
 
-      numberOfStepsToRecover.set(10);
+      // the look-ahead step adjustment was doing integer division which was 1.0 for step 0 and 0.0 after, so effectively having a one step recovery
+      // TODO tune this value
+      numberOfStepsToRecover.set(1);
 
       parentRegistry.addChild(registry);
    }
@@ -166,9 +168,10 @@ public class QuadrupedStepMessageHandler
 
    public void shiftPlanBasedOnStepAdjustment(FrameVector3DReadOnly stepAdjustment)
    {
-      for (int i = 0; i < Math.min(numberOfStepsToRecover.getIntegerValue(), receivedStepSequence.size()); i++)
+      int numberOfStepsToAdjust = Math.min(numberOfStepsToRecover.getIntegerValue(), receivedStepSequence.size());
+      for (int i = 0; i < numberOfStepsToAdjust; i++)
       {
-         double multiplier = (numberOfStepsToRecover.getIntegerValue() - i) / numberOfStepsToRecover.getIntegerValue();
+         double multiplier = (numberOfStepsToRecover.getIntegerValue() - i) / (double) numberOfStepsToRecover.getIntegerValue();
          receivedStepSequence.get(i).getGoalPosition(tempStep);
          tempStep.scaleAdd(multiplier, stepAdjustment, tempStep);
          receivedStepSequence.get(i).setGoalPosition(tempStep);
