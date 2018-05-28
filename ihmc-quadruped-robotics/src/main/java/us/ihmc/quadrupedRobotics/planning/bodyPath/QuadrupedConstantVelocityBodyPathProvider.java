@@ -118,7 +118,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          setStartConditionsFromCurrent();
       }
 
-      initialPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+      initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
       extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
    }
 
@@ -185,8 +185,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       tempVector.applyTransform(tempTransform);
       tempVector.add(latestMessageSoleDesiredPosition);
       startPoint.set(tempVector);
-
-      startPoint.add(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
    }
 
    private void computeStepAdjustmentFromFootstepStatus()
@@ -203,7 +201,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
       mostRecentTouchdown.set(quadrant);
       achievedStepAdjustment.sub(soleDesiredAtTouchdown, soleDesiredAtStartOfStep);
-      startPoint.add(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
    }
 
    private QuadrupedFootstepStatusMessage getLatestStartStatusMessage()
