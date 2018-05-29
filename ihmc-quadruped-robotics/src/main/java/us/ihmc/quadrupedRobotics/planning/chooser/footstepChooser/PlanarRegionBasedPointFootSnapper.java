@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -51,10 +52,13 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList.clear();
+      double minimumPolygonArea = Math.PI * MathTools.square(parameters.distanceInsidePlanarRegion());
+
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         if (planarRegion.getNormal().getZ() > Math.cos(parameters.maximumNormalAngleFromVertical()))
+         if (planarRegion.getNormal().getZ() > Math.cos(parameters.maximumNormalAngleFromVertical())
+               && planarRegion.getConvexHull().getArea() > minimumPolygonArea)
          {
             this.planarRegionsList.addPlanarRegion(planarRegion);
          }
