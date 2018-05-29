@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.AssertionFailedError;
+import org.lwjgl.Sys;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,6 +23,9 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
+
+   private final boolean exportSimulationDataOnFailure;
+   private String testName;
    
    private boolean yoTimeChangedListenerActive = false;
    
@@ -40,11 +44,17 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private String assertionFailedMessage = null;
    private String scsCrashedException = null;
-   
+
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
+   {
+      this(scs, simulationTestingParameters, false);
+   }
+
+   public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters, boolean exportSimulationDataOnFailure)
    {
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
+      this.exportSimulationDataOnFailure = exportSimulationDataOnFailure;
       
       YoDouble yoTime = (YoDouble) scs.getVariable("t");
       yoTime.addVariableChangedListener(this::notifyOfVariableChange);
@@ -181,6 +191,27 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       terminalGoals.clear();
       scs.stop();
    }
+
+   private void exportSimulationDataIfRequested()
+   {
+      if(exportSimulationDataOnFailure)
+      {
+         String varGroup = "all";
+         boolean useBinary = true;
+         boolean compress = false;
+         String fileName;
+         if(testName != null)
+         {
+            fileName = testName + System.currentTimeMillis() + ".data";
+         }
+         else
+         {
+            fileName = "simulation_data_" + System.currentTimeMillis() + ".data";
+         }
+
+         scs.writeData(varGroup, useBinary, compress, fileName);
+      }
+   }
    
    public void simulate() throws AssertionFailedError
    {
@@ -204,6 +235,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          createAssertionFailedException();
          stop();
+         exportSimulationDataIfRequested();
       }
       else if(printSuccessMessage.get())
       {
@@ -214,6 +246,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          stop();
          PrintTools.error(scsCrashedException);
+         exportSimulationDataIfRequested();
          fail();
       }
       
@@ -298,6 +331,11 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    public void setKeepSCSUp(boolean keepSCSUp)
    {
       simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+   }
+
+   public void setTestName(String testName)
+   {
+      this.testName = testName;
    }
 
    @Override

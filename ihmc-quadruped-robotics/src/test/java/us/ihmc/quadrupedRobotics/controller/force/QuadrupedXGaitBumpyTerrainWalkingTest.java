@@ -44,6 +44,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    
    public void testWalkingOverShallowBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
+      conductor.setTestName("testWalkingOverShallowBumpyTerrain");
       double xAmp1 = 0.01, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
       double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.01, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2);
@@ -68,6 +69,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
+      conductor.setTestName("testWalkingOverMediumBumpyTerrain");
       double xAmp1 = 0.02, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
       double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2);
