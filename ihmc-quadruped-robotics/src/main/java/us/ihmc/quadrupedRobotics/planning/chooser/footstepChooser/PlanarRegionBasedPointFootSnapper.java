@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -8,6 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -17,27 +20,23 @@ import java.util.List;
 public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double distanceInside = 0.05;
-   private static final double maxNormalAngleFromVertical = 0.3;
 
+   private final PointFootSnapperParameters parameters;
 
-   private final Point2D unsnappedPoint = new Point2D();
    private final Point2D snappedPoint2D = new Point2D();
-   private final Point3D snappedPoint = new Point3D();
+   private final FramePoint3D snappedPoint3D = new FramePoint3D();
    private final ReferenceFrame planarRegionFrame;
 
    private final PlanarRegionsList planarRegionsList;
-   private final Vector3D planeNormal = new Vector3D();
-   private final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
-
 
    private final RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-   private final FrameConvexPolygon2D planarRegionPolygon = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D shrunkPolygon = new FrameConvexPolygon2D();
+   private final ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D shrunkPolygon = new ConvexPolygon2D();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
-   public PlanarRegionBasedPointFootSnapper()
+   public PlanarRegionBasedPointFootSnapper(PointFootSnapperParameters parameters)
    {
+      this.parameters = parameters;
       planarRegionsList = new PlanarRegionsList();
       planarRegionFrame = new ReferenceFrame("planarRegionFrame", worldFrame)
       {
@@ -55,11 +54,7 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         planarRegion.getNormal(planeNormal);
-
-         double angle = planeNormal.angle(verticalAxis);
-
-         if (angle < maxNormalAngleFromVertical)
+         if (planarRegion.getNormal().getZ() > Math.cos(parameters.maximumNormalAngleFromVertical()))
          {
             this.planarRegionsList.addPlanarRegion(planarRegion);
          }
@@ -69,20 +64,11 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    @Override
    public Point3DReadOnly snapStep(double xPosition, double yPosition)
    {
-      unsnappedPoint.set(xPosition, yPosition);
-      return snapStep(unsnappedPoint);
-   }
-
-   public Point3DReadOnly snapStep(Point2DReadOnly unsnappedPoint)
-   {
-      List<PlanarRegion> intersectingRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(unsnappedPoint);
+      List<PlanarRegion> intersectingRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(xPosition, yPosition);
       if(intersectingRegions == null)
       {
-         PlanarRegion closestRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(unsnappedPoint);
-         Point2DReadOnly snappedPoint2D = projectPointIntoPlanarRegion(unsnappedPoint, closestRegion, distanceInside);
-         double zHeight = closestRegion.getPlaneZGivenXY(snappedPoint2D.getX(), snappedPoint2D.getY());
-
-         snappedPoint.set(snappedPoint2D, zHeight);
+         PlanarRegion closestRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(xPosition, yPosition);
+         return projectPointIntoPlanarRegion(xPosition, yPosition, closestRegion, parameters.distanceInsidePlanarRegion());
       }
       else
       {
@@ -90,7 +76,7 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
          PlanarRegion planarRegion = null;
          for (int i = 0; i < intersectingRegions.size(); i++)
          {
-            double regionHeight = intersectingRegions.get(i).getPlaneZGivenXY(unsnappedPoint.getX(), unsnappedPoint.getY());
+            double regionHeight = intersectingRegions.get(i).getPlaneZGivenXY(xPosition, yPosition);
             if(regionHeight > maxZ)
             {
                planarRegion = intersectingRegions.get(i);
@@ -98,31 +84,28 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
             }
          }
 
-         Point2DReadOnly snappedPoint2D = projectPointIntoPlanarRegion(unsnappedPoint, planarRegion, distanceInside);
-         snappedPoint.set(snappedPoint2D, maxZ);
+         return projectPointIntoPlanarRegion(xPosition, yPosition, planarRegion, parameters.distanceInsidePlanarRegion());
       }
-
-      return snappedPoint;
    }
 
-   private Point2DReadOnly projectPointIntoPlanarRegion(Point2DReadOnly unsnappedPoint, PlanarRegion planarRegion, double distanceInside)
+   private Point3DReadOnly projectPointIntoPlanarRegion(double xPosition, double yPosition, PlanarRegion planarRegion, double distanceInside)
    {
       planarRegion.getTransformToWorld(planarRegionTransformToWorld);
       planarRegionFrame.update();
-      planarRegionPolygon.setReferenceFrame(planarRegionFrame);
       planarRegionPolygon.set(planarRegion.getConvexHull());
-      planarRegionPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
-      if (planarRegionPolygon.signedDistance(unsnappedPoint) > -distanceInside)
+      snappedPoint3D.setIncludingFrame(worldFrame, xPosition, yPosition, planarRegion.getPlaneZGivenXY(xPosition, yPosition));
+      snappedPoint3D.changeFrame(planarRegionFrame);
+      snappedPoint2D.set(snappedPoint3D);
+
+      if (planarRegionPolygon.signedDistance(snappedPoint2D) > -distanceInside)
       {
          scaler.scaleConvexPolygon(planarRegionPolygon, distanceInside, shrunkPolygon);
-         shrunkPolygon.orthogonalProjection(unsnappedPoint, snappedPoint2D);
-      }
-      else
-      {
-         snappedPoint2D.set(unsnappedPoint);
+         shrunkPolygon.orthogonalProjection(snappedPoint2D);
       }
 
-      return snappedPoint2D;
+      snappedPoint3D.set(snappedPoint2D);
+      snappedPoint3D.changeFrame(worldFrame);
+      return snappedPoint3D;
    }
 }
