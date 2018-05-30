@@ -35,7 +35,7 @@ import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
 import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.PilotInterfaceActionPacket;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import controller_msgs.msg.dds.SnapFootstepPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -212,7 +212,7 @@ public class PacketCodeQualityTest
                }
 
                if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && Supplier.class.isAssignableFrom(method.getReturnType()))
-                     continue;
+                  continue;
 
                if (methodName.equals("set"))
                {
@@ -615,7 +615,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 0.4, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 30000)
+   @Test//(timeout = 30000)
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -623,9 +623,13 @@ public class PacketCodeQualityTest
       Reflections packetReflections = new Reflections(PACKETS_LOCATION);
       Reflections enumReflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
-      Set<String> enumLowerCaseNames = enumReflections.getSubTypesOf(Enum.class).stream().map(Class::getSimpleName).map(name -> name.toLowerCase())
-                                                      .collect(Collectors.toSet());
-      enumLowerCaseNames.add("pilotaction"); // In exo land
+      Set<String> enumLowerCaseNames = enumReflections.getSubTypesOf(Enum.class).stream().filter(Class::isEnum).map(Class::getSimpleName)
+                                                      .map(name -> name.toLowerCase()).collect(Collectors.toSet());
+      enumLowerCaseNames.add("PilotAction".toLowerCase()); // In exo land
+      enumLowerCaseNames.add("QuadrupedControllerEnum".toLowerCase()); // In quadruped land
+      enumLowerCaseNames.add("QuadrupedControllerRequestedEvent".toLowerCase()); // In quadruped land
+      enumLowerCaseNames.add("QuadrupedSteppingStateEnum".toLowerCase()); // In quadruped land
+      enumLowerCaseNames.add("QuadrupedSteppingRequestedEvent".toLowerCase()); // In quadruped land
 
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
@@ -688,7 +692,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 0.7, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 30000)
+   @Test //(timeout = 30000)
    public void testPacketWithByteFieldDeclareEnumValuesAsStaticByteFields() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -697,15 +701,15 @@ public class PacketCodeQualityTest
       Reflections enumReflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
       Map<String, Class<? extends Enum>> nameToEnumMap = new HashMap<>();
-      enumReflections.getSubTypesOf(Enum.class).forEach(type -> nameToEnumMap.put(type.getSimpleName().toLowerCase(), type));
-
+      enumReflections.getSubTypesOf(Enum.class).stream().filter(Class::isEnum).forEach(type -> nameToEnumMap.put(type.getSimpleName().toLowerCase(), type));
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
-      fieldsToIngore.add(PilotInterfaceActionPacket.class.getField("pilot_action_")); // In exo land
       fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
+      fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("initial_quadruped_stepping_state_enum_")); // In quadruped land
+      fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("end_quadruped_stepping_state_enum_")); // In quadruped land
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -750,9 +754,15 @@ public class PacketCodeQualityTest
                   }
                }
 
-               Enum[] enumConstants = matchingEnum.getEnumConstants();
-               // Now verifies that all the enum constants are declared as statics in the packet type and that they refer to the enum ordinal.
+               if (matchingEnum == null)
+               {
+                  PrintTools.warn("Failed to find a matching enum for the field: " + field.getDeclaringClass().getSimpleName() + "." + field.getName());
+                  continue;
+               }
 
+               Enum[] enumConstants = matchingEnum.getEnumConstants();
+
+               // Now verifies that all the enum constants are declared as statics in the packet type and that they refer to the enum ordinal.
                for (Enum enumConstant : enumConstants)
                {
 

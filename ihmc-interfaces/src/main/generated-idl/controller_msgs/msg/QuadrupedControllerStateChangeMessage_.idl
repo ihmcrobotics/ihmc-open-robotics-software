@@ -41,12 +41,12 @@ module controller_msgs
          * Specifies the controller's state prior to transition.
          */
         @defaultValue(value=255)
-        octet initial_controller_name;
+        octet initial_quadruped_controller_enum;
         /**
          * Specifies the state the controller has transitioned into.
          */
         @defaultValue(value=255)
-        octet end_controller_name;
+        octet end_quadruped_controller_enum;
       };
     };
   };

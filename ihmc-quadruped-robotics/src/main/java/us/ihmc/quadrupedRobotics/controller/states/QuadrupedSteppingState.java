@@ -187,8 +187,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
-            quadrupedSteppingStateChangeMessage.setInitialSteppingControllerName(fromByte);
-            quadrupedSteppingStateChangeMessage.setEndSteppingControllerName(toByte);
+            quadrupedSteppingStateChangeMessage.setInitialQuadrupedSteppingStateEnum(fromByte);
+            quadrupedSteppingStateChangeMessage.setEndQuadrupedSteppingStateEnum(toByte);
             statusMessageOutputManager.reportStatusMessage(quadrupedSteppingStateChangeMessage);
          }
       });

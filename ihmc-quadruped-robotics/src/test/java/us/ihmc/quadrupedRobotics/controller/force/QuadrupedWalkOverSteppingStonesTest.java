@@ -73,10 +73,10 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       AtomicReference<QuadrupedControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
-                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndControllerName())));
+                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndQuadrupedControllerEnum())));
 
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
-                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
+                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndQuadrupedSteppingStateEnum())));
       packetCommunicator.connect();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

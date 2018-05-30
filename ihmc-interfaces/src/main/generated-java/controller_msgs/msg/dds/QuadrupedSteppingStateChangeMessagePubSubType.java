@@ -69,17 +69,17 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
 
    public static void write(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_9(data.getInitialSteppingControllerName());
+      cdr.write_type_9(data.getInitialQuadrupedSteppingStateEnum());
 
-      cdr.write_type_9(data.getEndSteppingControllerName());
+      cdr.write_type_9(data.getEndQuadrupedSteppingStateEnum());
 
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setInitialSteppingControllerName(cdr.read_type_9());
+      data.setInitialQuadrupedSteppingStateEnum(cdr.read_type_9());
       	
-      data.setEndSteppingControllerName(cdr.read_type_9());
+      data.setEndQuadrupedSteppingStateEnum(cdr.read_type_9());
       	
 
    }
@@ -87,15 +87,15 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("initial_stepping_controller_name", data.getInitialSteppingControllerName());
-      ser.write_type_9("end_stepping_controller_name", data.getEndSteppingControllerName());
+      ser.write_type_9("initial_quadruped_stepping_state_enum", data.getInitialQuadrupedSteppingStateEnum());
+      ser.write_type_9("end_quadruped_stepping_state_enum", data.getEndQuadrupedSteppingStateEnum());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data)
    {
-      data.setInitialSteppingControllerName(ser.read_type_9("initial_stepping_controller_name"));
-      data.setEndSteppingControllerName(ser.read_type_9("end_stepping_controller_name"));
+      data.setInitialQuadrupedSteppingStateEnum(ser.read_type_9("initial_quadruped_stepping_state_enum"));
+      data.setEndQuadrupedSteppingStateEnum(ser.read_type_9("end_quadruped_stepping_state_enum"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage src, controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage dest)

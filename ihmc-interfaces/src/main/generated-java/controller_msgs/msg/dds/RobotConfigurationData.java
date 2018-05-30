@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
+       * It is published frequently from the IHMC state estimator.
+       */
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
    public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 0;

@@ -67,14 +67,14 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       AtomicReference<QuadrupedControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
-                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndControllerName())));
+                                        packet -> controllerState.set(QuadrupedControllerEnum.fromByte(packet.getEndQuadrupedControllerEnum())));
 
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
-                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
+                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndQuadrupedSteppingStateEnum())));
       packetCommunicator.connect();
 
       QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      controllerMessage.setQuadrupedControllerRequestedEvent(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
       packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

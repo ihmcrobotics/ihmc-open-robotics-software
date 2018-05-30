@@ -25,11 +25,14 @@ module controller_msgs
       const octet WALKING =
       5;
 
-      const octet DIAGNOSTICS =
+      const octet EXIT_WALKING =
       6;
 
-      const octet CALIBRATION =
+      const octet DIAGNOSTICS =
       7;
+
+      const octet CALIBRATION =
+      8;
 
 
       /**

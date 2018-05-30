@@ -23,7 +23,7 @@ public class QuadrupedRequestedSteppingStateCommand implements Command<Quadruped
    @Override
    public void set(QuadrupedRequestedSteppingStateMessage message)
    {
-      requestedSteppingState = QuadrupedSteppingRequestedEvent.fromByte(message.getQuadrupedSteppingState());
+      requestedSteppingState = QuadrupedSteppingRequestedEvent.fromByte(message.getQuadrupedSteppingRequestedEvent());
    }
 
    public void setRequestedSteppingState(QuadrupedSteppingRequestedEvent requestedSteppingState)

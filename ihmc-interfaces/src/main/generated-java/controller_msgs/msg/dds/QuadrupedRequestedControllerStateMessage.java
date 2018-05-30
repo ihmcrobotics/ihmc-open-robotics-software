@@ -24,7 +24,7 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
    /**
             * Specifies the which state the controller should transition into.
             */
-   public byte quadruped_controller_name_ = (byte) 255;
+   public byte quadruped_controller_requested_event_ = (byte) 255;
 
    public QuadrupedRequestedControllerStateMessage()
    {
@@ -40,7 +40,7 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
    {
       sequence_id_ = other.sequence_id_;
 
-      quadruped_controller_name_ = other.quadruped_controller_name_;
+      quadruped_controller_requested_event_ = other.quadruped_controller_requested_event_;
 
    }
 
@@ -62,16 +62,16 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
    /**
             * Specifies the which state the controller should transition into.
             */
-   public void setQuadrupedControllerName(byte quadruped_controller_name)
+   public void setQuadrupedControllerRequestedEvent(byte quadruped_controller_requested_event)
    {
-      quadruped_controller_name_ = quadruped_controller_name;
+      quadruped_controller_requested_event_ = quadruped_controller_requested_event;
    }
    /**
             * Specifies the which state the controller should transition into.
             */
-   public byte getQuadrupedControllerName()
+   public byte getQuadrupedControllerRequestedEvent()
    {
-      return quadruped_controller_name_;
+      return quadruped_controller_requested_event_;
    }
 
 
@@ -94,7 +94,7 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_controller_name_, other.quadruped_controller_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_controller_requested_event_, other.quadruped_controller_requested_event_, epsilon)) return false;
 
 
       return true;
@@ -111,7 +111,7 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.quadruped_controller_name_ != otherMyClass.quadruped_controller_name_) return false;
+      if(this.quadruped_controller_requested_event_ != otherMyClass.quadruped_controller_requested_event_) return false;
 
 
       return true;
@@ -125,8 +125,8 @@ public class QuadrupedRequestedControllerStateMessage extends Packet<QuadrupedRe
       builder.append("QuadrupedRequestedControllerStateMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("quadruped_controller_name=");
-      builder.append(this.quadruped_controller_name_);
+      builder.append("quadruped_controller_requested_event=");
+      builder.append(this.quadruped_controller_requested_event_);
       builder.append("}");
       return builder.toString();
    }

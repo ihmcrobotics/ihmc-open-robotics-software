@@ -23,11 +23,11 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
    /**
             * Specifies the controller's state prior to transition.
             */
-   public byte initial_controller_name_ = (byte) 255;
+   public byte initial_quadruped_controller_enum_ = (byte) 255;
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public byte end_controller_name_ = (byte) 255;
+   public byte end_quadruped_controller_enum_ = (byte) 255;
 
    public QuadrupedControllerStateChangeMessage()
    {
@@ -41,40 +41,40 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
 
    public void set(QuadrupedControllerStateChangeMessage other)
    {
-      initial_controller_name_ = other.initial_controller_name_;
+      initial_quadruped_controller_enum_ = other.initial_quadruped_controller_enum_;
 
-      end_controller_name_ = other.end_controller_name_;
+      end_quadruped_controller_enum_ = other.end_quadruped_controller_enum_;
 
    }
 
    /**
             * Specifies the controller's state prior to transition.
             */
-   public void setInitialControllerName(byte initial_controller_name)
+   public void setInitialQuadrupedControllerEnum(byte initial_quadruped_controller_enum)
    {
-      initial_controller_name_ = initial_controller_name;
+      initial_quadruped_controller_enum_ = initial_quadruped_controller_enum;
    }
    /**
             * Specifies the controller's state prior to transition.
             */
-   public byte getInitialControllerName()
+   public byte getInitialQuadrupedControllerEnum()
    {
-      return initial_controller_name_;
+      return initial_quadruped_controller_enum_;
    }
 
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public void setEndControllerName(byte end_controller_name)
+   public void setEndQuadrupedControllerEnum(byte end_quadruped_controller_enum)
    {
-      end_controller_name_ = end_controller_name;
+      end_quadruped_controller_enum_ = end_quadruped_controller_enum;
    }
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public byte getEndControllerName()
+   public byte getEndQuadrupedControllerEnum()
    {
-      return end_controller_name_;
+      return end_quadruped_controller_enum_;
    }
 
 
@@ -95,9 +95,9 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_controller_name_, other.initial_controller_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_quadruped_controller_enum_, other.initial_quadruped_controller_enum_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_controller_name_, other.end_controller_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_quadruped_controller_enum_, other.end_quadruped_controller_enum_, epsilon)) return false;
 
 
       return true;
@@ -112,9 +112,9 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
 
       QuadrupedControllerStateChangeMessage otherMyClass = (QuadrupedControllerStateChangeMessage) other;
 
-      if(this.initial_controller_name_ != otherMyClass.initial_controller_name_) return false;
+      if(this.initial_quadruped_controller_enum_ != otherMyClass.initial_quadruped_controller_enum_) return false;
 
-      if(this.end_controller_name_ != otherMyClass.end_controller_name_) return false;
+      if(this.end_quadruped_controller_enum_ != otherMyClass.end_quadruped_controller_enum_) return false;
 
 
       return true;
@@ -126,10 +126,10 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuadrupedControllerStateChangeMessage {");
-      builder.append("initial_controller_name=");
-      builder.append(this.initial_controller_name_);      builder.append(", ");
-      builder.append("end_controller_name=");
-      builder.append(this.end_controller_name_);
+      builder.append("initial_quadruped_controller_enum=");
+      builder.append(this.initial_quadruped_controller_enum_);      builder.append(", ");
+      builder.append("end_quadruped_controller_enum=");
+      builder.append(this.end_quadruped_controller_enum_);
       builder.append("}");
       return builder.toString();
    }
