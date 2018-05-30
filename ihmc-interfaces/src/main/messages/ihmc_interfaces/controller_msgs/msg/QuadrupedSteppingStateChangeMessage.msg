@@ -7,6 +7,6 @@ byte STEP = 1
 byte SOLE_WAYPOINT = 2
 
 # Specifies the controller's state prior to transition.
-byte initial_stepping_controller_name 255
+byte initial_quadruped_stepping_state_enum 255
 # Specifies the state the controller has transitioned into.
-byte end_stepping_controller_name 255
+byte end_quadruped_stepping_state_enum 255

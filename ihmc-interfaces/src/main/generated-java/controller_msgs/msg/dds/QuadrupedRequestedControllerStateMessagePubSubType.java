@@ -71,7 +71,7 @@ public class QuadrupedRequestedControllerStateMessagePubSubType implements us.ih
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_9(data.getQuadrupedControllerName());
+      cdr.write_type_9(data.getQuadrupedControllerRequestedEvent());
 
    }
 
@@ -79,7 +79,7 @@ public class QuadrupedRequestedControllerStateMessagePubSubType implements us.ih
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setQuadrupedControllerName(cdr.read_type_9());
+      data.setQuadrupedControllerRequestedEvent(cdr.read_type_9());
       	
 
    }
@@ -88,14 +88,14 @@ public class QuadrupedRequestedControllerStateMessagePubSubType implements us.ih
    public final void serialize(controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_9("quadruped_controller_name", data.getQuadrupedControllerName());
+      ser.write_type_9("quadruped_controller_requested_event", data.getQuadrupedControllerRequestedEvent());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setQuadrupedControllerName(ser.read_type_9("quadruped_controller_name"));
+      data.setQuadrupedControllerRequestedEvent(ser.read_type_9("quadruped_controller_requested_event"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage src, controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage dest)

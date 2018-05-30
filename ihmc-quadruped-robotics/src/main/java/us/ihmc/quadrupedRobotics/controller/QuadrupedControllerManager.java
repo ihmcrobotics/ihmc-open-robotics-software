@@ -355,8 +355,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
-            quadrupedControllerStateChangeMessage.setInitialControllerName(fromByte);
-            quadrupedControllerStateChangeMessage.setEndControllerName(toByte);
+            quadrupedControllerStateChangeMessage.setInitialQuadrupedControllerEnum(fromByte);
+            quadrupedControllerStateChangeMessage.setEndQuadrupedControllerEnum(toByte);
             statusMessageOutputManager.reportStatusMessage(quadrupedControllerStateChangeMessage);
          }
       });

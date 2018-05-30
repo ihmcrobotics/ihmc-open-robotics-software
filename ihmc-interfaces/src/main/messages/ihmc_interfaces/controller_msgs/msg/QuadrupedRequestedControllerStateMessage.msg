@@ -11,4 +11,4 @@ byte REQUEST_FALL = 4
 uint32 sequence_id
 
 # Specifies the which state the controller should transition into.
-byte quadruped_controller_name 255
+byte quadruped_controller_requested_event 255

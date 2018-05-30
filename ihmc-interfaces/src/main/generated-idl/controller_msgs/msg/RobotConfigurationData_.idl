@@ -18,6 +18,10 @@ module controller_msgs
       1;
 
 
+      /**
+       * This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
+       * It is published frequently from the IHMC state estimator.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::RobotConfigurationData_")
       struct RobotConfigurationData
       {

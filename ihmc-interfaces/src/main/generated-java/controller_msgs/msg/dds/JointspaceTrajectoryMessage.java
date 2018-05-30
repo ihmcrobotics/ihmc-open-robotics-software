@@ -20,7 +20,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
             */
    public long sequence_id_;
    /**
-            * Trajectory for each.
+            * Trajectory for each joint.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  joint_trajectory_messages_;
    /**
@@ -66,7 +66,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
 
    /**
-            * Trajectory for each.
+            * Trajectory for each joint.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  getJointTrajectoryMessages()
    {
