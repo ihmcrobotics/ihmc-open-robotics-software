@@ -35,6 +35,7 @@ import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -75,6 +76,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
+   private FullQuadrupedRobotModel fullRobotModel;
    private QuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
@@ -110,7 +112,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
-      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
             fullRobotModel.getTotalMass());
@@ -272,5 +274,10 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public String getRobotName()
    {
       return robotName;
+   }
+
+   public FullRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
    }
 }
