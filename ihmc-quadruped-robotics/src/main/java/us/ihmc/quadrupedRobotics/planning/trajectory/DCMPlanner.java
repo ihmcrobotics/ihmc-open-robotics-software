@@ -133,6 +133,7 @@ public class DCMPlanner
    public void initializeForStanding()
    {
       isStanding.set(true);
+      timedContactSequence.clear();
       piecewiseConstantCopTrajectory.resetVariables();
       dcmTrajectory.resetVariables();
    }
