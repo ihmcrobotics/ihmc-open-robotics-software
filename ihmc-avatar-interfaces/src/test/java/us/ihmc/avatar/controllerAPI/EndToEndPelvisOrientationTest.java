@@ -276,7 +276,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    {
       double pitch = Math.toRadians(20.0);
       double chestTrajectoryTime = 1.0;
-      double epsilon = 1.0E-3;
+      double epsilon = 2.0E-3;
       Quaternion desiredOrientation = new Quaternion();
       humanoidReferenceFrames.updateFrames();
       ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
