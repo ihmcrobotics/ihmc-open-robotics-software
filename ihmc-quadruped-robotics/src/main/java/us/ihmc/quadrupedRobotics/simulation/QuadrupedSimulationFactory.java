@@ -33,6 +33,7 @@ import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedRobotControllerFactory;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
@@ -128,6 +129,7 @@ public class QuadrupedSimulationFactory
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
+   private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
@@ -182,6 +184,7 @@ public class QuadrupedSimulationFactory
 
    private void createSensorReader()
    {
+      SensorReader sensorReader;
       if (useStateEstimator.get())
       {
 
@@ -202,6 +205,16 @@ public class QuadrupedSimulationFactory
       else
       {
          sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get());
+      }
+
+      if (this.sensorReaderWrapper != null)
+      {
+         this.sensorReaderWrapper.setSensorReader(sensorReader);
+         this.sensorReader = sensorReaderWrapper;
+      }
+      else
+      {
+         this.sensorReader = sensorReader;
       }
    }
 
@@ -739,5 +752,10 @@ public class QuadrupedSimulationFactory
    public void setUseLocalCommunicator(boolean useLocalCommunicator)
    {
       this.useLocalCommunicator.set(useLocalCommunicator);
+   }
+
+   public void setSensorReaderWrapper(QuadrupedSensorReaderWrapper sensorReaderWrapper)
+   {
+      this.sensorReaderWrapper = sensorReaderWrapper;
    }
 }
