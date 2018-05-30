@@ -2,6 +2,9 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -16,6 +19,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private PushRobotTestConductor pusher;
+   private QuadrupedTestFactory quadrupedTestFactory;
    private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
@@ -25,12 +30,15 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
+         quadrupedTestFactory.setUsePushRobotController(true);
+
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         pusher = new PushRobotTestConductor(conductor.getScs(), "body");
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
@@ -43,8 +51,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    public void tearDown()
    {
       conductor.concludeTesting();
+      quadrupedTestFactory = null;
       conductor = null;
       variables = null;
+      pusher = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -92,4 +102,59 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
+   {
+      stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
+      stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
+      stepTeleopManager.setDesiredCoMHeight(0.8);
+
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.2);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+
+
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      stepTeleopManager.requestXGait();
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), 5.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
+      conductor.simulate();
+
+      double duration = 0.2;
+      double magnitude = 225;
+      pusher.applyForce(new Vector3D(0.0, -1.0, 0.0), magnitude, duration);
+      PrintTools.info("CoM velocity change = " + magnitude * duration / quadrupedTestFactory.getFullRobotModel().getTotalMass());
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.75);
+      conductor.simulate();
+
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), magnitude, duration);
+      PrintTools.info("CoM velocity change = " + magnitude * duration / quadrupedTestFactory.getFullRobotModel().getTotalMass());
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.75);
+      conductor.simulate();
+
+      duration = 0.5;
+      magnitude = 500.0;
+      pusher.applyForce(new Vector3D(-1.0, 0.0, 0.0), magnitude, duration);
+      PrintTools.info("CoM velocity change = " + magnitude * duration / quadrupedTestFactory.getFullRobotModel().getTotalMass());
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 2.5);
+      conductor.simulate();
+
+      duration = 0.4;
+      magnitude = 400.0;
+      pusher.applyForce(new Vector3D(1.0, 0.0, 0.0), magnitude, duration);
+      PrintTools.info("CoM velocity change = " + magnitude * duration / quadrupedTestFactory.getFullRobotModel().getTotalMass());
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 5.0);
+      conductor.simulate();
+   }
 }
