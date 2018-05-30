@@ -66,7 +66,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.stepTeleopMode = new QuadrupedStepTeleopMode(robotName, ros2Node, physicalProperties, defaultXGaitSettings, referenceFrames, graphicsListRegistry, registry);
+      this.stepTeleopMode = new QuadrupedStepTeleopMode(robotName, ros2Node, physicalProperties, defaultXGaitSettings, referenceFrames, DT, graphicsListRegistry, registry);
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
