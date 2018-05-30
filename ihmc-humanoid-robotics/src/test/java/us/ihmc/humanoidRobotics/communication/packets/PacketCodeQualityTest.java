@@ -615,7 +615,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 0.4, categoriesOverride = IntegrationCategory.FAST)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -692,7 +692,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 0.7, categoriesOverride = IntegrationCategory.FAST)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testPacketWithByteFieldDeclareEnumValuesAsStaticByteFields() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
