@@ -46,7 +46,6 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final RobotDataReceiver robotDataReceiver;
-   private final QuadrupedReferenceFrames referenceFrames;
 
    private final QuadrupedStepTeleopMode stepTeleopMode;
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -65,7 +64,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.stepTeleopMode = new QuadrupedStepTeleopMode(robotName, ros2Node, physicalProperties, defaultXGaitSettings, referenceFrames, DT, graphicsListRegistry, registry);
 
       // Initialize all channels to zero.
@@ -105,9 +104,12 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
          }
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
-      configureJoystickFilters(device);
-      device.addJoystickEventListener(this);
-      device.setPollInterval(10);
+      if (device != null)
+      {
+         configureJoystickFilters(device);
+         device.addJoystickEventListener(this);
+         device.setPollInterval(10);
+      }
    }
 
    private void configureJoystickFilters(Joystick device)
@@ -124,7 +126,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    {
       robotDataReceiver.updateRobotModel();
 
-      stepTeleopMode.update(Collections.unmodifiableMap(channels));
+      if (device != null)
+         stepTeleopMode.update(Collections.unmodifiableMap(channels));
 
       server.update(robotDataReceiver.getSimTimestamp());
    }
