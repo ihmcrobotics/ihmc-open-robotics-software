@@ -47,4 +47,12 @@ public interface ParameterGuiInterface
     * This will allow the input manager to close any YoVariableServers and clean up.
     */
    public void shutdown();
+
+   /**
+    * Allows the GUI to modify the root registry. This is used when the user would like to save an XML
+    * file that uses a non-root registry as a new root. For example if the registry structure seen in
+    * the GUI is "scs" - "atlas" - "controller" but the user of the GUI would like to save an XML file
+    * for the controller.
+    */
+   public void changeRootRegistries(List<String> pollRootRegistryNames);
 }
