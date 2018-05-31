@@ -76,9 +76,9 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
-      double walkTime = 15.0;
+      double walkTime = 40.0;
       double walkingSpeed = 0.3;
-      double minimumXPositionAfterWalking = 3.0;
+      double minimumXPositionAfterWalking = 8.0;
 
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
