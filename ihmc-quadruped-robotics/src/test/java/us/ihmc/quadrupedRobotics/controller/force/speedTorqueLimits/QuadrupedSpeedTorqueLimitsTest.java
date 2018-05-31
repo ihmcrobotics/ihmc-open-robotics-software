@@ -143,7 +143,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+      stepTeleopManager.setDesiredBodyHeight(desiredCoMHeight);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getCurrentHeightInWorld(), desiredCoMHeight, 0.01));
       conductor.simulate();
@@ -154,7 +154,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       for (double heightDelta = 0.0; (originalHeight + heightDelta) > 0.38; heightDelta -= 0.01)
       {
          double desiredCoMHeight = originalHeight + heightDelta;
-         stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+         stepTeleopManager.setDesiredBodyHeight(desiredCoMHeight);
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -182,7 +182,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       for (double heightDelta = 0.38 - originalHeight; (originalHeight + heightDelta) < originalHeight; heightDelta += 0.01)
       {
          double desiredCoMHeight = originalHeight + heightDelta;
-         stepTeleopManager.setDesiredCoMHeight(desiredCoMHeight);
+         stepTeleopManager.setDesiredBodyHeight(desiredCoMHeight);
 
          variables.getLimitJointTorques().set(false);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

@@ -238,18 +238,18 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      double initialComZ = variables.getCurrentHeightInWorld().getDoubleValue();
-      testMovingCoM(initialComZ + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialComZ, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
+      double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
+      testMovingCoM(initialBodyHeight + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(initialBodyHeight, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(initialBodyHeight - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(initialBodyHeight + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(initialBodyHeight, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
    }
 
-   private void testMovingCoM(double comPositionZ, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
+   private void testMovingCoM(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
                               double orientationDelta)
    {
-      stepTeleopManager.setDesiredCoMHeight(comPositionZ);
+      stepTeleopManager.setDesiredBodyHeight(bodyHeight);
       stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

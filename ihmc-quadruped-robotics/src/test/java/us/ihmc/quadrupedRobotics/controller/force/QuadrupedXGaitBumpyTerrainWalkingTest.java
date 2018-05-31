@@ -108,7 +108,6 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.setDesiredCoMHeight(0.55);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
 
