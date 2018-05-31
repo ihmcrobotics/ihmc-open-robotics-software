@@ -1,5 +1,7 @@
 package us.ihmc.atlas.kinematicToolboxDiagnostics;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -20,7 +22,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 public class AtlasKinematicsToolboxDiagnosticsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 50000)
    public void testReceiveRobotConfigurationData() throws IOException
    {
       AtlasRobotVersion atlasVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
@@ -43,7 +45,8 @@ public class AtlasKinematicsToolboxDiagnosticsTest
          receivedMessages.increment();
       });
 
+      ThreadTools.sleepSeconds(1.0);
       
-      while (receivedMessages.intValue() < 10);
+      assertTrue("didn't receive enough", receivedMessages.intValue() > 10);
    }
 }
