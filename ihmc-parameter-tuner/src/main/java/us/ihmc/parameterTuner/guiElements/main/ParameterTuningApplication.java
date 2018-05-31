@@ -42,6 +42,12 @@ public abstract class ParameterTuningApplication extends Application
                controller.setRegistries(fullRegistries);
             }
 
+            // Check if the user changed the root registries.
+            if (controller.areRootRegistriesChanged())
+            {
+               guiInterface.changeRootRegistries(controller.pollRootRegistryNames());
+            }
+
             // If parameters were changed in the GUI forward copies to the interface.
             List<GuiParameter> changedParameters = controller.pollChangedParameters();
             if (changedParameters != null && !changedParameters.isEmpty())

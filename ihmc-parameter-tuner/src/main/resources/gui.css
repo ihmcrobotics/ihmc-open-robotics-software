@@ -1,7 +1,3 @@
-.tree-cell:is-registry {
-	-fx-font-weight: bold;
-}
-
 .scroll-pane {
     -fx-background-color: transparent;
 }
@@ -21,6 +17,16 @@
 
 #default-parameter-name-in-tree-view {
 	-fx-fill: darkred;
+}
+
+#registry-name-in-tree-view {
+	-fx-font-weight: bold;
+	-fx-fill: black;
+}
+
+#root-registry-name-in-tree-view {
+	-fx-font-weight: bold;
+	-fx-fill: red;
 }
 
 #parameter-name-in-tuner {
