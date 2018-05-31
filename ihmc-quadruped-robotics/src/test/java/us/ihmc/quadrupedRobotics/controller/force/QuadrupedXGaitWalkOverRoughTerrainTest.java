@@ -6,6 +6,8 @@ import org.junit.Before;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -41,48 +43,48 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testWalkingOverTiledGround() throws IOException, AssertionFailedError
+   public void testWalkingOverTiledGround(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
    {
       VaryingHeightTiledGroundEnvironment environment = new VaryingHeightTiledGroundEnvironment(0.75, 10, 4, -0.1, 0.1);
       double walkTime = 12.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 2.0;
 
-      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking);
+      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverSingleStepUp() throws IOException, AssertionFailedError
+   public void testWalkingOverSingleStepUp(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
    {
       SingleStepEnvironment environment = new SingleStepEnvironment(0.1, 1.0);
       double walkTime = 12.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 2.0;
 
-      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking);
+      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverConsecutiveRamps() throws IOException, AssertionFailedError
+   public void testWalkingOverConsecutiveRamps(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
    {
       ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 4, -0.1);
       double walkTime = 15.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 3.0;
 
-      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking);
+      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
+   public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
       double walkTime = 15.0;
       double walkingSpeed = 0.3;
       double minimumXPositionAfterWalking = 3.0;
 
-      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking);
+      testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
    private void testWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed,
-                                       double minimumXPositionAfterWalking) throws IOException
+                                       double minimumXPositionAfterWalking, QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
@@ -103,7 +105,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       stepTeleopManager.setStepSnapper(snapper);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      stepTeleopManager.getXGaitSettings().set(xGaitSettings);
 
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
