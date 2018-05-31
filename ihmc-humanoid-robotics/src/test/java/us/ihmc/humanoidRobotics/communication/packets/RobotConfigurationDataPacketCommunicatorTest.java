@@ -81,6 +81,8 @@ public class RobotConfigurationDataPacketCommunicatorTest
          ThreadTools.sleep(10); // these waits ensure all the messages have time to get over, lengthen a little if it fails
       }
       
+      ThreadTools.sleep(100);
+      
       assertEquals("all messages not received.", NUMBER_OF_MESSAGES_TO_SEND, messageReceived.intValue(), 0);
    }
 }
