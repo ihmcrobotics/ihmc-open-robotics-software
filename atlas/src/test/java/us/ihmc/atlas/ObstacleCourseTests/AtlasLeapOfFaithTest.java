@@ -15,6 +15,7 @@ import us.ihmc.avatar.obstacleCourseTests.AvatarLeapOfFaithTest;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -57,7 +58,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    }
 
    /** {@inheritDoc} */
-   @ContinuousIntegrationTest(estimatedDuration = 68.1)
+   @ContinuousIntegrationTest(estimatedDuration = 68.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 340000)
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
