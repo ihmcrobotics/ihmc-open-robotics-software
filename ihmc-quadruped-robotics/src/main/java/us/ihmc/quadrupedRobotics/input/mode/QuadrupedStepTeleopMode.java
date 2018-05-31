@@ -36,11 +36,10 @@ public class QuadrupedStepTeleopMode
    private final QuadrupedTeleopManager stepTeleopManager;
    private InputValueIntegrator comZ;
 
-   public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+   public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames,
-                                                          updateDT, graphicsListRegistry, registry);
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, updateDT, graphicsListRegistry, registry);
       this.comZ = new InputValueIntegrator(updateDT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
@@ -55,30 +54,33 @@ public class QuadrupedStepTeleopMode
 
    public void update(Map<XBoxOneMapping, Double> channels)
    {
-      double bodyRoll = 0.0;
-      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
-      double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
-      stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
-
-      double comZdot = 0.0;
-      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
+      if (channels != null)
       {
-         comZdot += zdotScaleParameter.getValue();
-      }
-      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
-      {
-         comZdot -= zdotScaleParameter.getValue();
-      }
-      stepTeleopManager.setDesiredCoMHeight(comZ.update(comZdot));
+         double bodyRoll = 0.0;
+         double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
+         double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
+         stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
 
-      YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
-      double xVelocityMax = 0.5 * xStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
-      double yVelocityMax = 0.5 * yStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
-      double yawRateMax = yawRateScale.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
-      double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
-      double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
-      double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
-      stepTeleopManager.setDesiredVelocity(xVelocity, yVelocity, yawRate);
+         double comZdot = 0.0;
+         if (channels.get(XBoxOneMapping.DPAD) == 0.25)
+         {
+            comZdot += zdotScaleParameter.getValue();
+         }
+         if (channels.get(XBoxOneMapping.DPAD) == 0.75)
+         {
+            comZdot -= zdotScaleParameter.getValue();
+         }
+         stepTeleopManager.setDesiredCoMHeight(comZ.update(comZdot));
+
+         YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
+         double xVelocityMax = 0.5 * xStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
+         double yVelocityMax = 0.5 * yStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
+         double yawRateMax = yawRateScale.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
+         double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
+         double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
+         double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
+         stepTeleopManager.setDesiredVelocity(xVelocity, yVelocity, yawRate);
+      }
       stepTeleopManager.update();
    }
 
