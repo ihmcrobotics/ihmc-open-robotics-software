@@ -158,4 +158,98 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.addDurationGoal(variables.getYoTime(), 5.0);
       conductor.simulate();
    }
+
+   public void testMultiGait()
+   {
+      stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
+      stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
+      stepTeleopManager.setDesiredCoMHeight(0.8);
+
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
+
+      double startingStanceDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
+
+      stepTeleopManager.requestXGait();
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.5);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.7, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 3.0);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.6, 0.2, 0.4);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 3.0);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.7 , 0.0, 0.0);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 0.5);
+      conductor.simulate();
+
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+
+      stepTeleopManager.setDesiredVelocity(1.1 , 0.0, 0.0);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 4.0);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.9, -0.2, -0.4);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 3.0);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.8, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.0);
+      conductor.simulate();
+
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(startingStanceDuration);
+
+
+      stepTeleopManager.setDesiredVelocity(0.4 , 0.0, 0.0);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 0.5);
+      conductor.simulate();
+
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.001);
+
+      stepTeleopManager.setDesiredVelocity(0.5 , 0.0, 0.0);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 5.0);
+      conductor.simulate();
+
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.3);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(startingStanceDuration);
+
+      stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.0);
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 1.0);
+      conductor.simulate();
+
+      stepTeleopManager.requestStanding();
+
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addDurationGoal(variables.getYoTime(), 0.5);
+      conductor.simulate();
+   }
 }
