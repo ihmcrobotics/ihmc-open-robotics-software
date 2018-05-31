@@ -5,7 +5,7 @@ public class DefaultPointFootSnapperParameters implements PointFootSnapperParame
    @Override
    public double distanceInsidePlanarRegion()
    {
-      return 0.07;
+      return 0.05;
    }
 
    @Override
