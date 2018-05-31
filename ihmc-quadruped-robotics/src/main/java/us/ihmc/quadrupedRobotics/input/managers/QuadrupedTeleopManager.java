@@ -8,17 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.ComPositionPacket;
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
-import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -60,7 +50,7 @@ public class QuadrupedTeleopManager
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
 
    private final AtomicBoolean standingRequested = new AtomicBoolean();
-   private final AtomicDouble desiredCoMHeight = new AtomicDouble();
+   private final AtomicDouble desiredBodyHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
    private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
    private final AtomicDouble desiredOrientationRoll = new AtomicDouble();
@@ -70,7 +60,6 @@ public class QuadrupedTeleopManager
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicLong timestampNanos = new AtomicLong();
 
-   private final ComPositionPacket comPositionPacket = new ComPositionPacket();
    private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
@@ -78,15 +67,15 @@ public class QuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
    private IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
    private IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
-   private IHMCROS2Publisher<ComPositionPacket> comPositionPublisher;
+   private IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
 
    public QuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                 double initialCoMHeight, QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                 double initialBodyHeight, QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(robotName, ros2Node, defaultXGaitSettings, initialCoMHeight, referenceFrames, 0.01, graphicsListRegistry, parentRegistry);
+      this(robotName, ros2Node, defaultXGaitSettings, initialBodyHeight, referenceFrames, 0.01, graphicsListRegistry, parentRegistry);
    }
 
-   public QuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialCoMHeight,
+   public QuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight,
                                  QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry,
                                  YoVariableRegistry parentRegistry)
    {
@@ -114,7 +103,7 @@ public class QuadrupedTeleopManager
          }
       });
 
-      desiredCoMHeight.set(initialCoMHeight);
+      desiredBodyHeight.set(initialBodyHeight);
       stepStream.setStepSnapper(new PlanarGroundPointFootSnapper(robotName, referenceFrames, ros2Node));
 
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
@@ -128,7 +117,7 @@ public class QuadrupedTeleopManager
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
-      comPositionPublisher = ROS2Tools.createPublisher(ros2Node, ComPositionPacket.class, controllerSubGenerator);
+      bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
 
       parentRegistry.addChild(registry);
    }
@@ -158,14 +147,19 @@ public class QuadrupedTeleopManager
          requestStopWalking();
          walking.set(false);
       }
-      else if (isInStepState() && walking.getBooleanValue())
+      else if (isInBalancingState())
       {
-         stepStream.process();
-         sendSteps();
-      }
-      else if (!walking.getBooleanValue())
-      {
-         sendBodyPose();
+         sendDesiredBodyHeight();
+
+         if(walking.getBooleanValue())
+         {
+            stepStream.process();
+            sendSteps();
+         }
+         else
+         {
+            sendDesiredBodyOrientation();
+         }
       }
    }
 
@@ -193,13 +187,17 @@ public class QuadrupedTeleopManager
       xGaitRequested.set(true);
    }
 
-   private boolean isInStepState()
+   private boolean isInBalancingState()
    {
       QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
-      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte());
+   }
 
-      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte()) &&
-            (steppingStateChangeMessage != null && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STEP.toByte());
+   private boolean isInStepState()
+   {
+      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+      return isInBalancingState() && (steppingStateChangeMessage != null
+            && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STEP.toByte());
    }
 
    public boolean isWalking()
@@ -226,9 +224,9 @@ public class QuadrupedTeleopManager
       bodyOrientationPublisher.publish(orientationMessage);
    }
 
-   public void setDesiredCoMHeight(double desiredCoMHeight)
+   public void setDesiredBodyHeight(double desiredBodyHeight)
    {
-      this.desiredCoMHeight.set(desiredCoMHeight);
+      this.desiredBodyHeight.set(desiredBodyHeight);
    }
 
    public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
@@ -239,19 +237,25 @@ public class QuadrupedTeleopManager
       desiredOrientationTime.set(time);
    }
 
-   private void sendBodyPose()
+   private void sendDesiredBodyHeight()
    {
-      double comHeight = desiredCoMHeight.getAndSet(Double.NaN);
+      double bodyHeight = desiredBodyHeight.getAndSet(Double.NaN);
+
+      if (!Double.isNaN(bodyHeight))
+      {
+         QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, bodyHeight);
+         bodyHeightMessage.setControlBodyHeight(true);
+         bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
+         bodyHeightPublisher.publish(bodyHeightMessage);
+      }
+   }
+
+   private void sendDesiredBodyOrientation()
+   {
       double desiredYaw = desiredOrientationYaw.getAndSet(Double.NaN);
       double desiredPitch = desiredOrientationPitch.getAndSet(Double.NaN);
       double desiredRoll = desiredOrientationRoll.getAndSet(Double.NaN);
       double desiredTime = desiredOrientationTime.getAndSet(Double.NaN);
-
-      if (!Double.isNaN(comHeight))
-      {
-         comPositionPacket.getPosition().set(0.0, 0.0, comHeight);
-         comPositionPublisher.publish(comPositionPacket);
-      }
 
       if (!Double.isNaN(desiredYaw))
       {

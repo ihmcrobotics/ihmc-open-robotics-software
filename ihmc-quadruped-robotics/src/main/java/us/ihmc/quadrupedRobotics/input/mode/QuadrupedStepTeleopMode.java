@@ -21,7 +21,7 @@ public class QuadrupedStepTeleopMode
 
    private final DoubleParameter yawScaleParameter = new DoubleParameter("yawScale", registry, 0.15);
    private final DoubleParameter pitchScaleParameter = new DoubleParameter("pitchScale", registry, 0.15);
-   private final DoubleParameter zdotScaleParameter = new DoubleParameter("zdotScale", registry, 0.25);
+   private final DoubleParameter bodyHeightMaxVelocity = new DoubleParameter("bodyHeightMaxVelocity", registry, 0.1);
    private final DoubleParameter xStrideMax = new DoubleParameter("xStrideMax", registry, 0.4);
    private final DoubleParameter yStrideMax = new DoubleParameter("yStrideMax", registry, 0.25);
    private final DoubleParameter yawRateScale = new DoubleParameter("yawRateScale", registry, 0.25);
@@ -34,13 +34,13 @@ public class QuadrupedStepTeleopMode
    private final DoubleParameter xGaitBodyOrientationShiftTime = new DoubleParameter("xGaitBodyOrientationShiftTime", registry, 0.1);
 
    private final QuadrupedTeleopManager stepTeleopManager;
-   private InputValueIntegrator comZ;
+   private InputValueIntegrator bodyHeight;
 
    public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, updateDT, graphicsListRegistry, registry);
-      this.comZ = new InputValueIntegrator(updateDT, physicalProperties.getNominalCoMHeight());
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, registry);
+      this.bodyHeight = new InputValueIntegrator(updateDT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
       xGaitStepDuration[1] = new DoubleParameter("xGaitStepDurationMode1", registry, 0.33);
@@ -61,16 +61,16 @@ public class QuadrupedStepTeleopMode
          double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
          stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
 
-         double comZdot = 0.0;
+         double bodyHeightVelocity = 0.0;
          if (channels.get(XBoxOneMapping.DPAD) == 0.25)
          {
-            comZdot += zdotScaleParameter.getValue();
+            bodyHeightVelocity += bodyHeightMaxVelocity.getValue();
          }
          if (channels.get(XBoxOneMapping.DPAD) == 0.75)
          {
-            comZdot -= zdotScaleParameter.getValue();
+            bodyHeightVelocity -= bodyHeightMaxVelocity.getValue();
          }
-         stepTeleopManager.setDesiredCoMHeight(comZ.update(comZdot));
+         stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
 
          YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
          double xVelocityMax = 0.5 * xStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());

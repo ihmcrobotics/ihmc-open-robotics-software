@@ -68,7 +68,9 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
       double singleSupportDuration = 0.3;
 
-      stepTeleopManager.setDesiredCoMHeight(0.8);
+      // this was sending a CoMPositionPacket and wasn't being used in the controller
+//      stepTeleopManager.setDesiredBodyHeight(0.8);
+
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift);
       stepTeleopManager.getXGaitSettings().setStepDuration(0.15);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.05);
@@ -106,7 +108,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    {
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
       stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
-      stepTeleopManager.setDesiredCoMHeight(0.8);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
