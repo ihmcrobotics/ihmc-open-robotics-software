@@ -41,10 +41,9 @@ import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
 
 public class QuadrupedTeleopManager
 {
@@ -54,11 +53,13 @@ public class QuadrupedTeleopManager
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
    private final YoBoolean walking = new YoBoolean("walking", registry);
 
-   private final AtomicBoolean xGaitRequested = new AtomicBoolean();
-   private final AtomicBoolean standingRequested = new AtomicBoolean();
+   private final YoBoolean xGaitRequested = new YoBoolean("xGaitRequested", registry);
    private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("teleopDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredVelocityRateLimit = new YoDouble("teleopDesiredVelocityRateLimit", registry);
+   private final YoEnum<QuadrupedControllerRequestedEvent> controllerRequestedEvent = new YoEnum<>("teleopControllerRequestedEvent", registry, QuadrupedControllerRequestedEvent.class, true);
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
+
+   private final AtomicBoolean standingRequested = new AtomicBoolean();
    private final AtomicDouble desiredCoMHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
    private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
@@ -97,6 +98,22 @@ public class QuadrupedTeleopManager
       desiredVelocityRateLimit.set(10.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
 
+      controllerRequestedEvent.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            QuadrupedControllerRequestedEvent requestedEvent = controllerRequestedEvent.getEnumValue();
+            if (requestedEvent != null)
+            {
+               controllerRequestedEvent.set(null);
+               QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+               controllerMessage.setQuadrupedControllerRequestedEvent(requestedEvent.toByte());
+               controllerStatePublisher.publish(controllerMessage);
+            }
+         }
+      });
+
       desiredCoMHeight.set(initialCoMHeight);
       stepStream.setStepSnapper(new PlanarGroundPointFootSnapper(robotName, referenceFrames, ros2Node));
 
@@ -129,8 +146,9 @@ public class QuadrupedTeleopManager
       bodyPathMultiplexer.setPlanarVelocityForJoystickPath(limitedDesiredVelocity.getX(), limitedDesiredVelocity.getY(), limitedDesiredVelocity.getZ());
       referenceFrames.updateFrames();
 
-      if (xGaitRequested.getAndSet(false) && !isInStepState())
+      if (xGaitRequested.getValue() && !isInStepState())
       {
+         xGaitRequested.set(false);
          stepStream.onEntry();
          sendSteps();
          walking.set(true);
