@@ -43,7 +43,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testWalkingOverTiledGround(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
+   public void testWalkingOverTiledGround(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       VaryingHeightTiledGroundEnvironment environment = new VaryingHeightTiledGroundEnvironment(0.75, 10, 4, -0.1, 0.1);
       double walkTime = 12.0;
@@ -53,7 +53,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverSingleStepUp(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
+   public void testWalkingOverSingleStepUp(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       SingleStepEnvironment environment = new SingleStepEnvironment(0.1, 1.0);
       double walkTime = 12.0;
@@ -63,7 +63,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverConsecutiveRamps(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
+   public void testWalkingOverConsecutiveRamps(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 4, -0.1);
       double walkTime = 15.0;
@@ -73,7 +73,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException, AssertionFailedError
+   public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
       double walkTime = 40.0;
@@ -81,6 +81,17 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       double minimumXPositionAfterWalking = 8.0;
 
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
+   }
+
+   public void testWalkingUpStaircase(QuadrupedXGaitSettingsReadOnly xGaitSettings, double stepHeight, double stepLength) throws IOException
+   {
+      int numberOfSteps = 6;
+      StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength);
+      double walkTime = 20.0;
+      double walkingSpeed = 0.3;
+      double minimumXPositionAfterWalking  = numberOfSteps * stepLength + 0.5;
+
+      testWalkingOverTerrain(staircaseEnvironment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
    private void testWalkingOverTerrain(PlanarRegionEnvironmentInterface environment, double walkTime, double walkingSpeed,
@@ -113,6 +124,10 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), minimumXPositionAfterWalking));
+      conductor.simulate();
+
+      stepTeleopManager.requestStopWalking();
+      conductor.addTimeLimit(variables.getYoTime(), 1.5);
       conductor.simulate();
    }
 }
