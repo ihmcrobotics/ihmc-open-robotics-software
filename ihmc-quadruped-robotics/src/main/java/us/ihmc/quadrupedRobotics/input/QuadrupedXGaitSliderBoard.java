@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.input;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -17,13 +18,17 @@ public class QuadrupedXGaitSliderBoard
       sliderBoard.setSlider(2, "stanceLengthInput", scs, 0.4, 1.4);
       sliderBoard.setSlider(3, "stanceWidthInput", scs, 0.1, 0.6);
       sliderBoard.setSlider(4, "stepGroundClearanceInput", scs, 0.01, 0.25);
+      sliderBoard.setSlider(5, "teleopDesiredVelocityX", scs, -1.5, 1.5);
+      sliderBoard.setSlider(6, "teleopDesiredVelocityY", scs, -0.5, 0.5);
 
       sliderBoard.setKnob(0, "endPhaseShiftInput", scs, 0.0, 359);
       sliderBoard.setKnob(1, "teleopDesiredVelocityZ", scs, -0.25, 0.25);
 
-      sliderBoard.setButton(0, "xGaitRequested", scs);
+//      sliderBoard.setButtonEnum(0, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      sliderBoard.setButtonEnum(0, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_STEPPING);
+      sliderBoard.setButtonEnum(1, "teleopControllerRequestedEvent", scs, QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      sliderBoard.setButton(2, "xGaitRequested", scs);
 
-      sliderBoard.setSlider(5, "teleopDesiredVelocityX", scs, -1.5, 1.5);
-      sliderBoard.setSlider(6, "teleopDesiredVelocityY", scs, -0.5, 0.5);
+
    }
 }

@@ -128,6 +128,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
 
       if (device != null)
          stepTeleopMode.update(Collections.unmodifiableMap(channels));
+      else
+         stepTeleopMode.update(null);
 
       server.update(robotDataReceiver.getSimTimestamp());
    }
