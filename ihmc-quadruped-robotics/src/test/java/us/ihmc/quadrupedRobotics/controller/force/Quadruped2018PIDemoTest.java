@@ -14,8 +14,12 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.HeightMapFootS
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.StaircaseEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
@@ -339,6 +343,49 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   public void testWalkingOverCinderBlocks() throws IOException
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 4, 0.03, 0.0, 1.2);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("testEnvironment", planarRegionsList, 1e-2, false);
+
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
+      simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
+
+      quadrupedTestFactory = createQuadrupedTestFactory();
+
+      quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
+      quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setUseNetworking(true);
+
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
+      snapper.setPlanarRegionsList(planarRegionsList);
+      stepTeleopManager.setStepSnapper(snapper);
+
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(0.3, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), 30.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 4.65));
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.simulate();
+
+      stepTeleopManager.requestStanding();
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.simulate();
+   }
+
    public void testTrottingOverAggressiveBumpyTerrain() throws IOException
    {
       double xAmp1 = 0.03, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;
@@ -352,7 +399,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-//      stepTeleopManager.setStepSnapper(new HeightMapFootSnapper(groundProfile));
+      //      stepTeleopManager.setStepSnapper(new HeightMapFootSnapper(groundProfile));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

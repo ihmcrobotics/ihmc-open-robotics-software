@@ -66,12 +66,13 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
 
-   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation, double extrusionLength)
+   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation, double extrusionLength,
+                                               double startingBlockLength)
    {
       double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
 
-      generator.addRectangle(0.6 + extrusionLength, courseWidth + extrusionLength); // standing platform
-      generator.translate(0.5, 0.0, 0.0); // forward to first row
+      generator.addRectangle(startingBlockLength + extrusionLength, courseWidth + extrusionLength); // standing platform
+      generator.translate(0.2 + 0.5 * startingBlockLength, 0.0, 0.0); // forward to first row
       generator.translate(0.0, -0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid origin
 
       Random random = new Random(1231239L);
@@ -100,13 +101,13 @@ public class PlanarRegionsListExamples
       }
 
       generator.identity();
-      generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
-      generator.addRectangle(0.6 + extrusionLength, courseWidth + extrusionLength);
+      generator.translate(startingBlockLength + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
+      generator.addRectangle(startingBlockLength + extrusionLength, courseWidth + extrusionLength);
    }
 
    public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
    {
-      generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation, 0.0);
+      generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation, 0.0, 0.6);
    }
 
    public static PlanarRegionsList generateSteppingStoneField(double steppingStoneWidth, double steppingStoneLength, double stepWidth, double stepLength, int numberOfSteps)

@@ -85,9 +85,9 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       maxBodyYaw.set(0.15);
       maxBodyPitch.set(0.15);
       maxBodyHeightVelocity.set(0.1);
-      maxVelocityX.set(0.8);
-      maxVelocityY.set(0.5);
-      maxVelocityYaw.set(0.5);
+      maxVelocityX.set(0.5);
+      maxVelocityY.set(0.25);
+      maxVelocityYaw.set(0.4);
       bodyOrientationShiftTime.set(0.1);
       this.bodyHeight = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
