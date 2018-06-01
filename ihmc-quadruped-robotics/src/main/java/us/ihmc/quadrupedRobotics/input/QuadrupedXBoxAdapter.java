@@ -1,22 +1,18 @@
 package us.ihmc.quadrupedRobotics.input;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import net.java.games.input.Event;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -30,29 +26,46 @@ import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedBodyTeleopNode implements JoystickEventListener
+import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class QuadrupedXBoxAdapter implements JoystickEventListener
 {
    /**
     * Period at which to send control packets.
     */
    private static final double DT = 0.01;
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableServer server;
+
    private final Joystick device;
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-   private final YoVariableServer server;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final RobotDataReceiver robotDataReceiver;
 
-   private final QuadrupedStepTeleopMode stepTeleopMode;
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+   private final QuadrupedTeleopManager stepTeleopManager;
 
-   public QuadrupedBodyTeleopNode(String robotName, Joystick device, FullQuadrupedRobotModel fullRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+   private final YoDouble maxBodyYaw = new YoDouble("maxBodyYaw", registry);
+   private final YoDouble maxBodyPitch = new YoDouble("maxBodyPitch", registry);
+   private final YoDouble maxBodyHeightVelocity = new YoDouble("maxBodyHeightVelocity", registry);
+   private final YoDouble maxVelocityX = new YoDouble("maxVelocityX", registry);
+   private final YoDouble maxVelocityY = new YoDouble("maxVelocityY", registry);
+   private final YoDouble maxVelocityYaw = new YoDouble("maxVelocityYaw", registry);
+   private final YoDouble bodyOrientationShiftTime = new YoDouble("bodyOrientationShiftTime", registry);
+   private InputValueIntegrator bodyHeight;
+
+   public QuadrupedXBoxAdapter(String robotName, Joystick device, FullQuadrupedRobotModel fullRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                   QuadrupedPhysicalProperties physicalProperties)
-         throws IOException
    {
       this.device = device;
 
@@ -65,7 +78,17 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.stepTeleopMode = new QuadrupedStepTeleopMode(robotName, ros2Node, physicalProperties, defaultXGaitSettings, referenceFrames, DT, graphicsListRegistry, registry);
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames,
+                                                          DT, graphicsListRegistry, registry);
+
+      maxBodyYaw.set(0.15);
+      maxBodyPitch.set(0.15);
+      maxBodyHeightVelocity.set(0.1);
+      maxVelocityX.set(0.8);
+      maxVelocityY.set(0.5);
+      maxVelocityYaw.set(0.5);
+      bodyOrientationShiftTime.set(0.1);
+      this.bodyHeight = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
@@ -74,7 +97,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       }
    }
 
-   public void start() throws IOException, InterruptedException
+   public void start() throws InterruptedException
    {
       server.start();
 
@@ -85,7 +108,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
          robotDataReceiver.updateRobotModel();
          Thread.sleep(10);
       }
-      
+
       // Send packets and integrate at fixed interval.
       executor.scheduleAtFixedRate(new Runnable()
       {
@@ -127,11 +150,54 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       robotDataReceiver.updateRobotModel();
 
       if (device != null)
-         stepTeleopMode.update(Collections.unmodifiableMap(channels));
-      else
-         stepTeleopMode.update(null);
+      {
+         processJoystickCommands();
+      }
 
+      stepTeleopManager.update();
       server.update(robotDataReceiver.getSimTimestamp());
+   }
+
+   private void processJoystickCommands()
+   {
+      double bodyRoll = 0.0;
+      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * maxBodyPitch.getValue();
+      double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxBodyYaw.getValue();
+      stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, bodyOrientationShiftTime.getValue());
+
+      double bodyHeightVelocity = 0.0;
+      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
+      {
+         bodyHeightVelocity += maxBodyHeightVelocity.getValue();
+      }
+      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
+      {
+         bodyHeightVelocity -= maxBodyHeightVelocity.getValue();
+      }
+      stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
+
+      double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * maxVelocityX.getDoubleValue();
+      double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * maxVelocityY.getDoubleValue();
+      double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxVelocityYaw.getDoubleValue();
+      stepTeleopManager.setDesiredVelocity(xVelocity, yVelocity, yawRate);
+   }
+
+   private void processStateChangeRequests(Event event)
+   {
+      if (event.getValue() < 0.5)
+         return;
+
+      if (XBoxOneMapping.getMapping(event) == XBoxOneMapping.A)
+      {
+         stepTeleopManager.requestSteppingState();
+         if (stepTeleopManager.isWalking())
+            stepTeleopManager.requestStanding();
+      }
+
+      if (XBoxOneMapping.getMapping(event) == XBoxOneMapping.X)
+      {
+         stepTeleopManager.requestXGait();
+      }
    }
 
    @Override
@@ -141,7 +207,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
 
       // Handle events that should trigger once immediately after the event is triggered.
-      stepTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), event);
+      processStateChangeRequests(event);
    }
 
    public YoVariableRegistry getRegistry()
