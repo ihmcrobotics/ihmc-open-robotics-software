@@ -75,6 +75,29 @@ public class PlanarRegionsListGenerator
       transformGeneratorTwo.translate(lengthX / 2.0, 0.0, heightZ / 2.0);
       transformGeneratorTwo.rotate(-slope, Axis.Y);
       addRectangle(transformGeneratorTwo, EuclidGeometryTools.pythagorasGetHypotenuse(lengthX, heightZ), widthY);
+
+      ConvexPolygon2D leftSide = new ConvexPolygon2D();
+      leftSide.addVertex(0.0, 0.0);
+      leftSide.addVertex(- lengthX, 0.0);
+      leftSide.addVertex(- lengthX, heightZ);
+      leftSide.update();
+
+      ConvexPolygon2D rightSide = new ConvexPolygon2D();
+      rightSide.addVertex(0.0, 0.0);
+      rightSide.addVertex(lengthX, 0.0);
+      rightSide.addVertex(lengthX, heightZ);
+      rightSide.update();
+
+      transformGeneratorTwo.set(transformGenerator);
+      transformGeneratorTwo.translate(0.0, 0.5 * widthY, 0.0);
+      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis.X);
+      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      addPolygon(transformGeneratorTwo, leftSide);
+
+      transformGeneratorTwo.set(transformGenerator);
+      transformGeneratorTwo.translate(0.0, -0.5 * widthY, 0.0);
+      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis.X);
+      addPolygon(transformGeneratorTwo, rightSide);
    }
 
    public void addRectangle(double lengthX, double widthY)
@@ -84,6 +107,13 @@ public class PlanarRegionsListGenerator
    }
 
    public void addPolygon(ConvexPolygon2D polygon)
+   {
+      PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
+      planarRegion.setRegionId(id++);
+      planarRegionsList.addPlanarRegion(planarRegion);
+   }
+
+   public void addPolygon(RigidBodyTransformGenerator transformGenerator, ConvexPolygon2D polygon)
    {
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
       planarRegion.setRegionId(id++);
