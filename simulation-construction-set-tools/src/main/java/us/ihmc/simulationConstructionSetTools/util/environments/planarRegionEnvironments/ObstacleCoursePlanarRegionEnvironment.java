@@ -24,7 +24,7 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       // staircase and ramps
       generator.identity();
       generator.translate(2.0, 0.0, 0.0);
-      double stepHeight = 0.13;
+      double stepHeight = 0.1;
       double stepLength = 0.30;
       int numberOfSteps = 6;
       double startingBlockLength = 1.0;
@@ -59,7 +59,7 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       generator.identity();
       generator.translate(-2.0, 0.0, -0.05);
       generator.rotate(Math.PI, Axis.Z);
-      PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 6, 0.1);
+      PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 6, 0.05);
 
       // stepping stones
       generator.identity();
@@ -130,6 +130,18 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
 
       environment = new PlanarRegionsListDefinedEnvironment("obstacleCourse", planarRegionsLists, appearances, 1e-2, false);
       hasBeenGenerated = true;
+   }
+
+   @Override
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      for (int i = 0; i < planarRegionsLists.size(); i++)
+      {
+         planarRegionsList.getPlanarRegionsAsList().addAll(planarRegionsLists.get(i).getPlanarRegionsAsList());
+      }
+
+      return planarRegionsList;
    }
 
    //   @Override

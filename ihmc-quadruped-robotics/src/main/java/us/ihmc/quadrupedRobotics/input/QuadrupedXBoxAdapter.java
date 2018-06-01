@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -165,16 +166,16 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * maxBodyYaw.getValue();
       stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, bodyOrientationShiftTime.getValue());
 
-      double bodyHeightVelocity = 0.0;
       if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
-         bodyHeightVelocity += maxBodyHeightVelocity.getValue();
+         double bodyHeightVelocity = maxBodyHeightVelocity.getValue();
+         stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
       }
-      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
+      else if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
-         bodyHeightVelocity -= maxBodyHeightVelocity.getValue();
+         double bodyHeightVelocity = maxBodyHeightVelocity.getValue();
+         stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
       }
-      stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
 
       double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * maxVelocityX.getDoubleValue();
       double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * maxVelocityY.getDoubleValue();
@@ -208,6 +209,11 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
 
       // Handle events that should trigger once immediately after the event is triggered.
       processStateChangeRequests(event);
+   }
+
+   public void setSnapper(PointFootSnapper snapper)
+   {
+      stepTeleopManager.setStepSnapper(snapper);
    }
 
    public YoVariableRegistry getRegistry()
