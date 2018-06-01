@@ -81,18 +81,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean allowUpperBodyMotionDuringLocomotion()
-   {
-      return target == RobotTarget.REAL_ROBOT;
-   }
-
-   @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return target == RobotTarget.REAL_ROBOT;
-   }
-
-   @Override
    public double getOmega0()
    {
       // TODO probably need to be tuned.
