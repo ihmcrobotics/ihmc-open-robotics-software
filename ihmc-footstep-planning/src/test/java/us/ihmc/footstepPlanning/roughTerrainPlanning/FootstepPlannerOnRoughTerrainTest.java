@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -105,7 +105,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
       double heightVariation = 0.1;
-      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(startX, startY, -0.001);
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
 
       FramePose3D goalPose = new FramePose3D(worldFrame);
       goalPose.setPosition(9.0, 0.0, 0.0);
