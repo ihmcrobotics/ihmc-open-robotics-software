@@ -166,4 +166,9 @@ public class PlanarRegionsListGenerator
       return planarRegionsList;
    }
 
+   public void reset()
+   {
+      planarRegionsList.clear();
+      transformGenerator.identity();
+   }
 }

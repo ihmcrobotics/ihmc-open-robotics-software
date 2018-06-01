@@ -1,17 +1,26 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
+
+import java.util.ArrayList;
 
 public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
 {
-   private static final double RAMP_ANGLE = Math.toRadians(20.0);
+   private final ArrayList<PlanarRegionsList> planarRegionsLists = new ArrayList<>();
+   private final ArrayList<AppearanceDefinition> appearances = new ArrayList<>();
 
    public ObstacleCoursePlanarRegionEnvironment()
    {
       // ground plane
       generator.translate(0.0, 0.0, -0.01);
       generator.addRectangle(15.0, 15.0);
+      addPlanarRegionsToTerrain(YoAppearance.RGBColor(110 / 256.0, 121 / 256.0, 121 / 256.0));
 
       // staircase and ramps
       generator.identity();
@@ -51,7 +60,7 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       generator.identity();
       generator.translate(-2.0, 0.0, -0.05);
       generator.rotate(Math.PI, Axis.Z);
-      PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 9, 0.1);
+      PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 6, 0.1);
 
       // stepping stones
       generator.identity();
@@ -97,5 +106,60 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       generator.translate(0.0, -(0.5 + 1.0), 0.0);
       generator.rotate(0.5 * Math.PI, Axis.Z);
       generator.addRampReferencedAtBottomMiddle(1.0, 1.0, steppingStoneHeight);
+
+      addPlanarRegionsToTerrain(YoAppearance.Gray());
    }
+
+   private void addPlanarRegionsToTerrain(AppearanceDefinition appearance)
+   {
+      planarRegionsLists.add(generator.getPlanarRegionsList().copy());
+      appearances.add(appearance);
+      generator.reset();
+   }
+
+   @Override
+   public void generateEnvironment()
+   {
+      PlanarRegionsList[] planarRegionsLists = new PlanarRegionsList[this.planarRegionsLists.size()];
+      AppearanceDefinition[] appearances = new AppearanceDefinition[this.appearances.size()];
+
+      for (int i = 0; i < planarRegionsLists.length; i++)
+      {
+         planarRegionsLists[i] = this.planarRegionsLists.get(i);
+         appearances[i] = this.appearances.get(i);
+      }
+
+      environment = new PlanarRegionsListDefinedEnvironment("obstacleCourse", planarRegionsLists, appearances, 1e-2, false);
+      hasBeenGenerated = true;
+   }
+
+   //   @Override
+//   public TerrainObject3D getTerrainObject3D()
+//   {
+//      TerrainObject3D planarRegionsTerrain = super.getTerrainObject3D();
+//      CombinedTerrainObject3D combinedTerrain = new CombinedTerrainObject3D("obstacleCourse");
+//      combinedTerrain.addTerrainObject(planarRegionsTerrain);
+//      combinedTerrain.addTerrainObject(new BumpyGroundTerrainObject());
+//      return combinedTerrain;
+//   }
+//
+//   // adding bumpy ground as a terrain object slows the sim down too much
+//   private class BumpyGroundTerrainObject extends BumpyGroundProfile implements TerrainObject3D
+//   {
+//      private final Graphics3DObject graphics = new Graphics3DObject();
+//      private static final double xAmp1 = 0.02, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
+//      private static final double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
+//
+//      private BumpyGroundTerrainObject()
+//      {
+//         super(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, -3.0, 3.0, -6.0, -3.0);
+//         graphics.addHeightMap(this, 100, 100, YoAppearance.DarkGreen());
+//      }
+//
+//      @Override
+//      public Graphics3DObject getLinkGraphics()
+//      {
+//         return graphics;
+//      }
+//   }
 }
