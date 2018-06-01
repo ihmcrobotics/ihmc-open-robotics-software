@@ -44,7 +44,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       zForceThreshold = new YoDouble(prefix + "zForceThreshold", registry);
       measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
       
-      zForceThreshold.set(80.0);
+      zForceThreshold.set(40.0);
       
       RigidBody body = robotModel.getRootBody();
       RigidBody foot = robotModel.getFoot(robotQuadrant);
