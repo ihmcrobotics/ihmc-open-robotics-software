@@ -29,6 +29,7 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoDouble controllerTime;
 
    private final YoBoolean controlBodyHeight = new YoBoolean("controlBodyHeight", registry);
+   private final YoBoolean heightCommandHasBeenReceived = new YoBoolean("heightCommandHasBeenReceived", registry);
 
    private final MovingReferenceFrame bodyFrame;
    private final ReferenceFrame centerOfMassFrame;
@@ -78,6 +79,7 @@ public class QuadrupedCenterOfMassHeightManager
       linearMomentumZPDController = new PIDController("linearMomentumZPDController", registry);
 
       controlBodyHeight.set(true);
+      heightCommandHasBeenReceived.set(false);
 
       nominalPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
       nominalVelocity = new FrameVector3D(supportFrame);
@@ -126,21 +128,25 @@ public class QuadrupedCenterOfMassHeightManager
       }
 
       centerOfMassHeightTrajectory.initialize();
+      heightCommandHasBeenReceived.set(true);
    }
 
    public void initialize()
    {
-      computeCurrentState();
+      if(!heightCommandHasBeenReceived.getBooleanValue())
+      {
+         computeCurrentState();
 
-      currentPosition.changeFrame(supportFrame);
-      currentVelocity.changeFrame(supportFrame);
+         currentPosition.changeFrame(supportFrame);
+         currentVelocity.changeFrame(supportFrame);
 
-      double startTime = controllerTime.getDoubleValue();
-      double endTime = startTime + initializationDuration.getValue();
-      centerOfMassHeightTrajectory.clear();
-      centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
-      centerOfMassHeightTrajectory.appendWaypoint(endTime, nominalPosition, nominalVelocity);
-      centerOfMassHeightTrajectory.initialize();
+         double startTime = controllerTime.getDoubleValue();
+         double endTime = startTime + initializationDuration.getValue();
+         centerOfMassHeightTrajectory.clear();
+         centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
+         centerOfMassHeightTrajectory.appendWaypoint(endTime, nominalPosition, nominalVelocity);
+         centerOfMassHeightTrajectory.initialize();
+      }
    }
 
    public void update()
