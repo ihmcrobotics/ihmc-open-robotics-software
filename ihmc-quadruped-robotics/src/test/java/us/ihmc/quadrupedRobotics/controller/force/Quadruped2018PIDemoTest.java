@@ -153,6 +153,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.addDurationGoal(variables.getYoTime(), 1.75);
       conductor.simulate();
 
+      magnitude = 200;
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), magnitude, duration);
       PrintTools.info("CoM velocity change = " + magnitude * duration / quadrupedTestFactory.getFullRobotModel().getTotalMass());
 
@@ -359,12 +360,12 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
 
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.1);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
-      stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
       stepTeleopManager.requestXGait();
-      stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
+      stepTeleopManager.setDesiredVelocity(0.4, 0.0, 0.0);
       conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
