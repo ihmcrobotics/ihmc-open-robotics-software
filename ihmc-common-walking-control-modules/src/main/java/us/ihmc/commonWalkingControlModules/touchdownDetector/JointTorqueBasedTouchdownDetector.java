@@ -12,8 +12,6 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private final YoDouble torqueThreshold;
    private final YoBoolean touchdownDetected;
 
-   private double signum;
-
    public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, YoVariableRegistry registry)
    {
       this.joint = joint;
@@ -33,7 +31,6 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    public void setTorqueThreshold(double torqueThreshold)
    {
       this.torqueThreshold.set(torqueThreshold);
-      signum = Math.signum(torqueThreshold);
    }
 
    @Override
@@ -45,11 +42,11 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    @Override
    public void update()
    {
-      double threshold = torqueThreshold.getDoubleValue() * signum;
-      double torque = joint.getTauMeasured() * signum;
+      double threshold = torqueThreshold.getDoubleValue();
+      double torque = joint.getTauMeasured();
 
       jointTorque.set(joint.getTauMeasured());
 
-      touchdownDetected.set(torque > threshold);
+      touchdownDetected.set(Math.abs(torque) > Math.abs(threshold));
    }
 }
