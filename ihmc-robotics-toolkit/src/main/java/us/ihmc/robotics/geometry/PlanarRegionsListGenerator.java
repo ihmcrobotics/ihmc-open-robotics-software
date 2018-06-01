@@ -4,11 +4,14 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PlanarRegionsListGenerator
 {
@@ -61,6 +64,17 @@ public class PlanarRegionsListGenerator
       translate(-lengthX / 2.0, 0.0, heightZ / 2.0);
       addCubeReferencedAtCenter(lengthX, widthY, heightZ);
       translate(lengthX / 2.0, 0.0, -heightZ / 2.0);
+   }
+
+   public void addRampReferencedAtBottomMiddle(double lengthX, double widthY, double heightZ)
+   {
+      RigidBodyTransformGenerator transformGeneratorTwo = new RigidBodyTransformGenerator(transformGenerator);
+      double slope = Math.atan2(heightZ, lengthX);
+
+      transformGeneratorTwo.set(transformGenerator);
+      transformGeneratorTwo.translate(lengthX / 2.0, 0.0, heightZ / 2.0);
+      transformGeneratorTwo.rotate(-slope, Axis.Y);
+      addRectangle(transformGeneratorTwo, EuclidGeometryTools.pythagorasGetHypotenuse(lengthX, heightZ), widthY);
    }
 
    public void addRectangle(double lengthX, double widthY)
