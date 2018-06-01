@@ -22,8 +22,6 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
  */
 public class GenericQuadrupedTeleopNode
 {
-   private static final String parameterResourcePath = "/parameters/teleop.xml";
-
    private GenericQuadrupedTeleopNode() throws IOException, InterruptedException
    {
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
@@ -34,9 +32,6 @@ public class GenericQuadrupedTeleopNode
       String robotName = modelFactory.getRobotDescription().getName();
       Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
       QuadrupedXBoxAdapter eventListener = new QuadrupedXBoxAdapter(robotName, joystick, fullRobotModel, xGaitSettings, physicalProperties);
-
-      InputStream parameterFile = getClass().getResourceAsStream(parameterResourcePath);
-      ParameterLoaderHelper.loadParameters(this, parameterFile, eventListener.getRegistry());
 
       eventListener.start();
       joystick.addJoystickEventListener(eventListener);
