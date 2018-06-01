@@ -18,7 +18,7 @@ public class QuadrupedXGaitStepStream
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, 0.075);
+   private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
@@ -36,6 +36,7 @@ public class QuadrupedXGaitStepStream
       this.bodyPathProvider = bodyPathProvider;
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
+      minimumStepClearance.set(0.075);
 
       if (parentRegistry != null)
       {
@@ -51,8 +52,8 @@ public class QuadrupedXGaitStepStream
       double strideWidth = Math.abs(2 * desiredPlanarVelocity.getY() * xGaitSettings.getStepDuration());
       strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
       strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
-      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.getValue()));
-      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.getValue()));
+      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearance.getValue()));
+      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearance.getValue()));
    }
 
    public void onEntry()
