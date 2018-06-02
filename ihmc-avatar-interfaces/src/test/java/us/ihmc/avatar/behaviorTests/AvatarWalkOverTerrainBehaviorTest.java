@@ -47,7 +47,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       generator.translate(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, 0.001);
       PlanarRegionsListExamples.generateCinderBlockField(generator, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
                                                                             CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
-                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03);
+                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03, 0.6);
       cinderBlockField = generator.getPlanarRegionsList();
 
       SimulationTestingParameters parameters = SimulationTestingParameters.createFromSystemProperties();
