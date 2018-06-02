@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.HeightMapFootSnapper;
@@ -291,16 +292,16 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
    public void testWalkingUpStaircase() throws IOException
    {
-      double stepHeight = 0.13;
-      double stepLength = 0.30;
+      double stepHeight = 0.08;
+      double stepLength = 0.40;
       int numberOfSteps = 6;
       StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength, true);
       double walkTime = 20.0;
       double walkingSpeed = 0.3;
       double minimumXPositionAfterWalking  = numberOfSteps * stepLength + 1.2;
 
-      double stanceLength = 0.75;
-      double bodyHeight = 0.6;
+      double bodyHeight = 0.58;
+      double stanceLength = 0.7;
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
@@ -315,10 +316,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      stepTeleopManager.setDesiredBodyHeight(bodyHeight);
 
       YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
       xGaitSettings.setStanceLength(stanceLength);
+      stepTeleopManager.setDesiredBodyHeight(bodyHeight);
 
       PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
       snapper.setPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
@@ -327,7 +328,62 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.requestXGait();
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), walkTime);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), minimumXPositionAfterWalking));
+      conductor.simulate();
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.simulate();
+
+      stepTeleopManager.requestStanding();
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.simulate();
+   }
+
+   public void testWalkingDownStaircase() throws IOException
+   {
+      double stepHeight = 0.08;
+      double stepLength = 0.40;
+      int numberOfSteps = 6;
+      StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength, true);
+      double walkTime = 20.0;
+      double walkingSpeed = 0.3;
+      double minimumXPositionAfterWalking  = 3.4 + numberOfSteps * stepLength + 1.2;
+
+      double bodyHeight = 0.54;
+      double stanceLength = 0.65;
+
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
+      simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
+
+      quadrupedTestFactory = createQuadrupedTestFactory();
+
+      QuadrupedInitialOffsetAndYaw initialOffsetAndYaw = new QuadrupedInitialOffsetAndYaw(3.4, 0.0, 0.525, 0.0);
+
+      quadrupedTestFactory.setInitialOffset(initialOffsetAndYaw);
+      quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
+      quadrupedTestFactory.setTerrainObject3D(staircaseEnvironment.getTerrainObject3D());
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setUseNetworking(true);
+
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+
+      YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
+      xGaitSettings.setStanceLength(stanceLength);
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
+
+      PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
+      snapper.setPlanarRegionsList(staircaseEnvironment.getPlanarRegionsList());
+      stepTeleopManager.setStepSnapper(snapper);
+
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), walkTime);
