@@ -86,7 +86,7 @@ public class LandingState extends AbstractJumpState
       pelvisControlManager.getCurrentPelvisOrientation(worldFrame, tempOrientation);
       pelvisControlManager.setDesiredPelvisOrientation(tempOrientation);
       headManager.holdInJointspace();
-      chestManager.holdInTaskspace();
+      chestManager.holdInJointspace();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);

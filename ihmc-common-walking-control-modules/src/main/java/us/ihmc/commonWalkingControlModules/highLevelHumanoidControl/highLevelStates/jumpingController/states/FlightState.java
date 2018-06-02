@@ -115,6 +115,7 @@ public class FlightState extends AbstractJumpState
          feetManager.makeFeetFullyUnconstrained(robotSide);
       }
       headManager.holdInTaskspace();
+      chestManager.holdInJointspace();
    }
    
    @Override

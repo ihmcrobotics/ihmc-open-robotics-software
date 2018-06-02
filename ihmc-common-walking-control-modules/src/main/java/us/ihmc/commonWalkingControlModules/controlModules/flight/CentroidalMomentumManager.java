@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class CentroidalMomentumManager implements JumpControlManagerInterface
 {
-   private final double angularWeight = 10.0;
+   private final double angularWeight = 15.0;
    private final double linearWeight = 2.0;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry;

@@ -116,7 +116,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
-   private final BooleanParameter useBaseFrameForControl = new BooleanParameter("UseBaseFrameForControl", registry, false);
+   private final BooleanParameter useBaseFrameForControl = new BooleanParameter("UseBaseFrameForControl", registry, true);
 
    public RigidBodyTaskspaceControlState(String postfix, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,

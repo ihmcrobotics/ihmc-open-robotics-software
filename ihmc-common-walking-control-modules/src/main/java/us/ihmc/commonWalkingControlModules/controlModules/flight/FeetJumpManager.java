@@ -53,7 +53,7 @@ public class FeetJumpManager implements JumpControlManagerInterface
       {
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          ContactableFoot contactableFoot = contactableFeet.get(robotSide);
-         JumpFootControlModule footControlModule = new JumpFootControlModule(robotSide, footSwitch, contactableFoot, elevator, pelvis, trajectoryFrames,
+         JumpFootControlModule footControlModule = new JumpFootControlModule(robotSide, footSwitch, contactableFoot, pelvis, pelvis, trajectoryFrames,
                                                                              homeConfiguration, jumpControlParameters, controllerToolbox.getYoTime(),
                                                                              graphicsListRegistry, registry);
          footControlModules.put(robotSide, footControlModule);
