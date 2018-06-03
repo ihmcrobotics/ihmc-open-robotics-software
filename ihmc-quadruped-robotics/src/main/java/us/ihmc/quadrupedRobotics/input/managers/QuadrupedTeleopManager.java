@@ -13,6 +13,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
@@ -237,13 +238,17 @@ public class QuadrupedTeleopManager
       desiredOrientationTime.set(time);
    }
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private void sendDesiredBodyHeight()
    {
       double bodyHeight = desiredBodyHeight.getAndSet(Double.NaN);
 
       if (!Double.isNaN(bodyHeight))
       {
-         QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, bodyHeight);
+         tempPoint.setIncludingFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), 0.0, 0.0, bodyHeight);
+         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, tempPoint.getZ());
          bodyHeightMessage.setControlBodyHeight(true);
          bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
          bodyHeightPublisher.publish(bodyHeightMessage);
