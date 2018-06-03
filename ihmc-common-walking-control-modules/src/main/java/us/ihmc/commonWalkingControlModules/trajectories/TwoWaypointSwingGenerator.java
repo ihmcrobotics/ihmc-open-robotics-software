@@ -226,7 +226,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          for (int i = 0; i < numberWaypoints; i++)
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getValue());
-            waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
+            waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
                waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
@@ -239,7 +239,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          throw new RuntimeException("Trajectory type not implemented");
       }
 
-      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+      double maxWaypointZ;
+      if (stanceFootPosition.containsNaN())
+         maxWaypointZ = maxStepZ + maxSwingHeight.getDoubleValue();
+      else
+         maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
+
       for (int i = 0; i < numberWaypoints; i++)
       {
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
