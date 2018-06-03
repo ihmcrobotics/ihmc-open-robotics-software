@@ -88,4 +88,10 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       measuredZForce.set(footForce.getZ() * -1.0);
       isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getDoubleValue());
    }
+
+   public void reset()
+   {
+      measuredZForce.set(0.0);
+      isInContact.set(false);
+   }
 }

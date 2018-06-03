@@ -46,4 +46,11 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
       touchdownDetected.set(vectorToPack.length() > touchdownForceThreshold.getDoubleValue());
       touchdownDetectedFiltered.update();
    }
+
+   @Override
+   public void reset()
+   {
+      touchdownDetected.set(false);
+      touchdownDetectedFiltered.set(false);
+   }
 }

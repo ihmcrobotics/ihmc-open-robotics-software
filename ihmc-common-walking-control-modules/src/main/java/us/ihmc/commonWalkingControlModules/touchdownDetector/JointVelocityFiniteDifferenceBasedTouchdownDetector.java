@@ -75,4 +75,10 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
          initialized = true;
       }
    }
+
+   @Override
+   public void reset()
+   {
+      touchdownDetected.set(false);
+   }
 }

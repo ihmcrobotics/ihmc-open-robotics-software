@@ -8,4 +8,6 @@ public interface TouchdownDetector
     * This should only be called once per tick!!
     */
    void update();
+
+   void reset();
 }

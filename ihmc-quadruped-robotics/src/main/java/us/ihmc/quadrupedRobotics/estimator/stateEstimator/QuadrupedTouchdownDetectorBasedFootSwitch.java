@@ -106,5 +106,10 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void reset()
    {
       touchdownDetectorsUpdated = false;
+
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+      {
+         touchdownDetectors.get(i).reset();
+      }
    }
 }
