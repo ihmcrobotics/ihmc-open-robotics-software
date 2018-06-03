@@ -49,4 +49,10 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 
       touchdownDetected.set(Math.abs(torque) > Math.abs(threshold));
    }
+
+   @Override
+   public void reset()
+   {
+      touchdownDetected.set(false);
+   }
 }
