@@ -23,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
@@ -30,6 +31,8 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPo
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -224,6 +227,21 @@ public class QuadrupedTeleopManager
 
       QuadrupedBodyOrientationMessage orientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getFootstepPlan().getPlannedSteps(), limitedDesiredVelocity.getZ());
       bodyOrientationPublisher.publish(orientationMessage);
+   }
+
+   private final List<QuadrupedTimedOrientedStep> plannedStepsSortedByEndTime = new ArrayList<>();
+
+   private List<QuadrupedTimedOrientedStep> getPlannedStepsSortedByEndTime()
+   {
+      plannedStepsSortedByEndTime.clear();
+      PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = stepStream.getFootstepPlan().getPlannedSteps();
+      for (int i = 0; i < plannedSteps.size(); i++)
+      {
+         plannedStepsSortedByEndTime.add(plannedSteps.get(i));
+      }
+
+      TimeIntervalTools.sortByEndTime(plannedStepsSortedByEndTime);
+      return plannedStepsSortedByEndTime;
    }
 
    public void setDesiredBodyHeight(double desiredBodyHeight)
