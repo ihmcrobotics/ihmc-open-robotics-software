@@ -17,9 +17,21 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
    public ObstacleCoursePlanarRegionEnvironment()
    {
       // ground plane
-      generator.translate(3.25, 0.0, -0.01);
-      generator.addRectangle(9.5, 16.0);
-      generator.translate(-3.25, 0.0, 0.0);
+      generator.translate(3.25, -2.4, -0.01);
+      generator.addRectangle(9.5, 11.25);
+      generator.translate(-3.25, 2.4, 0.0);
+
+      generator.translate(3.25, 6.45, 0.0);
+      generator.addRectangle(9.5, 3.1);
+      generator.translate(-3.25, -6.45, 0.0);
+
+      generator.translate(-1.0, 4.05, 0.0);
+      generator.addRectangle(1.0, 1.7);
+      generator.translate(1.0, -4.05, 0.0);
+
+      generator.translate(4.25, 4.05, 0.0);
+      generator.addRectangle(7.5, 1.7);
+      generator.translate(-4.25, -4.05, 0.0);
 
       generator.translate(-4.75, -4.6, 0.0);
       generator.addRectangle(6.5, 6.8);

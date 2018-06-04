@@ -172,11 +172,9 @@ public class QuadrupedXGaitPlanner
       }
 
       // snap the desired footsteps to a height map, if provided
-      double previousStepZValue = latestStep.getGoalPosition().getZ();
       for (int i = 0; i < plannedSteps.size(); i++)
       {
-         snapStep(plannedSteps.get(i), previousStepZValue);
-         previousStepZValue = plannedSteps.get(i).getGoalPosition().getZ();
+         snapStep(plannedSteps.get(i));
       }
    }
 
