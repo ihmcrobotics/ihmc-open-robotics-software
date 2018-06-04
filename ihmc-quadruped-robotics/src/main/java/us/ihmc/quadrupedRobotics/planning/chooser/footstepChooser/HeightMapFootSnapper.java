@@ -15,7 +15,7 @@ public class HeightMapFootSnapper implements PointFootSnapper
    }
 
    @Override
-   public Point3DReadOnly snapStep(double xPosition, double yPosition)
+   public Point3DReadOnly snapStep(double xPosition, double yPosition, double minimumZPosition)
    {
       snappedStep.setX(xPosition);
       snappedStep.setY(yPosition);
