@@ -122,6 +122,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
+   private final OptionalFactoryField<QuadrantDependentList<Boolean>> kneeOrientationsOutward = new OptionalFactoryField<>("kneeOrientationsOutward");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<QuadrupedControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
@@ -244,6 +245,8 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
+      footSwitchFactory.setKneeOrientationsOutward(kneeOrientationsOutward.get());
+
       footSwitches = footSwitchFactory.createFootSwitches();
    }
 
@@ -542,9 +545,9 @@ public class QuadrupedSimulationFactory
       {
          scs.setCameraTrackingVars("q_x", "q_y", "q_z");
          scs.setCameraDollyVars("q_x", "q_y", "q_z");
-         scs.setCameraTracking(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), false);
-//         scs.setCameraDolly(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), false);
-         scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
+         scs.setCameraTracking(useTrackAndDolly.get(), true, true, true);
+         scs.setCameraDolly(useTrackAndDolly.get(), true, true, false);
+         scs.setCameraDollyOffsets(4.0 * 0.66, -3.0 * 0.66 , 1 * 0.66);
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
@@ -692,6 +695,11 @@ public class QuadrupedSimulationFactory
    public void setSDFRobot(FloatingRootJointRobot sdfRobot)
    {
       this.sdfRobot.set(sdfRobot);
+   }
+
+   public void setKneeOrientationsOutward(QuadrantDependentList<Boolean> kneeOrientationsOutward)
+   {
+      this.kneeOrientationsOutward.set(kneeOrientationsOutward);
    }
 
    public void setUseStateEstimator(boolean useStateEstimator)

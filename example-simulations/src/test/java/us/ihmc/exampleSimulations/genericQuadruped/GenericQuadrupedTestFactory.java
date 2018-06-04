@@ -1,18 +1,12 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
-import java.io.IOException;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -37,6 +31,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -51,6 +46,8 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.io.IOException;
 
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 {
@@ -124,6 +121,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       OutputWriter outputWriter = new SimulatedQuadrupedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList, CONTROL_DT);
 
+      QuadrantDependentList<Boolean> kneeOrientationsOutward = new QuadrantDependentList<>(false, false, false, false);
+
       QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(CONTROL_DT);
       simulationFactory.setSimulationDT(SIMULATION_DT);
@@ -142,6 +141,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setInitialOffset(initialOffset.get());
       simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setKneeOrientationsOutward(kneeOrientationsOutward);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(useNetworking.get());

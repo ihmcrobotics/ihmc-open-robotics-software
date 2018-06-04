@@ -12,7 +12,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
