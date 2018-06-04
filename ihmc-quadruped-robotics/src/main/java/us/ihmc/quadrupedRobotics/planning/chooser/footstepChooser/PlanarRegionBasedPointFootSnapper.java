@@ -88,29 +88,7 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
             }
          }
 
-         if(maxZ > minimumZPosition)
-         {
-            return projectPointIntoPlanarRegion(xPosition, yPosition, intersectingRegions.get(highestPlanarRegionIndex), parameters.distanceInsidePlanarRegion());
-         }
-         else
-         {
-            PlanarRegionsList planarRegionsListCopy = planarRegionsList.copy();
-            removePlanarRegion(planarRegionsListCopy, intersectingRegions.get(highestPlanarRegionIndex));
-            PlanarRegion closestRegion = planarRegionsListCopy.findClosestPlanarRegionToPointByProjectionOntoXYPlane(xPosition, yPosition);
-            return projectPointIntoPlanarRegion(xPosition, yPosition, closestRegion, parameters.distanceInsidePlanarRegion());
-         }
-      }
-   }
-
-   private static void removePlanarRegion(PlanarRegionsList planarRegionsList, PlanarRegion planarRegion)
-   {
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         if(planarRegionsList.getPlanarRegion(i).epsilonEquals(planarRegion, 1e-6))
-         {
-            planarRegionsList.pollPlanarRegion(i);
-            return;
-         }
+         return projectPointIntoPlanarRegion(xPosition, yPosition, intersectingRegions.get(highestPlanarRegionIndex), parameters.distanceInsidePlanarRegion());
       }
    }
 
