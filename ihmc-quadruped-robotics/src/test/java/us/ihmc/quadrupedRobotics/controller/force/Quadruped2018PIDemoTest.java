@@ -350,11 +350,15 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       int numberOfSteps = 6;
       StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength, true);
       double walkTime = 20.0;
-      double walkingSpeed = 0.3;
+      double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking  = 3.4 + numberOfSteps * stepLength + 1.2;
 
       double bodyHeight = 0.54;
       double stanceLength = 0.65;
+      double stepGroundClearance = 0.06;
+      double endDoubleSupportDuration = 0.15;
+      double stanceWidth = 0.42;
+      double endPhaseShift = 180.0;
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
@@ -376,6 +380,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
       xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStepGroundClearance(stepGroundClearance);
+      xGaitSettings.setEndDoubleSupportDuration(endDoubleSupportDuration);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setEndPhaseShift(endPhaseShift);
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
 
       PlanarRegionBasedPointFootSnapper snapper = new PlanarRegionBasedPointFootSnapper(new DefaultPointFootSnapperParameters());
