@@ -292,7 +292,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
    public void testWalkingUpStaircase() throws IOException
    {
-      double stepHeight = 0.08;
+      double stepHeight = 0.13;
       double stepLength = 0.40;
       int numberOfSteps = 6;
       StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength, true);
@@ -345,7 +345,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
    public void testWalkingDownStaircase() throws IOException
    {
-      double stepHeight = 0.08;
+      double stepHeight = 0.13;
       double stepLength = 0.40;
       int numberOfSteps = 6;
       StaircaseEnvironment staircaseEnvironment = new StaircaseEnvironment(numberOfSteps, stepHeight, stepLength, true);
@@ -361,7 +361,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       quadrupedTestFactory = createQuadrupedTestFactory();
 
-      QuadrupedInitialOffsetAndYaw initialOffsetAndYaw = new QuadrupedInitialOffsetAndYaw(3.4, 0.0, 0.525, 0.0);
+      double heightOffset = stepHeight * numberOfSteps + 0.045;
+      QuadrupedInitialOffsetAndYaw initialOffsetAndYaw = new QuadrupedInitialOffsetAndYaw(3.4, 0.0, heightOffset, 0.0);
 
       quadrupedTestFactory.setInitialOffset(initialOffsetAndYaw);
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
