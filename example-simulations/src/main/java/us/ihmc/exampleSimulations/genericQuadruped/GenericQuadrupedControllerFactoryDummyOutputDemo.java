@@ -109,12 +109,17 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
             footContactableBodiesFactory.createFootContactablePlaneBodies());
       footContactableBodiesFactory.disposeFactory();
 
+      QuadrantDependentList<Boolean> kneeOrientation = new QuadrantDependentList<>(false, false, false, false);
+
+
       QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
       footSwitchFactory.setFootContactableBodies(contactableFeet);
       footSwitchFactory.setFullRobotModel(fullRobotModel);
       footSwitchFactory.setGravity(GRAVITY);
       footSwitchFactory.setYoVariableRegistry(registry);
       footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
+      footSwitchFactory.setKneeOrientationsOutward(kneeOrientation);
+
       QuadrantDependentList<FootSwitchInterface> footSwitches = footSwitchFactory.createFootSwitches();
 
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
