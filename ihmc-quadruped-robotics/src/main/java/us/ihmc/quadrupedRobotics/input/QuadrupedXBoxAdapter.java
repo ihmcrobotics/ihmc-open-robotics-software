@@ -188,27 +188,37 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       if (event.getValue() < 0.5)
          return;
 
-      if (XBoxOneMapping.getMapping(event) == XBoxOneMapping.A)
+      XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
+      if (mapping == XBoxOneMapping.A)
       {
          stepTeleopManager.requestSteppingState();
          if (stepTeleopManager.isWalking())
             stepTeleopManager.requestStanding();
       }
-
-      if (XBoxOneMapping.getMapping(event) == XBoxOneMapping.X)
+      else if (mapping == XBoxOneMapping.X)
       {
          stepTeleopManager.requestXGait();
+      }
+      else if(mapping == XBoxOneMapping.LEFT_BUMPER && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
+      {
+         double endPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
+         stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift - 90.0);
+      }
+      else if(mapping == XBoxOneMapping.RIGHT_BUMPER && channels.get(mapping) < 0.5)
+      {
+         double endPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
+         stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift + 90.0);
       }
    }
 
    @Override
    public void processEvent(Event event)
    {
-      // Store updated value in a cache so historical values for all channels can be used.
-      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
-
       // Handle events that should trigger once immediately after the event is triggered.
       processStateChangeRequests(event);
+
+      // Store updated value in a cache so historical values for all channels can be used.
+      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
    }
 
    public void setSnapper(PointFootSnapper snapper)
