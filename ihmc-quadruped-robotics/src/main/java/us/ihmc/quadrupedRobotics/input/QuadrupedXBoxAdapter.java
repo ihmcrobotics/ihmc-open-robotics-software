@@ -173,7 +173,7 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
       }
       else if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
-         double bodyHeightVelocity = maxBodyHeightVelocity.getValue();
+         double bodyHeightVelocity = - maxBodyHeightVelocity.getValue();
          stepTeleopManager.setDesiredBodyHeight(bodyHeight.update(bodyHeightVelocity));
       }
 
