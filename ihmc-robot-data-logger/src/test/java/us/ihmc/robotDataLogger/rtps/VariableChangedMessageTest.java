@@ -61,6 +61,8 @@ public class VariableChangedMessageTest
                if(subscriber.takeNextData(req, new SampleInfo()))
                {
                   receivedMessages.incrementAndGet();
+
+                  System.out.println("Received: " + req);
                }
                else
                {
@@ -80,6 +82,7 @@ public class VariableChangedMessageTest
             msg.requestedValue_ = i * 13.37;
             
             publisher.write(msg);
+            System.out.println("Writing: " + msg);
             ThreadTools.sleep(1000);
          }
          
