@@ -15,6 +15,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,6 +24,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
@@ -49,6 +51,7 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -67,11 +70,7 @@ import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainP
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -146,6 +145,7 @@ public class QuadrupedSimulationFactory
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
    private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
+   private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
 
    /**
     * The PacketCommunicator used as input of the controller is either equal to the output
@@ -491,6 +491,38 @@ public class QuadrupedSimulationFactory
       PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
 
+   private void setupCameras()
+   {
+      FloatingRootJointRobot robot = sdfRobot.get();
+      RigidBodyTransform cameraTransform = new RigidBodyTransform();
+      List<CameraMount> cameraMounts = new ArrayList<>();
+
+      // straight behind
+      cameraTransform.setTranslation(-2.4, 0.0, 0.5);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(15.0), 0.0);
+      cameraMounts.add(new CameraMount("ThirdPersonViewBehind", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      // behind and to the side
+      cameraTransform.setTranslation(-2.0, 0.95, 1.0);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(25.0), Math.toRadians(-18.0));
+      cameraMounts.add(new CameraMount("ThirdPersonViewSide", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      // top-down
+      cameraTransform.setTranslation(0.5, 0.0, 3.5);
+      cameraTransform.setRotationEuler(0.0, Math.toRadians(90.0), 0.0);
+      cameraMounts.add(new CameraMount("TopDownView", cameraTransform, 1.4, 0.5, 20.0, robot));
+
+      for (int i = 0; i < cameraMounts.size(); i++)
+      {
+         robot.getRootJoint().addCameraMount(cameraMounts.get(i));
+         CameraConfiguration cameraConfiguration = new CameraConfiguration(cameraMounts.get(i).getName());
+         cameraConfiguration.setCameraMount(cameraMounts.get(i).getName());
+         cameraConfiguration.setCameraTracking(false, false, false, false);
+         cameraConfiguration.setCameraDolly(false, false, false, false);
+         cameraConfigurations.add(cameraConfiguration);
+      }
+   }
+
    public SimulationConstructionSet createSimulation() throws IOException
    {
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
@@ -521,11 +553,13 @@ public class QuadrupedSimulationFactory
       createSimulationController();
       setupSDFRobot();
       setupJointElasticity();
+      setupCameras();
 
       if (useNetworking.get())
          realtimeRos2Node.spin();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
+
       if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
       {
          scs.setGroundVisible(false);
@@ -549,11 +583,23 @@ public class QuadrupedSimulationFactory
          scs.setCameraTracking(useTrackAndDolly.get(), true, true, true);
          scs.setCameraDolly(useTrackAndDolly.get(), true, true, false);
          scs.setCameraDollyOffsets(4.0 * 0.66, -3.0 * 0.66 , 1 * 0.66);
+         scs.setCameraPosition(-2.5, -4.5, 1.5);
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
          simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
          simulationOverheadPlotterFactory.createOverheadPlotter();
+
+         for (int i = 0; i < cameraConfigurations.size(); i++)
+         {
+            scs.setupCamera(cameraConfigurations.get(i));
+         }
+
+         ViewportConfiguration viewportConfiguration = new ViewportConfiguration("Multi-View");
+         viewportConfiguration.addCameraView("ThirdPersonViewBehind", 0, 0, 1, 1);
+         viewportConfiguration.addCameraView("Right Side", 1, 0, 1, 1);
+         scs.setupViewport(viewportConfiguration);
+         scs.selectViewport("Multi-View");
       }
 
       InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
