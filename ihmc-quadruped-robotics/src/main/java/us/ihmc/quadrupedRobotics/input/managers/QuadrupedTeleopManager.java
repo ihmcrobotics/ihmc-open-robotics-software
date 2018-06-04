@@ -50,7 +50,7 @@ public class QuadrupedTeleopManager
    private final YoEnum<QuadrupedControllerRequestedEvent> controllerRequestedEvent = new YoEnum<>("teleopControllerRequestedEvent", registry, QuadrupedControllerRequestedEvent.class, true);
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
 
-   private final AtomicBoolean standingRequested = new AtomicBoolean();
+   private final YoBoolean standingRequested = new YoBoolean("standingRequested", registry);
    private final AtomicDouble desiredBodyHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
    private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
@@ -143,8 +143,9 @@ public class QuadrupedTeleopManager
          sendSteps();
          walking.set(true);
       }
-      else if (standingRequested.getAndSet(false))
+      else if (standingRequested.getBooleanValue())
       {
+         standingRequested.set(false);
          requestStopWalking();
          walking.set(false);
       }
