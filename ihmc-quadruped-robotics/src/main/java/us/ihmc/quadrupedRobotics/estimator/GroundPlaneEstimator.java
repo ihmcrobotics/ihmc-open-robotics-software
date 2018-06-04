@@ -86,7 +86,7 @@ public class GroundPlaneEstimator
    public double getPitch(double yaw)
    {
       groundPlane.getNormal(groundPlaneNormal);
-      return Math.atan2(Math.cos(yaw) * groundPlaneNormal.getX() - Math.sin(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
+      return Math.atan2(Math.cos(yaw) * groundPlaneNormal.getX() + Math.sin(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
    /**
@@ -96,7 +96,7 @@ public class GroundPlaneEstimator
    public double getRoll(double yaw)
    {
       groundPlane.getNormal(groundPlaneNormal);
-      return Math.atan2(Math.sin(yaw) * groundPlaneNormal.getX() + Math.cos(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
+      return Math.atan2(Math.sin(yaw) * groundPlaneNormal.getX() - Math.cos(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
    /**
