@@ -497,6 +497,7 @@ public class QuadrupedSimulationFactory
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
       useLocalCommunicator.setDefaultValue(false);
+      kneeOrientationsOutward.setDefaultValue(new QuadrantDependentList<>(true, true, true, true));
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
