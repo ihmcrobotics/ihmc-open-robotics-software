@@ -100,6 +100,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          footstepStartStatuses.get(quadrant).set(null);
+         footstepCompleteStatuses.get(quadrant).set(null);
       }
 
       recomputeInitialPose.set(false);
