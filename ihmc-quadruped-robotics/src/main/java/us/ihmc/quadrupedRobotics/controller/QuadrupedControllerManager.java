@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
@@ -74,6 +75,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final QuadrupedControllerStateChangeMessage quadrupedControllerStateChangeMessage = new QuadrupedControllerStateChangeMessage();
+   private final WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
 
    private final AtomicReference<QuadrupedControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
@@ -204,12 +206,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedControllerStateCommand.class).getRequestedControllerState());
       }
 
-      // update fall detector
-      if (controllerToolbox.getFallDetector().detect())
-      {
-         trigger.fireEvent(QuadrupedControllerRequestedEvent.REQUEST_FALL);
-      }
-
       // update requested events
       QuadrupedControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
@@ -253,6 +249,14 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             }
          }
          break;
+      }
+
+      // update fall detector
+      if (controllerToolbox.getFallDetector().detect())
+      {
+         trigger.fireEvent(QuadrupedControllerRequestedEvent.REQUEST_FALL);
+         walkingControllerFailureStatusMessage.falling_direction_.set(runtimeEnvironment.getFullRobotModel().getRootJoint().getLinearVelocityForReading());
+         statusMessageOutputManager.reportStatusMessage(walkingControllerFailureStatusMessage);
       }
 
       // update output processor
@@ -381,6 +385,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                                 realtimeRos2Node);
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
+   }
+
+   public void resetSteppingState()
+   {
+      QuadrupedSteppingState steppingState = (QuadrupedSteppingState) stateMachine.getState(QuadrupedControllerEnum.STEPPING);
+      steppingState.onEntry();
    }
 
    @Override

@@ -187,5 +187,8 @@ public class QuadrupedNetClassList extends NetClassList
 
       registerPacketClass(QuadrupedFootstepStatusMessage.class);
       registerPacketClass(QuadrupedGroundPlaneMessage.class);
+
+      registerPacketClass(WalkingControllerFailureStatusMessage.class);
+      registerPacketField(WalkingControllerFailureStatusMessagePubSubType.class);
    }
 }
