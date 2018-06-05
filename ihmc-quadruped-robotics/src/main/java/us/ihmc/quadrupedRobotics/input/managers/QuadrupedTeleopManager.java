@@ -54,6 +54,7 @@ public class QuadrupedTeleopManager
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
 
    private final YoBoolean standingRequested = new YoBoolean("standingRequested", registry);
+   private final AtomicBoolean paused = new AtomicBoolean(false);
    private final AtomicDouble desiredBodyHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
    private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
@@ -114,6 +115,7 @@ public class QuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedControllerStateChangeMessage.class, controllerPubGenerator, s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator, s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> timestampNanos.set(s.takeNextData().timestamp_));
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedRequestedControllerStateMessage.class, controllerPubGenerator, s -> paused.set(true));
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
@@ -139,7 +141,11 @@ public class QuadrupedTeleopManager
       bodyPathMultiplexer.setPlanarVelocityForJoystickPath(limitedDesiredVelocity.getX(), limitedDesiredVelocity.getY(), limitedDesiredVelocity.getZ());
       referenceFrames.updateFrames();
 
-      if (xGaitRequested.getValue() && !isInStepState())
+      if(paused.get())
+      {
+         return;
+      }
+      else if (xGaitRequested.getValue() && !isInStepState())
       {
          xGaitRequested.set(false);
          stepStream.onEntry();
@@ -306,5 +312,18 @@ public class QuadrupedTeleopManager
    {
       bodyPathMultiplexer.initialize();
       bodyPathMultiplexer.handleBodyPathPlanMessage(bodyPathPlanMessage);
+   }
+
+   public void setPaused(boolean pause)
+   {
+      paused.set(pause);
+
+      steppingStateChangeMessage.set(null);
+      walking.set(false);
+   }
+
+   public boolean isPaused()
+   {
+      return paused.get();
    }
 }

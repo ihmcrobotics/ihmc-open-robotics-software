@@ -209,6 +209,10 @@ public class QuadrupedXBoxAdapter implements JoystickEventListener
          double endPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
          stepTeleopManager.getXGaitSettings().setEndPhaseShift(endPhaseShift + 90.0);
       }
+      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
+      {
+         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
+      }
    }
 
    @Override
