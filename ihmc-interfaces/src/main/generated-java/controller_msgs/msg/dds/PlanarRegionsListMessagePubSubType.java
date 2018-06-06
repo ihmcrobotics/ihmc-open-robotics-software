@@ -42,9 +42,27 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -62,9 +80,41 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getPlanarRegions().size(); ++i0)
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getRegionId().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRegionOrigin().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getPlanarRegions().get(i0), current_alignment);}
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRegionNormal().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getConcaveHullsSize().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getNumberOfConvexPolygons().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getConvexPolygonsSize().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getVertexBuffer().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertexBuffer().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -72,34 +122,88 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_2(data.getSource());
+
+      cdr.write_type_2(data.getDestination());
+
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getPlanarRegions().size() <= 1)
-      cdr.write_type_e(data.getPlanarRegions());else
-          throw new RuntimeException("planar_regions field exceeds the maximum length");
+      if(data.getRegionId().size() <= 300)
+      cdr.write_type_e(data.getRegionId());else
+          throw new RuntimeException("region_id field exceeds the maximum length");
+
+      if(data.getRegionOrigin().size() <= 300)
+      cdr.write_type_e(data.getRegionOrigin());else
+          throw new RuntimeException("region_origin field exceeds the maximum length");
+
+      if(data.getRegionNormal().size() <= 300)
+      cdr.write_type_e(data.getRegionNormal());else
+          throw new RuntimeException("region_normal field exceeds the maximum length");
+
+      if(data.getConcaveHullsSize().size() <= 300)
+      cdr.write_type_e(data.getConcaveHullsSize());else
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+
+      if(data.getNumberOfConvexPolygons().size() <= 300)
+      cdr.write_type_e(data.getNumberOfConvexPolygons());else
+          throw new RuntimeException("number_of_convex_polygons field exceeds the maximum length");
+
+      if(data.getConvexPolygonsSize().size() <= 1000)
+      cdr.write_type_e(data.getConvexPolygonsSize());else
+          throw new RuntimeException("convex_polygons_size field exceeds the maximum length");
+
+      if(data.getVertexBuffer().size() <= 5000)
+      cdr.write_type_e(data.getVertexBuffer());else
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSource(cdr.read_type_2());
+      	
+      data.setDestination(cdr.read_type_2());
+      	
       data.setSequenceId(cdr.read_type_4());
       	
-      cdr.read_type_e(data.getPlanarRegions());	
+      cdr.read_type_e(data.getRegionId());	
+      cdr.read_type_e(data.getRegionOrigin());	
+      cdr.read_type_e(data.getRegionNormal());	
+      cdr.read_type_e(data.getConcaveHullsSize());	
+      cdr.read_type_e(data.getNumberOfConvexPolygons());	
+      cdr.read_type_e(data.getConvexPolygonsSize());	
+      cdr.read_type_e(data.getVertexBuffer());	
 
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_2("source", data.getSource());
+      ser.write_type_2("destination", data.getDestination());
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_e("planar_regions", data.getPlanarRegions());
+      ser.write_type_e("region_id", data.getRegionId());
+      ser.write_type_e("region_origin", data.getRegionOrigin());
+      ser.write_type_e("region_normal", data.getRegionNormal());
+      ser.write_type_e("concave_hulls_size", data.getConcaveHullsSize());
+      ser.write_type_e("number_of_convex_polygons", data.getNumberOfConvexPolygons());
+      ser.write_type_e("convex_polygons_size", data.getConvexPolygonsSize());
+      ser.write_type_e("vertex_buffer", data.getVertexBuffer());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PlanarRegionsListMessage data)
    {
+      data.setSource(ser.read_type_2("source"));
+      data.setDestination(ser.read_type_2("destination"));
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_e("planar_regions", data.getPlanarRegions());
+      ser.read_type_e("region_id", data.getRegionId());
+      ser.read_type_e("region_origin", data.getRegionOrigin());
+      ser.read_type_e("region_normal", data.getRegionNormal());
+      ser.read_type_e("concave_hulls_size", data.getConcaveHullsSize());
+      ser.read_type_e("number_of_convex_polygons", data.getNumberOfConvexPolygons());
+      ser.read_type_e("convex_polygons_size", data.getConvexPolygonsSize());
+      ser.read_type_e("vertex_buffer", data.getVertexBuffer());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PlanarRegionsListMessage src, controller_msgs.msg.dds.PlanarRegionsListMessage dest)
