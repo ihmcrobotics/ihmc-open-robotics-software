@@ -35,7 +35,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
-   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.7.1"
+   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.7.2'
    compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.7.5-alpha"
    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 }
