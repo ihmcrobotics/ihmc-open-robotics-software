@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -256,7 +255,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
             planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       }
 
-      PlanarRegionsListMessage messageList = MessageTools.createPlanarRegionsListMessage(planarRegionsAsMessages);
+      PlanarRegionsListMessage messageList = PlanarRegionMessageConverter.createPlanarRegionsListMessage(planarRegionsAsMessages);
 
       return messageList;
    }
