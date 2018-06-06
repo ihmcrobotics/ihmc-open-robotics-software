@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.trajectories;
 
-import java.util.List;
-
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * <p>Provides a basic frame work to create and access a list of {@link FrameTrajectory3D}. 
@@ -41,7 +41,7 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       this.maxNumberOfSegments = maxNumberOfSegments;
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
       currentSegmentIndex = -1;
-      segments = new RecyclingArrayList<>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
+      segments = new RecyclingArrayList<FrameTrajectory3D>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
    }
 
@@ -219,10 +219,10 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       return ret;
    }
 
-   private class FrameTrajectory3DBuilder extends GenericTypeBuilder<FrameTrajectory3D>
+   private class FrameTrajectory3DBuilder implements Supplier<FrameTrajectory3D>
    {
       @Override
-      public FrameTrajectory3D newInstance()
+      public FrameTrajectory3D get()
       {
          FrameTrajectory3D frameTrajectory3D = new FrameTrajectory3D(maxNumberOfCoefficients, worldFrame);
          frameTrajectory3D.reset();

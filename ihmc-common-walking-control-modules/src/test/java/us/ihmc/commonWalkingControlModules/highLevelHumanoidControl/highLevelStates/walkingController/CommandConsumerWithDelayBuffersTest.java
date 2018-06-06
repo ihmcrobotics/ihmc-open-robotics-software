@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
@@ -20,7 +21,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.robotics.lists.SupplierBuilder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CommandConsumerWithDelayBuffersTest
@@ -507,8 +508,8 @@ public class CommandConsumerWithDelayBuffersTest
    private Command<?, ?> getInstanceUsingEmptyConstructor(Class clazz)
    {
       Command<?, ?> command;
-      GenericTypeBuilder builder = GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz);
-      command = (Command<?, ?>) builder.newInstance();
+      Supplier builder = SupplierBuilder.createFromEmptyConstructor(clazz);
+      command = (Command<?, ?>) builder.get();
       return command;
    }
 

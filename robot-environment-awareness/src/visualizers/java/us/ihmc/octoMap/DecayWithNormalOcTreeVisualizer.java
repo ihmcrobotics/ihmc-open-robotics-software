@@ -22,8 +22,8 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.SupplierBuilder;
 
 public class DecayWithNormalOcTreeVisualizer extends Application
 {
@@ -101,7 +101,7 @@ public class DecayWithNormalOcTreeVisualizer extends Application
       return pointcloud;
    }
 
-   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(GenericTypeBuilder.createBuilderWithEmptyConstructor(Point3D.class));
+   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(SupplierBuilder.createFromEmptyConstructor(Point3D.class));
    private final IntersectionPlaneBoxCalculator intersectionPlaneBoxCalculator = new IntersectionPlaneBoxCalculator();
 
    @Override
