@@ -46,7 +46,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (65536 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -98,7 +98,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<contr
 
       cdr.write_type_11(data.getTimestamp());
 
-      if(data.getData().size() <= 100)
+      if(data.getData().size() <= 65536)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
