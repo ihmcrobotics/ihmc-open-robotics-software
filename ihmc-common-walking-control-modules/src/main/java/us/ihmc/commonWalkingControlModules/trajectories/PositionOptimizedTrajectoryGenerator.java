@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -15,17 +11,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D.TrajectoryColorType;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 /**
  * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d
@@ -105,29 +100,21 @@ public class PositionOptimizedTrajectoryGenerator
    {
       this.namePrefix = namePrefix;
 
-      coefficients = new RecyclingArrayList<>(new GenericTypeBuilder<TDoubleArrayList>()
-      {
-         @Override
-         public TDoubleArrayList newInstance()
-         {
-            TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
-            for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
-               ret.add(0.0);
-            return ret;
-         }
-      });
+      coefficients = new RecyclingArrayList<>(() ->
+                                              {
+                                                 TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
+                                                 for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
+                                                    ret.add(0.0);
+                                                 return ret;
+                                              });
 
-      waypointPositions = new RecyclingArrayList<>(new GenericTypeBuilder<TDoubleArrayList>()
-      {
-         @Override
-         public TDoubleArrayList newInstance()
-         {
-            TDoubleArrayList ret = new TDoubleArrayList(dimensions);
-            for (int i = 0; i < dimensions; i++)
-               ret.add(0.0);
-            return ret;
-         }
-      });
+      waypointPositions = new RecyclingArrayList<>(() ->
+                                                   {
+                                                      TDoubleArrayList ret = new TDoubleArrayList(dimensions);
+                                                      for (int i = 0; i < dimensions; i++)
+                                                         ret.add(0.0);
+                                                      return ret;
+                                                   });
 
       registry = new YoVariableRegistry(namePrefix + "Trajectory");
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, registry);
