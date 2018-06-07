@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.PacketRouter;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -48,6 +49,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -70,6 +72,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
+   private static final String IHMC_SIMULATION_STARTER_NODE_NAME = "ihmc_simulation_starter";
+
    private static final boolean DEBUG = false;
 
    private final DRCRobotModel robotModel;
@@ -101,6 +105,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * It is bidirectional meaning that it carries commands to be executed by the controller and that the controller is able to send feedback the other way to whoever is listening to the PacketCommunicator.
     */
    private PacketCommunicator controllerPacketCommunicator;
+   private RealtimeRos2Node realtimeRos2Node;
 
    /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
@@ -344,6 +349,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       networkParameters.enableLocalControllerCommunicator(true);
 
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, IHMC_SIMULATION_STARTER_NODE_NAME);
       controllerPacketCommunicator = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       try
@@ -465,6 +471,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
+      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setShapeCollision(robotModel.useShapeCollision());
@@ -599,6 +606,10 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (controllerPacketCommunicator != null)
       {
          controllerPacketCommunicator.disconnect();
+      }
+      if (realtimeRos2Node != null)
+      {
+         realtimeRos2Node.stopSpinning();
       }
    }
 

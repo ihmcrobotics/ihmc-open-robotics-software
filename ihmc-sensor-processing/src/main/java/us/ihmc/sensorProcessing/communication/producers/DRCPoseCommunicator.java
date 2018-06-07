@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotDataPubSubType;
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -20,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -36,14 +38,15 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 // consumer
 public class DRCPoseCommunicator implements RawOutputWriter
 {
+   private static final String robotConfigurationDataTopicName = "/ihmc/robot_configuration_data";
+   private static final String atlasAuxiliaryRobotDataTopicName = "/ihmc/atlas_auxiliary_robot_data";
+
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
-   private final NetClassList netClassList;
 
    //   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
    private final PeriodicThreadScheduler scheduler;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final GlobalDataProducer dataProducer;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorTimestampHolder sensorTimestampHolder;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -61,19 +64,20 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
    private final ConcurrentRingBuffer<AtlasAuxiliaryRobotData> atlasAuxiliaryRobotDataRingBuffer;
 
+   private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final IHMCRealtimeROS2Publisher<AtlasAuxiliaryRobotData> atlasAuxiliaryRobotDataPublisher;
+
    public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, GlobalDataProducer dataProducer,
+                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, RealtimeRos2Node realtimeRos2Node,
                               SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
                               RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation,
-                              PeriodicThreadScheduler scheduler, NetClassList netClassList)
+                              PeriodicThreadScheduler scheduler)
    {
-      this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorTimestampHolder = sensorTimestampHolder;
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.scheduler = scheduler;
-      this.netClassList = netClassList;
 
       if (sensorInformation != null)
       {
@@ -97,13 +101,23 @@ public class DRCPoseCommunicator implements RawOutputWriter
          rawImuAngularVelocities[imuSensorIndex] = new Vector3D32();
          imuOrientations[imuSensorIndex] = new Quaternion32();
       }
+
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
       OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
       robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions), 16);
+      robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, new RobotConfigurationDataPubSubType(), robotConfigurationDataTopicName);
+
       if (auxiliaryRobotDataProvider == null)
+      {
          atlasAuxiliaryRobotDataRingBuffer = null;
+         atlasAuxiliaryRobotDataPublisher = null;
+      }
       else
+      {
          atlasAuxiliaryRobotDataRingBuffer = new ConcurrentRingBuffer<>(auxiliaryRobotDataProvider::newAuxiliaryRobotDataInstance, 16);
+         atlasAuxiliaryRobotDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, new AtlasAuxiliaryRobotDataPubSubType(),
+                                                                      atlasAuxiliaryRobotDataTopicName);
+      }
       startWriterThread();
    }
 
@@ -133,7 +147,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
-      dataProducer.registerPacketToSkipQueue(RobotConfigurationData.class);
       scheduler.schedule(new Runnable()
       {
          @Override
@@ -146,7 +159,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   RobotConfigurationData robotConfigData;
                   while ((robotConfigData = robotConfigurationDataRingBuffer.read()) != null)
                   {
-                     dataProducer.skipQueueAndSend(robotConfigData);
+                     robotConfigurationDataPublisher.publish(robotConfigData);
                   }
                   robotConfigurationDataRingBuffer.flush();
                }
@@ -156,7 +169,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   AtlasAuxiliaryRobotData auxData;
                   while ((auxData = atlasAuxiliaryRobotDataRingBuffer.read()) != null)
                   {
-                     dataProducer.skipQueueAndSend(auxData);
+                     atlasAuxiliaryRobotDataPublisher.publish(auxData);
                   }
                   atlasAuxiliaryRobotDataRingBuffer.flush();
                }
@@ -229,14 +242,15 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
          configData.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus().toByte());
 
-         LastPacket lastPacket = dataProducer.getLastPacket();
-         if (lastPacket != null)
-         {
-            configData.setLastReceivedPacketTypeId(netClassList.getID(lastPacket.getPacket()));
-            configData.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
-            configData.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
-         }
-         else
+         // FIXME lost the knowledge of the last packet received when switching to DDS.
+         //         LastPacket lastPacket = null;
+         //         if (lastPacket != null)
+         //         {
+         //            configData.setLastReceivedPacketTypeId(netClassList.getID(lastPacket.getPacket()));
+         //            configData.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
+         //            configData.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
+         //         }
+         //         else
          {
             configData.setLastReceivedPacketTypeId(-1);
             configData.setLastReceivedPacketUniqueId(-1);
