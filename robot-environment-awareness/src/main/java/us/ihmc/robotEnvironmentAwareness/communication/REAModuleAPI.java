@@ -115,7 +115,6 @@ public class REAModuleAPI
    public static final Topic<BoxMessage> OcTreeBoundingBoxState = OcTreeCategory.child(BoundingBox).topic(Data);
 
    public static final Topic<Boolean> RequestEntireModuleState = ModuleCategory.child(Request).topic(Data);
-   public static final Topic<Boolean> RequestLidarScan = ModuleCategory.child(Lidar).child(Request).topic(Data);
    public static final Topic<Boolean> RequestOctree = OcTreeCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestBuffer = OcTreeCategory.child(Buffer).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegions = PlanarRegionsCategory.child(Request).topic(Data);

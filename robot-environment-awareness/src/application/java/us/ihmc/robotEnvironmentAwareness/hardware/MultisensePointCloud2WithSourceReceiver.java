@@ -5,14 +5,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanMessagePubSubType;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -20,7 +22,9 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSubscriber<PointCloud2WithSource>
 {
-   PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.REA_MODULE_PORT, REACommunicationKryoNetClassLists.getPublicNetClassList());
+   private final Ros2Node ros2Node = new Ros2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+
+   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    public MultisensePointCloud2WithSourceReceiver() throws URISyntaxException, IOException
    {
@@ -30,7 +34,7 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
       rosMainNode.attachSubscriber("/singleScanAsCloudWithSource", this);
       rosMainNode.execute();
 
-      packetCommunicator.connect();
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), "/ihmc/lidar_scan");
    }
 
    @Override
@@ -49,7 +53,7 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
       lidarScanMessage.getLidarOrientation().set(lidarQuaternion);
       MessageTools.packScan(lidarScanMessage, points);
 
-      packetCommunicator.send(lidarScanMessage);
+      lidarScanPublisher.publish(lidarScanMessage);
    }
 
    public static void main(String[] args) throws URISyntaxException, IOException

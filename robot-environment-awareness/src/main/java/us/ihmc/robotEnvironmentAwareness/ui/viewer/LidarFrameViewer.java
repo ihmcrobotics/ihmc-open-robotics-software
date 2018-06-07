@@ -22,11 +22,8 @@ public class LidarFrameViewer extends AnimationTimer
    private final AtomicReference<Affine> lastAffine = new AtomicReference<>();
 
    private final Group root = new Group();
-   private final REAUIMessager uiMessager;
-
    public LidarFrameViewer(REAUIMessager uiMessager)
    {
-      this.uiMessager = uiMessager;
       lidarCoordinateSystem = new JavaFXCoordinateSystem(0.1);
       lidarCoordinateSystem.getTransforms().add(lidarPose);
       root.getChildren().add(lidarCoordinateSystem);
@@ -47,7 +44,6 @@ public class LidarFrameViewer extends AnimationTimer
       Affine affine = lastAffine.getAndSet(null);
       if (affine != null)
          lidarPose.setToTransform(affine);
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestLidarScan);
    }
 
    private void handleMessage(LidarScanMessage lidarScanMessage)

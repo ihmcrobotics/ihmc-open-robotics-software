@@ -4,8 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.RequestLidarScanMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.javaFXToolkit.messager.Messager;
@@ -26,27 +24,23 @@ public class REAOcTreeBuffer
    private final AtomicBoolean isBufferFull = new AtomicBoolean(false);
    private final AtomicBoolean isBufferRequested = new AtomicBoolean(false);
    private final AtomicReference<NormalOcTree> newBuffer = new AtomicReference<>(null);
-   
-   private final double octreeResolution;
 
-   private final PacketCommunicator publicPacketCommunicator;
+   private final double octreeResolution;
 
    private final REAModuleStateReporter moduleStateReporter;
 
    private final Messager reaMessager;
 
-   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter)
    {
       this.octreeResolution = octreeResolution;
       this.reaMessager = reaMessager;
       this.moduleStateReporter = moduleStateReporter;
-      this.publicPacketCommunicator = publicPacketCommunicator;
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       bufferSize = reaMessager.createInput(REAModuleAPI.OcTreeBufferSize, 10000);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
-      publicPacketCommunicator.attachListener(LidarScanMessage.class, this::handlePacket);
    }
 
    private void sendCurrentState()
@@ -78,8 +72,6 @@ public class REAOcTreeBuffer
          @Override
          public void run()
          {
-            publicPacketCommunicator.send(new RequestLidarScanMessage());
-
             updateScanCollection();
             ScanCollection newScan = newFullScanReference.getAndSet(null);
 
@@ -144,9 +136,8 @@ public class REAOcTreeBuffer
       scanCollection.addScan(lidarScanMessage.getScan().toArray(), lidarScanMessage.getLidarPosition());
    }
 
-   private void handlePacket(LidarScanMessage packet)
+   public void handleLidarScanMessage(LidarScanMessage message)
    {
-      if (packet != null)
-         latestLidarScanMessage.set(packet);
+      latestLidarScanMessage.set(message);
    }
 }
