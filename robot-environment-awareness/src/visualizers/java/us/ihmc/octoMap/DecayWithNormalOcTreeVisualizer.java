@@ -101,7 +101,7 @@ public class DecayWithNormalOcTreeVisualizer extends Application
       return pointcloud;
    }
 
-   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(SupplierBuilder.createFromEmptyConstructor(Point3D.class));
+   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(0, Point3D.class, SupplierBuilder.createFromEmptyConstructor(Point3D.class));
    private final IntersectionPlaneBoxCalculator intersectionPlaneBoxCalculator = new IntersectionPlaneBoxCalculator();
 
    @Override

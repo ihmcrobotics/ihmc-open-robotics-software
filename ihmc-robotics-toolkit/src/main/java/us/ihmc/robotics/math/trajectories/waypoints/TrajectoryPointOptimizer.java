@@ -68,7 +68,7 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
    private final TDoubleArrayList costs = new TDoubleArrayList(maxIterations + 1);
 
-   private final RecyclingArrayList<DenseMatrix64F> x = new RecyclingArrayList<>(() -> new DenseMatrix64F(1, 1));
+   private final RecyclingArrayList<DenseMatrix64F> x = new RecyclingArrayList<>(0, DenseMatrix64F.class, () -> new DenseMatrix64F(1, 1));
 
    private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F f = new DenseMatrix64F(1, 1);
