@@ -4,11 +4,6 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Random;
 
-import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -17,7 +12,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -41,18 +37,13 @@ public class LidarFastSimulation
    public static final boolean VISUALIZE_GPU_LIDAR = false;
    private static final GroundType DEFAULT_GROUND = GroundType.OBSTACLE_COURSE;
 
-   private final PacketRouter<PacketDestination> packetRouter = new PacketRouter<>(PacketDestination.class);
-   private final PacketCommunicator reaPacketCommunicator;
+   private final Ros2Node ros2Node = new Ros2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    public LidarFastSimulation() throws IOException
    {
-      reaPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.REA_MODULE_PORT,
-                                                                                   REACommunicationKryoNetClassLists.getPublicNetClassList());
-      reaPacketCommunicator.connect();
-      packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaPacketCommunicator);
    }
 
-   public void startSimulation()
+   public void startSimulation() throws IOException
    {
       SimpleLidarRobot robot = new SimpleLidarRobot();
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, RealtimeTools.nextPowerOfTwo(200000));
@@ -65,7 +56,7 @@ public class LidarFastSimulation
       Graphics3DAdapter graphics3dAdapter = scs.getGraphics3dAdapter();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      SimpleLidarRobotController controller = new SimpleLidarRobotController(robot, controlDT, reaPacketCommunicator, graphics3dAdapter,
+      SimpleLidarRobotController controller = new SimpleLidarRobotController(robot, controlDT, ros2Node, graphics3dAdapter,
                                                                              yoGraphicsListRegistry);
       robot.setController(controller, (int) (controlDT / simDT));
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -75,13 +66,6 @@ public class LidarFastSimulation
       scs.setGroundVisible(false);
       scs.startOnAThread();
       scs.simulate();
-   }
-
-   public void registerServer(PacketDestination destination, NetworkPorts networkPort, NetClassList netClassList) throws IOException
-   {
-      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(networkPort, netClassList);
-      packetCommunicator.connect();
-      packetRouter.attachPacketCommunicator(destination, packetCommunicator);
    }
 
    private void createGroundTypeListener(final SimulationConstructionSet scs)

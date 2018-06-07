@@ -1,16 +1,16 @@
 package us.ihmc.robotEnvironmentAwareness.simulation;
 
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,11 +22,10 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -40,9 +39,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class SimpleLidarRobotController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("Messaging"),
-                                                                                                                  ExceptionHandling.CATCH_AND_REPORT);
 
    private final YoBoolean spinLidar = new YoBoolean("spinLidar", registry);
    private final YoDouble desiredLidarVelocity = new YoDouble("desiredLidarVelocity", registry);
@@ -58,15 +54,14 @@ public class SimpleLidarRobotController implements RobotController
    private final int vizualizeEveryNPoints = 5;
    private final BagOfBalls sweepViz;
 
-   private final PacketCommunicator packetCommunicator;
-
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("region", 100, 150, registry);
 
-   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, PacketCommunicator packetCommunicator, Graphics3DAdapter graphics3dAdapter,
-                                     YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
+
+   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, Ros2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
+                                     YoGraphicsListRegistry yoGraphicsListRegistry) throws IOException
    {
       this.dt = dt;
-      this.packetCommunicator = packetCommunicator;
       lidarJoint = lidarRobot.getLidarJoint();
       rootJoint = lidarRobot.getRootJoint();
 
@@ -100,7 +95,8 @@ public class SimpleLidarRobotController implements RobotController
          sweepViz = null;
       yoGraphicPlanarRegionsList.hideGraphicObject();
       yoGraphicsListRegistry.registerYoGraphic("Regions", yoGraphicPlanarRegionsList);
-      packetCommunicator.attachListener(PlanarRegionsListMessage.class, this::handlePacket);
+
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), "/ihmc/lidar_scan");
    }
 
    @Override
@@ -156,10 +152,9 @@ public class SimpleLidarRobotController implements RobotController
          lidarScanMessage.getLidarPosition().set(lidarPosition);
          lidarScanMessage.getLidarOrientation().set(lidarOrientation);
          MessageTools.copyData(newScan, lidarScanMessage.getScan());
-         executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
+         lidarScanPublisher.publish(lidarScanMessage);
       }
 
-      packetCommunicator.send(MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CONTINUOUS_UPDATE));
       yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
    }
 
