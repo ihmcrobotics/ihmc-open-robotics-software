@@ -75,7 +75,7 @@ public class OcTreeMeshBuilder implements Runnable
 
    private final TextureColorPalette1D normalBasedColorPalette1D = new TextureColorPalette1D();
 
-   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(SupplierBuilder.createFromEmptyConstructor(Point3D.class));
+   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(0, Point3D.class, SupplierBuilder.createFromEmptyConstructor(Point3D.class));
    private final IntersectionPlaneBoxCalculator intersectionPlaneBoxCalculator = new IntersectionPlaneBoxCalculator();
 
    private final AtomicReference<NormalOcTreeMessage> ocTreeState;

@@ -79,8 +79,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       constantsSequence = new DiscreteSequence(constantSize, 1);
       feedbackGainSequence = new DiscreteSequence(controlSize, stateSize);
 
-      S2Sequence = new RecyclingArrayList<>(1000, hessianBuilder);
-      S1Sequence = new RecyclingArrayList<>(1000, stateBuilder);
+      S2Sequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, hessianBuilder);
+      S1Sequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, stateBuilder);
 
       feedbackGainSequence.clear();
 

@@ -73,8 +73,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       feedforwardSequence = new DiscreteSequence(controlSize);
       constantsSequence = new DiscreteSequence(constantSize);
 
-      s1Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
-      s2Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(1, stateSize));
+      s1Sequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, stateSize));
+      s2Sequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(1, stateSize));
 
       feedbackGainSequence.clear();
       feedforwardSequence.clear();

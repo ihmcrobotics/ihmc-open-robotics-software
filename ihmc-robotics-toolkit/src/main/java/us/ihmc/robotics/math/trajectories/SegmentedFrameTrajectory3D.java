@@ -41,7 +41,7 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       this.maxNumberOfSegments = maxNumberOfSegments;
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
       currentSegmentIndex = -1;
-      segments = new RecyclingArrayList<FrameTrajectory3D>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
+      segments = new RecyclingArrayList<>(maxNumberOfSegments, FrameTrajectory3D.class, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
    }
 

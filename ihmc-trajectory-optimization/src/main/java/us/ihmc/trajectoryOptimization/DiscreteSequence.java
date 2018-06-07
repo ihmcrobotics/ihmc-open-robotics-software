@@ -12,7 +12,7 @@ public class DiscreteSequence extends RecyclingArrayList<DenseMatrix64F> impleme
 
    public DiscreteSequence(int xDimension, int yDimension)
    {
-      super(1000, new VariableVectorBuilder(xDimension, yDimension));
+      super(1000, DenseMatrix64F.class, new VariableVectorBuilder(xDimension, yDimension));
       this.clear();
    }
 
