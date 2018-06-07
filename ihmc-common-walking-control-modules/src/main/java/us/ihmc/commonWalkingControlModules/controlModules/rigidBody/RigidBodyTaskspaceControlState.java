@@ -93,7 +93,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame);
 
-   private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
+   private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class, FrameSE3TrajectoryPoint::set);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
    private final FramePose3D initialPose = new FramePose3D();

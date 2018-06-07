@@ -72,7 +72,7 @@ public class RigidBodyJointControlHelper
          String jointName = joint.getName();
          jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, RigidBodyJointspaceControlState.maxPointsInGenerator, registry));
 
-         RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, SimpleTrajectoryPoint1D.class);
+         RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, SimpleTrajectoryPoint1D.class, SimpleTrajectoryPoint1D::set);
          pointQueue.clear();
          pointQueues.add(pointQueue);
 

@@ -84,7 +84,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
+   private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class, HandTrajectoryCommand::set);
 
    public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoPIDSE3Gains gains,
          Collection<ReferenceFrame> trajectoryFrames, YoGraphicsListRegistry yoGraphicsListRegistry,

@@ -4,7 +4,9 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.lists.Settable;
+import us.ihmc.euclid.interfaces.Settable;
+
+import java.util.function.BiConsumer;
 
 /**
  * A Command has to be used when interacting with the {@link CommandInputManager} that represents notably the walking controller input API.
