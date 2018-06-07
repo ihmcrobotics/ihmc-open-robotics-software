@@ -25,6 +25,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -49,7 +50,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.tools.factories.FactoryTools;
@@ -75,6 +75,7 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
+   private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2Node = new RequiredFactoryField<>("realtimeRos2Node");
    private final RequiredFactoryField<HumanoidGlobalDataProducer> humanoidGlobalDataProducer = new RequiredFactoryField<>("humanoidGlobalDataProducer");
 
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
@@ -210,7 +211,7 @@ public class AvatarSimulationFactory
    {
       stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(), robotModel.get(),
                                                      robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
-                                                     new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), humanoidGlobalDataProducer.get(),
+                                                     new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), realtimeRos2Node.get(),
                                                      simulationOutputWriter, yoVariableServer, gravity.get());
 
       if (humanoidGlobalDataProducer.get() != null)
@@ -493,6 +494,11 @@ public class AvatarSimulationFactory
    public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
    {
       this.guiInitialSetup.set(guiInitialSetup);
+   }
+
+   public void setRealtimeRos2Node(RealtimeRos2Node realtimeRos2Node)
+   {
+      this.realtimeRos2Node.set(realtimeRos2Node);
    }
 
    public void setHumanoidGlobalDataProducer(HumanoidGlobalDataProducer humanoidGlobalDataProducer)
