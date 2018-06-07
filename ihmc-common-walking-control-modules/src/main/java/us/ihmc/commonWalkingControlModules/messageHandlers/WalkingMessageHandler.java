@@ -132,7 +132,7 @@ public class WalkingMessageHandler
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
 
-         upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class));
+         upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class, FootTrajectoryCommand::set));
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)

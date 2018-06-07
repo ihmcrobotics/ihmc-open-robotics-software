@@ -77,7 +77,7 @@ public class JointSpaceHandControlState extends HandControlState
          jointTrajectoryGenerators.put(joint, multiWaypointTrajectoryGenerator);
 
          numberOfQueuedCommands.put(joint, new YoInteger(joint.getName() + "NumberOfQueuedCommands", registry));
-         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class));
+         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class, OneDoFJointTrajectoryCommand::set));
       }
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
