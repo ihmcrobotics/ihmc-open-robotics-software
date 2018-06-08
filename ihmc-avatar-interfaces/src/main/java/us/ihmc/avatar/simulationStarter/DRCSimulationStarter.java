@@ -347,9 +347,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      networkParameters.enableLocalControllerCommunicator(true);
+      PubSubImplementation pubSubImplementation;
+      if (networkParameters.isLocalControllerCommunicatorEnabled())
+         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+      else
+         pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, IHMC_SIMULATION_STARTER_NODE_NAME);
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
+
       controllerPacketCommunicator = PacketCommunicator
             .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       try
@@ -396,6 +401,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       if (automaticallySpawnSimulation)
          avatarSimulation.start();
+
+      if (realtimeRos2Node != null)
+         realtimeRos2Node.spin();
 
       if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
