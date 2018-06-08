@@ -6,8 +6,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 
-import java.util.function.BiConsumer;
-
 /**
  * A Command has to be used when interacting with the {@link CommandInputManager} that represents notably the walking controller input API.
  * As a {@link Packet}, a Command holds onto the required data execute a body trajectory for instance.
@@ -21,7 +19,7 @@ import java.util.function.BiConsumer;
  * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(M)}.
  * @param <M> Type of the corresponding {@link Packet} that this Command can copy.
  */
-public interface Command<C extends Command<C, M>, M extends Packet<M>> extends Settable<C>
+public interface Command<C extends Command<C, M>, M extends Settable<M>> extends Settable<C>
 {
    /**
     * Clear all the data held in this Command.

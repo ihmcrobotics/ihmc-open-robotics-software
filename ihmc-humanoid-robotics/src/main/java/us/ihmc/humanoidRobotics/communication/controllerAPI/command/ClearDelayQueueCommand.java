@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 
 /**
@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelay
 public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, ClearDelayQueueMessage>
 {
    private Class<? extends Command<?, ?>> commandClassToClear;
-   private Class<? extends Packet<?>> messageClassToClear;
+   private Class<? extends Settable<?>> messageClassToClear;
 
    private boolean clearAllDelayBuffers;
 
@@ -48,7 +48,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * 
     * @param clazz the class you want to clear
     */
-   public void setMessageClassToClear(Class<? extends Packet<?>> messageClassToClear)
+   public void setMessageClassToClear(Class<? extends Settable<?>> messageClassToClear)
    {
       this.messageClassToClear = messageClassToClear;
    }
@@ -78,7 +78,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * 
     * @param commandClassToClear the class to clear
     */
-   public Class<? extends Packet<?>> getMessageClassToClear()
+   public Class<? extends Settable<?>> getMessageClassToClear()
    {
       return messageClassToClear;
    }

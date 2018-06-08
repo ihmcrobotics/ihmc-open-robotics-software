@@ -1,28 +1,34 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
-import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import controller_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.MessageCollectionNotification;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.util.PeriodicThreadScheduler;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.CaseFormat;
+
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.MessageCollectionNotification;
+import controller_msgs.msg.dds.MessageCollectionPubSubType;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
  * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
@@ -32,19 +38,15 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author Sylvain
  */
-public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
+public class ControllerNetworkSubscriber
 {
    private static final boolean DEBUG = false;
+   private static final String pubSubTypeGetterName = "getPubSubType";
 
-   private final int buffersCapacity = 16;
    /** The input API to which the received messages should be submitted. */
    private final CommandInputManager controllerCommandInputManager;
    /** The output API that provides the status messages to send to the packet communicator. */
    private final StatusMessageOutputManager controllerStatusOutputManager;
-   /** Communicator from which commands are received and status messages can send to. */
-   private final PacketCommunicator packetCommunicator;
-   /** Used to schedule status message sending. */
-   private final PeriodicThreadScheduler scheduler;
    /** Used to filter messages coming in. */
    private final AtomicReference<MessageFilter> messageFilter;
    /** Used to filter messages coming in and report an error. */
@@ -53,58 +55,111 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private MessageCollector messageCollector = MessageCollector.createDummyCollector();
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
-   private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
+   private final List<Class<? extends Settable<?>>> listOfSupportedControlMessages;
 
    /**
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Packet<?>>> statusMessageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, IHMCRealtimeROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+
+   private final RealtimeRos2Node realtimeRos2Node;
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-                                      PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+                                      RealtimeRos2Node realtimeRos2Node)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
-      this.scheduler = scheduler;
-      this.packetCommunicator = packetCommunicator;
+      this.realtimeRos2Node = realtimeRos2Node;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (packetCommunicator == null)
-         PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
+      if (realtimeRos2Node == null)
+         PrintTools.error(this, "No ROS2 node, " + getClass().getSimpleName() + " cannot be created.");
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
 
-      createAllSubscribersForSupportedMessages();
+      createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
-      createAllStatusMessageBuffers();
-
-      if (scheduler != null)
-         scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
 
-   public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageHolderClass, int expectedMessageSize,
-                                                                          MessageUnpacker<T> messageUnpacker)
+   private static <T> T newMessageInstance(Class<T> messageType)
    {
-      final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
-      PacketConsumer<T> packetConsumer = multipleMessageHolder -> {
-         unpackMultiMessage(multipleMessageHolderClass, messageUnpacker, unpackedMessages, multipleMessageHolder);
-      };
-      packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
+      try
+      {
+         return messageType.newInstance();
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         throw new RuntimeException("Something went wrong when invoking " + messageType.getSimpleName() + "'s empty constructor.", e);
+      }
    }
 
-   private <T extends Packet<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
-                                                         List<Packet<?>> unpackedMessages, T multipleMessageHolder)
+   @SuppressWarnings({"unused", "unchecked"})
+   private static <T> void getMessageTopicDataType(T messageInstance, Map<Class<?>, TopicDataType<?>> mapToModify)
+   {
+      Class<T> messageType = (Class<T>) messageInstance.getClass();
+
+      if (mapToModify.containsKey(messageType))
+         return;
+
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+
+      mapToModify.put(messageType, topicDataType);
+   }
+
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
+   {
+      Method pubSubTypeGetter;
+
+      try
+      {
+         pubSubTypeGetter = messageType.getDeclaredMethod(pubSubTypeGetterName);
+      }
+      catch (NoSuchMethodException | SecurityException e)
+      {
+         throw new RuntimeException("Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().",
+                                    e);
+      }
+
+      TopicDataType<T> topicDataType;
+
+      try
+      {
+         topicDataType = (TopicDataType<T>) ((Supplier) pubSubTypeGetter.invoke(newMessageInstance(messageType))).get();
+      }
+      catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+      {
+         throw new RuntimeException("Something went wrong when invoking the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().", e);
+      }
+      return topicDataType;
+   }
+
+   @SuppressWarnings("unchecked")
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(TopicDataType<T> multipleMessageTopicDataType, String topicName,
+                                                                            int expectedMessageSize, MessageUnpacker<T> messageUnpacker)
+   {
+      Class<T> multipleMessageType = (Class<T>) multipleMessageTopicDataType.createData().getClass();
+      final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageTopicDataType, topicName,
+                                           s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
+                                                           List<? extends Settable<?>> unpackedMessages, T multipleMessageHolder)
    {
       if (DEBUG)
-         PrintTools
-               .debug(ControllerNetworkSubscriber.this, "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
+         PrintTools.debug(ControllerNetworkSubscriber.this,
+                          "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
 
       String errorMessage = messageValidator.get().validate(multipleMessageHolder);
 
@@ -116,7 +171,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (testMessageWithMessageFilter(multipleMessageHolder))
       {
-         messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
+         messageUnpacker.unpackMessage(multipleMessageHolder, (List<Object>) unpackedMessages);
 
          for (int i = 0; i < unpackedMessages.size(); i++)
          {
@@ -129,11 +184,15 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    public void addMessageCollector(MessageIDExtractor messageIDExtractor)
    {
       messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
-      createStatusMessageBuffer(MessageCollectionNotification.class);
+      IHMCRealtimeROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
-      packetCommunicator.attachListener(MessageCollection.class, message -> {
-         MessageCollectionNotification notification = messageCollector.startCollecting(message);
-         copyAndCommitStatusMessage(notification);
+
+      MessageCollection messageCollection = new MessageCollection();
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new MessageCollectionPubSubType(), "/ihmc/message_collection", s -> {
+         s.takeNextData(messageCollection, null);
+         MessageCollectionNotification notification = messageCollector.startCollecting(messageCollection);
+         publisher.publish(notification);
       });
    }
 
@@ -158,33 +217,47 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Packet<T>> void createAllStatusMessageBuffers()
+   private <T extends Settable<T>> void createPublishersSubscribersForSupportedMessages()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         createStatusMessageBuffer((Class<T>) listOfSupportedStatusMessages.get(i));
+         Class<T> messageClass = (Class<T>) listOfSupportedStatusMessages.get(i);
+         statusMessagePublisherMap.put(messageClass, createPublisher(messageClass));
       }
-   }
 
-   private <T extends Packet<T>> void createStatusMessageBuffer(Class<T> statusMessageClass)
-   {
-      Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
-      ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
-      statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
-   }
-
-   @SuppressWarnings("unchecked")
-   private <T extends Packet<T>> void createAllSubscribersForSupportedMessages()
-   {
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
-      {
+      { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         packetCommunicator.attachListener(messageClass, this::receivedMessage);
+         T messageLocalInstance = newMessageInstance(messageClass);
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageClass);
+         String topicName = createDefaultTopicName(messageClass);
+
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, s -> {
+            s.takeNextData(messageLocalInstance, null);
+            receivedMessage(messageLocalInstance);
+         });
       }
    }
 
+   private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
+   {
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageClass);
+      String topicName = createDefaultTopicName(messageClass);
+      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, topicDataType, topicName);
+      return publisher;
+   }
+
+   private static <T extends Settable<T>> String createDefaultTopicName(Class<T> messageClass)
+   {
+      String topicName = messageClass.getSimpleName();
+      topicName = StringUtils.removeEnd(topicName, "Packet");
+      topicName = StringUtils.removeEnd(topicName, "Message");
+      topicName = "/ihmc/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, topicName);
+      return topicName;
+   }
+
    @SuppressWarnings("unchecked")
-   private <T extends Packet<T>> void receivedMessage(Packet<?> message)
+   private <T extends Settable<T>> void receivedMessage(Settable<?> message)
    {
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
@@ -196,7 +269,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
          if (!messageCollector.isCollecting())
          {
-            List<Packet<?>> collectedMessages = messageCollector.getCollectedMessages();
+            List<Settable<?>> collectedMessages = messageCollector.getCollectedMessages();
             for (int i = 0; i < collectedMessages.size(); i++)
             {
                receivedMessage(collectedMessages.get(i));
@@ -211,7 +284,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (errorMessage != null)
       {
-         reportInvalidMessage((Class<? extends Packet<?>>) message.getClass(), errorMessage);
+         reportInvalidMessage((Class<? extends Settable<?>>) message.getClass(), errorMessage);
          return;
       }
 
@@ -219,7 +292,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          controllerCommandInputManager.submitMessage((T) message);
    }
 
-   private boolean testMessageWithMessageFilter(Packet<?> messageToTest)
+   private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
    {
       if (!messageFilter.get().isMessageValid(messageToTest))
       {
@@ -231,72 +304,32 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       return true;
    }
 
-   private void reportInvalidMessage(Class<? extends Packet<?>> messageClass, String errorMessage)
+   private void reportInvalidMessage(Class<?> messageClass, String errorMessage)
    {
-      ConcurrentRingBuffer<?> buffer = statusMessageClassToBufferMap.get(InvalidPacketNotificationPacket.class);
-
-      InvalidPacketNotificationPacket next = (InvalidPacketNotificationPacket) buffer.next();
-
-      if (next != null)
-      {
-         next.setPacketClassSimpleName(messageClass.getSimpleName());
-         next.setErrorMessage(errorMessage);
-         buffer.commit();
-      }
-
+      publishStatusMessage(MessageTools.createInvalidPacketNotificationPacket(messageClass, errorMessage));
       PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate: " + messageClass.getSimpleName());
       PrintTools.error(ControllerNetworkSubscriber.this, errorMessage);
    }
 
    private void createGlobalStatusMessageListener()
    {
-      controllerStatusOutputManager.attachGlobalStatusMessageListener(statusMessage -> copyAndCommitStatusMessage(statusMessage));
+      controllerStatusOutputManager.attachGlobalStatusMessageListener(statusMessage -> publishStatusMessage(statusMessage));
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Packet<T>> void copyAndCommitStatusMessage(Packet<?> statusMessage)
+   private <T> void publishStatusMessage(T message)
    {
-      ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
-      T next = buffer.next();
-      if (next != null)
-      {
-         next.set((T) statusMessage);
-         buffer.commit();
-      }
-   }
-
-   @Override
-   public void run()
-   {
-      for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
-      {
-         ConcurrentRingBuffer<? extends Packet<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
-         if (buffer.poll())
-         {
-            Packet<?> statusMessage;
-            while ((statusMessage = buffer.read()) != null)
-            {
-               packetCommunicator.send(statusMessage);
-            }
-            buffer.flush();
-         }
-      }
-   }
-
-   @Override
-   public void closeAndDispose()
-   {
-      if (scheduler != null)
-         scheduler.shutdown();
+      IHMCRealtimeROS2Publisher<T> publisher = (IHMCRealtimeROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
+      publisher.publish(message);
    }
 
    public static interface MessageFilter
    {
-      public boolean isMessageValid(Packet<?> message);
+      public boolean isMessageValid(Object message);
    }
 
    public static interface MessageValidator
    {
-      String validate(Packet<?> message);
+      String validate(Object message);
    }
 }

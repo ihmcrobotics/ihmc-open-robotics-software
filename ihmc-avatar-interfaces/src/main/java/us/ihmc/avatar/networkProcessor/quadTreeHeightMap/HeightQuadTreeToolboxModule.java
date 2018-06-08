@@ -6,42 +6,46 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
 import controller_msgs.msg.dds.HeightQuadTreeMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 public class HeightQuadTreeToolboxModule extends ToolboxModule
 {
-   private static final PacketDestination PACKET_DESTINATION = PacketDestination.HEIGHT_QUADTREE_TOOLBOX_MODULE;
-   private static final NetworkPorts NETWORK_PORT = NetworkPorts.HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT;
-
    private final HeightQuadTreeToolboxController controller;
 
    public HeightQuadTreeToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider) throws IOException
    {
-      super(desiredFullRobotModel, modelProvider, false, PACKET_DESTINATION, NETWORK_PORT, 50);
+      super(desiredFullRobotModel, modelProvider, false, 50);
 
-      controller = new HeightQuadTreeToolboxController(fullRobotModel, packetCommunicator, commandInputManager, statusOutputManager, registry);
+      controller = new HeightQuadTreeToolboxController(fullRobotModel, commandInputManager, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      packetCommunicator.attachListener(RobotConfigurationData.class, controller.robotConfigurationDataConsumer());
-      packetCommunicator.attachListener(CapturabilityBasedStatus.class, controller.capturabilityBasedStatusConsumer());
    }
 
    @Override
    public ToolboxController getToolboxController()
    {
       return controller;
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+                                           s -> controller.receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status",
+                                           s -> controller.receivedPacket(s.takeNextData()));
    }
 
    @Override
@@ -54,7 +58,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
       return Collections.singletonList(HeightQuadTreeMessage.class);
    }
@@ -66,7 +70,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public Set<Class<? extends Packet<?>>> filterExceptions()
+   public Set<Class<? extends Settable<?>>> filterExceptions()
    {
       return Collections.singleton(LidarScanMessage.class);
    }
