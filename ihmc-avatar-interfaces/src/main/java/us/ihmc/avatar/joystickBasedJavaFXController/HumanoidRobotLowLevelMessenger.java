@@ -1,10 +1,8 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-
 public interface HumanoidRobotLowLevelMessenger
 {
-   void sendFreezeRequest(PacketCommunicator packetCommunicator);
+   void sendFreezeRequest();
 
-   void sendStandRequest(PacketCommunicator packetCommunicator);
+   void sendStandRequest();
 }

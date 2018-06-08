@@ -24,11 +24,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessagePubSubType;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessagePubSubType;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -43,7 +46,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -55,6 +59,7 @@ import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
 public class StepGeneratorJavaFXController
@@ -68,7 +73,6 @@ public class StepGeneratorJavaFXController
    private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty", 0.0);
 
    private final AnimationTimer animationTimer;
-   private final PacketCommunicator packetCommunicator;
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final AtomicReference<List<Node>> footstepsToVisualizeReference = new AtomicReference<>(null);
 
@@ -91,11 +95,13 @@ public class StepGeneratorJavaFXController
    private final HumanoidRobotKickMessenger kickMessenger;
    private final HumanoidRobotPunchMessenger punchMessenger;
 
-   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+
+   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
                                         HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
    {
-      this.packetCommunicator = packetCommunicator;
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
       this.kickMessenger = kickMessenger;
       this.punchMessenger = punchMessenger;
@@ -111,7 +117,11 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setSupportFootBasedFootstepAdjustment(false);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
-      packetCommunicator.attachListener(FootstepStatusMessage.class, continuousStepGenerator::consumeFootstepStatus);
+      ROS2Tools.createCallbackSubscription(ros2Node, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status",
+                                           s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
+
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, new PauseWalkingMessagePubSubType(), "/ihmc/pause_walking");
+      footstepPublisher = ROS2Tools.createPublisher(ros2Node, new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
 
       swingHeight = messager.createInput(WalkingSwingHeight, 0.05);
       swingDuration = messager.createInput(WalkingSwingDuration, walkingControllerParameters.getDefaultSwingTime());
@@ -191,12 +201,14 @@ public class StepGeneratorJavaFXController
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateTurningVelocity);
 
-      packetCommunicator.attachListener(WalkingControllerFailureStatusMessage.class, packet -> stopWalking(true));
+      ROS2Tools.createCallbackSubscription(ros2Node, new WalkingControllerFailureStatusMessagePubSubType(), "/ihmc/walking_controller_failure",
+                                           s -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> stopWalking(true));
-      messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest(packetCommunicator));
+      messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
       messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
-      messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest(packetCommunicator));
-      packetCommunicator.attachListener(CapturabilityBasedStatus.class, status -> {
+      messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
+      ROS2Tools.createCallbackSubscription(ros2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status", s -> {
+         CapturabilityBasedStatus status = s.readNextData();
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
          isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
       });
@@ -246,7 +258,7 @@ public class StepGeneratorJavaFXController
    {
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
       pauseWalkingMessage.setPause(true);
-      packetCommunicator.send(pauseWalkingMessage);
+      pauseWalkingPublisher.publish(pauseWalkingMessage);
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)
@@ -268,7 +280,7 @@ public class StepGeneratorJavaFXController
       FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
       if (footstepsToSend != null && isWalking.get())
       {
-         packetCommunicator.send(footstepsToSend);
+         footstepPublisher.publish(footstepsToSend);
       }
       if (!isWalking.get())
          sendPauseMessage();
@@ -301,34 +313,31 @@ public class StepGeneratorJavaFXController
 
    private void sendArmHomeConfiguration(RobotSide... robotSides)
    {
-      punchMessenger.sendArmHomeConfiguration(packetCommunicator, trajectoryDuration.get(), robotSides);
+      punchMessenger.sendArmHomeConfiguration(trajectoryDuration.get(), robotSides);
    }
 
    private void sendArmStraightConfiguration(RobotSide robotSide)
    {
-      punchMessenger.sendArmStraightConfiguration(packetCommunicator, trajectoryDuration.get(), robotSide);
+      punchMessenger.sendArmStraightConfiguration(trajectoryDuration.get(), robotSide);
    }
 
    private void flamingoHomeStance(RobotSide robotSide)
    {
-      kickMessenger.sendFlamingoHomeStance(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
-                                           javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
+      kickMessenger.sendFlamingoHomeStance(robotSide, trajectoryDuration.get(), inPlaceStepWidth, javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    private void putFootDown(RobotSide robotSide)
    {
       if (isFootInSupport.get(robotSide).get())
          return;
-      kickMessenger.sendPutFootDown(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
-                                    javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
+      kickMessenger.sendPutFootDown(robotSide, trajectoryDuration.get(), inPlaceStepWidth, javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    private void kick(RobotSide robotSide)
    {
       if (isFootInSupport.get(robotSide).get())
          return;
-      kickMessenger.sendKick(packetCommunicator, robotSide, trajectoryDuration.get(), inPlaceStepWidth,
-                             javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
+      kickMessenger.sendKick(robotSide, trajectoryDuration.get(), inPlaceStepWidth, javaFXRobotVisualizer.getFullRobotModel().getSoleFrames());
    }
 
    public void start()
@@ -341,6 +350,9 @@ public class StepGeneratorJavaFXController
    {
       animationTimer.stop();
       executorService.shutdownNow();
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+      pauseWalkingMessage.setPause(true);
+      pauseWalkingPublisher.publish(pauseWalkingMessage);
    }
 
    public Node getRootNode()
