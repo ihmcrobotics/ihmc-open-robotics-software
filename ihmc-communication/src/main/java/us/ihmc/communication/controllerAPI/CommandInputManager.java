@@ -10,14 +10,14 @@ import java.util.Map;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
- * CommandInputManager is used to generate a thread-safe input API for a controller. {@link Packet}
- * and {@link Command} can be submitted through the methods {@link #submitMessage(Packet)} and
+ * CommandInputManager is used to generate a thread-safe input API for a controller. Message
+ * and {@link Command} can be submitted through the methods {@link #submitMessage(Object)} and
  * {@link #submitCommand(Command)}. Only registered inputs (Packet or Command) will make it through
  * to controller side. Unregistered inputs are ignored and the user is averted by a message error
  * with the information on the input class.
@@ -55,7 +55,7 @@ public class CommandInputManager
     * Map from the registered messages to their associated buffer. These buffers CANNOT be visible
     * or accessed from outside this class.
     */
-   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
 
    /** Controller's copy of the new commands to be processed. */
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
@@ -63,7 +63,7 @@ public class CommandInputManager
    /** Exhaustive list of all the supported commands that this API can process. */
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands = new ArrayList<>();
    /** Exhaustive list of all the supported messages that this API can process. */
-   private final List<Class<? extends Packet<?>>> listOfSupportedMessages = new ArrayList<>();
+   private final List<Class<? extends Settable<?>>> listOfSupportedMessages = new ArrayList<>();
 
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
@@ -75,9 +75,9 @@ public class CommandInputManager
     * Protocols for unpacking certain types of messages. These messages do not have to be registered
     * at construction time.
     */
-   private final Map<Class<? extends Packet<?>>, MessageUnpacker<? extends Packet<?>>> messageUnpackers = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, MessageUnpacker<? extends Settable<?>>> messageUnpackers = new HashMap<>();
    /** Buffer used to unpack messages without making garbage. */
-   private final List<Packet<?>> unpackedMessages = new ArrayList<>();
+   private final List<Settable<?>> unpackedMessages = new ArrayList<>();
 
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
@@ -134,7 +134,7 @@ public class CommandInputManager
     *           unpacked at reception.
     * @param messageUnpacker the protocol for unpacking the message.
     */
-   public <T extends Packet<T>> void registerMessageUnpacker(Class<T> messageClass, MessageUnpacker<T> messageUnpacker)
+   public <T extends Settable<T>> void registerMessageUnpacker(Class<T> messageClass, MessageUnpacker<T> messageUnpacker)
    {
       messageUnpackers.put(messageClass, messageUnpacker);
    }
@@ -145,7 +145,7 @@ public class CommandInputManager
     * @param commandClasses
     */
    @SuppressWarnings("unchecked")
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
+   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
    {
       for (int i = 0; i < commandClasses.size(); i++)
          registerNewCommand((Class<C>) commandClasses.get(i));
@@ -156,7 +156,7 @@ public class CommandInputManager
     * 
     * @param commandClass
     */
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
+   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommand(Class<C> commandClass)
    {
       Builder<C> builer = createBuilderWithEmptyConstructor(commandClass);
       ConcurrentRingBuffer<C> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
@@ -184,13 +184,13 @@ public class CommandInputManager
     * 
     * @param message message to be submitted to the controller.
     */
-   public <M extends Packet<M>> void submitMessage(M message)
+   public <M extends Settable<M>> void submitMessage(M message)
    {
       submitMessageInternal(message);
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private void submitMessageInternal(Packet message)
+   private void submitMessageInternal(Settable message)
    {
       if (message == null)
       {
@@ -248,7 +248,7 @@ public class CommandInputManager
     * @param commandToStoreMessage the command in which the message is converted. Modified.
     * @return whether the message was converted or not.
     */
-   private <M extends Packet<M>> boolean performCustomConversion(M message, Command<?, M> commandToStoreMessage)
+   private <M extends Settable<M>> boolean performCustomConversion(M message, Command<?, M> commandToStoreMessage)
    {
       for (int i = 0; i < commandConverters.size(); i++)
       {
@@ -272,7 +272,7 @@ public class CommandInputManager
     * @param messages list of messages to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
-   public <M extends Packet<M>> void submitMessages(List<Packet<?>> messages)
+   public <M extends Settable<M>> void submitMessages(List<Settable<?>> messages)
    {
       for (int i = 0; i < messages.size(); i++)
          submitMessage((M) messages.get(i));
@@ -513,7 +513,7 @@ public class CommandInputManager
    /**
     * @return The list of all the messages supported by this API.
     */
-   public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
+   public List<Class<? extends Settable<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
    }

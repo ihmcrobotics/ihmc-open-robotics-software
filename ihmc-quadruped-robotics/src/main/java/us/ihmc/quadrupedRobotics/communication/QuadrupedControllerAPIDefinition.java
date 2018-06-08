@@ -1,23 +1,42 @@
 package us.ihmc.quadrupedRobotics.communication;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyHeightMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyOrientationMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage;
+import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
-
-import java.util.*;
-
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
 public class QuadrupedControllerAPIDefinition
 {
 
    private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
-   private static final List<Class<? extends Packet<?>>> quadrupedSupportedStatusMessages;
+   private static final List<Class<? extends Settable<?>>> quadrupedSupportedStatusMessages;
 
    static
    {
@@ -41,7 +60,7 @@ public class QuadrupedControllerAPIDefinition
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
 
-      List<Class<? extends Packet<?>>> quadrupedStatusMessages = new ArrayList<>();
+      List<Class<? extends Settable<?>>> quadrupedStatusMessages = new ArrayList<>();
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
       quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
@@ -56,14 +75,14 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedCommands;
    }
 
-   public static List<Class<? extends Packet<?>>> getQuadrupedSupportedStatusMessages()
+   public static List<Class<? extends Settable<?>>> getQuadrupedSupportedStatusMessages()
    {
       return quadrupedSupportedStatusMessages;
    }
 
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()
    {
-      Map<Class<? extends Packet<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
       validators.put(SoleTrajectoryMessage.class, message -> validateSoleTrajectoryMessage((SoleTrajectoryMessage) message));
       //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
       validators.put(QuadrupedBodyOrientationMessage.class, message -> validateQuadrupedBodyOrientationMessage((QuadrupedBodyOrientationMessage) message));
@@ -75,7 +94,7 @@ public class QuadrupedControllerAPIDefinition
       return new ControllerNetworkSubscriber.MessageValidator()
       {
          @Override
-         public String validate(Packet<?> message)
+         public String validate(Object message)
          {
             ControllerNetworkSubscriber.MessageValidator validator = validators.get(message.getClass());
             return validator == null ? null : validator.validate(message);
@@ -85,7 +104,7 @@ public class QuadrupedControllerAPIDefinition
 
    public static MessageCollector.MessageIDExtractor createDefaultMessageIDExtractor()
    {
-      Map<Class<? extends Packet<?>>, MessageCollector.MessageIDExtractor> extractors = new HashMap<>();
+      Map<Class<? extends Settable<?>>, MessageCollector.MessageIDExtractor> extractors = new HashMap<>();
       extractors.put(SoleTrajectoryMessage.class, m -> ((SoleTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisTrajectoryMessage.class, m -> ((PelvisTrajectoryMessage) m).getSequenceId());
       extractors.put(QuadrupedBodyOrientationMessage.class, m -> ((QuadrupedBodyOrientationMessage) m).getSequenceId());
@@ -107,7 +126,7 @@ public class QuadrupedControllerAPIDefinition
       return new MessageCollector.MessageIDExtractor()
       {
          @Override
-         public long getMessageID(Packet<?> message)
+         public long getMessageID(Object message)
          {
             MessageCollector.MessageIDExtractor extractor = extractors.get(message.getClass());
             return extractor == null ? NO_ID : extractor.getMessageID(message);

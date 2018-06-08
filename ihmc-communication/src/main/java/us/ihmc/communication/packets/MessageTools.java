@@ -88,7 +88,7 @@ public class MessageTools
       return message;
    }
 
-   public static InvalidPacketNotificationPacket createInvalidPacketNotificationPacket(Class<? extends Packet<?>> packetClass, String errorMessage)
+   public static InvalidPacketNotificationPacket createInvalidPacketNotificationPacket(Class<?> packetClass, String errorMessage)
    {
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
       message.setPacketClassSimpleName(packetClass.getSimpleName());

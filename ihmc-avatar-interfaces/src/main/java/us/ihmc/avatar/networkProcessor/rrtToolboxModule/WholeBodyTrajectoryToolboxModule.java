@@ -6,43 +6,45 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessagePubSubType;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
-   private static final PacketDestination PACKET_DESTINATION = PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE;
-   private static final NetworkPorts NETWORK_PORT = NetworkPorts.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_PORT;
-
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
    public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
                                            boolean startYoVariableServer)
          throws IOException
    {
-      super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
+      super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
       wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
                                                                                       registry, yoGraphicsListRegistry, startYoVariableServer);
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, 10, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
       commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   {
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(new WholeBodyTrajectoryToolboxMessagePubSubType(), "/ihmc/whole_body_trajectory_toolbox",
+                                                                       10, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
    }
 
    @Override
@@ -68,14 +70,14 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   static List<Class<? extends Packet<?>>> supportedStatus()
+   static List<Class<? extends Settable<?>>> supportedStatus()
    {
-      List<Class<? extends Packet<?>>> status = new ArrayList<>();
+      List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(WholeBodyTrajectoryToolboxOutputStatus.class);
       return status;
    }

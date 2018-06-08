@@ -369,7 +369,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                                                     feetContactSensorNames, wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
 
-      controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
+      controllerFactory.createControllerNetworkSubscriber(realtimeRos2Node);
 
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();

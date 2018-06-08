@@ -1,7 +1,7 @@
 package us.ihmc.communication.controllerAPI;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Helps converts packets to commands
@@ -14,12 +14,12 @@ public interface CommandConversionInterface
     * @param message the message that was received
     * @return whether it can convert it
     */
-   <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message);
+   <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message);
    
    /**
     * actually update the command based on the message
     * @param command the command to update
     * @param message the message with the source data
     */
-   <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message);
+   <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message);
 }

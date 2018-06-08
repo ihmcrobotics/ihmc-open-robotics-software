@@ -147,7 +147,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private ValkyrieCalibrationControllerStateFactory calibrationStateFactory = null;
 
-   private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, PacketCommunicator packetCommunicator,
+   private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
                                                                                DRCRobotSensorInformation sensorInformation)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -174,8 +174,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                                                     highLevelControllerParameters, walkingControllerParameters,
                                                                                                     capturePointPlannerParameters);
 
-      PeriodicRealtimeThreadScheduler networkSubscriberScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
-      controllerFactory.createControllerNetworkSubscriber(networkSubscriberScheduler, packetCommunicator);
+      controllerFactory.createControllerNetworkSubscriber(realtimeRos2Node);
 
       // setup states
       controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
@@ -326,7 +325,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create controllers
        */
-      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
+      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, realtimeRos2Node, sensorInformation);
       CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
 

@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.yoVariables.variable.YoDouble;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Pulls commands from the CommandInputManager and checks the delay time, If there is no delay or the delay is negative, it is available to be consumed
@@ -30,7 +30,7 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
-   private final Map<Class<? extends Packet<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, YoDouble yoTime)
@@ -42,7 +42,7 @@ public class CommandConsumerWithDelayBuffers
    }
    
    @SuppressWarnings("unchecked")
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
+   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
    {
       for (int i = 0; i < commandClasses.size(); i++)
       {
@@ -55,7 +55,7 @@ public class CommandConsumerWithDelayBuffers
       }
    }
 
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
+   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommand(Class<C> commandClass)
    {
       queuedCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       outgoingCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
@@ -104,7 +104,7 @@ public class CommandConsumerWithDelayBuffers
             clearDelayQueue(commandClassToFlush);
          }
       }
-      Class<? extends Packet<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
+      Class<? extends Settable<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
       if(messageClassToClear != null)
       {
          Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);

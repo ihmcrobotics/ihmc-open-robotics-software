@@ -373,7 +373,7 @@ public class QuadrupedSimulationFactory
    private void createControllerNetworkSubscriber()
    {
       if (useNetworking.get())
-         controllerManager.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("controllerNetworkSubscriber"), packetCommunicator);
+         controllerManager.createControllerNetworkSubscriber(realtimeRos2Node);
    }
 
    private void createGroundContactModel()
