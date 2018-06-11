@@ -6,13 +6,13 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.robotics.lists.PriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 /**
  * Pulls commands from the CommandInputManager and checks the delay time, If there is no delay or the delay is negative, it is available to be consumed
@@ -60,7 +60,7 @@ public class CommandConsumerWithDelayBuffers
       queuedCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       outgoingCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
-      priorityQueues.put(commandClass, new PriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, Command.class, commandComparator));
+      priorityQueues.put(commandClass, new PriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, commandComparator));
    }
    
    /**
@@ -158,7 +158,7 @@ public class CommandConsumerWithDelayBuffers
    private void queueCommand(Command<?,?> command)
    {
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
-      if(priorityQueue.getSize() >= NUMBER_OF_COMMANDS_TO_QUEUE)
+      if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
          PrintTools.error("Tried to add " + command.getClass() + " to the delay queue, but the queue was full. Try increasing the queue size");
          return;
@@ -188,7 +188,7 @@ public class CommandConsumerWithDelayBuffers
       {
          RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToPoll);
          PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
-         Command<?, ?> command = priorityQueue.pop();
+         Command<?, ?> command = priorityQueue.poll();
          recyclingArrayList.remove(command);
          return (C) command;
       }
@@ -213,7 +213,7 @@ public class CommandConsumerWithDelayBuffers
       
       while(isNewCommandAvailable(commandClassToPoll))
       {
-         Command<?, ?> queuedCommand =  priorityQueue.pop();
+         Command<?, ?> queuedCommand =  priorityQueue.poll();
          recyclingArrayList.remove(queuedCommand);
          commands.add().set((C) queuedCommand);
       }
