@@ -103,7 +103,7 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
       stepAdjustmentController = new QuadrupedStepAdjustmentController(controllerToolbox, registry);
 
-      adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep.class, QuadrupedStep::new);
+      adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep::new);
       adjustedActiveSteps.clear();
 
       if (yoGraphicsListRegistry != null)

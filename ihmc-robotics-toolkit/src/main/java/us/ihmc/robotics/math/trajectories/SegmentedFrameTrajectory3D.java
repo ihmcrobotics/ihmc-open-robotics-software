@@ -7,6 +7,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -41,7 +44,7 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       this.maxNumberOfSegments = maxNumberOfSegments;
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
       currentSegmentIndex = -1;
-      segments = new RecyclingArrayList<>(maxNumberOfSegments, FrameTrajectory3D.class, new FrameTrajectory3DBuilder());
+      segments = new RecyclingArrayList<>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
    }
 
@@ -97,6 +100,9 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
 
    public List<FrameTrajectory3D> getSegments()
    {
+      Collection<FrameTrajectory3D> c = new ArrayList<FrameTrajectory3D>();
+      Collections.unmodifiableCollection(null);
+
       return segments;
    }
 

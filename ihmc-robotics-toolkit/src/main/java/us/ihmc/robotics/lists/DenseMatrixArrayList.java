@@ -14,7 +14,7 @@ public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
 
    public DenseMatrixArrayList(int initialCapacity)
    {
-      super(initialCapacity, DenseMatrix64F.class, createBuilder());
+      super(initialCapacity, createBuilder());
    }
 
    public void set(DenseMatrixArrayList denseMatrixArrayList)
