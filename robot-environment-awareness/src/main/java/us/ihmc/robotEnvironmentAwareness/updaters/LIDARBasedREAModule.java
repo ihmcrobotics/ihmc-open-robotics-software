@@ -29,7 +29,7 @@ import us.ihmc.ros2.Ros2Node;
 public class LIDARBasedREAModule
 {
    private static final String lidarScanTopicName = "/ihmc/lidar_scan";
-   private static final String planarRegionsTopicName = "/ihmc/planar_regions";
+   private static final String planarRegionsTopicName = "/ihmc/planar_regions_list";
    private static final String planarRegionRequestTopicName = "/ihmc/planar_region_request";
 
    private static final String ocTreeTimeReport = "OcTree update took: ";

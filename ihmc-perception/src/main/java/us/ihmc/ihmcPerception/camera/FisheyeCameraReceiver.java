@@ -3,9 +3,12 @@ package us.ihmc.ihmcPerception.camera;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import controller_msgs.msg.dds.FisheyePacket;
+import controller_msgs.msg.dds.FisheyePacketPubSubType;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -14,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -22,11 +26,12 @@ import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 public class FisheyeCameraReceiver extends CameraDataReceiver
 {
    private static final boolean DEBUG = false;
+
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
-         RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator,
-         PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, Ros2Node ros2Node,
+                                PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
    {
-      super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(packetCommunicator),
+      super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
             ppsTimestampOffsetProvider);
 
       if (!cameraParameters.useIntrinsicParametersFromRos())
@@ -44,7 +49,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
          protected void imageReceived(long timeStamp, BufferedImage image)
          {
             IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
-            if(DEBUG)
+            if (DEBUG)
             {
                PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
             }
@@ -54,39 +59,38 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
 
-
    }
 
    private static class CompressedFisheyeHandler implements CompressedVideoHandler
    {
-      private final PacketCommunicator packetCommunicator;
+      private final IHMCROS2Publisher<FisheyePacket> publisher;
 
-      public CompressedFisheyeHandler(PacketCommunicator packetCommunicator)
+      public CompressedFisheyeHandler(Ros2Node ros2Node)
       {
-         this.packetCommunicator = packetCommunicator;
+         publisher = ROS2Tools.createPublisher(ros2Node, new FisheyePacketPubSubType(), "/ihmc/fisheye");
       }
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-            IntrinsicParameters intrinsicParameters)
+                          IntrinsicParameters intrinsicParameters)
       {
-         if(DEBUG)
+         if (DEBUG)
          {
             PrintTools.debug(this, videoSource.name() + " fisheye data size size is " + data.length);
          }
-         packetCommunicator.send(HumanoidMessageTools.createFisheyePacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
+         publisher.publish(HumanoidMessageTools.createFisheyePacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       }
 
       @Override
       public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
       {
-         packetCommunicator.attachStateListener(compressedVideoDataServer);
+         // FIXME
       }
 
       @Override
       public boolean isConnected()
       {
-         return packetCommunicator.isConnected();
+         return true; // FIXME
       }
 
    }

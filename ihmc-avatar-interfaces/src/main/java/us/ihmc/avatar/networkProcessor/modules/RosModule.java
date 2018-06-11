@@ -8,8 +8,8 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.LocalizationPacketPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
@@ -18,6 +18,7 @@ import us.ihmc.avatar.ros.RosSCSCameraPublisher;
 import us.ihmc.avatar.ros.RosSCSLidarPublisher;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -26,7 +27,9 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -40,11 +43,7 @@ public class RosModule
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
-//   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-//         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
-
-   private final PacketCommunicator rosModulePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE,
-         new IHMCCommunicationKryoNetClassList());
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_ros_node");
 
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -57,14 +56,14 @@ public class RosModule
 
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-      rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, ppsTimestampOffsetProvider);
+      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> ppsTimestampOffsetProvider.receivedPacket(s.readNextData()));
 
       sensorInformation = robotModel.getSensorInformation();
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node,
             rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, rosTopicPrefix, tfPublisher);
 
       if(simulatedSensorCommunicator != null)
@@ -90,15 +89,6 @@ public class RosModule
       if (CREATE_ROS_ECHO_PUBLISHER)
          setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
 
-      try
-      {
-         rosModulePacketCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
       System.out.flush();
       rosMainNode.execute();
       if (DEBUG)
@@ -121,9 +111,9 @@ public class RosModule
 
    private void setupRosLocalization()
    {
-      new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, rosModulePacketCommunicator, ppsTimestampOffsetProvider);
+      new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, ros2Node, ppsTimestampOffsetProvider);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      rosModulePacketCommunicator.attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
+      ROS2Tools.createCallbackSubscription(ros2Node, new LocalizationPacketPubSubType(), "/ihmc/localization", s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
    }
 
 //   private void setupFootstepServiceClient()

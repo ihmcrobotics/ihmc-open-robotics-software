@@ -1,14 +1,14 @@
 package us.ihmc.ihmcPerception.camera;
 
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 /**
@@ -20,9 +20,9 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
    private final RobotSide robotSide;
    
    public SCSCameraDataReceiver(RobotSide robotSide, FullHumanoidRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
-         PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+                                Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
-      super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(sensorSuitePacketCommunicator), ppsTimestampOffsetProvider);
+      super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(ros2Node), ppsTimestampOffsetProvider);
       
       this.robotSide = robotSide;
 

@@ -91,7 +91,7 @@ public abstract class ToolboxModule
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, name);
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, realtimeRos2Node);

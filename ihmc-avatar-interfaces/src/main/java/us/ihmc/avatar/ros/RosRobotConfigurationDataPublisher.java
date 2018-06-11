@@ -10,9 +10,10 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -25,6 +26,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -71,7 +73,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
-   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
+   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
@@ -138,7 +140,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
       }
 
-      rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, this);
+      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> receivedPacket(s.readNextData()));
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
       t.start();

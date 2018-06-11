@@ -13,6 +13,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import controller_msgs.msg.dds.MultisenseParameterPacket;
+import controller_msgs.msg.dds.MultisenseParameterPacketPubSubType;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
@@ -20,9 +21,11 @@ import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -39,22 +42,23 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private boolean autoWhitebalance;
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
-   private PacketCommunicator packetCommunicator;
    private ParameterTree params;
-   
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator)
+   private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
+
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, Ros2Node ros2Node)
    {
       this.rosMainNode = rosMainNode;
-      this.packetCommunicator = sensorSuitePacketCommunicator;
-      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);      
+      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      sensorSuitePacketCommunicator.attachListener(MultisenseParameterPacket.class, this);;
+      ROS2Tools.createCallbackSubscription(ros2Node, new MultisenseParameterPacketPubSubType(), "/ihmc/multisense_parameter",
+                                           s -> receivedPacket(s.readNextData()));
+      publisher = ROS2Tools.createPublisher(ros2Node, new MultisenseParameterPacketPubSubType(), "/ihmc/initial_multisense_parameter");
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)
    {
-     this.rosMainNode = rosMainNode2;
-     multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);    
+      this.rosMainNode = rosMainNode2;
+      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
    }
 
    public boolean setupNativeROSCommunicator(double lidarSpindleVelocity)
@@ -63,39 +67,35 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       if (useRosHydro(rosPrefix))
       {
          PrintTools.info(this, "Using ROS Hydro");
-         String[] hydroSpindleSpeedShellString = {"sh", "-c",
-               ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-                     + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         String[] hydroSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
+               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
       }
       else if (useRosGroovy(rosPrefix))
       {
          PrintTools.info(this, "Using ROS Groovy");
-         String[] groovySpindleSpeedShellString = {"sh", "-c",
-               ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         String[] groovySpindleSpeedShellString = {"sh", "-c", ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
+               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
       }
       else if (useRosFuerte(rosPrefix))
       {
          PrintTools.info(this, "Using ROS Fuerte");
-         String[] fuerteSpindleSpeedShellString = {"sh", "-c",
-               ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         String[] fuerteSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
+               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
       }
       else if (useRosIndigo(rosPrefix))
       {
          PrintTools.info(this, "Using ROS Indigo");
-         String[] indigoSpindleSpeedShellString = {"sh", "-c",
-               ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         String[] indigoSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
+               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
       }
-      
+
       throw new RuntimeException();
    }
-   
+
    private boolean shellOutSpindleSpeedCommand(String[] shellCommandString)
    {
       ProcessBuilder builder = new ProcessBuilder(shellCommandString);
@@ -137,27 +137,27 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       }
    }
 
-   private  boolean useRosFuerte(String rosPrefix)
+   private boolean useRosFuerte(String rosPrefix)
    {
       return new File(rosPrefix + "/fuerte").exists();
    }
 
-   private  boolean useRosGroovy(String rosPrefix)
+   private boolean useRosGroovy(String rosPrefix)
    {
       return new File(rosPrefix + "/groovy").exists();
    }
 
-   private  boolean useRosHydro(String rosPrefix)
+   private boolean useRosHydro(String rosPrefix)
    {
       return new File(rosPrefix + "/hydro").exists();
    }
-      
-   private  boolean useRosIndigo(String rosPrefix)
+
+   private boolean useRosIndigo(String rosPrefix)
    {
       return new File(rosPrefix + "/indigo").exists();
    }
-   
-   public  void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
+
+   public void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
    {
       final RosDoublePublisher rosDoublePublisher = new RosDoublePublisher(true)
       {
@@ -169,7 +169,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       };
       rosMainNode.attachPublisher("/multisense/set_spindle_speed", rosDoublePublisher);
    }
-  
+
    public void handleMultisenseParameters(MultisenseParameterPacket object)
    {
       if (object.getInitialize())
@@ -185,8 +185,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          setMultisenseParameters(object);
 
    }
-   
-   
+
    private void send()
    {
       if (params == null)
@@ -195,13 +194,14 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          return;
       }
 
-      packetCommunicator.send(
-            HumanoidMessageTools.createMultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
-                  .getDouble("/multisense/led_duty_cycle"), params.getBoolean("/multisense/lighting"), params
-                  .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
+      publisher.publish(HumanoidMessageTools.createMultisenseParameterPacket(false, params.getDouble("/multisense/gain"),
+                                                                             params.getDouble("/multisense/motor_speed"),
+                                                                             params.getDouble("/multisense/led_duty_cycle"),
+                                                                             params.getBoolean("/multisense/lighting"), params.getBoolean("/multisense/flash"),
+                                                                             params.getBoolean("multisense/auto_exposure"),
+                                                                             params.getBoolean("multisense/auto_white_balance")));
    }
-   
-   
+
    public void initializeParameterListeners()
    {
 
@@ -254,7 +254,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          @Override
          public void onNewValue(Object value)
          {
-           // System.out.println("new flash received");
+            // System.out.println("new flash received");
             send();
          }
       });
@@ -280,7 +280,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
             send();
          }
       });
-      
+
       rosMainNode.attachParameterListener("/multisense/auto_white_balance", new ParameterListener()
       {
 
@@ -294,11 +294,11 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
 
    }
 
-  public  void setMultisenseResolution(RosMainNode rosMainNode)
+   public void setMultisenseResolution(RosMainNode rosMainNode)
    {
       try
       {
-         
+
          Thread setupThread = new Thread()
          {
             public void run()
@@ -307,8 +307,8 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
                ReconfigureRequest request = multiSenseClient.getMessage();
                StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
                resolutionParam.setName("resolution");
-//               System.out.println("Setting multisense resolution to 2048x1088");
-//               resolutionParam.setValue("2048x1088x64");
+               //               System.out.println("Setting multisense resolution to 2048x1088");
+               //               resolutionParam.setValue("2048x1088x64");
                System.out.println("Setting multisense resolution to 1024x544x128");
                resolutionParam.setValue("1024x544x256");
                request.getConfig().getStrs().add(resolutionParam);
@@ -317,14 +317,12 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
                fpsParam.setName("fps");
                fpsParam.setValue(30.0);
                request.getConfig().getDoubles().add(fpsParam);
-               
-               
+
                DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
                gainParam.setName("gain");
                gainParam.setValue(3.2);
                request.getConfig().getDoubles().add(gainParam);
-               
-               
+
                multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
                {
 
@@ -349,74 +347,77 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          System.err.println(e.getMessage());
       }
    }
-   
-   
 
    public void setMultisenseParameters(MultisenseParameterPacket object)
    {
-     
-     // System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
-     
-      
-      
+
+      // System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
+
       multiSenseClient.waitTillConnected();
       final ReconfigureRequest request = multiSenseClient.getMessage();
-      if(object.getGain() != gain){
-      gain = object.getGain();
-      DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-      gainParam.setName("gain");
-      gainParam.setValue(gain);
-      request.getConfig().getDoubles().add(gainParam);
+      if (object.getGain() != gain)
+      {
+         gain = object.getGain();
+         DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+         gainParam.setName("gain");
+         gainParam.setValue(gain);
+         request.getConfig().getDoubles().add(gainParam);
       }
-      
-      if(object.getMotorSpeed() != motorSpeed){
-      motorSpeed = object.getMotorSpeed();
-      DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-      motorSpeedParam.setName("motor_speed");
-      motorSpeedParam.setValue(motorSpeed);
-      request.getConfig().getDoubles().add(motorSpeedParam);
+
+      if (object.getMotorSpeed() != motorSpeed)
+      {
+         motorSpeed = object.getMotorSpeed();
+         DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+         motorSpeedParam.setName("motor_speed");
+         motorSpeedParam.setValue(motorSpeed);
+         request.getConfig().getDoubles().add(motorSpeedParam);
       }
-      
-      if(object.getDutyCycle() != dutyCycle){
-      dutyCycle = object.getDutyCycle();
-      DoubleParameter dutyCycleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-      dutyCycleParam.setName("led_duty_cycle");
-      dutyCycleParam.setValue(dutyCycle);
-      request.getConfig().getDoubles().add(dutyCycleParam);
+
+      if (object.getDutyCycle() != dutyCycle)
+      {
+         dutyCycle = object.getDutyCycle();
+         DoubleParameter dutyCycleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+         dutyCycleParam.setName("led_duty_cycle");
+         dutyCycleParam.setValue(dutyCycle);
+         request.getConfig().getDoubles().add(dutyCycleParam);
       }
-      
-      if(object.getLedEnable() != ledEnable){
-      ledEnable = object.getLedEnable();
-      BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
-      ledEnableParam.setName("lighting");
-      ledEnableParam.setValue(ledEnable);
-      request.getConfig().getBools().add(ledEnableParam);
+
+      if (object.getLedEnable() != ledEnable)
+      {
+         ledEnable = object.getLedEnable();
+         BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+         ledEnableParam.setName("lighting");
+         ledEnableParam.setValue(ledEnable);
+         request.getConfig().getBools().add(ledEnableParam);
       }
-      
-      if(object.getFlashEnable() != flashEnable){
-      flashEnable = object.getFlashEnable();
-      BoolParameter flashEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
-      flashEnableParam.setName("flash");
-      flashEnableParam.setValue(flashEnable);
-      request.getConfig().getBools().add(flashEnableParam);
+
+      if (object.getFlashEnable() != flashEnable)
+      {
+         flashEnable = object.getFlashEnable();
+         BoolParameter flashEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+         flashEnableParam.setName("flash");
+         flashEnableParam.setValue(flashEnable);
+         request.getConfig().getBools().add(flashEnableParam);
       }
-      
-      if(object.getAutoExposure() != autoExposure){
-      autoExposure = object.getAutoExposure();
-      BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
-      autoExposureParam.setName("auto_exposure");
-      autoExposureParam.setValue(autoExposure);
-      request.getConfig().getBools().add(autoExposureParam);
+
+      if (object.getAutoExposure() != autoExposure)
+      {
+         autoExposure = object.getAutoExposure();
+         BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+         autoExposureParam.setName("auto_exposure");
+         autoExposureParam.setValue(autoExposure);
+         request.getConfig().getBools().add(autoExposureParam);
       }
-      
-      if(object.getAutoWhiteBalance() != autoWhitebalance){
+
+      if (object.getAutoWhiteBalance() != autoWhitebalance)
+      {
          autoWhitebalance = object.getAutoWhiteBalance();
          BoolParameter autoWhiteBalanceParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
          autoWhiteBalanceParam.setName("auto_white_balance");
          autoWhiteBalanceParam.setValue(autoWhitebalance);
          request.getConfig().getBools().add(autoWhiteBalanceParam);
-         }
-            
+      }
+
       new Thread()
       {
          @Override
