@@ -77,7 +77,7 @@ public class QuadrupedStepAdjustmentController
          dcmStepAdjustmentMultipliers.put(robotQuadrant, dcmStepAdjustmentMultiplier);
       }
 
-      adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep.class, QuadrupedStep::new);
+      adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep::new);
       adjustedActiveSteps.clear();
 
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

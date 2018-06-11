@@ -87,14 +87,14 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       feedBackGainSequence = new DiscreteSequence(controlSize, stateSize);
       feedForwardSequence = new DiscreteSequence(controlSize, 1);
 
-      valueStateGradientSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, 1));
-      valueStateHessianSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, stateSize));
+      valueStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, 1));
+      valueStateHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
 
-      costStateGradientSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, 1));
-      costControlGradientSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(controlSize, 1));
-      costStateHessianSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, stateSize));
-      costControlHessianSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(controlSize, controlSize));
-      costStateControlHessianSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, controlSize));
+      costStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, 1));
+      costControlGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(controlSize, 1));
+      costStateHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
+      costControlHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(controlSize, controlSize));
+      costStateControlHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, controlSize));
 
       hamiltonianStateGradient = new DenseMatrix64F(stateSize, 1);
       hamiltonianControlGradient = new DenseMatrix64F(controlSize, 1);
@@ -104,8 +104,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       hamiltonianControlStateHessian = new DenseMatrix64F(controlSize, stateSize);
       invQuu = new DenseMatrix64F(controlSize, controlSize);
 
-      dynamicsStateGradientSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, stateSize));
-      dynamicsControlGradientSequence = new RecyclingArrayList<>(1000, DenseMatrix64F.class, new VariableVectorBuilder(stateSize, controlSize));
+      dynamicsStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
+      dynamicsControlGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, controlSize));
       dynamicsStateHessian = new DenseMatrix64F(stateSize, stateSize);
       dynamicsControlHessian = new DenseMatrix64F(stateSize, controlSize);
       dynamicsControlStateHessian = new DenseMatrix64F(stateSize, controlSize);

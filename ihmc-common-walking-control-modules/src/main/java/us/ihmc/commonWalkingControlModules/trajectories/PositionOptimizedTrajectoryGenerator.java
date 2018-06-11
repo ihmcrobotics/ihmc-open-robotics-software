@@ -100,7 +100,7 @@ public class PositionOptimizedTrajectoryGenerator
    {
       this.namePrefix = namePrefix;
 
-      coefficients = new RecyclingArrayList<>(0, TDoubleArrayList.class, () ->
+      coefficients = new RecyclingArrayList<>(0, () ->
                                               {
                                                  TDoubleArrayList ret = new TDoubleArrayList(TrajectoryPointOptimizer.coefficients);
                                                  for (int i = 0; i < TrajectoryPointOptimizer.coefficients; i++)
@@ -108,7 +108,7 @@ public class PositionOptimizedTrajectoryGenerator
                                                  return ret;
                                               });
 
-      waypointPositions = new RecyclingArrayList<>(0, TDoubleArrayList.class, () ->
+      waypointPositions = new RecyclingArrayList<>(0, () ->
                                                    {
                                                       TDoubleArrayList ret = new TDoubleArrayList(dimensions);
                                                       for (int i = 0; i < dimensions; i++)
