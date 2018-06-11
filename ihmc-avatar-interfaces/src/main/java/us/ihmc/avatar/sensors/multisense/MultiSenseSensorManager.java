@@ -1,12 +1,12 @@
 package us.ihmc.avatar.sensors.multisense;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -23,7 +23,6 @@ public class MultiSenseSensorManager
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final PacketCommunicator packetCommunicator;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
    private final DRCRobotCameraParameters cameraParameters;
@@ -31,25 +30,24 @@ public class MultiSenseSensorManager
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
    public MultiSenseSensorManager(FullHumanoidRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         DRCRobotCameraParameters cameraParameters, DRCRobotLidarParameters lidarParameters, DRCRobotPointCloudParameters stereoParameters,
-         boolean setROSParameters)
+                                  RosMainNode rosMainNode, Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+                                  DRCRobotCameraParameters cameraParameters, DRCRobotLidarParameters lidarParameters,
+                                  DRCRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraParameters = cameraParameters;
       this.rosMainNode = rosMainNode;
-      this.packetCommunicator = sensorSuitePacketCommunicator;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
 
       boolean rosOnline = false;
-      
+
       while (!rosOnline)
       {
-         registerCameraReceivers();
+         registerCameraReceivers(ros2Node);
          if (setROSParameters)
          {
-            multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
+            multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);
             rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
          }
          else
@@ -75,15 +73,15 @@ public class MultiSenseSensorManager
          multiSenseParameterSetter.setMultisenseResolution(rosMainNode);
          return multiSenseParameterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
       }
-      
+
       return true;
    }
 
-   private void registerCameraReceivers()
+   private void registerCameraReceivers(Ros2Node ros2Node)
    {
       CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer, new VideoPacketHandler(packetCommunicator),
-            ppsTimestampOffsetProvider);
+      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer,
+                                              new VideoPacketHandler(ros2Node), ppsTimestampOffsetProvider);
 
       new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 

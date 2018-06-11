@@ -1,32 +1,29 @@
 package us.ihmc.ihmcPerception.camera;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import controller_msgs.msg.dds.VideoPacket;
+import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.ros2.Ros2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
    private static final boolean DEBUG = false;
-   private final PacketCommunicator packetCommunicator;
-   private final PacketDestination packetDestination;
+   private final IHMCROS2Publisher<VideoPacket> publisher;
 
-   public VideoPacketHandler(PacketCommunicator sensorSuitePacketCommunicator)
+   public VideoPacketHandler(Ros2Node ros2Node)
    {
-      this(sensorSuitePacketCommunicator, PacketDestination.BROADCAST);
-   }
-
-   public VideoPacketHandler(PacketCommunicator sensorSuitePacketCommunicator, PacketDestination packetDestination)
-   {
-      this.packetCommunicator = sensorSuitePacketCommunicator;
-      this.packetDestination = packetDestination;
+      publisher = ROS2Tools.createPublisher(ros2Node, new VideoPacketPubSubType(), "/ihmc/video");
    }
 
    private Stopwatch timer;
@@ -44,18 +41,18 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer.lap();
       }
          
-      packetCommunicator.send(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
+      publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, PacketDestination.BROADCAST));
    }
 
    @Override
    public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
    {
-      packetCommunicator.attachStateListener(compressedVideoDataServer);
+//      packetCommunicator.attachStateListener(compressedVideoDataServer); 
    }
 
    @Override
    public boolean isConnected()
    {
-      return packetCommunicator.isConnected();
+      return true;
    }
 }

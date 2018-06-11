@@ -1,13 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 
 public class SimpleDoNothingBehavior extends AbstractBehavior
 {
-   public SimpleDoNothingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public SimpleDoNothingBehavior(Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
    }
 
    @Override

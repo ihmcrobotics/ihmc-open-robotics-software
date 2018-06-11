@@ -1,36 +1,22 @@
 package us.ihmc.robotBehaviors.watson;
 
-import java.io.IOException;
-
 import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
 
-public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPacket>
+public class TextToSpeechNetworkModule
 {
-   private final PacketCommunicator packetCommunicator;
    private final TextToSpeechClient ttsClient = new TextToSpeechClient();
-   
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_text_to_speech_node");
+
    public TextToSpeechNetworkModule()
    {
-//      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TEXT_TO_SPEECH, 2048, 16384, new IHMCCommunicationKryoNetClassList());
-      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.TEXT_TO_SPEECH, new IHMCCommunicationKryoNetClassList());
-      try
-      {
-         packetCommunicator.connect();
-         System.out.println("The TextToSpeech Network Module is up and running");
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-      packetCommunicator.attachListener(TextToSpeechPacket.class, this);
+      ROS2Tools.createCallbackSubscription(ros2Node, new TextToSpeechPacketPubSubType(), "/ihmc/text_to_speech", s -> receivedPacket(s.takeNextData()));
    }
-   
-   @Override
+
    public void receivedPacket(TextToSpeechPacket packet)
    {
       PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeakAsString());
@@ -38,7 +24,7 @@ public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPac
       textToSpeak = "<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">" + textToSpeak + "</prosody>";
       ttsClient.playText(textToSpeak);
    }
-   
+
    public static void main(String[] args)
    {
       System.out.println("Starting...");

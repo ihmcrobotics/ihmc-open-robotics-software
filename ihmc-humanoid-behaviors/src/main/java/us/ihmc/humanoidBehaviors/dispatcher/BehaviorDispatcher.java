@@ -6,22 +6,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import controller_msgs.msg.dds.BehaviorControlModeResponsePacketPubSubType;
+import controller_msgs.msg.dds.BehaviorStatusPacket;
+import controller_msgs.msg.dds.BehaviorStatusPacketPubSubType;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -52,7 +59,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final BehaviorTypeSubscriber<E> desiredBehaviorSubscriber;
    private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
-   private final CommunicationBridge communicationBridge;
 
    private final RobotDataReceiver robotDataReceiver;
 
@@ -65,15 +71,17 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private E stopBehaviorKey;
    private E currentBehaviorKey;
 
+   private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
+   private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
+
    public BehaviorDispatcher(YoDouble yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-                             BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer,
-                             Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                             BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum,
+                             E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
       this.stopBehaviorKey = stopBehavior;
       this.yoTime = yoTime;
-      this.yoVariableServer = yoVaribleServer;
-      this.communicationBridge = communicationBridge;
+      this.yoVariableServer = yoVariableServer;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.requestedBehavior = new YoEnum<E>("requestedBehavior", registry, behaviourEnum, true);
 
@@ -84,8 +92,12 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       stateMachineFactory = new StateMachineFactory<>(behaviourEnum);
       stateMachineFactory.setNamePrefix("behaviorDispatcher").setRegistry(registry).buildYoClock(yoTime);
 
-      SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(communicationBridge);
+      SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(ros2Node);
       addBehavior(stopBehavior, simpleForwardingBehavior);
+
+      behaviorStatusPublisher = ROS2Tools.createPublisher(ros2Node, new BehaviorStatusPacketPubSubType(), "/ihmc/behavior_status");
+      behaviorControlModeResponsePublisher = ROS2Tools.createPublisher(ros2Node, new BehaviorControlModeResponsePacketPubSubType(),
+                                                                       "/ihmc/behavior_control_mode_response");
 
       requestedBehavior.set(null);
 
@@ -163,7 +175,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       if (stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey) && currentBehaviorKey != null && !currentBehaviorKey.equals(stopBehaviorKey))
       {
-         communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
       }
       currentBehaviorKey = stateMachine.getCurrentBehaviorKey();
 
@@ -211,20 +223,18 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          {
          case STOP:
             stateMachine.stop();
-            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
-            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
             stateMachine.pause();
-            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
-
-            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
+            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
+            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
-            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
-
-            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
+            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
+            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          default:
             throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");

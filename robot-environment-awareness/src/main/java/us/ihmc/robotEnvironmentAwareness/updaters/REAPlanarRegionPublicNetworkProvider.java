@@ -36,6 +36,9 @@ public class REAPlanarRegionPublicNetworkProvider
       if (regionFeaturesProvider.getPlanarRegionsList() == null)
          return;
 
+      if (regionFeaturesProvider.getPlanarRegionsList().isEmpty())
+         return;
+
       publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList()));
    }
 

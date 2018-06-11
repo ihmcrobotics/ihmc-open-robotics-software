@@ -29,12 +29,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -121,8 +119,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
    private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
-   private DRCNetworkProcessor networkProcessor;
-
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
@@ -574,7 +570,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
 
-      networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams);
+      new DRCNetworkProcessor(robotModel, networkModuleParams);
    }
 
    public AvatarSimulation getAvatarSimulation()
@@ -590,11 +586,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public HumanoidFloatingRootJointRobot getSDFRobot()
    {
       return sdfRobot;
-   }
-
-   public PacketRouter<PacketDestination> getPacketRouter()
-   {
-      return networkProcessor.getPacketRouter();
    }
 
    public LocalObjectCommunicator getSimulatedSensorsPacketCommunicator()

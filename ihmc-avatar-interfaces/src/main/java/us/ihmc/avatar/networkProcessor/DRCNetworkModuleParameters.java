@@ -2,11 +2,8 @@ package us.ihmc.avatar.networkProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
 
 public class DRCNetworkModuleParameters
 {
@@ -43,7 +40,6 @@ public class DRCNetworkModuleParameters
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private HashMap<NetworkPorts, PacketDestination> extraIntraProcessCommunicatorPorts = new HashMap<NetworkPorts, PacketDestination>();
    private URI rosUri;
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
@@ -383,16 +379,6 @@ public class DRCNetworkModuleParameters
             + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule="
             + useRosModule + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator
             + "\n rosUri=" + rosUri + "]";
-   }
-
-   public void addRobotSpecificModuleCommunicatorPort(NetworkPorts networkPort, PacketDestination communicatorId)
-   {
-      extraIntraProcessCommunicatorPorts.put(networkPort, communicatorId);
-   }
-
-   public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
-   {
-      return extraIntraProcessCommunicatorPorts;
    }
 
    public boolean isFilterControllerInputMessages()
