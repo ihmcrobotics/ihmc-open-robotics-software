@@ -47,6 +47,8 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class LidarScanPublisher
 {
+   private static final String IHMC_LIDAR_SCAN_TOPIC_NAME = "/ihmc/lidar_scan";
+
    private static final double DEFAULT_SHADOW_ANGLE_THRESHOLD = Math.toRadians(12.0);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -70,7 +72,7 @@ public class LidarScanPublisher
 
    private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
 
-   public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node)
+   public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
@@ -79,9 +81,9 @@ public class LidarScanPublisher
       RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
       lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), "/ihmc/lidar_scan");
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), IHMC_LIDAR_SCAN_TOPIC_NAME);
    }
 
    public void start()

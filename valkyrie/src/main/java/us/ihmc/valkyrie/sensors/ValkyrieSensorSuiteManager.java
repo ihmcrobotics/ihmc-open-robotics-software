@@ -3,12 +3,13 @@ package us.ihmc.valkyrie.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
@@ -36,17 +37,21 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final LidarScanPublisher lidarScanPublisher;
 
-   public ValkyrieSensorSuiteManager(FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
+   private final String robotName;
+
+   public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
                                      DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
                                      ValkyrieJointMap jointMap, RobotTarget target)
    {
+      this.robotName = robotName;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
 
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node);
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+      lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
    }
@@ -54,7 +59,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
 
       DRCRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
@@ -75,7 +80,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       {
          throw new IllegalArgumentException("The ros uri was null, val's physical sensors require a ros uri to be set! Check your Network Parameters.ini file");
       }
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
 
       RosMainNode rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");

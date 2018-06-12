@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotDataPubSubType;
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -38,9 +37,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 // consumer
 public class DRCPoseCommunicator implements RawOutputWriter
 {
-   private static final String robotConfigurationDataTopicName = "/ihmc/robot_configuration_data";
-   private static final String atlasAuxiliaryRobotDataTopicName = "/ihmc/atlas_auxiliary_robot_data";
-
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
 
    //   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
@@ -68,10 +64,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final IHMCRealtimeROS2Publisher<AtlasAuxiliaryRobotData> atlasAuxiliaryRobotDataPublisher;
 
    public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, RealtimeRos2Node realtimeRos2Node,
-                              SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
-                              RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation,
-                              PeriodicThreadScheduler scheduler)
+                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, MessageTopicNameGenerator publisherTopicNameGenerator,
+                              RealtimeRos2Node realtimeRos2Node, SensorTimestampHolder sensorTimestampHolder,
+                              SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController,
+                              DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler)
    {
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorTimestampHolder = sensorTimestampHolder;
@@ -105,7 +101,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
       OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
       robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions), 16);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, new RobotConfigurationDataPubSubType(), robotConfigurationDataTopicName);
+      robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, RobotConfigurationData.class, publisherTopicNameGenerator);
 
       if (auxiliaryRobotDataProvider == null)
       {
@@ -115,8 +111,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       else
       {
          atlasAuxiliaryRobotDataRingBuffer = new ConcurrentRingBuffer<>(auxiliaryRobotDataProvider::newAuxiliaryRobotDataInstance, 16);
-         atlasAuxiliaryRobotDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, new AtlasAuxiliaryRobotDataPubSubType(),
-                                                                      atlasAuxiliaryRobotDataTopicName);
+         atlasAuxiliaryRobotDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, AtlasAuxiliaryRobotData.class, publisherTopicNameGenerator);
       }
       startWriterThread();
    }

@@ -64,7 +64,6 @@ import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
@@ -168,28 +167,28 @@ public class ControllerAPIDefinition
       return controllerSupportedStatusMessages;
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
          private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }
       };
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
          private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control/output";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }

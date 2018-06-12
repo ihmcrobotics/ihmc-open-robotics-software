@@ -9,7 +9,7 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import controller_msgs.msg.dds.LocalizationPacketPubSubType;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
@@ -17,6 +17,7 @@ import us.ihmc.avatar.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.avatar.ros.RosSCSCameraPublisher;
 import us.ihmc.avatar.ros.RosSCSLidarPublisher;
 import us.ihmc.avatar.ros.RosTfPublisher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -56,17 +57,20 @@ public class RosModule
 
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> ppsTimestampOffsetProvider.receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
+                                           s -> ppsTimestampOffsetProvider.receivedPacket(s.readNextData()));
 
       sensorInformation = robotModel.getSensorInformation();
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node,
-            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, rosTopicPrefix, tfPublisher);
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node, rosMainNode,
+                                                                                                              ppsTimestampOffsetProvider, sensorInformation,
+                                                                                                              jointMap, rosTopicPrefix, tfPublisher);
 
-      if(simulatedSensorCommunicator != null)
+      if (simulatedSensorCommunicator != null)
       {
          publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
 
@@ -78,13 +82,13 @@ public class RosModule
          }
       }
 
-      if(sensorInformation.setupROSLocationService())
+      if (sensorInformation.setupROSLocationService())
       {
          setupRosLocalization();
       }
 
-//      setupFootstepServiceClient();
-//      setupFootstepPathPlannerService();
+      //      setupFootstepServiceClient();
+      //      setupFootstepPathPlannerService();
 
       if (CREATE_ROS_ECHO_PUBLISHER)
          setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
@@ -95,7 +99,8 @@ public class RosModule
          PrintTools.debug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
+                                               ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
@@ -104,8 +109,7 @@ public class RosModule
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new RosSCSLidarPublisher(localObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
-               sensorInformation.getLidarParameters());
+         new RosSCSLidarPublisher(localObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel, sensorInformation.getLidarParameters());
       }
    }
 
@@ -113,30 +117,32 @@ public class RosModule
    {
       new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, ros2Node, ppsTimestampOffsetProvider);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, new LocalizationPacketPubSubType(), "/ihmc/localization", s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, new LocalizationPacketPubSubType(), "/ihmc/localization",
+                                           s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
    }
 
-//   private void setupFootstepServiceClient()
-//   {
-//      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(rosModulePacketCommunicator, rosMainNode, physicalProperties.getAnkleHeight());
-//      rosModulePacketCommunicator.attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-//   }
-//
-//   private void setupFootstepPathPlannerService()
-//   {
-//      FootstepPlanningParameterization footstepParameters = new BasicFootstepPlanningParameterization();
-//      FootstepPathPlannerService footstepPathPlannerService;
-////    footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-////    footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-//      footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), rosModulePacketCommunicator);
-//      rosModulePacketCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
-//   }
+   //   private void setupFootstepServiceClient()
+   //   {
+   //      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(rosModulePacketCommunicator, rosMainNode, physicalProperties.getAnkleHeight());
+   //      rosModulePacketCommunicator.attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
+   //   }
+   //
+   //   private void setupFootstepPathPlannerService()
+   //   {
+   //      FootstepPlanningParameterization footstepParameters = new BasicFootstepPlanningParameterization();
+   //      FootstepPathPlannerService footstepPathPlannerService;
+   ////    footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+   ////    footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+   //      footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), rosModulePacketCommunicator);
+   //      rosModulePacketCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
+   //   }
 
    @SuppressWarnings("unchecked")
    private void setupROSEchoPublisher(RosMainNode rosMainNode, String namespace)
    {
 
-      PacketCommunicator uiPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator uiPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE,
+                                                                                                        new IHMCCommunicationKryoNetClassList());
       try
       {
          uiPacketCommunicator.connect();
@@ -155,8 +161,8 @@ public class RosModule
          String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(inputType.getSimpleName());
          Message message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
-               uiPacketCommunicator, inputType);
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, uiPacketCommunicator,
+                                                                                                                       inputType);
          String topic = rosAnnotation.topic();
          topic = topic.replaceFirst("control", "output");
          rosMainNode.attachPublisher(namespace + topic, publisher);

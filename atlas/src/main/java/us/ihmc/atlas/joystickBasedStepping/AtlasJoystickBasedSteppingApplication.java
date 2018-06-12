@@ -35,8 +35,9 @@ public class AtlasJoystickBasedSteppingApplication extends Application
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, robotTarget, false);
       AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger(ros2Node);
 
-      ui = new JoystickBasedSteppingMainUI(primaryStage, ros2Node, atlasRobotModel, atlasRobotModel.getWalkingControllerParameters(),
-                                           atlasKickAndPunchMessenger, atlasKickAndPunchMessenger, atlasKickAndPunchMessenger);
+      ui = new JoystickBasedSteppingMainUI(atlasRobotModel.getSimpleRobotName(), primaryStage, ros2Node, atlasRobotModel,
+                                           atlasRobotModel.getWalkingControllerParameters(), atlasKickAndPunchMessenger, atlasKickAndPunchMessenger,
+                                           atlasKickAndPunchMessenger);
    }
 
    @Override

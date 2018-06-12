@@ -4,11 +4,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -21,12 +20,12 @@ public class REAPlanarRegionPublicNetworkProvider
    private final AtomicBoolean hasReceivedClearRequest = new AtomicBoolean(false);
    private final RegionFeaturesProvider regionFeaturesProvider;
 
-   public REAPlanarRegionPublicNetworkProvider(RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node, String planarRegionsTopicName,
-                                               String planarRegionRequestTopicName)
+   public REAPlanarRegionPublicNetworkProvider(RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
+                                               MessageTopicNameGenerator publisherTopicNameGenerator, MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
-      publisher = ROS2Tools.createPublisher(ros2Node, new PlanarRegionsListMessagePubSubType(), planarRegionsTopicName);
-      ROS2Tools.createCallbackSubscription(ros2Node, new RequestPlanarRegionsListMessagePubSubType(), planarRegionRequestTopicName, this::handlePacket);
+      publisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator, this::handlePacket);
    }
 
    public void update(boolean planarRegionsHaveBeenUpdated)

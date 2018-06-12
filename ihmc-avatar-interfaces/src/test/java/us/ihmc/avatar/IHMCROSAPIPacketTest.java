@@ -126,15 +126,15 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       Random random = new Random();
 
-      PacketCommunicator controllerCommunicatorServer = PacketCommunicator
-            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+                                                                                                                new IHMCCommunicationKryoNetClassList());
       PacketCommunicator controllerCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-            new IHMCCommunicationKryoNetClassList());
+                                                                                                                new IHMCCommunicationKryoNetClassList());
 
       PacketCommunicator rosAPI_communicator_server = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR,
-            new IHMCCommunicationKryoNetClassList());
+                                                                                                              new IHMCCommunicationKryoNetClassList());
       PacketCommunicator rosAPI_communicator_client = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR,
-            new IHMCCommunicationKryoNetClassList());
+                                                                                                              new IHMCCommunicationKryoNetClassList());
 
       try
       {
@@ -174,7 +174,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
          String nameSpace = "/ihmc_ros/atlas";
          String tfPrefix = null;
-         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, Collections.<Class>emptySet());
+         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
+                                                Collections.<Class> emptySet());
       }
       catch (IOException e)
       {
@@ -234,10 +235,10 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       Random random = new Random();
 
-      PacketCommunicator packetCommunicatorServer = PacketCommunicator
-            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT, new IHMCCommunicationKryoNetClassList());
-      PacketCommunicator packetCommunicatorClient = PacketCommunicator
-            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator packetCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT,
+                                                                                                            new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator packetCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT,
+                                                                                                            new IHMCCommunicationKryoNetClassList());
 
       try
       {
@@ -328,21 +329,23 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 
       DRCPerfectSensorReaderFactory sensorReaderFactory = new DRCPerfectSensorReaderFactory(sdfRobot,
-            threadDataSynchronizer.getEstimatorForceSensorDataHolder(), robotModel.getEstimatorDT());
+                                                                                            threadDataSynchronizer.getEstimatorForceSensorDataHolder(),
+                                                                                            robotModel.getEstimatorDT());
 
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
-            robotModel, robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
-            new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), realtimeRos2Node, null, robotVisualizer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), robotModel.getSensorInformation(),
+                                                                  robotModel.getContactPointParameters(), robotModel, robotModel.getStateEstimatorParameters(),
+                                                                  sensorReaderFactory, threadDataSynchronizer,
+                                                                  new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), realtimeRos2Node, null,
+                                                                  robotVisualizer, gravity);
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
-            outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());
+                                                                     outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());
 
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
 
       return robotController;
    }
-
 
    private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
@@ -353,9 +356,11 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
@@ -366,10 +371,11 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-                                                                                                    feetContactSensorNames, wristForceSensorNames, highLevelControllerParameters,
-                                                                                                    walkingControllerParameters, capturePointPlannerParameters);
+                                                                                                    feetContactSensorNames, wristForceSensorNames,
+                                                                                                    highLevelControllerParameters, walkingControllerParameters,
+                                                                                                    capturePointPlannerParameters);
 
-      controllerFactory.createControllerNetworkSubscriber(realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
 
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();

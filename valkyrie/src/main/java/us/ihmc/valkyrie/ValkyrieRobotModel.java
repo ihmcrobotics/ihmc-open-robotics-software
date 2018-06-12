@@ -119,13 +119,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       this(target, headless, model, null, false);
    }
-   
+
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this(target, headless, model, simulationContactPoints, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints,
+                             boolean useShapeCollision)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap();
@@ -226,7 +227,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return useShapeCollision;
    }
-   
+
    @Override
    public RobotDescription getRobotDescription()
    {
@@ -405,7 +406,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
+      return new ValkyrieSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap,
+                                            target);
    }
 
    @Override

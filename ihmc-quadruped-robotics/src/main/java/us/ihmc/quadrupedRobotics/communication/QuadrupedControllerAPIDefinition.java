@@ -22,7 +22,6 @@ import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -82,28 +81,28 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedStatusMessages;
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
          private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }
       };
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
          private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control/output";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }

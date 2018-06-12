@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 
 import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -23,6 +22,11 @@ import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 
 public class ROS2Tools
 {
+   public static interface MessageTopicNameGenerator
+   {
+      String generateTopicName(Class<?> messageType);
+   }
+
    public final static ExceptionHandler RUNTIME_EXCEPTION = e -> {
       throw new RuntimeException(e);
    };
@@ -64,6 +68,14 @@ public class ROS2Tools
       }
    }
 
+   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+                                                     NewMessageListener<T> newMessageListener)
+   {
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      createCallbackSubscription(ros2Node, topicDataType, topicName, newMessageListener);
+   }
+
    public static <T> void createCallbackSubscription(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName,
                                                      NewMessageListener<T> newMessageListener)
    {
@@ -81,6 +93,14 @@ public class ROS2Tools
       {
          exceptionHandler.handleException(e);
       }
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+                                                     NewMessageListener<T> newMessageListener)
+   {
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, newMessageListener);
    }
 
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName,
@@ -102,6 +122,13 @@ public class ROS2Tools
       }
    }
 
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   {
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      return createPublisher(realtimeRos2Node, topicDataType, topicName);
+   }
+
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName)
    {
       return createPublisher(realtimeRos2Node, topicDataType, topicName, RUNTIME_EXCEPTION);
@@ -119,6 +146,13 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   {
+      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+      String topicName = topicNameGenerator.generateTopicName(messageType);
+      return createPublisher(ros2Node, topicDataType, topicName);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName)
@@ -158,12 +192,12 @@ public class ROS2Tools
       }
    }
 
-   public static <T extends Settable<T>> String generateDefaultTopicName(Class<T> messageClass)
+   public static String generateDefaultTopicName(Class<?> messageClass)
    {
       return appendTypeToTopicName("/ihmc", messageClass);
    }
 
-   public static String appendTypeToTopicName(String prefix, Class<? extends Settable<?>> messageClass)
+   public static String appendTypeToTopicName(String prefix, Class<?> messageClass)
    {
       String topicName = messageClass.getSimpleName();
       topicName = StringUtils.removeEnd(topicName, "Packet"); // This makes BehaviorControlModePacket => BehaviorControlMode

@@ -113,9 +113,10 @@ public class AvatarSimulationFactory
       {
          double coefficientOfRestitution = 0.0;
          double coefficientOfFriction = 0.9;
-         HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
-                                                                                           simulationConstructionSet.getRootRegistry(),
-                                                                                           new YoGraphicsListRegistry());
+         HybridImpulseSpringDamperCollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution,
+                                                                                                                    coefficientOfFriction,
+                                                                                                                    simulationConstructionSet.getRootRegistry(),
+                                                                                                                    new YoGraphicsListRegistry());
          collisionHandler.setKp(100000);
          collisionHandler.setKd(500);
          CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
@@ -209,7 +210,8 @@ public class AvatarSimulationFactory
 
    private void setupStateEstimationThread()
    {
-      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(), robotModel.get(),
+      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSimpleRobotName(), robotModel.get().getSensorInformation(),
+                                                     robotModel.get().getContactPointParameters(), robotModel.get(),
                                                      robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
                                                      new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), realtimeRos2Node.get(),
                                                      simulationOutputWriter, yoVariableServer, gravity.get());
@@ -272,9 +274,9 @@ public class AvatarSimulationFactory
          PrintTools.info(this, "Initializing estimator to actual");
 
          /**
-          * The following is to get the initial CoM position from the robot. It is cheating for now, and we need
-          * to move to where the robot itself determines coordinates, and the sensors are all in the
-          * robot-determined world coordinates..
+          * The following is to get the initial CoM position from the robot. It is cheating for now,
+          * and we need to move to where the robot itself determines coordinates, and the sensors
+          * are all in the robot-determined world coordinates..
           */
          robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
          try

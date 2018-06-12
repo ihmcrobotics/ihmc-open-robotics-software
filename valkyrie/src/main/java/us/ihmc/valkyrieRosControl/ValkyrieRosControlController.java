@@ -348,9 +348,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       PeriodicRealtimeThreadScheduler estimatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, robotModel, stateEstimatorParameters,
-                                                                  sensorReaderFactory, threadDataSynchronizer, estimatorScheduler, realtimeRos2Node,
-                                                                  valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
+                                                                  stateEstimatorParameters, sensorReaderFactory, threadDataSynchronizer, estimatorScheduler,
+                                                                  realtimeRos2Node, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
       PeriodicRealtimeThreadScheduler handStateCommunicatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.HAND_COMMUNICATOR_PRIORITY);
