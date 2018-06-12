@@ -1,17 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.MessageCollection;
@@ -41,7 +34,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 public class ControllerNetworkSubscriber
 {
    private static final boolean DEBUG = false;
-   private static final String pubSubTypeGetterName = "getPubSubType";
 
    /** The input API to which the received messages should be submitted. */
    private final CommandInputManager controllerCommandInputManager;
@@ -68,10 +60,16 @@ public class ControllerNetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
+   private final MessageTopicNameGenerator subscriberTopicNameGenerator;
+   private final MessageTopicNameGenerator publisherTopicNameGenerator;
+
+   public ControllerNetworkSubscriber(MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
+                                      MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeRos2Node realtimeRos2Node)
    {
+      this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
       this.controllerCommandInputManager = controllerCommandInputManager;
+      this.publisherTopicNameGenerator = publisherTopicNameGenerator;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.realtimeRos2Node = realtimeRos2Node;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
@@ -89,18 +87,6 @@ public class ControllerNetworkSubscriber
       createGlobalStatusMessageListener();
    }
 
-   private static <T> T newMessageInstance(Class<T> messageType)
-   {
-      try
-      {
-         return messageType.newInstance();
-      }
-      catch (InstantiationException | IllegalAccessException e)
-      {
-         throw new RuntimeException("Something went wrong when invoking " + messageType.getSimpleName() + "'s empty constructor.", e);
-      }
-   }
-
    @SuppressWarnings({"unused", "unchecked"})
    private static <T> void getMessageTopicDataType(T messageInstance, Map<Class<?>, TopicDataType<?>> mapToModify)
    {
@@ -109,46 +95,18 @@ public class ControllerNetworkSubscriber
       if (mapToModify.containsKey(messageType))
          return;
 
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+      TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
 
       mapToModify.put(messageType, topicDataType);
    }
 
-   @SuppressWarnings({"unchecked", "rawtypes"})
-   private static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
+                                                                            MessageUnpacker<T> messageUnpacker)
    {
-      Method pubSubTypeGetter;
-
-      try
-      {
-         pubSubTypeGetter = messageType.getDeclaredMethod(pubSubTypeGetterName);
-      }
-      catch (NoSuchMethodException | SecurityException e)
-      {
-         throw new RuntimeException("Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().",
-                                    e);
-      }
-
-      TopicDataType<T> topicDataType;
-
-      try
-      {
-         topicDataType = (TopicDataType<T>) ((Supplier) pubSubTypeGetter.invoke(newMessageInstance(messageType))).get();
-      }
-      catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-      {
-         throw new RuntimeException("Something went wrong when invoking the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().", e);
-      }
-      return topicDataType;
-   }
-
-   @SuppressWarnings("unchecked")
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(TopicDataType<T> multipleMessageTopicDataType, String topicName,
-                                                                            int expectedMessageSize, MessageUnpacker<T> messageUnpacker)
-   {
-      Class<T> multipleMessageType = (Class<T>) multipleMessageTopicDataType.createData().getClass();
+      TopicDataType<T> multipleMessageTopicDataType = ROS2Tools.newMessageTopicDataTypeInstance(multipleMessageType);
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
+      String topicName = subscriberTopicNameGenerator.generateTopicName(multipleMessageType);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageTopicDataType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
@@ -189,7 +147,8 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new MessageCollectionPubSubType(), "/ihmc/message_collection", s -> {
+      String topicName = subscriberTopicNameGenerator.generateTopicName(MessageCollection.class);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new MessageCollectionPubSubType(), topicName, s -> {
          s.takeNextData(messageCollection, null);
          MessageCollectionNotification notification = messageCollector.startCollecting(messageCollection);
          publisher.publish(notification);
@@ -228,9 +187,9 @@ public class ControllerNetworkSubscriber
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         T messageLocalInstance = newMessageInstance(messageClass);
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageClass);
-         String topicName = createDefaultTopicName(messageClass);
+         T messageLocalInstance = ROS2Tools.newMessageInstance(messageClass);
+         TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageClass);
+         String topicName = subscriberTopicNameGenerator.generateTopicName(messageClass);
 
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);
@@ -241,19 +200,10 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageClass);
-      String topicName = createDefaultTopicName(messageClass);
+      TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageClass);
+      String topicName = publisherTopicNameGenerator.generateTopicName(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, topicDataType, topicName);
       return publisher;
-   }
-
-   private static <T extends Settable<T>> String createDefaultTopicName(Class<T> messageClass)
-   {
-      String topicName = messageClass.getSimpleName();
-      topicName = StringUtils.removeEnd(topicName, "Packet");
-      topicName = StringUtils.removeEnd(topicName, "Message");
-      topicName = "/ihmc/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, topicName);
-      return topicName;
    }
 
    @SuppressWarnings("unchecked")
@@ -331,5 +281,10 @@ public class ControllerNetworkSubscriber
    public static interface MessageValidator
    {
       String validate(Object message);
+   }
+
+   public static interface MessageTopicNameGenerator
+   {
+      String generateTopicName(Class<? extends Settable<?>> messageType);
    }
 }

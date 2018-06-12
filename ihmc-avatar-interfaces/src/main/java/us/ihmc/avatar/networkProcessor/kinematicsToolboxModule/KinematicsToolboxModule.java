@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -91,5 +92,35 @@ public class KinematicsToolboxModule extends ToolboxModule
    public CommandInputManager getCommandInputManager()
    {
       return commandInputManager;
+   }
+
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik/input";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik/output";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
    }
 }

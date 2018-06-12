@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -73,5 +74,35 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    public Set<Class<? extends Settable<?>>> filterExceptions()
    {
       return Collections.singleton(LidarScanMessage.class);
+   }
+
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/height_quad_tree/input";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/height_quad_tree/output";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
    }
 }

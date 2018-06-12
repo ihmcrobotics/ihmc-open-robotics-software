@@ -448,7 +448,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(realtimeRos2Node);
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
 
       for (int i = 0; i < highLevelControllerFactories.size(); i++)
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));

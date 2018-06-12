@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -45,7 +46,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
+ * A {@link RobotController} for switching between other robot controllers according to an internal
+ * finite state machine.
  * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
@@ -75,7 +77,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final AtomicReference<QuadrupedControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                     QuadrupedInitialPositionParameters initialPositionParameters) throws IOException
+                                     QuadrupedInitialPositionParameters initialPositionParameters)
+         throws IOException
    {
       this(runtimeEnvironment, null, physicalProperties, null, initialPositionParameters, QuadrupedControllerEnum.JOINT_INITIALIZATION,
            QuadrupedControlMode.FORCE);
@@ -152,7 +155,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    }
 
    /**
-    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpreted code paths
+    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the
+    * JIT compiler and avoids expensive interpreted code paths
     */
    public void warmup(int iterations)
    {
@@ -367,9 +371,13 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       return factory.build(initialState);
    }
 
-   public void createControllerNetworkSubscriber(RealtimeRos2Node realtimeRos2Node)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, realtimeRos2Node);
+      MessageTopicNameGenerator subscriberTopicNameGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator, commandInputManager,
+                                                                                                publisherTopicNameGenerator, statusMessageOutputManager,
+                                                                                                realtimeRos2Node);
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
    }
