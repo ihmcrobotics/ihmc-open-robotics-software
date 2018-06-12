@@ -12,14 +12,14 @@ public class AdditionBehavior extends AbstractBehavior
    double value2;
    double result;
 
-   public AdditionBehavior(Ros2Node ros2Node)
+   public AdditionBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
    }
 
-   public AdditionBehavior(Ros2Node ros2Node, double value1, double value2)
+   public AdditionBehavior(String robotName, Ros2Node ros2Node, double value1, double value2)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       setInput(value1, value2);
    }

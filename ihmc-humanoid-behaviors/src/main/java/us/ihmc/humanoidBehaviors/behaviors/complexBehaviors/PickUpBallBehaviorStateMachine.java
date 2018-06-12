@@ -36,11 +36,11 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PickUpBallBehaviorStateMachine(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
-                                         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
+   public PickUpBallBehaviorStateMachine(String robotName, Ros2Node ros2Node, YoDouble yoTime,
+                                         YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                                         HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("pickUpBallStateMachine", PickUpBallBehaviorState.class, yoTime, ros2Node);
+      super(robotName, "pickUpBallStateMachine", PickUpBallBehaviorState.class, yoTime, ros2Node);
 
 //      ros2Node.addListeners(this); I kinda broke the coactive thingy when switching to pub-sub
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
@@ -55,14 +55,14 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       // create sub-behaviors:
 
       //NEW
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
-      searchFarForSphereBehavior = new SearchFarForSphereBehavior(yoTime, coactiveElement, referenceFrames, ros2Node, false, atlasPrimitiveActions);
-      searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, fullRobotModel, ros2Node, false,
-                                                                    atlasPrimitiveActions);
-      walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(yoTime, referenceFrames, ros2Node, wholeBodyControllerParameters,
-                                                                                   fullRobotModel, atlasPrimitiveActions);
-      pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
-      putBallInBucketBehavior = new PutBallInBucketBehavior(yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
+      searchFarForSphereBehavior = new SearchFarForSphereBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, false, atlasPrimitiveActions);
+      searchNearForSphereBehavior = new SearchNearForSphereBehavior(robotName, yoTime, coactiveElement, referenceFrames, fullRobotModel, ros2Node,
+                                                                    false, atlasPrimitiveActions);
+      walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(robotName, yoTime, referenceFrames, ros2Node,
+                                                                                   wholeBodyControllerParameters, fullRobotModel, atlasPrimitiveActions);
+      pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
+      putBallInBucketBehavior = new PutBallInBucketBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
       setupStateMachine();
    }
 

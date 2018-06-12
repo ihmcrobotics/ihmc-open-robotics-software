@@ -15,9 +15,9 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>(10);
 
-   public SearchForValveBehavior(Ros2Node ros2Node)
+   public SearchForValveBehavior(String robotName, Ros2Node ros2Node)
    {
-      super("SearchForSpehereFar", ros2Node);
+      super(robotName, "SearchForSpehereFar", ros2Node);
       createSubscriber(valveLocationQueue, new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
    }
 

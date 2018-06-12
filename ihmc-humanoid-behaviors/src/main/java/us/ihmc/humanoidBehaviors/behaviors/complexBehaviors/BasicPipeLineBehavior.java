@@ -37,16 +37,16 @@ public class BasicPipeLineBehavior extends AbstractBehavior
 
    private BasicStates currentState = BasicStates.ENABLE_LIDAR;
 
-   public BasicPipeLineBehavior(String name, YoDouble yoTime, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                WholeBodyControllerParameters wholeBodyControllerParameters)
+   public BasicPipeLineBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
-      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(ros2Node);
-      clearLidarBehavior = new ClearLidarBehavior(ros2Node);
-      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
-                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
-      armGoHomeLeftBehavior = new GoHomeBehavior(ros2Node, yoTime);
+      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(robotName, ros2Node);
+      clearLidarBehavior = new ClearLidarBehavior(robotName, ros2Node);
+      walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel,
+                                                          referenceFrames, wholeBodyControllerParameters.getWalkingControllerParameters());
+      armGoHomeLeftBehavior = new GoHomeBehavior(robotName, ros2Node, yoTime);
 
       setUpPipeline();
    }

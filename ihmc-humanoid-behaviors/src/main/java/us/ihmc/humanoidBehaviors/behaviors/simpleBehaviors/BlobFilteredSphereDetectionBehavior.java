@@ -32,14 +32,14 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
-   public BlobFilteredSphereDetectionBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
-         FullHumanoidRobotModel fullRobotModel)
+   public BlobFilteredSphereDetectionBehavior(String robotName, Ros2Node ros2Node,
+         HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel)
    {
-      super(ros2Node, referenceFrames);
+      super(robotName, ros2Node, referenceFrames);
 
       createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
 
-      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(ros2Node);
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(robotName, ros2Node);
 
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }

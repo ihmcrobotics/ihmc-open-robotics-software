@@ -57,11 +57,11 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    private BasicStates currentState = BasicStates.SET_STANCE;
    private FullHumanoidRobotModel fullRobotModel;
 
-   public FireFighterStanceBehavior(String name, YoDouble yoTime, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
-                                    HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                    AtlasPrimitiveActions atlasPrimitiveActions)
+   public FireFighterStanceBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node,
+                                    FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                    WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
       this.fullRobotModel = fullRobotModel;
       footListBehavior = atlasPrimitiveActions.footstepListBehavior;

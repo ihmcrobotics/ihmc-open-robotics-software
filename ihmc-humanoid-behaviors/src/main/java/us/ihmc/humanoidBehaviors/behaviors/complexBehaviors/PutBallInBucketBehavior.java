@@ -20,10 +20,10 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PutBallInBucketBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                  Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public PutBallInBucketBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                  HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeLine();

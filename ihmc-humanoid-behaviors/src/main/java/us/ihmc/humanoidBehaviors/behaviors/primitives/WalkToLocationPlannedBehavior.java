@@ -33,16 +33,16 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final FootstepListBehavior footstepListBehavior;
    private final PlanPathToLocationBehavior planPathToLocationBehavior;
 
-   public WalkToLocationPlannedBehavior(Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
+   public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                        HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
    {
-      super("WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
+      super(robotName, "WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
 
       this.referenceFrames = referenceFrames;
 
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
-      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
-      planPathToLocationBehavior = new PlanPathToLocationBehavior(ros2Node, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
+      planPathToLocationBehavior = new PlanPathToLocationBehavior(robotName, ros2Node, yoTime);
       setupStateMachine();
    }
 
@@ -62,7 +62,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    protected WalkToLocationStates configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkToLocationStates, BehaviorAction> factory)
    {
-      BehaviorAction setUpState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node));
+      BehaviorAction setUpState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node));
 
       BehaviorAction planFootSteps = new BehaviorAction(planPathToLocationBehavior)
       {
@@ -89,7 +89,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             publishTextToSpeack("Walking Path");
          }
       };
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -97,7 +97,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             publishTextToSpeack("Finished Walking");
          }
       };
-      BehaviorAction planFailedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction planFailedState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

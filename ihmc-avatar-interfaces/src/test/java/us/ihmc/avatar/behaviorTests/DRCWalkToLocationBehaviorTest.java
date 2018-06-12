@@ -518,7 +518,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
-      final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParams);
+      final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(drcBehaviorTestHelper.getRobotName(), ros2Node, fullRobotModel, referenceFrames, walkingControllerParams);
 
       return walkToLocationBehavior;
    }

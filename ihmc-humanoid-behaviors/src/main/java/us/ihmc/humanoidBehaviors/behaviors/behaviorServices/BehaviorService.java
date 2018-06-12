@@ -18,7 +18,7 @@ public abstract class BehaviorService
    private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
 
-   public BehaviorService(String name, Ros2Node ros2Node)
+   public BehaviorService(String robotName, String name, Ros2Node ros2Node)
    {
       this.ros2Node = ros2Node;
       registry = new YoVariableRegistry(name);

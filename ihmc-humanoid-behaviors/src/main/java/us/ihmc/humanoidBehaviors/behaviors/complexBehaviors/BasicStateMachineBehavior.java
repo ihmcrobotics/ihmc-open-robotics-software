@@ -25,9 +25,9 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM, BEHAVIOR_COMPLETE
    }
 
-   public BasicStateMachineBehavior(String name, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public BasicStateMachineBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(name, BasicStates.class, yoTime, ros2Node);
+      super(robotName, name, BasicStates.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       setupStateMachine();
    }

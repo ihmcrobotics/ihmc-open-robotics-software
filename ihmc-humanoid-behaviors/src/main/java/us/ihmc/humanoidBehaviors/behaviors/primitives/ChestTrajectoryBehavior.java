@@ -25,9 +25,9 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<ChestTrajectoryMessage> publisher;
 
-   public ChestTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public ChestTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());

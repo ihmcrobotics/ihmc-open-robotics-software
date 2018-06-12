@@ -48,12 +48,12 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
-   public GraspAndTurnValveBehavior(YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       uiPositionCheckerPacketpublisher = createPublisher(new UIPositionCheckerPacketPubSubType(), "/ihmc/ui_position_checker");
    }
 

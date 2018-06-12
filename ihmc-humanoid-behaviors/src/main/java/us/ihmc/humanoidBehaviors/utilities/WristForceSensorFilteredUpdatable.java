@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
@@ -65,7 +66,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final IHMCROS2Publisher<HandCollisionDetectedPacket> publisher;
 
-   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
+   public WristForceSensorFilteredUpdatable(String robotName, RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
                                             ForceSensorDataHolder forceSensorDataHolder, double DT, Ros2Node ros2Node, YoVariableRegistry registry)
    {
       this.DT = DT;
@@ -117,7 +118,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
-      publisher = ROS2Tools.createPublisher(ros2Node, new HandCollisionDetectedPacketPubSubType(), "/ihmc/hand_collision_detected");
+      publisher = ROS2Tools.createPublisher(ros2Node, HandCollisionDetectedPacket.class, IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName));
 
       initialize();
    }

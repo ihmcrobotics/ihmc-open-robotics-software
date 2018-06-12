@@ -65,18 +65,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    private final IHMCROS2Publisher<DoorLocationPacket> publisher;
 
-   public WalkThroughDoorBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                                  HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                  AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkThroughDoorBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                  FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                  WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
+      super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
 
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      searchForDoorBehavior = new SearchForDoorBehavior(ros2Node);
-      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, ros2Node, atlasPrimitiveActions);
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      searchForDoorBehavior = new SearchForDoorBehavior(robotName, ros2Node);
+      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       publisher = createPublisher(new DoorLocationPacketPubSubType(), "/ihmc/door_location");
       setupStateMachine();
    }
@@ -178,7 +178,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -187,7 +187,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

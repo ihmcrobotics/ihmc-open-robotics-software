@@ -42,15 +42,15 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   public PlanPathToLocationBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       createSubscriber(footPlanStatusQueue, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
       toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
       footstepPlanningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
 
-      sleepBehavior = new SleepBehavior(ros2Node, yoTime);
+      sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
 
    public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
@@ -81,7 +81,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
       pipeLine.clearAll();
 
-      BehaviorAction wakeup = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction wakeup = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -95,7 +95,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          }
       };
 
-      BehaviorAction requestPlan = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction requestPlan = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -127,7 +127,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          }
       };
 
-      BehaviorAction processPlan = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction processPlan = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

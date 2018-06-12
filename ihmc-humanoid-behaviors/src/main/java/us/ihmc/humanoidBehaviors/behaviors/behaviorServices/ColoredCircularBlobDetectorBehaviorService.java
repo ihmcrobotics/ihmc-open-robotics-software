@@ -45,9 +45,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private static final Scalar circleColor = new Scalar(160, 0, 0);
    private final IHMCROS2Publisher<VideoPacket> videoPublisher;
 
-   public ColoredCircularBlobDetectorBehaviorService(Ros2Node ros2Node)
+   public ColoredCircularBlobDetectorBehaviorService(String robotName, Ros2Node ros2Node)
    {
-      super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
+      super(robotName, ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
       createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
       createSubscriber(robotConfigurationDataQueue, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data");

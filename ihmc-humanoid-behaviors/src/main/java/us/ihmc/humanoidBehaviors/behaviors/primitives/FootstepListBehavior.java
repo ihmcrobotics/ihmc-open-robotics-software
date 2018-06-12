@@ -54,9 +54,9 @@ public class FootstepListBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public FootstepListBehavior(Ros2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
+   public FootstepListBehavior(String robotName, Ros2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
       walkingStatusQueue = new ConcurrentListeningQueue<>(40);
       createSubscriber(footstepStatusQueue, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");

@@ -95,6 +95,7 @@ public class DRCSimulationTestHelper
    private final DRCGuiInitialSetup guiInitialSetup;
 
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
+   protected final String robotName;
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
@@ -106,6 +107,8 @@ public class DRCSimulationTestHelper
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
+
+      robotName = robotModel.getSimpleRobotName();
 
       if (testEnvironment != null)
          this.testEnvironment = testEnvironment;
@@ -563,5 +566,10 @@ public class DRCSimulationTestHelper
    public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
    {
       this.networkProcessorParameters = networkProcessorParameters;
+   }
+
+   public String getRobotName()
+   {
+      return robotName;
    }
 }

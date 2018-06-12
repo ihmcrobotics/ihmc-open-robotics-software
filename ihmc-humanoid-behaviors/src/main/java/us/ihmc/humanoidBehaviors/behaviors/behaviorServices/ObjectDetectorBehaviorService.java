@@ -49,9 +49,9 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    private final YoBoolean shouldRecordVideoPackets;
    private final VideoPacketToImageFilesRecorder imageFilesRecorder = new VideoPacketToImageFilesRecorder(videoFilesRecordingLocation);
 
-   public ObjectDetectorBehaviorService(Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
+   public ObjectDetectorBehaviorService(String robotName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
-      super(ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
+      super(robotName, ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
       createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
 

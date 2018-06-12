@@ -12,9 +12,9 @@ public class ClearLidarBehavior extends AbstractBehavior
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
 //   private DepthDataClearCommand clearLidarPacket;
 
-   public ClearLidarBehavior(Ros2Node ros2Node)
+   public ClearLidarBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
    }
 

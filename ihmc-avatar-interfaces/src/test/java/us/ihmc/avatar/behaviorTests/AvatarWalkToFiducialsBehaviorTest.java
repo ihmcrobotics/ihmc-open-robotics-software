@@ -84,18 +84,20 @@ public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(ros2Node, yoGraphicsListRegistry);
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(drcBehaviorTestHelper.getRobotName(), ros2Node,
+                                                                                                            yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      FollowFiducialBehavior followFiducialBehavior = new FollowFiducialBehavior(ros2Node, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      FollowFiducialBehavior followFiducialBehavior = new FollowFiducialBehavior(drcBehaviorTestHelper.getRobotName(), ros2Node, fullRobotModel,
+                                                                                 referenceFrames, fiducialDetectorBehaviorService);
       followFiducialBehavior.initialize();
-      
+
       drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
       drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(followFiducialBehavior.getYoVariableRegistry());
-      
+
       assertTrue(drcBehaviorTestHelper.executeBehaviorUntilDone(followFiducialBehavior));
 
       assertTrue(followFiducialBehavior.isDone());

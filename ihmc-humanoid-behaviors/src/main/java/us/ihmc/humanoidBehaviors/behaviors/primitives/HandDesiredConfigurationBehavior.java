@@ -26,9 +26,9 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final boolean DEBUG = false;
    private final IHMCROS2Publisher<HandDesiredConfigurationMessage> publisher;
 
-   public HandDesiredConfigurationBehavior(String name, Ros2Node ros2Node, YoDouble yoTime)
+   public HandDesiredConfigurationBehavior(String robotName, String name, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(name,ros2Node);
+      super(robotName,name, ros2Node);
       this.yoTime = yoTime;
 
       hasInputBeenSet = new YoBoolean(getName() + "hasInputBeenSet", registry);

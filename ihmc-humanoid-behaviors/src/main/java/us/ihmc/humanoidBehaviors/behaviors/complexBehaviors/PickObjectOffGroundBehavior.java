@@ -31,10 +31,10 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    private double objectRadius = 0;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PickObjectOffGroundBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                      Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public PickObjectOffGroundBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                      HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeline();

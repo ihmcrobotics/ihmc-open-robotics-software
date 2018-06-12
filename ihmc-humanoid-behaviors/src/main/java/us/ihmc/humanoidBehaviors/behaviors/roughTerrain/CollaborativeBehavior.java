@@ -23,11 +23,11 @@ public class CollaborativeBehavior extends AbstractBehavior
    private ConcurrentListeningQueue<VideoPacket> cameraData = new ConcurrentListeningQueue<>(20);
    private boolean testImage = false;
 
-   public CollaborativeBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullHumanoidRobotModel,
-                                DRCRobotSensorInformation robotSensorInfo, WalkingControllerParameters walkingControllerParameters,
-                                YoGraphicsListRegistry graphicsListRegistry)
+   public CollaborativeBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
+                                FullHumanoidRobotModel fullHumanoidRobotModel, DRCRobotSensorInformation robotSensorInfo,
+                                WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       createSubscriber(cameraData, new VideoPacketPubSubType(), "/ihmc/video");
       DRCRobotCameraParameters[] robotCameraParameters = robotSensorInfo.getCameraParameters();
    }

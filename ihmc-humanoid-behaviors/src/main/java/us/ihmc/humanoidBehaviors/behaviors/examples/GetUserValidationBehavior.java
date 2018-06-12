@@ -14,9 +14,9 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    CommunicationBridge coactiveBehaviorsNetworkManager;
    private boolean recievedMessage = false;
 
-   public GetUserValidationBehavior(Ros2Node ros2Node)
+   public GetUserValidationBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; // FIXME I broke it when switching to pub-sub (Sylvain)
       //      coactiveBehaviorsNetworkManager.addListeners(this);
    }

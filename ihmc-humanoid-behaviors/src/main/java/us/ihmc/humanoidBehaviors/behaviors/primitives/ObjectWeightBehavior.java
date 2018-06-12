@@ -14,9 +14,9 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private ObjectWeightPacket objectWeightPacket;
    private IHMCROS2Publisher<ObjectWeightPacket> publisher;
 
-   public ObjectWeightBehavior(Ros2Node ros2Node)
+   public ObjectWeightBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       publisher = createPublisher(new ObjectWeightPacketPubSubType(), "/ihmc/object_weight");
    }

@@ -25,25 +25,25 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
-   public ResetRobotBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public ResetRobotBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(true, true, true, true, ros2Node, yoTime);
+      this(robotName, true, true, true, true, ros2Node, yoTime);
    }
 
-   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, Ros2Node ros2Node, YoDouble yoTime)
+   public ResetRobotBehavior(String robotName, boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.leftArm = leftArm;
       this.rightArm = rightArm;
       this.chest = chest;
       this.pelvis = pelvis;
 
-      chestGoHomeBehavior = new GoHomeBehavior("chest", ros2Node, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior(robotName, "chest", ros2Node, yoTime);
 
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", ros2Node, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior(robotName, "pelvis", ros2Node, yoTime);
 
-      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", ros2Node, yoTime);
-      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", ros2Node, yoTime);
+      armGoHomeLeftBehavior = new GoHomeBehavior(robotName, "leftArm", ros2Node, yoTime);
+      armGoHomeRightBehavior = new GoHomeBehavior(robotName, "rightArm", ros2Node, yoTime);
    }
 
    @Override

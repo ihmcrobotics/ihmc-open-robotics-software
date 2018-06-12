@@ -63,9 +63,9 @@ public class SphereDetectionBehavior extends AbstractBehavior
   
    private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
 
-   public SphereDetectionBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
       detectedObjectPublisher = createPublisher(new DetectedObjectPacketPubSubType(), "/ihmc/detected_object");
 

@@ -20,14 +20,14 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> publisher;
 
-   public HeadTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public HeadTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, ros2Node, yoTime);
+      this(robotName, null, ros2Node, yoTime);
    }
 
-   public HeadTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public HeadTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());

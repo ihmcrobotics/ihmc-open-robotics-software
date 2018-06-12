@@ -13,14 +13,14 @@ public class CountByNumberBehavior extends AbstractBehavior
    int timeToCount;
    double result = 0;
 
-   public CountByNumberBehavior(Ros2Node ros2Node)
+   public CountByNumberBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
    }
 
-   public CountByNumberBehavior(Ros2Node ros2Node, double numberToCountBy, int timeToCount)
+   public CountByNumberBehavior(String robotName, Ros2Node ros2Node, double numberToCountBy, int timeToCount)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       setInput(numberToCountBy, timeToCount);
    }

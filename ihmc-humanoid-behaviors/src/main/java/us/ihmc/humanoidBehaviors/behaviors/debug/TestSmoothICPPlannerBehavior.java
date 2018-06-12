@@ -61,11 +61,11 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
 
    private RobotSide side = RobotSide.LEFT;
 
-   public TestSmoothICPPlannerBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                                       HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                       AtlasPrimitiveActions atlasPrimitiveActions)
+   public TestSmoothICPPlannerBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                       FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                       WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("testSmoothICPPlannerBehavior", TestSmoothICPPlannerBehaviorState.class, yoTime, ros2Node);
+      super(robotName, "testSmoothICPPlannerBehavior", TestSmoothICPPlannerBehaviorState.class, yoTime, ros2Node);
 
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
@@ -86,7 +86,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       finalTransferTime = new YoDouble("TestSmoothICPPlannerFinalTransferTime", registry);
       finalTransferTime.set(defaultFinalTransferTime);
 
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       setupStateMachine();
    }
 
@@ -150,7 +150,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

@@ -36,9 +36,9 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ChestTrajectoryMessage> chestPublisher;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public TestGarbageGenerationBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
+   public TestGarbageGenerationBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
       timer = new YoStopwatch(yoTime);
       armPublisher = createPublisher(new ArmTrajectoryMessagePubSubType(), "/ihmc/arm_trajectory");

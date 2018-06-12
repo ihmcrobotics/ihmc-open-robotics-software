@@ -43,17 +43,17 @@ public class KickBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                       HumanoidReferenceFrames referenceFrames)
+   public KickBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                       FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       trajectoryTime = new YoDouble("kickTrajectoryTime", registry);
       trajectoryTime.set(0.5);
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
-      footTrajectoryBehavior = new FootTrajectoryBehavior(ros2Node, yoTime, yoDoubleSupport);
+      footTrajectoryBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
       registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
    }
 
@@ -118,7 +118,7 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(ros2Node);
+      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(robotName, ros2Node);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 

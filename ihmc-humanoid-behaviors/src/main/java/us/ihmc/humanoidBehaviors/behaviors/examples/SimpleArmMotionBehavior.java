@@ -29,13 +29,14 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
    private final ResetRobotBehavior resetRobotBehavior;
 
-   public SimpleArmMotionBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public SimpleArmMotionBehavior(String robotName, YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
+                                  AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
 
    }
 

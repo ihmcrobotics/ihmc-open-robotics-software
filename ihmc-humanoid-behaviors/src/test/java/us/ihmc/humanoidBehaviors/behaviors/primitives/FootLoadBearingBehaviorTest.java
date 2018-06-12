@@ -19,7 +19,7 @@ public class FootLoadBearingBehaviorTest
    public void testSetInput()
    {
       Ros2Node ros2Node = null;
-      FootLoadBearingBehavior footLoadBearingBehavior = new FootLoadBearingBehavior(ros2Node);
+      FootLoadBearingBehavior footLoadBearingBehavior = new FootLoadBearingBehavior("Bloppy", ros2Node);
 
       FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
 

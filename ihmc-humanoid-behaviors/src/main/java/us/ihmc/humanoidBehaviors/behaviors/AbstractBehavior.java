@@ -59,14 +59,16 @@ public abstract class AbstractBehavior implements RobotController
 
    private final List<BehaviorService> behaviorsServices;
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   protected final String robotName;
 
-   public AbstractBehavior(Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, Ros2Node ros2Node)
    {
-      this(null, ros2Node);
+      this(robotName, null, ros2Node);
    }
 
-   public AbstractBehavior(String namePrefix, Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
    {
+      this.robotName = robotName;
       this.ros2Node = ros2Node;
 
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
