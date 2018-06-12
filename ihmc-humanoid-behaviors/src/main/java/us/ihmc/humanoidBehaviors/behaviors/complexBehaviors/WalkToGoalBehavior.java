@@ -56,14 +56,14 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
 
-   public WalkToGoalBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-                             YoDouble yoTime)
+   public WalkToGoalBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
+                             WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.referenceFrames = referenceFrames;
 
-      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
       registry.addChild(footstepListBehavior.getYoVariableRegistry());
 
       isDone = new YoBoolean("isDone", registry);

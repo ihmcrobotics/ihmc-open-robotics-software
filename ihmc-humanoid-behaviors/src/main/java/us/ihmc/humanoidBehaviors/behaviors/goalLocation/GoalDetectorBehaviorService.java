@@ -6,9 +6,9 @@ import us.ihmc.ros2.Ros2Node;
 
 public abstract class GoalDetectorBehaviorService extends ThreadedBehaviorService
 {
-   public GoalDetectorBehaviorService(String threadName, Ros2Node ros2Node)
+   public GoalDetectorBehaviorService(String robotName, String threadName, Ros2Node ros2Node)
    {
-      super(threadName, ros2Node);
+      super(robotName, threadName, ros2Node);
    }
 
    public abstract boolean getGoalHasBeenLocated();

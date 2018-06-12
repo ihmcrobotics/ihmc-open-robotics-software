@@ -19,9 +19,9 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public GetLidarScanExampleBehavior(Ros2Node ros2Node)
+   public GetLidarScanExampleBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
       createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
    }

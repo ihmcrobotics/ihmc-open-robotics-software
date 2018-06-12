@@ -38,18 +38,18 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final double standingDistance = 0.4;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
-                                                    WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
-                                                    AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToPickObjectOffGroundLocationBehavior(String robotName, YoDouble yoTime, HumanoidReferenceFrames referenceFrames,
+                                                    Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                                    FullHumanoidRobotModel fullRobotModel, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("WalkState", WalkState.class, yoTime, ros2Node);
+      super(robotName, "WalkState", WalkState.class, yoTime, ros2Node);
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.referenceFrames = referenceFrames;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
-      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
-                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
+      walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel,
+                                                          referenceFrames, wholeBodyControllerParameters.getWalkingControllerParameters());
       setupStateMachine();
    }
 

@@ -223,8 +223,8 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
                                                                                  double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior("test", drcBehaviorTestHelper.getRos2Node(),
-                                                                                             drcBehaviorTestHelper.getYoTime());
+      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior(drcBehaviorTestHelper.getRobotName(), "test",
+                                                                                             drcBehaviorTestHelper.getRos2Node(), drcBehaviorTestHelper.getYoTime());
 
       behavior.initialize();
       behavior.setInput(handDesiredConfigurationMessage);

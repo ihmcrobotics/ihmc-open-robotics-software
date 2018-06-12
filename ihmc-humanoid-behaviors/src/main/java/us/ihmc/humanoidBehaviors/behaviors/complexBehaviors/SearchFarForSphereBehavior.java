@@ -28,19 +28,19 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final boolean requireUserValidation;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public SearchFarForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                     Ros2Node ros2Node, boolean requireUserValidation,
-                                     AtlasPrimitiveActions atlasPrimitiveActions)
+   public SearchFarForSphereBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                     HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
+                                     boolean requireUserValidation, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("SearchForSpehereFar", SearchFarState.class, yoTime, ros2Node);
+      super(robotName, "SearchForSpehereFar", SearchFarState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(ros2Node, referenceFrames);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
 
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(ros2Node, coactiveElement.validClicked,
-                                                                        coactiveElement.validAcknowledged);
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node,
+                                                                        coactiveElement.validClicked, coactiveElement.validAcknowledged);
       setupStateMachine();
    }
 

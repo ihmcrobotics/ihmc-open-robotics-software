@@ -87,10 +87,10 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<RequestPlanarRegionsListMessage> planarRegionsRequestPublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
-   public WalkOverTerrainStateMachineBehavior(Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                              HumanoidReferenceFrames referenceFrames)
+   public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime,
+                                              WholeBodyControllerParameters wholeBodyControllerParameters, HumanoidReferenceFrames referenceFrames)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       createSubscriber(plannerResult::set, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
       createSubscriber((packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())),

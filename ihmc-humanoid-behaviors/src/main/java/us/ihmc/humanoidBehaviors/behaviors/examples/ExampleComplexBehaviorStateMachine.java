@@ -29,9 +29,9 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final ResetRobotBehavior resetRobotBehavior;
    private final ReferenceFrame midZupFrame;
 
-   public ExampleComplexBehaviorStateMachine(Ros2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
+   public ExampleComplexBehaviorStateMachine(String robotName, Ros2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("ExampleStateMachine", ExampleStates.class, yoTime, ros2Node);
+      super(robotName, "ExampleStateMachine", ExampleStates.class, yoTime, ros2Node);
 
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
       //      coactiveBehaviorsNetworkManager = ros2Node;
@@ -40,11 +40,11 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       //create your behaviors
-      getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(ros2Node);
-      getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(ros2Node);
-      userValidationExampleBehavior = new GetUserValidationBehavior(ros2Node);
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
-      simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, ros2Node, atlasPrimitiveActions);
+      getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(robotName, ros2Node);
+      getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(robotName, ros2Node);
+      userValidationExampleBehavior = new GetUserValidationBehavior(robotName, ros2Node);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
+      simpleArmMotionBehavior = new SimpleArmMotionBehavior(robotName, yoTime, atlasPrimitiveActions.referenceFrames, ros2Node, atlasPrimitiveActions);
 
       // FIXME
       //      statemachine.getStateYoVariable().addVariableChangedListener(new VariableChangedListener()

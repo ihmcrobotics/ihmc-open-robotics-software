@@ -24,9 +24,9 @@ public class FootTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<FootTrajectoryMessage> publisher;
 
-   public FootTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport)
+   public FootTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.yoTime = yoTime;
       this.doubleSupport = yoDoubleSupport;

@@ -10,14 +10,14 @@ public class SleepBehavior extends AbstractBehavior
    private final YoDouble sleepTime;
    private final YoStopwatch stopwatch;
 
-   public SleepBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public SleepBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(ros2Node, yoTime, 1.0);
+      this(robotName, ros2Node, yoTime, 1.0);
    }
 
-   public SleepBehavior(Ros2Node ros2Node, YoDouble yoTime, double sleepTime)
+   public SleepBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, double sleepTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.sleepTime = new YoDouble("sleepTime", registry);
       this.sleepTime.set(sleepTime);

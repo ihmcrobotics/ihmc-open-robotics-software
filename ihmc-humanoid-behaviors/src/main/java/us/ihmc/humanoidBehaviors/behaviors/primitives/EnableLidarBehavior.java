@@ -13,9 +13,9 @@ public class EnableLidarBehavior extends AbstractBehavior
 //   private DepthDataStateCommand enableLidarPacket;
 //   private LidarState lidarState;
 
-   public EnableLidarBehavior(Ros2Node ros2Node)
+   public EnableLidarBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
    }
 

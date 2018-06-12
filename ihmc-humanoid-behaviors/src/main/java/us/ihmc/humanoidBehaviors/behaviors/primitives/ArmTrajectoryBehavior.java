@@ -36,14 +36,14 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
    private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
 
-   public ArmTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public ArmTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, ros2Node, yoTime);
+      this(robotName, null, ros2Node, yoTime);
    }
 
-   public ArmTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public ArmTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());

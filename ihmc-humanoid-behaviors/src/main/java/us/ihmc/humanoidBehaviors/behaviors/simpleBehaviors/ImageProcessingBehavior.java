@@ -20,9 +20,9 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
 {
    private final CompressedVideoDataServer videoDataServer;
 
-   public ImageProcessingBehavior(String namePrefix, Ros2Node ros2Node)
+   public ImageProcessingBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
 
       IHMCROS2Publisher<VideoPacket> publisher = createPublisher(new VideoPacketPubSubType(), "/ihmc/video");
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler(publisher));

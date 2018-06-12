@@ -13,14 +13,14 @@ public class FootLoadBearingBehavior extends AbstractBehavior
    private FootLoadBearingMessage outgoingFootLoadBearingMessage;
    private final IHMCROS2Publisher<FootLoadBearingMessage> publisher;
 
-   public FootLoadBearingBehavior(Ros2Node ros2Node)
+   public FootLoadBearingBehavior(String robotName, Ros2Node ros2Node)
    {
-      this(null, ros2Node);
+      this(robotName, null, ros2Node);
    }
 
-   public FootLoadBearingBehavior(String prefix, Ros2Node ros2Node)
+   public FootLoadBearingBehavior(String robotName, String prefix, Ros2Node ros2Node)
    {
-      super(prefix, ros2Node);
+      super(robotName, prefix, ros2Node);
       publisher = createPublisher(new FootLoadBearingMessagePubSubType(), "/ihmc/foot_load_bearing");
    }
 

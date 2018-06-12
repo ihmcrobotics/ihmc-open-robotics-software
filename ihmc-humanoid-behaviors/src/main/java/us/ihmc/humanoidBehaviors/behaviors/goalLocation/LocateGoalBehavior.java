@@ -15,9 +15,9 @@ public class LocateGoalBehavior extends AbstractBehavior
    private final FramePose3D foundFiducialPose = new FramePose3D();
    private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-   public LocateGoalBehavior(Ros2Node ros2Node, GoalDetectorBehaviorService detectorBehaviorService)
+   public LocateGoalBehavior(String robotName, Ros2Node ros2Node, GoalDetectorBehaviorService detectorBehaviorService)
    {
-      super(detectorBehaviorService.getClass().getSimpleName(), ros2Node);
+      super(robotName, detectorBehaviorService.getClass().getSimpleName(), ros2Node);
 
       this.detectorBehaviorService = detectorBehaviorService;
       addBehaviorService(detectorBehaviorService);

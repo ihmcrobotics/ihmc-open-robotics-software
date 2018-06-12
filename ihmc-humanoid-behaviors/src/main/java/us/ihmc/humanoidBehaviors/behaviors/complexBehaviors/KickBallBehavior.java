@@ -58,10 +58,10 @@ public class KickBallBehavior extends AbstractBehavior
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                           HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+   public KickBallBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                           FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
@@ -69,22 +69,22 @@ public class KickBallBehavior extends AbstractBehavior
       // create sub-behaviors:
       if (USE_BLOB_FILTERING)
       {
-         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(ros2Node, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(robotName, ros2Node, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
          sphereDetectionBehavior.addHSVRange(new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255)));
          this.sphereDetectionBehavior = sphereDetectionBehavior;
       }
       else
       {
-         sphereDetectionBehavior = new SphereDetectionBehavior(ros2Node, referenceFrames);
+         sphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
       }
 
       behaviors.add(sphereDetectionBehavior);
 
-      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
-                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
+      walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel,
+                                                          referenceFrames, wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
 
-      kickBehavior = new KickBehavior(ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
+      kickBehavior = new KickBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
       behaviors.add(kickBehavior);
 
       for (AbstractBehavior behavior : behaviors)
@@ -99,7 +99,7 @@ public class KickBallBehavior extends AbstractBehavior
          registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
          registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
-         waitForUserValidationBehavior = new WaitForUserValidationBehavior(ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
+         waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
          behaviors.add(waitForUserValidationBehavior);
 
       }

@@ -74,10 +74,10 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   public WalkToLocationBehavior(Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                 WalkingControllerParameters walkingControllerParameters)
+   public WalkToLocationBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                 HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -88,7 +88,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength() / 2,
                                                walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0, Math.toRadians(20.0),
                                                Math.toRadians(10.0), 0.4); // 10 5 0.4
-      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {

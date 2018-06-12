@@ -17,9 +17,9 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public GetVideoPacketExampleBehavior(Ros2Node ros2Node)
+   public GetVideoPacketExampleBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
       createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
    }

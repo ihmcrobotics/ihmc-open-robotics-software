@@ -11,15 +11,15 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    private final Class<E> keyType;
    private BehaviorStateMachine<E> stateMachine = null;
 
-   public StateMachineBehavior(String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, Ros2Node ros2Node)
+   public StateMachineBehavior(String robotName, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, Ros2Node ros2Node)
    {
-      this(null, stateMachineName, keyType, timeProvider, ros2Node);
+      this(robotName, null, stateMachineName, keyType, timeProvider, ros2Node);
    }
 
-   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider,
-                               Ros2Node ros2Node)
+   public StateMachineBehavior(String robotName, String namePrefix, String stateMachineName, Class<E> keyType,
+                               DoubleProvider timeProvider, Ros2Node ros2Node)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
       this.keyType = keyType;
    }
 

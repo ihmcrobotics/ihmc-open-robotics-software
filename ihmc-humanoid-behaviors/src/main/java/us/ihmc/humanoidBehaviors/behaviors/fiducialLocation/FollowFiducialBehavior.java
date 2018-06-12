@@ -95,10 +95,10 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
-   public FollowFiducialBehavior(Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                 GoalDetectorBehaviorService goalDetectorBehaviorService)
+   public FollowFiducialBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                                 HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super(FollowFiducialBehavior.class.getSimpleName() + "_" + goalDetectorBehaviorService.getClass().getSimpleName(), ros2Node);
+      super(robotName, FollowFiducialBehavior.class.getSimpleName() + "_" + goalDetectorBehaviorService.getClass().getSimpleName(), ros2Node);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;

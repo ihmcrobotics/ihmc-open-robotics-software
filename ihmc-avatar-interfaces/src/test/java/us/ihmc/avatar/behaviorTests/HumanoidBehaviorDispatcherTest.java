@@ -150,7 +150,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, yoGraphicsListRegistry, registry);
+      behaviorDispatcher = setupBehaviorDispatcher(getRobotModel().getSimpleRobotName(), fullRobotModel, ros2Node, yoGraphicsListRegistry, registry);
 
       CapturePointUpdatable capturePointUpdatable = createCapturePointUpdateable(drcSimulationTestHelper, registry, yoGraphicsListRegistry);
       behaviorDispatcher.addUpdatable(capturePointUpdatable);
@@ -180,7 +180,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
+   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(String robotName, FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
                                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -199,7 +199,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(robotName, yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
                                                                               desiredBehaviorSubscriber, ros2Node, yoVariableServer, HumanoidBehaviorType.class,
                                                                               HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
 
@@ -215,7 +215,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(ros2Node, yoTime);
+      PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(drcSimulationTestHelper.getRobotName(),
+                                                                                                                        ros2Node, yoTime);
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.TEST, pelvisOrientationTrajectoryBehavior);
 
       behaviorDispatcher.start();
@@ -259,7 +260,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(drcSimulationTestHelper.getRobotName(), ros2Node, fullRobotModel,
+                                                                                 referenceFrames, walkingControllerParameters);
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();
@@ -324,8 +326,9 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
-      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, supportLeg, referenceFrames, yoTime, yoDoubleSupport, ros2Node,
-                                                                     wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(drcSimulationTestHelper.getRobotName(), fullRobotModel, supportLeg, referenceFrames,
+                                                                     yoTime, yoDoubleSupport, ros2Node, wholeBodyControllerParameters, yoSupportPolygon,
+                                                                     yoGraphicsListRegistry);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
@@ -368,7 +371,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(drcSimulationTestHelper.getRobotName(), ros2Node, fullRobotModel,
+                                                                                 referenceFrames, walkingControllerParameters);
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();
@@ -416,7 +420,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(drcSimulationTestHelper.getRobotName(), ros2Node, fullRobotModel,
+                                                                                 referenceFrames, walkingControllerParameters);
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();

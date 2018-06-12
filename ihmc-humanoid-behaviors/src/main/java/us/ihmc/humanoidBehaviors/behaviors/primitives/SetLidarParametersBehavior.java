@@ -14,9 +14,9 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private DepthDataFilterParameters lidarParamPacket;
 
-   public SetLidarParametersBehavior(Ros2Node ros2Node)
+   public SetLidarParametersBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
    }
 

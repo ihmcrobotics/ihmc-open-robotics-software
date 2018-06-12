@@ -70,16 +70,16 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<KinematicsToolboxRigidBodyMessage> kinematicsToolboxRigidBodyPublisher;
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
-   public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime, Ros2Node ros2Node,
-                                             FullHumanoidRobotModel fullRobotModel)
+   public WholeBodyInverseKinematicsBehavior(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
+                                             Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
-      this(null, fullRobotModelFactory, yoTime, ros2Node, fullRobotModel);
+      this(robotName, null, fullRobotModelFactory, yoTime, ros2Node, fullRobotModel);
    }
 
-   public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime, Ros2Node ros2Node,
-                                             FullHumanoidRobotModel fullRobotModel)
+   public WholeBodyInverseKinematicsBehavior(String robotName, String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
+                                             Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
 

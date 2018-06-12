@@ -35,12 +35,12 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame midZupFrame;
 
-   public WalkToInteractableObjectBehavior(YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToInteractableObjectBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("WalkState", WalkToObjectState.class, yoTime, ros2Node);
+      super(robotName, "WalkState", WalkToObjectState.class, yoTime, ros2Node);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
 
-      reset = new ResetRobotBehavior(false, false, false, false, ros2Node, yoTime);
+      reset = new ResetRobotBehavior(robotName, false, false, false, false, ros2Node, yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       setupStateMachine();
    }
@@ -118,7 +118,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          }
       };
 
-      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -128,7 +128,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

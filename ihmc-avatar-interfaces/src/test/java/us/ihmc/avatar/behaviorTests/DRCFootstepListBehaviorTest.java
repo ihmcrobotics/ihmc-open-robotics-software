@@ -108,7 +108,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(success);
 
       PrintTools.debug(this, "Dispatching Behavior");
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
                                                                            getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
@@ -164,7 +164,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       PrintTools.debug(this, "Dispatching Behavior");
       drcBehaviorTestHelper.updateRobotModel();
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
                                                                            getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
@@ -226,7 +226,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       PrintTools.debug(this, "Dispatching Behavior");
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
                                                                            getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
@@ -297,7 +297,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       xOffsets.add(0.2);
       xOffsets.add(0.3);
 
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
                                                                            getRobotModel().getWalkingControllerParameters());
       SideDependentList<FramePose2D> desiredFinalFootPoses = new SideDependentList<FramePose2D>();
 

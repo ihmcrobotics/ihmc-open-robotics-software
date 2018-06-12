@@ -238,9 +238,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber,
-                                                                              desiredBehaviorSubscriber, ros2Node, yoVariableServer, HumanoidBehaviorType.class,
-                                                                              HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(robotName, yoTimeBehaviorDispatcher, robotDataReceiver,
+                                                                              desiredBehaviorControlSubscriber, desiredBehaviorSubscriber, ros2Node,
+                                                                              yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
+                                                                              yoGraphicsListRegistry);
 
       ret.addUpdatable(capturePointUpdatable);
       ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
@@ -257,8 +258,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel,
-                                                                                                        drcRobotModel.getSensorInformation(),
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(drcRobotModel.getSimpleRobotName(), robotSide,
+                                                                                                        fullRobotModel, drcRobotModel.getSensorInformation(),
                                                                                                         robotDataReceiver.getForceSensorDataHolder(),
                                                                                                         IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
                                                                                                         ros2Node, registry);
@@ -272,7 +273,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status", s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status",
+                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.readNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
 

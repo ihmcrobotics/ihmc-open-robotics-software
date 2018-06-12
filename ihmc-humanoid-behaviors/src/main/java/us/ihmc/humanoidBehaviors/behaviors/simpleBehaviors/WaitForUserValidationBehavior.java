@@ -15,9 +15,9 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
 
    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-   public WaitForUserValidationBehavior(Ros2Node ros2Node, YoBoolean validClicked, YoBoolean validAcknoledged)
+   public WaitForUserValidationBehavior(String robotName, Ros2Node ros2Node, YoBoolean validClicked, YoBoolean validAcknoledged)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.validAcknoledged = validAcknoledged;
       this.validClicked = validClicked;
 

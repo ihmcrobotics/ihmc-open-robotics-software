@@ -74,9 +74,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
 
-   public BehaviorDispatcher(YoDouble yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-                             BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum,
-                             E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
+                             BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, Ros2Node ros2Node, YoVariableServer yoVariableServer,
+                             Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
       this.stopBehaviorKey = stopBehavior;
@@ -92,7 +92,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       stateMachineFactory = new StateMachineFactory<>(behaviourEnum);
       stateMachineFactory.setNamePrefix("behaviorDispatcher").setRegistry(registry).buildYoClock(yoTime);
 
-      SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(ros2Node);
+      SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(robotName, ros2Node);
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
       behaviorStatusPublisher = ROS2Tools.createPublisher(ros2Node, new BehaviorStatusPacketPubSubType(), "/ihmc/behavior_status");

@@ -251,11 +251,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
-   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                             YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
-                             YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node,
+                             WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
@@ -331,48 +331,48 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       bootyShakeTime.set(1.0);
 
-      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
 
-      chestTrajectoryBehavior = new ChestTrajectoryBehavior(ros2Node, yoTime);
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
 
-      chestGoHomeBehavior = new GoHomeBehavior("chest", ros2Node, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior(robotName, "chest", ros2Node, yoTime);
       registry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
 
-      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(ros2Node, yoTime);
+      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(pelvisTrajectoryBehavior.getYoVariableRegistry());
 
-      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(ros2Node, yoTime);
+      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(pelvisOrientationTrajectoryBehavior.getYoVariableRegistry());
 
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", ros2Node, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior(robotName, "pelvis", ros2Node, yoTime);
       registry.addChild(pelvisGoHomeBehavior.getYoVariableRegistry());
 
-      footPoseBehavior = new FootTrajectoryBehavior(ros2Node, yoTime, yoDoubleSupport);
+      footPoseBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
       registry.addChild(footPoseBehavior.getYoVariableRegistry());
 
-      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
       registry.addChild(footstepListBehavior.getYoVariableRegistry());
 
-      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(ros2Node, yoTime);
+      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
 
-      turnInPlaceBehavior = new TurnInPlaceBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         ArmTrajectoryBehavior armTrajectoryBehavior = new ArmTrajectoryBehavior(namePrefix, ros2Node, yoTime);
+         ArmTrajectoryBehavior armTrajectoryBehavior = new ArmTrajectoryBehavior(robotName, namePrefix, ros2Node, yoTime);
          registry.addChild(armTrajectoryBehavior.getYoVariableRegistry());
          armTrajectoryBehaviors.put(robotSide, armTrajectoryBehavior);
 
-         HandTrajectoryBehavior handTrajectoryBehavior = new HandTrajectoryBehavior(namePrefix, ros2Node, yoTime);
+         HandTrajectoryBehavior handTrajectoryBehavior = new HandTrajectoryBehavior(robotName, namePrefix, ros2Node, yoTime);
          registry.addChild(handTrajectoryBehavior.getYoVariableRegistry());
          handTrajectoryBehaviors.put(robotSide, handTrajectoryBehavior);
 
-         GoHomeBehavior armGoHomeBehavior = new GoHomeBehavior(namePrefix + "Arm", ros2Node, yoTime);
+         GoHomeBehavior armGoHomeBehavior = new GoHomeBehavior(robotName, namePrefix + "Arm", ros2Node, yoTime);
          registry.addChild(armGoHomeBehavior.getYoVariableRegistry());
          armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
@@ -421,7 +421,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
 
       createSubscriber(inputListeningQueue, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status");
-      new SleepBehavior(ros2Node, yoTime);
+      new SleepBehavior(robotName, ros2Node, yoTime);
 
       stampedPosePublisher = createPublisher(new StampedPosePacketPubSubType(), "/ihmc/stamped_pose");
    }
@@ -2825,7 +2825,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private BehaviorAction createSleepTask(double sleepTime)
    {
-      SleepBehavior sleepBehavior = new SleepBehavior(ros2Node, yoTime);
+      SleepBehavior sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       SleepTask sleepTask = new SleepTask(sleepBehavior, sleepTime);
       return sleepTask;
    }

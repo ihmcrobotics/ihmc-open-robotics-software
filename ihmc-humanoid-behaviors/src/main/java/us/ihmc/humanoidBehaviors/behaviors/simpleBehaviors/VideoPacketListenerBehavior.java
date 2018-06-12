@@ -17,9 +17,9 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
    private final CompressedVideoDataClient videoDataClient;
 
-   public VideoPacketListenerBehavior(String namePrefix, Ros2Node ros2Node)
+   public VideoPacketListenerBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 

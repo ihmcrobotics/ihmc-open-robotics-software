@@ -14,9 +14,9 @@ public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorSer
    private final HumanoidReferenceFrames referenceFrames;
    private final Point3D constantGoalLocationInMidFeetZUpFrame = new Point3D();
 
-   public ConstantGoalDetectorBehaviorService(HumanoidReferenceFrames referenceFrames, Point3D constantGoalLocationInMidFeetZUpFrame, Ros2Node ros2Node)
+   public ConstantGoalDetectorBehaviorService(String robotName, HumanoidReferenceFrames referenceFrames, Point3D constantGoalLocationInMidFeetZUpFrame, Ros2Node ros2Node)
    {
-      super(ConstantGoalDetectorBehaviorService.class.getSimpleName(), ros2Node);
+      super(robotName, ConstantGoalDetectorBehaviorService.class.getSimpleName(), ros2Node);
       this.referenceFrames = referenceFrames;
       this.constantGoalLocationInMidFeetZUpFrame.set(constantGoalLocationInMidFeetZUpFrame);
    }

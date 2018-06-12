@@ -24,14 +24,14 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> publisher;
 
-   public WholeBodyTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public WholeBodyTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, ros2Node, yoTime);
+      this(robotName, null, ros2Node, yoTime);
    }
 
-   public WholeBodyTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public WholeBodyTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, ros2Node);
+      super(robotName, namePrefix, ros2Node);
 
       startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);

@@ -20,9 +20,9 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final IHMCROS2Publisher<PelvisHeightTrajectoryMessage> publisher;
 
-   public PelvisHeightTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public PelvisHeightTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new YoDouble(getName() + "TrajectoryTime", registry);

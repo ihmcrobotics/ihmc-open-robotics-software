@@ -22,9 +22,9 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<PelvisTrajectoryMessage> publisher;
 
-   public PelvisTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
+   public PelvisTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());

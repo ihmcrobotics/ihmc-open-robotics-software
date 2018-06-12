@@ -52,9 +52,9 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final ReferenceFrame midFootZUpFrame;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public RepeatedlyWalkFootstepListBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public RepeatedlyWalkFootstepListBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();

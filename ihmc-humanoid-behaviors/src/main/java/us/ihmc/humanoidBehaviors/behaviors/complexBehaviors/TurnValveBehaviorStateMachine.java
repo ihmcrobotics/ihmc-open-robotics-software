@@ -63,21 +63,21 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    RobotSide side = RobotSide.RIGHT;
    private final IHMCROS2Publisher<ValveLocationPacket> publisher;
 
-   public TurnValveBehaviorStateMachine(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                                        HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                        AtlasPrimitiveActions atlasPrimitiveActions)
+   public TurnValveBehaviorStateMachine(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                        WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, ros2Node);
+      super(robotName, "turnValveStateMachine", TurnValveBehaviorState.class, yoTime, ros2Node);
 
       //      ros2Node.addListeners(this); // FIXME I broke it when switching to pub-sub (Sylvain)
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      searchForValveBehavior = new SearchForValveBehavior(ros2Node);
-      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, ros2Node, atlasPrimitiveActions);
-      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
-      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, ros2Node, atlasPrimitiveActions);
-      userValidationExampleBehavior = new GetUserValidationBehavior(ros2Node);
+      searchForValveBehavior = new SearchForValveBehavior(robotName, ros2Node);
+      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
+      resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
+      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
+      userValidationExampleBehavior = new GetUserValidationBehavior(robotName, ros2Node);
       publisher = createPublisher(new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
       setupStateMachine();
    }
@@ -154,7 +154,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()

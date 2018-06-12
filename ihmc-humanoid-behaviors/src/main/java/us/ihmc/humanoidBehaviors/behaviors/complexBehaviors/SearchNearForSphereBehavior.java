@@ -39,18 +39,18 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame chestCoMFrame;
 
-   public SearchNearForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                      FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node, boolean requireUserValidation,
-                                      AtlasPrimitiveActions atlasPrimitiveActions)
+   public SearchNearForSphereBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
+                                      boolean requireUserValidation, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("SearchForSpehereNear", SearchNearState.class, yoTime, ros2Node);
+      super(robotName, "SearchForSpehereNear", SearchNearState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.referenceFrames = referenceFrames;
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(ros2Node, referenceFrames);
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       setupStateMachine();
    }

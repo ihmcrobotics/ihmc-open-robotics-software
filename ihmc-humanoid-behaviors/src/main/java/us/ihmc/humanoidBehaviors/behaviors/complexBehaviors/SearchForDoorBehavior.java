@@ -14,9 +14,9 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
 
-   public SearchForDoorBehavior(Ros2Node ros2Node)
+   public SearchForDoorBehavior(String robotName, Ros2Node ros2Node)
    {
-      super("SearchForDoor", ros2Node);
+      super(robotName, "SearchForDoor", ros2Node);
       createSubscriber(doorLocationQueue, new DoorLocationPacketPubSubType(), "/ihmc/door_location");
    }
 

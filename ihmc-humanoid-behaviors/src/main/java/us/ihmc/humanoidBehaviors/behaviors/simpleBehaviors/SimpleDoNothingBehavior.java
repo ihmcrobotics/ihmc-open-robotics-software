@@ -5,9 +5,9 @@ import us.ihmc.ros2.Ros2Node;
 
 public class SimpleDoNothingBehavior extends AbstractBehavior
 {
-   public SimpleDoNothingBehavior(Ros2Node ros2Node)
+   public SimpleDoNothingBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
    }
 
    @Override

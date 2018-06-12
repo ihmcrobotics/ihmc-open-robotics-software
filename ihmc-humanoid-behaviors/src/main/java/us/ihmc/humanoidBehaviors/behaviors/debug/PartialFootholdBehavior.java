@@ -18,9 +18,9 @@ public class PartialFootholdBehavior extends AbstractBehavior
 {
    private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
 
-   public PartialFootholdBehavior(Ros2Node ros2Node)
+   public PartialFootholdBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       publisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
    }
 

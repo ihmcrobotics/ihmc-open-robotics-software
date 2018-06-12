@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,9 +32,9 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final YoStopwatch timer;
    private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
 
-   public TestICPOptimizationBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
+   public TestICPOptimizationBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
-      super(ros2Node);
+      super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
 
       swingTime.set(1.2);

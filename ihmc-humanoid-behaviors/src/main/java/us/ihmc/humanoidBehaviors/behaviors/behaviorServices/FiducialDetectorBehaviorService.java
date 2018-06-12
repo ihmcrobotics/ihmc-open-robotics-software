@@ -26,9 +26,9 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
 
    private final YoBoolean locationEnabled;
 
-   public FiducialDetectorBehaviorService(Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FiducialDetectorBehaviorService(String robotName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node);
+      super(robotName, FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
       createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
 
