@@ -6,7 +6,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.lists.SupplierBuilder;
+import us.ihmc.commons.lists.SupplierBuilder;
 
 import java.util.List;
 import java.util.Random;

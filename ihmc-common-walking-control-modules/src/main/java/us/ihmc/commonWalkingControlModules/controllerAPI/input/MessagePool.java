@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
  * This class provides a simple way of creating a pool of messages that is garbage free.

@@ -1,9 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.getNext;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.getPrevious;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.next;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.previous;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.getNext;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.getPrevious;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
 
 import java.io.File;
 import java.io.FileWriter;

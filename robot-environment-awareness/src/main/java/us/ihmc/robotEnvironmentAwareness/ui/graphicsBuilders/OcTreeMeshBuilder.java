@@ -39,8 +39,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegme
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.lists.SupplierBuilder;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 
 /**
  * Created by adrien on 11/21/16.

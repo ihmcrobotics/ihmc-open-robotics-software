@@ -1,6 +1,7 @@
 package us.ihmc.robotics.lists;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 import java.util.function.Supplier;
 

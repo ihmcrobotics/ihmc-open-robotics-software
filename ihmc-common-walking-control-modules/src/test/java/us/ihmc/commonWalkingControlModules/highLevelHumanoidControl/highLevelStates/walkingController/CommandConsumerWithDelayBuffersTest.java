@@ -21,7 +21,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.lists.SupplierBuilder;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CommandConsumerWithDelayBuffersTest
