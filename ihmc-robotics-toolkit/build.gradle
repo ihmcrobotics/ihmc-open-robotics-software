@@ -37,7 +37,6 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.javassist", name: "javassist", version: "3.18.1-GA"
    compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "com.google.code.java-allocation-instrumenter", name: "java-allocation-instrumenter", version: "3.1.0"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.1"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.1"
    compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
