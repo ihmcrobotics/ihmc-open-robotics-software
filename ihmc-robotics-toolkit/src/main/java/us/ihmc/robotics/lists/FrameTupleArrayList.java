@@ -2,6 +2,7 @@ package us.ihmc.robotics.lists;
 
 import java.util.List;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;

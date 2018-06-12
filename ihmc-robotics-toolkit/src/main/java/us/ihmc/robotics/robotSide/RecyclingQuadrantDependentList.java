@@ -1,6 +1,6 @@
 package us.ihmc.robotics.robotSide;
 
-import us.ihmc.robotics.lists.SupplierBuilder;
+import us.ihmc.commons.lists.SupplierBuilder;
 
 import java.lang.reflect.Array;
 import java.util.function.Supplier;

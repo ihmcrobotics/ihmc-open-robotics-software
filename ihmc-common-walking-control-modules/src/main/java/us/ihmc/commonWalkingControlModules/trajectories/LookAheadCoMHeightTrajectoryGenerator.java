@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.StringStretcher2d;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;

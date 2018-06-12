@@ -9,7 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedStepController implements QuadrupedController

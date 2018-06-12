@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;

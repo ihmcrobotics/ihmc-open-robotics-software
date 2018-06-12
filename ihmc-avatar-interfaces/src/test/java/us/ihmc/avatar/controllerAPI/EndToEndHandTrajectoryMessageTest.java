@@ -54,7 +54,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;

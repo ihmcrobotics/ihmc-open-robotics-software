@@ -22,7 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Extrusion
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class VisibilityTools
 {

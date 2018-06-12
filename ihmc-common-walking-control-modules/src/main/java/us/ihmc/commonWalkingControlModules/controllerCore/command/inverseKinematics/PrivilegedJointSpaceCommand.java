@@ -4,7 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import java.util.ArrayList;

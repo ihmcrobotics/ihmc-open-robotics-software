@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.idl.RecyclingArrayListPubSub;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
 {

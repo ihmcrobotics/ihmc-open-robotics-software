@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

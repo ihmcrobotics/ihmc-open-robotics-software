@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**

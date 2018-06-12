@@ -4,8 +4,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import javafx.util.Pair;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.lists.SupplierBuilder;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
