@@ -46,7 +46,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.allocations.AllocationTest;
+import us.ihmc.commons.allocations.AllocationTest;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
