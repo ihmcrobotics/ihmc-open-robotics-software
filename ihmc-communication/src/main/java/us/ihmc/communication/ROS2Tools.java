@@ -71,22 +71,21 @@ public class ROS2Tools
    public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
                                                      NewMessageListener<T> newMessageListener)
    {
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
       String topicName = topicNameGenerator.generateTopicName(messageType);
-      createCallbackSubscription(ros2Node, topicDataType, topicName, newMessageListener);
+      createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName,
-                                                     NewMessageListener<T> newMessageListener)
+   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(ros2Node, topicDataType, topicName, newMessageListener, RUNTIME_EXCEPTION);
+      createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> void createCallbackSubscription(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName,
-                                                     NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
+   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, NewMessageListener<T> newMessageListener,
+                                                     ExceptionHandler exceptionHandler)
    {
       try
       {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
          ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
       }
       catch (IOException e)
@@ -98,22 +97,22 @@ public class ROS2Tools
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
                                                      NewMessageListener<T> newMessageListener)
    {
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
       String topicName = topicNameGenerator.generateTopicName(messageType);
-      createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, newMessageListener);
+      createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName,
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
                                                      NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, newMessageListener, RUNTIME_EXCEPTION);
+      createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName,
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
                                                      NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
    {
       try
       {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
          realtimeRos2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, Ros2QosProfile.DEFAULT());
       }
       catch (IOException e)
@@ -122,23 +121,24 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType,
+                                                                  MessageTopicNameGenerator topicNameGenerator)
    {
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
       String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createPublisher(realtimeRos2Node, topicDataType, topicName);
+      return createPublisher(realtimeRos2Node, messageType, topicName);
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
    {
-      return createPublisher(realtimeRos2Node, topicDataType, topicName, RUNTIME_EXCEPTION);
+      return createPublisher(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, TopicDataType<T> topicDataType, String topicName,
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
                                                                   ExceptionHandler exceptionHandler)
    {
       try
       {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
          return new IHMCRealtimeROS2Publisher<T>(realtimeRos2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10));
       }
       catch (IOException e)
@@ -150,21 +150,20 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
-      TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
       String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createPublisher(ros2Node, topicDataType, topicName);
+      return createPublisher(ros2Node, messageType, topicName);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName)
    {
-      return createPublisher(ros2Node, topicDataType, topicName, RUNTIME_EXCEPTION);
+      return createPublisher(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, TopicDataType<T> topicDataType, String topicName,
-                                                          ExceptionHandler exceptionHandler)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
       try
       {
+         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
          return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT()));
       }
       catch (IOException e)
@@ -174,7 +173,8 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void popMessage(Subscriber<T> subscriber, T message, SampleInfo sampleInfo)
+   @SuppressWarnings({"rawtypes", "unchecked"})
+   public static void popMessage(Subscriber subscriber, Object message, SampleInfo sampleInfo)
    {
       subscriber.takeNextData(message, sampleInfo);
    }
@@ -203,7 +203,7 @@ public class ROS2Tools
       topicName = StringUtils.removeEnd(topicName, "Packet"); // This makes BehaviorControlModePacket => BehaviorControlMode
       topicName = StringUtils.removeEnd(topicName, "Message"); // This makes ArmTrajectoryMessage => ArmTrajectory
       topicName = "/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, topicName); // This makes ArmTrajectory => arm_trajectory
-      return topicName;
+      return prefix + topicName;
    }
 
    public static final String pubSubTypeGetterName = "getPubSubType";

@@ -10,7 +10,6 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
-import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -51,14 +50,13 @@ public abstract class BehaviorService
    @SuppressWarnings("unchecked")
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
    {
-      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
       MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
 
       if (publisher != null)
          return publisher;
 
-      publisher = ROS2Tools.createPublisher(ros2Node, pubSubType, topicName);
+      publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
       publishers.put(key, publisher);
       return publisher;
    }
@@ -71,8 +69,7 @@ public abstract class BehaviorService
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
-      ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> consumer.consumeObject(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.readNextData()));
    }
 
    protected Ros2Node getRos2Node()

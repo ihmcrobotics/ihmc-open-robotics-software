@@ -2,7 +2,6 @@ package us.ihmc.ihmcPerception.camera;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -22,7 +21,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    public VideoPacketHandler(Ros2Node ros2Node)
    {
-      publisher = ROS2Tools.createPublisher(ros2Node, new VideoPacketPubSubType(), "/ihmc/video");
+      publisher = ROS2Tools.createPublisher(ros2Node, VideoPacket.class, "/ihmc/video");
    }
 
    private Stopwatch timer;

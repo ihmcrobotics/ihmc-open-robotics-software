@@ -5,15 +5,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import controller_msgs.msg.dds.BehaviorControlModePacketPubSubType;
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
+import controller_msgs.msg.dds.BehaviorControlModePacket;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
-import controller_msgs.msg.dds.HumanoidBehaviorTypePacketPubSubType;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -81,9 +81,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final BehaviorDispatcher behaviorDispatcher;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
-   private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                                         new HumanoidBehaviorTypePacketPubSubType(),
-                                                                                                                         "/ihmc/humanoid_behavior_type");
+   private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
 
    public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
                                 DRCRobotModel robotModel)
@@ -127,7 +125,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotDataReceiver.receivedPacket(s.readNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -141,6 +139,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, robotDataReceiver, yoGraphicsListRegistry);
 
       referenceFrames = robotDataReceiver.getReferenceFrames();
+      humanoidBehabiorTypePublisher = ROS2Tools.createPublisher(ros2Node, HumanoidBehaviorTypePacket.class,
+                                                                IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName));
    }
 
    public Ros2Node getRos2Node()
@@ -228,11 +228,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, new BehaviorControlModePacketPubSubType(), "/ihmc/behavior_control_mode",
+      ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.readNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, new HumanoidBehaviorTypePacketPubSubType(), "/ihmc/behavior_control_mode",
+      ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.readNextData()));
 
       YoVariableServer yoVariableServer = null;
@@ -273,7 +273,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status",
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.readNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);

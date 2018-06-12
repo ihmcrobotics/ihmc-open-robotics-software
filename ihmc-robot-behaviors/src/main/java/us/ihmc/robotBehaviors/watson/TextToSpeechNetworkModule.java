@@ -1,7 +1,6 @@
 package us.ihmc.robotBehaviors.watson;
 
 import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -15,7 +14,7 @@ public class TextToSpeechNetworkModule
 
    public TextToSpeechNetworkModule()
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, new TextToSpeechPacketPubSubType(), IHMC_TEXT_TO_SPEECH_TOPIC_NAME, s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, TextToSpeechPacket.class, IHMC_TEXT_TO_SPEECH_TOPIC_NAME, s -> receivedPacket(s.takeNextData()));
    }
 
    public void receivedPacket(TextToSpeechPacket packet)

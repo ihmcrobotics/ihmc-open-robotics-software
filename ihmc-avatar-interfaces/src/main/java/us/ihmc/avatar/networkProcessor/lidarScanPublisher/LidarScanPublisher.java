@@ -10,8 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
@@ -81,9 +80,9 @@ public class LidarScanPublisher
       RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
       lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), robotConfigurationDataTopicName,
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), IHMC_LIDAR_SCAN_TOPIC_NAME);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, IHMC_LIDAR_SCAN_TOPIC_NAME);
    }
 
    public void start()

@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -126,7 +125,7 @@ public abstract class ToolboxModule
       String topicName = "/ihmc/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
       topicName += CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ToolboxStateMessage.class.getSimpleName());
       topicName = StringUtils.removeEnd(topicName, "Message");
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new ToolboxStateMessagePubSubType(), topicName, s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, topicName, s -> receivedPacket(s.takeNextData()));
       registerExtraPuSubs(realtimeRos2Node);
       realtimeRos2Node.spin();
    }

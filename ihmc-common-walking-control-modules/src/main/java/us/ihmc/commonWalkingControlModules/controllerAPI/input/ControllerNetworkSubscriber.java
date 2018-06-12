@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
-import controller_msgs.msg.dds.MessageCollectionPubSubType;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -111,11 +110,10 @@ public class ControllerNetworkSubscriber
                                                                             MessageTopicNameGenerator subscriberTopicNameGenerator, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
-      TopicDataType<T> multipleMessageTopicDataType = ROS2Tools.newMessageTopicDataTypeInstance(multipleMessageType);
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
       String topicName = subscriberTopicNameGenerator.generateTopicName(multipleMessageType);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageTopicDataType, topicName,
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
 
@@ -156,7 +154,7 @@ public class ControllerNetworkSubscriber
       MessageCollection messageCollection = new MessageCollection();
 
       String topicName = subscriberTopicNameGenerator.generateTopicName(MessageCollection.class);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new MessageCollectionPubSubType(), topicName, s -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
          MessageCollectionNotification notification = messageCollector.startCollecting(messageCollection);
          publisher.publish(notification);
@@ -196,10 +194,9 @@ public class ControllerNetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2Tools.newMessageInstance(messageClass);
-         TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageClass);
          String topicName = subscriberTopicNameGenerator.generateTopicName(messageClass);
 
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, topicDataType, topicName, s -> {
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
          });
@@ -208,9 +205,8 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageClass);
       String topicName = publisherTopicNameGenerator.generateTopicName(messageClass);
-      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, topicDataType, topicName);
+      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }
 

@@ -3,20 +3,18 @@ package us.ihmc.atlas.joystickBasedStepping;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessagePubSubType;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessagePubSubType;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotLowLevelMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -34,12 +32,13 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    private final IHMCROS2Publisher<FootLoadBearingMessage> footLoadBearingPublisher;
    private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> atlasLowLevelControlModePublisher;
 
-   public AtlasKickAndPunchMessenger(Ros2Node ros2Node)
+   public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
    {
-      armTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, new ArmTrajectoryMessagePubSubType(), "/ihmc/arm_trajectory");
-      footTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, new FootTrajectoryMessagePubSubType(), "/ihmc/foot_trajectory");
-      footLoadBearingPublisher = ROS2Tools.createPublisher(ros2Node, new FootLoadBearingMessagePubSubType(), "/ihmc/foot_load_bearing");
-      atlasLowLevelControlModePublisher = ROS2Tools.createPublisher(ros2Node, new AtlasLowLevelControlModeMessagePubSubType(), "/ihmc/atlas_low_level_control_mode");
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      armTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footLoadBearingPublisher = ROS2Tools.createPublisher(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
+      atlasLowLevelControlModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
    }
 
    @Override
@@ -106,7 +105,8 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    }
 
    @Override
-   public void sendKick(RobotSide robotSide, double trajectoryDuration, double stanceWidth, SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
+   public void sendKick(RobotSide robotSide, double trajectoryDuration, double stanceWidth,
+                        SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
    {
       FramePose3D footPose = new FramePose3D(soleFrames.get(robotSide.getOppositeSide()));
       footPose.appendTranslation(0.60, robotSide.negateIfRightSide(stanceWidth), 0.35);
@@ -118,7 +118,8 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    }
 
    @Override
-   public void sendPutFootDown(RobotSide robotSide, double trajectoryDuration, double stanceWidth, SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
+   public void sendPutFootDown(RobotSide robotSide, double trajectoryDuration, double stanceWidth,
+                               SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
    {
       FramePose3D footPose = new FramePose3D(soleFrames.get(robotSide.getOppositeSide()));
       footPose.appendTranslation(0.0, robotSide.negateIfRightSide(stanceWidth), 0.0);
