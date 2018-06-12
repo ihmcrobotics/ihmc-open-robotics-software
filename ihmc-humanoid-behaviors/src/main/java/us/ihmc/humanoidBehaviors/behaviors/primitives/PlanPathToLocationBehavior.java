@@ -2,12 +2,13 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
 import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,10 +17,10 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,16 +38,19 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
 
-   protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(
-         2);
+   protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
+   private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
-   public PlanPathToLocationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public PlanPathToLocationBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
-      this.attachNetworkListeningQueue(footPlanStatusQueue, FootstepPlanningToolboxOutputStatus.class);
+      createSubscriber(footPlanStatusQueue, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
+      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
+      footstepPlanningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
 
-      sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
+      sleepBehavior = new SleepBehavior(ros2Node, yoTime);
    }
 
    public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
@@ -77,34 +81,31 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
       pipeLine.clearAll();
 
-      BehaviorAction wakeup = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction wakeup = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
             if (DEBUG)
             {
-               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Telling Planner To Wake Up");
-               sendPacket(p1);
+               publishTextToSpeack("Telling Planner To Wake Up");
             }
-            ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
-            sendPackageToPlanner(wakeUp);
+            toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
          }
       };
 
-      BehaviorAction requestPlan = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction requestPlan = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
             if (DEBUG)
             {
-               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Requesting Plan");
-               sendPacket(p1);
+               publishTextToSpeack("Requesting Plan");
             }
-            FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose);
-            sendPackageToPlanner(request);
+            footstepPlanningRequestPublisher.publish(HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
+                                                                                                              goalPose));
          }
       };
 
@@ -113,10 +114,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            
-               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Waiting For Plan");
-               sendPacket(p1);
-           
+
+            publishTextToSpeack("Waiting For Plan");
+
             sleepBehavior.setSleepTime(timeout);
          }
 
@@ -127,7 +127,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          }
       };
 
-      BehaviorAction processPlan = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction processPlan = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
@@ -154,14 +154,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             {
                if (DEBUG)
                {
-                  TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Processing Plan");
-                  sendPacket(p1);
+                  publishTextToSpeack("Processing Plan");
                }
             }
             else if (DEBUG)
             {
-               TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Plan Failed");
-               sendPacket(p1);
+               publishTextToSpeack("Plan Failed");
             }
 
          }
@@ -174,12 +172,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(waitForPlan);
       pipeLine.submitSingleTaskStage(processPlan);
 
-   }
-
-   private void sendPackageToPlanner(Packet<?> packet)
-   {
-      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
-      communicationBridge.sendPacket(packet);
    }
 
    @Override

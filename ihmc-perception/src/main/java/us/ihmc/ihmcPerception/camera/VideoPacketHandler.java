@@ -8,7 +8,6 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -41,7 +40,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer.lap();
       }
          
-      publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, PacketDestination.BROADCAST));
+      publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
    }
 
    @Override

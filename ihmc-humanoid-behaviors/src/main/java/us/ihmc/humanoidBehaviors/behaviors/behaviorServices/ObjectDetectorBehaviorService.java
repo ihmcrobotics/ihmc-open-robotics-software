@@ -10,19 +10,25 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.imageio.ImageIO;
 
-import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.BoundingBoxesPacketPubSubType;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.HeatMapPacketPubSubType;
+import controller_msgs.msg.dds.ObjectDetectorResultPacketPubSubType;
 import controller_msgs.msg.dds.VideoPacket;
+import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
@@ -43,32 +49,35 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    private final YoBoolean shouldRecordVideoPackets;
    private final VideoPacketToImageFilesRecorder imageFilesRecorder = new VideoPacketToImageFilesRecorder(videoFilesRecordingLocation);
 
-   public ObjectDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
+   public ObjectDetectorBehaviorService(Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
-      super(ObjectDetectorBehaviorService.class.getSimpleName(), communicationBridge);
+      super(ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      getCommunicationBridge().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
-      objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(), yoGraphicsListRegistry);
+      objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
+                                                                          yoGraphicsListRegistry);
 
       objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
 
-      getCommunicationBridge().attachListener(ObjectDetectorResultPacket.class, objectDetectorFromCameraImages);
-      
+      createSubscriber(objectDetectorFromCameraImages, new ObjectDetectorResultPacketPubSubType(), "/ihmc/objet_detector_result");
+
       String prefix = "fiducial";
       locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());
 
       shouldRecordVideoPackets = new YoBoolean("ShouldRecordVideoPackets", getYoVariableRegistry());
       shouldRecordVideoPackets.set(false);
-      
+
       locationEnabled.set(false);
 
+      IHMCROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createPublisher(new BoundingBoxesPacketPubSubType(), "/ihmc/bounding_boxes");
+      IHMCROS2Publisher<HeatMapPacket> heatMapPublisher = createPublisher(new HeatMapPacketPubSubType(), "/ihmc/heat_map");
+
       objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
-         getCommunicationBridge().sendPacketToUI(detectionVisualizationPackets.getBoundingBoxesPacket());
-         getCommunicationBridge().sendPacketToUI(detectionVisualizationPackets.getHeatMapPacket());
+         boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());
+         heatMapPublisher.publish(detectionVisualizationPackets.getHeatMapPacket());
       });
    }
 
@@ -79,7 +88,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       {
          VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
 
-         if(shouldRecordVideoPackets.getBooleanValue())
+         if (shouldRecordVideoPackets.getBooleanValue())
          {
             imageFilesRecorder.queueVideoPacket(videoPacket);
          }
@@ -120,21 +129,21 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
          objectDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
       }
    }
-   
+
    @Override
    public void run()
    {
       super.run();
       locationEnabled.set(true);
    }
-   
+
    @Override
    public void pause()
    {
       super.pause();
       locationEnabled.set(false);
    }
-   
+
    @Override
    public void destroy()
    {
@@ -176,7 +185,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       {
          imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
 
-         if(waiting)
+         if (waiting)
          {
             synchronized (waitLock)
             {
@@ -188,10 +197,10 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       @Override
       public void run()
       {
-         while(true)
+         while (true)
          {
             waiting = false;
-            while(!imagesQueue.isEmpty())
+            while (!imagesQueue.isEmpty())
             {
                index++;
                BufferedImage nextImage = imagesQueue.poll();

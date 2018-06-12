@@ -1,22 +1,26 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestGarbageGenerationBehavior extends AbstractBehavior
@@ -28,11 +32,18 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames referenceFrames;
    private final YoStopwatch timer;
 
-   public TestGarbageGenerationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
+   private final IHMCROS2Publisher<ArmTrajectoryMessage> armPublisher;
+   private final IHMCROS2Publisher<ChestTrajectoryMessage> chestPublisher;
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+
+   public TestGarbageGenerationBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
-      super(communicationBridge);
+      super(ros2Node);
       this.referenceFrames = referenceFrames;
       timer = new YoStopwatch(yoTime);
+      armPublisher = createPublisher(new ArmTrajectoryMessagePubSubType(), "/ihmc/arm_trajectory");
+      chestPublisher = createPublisher(new ChestTrajectoryMessagePubSubType(), "/ihmc/chest_trajectory");
+      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
    }
 
    @Override
@@ -40,8 +51,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    {
       if (timer.totalElapsed() > sendInterval)
       {
-         sendPacketToUI(MessageTools.createTextToSpeechPacket("Sending messages."));
-
+         publishTextToSpeack("Sending messages.");
          sendFootsteps();
          sendChestTrajectory();
          sendArmTrajectory();
@@ -66,7 +76,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
          }
       }
 
-      sendPacketToController(armTrajectory);
+      armPublisher.publish(armTrajectory);
    }
 
    private void sendChestTrajectory()
@@ -86,7 +96,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
          trajectoryPoint.getAngularVelocity().set(new Vector3D());
       }
 
-      sendPacketToController(chestTrajectory);
+      chestPublisher.publish(chestTrajectory);
    }
 
    double initialZHeight = Double.NaN;
@@ -115,17 +125,19 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(1.2, 0.8);
       for (int i = 0; i < steps / 2; i++)
       {
-         footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
-         footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
+         footsteps.getFootstepDataList().add()
+                  .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
+         footsteps.getFootstepDataList().add()
+                  .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
       }
 
-      sendPacketToController(footsteps);
+      footstepPublisher.publish(footsteps);
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      sendPacketToUI(MessageTools.createTextToSpeechPacket("Starting GC behavior."));
+      publishTextToSpeack("Starting GC behavior.");
       timer.reset();
    }
 

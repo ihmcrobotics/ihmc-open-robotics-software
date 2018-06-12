@@ -1,41 +1,47 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 {
    protected WholeBodyTrajectoryMessage outgoingMessage;
-   
+
    private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet" + behaviorName, registry);
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private final YoBoolean trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
-   
+
    private final YoDouble yoTime;
    private final YoDouble startTime;
    private final YoDouble trajectoryTime;
-   
-   public WholeBodyTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+
+   private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> publisher;
+
+   public WholeBodyTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, outgoingCommunicationBridge, yoTime);
+      this(null, ros2Node, yoTime);
    }
 
-   public WholeBodyTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public WholeBodyTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, outgoingCommunicationBridge);
+      super(namePrefix, ros2Node);
 
       startTime = new YoDouble(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new YoDouble(getName() + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
+
+      publisher = createPublisher(new WholeBodyTrajectoryMessagePubSubType(), "/ihmc/whole_body_trajectory");
    }
-   
+
    public void setInput(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       outgoingMessage = wholebodyTrajectoryMessage;
@@ -45,7 +51,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() &&  hasInputBeenSet())
+      if (!packetHasBeenSent.getBooleanValue() && hasInputBeenSet())
       {
          sendMessageToController();
       }
@@ -54,23 +60,22 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
    private void sendMessageToController()
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
-      {      
-         outgoingMessage.setDestination(PacketDestination.CONTROLLER.ordinal());  
-         sendPacketToController(outgoingMessage);
-         sendPacket(outgoingMessage);
+      {
+         outgoingMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+         publisher.publish(outgoingMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         
+
          double getTrajectoryTime = 0;
-         if(outgoingMessage.getRightHandTrajectoryMessage() != null)
+         if (outgoingMessage.getRightHandTrajectoryMessage() != null)
             getTrajectoryTime = outgoingMessage.getRightHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
-         if(outgoingMessage.getLeftHandTrajectoryMessage() != null)
+         if (outgoingMessage.getLeftHandTrajectoryMessage() != null)
             getTrajectoryTime = outgoingMessage.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
-         
+
          trajectoryTime.set(getTrajectoryTime);
       }
    }
-   
+
    @Override
    public void onBehaviorEntered()
    {
@@ -78,29 +83,29 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 
       isPaused.set(false);
       isAborted.set(false);
-      
+
       hasInputBeenSet.set(false);
       trajectoryTimeElapsed.set(false);
-      
+
       hasBeenInitialized.set(true);
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      
+
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      
+
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      
+
    }
 
    @Override
@@ -113,7 +118,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
-      
+
       isPaused.set(false);
       isAborted.set(false);
       PrintTools.info("WholeBodyTrajectoryBehavior Exited");
@@ -129,7 +134,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
-   
+
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

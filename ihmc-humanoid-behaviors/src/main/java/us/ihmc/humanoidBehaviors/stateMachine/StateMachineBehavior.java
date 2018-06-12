@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBehavior
@@ -11,15 +11,15 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    private final Class<E> keyType;
    private BehaviorStateMachine<E> stateMachine = null;
 
-   public StateMachineBehavior(String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, Ros2Node ros2Node)
    {
-      this(null, stateMachineName, keyType, timeProvider, outgoingCommunicationBridge);
+      this(null, stateMachineName, keyType, timeProvider, ros2Node);
    }
 
    public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider,
-                               CommunicationBridge outgoingCommunicationBridge)
+                               Ros2Node ros2Node)
    {
-      super(namePrefix, outgoingCommunicationBridge);
+      super(namePrefix, ros2Node);
       this.keyType = keyType;
    }
 

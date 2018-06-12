@@ -4,25 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PauseWalkingMessagePubSubType;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessagePubSubType;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -43,23 +48,25 @@ public class FootstepListBehavior extends AbstractBehavior
    private final YoBoolean isRobotDoneWalking = new YoBoolean("isRobotDoneWalking", registry);
    private final YoBoolean hasRobotStartedWalking = new YoBoolean("hasRobotStartedWalking", registry);
 
-
    private double defaultSwingTime;
    private double defaultTranferTime;
 
-   public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+
+   public FootstepListBehavior(Ros2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
-      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>(40);
-      attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+      createSubscriber(footstepStatusQueue, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");
+      createSubscriber(walkingStatusQueue, new WalkingStatusMessagePubSubType(), "/ihmc/walking_status");
+      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      pauseWalkingPublisher = createPublisher(new PauseWalkingMessagePubSubType(), "/ihmc/pause_walking");
       numberOfFootsteps.set(-1);
       defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
    }
-
-
 
    public void set(FootstepDataListMessage footStepList)
    {
@@ -67,7 +74,6 @@ public class FootstepListBehavior extends AbstractBehavior
       numberOfFootsteps.set(outgoingFootstepDataList.getFootstepDataList().size());
       packetHasBeenSent.set(false);
    }
-
 
    public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
@@ -92,7 +98,6 @@ public class FootstepListBehavior extends AbstractBehavior
       set(footsteps, defaultSwingTime, defaultTranferTime);
    }
 
-
    @Override
    public void doControl()
    {
@@ -108,11 +113,7 @@ public class FootstepListBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingFootstepDataList.setDestination(PacketDestination.UI.ordinal());
-         sendPacket(outgoingFootstepDataList);
-
-         outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER.ordinal());
-         sendPacketToController(outgoingFootstepDataList);
+         footstepPublisher.publish(outgoingFootstepDataList);
          packetHasBeenSent.set(true);
       }
    }
@@ -205,7 +206,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorAborted()
    {
-      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       isStopped.set(true);
    }
@@ -213,7 +214,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
@@ -222,7 +223,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorResumed()
    {
-      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(false));
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
       isRobotDoneWalking.set(false);
@@ -233,7 +234,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-//      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
+      //      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
       boolean ret = isRobotDoneWalking.getBooleanValue() && !isPaused.getBooleanValue();
       if (!isDone.getBooleanValue() && ret)
       {
@@ -243,8 +244,6 @@ public class FootstepListBehavior extends AbstractBehavior
       isDone.set(ret);
       return ret;
    }
-
-
 
    public boolean hasInputBeenSet()
    {
@@ -265,7 +264,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private final Point3D nextFootStepLocation = new Point3D();
 
    public ArrayList<Double> getFootstepLengths(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel,
-         WalkingControllerParameters walkingControllerParameters)
+                                               WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
       List<FootstepDataMessage> dataList = footStepList.getFootstepDataList();
@@ -277,8 +276,8 @@ public class FootstepListBehavior extends AbstractBehavior
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
-      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(RobotSide.fromByte(firstStepData.getRobotSide()).getOppositeSide()).getBodyFixedFrame()
-            .getTransformToWorldFrame();
+      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(RobotSide.fromByte(firstStepData.getRobotSide()).getOppositeSide())
+                                                                                .getBodyFixedFrame().getTransformToWorldFrame();
       firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
 
       previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
@@ -301,18 +300,20 @@ public class FootstepListBehavior extends AbstractBehavior
    {
       return defaultSwingTime;
    }
+
    public double getDefaultTranferTime()
    {
       return defaultTranferTime;
    }
 
-
-   public boolean areFootstepsTooFarApart(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   public boolean areFootstepsTooFarApart(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel,
+                                          WalkingControllerParameters walkingControllerParameters)
    {
       for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
       {
          if (DEBUG)
-            PrintTools.debug(this, "step length : " + stepLength + " max step length : " + walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+            PrintTools.debug(this,
+                             "step length : " + stepLength + " max step length : " + walkingControllerParameters.getSteppingParameters().getMaxStepLength());
          if (stepLength > walkingControllerParameters.getSteppingParameters().getMaxStepLength())
          {
             return true;

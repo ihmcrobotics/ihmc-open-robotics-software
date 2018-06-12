@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,10 +7,10 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
@@ -21,8 +19,6 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    {
       ENABLE_LIDAR, SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, RESET_ROBOT_PIPELINE_EXAMPLE, GET_LIDAR, GET_VIDEO, GET_USER_VALIDATION, WHOLEBODY_EXAMPLE,
    }
-
-   CommunicationBridge coactiveBehaviorsNetworkManager;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
@@ -33,22 +29,22 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final ResetRobotBehavior resetRobotBehavior;
    private final ReferenceFrame midZupFrame;
 
-   public ExampleComplexBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
+   public ExampleComplexBehaviorStateMachine(Ros2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("ExampleStateMachine", ExampleStates.class, yoTime, communicationBridge);
+      super("ExampleStateMachine", ExampleStates.class, yoTime, ros2Node);
 
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
-      coactiveBehaviorsNetworkManager = communicationBridge;
+      //      coactiveBehaviorsNetworkManager = ros2Node;
       //      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       //create your behaviors
-      getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(communicationBridge);
-      getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(communicationBridge);
-      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, communicationBridge, atlasPrimitiveActions);
+      getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(ros2Node);
+      getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(ros2Node);
+      userValidationExampleBehavior = new GetUserValidationBehavior(ros2Node);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, ros2Node, atlasPrimitiveActions);
 
       // FIXME
       //      statemachine.getStateYoVariable().addVariableChangedListener(new VariableChangedListener()
@@ -66,8 +62,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Starting Example Behavior");
-      sendPacket(p1);
+      publishTextToSpeack("Starting Example Behavior");
       super.onBehaviorEntered();
    }
 
@@ -87,7 +82,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Enabling Lidar"));
+            publishTextToSpeack("Enabling Lidar");
             // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
          }
       };
@@ -97,7 +92,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Resetting Robot"));
+            publishTextToSpeack("Resetting Robot");
             super.setBehaviorInput();
          }
       };
@@ -107,8 +102,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Setting Up Robot Pose"));
-            super.setBehaviorInput();
+            publishTextToSpeack("Setting Up Robot Pose");
          }
       };
 
@@ -117,9 +111,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Doing Whole Body Behavior");
-            sendPacket(p1);
+            publishTextToSpeack("Doing Whole Body Behavior");
             FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
 

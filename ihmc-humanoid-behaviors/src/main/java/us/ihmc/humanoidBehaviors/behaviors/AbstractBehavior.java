@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
@@ -79,11 +80,11 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      textToSpeechPublisher = getPublisher(new TextToSpeechPacketPubSubType(), "/ihmc/text_to_speech");
+      textToSpeechPublisher = createPublisher(new TextToSpeechPacketPubSubType(), "/ihmc/text_to_speech");
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> getPublisher(TopicDataType<T> pubSubType, String topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(TopicDataType<T> pubSubType, String topicName)
    {
       Class<T> messageType = (Class<T>) pubSubType.createData().getClass();
       MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
@@ -95,6 +96,16 @@ public abstract class AbstractBehavior implements RobotController
       publisher = ROS2Tools.createPublisher(ros2Node, pubSubType, topicName);
       publishers.put(key, publisher);
       return publisher;
+   }
+
+   public <T> void createSubscriber(ConcurrentListeningQueue<T> queue, TopicDataType<T> pubSubType, String topicName)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> queue.put(s.readNextData()));
+   }
+
+   public <T> void createSubscriber(ObjectConsumer<T> consumer, TopicDataType<T> pubSubType, String topicName)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> consumer.consumeObject(s.readNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
@@ -128,7 +139,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
-      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket("Aborting Behavior"));
+      publishTextToSpeack("Aborting Behavior");
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
@@ -147,7 +158,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void pause()
    {
-      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket("Pausing Behavior"));
+      publishTextToSpeack("Pausing Behavior");
       isPaused.set(true);
 
       for (BehaviorService behaviorService : behaviorsServices)
@@ -166,7 +177,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void resume()
    {
-      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket("Resuming Behavior"));
+      publishTextToSpeack("Resuming Behavior");
       isPaused.set(false);
       isPaused.set(false);
 
@@ -176,6 +187,11 @@ public abstract class AbstractBehavior implements RobotController
       }
 
       onBehaviorResumed();
+   }
+
+   public void publishTextToSpeack(String textToSpeak)
+   {
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
 
    public abstract void onBehaviorResumed();
@@ -238,7 +254,7 @@ public abstract class AbstractBehavior implements RobotController
       return this.getClass().getCanonicalName();
    }
 
-   private static class MessageTopicPair<T> extends Pair<Class<T>, String>
+   public static class MessageTopicPair<T> extends Pair<Class<T>, String>
    {
       private static final long serialVersionUID = 7511864115932037512L;
       private final Class<T> messageType;

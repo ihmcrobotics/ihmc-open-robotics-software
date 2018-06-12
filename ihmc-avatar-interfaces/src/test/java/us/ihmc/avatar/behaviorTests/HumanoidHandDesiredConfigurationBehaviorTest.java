@@ -1,6 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -14,20 +14,20 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements MultiRobotTestInterface
 {
@@ -71,9 +71,8 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 27.7)
@@ -88,14 +87,15 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double trajectoryTime = 2.0;
 
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
+                                                                                                                                                  HandConfiguration.CLOSE),
+                                                                                       trajectoryTime);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(behavior);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
 
       PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
       PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
-
 
       assertTrue(fingerJointQFinal > fingerJointQInitial);
       assertTrue(behavior.isDone());
@@ -118,7 +118,9 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
+                                                                                                                                                  HandConfiguration.CLOSE),
+                                                                                       trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -142,7 +144,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
@@ -158,7 +160,9 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
+                                                                                                                                                  HandConfiguration.CLOSE),
+                                                                                       trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -215,11 +219,12 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       return ret;
    }
 
-   private HandDesiredConfigurationBehavior testHandDesiredConfigurationBehavior(HandDesiredConfigurationMessage handDesiredConfigurationMessage, double trajectoryTime)
+   private HandDesiredConfigurationBehavior testHandDesiredConfigurationBehavior(HandDesiredConfigurationMessage handDesiredConfigurationMessage,
+                                                                                 double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior("test",drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getYoTime());
+      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior("test", drcBehaviorTestHelper.getRos2Node(),
+                                                                                             drcBehaviorTestHelper.getYoTime());
 
       behavior.initialize();
       behavior.setInput(handDesiredConfigurationMessage);

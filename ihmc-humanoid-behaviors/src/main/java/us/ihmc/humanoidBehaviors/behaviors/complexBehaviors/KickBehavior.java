@@ -14,7 +14,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -23,6 +22,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,17 +43,17 @@ public class KickBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+   public KickBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                       HumanoidReferenceFrames referenceFrames)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       trajectoryTime = new YoDouble("kickTrajectoryTime", registry);
       trajectoryTime.set(0.5);
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
-      footTrajectoryBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+      footTrajectoryBehavior = new FootTrajectoryBehavior(ros2Node, yoTime, yoDoubleSupport);
       registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
    }
 
@@ -118,7 +118,7 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(communicationBridge);
+      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(ros2Node);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 
@@ -146,7 +146,7 @@ public class KickBehavior extends AbstractBehavior
       Quaternion desiredFootOrientation = new Quaternion();
       desiredFootPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footTrajectoryBehavior,
-            trajectoryTime.getDoubleValue());
+                                                       trajectoryTime.getDoubleValue());
       pipeLine.submitSingleTaskStage(task);
    }
 
@@ -201,8 +201,6 @@ public class KickBehavior extends AbstractBehavior
          behavior.onBehaviorResumed();
       }
    }
-
-
 
    public boolean hasInputBeenSet()
    {

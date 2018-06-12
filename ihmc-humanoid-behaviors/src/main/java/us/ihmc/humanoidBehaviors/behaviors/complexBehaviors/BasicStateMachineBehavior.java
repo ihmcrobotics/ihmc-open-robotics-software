@@ -7,12 +7,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior.BasicStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
@@ -25,9 +25,9 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM, BEHAVIOR_COMPLETE
    }
 
-   public BasicStateMachineBehavior(String name, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
+   public BasicStateMachineBehavior(String name, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(name, BasicStates.class, yoTime, outgoingCommunicationBridge);
+      super(name, BasicStates.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       setupStateMachine();
    }

@@ -6,6 +6,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -41,7 +42,7 @@ public class AtlasPrimitiveActions
 
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public AtlasPrimitiveActions(Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
                                 FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
                                 WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
@@ -50,55 +51,55 @@ public class AtlasPrimitiveActions
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
-      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       addPrimitive(walkToLocationPlannedBehavior);
 
-      leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
+      leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", ros2Node, yoTime);
       addPrimitive(leftArmTrajectoryBehavior);
 
-      rightArmTrajectoryBehavior = new ArmTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
+      rightArmTrajectoryBehavior = new ArmTrajectoryBehavior("right", ros2Node, yoTime);
       addPrimitive(rightArmTrajectoryBehavior);
-      chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(ros2Node, yoTime);
       addPrimitive(chestTrajectoryBehavior);
-      clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
+      clearLidarBehavior = new ClearLidarBehavior(ros2Node);
       addPrimitive(clearLidarBehavior);
-      enableLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
+      enableLidarBehavior = new EnableLidarBehavior(ros2Node);
       addPrimitive(enableLidarBehavior);
-      leftFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("leftFoot", outgoingCommunicationBridge);
+      leftFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("leftFoot", ros2Node);
       addPrimitive(leftFootEndEffectorLoadBearingBehavior);
-      rightFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("rightFoot", outgoingCommunicationBridge);
+      rightFootEndEffectorLoadBearingBehavior = new FootLoadBearingBehavior("rightFoot", ros2Node);
       addPrimitive(rightFootEndEffectorLoadBearingBehavior);
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
       addPrimitive(footstepListBehavior);
-      leftArmGoHomeBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
+      leftArmGoHomeBehavior = new GoHomeBehavior("leftArm", ros2Node, yoTime);
       addPrimitive(leftArmGoHomeBehavior);
-      rightArmGoHomeBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
+      rightArmGoHomeBehavior = new GoHomeBehavior("rightArm", ros2Node, yoTime);
       addPrimitive(rightArmGoHomeBehavior);
-      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior("chest", ros2Node, yoTime);
       addPrimitive(chestGoHomeBehavior);
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", ros2Node, yoTime);
       addPrimitive(pelvisGoHomeBehavior);
-      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("leftHand", outgoingCommunicationBridge, yoTime);
+      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("leftHand", ros2Node, yoTime);
       addPrimitive(leftHandDesiredConfigurationBehavior);
-      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("rigthHand", outgoingCommunicationBridge, yoTime);
+      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("rigthHand", ros2Node, yoTime);
       addPrimitive(rightHandDesiredConfigurationBehavior);
-      leftHandTrajectoryBehavior = new HandTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
+      leftHandTrajectoryBehavior = new HandTrajectoryBehavior("left", ros2Node, yoTime);
       addPrimitive(leftHandTrajectoryBehavior);
-      rightHandTrajectoryBehavior = new HandTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
+      rightHandTrajectoryBehavior = new HandTrajectoryBehavior("right", ros2Node, yoTime);
       addPrimitive(rightHandTrajectoryBehavior);
-      headTrajectoryBehavior = new HeadTrajectoryBehavior("", outgoingCommunicationBridge, yoTime);
+      headTrajectoryBehavior = new HeadTrajectoryBehavior("", ros2Node, yoTime);
       addPrimitive(headTrajectoryBehavior);
-      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(ros2Node, yoTime);
       addPrimitive(pelvisHeightTrajectoryBehavior);
-      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(ros2Node, yoTime);
       addPrimitive(pelvisOrientationTrajectoryBehavior);
-      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(ros2Node, yoTime);
       addPrimitive(pelvisTrajectoryBehavior);
-      setLidarParametersBehavior = new SetLidarParametersBehavior(outgoingCommunicationBridge);
+      setLidarParametersBehavior = new SetLidarParametersBehavior(ros2Node);
       addPrimitive(setLidarParametersBehavior);
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
       addPrimitive(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", fullRobotModelFactory, yoTime, ros2Node, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
 
 

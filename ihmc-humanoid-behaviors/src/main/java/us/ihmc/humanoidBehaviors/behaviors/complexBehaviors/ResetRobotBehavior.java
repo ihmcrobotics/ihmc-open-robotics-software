@@ -1,17 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ResetRobotBehavior extends AbstractBehavior
 {
@@ -27,30 +25,25 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
-   private final YoDouble yoTime;
-
-   public ResetRobotBehavior(CommunicationBridge outgoingCommunicationBridge, YoDouble yoTime)
+   public ResetRobotBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(true, true, true, true, outgoingCommunicationBridge, yoTime);
+      this(true, true, true, true, ros2Node, yoTime);
    }
 
-   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, CommunicationBridge outgoingCommunicationBridge,
-         YoDouble yoTime)
+   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.leftArm = leftArm;
       this.rightArm = rightArm;
       this.chest = chest;
       this.pelvis = pelvis;
 
-      this.yoTime = yoTime;
+      chestGoHomeBehavior = new GoHomeBehavior("chest", ros2Node, yoTime);
 
-      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", ros2Node, yoTime);
 
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
-
-      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
-      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
+      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", ros2Node, yoTime);
+      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", ros2Node, yoTime);
    }
 
    @Override
@@ -62,8 +55,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    private void setupPipeline()
    {
 
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Resetting Robot Pose");
-      sendPacket(p1);
+      publishTextToSpeack("Resetting Robot Pose");
       pipeLine.clearAll();
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, 2);

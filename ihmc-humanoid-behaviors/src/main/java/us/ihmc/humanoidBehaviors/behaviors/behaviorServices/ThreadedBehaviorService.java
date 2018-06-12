@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.ros2.Ros2Node;
 
 public abstract class ThreadedBehaviorService extends BehaviorService
 {   
@@ -9,9 +9,9 @@ public abstract class ThreadedBehaviorService extends BehaviorService
    private boolean paused = false;
    private final String threadName;
    
-   public ThreadedBehaviorService(String threadName, CommunicationBridgeInterface communicationBridge)
+   public ThreadedBehaviorService(String threadName, Ros2Node ros2Node)
    {
-      super(threadName, communicationBridge);
+      super(threadName, ros2Node);
       
       this.threadName = threadName;
    }

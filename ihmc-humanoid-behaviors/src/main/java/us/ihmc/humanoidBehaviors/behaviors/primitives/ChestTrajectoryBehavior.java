@@ -3,17 +3,18 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ChestTrajectoryBehavior extends AbstractBehavior
 {
    private static final boolean DEBUG = false;
-   
+
    private ChestTrajectoryMessage outgoingChestTrajectoryMessage;
 
    private final YoBoolean hasPacketBeenSent;
@@ -22,9 +23,11 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeHasElapsed;
 
-   public ChestTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   private final IHMCROS2Publisher<ChestTrajectoryMessage> publisher;
+
+   public ChestTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
@@ -34,6 +37,8 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeHasElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
+
+      publisher = createPublisher(new ChestTrajectoryMessagePubSubType(), "/ihmc/chest_trajectory");
    }
 
    public void setInput(ChestTrajectoryMessage chestOrientationPacket)
@@ -54,9 +59,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingChestTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
-         sendPacket(outgoingChestTrajectoryMessage);
-         sendPacketToController(outgoingChestTrajectoryMessage);
+         publisher.publish(outgoingChestTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingChestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
@@ -67,9 +70,9 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
-      
+
       hasBeenInitialized.set(true);
-      
+
       isPaused.set(false);
       isAborted.set(false);
    }
@@ -87,9 +90,6 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
    }
 
-
-
-
    @Override
    public boolean isDone()
    {
@@ -103,10 +103,10 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
          PrintTools.debug(this, "TrajectoryTimeElapsed: " + trajectoryTimeElapsed);
       }
 
-      if ( startTimeUndefined || trajectoryTimeUndefined )
+      if (startTimeUndefined || trajectoryTimeUndefined)
          trajectoryTimeHasElapsed.set(false);
       else
-         trajectoryTimeHasElapsed.set( trajectoryTimeElapsed > trajectoryTime.getDoubleValue());
+         trajectoryTimeHasElapsed.set(trajectoryTimeElapsed > trajectoryTime.getDoubleValue());
 
       return trajectoryTimeHasElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }

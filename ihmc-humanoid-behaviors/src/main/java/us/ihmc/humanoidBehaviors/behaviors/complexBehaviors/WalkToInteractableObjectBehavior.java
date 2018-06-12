@@ -2,8 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import com.jme3.math.Quaternion;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,10 +13,10 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToInteractableOb
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
@@ -37,12 +35,12 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame midZupFrame;
 
-   public WalkToInteractableObjectBehavior(YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToInteractableObjectBehavior(YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("WalkState", WalkToObjectState.class, yoTime, outgoingCommunicationBridge);
+      super("WalkState", WalkToObjectState.class, yoTime, ros2Node);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
 
-      reset = new ResetRobotBehavior(false, false, false, false, outgoingCommunicationBridge, yoTime);
+      reset = new ResetRobotBehavior(false, false, false, false, ros2Node, yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       setupStateMachine();
    }
@@ -64,9 +62,10 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    {
       BehaviorAction resetRobot = new BehaviorAction(reset)
       {
+         @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Getting Ready To Walk"));
+            publishTextToSpeack("Getting Ready To Walk");
          }
       };
 
@@ -76,8 +75,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point One");
-            sendPacket(p1);
+            publishTextToSpeack("Walking To Point One");
             walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
             FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
@@ -102,9 +100,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point Two");
-            sendPacket(p1);
-
+            publishTextToSpeack("Walking To Point Two");
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint2D walkPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
             FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
@@ -122,22 +118,22 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          }
       };
 
-      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
+         @Override
          protected void setBehaviorInput()
          {
             succeded = false;
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Failed");
-            sendPacket(p1);
+            publishTextToSpeack("Walk Failed");
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
+         @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Complete");
-            sendPacket(p1);
+            publishTextToSpeack("Walk Complete");
          }
       };
 
