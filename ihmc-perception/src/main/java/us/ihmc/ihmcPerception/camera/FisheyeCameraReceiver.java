@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.FisheyePacket;
-import controller_msgs.msg.dds.FisheyePacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -67,7 +66,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
       public CompressedFisheyeHandler(Ros2Node ros2Node)
       {
-         publisher = ROS2Tools.createPublisher(ros2Node, new FisheyePacketPubSubType(), "/ihmc/fisheye");
+         publisher = ROS2Tools.createPublisher(ros2Node, FisheyePacket.class, "/ihmc/fisheye");
       }
 
       @Override

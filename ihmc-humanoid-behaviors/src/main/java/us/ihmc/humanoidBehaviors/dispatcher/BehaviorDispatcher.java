@@ -7,15 +7,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import controller_msgs.msg.dds.BehaviorControlModeResponsePacketPubSubType;
 import controller_msgs.msg.dds.BehaviorStatusPacket;
-import controller_msgs.msg.dds.BehaviorStatusPacketPubSubType;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -75,8 +74,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
 
    public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
-                             BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, Ros2Node ros2Node, YoVariableServer yoVariableServer,
-                             Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                             BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
+                             Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
+                             YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
       this.stopBehaviorKey = stopBehavior;
@@ -95,9 +95,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(robotName, ros2Node);
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
-      behaviorStatusPublisher = ROS2Tools.createPublisher(ros2Node, new BehaviorStatusPacketPubSubType(), "/ihmc/behavior_status");
-      behaviorControlModeResponsePublisher = ROS2Tools.createPublisher(ros2Node, new BehaviorControlModeResponsePacketPubSubType(),
-                                                                       "/ihmc/behavior_control_mode_response");
+      MessageTopicNameGenerator publisherTopicNameGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
+      behaviorStatusPublisher = ROS2Tools.createPublisher(ros2Node, BehaviorStatusPacket.class, publisherTopicNameGenerator);
+      behaviorControlModeResponsePublisher = ROS2Tools.createPublisher(ros2Node, BehaviorControlModeResponsePacket.class, publisherTopicNameGenerator);
 
       requestedBehavior.set(null);
 

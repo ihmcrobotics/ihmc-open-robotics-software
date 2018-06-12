@@ -7,9 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
@@ -43,14 +42,14 @@ public class StereoVisionPointCloudPublisher
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
 
-   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node)
+   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, new StereoVisionPointCloudMessagePubSubType(), "/ihmc/stereo_vision_point_cloud");
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud");
    }
 
    public void start()

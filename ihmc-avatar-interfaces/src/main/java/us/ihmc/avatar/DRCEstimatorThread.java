@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacketPubSubType;
-import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacketPubSubType;
-import controller_msgs.msg.dds.StateEstimatorModePacketPubSubType;
+import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
+import controller_msgs.msg.dds.StateEstimatorModePacket;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -73,10 +73,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
    private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
 
-   private static final String stateEstimatorModeTopicName = "/ihmc/state_estimator_mode";
-   private static final String requestWristForceSensorCalibrationTopicName = "/ihmc/request_wrist_force_sensor_calibration";
-   private static final String controllerCrashNotificationPacketTopicName = "/ihmc/controller_crash_notification";
-
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
@@ -116,7 +112,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
    public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
-                             WholeBodyControllerParameters wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
+                             WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
                              SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
                              PeriodicThreadScheduler poseCommunicatorScheduler, RealtimeRos2Node realtimeRos2Node, JointDesiredOutputWriter outputWriter,
                              RobotVisualizer robotVisualizer, double gravity)
@@ -151,8 +147,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
 
       if (realtimeRos2Node != null)
-         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node, new ControllerCrashNotificationPacketPubSubType(),
-                                                              controllerCrashNotificationPacketTopicName);
+         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
       else
          controllerCrashPublisher = null;
 
@@ -185,10 +181,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
 
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, new StateEstimatorModePacketPubSubType(), stateEstimatorModeTopicName,
+            MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, StateEstimatorModePacket.class, subscriberTopicNameGenerator,
                                                  subscriber -> stateEstimatorModeSubscriber.receivedPacket(subscriber.takeNextData()));
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, new RequestWristForceSensorCalibrationPacketPubSubType(),
-                                                 requestWristForceSensorCalibrationTopicName,
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
 
             drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);

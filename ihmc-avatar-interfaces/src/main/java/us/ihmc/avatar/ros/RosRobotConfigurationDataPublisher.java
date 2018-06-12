@@ -10,7 +10,6 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
@@ -73,9 +72,10 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
-   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node,
-         final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
+   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
+                                             final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+                                             DRCRobotSensorInformation sensorInformation, JointNameMap jointMap, String rosNameSpace,
+                                             RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
@@ -104,14 +104,14 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
       }
 
-      SideDependentList<String> feetForceSensorNames =  sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> handForceSensorNames =  sensorInformation.getWristForceSensorNames();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> handForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      for(RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
          footForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
          feetForceSensorIndexes.put(robotSide, getForceSensorIndex(feetForceSensorNames.get(robotSide), forceSensorDefinitions));
-         if(handForceSensorNames != null && !handForceSensorNames.isEmpty())
+         if (handForceSensorNames != null && !handForceSensorNames.isEmpty())
          {
             handForceSensorIndexes.put(robotSide, getForceSensorIndex(handForceSensorNames.get(robotSide), forceSensorDefinitions));
             wristForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
@@ -134,13 +134,13 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/last_robot_config_received", lastReceivedMessagePublisher);
 
-      if(!wristForceSensorPublishers.isEmpty())
+      if (!wristForceSensorPublishers.isEmpty())
       {
          rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
          rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
       }
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.readNextData()));
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
       t.start();
@@ -148,9 +148,9 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private int getForceSensorIndex(String forceSensorName, ForceSensorDefinition[] forceSensorDefinitions)
    {
-      for(int i = 0; i < forceSensorDefinitions.length; i++)
+      for (int i = 0; i < forceSensorDefinitions.length; i++)
       {
-         if(forceSensorDefinitions[i].getSensorName().equals(forceSensorName))
+         if (forceSensorDefinitions[i].getSensorName().equals(forceSensorName))
          {
             return i;
          }
@@ -161,7 +161,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    @Override
    public void receivedPacket(RobotConfigurationData robotConfigurationData)
    {
-      if(!availableRobotConfigurationData.offer(robotConfigurationData))
+      if (!availableRobotConfigurationData.offer(robotConfigurationData))
       {
          availableRobotConfigurationData.clear();
       }
@@ -220,7 +220,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                pubData.publish(jointAngles, jointVelocities, jointTorques, t);
             }
 
-            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(),
+                                                                        robotConfigurationData.getRootTranslation());
 
             jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
 
@@ -232,7 +233,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                footForceSensorWrenches.put(robotSide, arrayToPublish);
                footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
 
-               if(!handForceSensorIndexes.isEmpty())
+               if (!handForceSensorIndexes.isEmpty())
                {
                   arrayToPublish = new float[6];
                   robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
@@ -250,15 +251,14 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
             }
 
-
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                  robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(), WORLD_FRAME);
+                                            robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(), WORLD_FRAME);
 
             robotMotionStatusPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).name());
             robotBehaviorPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).getBehaviorId());
 
             tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, jointMap.getUnsanitizedRootJointInSdf());
-            if(staticTransforms != null)
+            if (staticTransforms != null)
             {
                for (int i = 0; i < staticTransforms.size(); i++)
                {
@@ -270,20 +270,21 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                }
             }
 
-            if(robotConfigurationData.getLastReceivedPacketTypeId() != -1)
+            if (robotConfigurationData.getLastReceivedPacketTypeId() != -1)
             {
                Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeId());
 
-               if(packetClass == null)
+               if (packetClass == null)
                {
                   System.err.println("Could not get packet class for ID " + robotConfigurationData.getLastReceivedPacketTypeId());
                }
                else
                {
                   String messageType = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(packetClass);
-                  if(messageType != null)
+                  if (messageType != null)
                   {
-                     lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                     lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(),
+                                                          robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
                   }
                }
             }

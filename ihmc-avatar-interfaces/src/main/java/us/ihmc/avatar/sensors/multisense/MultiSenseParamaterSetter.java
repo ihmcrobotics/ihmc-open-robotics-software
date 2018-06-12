@@ -13,7 +13,6 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import controller_msgs.msg.dds.MultisenseParameterPacket;
-import controller_msgs.msg.dds.MultisenseParameterPacketPubSubType;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
@@ -50,9 +49,8 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      ROS2Tools.createCallbackSubscription(ros2Node, new MultisenseParameterPacketPubSubType(), "/ihmc/multisense_parameter",
-                                           s -> receivedPacket(s.readNextData()));
-      publisher = ROS2Tools.createPublisher(ros2Node, new MultisenseParameterPacketPubSubType(), "/ihmc/initial_multisense_parameter");
+      ROS2Tools.createCallbackSubscription(ros2Node, MultisenseParameterPacket.class, "/ihmc/multisense_parameter", s -> receivedPacket(s.readNextData()));
+      publisher = ROS2Tools.createPublisher(ros2Node, MultisenseParameterPacket.class, "/ihmc/initial_multisense_parameter");
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)

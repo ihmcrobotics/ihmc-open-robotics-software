@@ -6,7 +6,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -40,8 +40,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
-      footstepPlanningToolboxController.setTextToSpeechPublisher(ROS2Tools.createPublisher(realtimeRos2Node, new TextToSpeechPacketPubSubType(),
-                                                                                           "/ihmc/text_to_speech"));
+      footstepPlanningToolboxController.setTextToSpeechPublisher(ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, "/ihmc/text_to_speech"));
    }
 
    @Override

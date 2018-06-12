@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -96,7 +95,7 @@ public class SimpleLidarRobotController implements RobotController
       yoGraphicPlanarRegionsList.hideGraphicObject();
       yoGraphicsListRegistry.registerYoGraphic("Regions", yoGraphicPlanarRegionsList);
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), "/ihmc/lidar_scan");
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
    }
 
    @Override

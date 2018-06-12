@@ -8,7 +8,7 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import controller_msgs.msg.dds.LocalizationPacketPubSubType;
+import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -54,6 +54,8 @@ public class RosModule
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       String rosTopicPrefix = "/ihmc_ros/" + robotModel.getSimpleRobotName().toLowerCase();
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName())
+                                                   .generateTopicName(RobotConfigurationData.class);
 
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -66,7 +68,7 @@ public class RosModule
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node, rosMainNode,
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node, rcdTopicName, rosMainNode,
                                                                                                               ppsTimestampOffsetProvider, sensorInformation,
                                                                                                               jointMap, rosTopicPrefix, tfPublisher);
 
@@ -117,7 +119,7 @@ public class RosModule
    {
       new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, ros2Node, ppsTimestampOffsetProvider);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, new LocalizationPacketPubSubType(), "/ihmc/localization",
+      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, "/ihmc/localization",
                                            s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
    }
 

@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -34,7 +33,7 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
       rosMainNode.attachSubscriber("/singleScanAsCloudWithSource", this);
       rosMainNode.execute();
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, new LidarScanMessagePubSubType(), "/ihmc/lidar_scan");
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
    }
 
    @Override
