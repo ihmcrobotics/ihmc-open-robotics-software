@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -52,6 +53,7 @@ public abstract class ToolboxModule
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
+   public static final String TOOLBOX_ROS_TOPIC_PREFIX = "/ihmc/toolbox";
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -91,10 +93,12 @@ public abstract class ToolboxModule
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS,
+                                                          "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, realtimeRos2Node);
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getSubscriberTopicNameGenerator(), commandInputManager, getPublisherTopicNameGenerator(),
+                                                                    statusOutputManager, realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -388,4 +392,8 @@ public abstract class ToolboxModule
    {
       return Collections.emptySet();
    }
+
+   public abstract MessageTopicNameGenerator getPublisherTopicNameGenerator();
+
+   public abstract MessageTopicNameGenerator getSubscriberTopicNameGenerator();
 }

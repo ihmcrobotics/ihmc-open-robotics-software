@@ -68,21 +68,15 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   private static final String[] torqueControlledJoints = {
-         "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
-         "torsoYaw", "torsoPitch", "torsoRoll",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
-         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch",
-         "leftForearmYaw", "leftWristRoll", "leftWristPitch",
-         "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2",
-         "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"
-         };
+   private static final String[] torqueControlledJoints = {"leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw",
+         "rightElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch",
+         "leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1",
+         "leftThumbMotorPitch2", "rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll",
+         "rightThumbMotorPitch1", "rightThumbMotorPitch2"};
 
-   private static final String[] positionControlledJoints = {
-         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
-   };
+   private static final String[] positionControlledJoints = {"lowerNeckPitch", "neckYaw", "upperNeckPitch",};
 
    private static final String[] allValkyrieJoints;
    static
@@ -157,10 +151,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
-
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
@@ -174,7 +169,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                                                     highLevelControllerParameters, walkingControllerParameters,
                                                                                                     capturePointPlannerParameters);
 
-      controllerFactory.createControllerNetworkSubscriber(realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
 
       // setup states
       controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
@@ -301,8 +296,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Create network servers/clients
        */
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
+                                                                                                             new IHMCCommunicationKryoNetClassList());
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
@@ -320,7 +315,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
                                                                                                             effortJointHandles, positionJointHandles,
                                                                                                             jointStateHandles, imuHandles,
-                                                                                                            forceTorqueSensorHandles, jointMap, sensorInformation);
+                                                                                                            forceTorqueSensorHandles, jointMap,
+                                                                                                            sensorInformation);
 
       /*
        * Create controllers
@@ -352,13 +348,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       PeriodicRealtimeThreadScheduler estimatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, robotModel, stateEstimatorParameters, sensorReaderFactory,
-                                                                  threadDataSynchronizer, estimatorScheduler, realtimeRos2Node, valkyrieLowLevelOutputWriter,
-                                                                  yoVariableServer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, robotModel, stateEstimatorParameters,
+                                                                  sensorReaderFactory, threadDataSynchronizer, estimatorScheduler, realtimeRos2Node,
+                                                                  valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
       PeriodicRealtimeThreadScheduler handStateCommunicatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.HAND_COMMUNICATOR_PRIORITY);
-      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(), robotModel.getHandModel(), controllerPacketCommunicator, handStateCommunicatorScheduler);
+      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(),
+                                                                                              robotModel.getHandModel(), controllerPacketCommunicator,
+                                                                                              handStateCommunicatorScheduler);
       handStateCommunicator.start();
       estimatorThread.addRobotController(handStateCommunicator);
 

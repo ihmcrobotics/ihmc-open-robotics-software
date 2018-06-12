@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessagePubSubType;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -43,8 +45,8 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(new WholeBodyTrajectoryToolboxMessagePubSubType(), "/ihmc/whole_body_trajectory_toolbox",
-                                                                       10, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, 10,
+                                                                       MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
    }
 
    @Override
@@ -91,5 +93,35 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
       commands.add(ReachingManifoldCommand.class);
       commands.add(WholeBodyTrajectoryToolboxConfigurationCommand.class);
       return commands;
+   }
+
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik_trajectory/input";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik_trajectory/output";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
    }
 }

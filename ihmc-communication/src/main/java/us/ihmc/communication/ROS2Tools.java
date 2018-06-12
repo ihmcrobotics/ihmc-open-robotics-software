@@ -1,8 +1,16 @@
 package us.ihmc.communication;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.CaseFormat;
 
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -148,5 +156,61 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
+   }
+
+   public static <T extends Settable<T>> String generateDefaultTopicName(Class<T> messageClass)
+   {
+      return appendTypeToTopicName("/ihmc", messageClass);
+   }
+
+   public static String appendTypeToTopicName(String prefix, Class<? extends Settable<?>> messageClass)
+   {
+      String topicName = messageClass.getSimpleName();
+      topicName = StringUtils.removeEnd(topicName, "Packet"); // This makes BehaviorControlModePacket => BehaviorControlMode
+      topicName = StringUtils.removeEnd(topicName, "Message"); // This makes ArmTrajectoryMessage => ArmTrajectory
+      topicName = "/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, topicName); // This makes ArmTrajectory => arm_trajectory
+      return topicName;
+   }
+
+   public static final String pubSubTypeGetterName = "getPubSubType";
+
+   public static <T> T newMessageInstance(Class<T> messageType)
+   {
+      try
+      {
+         return messageType.newInstance();
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         throw new RuntimeException("Something went wrong when invoking " + messageType.getSimpleName() + "'s empty constructor.", e);
+      }
+   }
+
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   public static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
+   {
+      Method pubSubTypeGetter;
+
+      try
+      {
+         pubSubTypeGetter = messageType.getDeclaredMethod(pubSubTypeGetterName);
+      }
+      catch (NoSuchMethodException | SecurityException e)
+      {
+         throw new RuntimeException("Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().",
+                                    e);
+      }
+
+      TopicDataType<T> topicDataType;
+
+      try
+      {
+         topicDataType = (TopicDataType<T>) ((Supplier) pubSubTypeGetter.invoke(newMessageInstance(messageType))).get();
+      }
+      catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+      {
+         throw new RuntimeException("Something went wrong when invoking the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().", e);
+      }
+      return topicDataType;
    }
 }

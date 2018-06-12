@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -64,4 +65,33 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       return status;
    }
 
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/footstep_plan/input";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/footstep_plan/output";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
 }

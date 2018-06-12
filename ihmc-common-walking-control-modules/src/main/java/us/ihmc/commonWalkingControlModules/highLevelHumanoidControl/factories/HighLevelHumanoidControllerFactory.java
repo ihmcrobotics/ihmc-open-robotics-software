@@ -5,11 +5,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
@@ -174,8 +175,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
          if (useHeadingAndVelocityScript)
          {
-            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT, controllerToolbox.getYoTime(), headingAndVelocityEvaluationScriptParameters,
-                                                                                               registry);
+            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT, controllerToolbox.getYoTime(),
+                                                                                               headingAndVelocityEvaluationScriptParameters, registry);
             continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
             continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
             controllerToolbox.addUpdatable(script);
@@ -544,10 +545,15 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void createControllerNetworkSubscriber(RealtimeRos2Node realtimeRos2Node)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, realtimeRos2Node);
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(new WholeBodyTrajectoryMessagePubSubType(), "/ihmc/whole_body_trajectory", 9,
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator, commandInputManager,
+                                                                                                publisherTopicNameGenerator, statusMessageOutputManager,
+                                                                                                realtimeRos2Node);
+
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollector(ControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());

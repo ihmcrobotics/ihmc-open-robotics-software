@@ -64,8 +64,10 @@ import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
@@ -100,7 +102,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesired
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 
-public abstract class ControllerAPIDefinition
+public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends Settable<?>>> controllerSupportedStatusMessages;
@@ -154,7 +156,6 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(RequestPlanarRegionsListMessage.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
-
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
@@ -165,6 +166,34 @@ public abstract class ControllerAPIDefinition
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
    {
       return controllerSupportedStatusMessages;
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
+      return new MessageTopicNameGenerator()
+      {
+         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control/output";
+
+         @Override
+         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         {
+            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
+         }
+      };
    }
 
    public static MessageValidator createDefaultMessageValidation()
@@ -179,8 +208,8 @@ public abstract class ControllerAPIDefinition
       validators.put(ChestTrajectoryMessage.class, message -> validateChestTrajectoryMessage((ChestTrajectoryMessage) message));
       validators.put(SpineTrajectoryMessage.class, message -> validateSpineTrajectoryMessage((SpineTrajectoryMessage) message));
       validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
-      validators
-            .put(PelvisOrientationTrajectoryMessage.class, message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
+      validators.put(PelvisOrientationTrajectoryMessage.class,
+                     message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
       validators.put(PelvisHeightTrajectoryMessage.class, message -> validatePelvisHeightTrajectoryMessage((PelvisHeightTrajectoryMessage) message));
       validators.put(FootstepDataListMessage.class, message -> validateFootstepDataListMessage((FootstepDataListMessage) message));
       validators.put(AdjustFootstepMessage.class, message -> validateAdjustFootstepMessage((AdjustFootstepMessage) message));
