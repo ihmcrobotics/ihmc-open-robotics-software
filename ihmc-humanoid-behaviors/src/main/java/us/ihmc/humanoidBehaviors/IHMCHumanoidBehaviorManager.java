@@ -339,13 +339,23 @@ public class IHMCHumanoidBehaviorManager
       return "/ihmc/" + robotName + "/behavior";
    }
 
+   public static String getBehaviorOutputRosTopicPrefix(String robotName)
+   {
+      return getBehaviorRosTopicPrefix(robotName) + "/output";
+   }
+
+   public static String getBehaviorInputRosTopicPrefix(String robotName)
+   {
+      return getBehaviorRosTopicPrefix(robotName) + "/input";
+   }
+
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorRosTopicPrefix(robotName) + "/output", messageType);
+      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorOutputRosTopicPrefix(robotName), messageType);
    }
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorRosTopicPrefix(robotName) + "/input", messageType);
+      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorInputRosTopicPrefix(robotName), messageType);
    }
 }

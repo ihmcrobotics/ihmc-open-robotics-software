@@ -3,9 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -58,8 +56,8 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
-      handTrajectoryPublisher = createPublisher(new HandTrajectoryMessagePubSubType(), "/ihmc/hand_trajectory");
-      stopAllTrajectoryPublisher = createPublisher(new StopAllTrajectoryMessagePubSubType(), "/ihmc/stop_all_trajectory");
+      handTrajectoryPublisher = createPublisherForController(HandTrajectoryMessage.class);
+      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)

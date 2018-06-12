@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -58,8 +56,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      createSubscriber(footstepStatusMessage::set, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");
-      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusMessage::set);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
 
       walkingForward.set(true);
       initialSwingSide.set(defaultInitialSwingSide);

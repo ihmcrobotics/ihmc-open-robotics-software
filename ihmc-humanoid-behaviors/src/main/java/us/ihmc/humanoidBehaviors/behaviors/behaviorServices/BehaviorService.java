@@ -3,11 +3,13 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -17,11 +19,16 @@ public abstract class BehaviorService
    private final Ros2Node ros2Node;
    private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
+   protected final String robotName;
+   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
 
    public BehaviorService(String robotName, String name, Ros2Node ros2Node)
    {
+      this.robotName = robotName;
       this.ros2Node = ros2Node;
       registry = new YoVariableRegistry(name);
+      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
    }
 
    public abstract void run();
@@ -30,10 +37,21 @@ public abstract class BehaviorService
 
    public abstract void destroy();
 
-   @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(TopicDataType<T> pubSubType, String topicName)
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      Class<T> messageType = (Class<T>) pubSubType.createData().getClass();
+      String topicName = controllerSubGenerator.generateTopicName(messageType);
+      return createPublisher(messageType, topicName);
+   }
+
+   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
+   {
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName) + topicName);
+   }
+
+   @SuppressWarnings("unchecked")
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   {
+      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
       MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
 
@@ -45,13 +63,15 @@ public abstract class BehaviorService
       return publisher;
    }
 
-   public <T> void createSubscriber(ConcurrentListeningQueue<T> queue, TopicDataType<T> pubSubType, String topicName)
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> queue.put(s.readNextData()));
+      String topicName = controllerPubGenerator.generateTopicName(messageType);
+      createSubscriber(messageType, topicName, consumer);
    }
 
-   public <T> void createSubscriber(ObjectConsumer<T> consumer, TopicDataType<T> pubSubType, String topicName)
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
+      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
       ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> consumer.consumeObject(s.readNextData()));
    }
 

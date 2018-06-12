@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
@@ -44,7 +43,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       timer = new YoStopwatch(yoTime);
 
-      publisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      publisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override

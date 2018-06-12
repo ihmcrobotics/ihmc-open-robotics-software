@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.DoorLocationPacketPubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -17,7 +16,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    public SearchForDoorBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, "SearchForDoor", ros2Node);
-      createSubscriber(doorLocationQueue, new DoorLocationPacketPubSubType(), "/ihmc/door_location");
+      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
    }
 
    @Override

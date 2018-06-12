@@ -172,8 +172,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      testHelper.createSubscriber(capturabilityBasedStatusSubsrciber::receivedPacket, new CapturabilityBasedStatusPubSubType(),
-                                  "/ihmc/capturability_based_status");
+      testHelper.createSubscriber("/ihmc/capturability_based_status", capturabilityBasedStatusSubsrciber::receivedPacket,
+                                  new CapturabilityBasedStatusPubSubType());
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
 

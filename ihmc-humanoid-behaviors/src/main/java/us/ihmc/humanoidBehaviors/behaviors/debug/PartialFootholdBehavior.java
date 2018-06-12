@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -21,7 +20,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
    public PartialFootholdBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
-      publisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      publisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override

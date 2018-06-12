@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -38,7 +37,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeHasElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
 
-      publisher = createPublisher(new ChestTrajectoryMessagePubSubType(), "/ihmc/chest_trajectory");
+      publisher = createPublisherForController(ChestTrajectoryMessage.class);
    }
 
    public void setInput(ChestTrajectoryMessage chestOrientationPacket)

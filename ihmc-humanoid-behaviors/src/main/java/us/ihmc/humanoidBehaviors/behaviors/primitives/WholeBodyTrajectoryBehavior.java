@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
@@ -39,7 +38,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
 
-      publisher = createPublisher(new WholeBodyTrajectoryMessagePubSubType(), "/ihmc/whole_body_trajectory");
+      publisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
    }
 
    public void setInput(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)

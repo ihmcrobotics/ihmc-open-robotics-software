@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -28,7 +27,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
    public HandDesiredConfigurationBehavior(String robotName, String name, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(robotName,name, ros2Node);
+      super(robotName, name, ros2Node);
       this.yoTime = yoTime;
 
       hasInputBeenSet = new YoBoolean(getName() + "hasInputBeenSet", registry);
@@ -41,7 +40,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
       trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
 
-      publisher = createPublisher(new HandDesiredConfigurationMessagePubSubType(), "/ihmc/hand_desired_configuration");
+      publisher = createPublisherForController(HandDesiredConfigurationMessage.class);
    }
 
    public void setInput(HandDesiredConfigurationMessage handDesiredConfigurationMessage)
@@ -73,7 +72,6 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       }
    }
 
-
    @Override
    public void onBehaviorAborted()
    {
@@ -83,8 +81,6 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       }
       isAborted.set(true);
    }
-
-  
 
    @Override
    public void onBehaviorPaused()

@@ -3,9 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.GoHomeMessagePubSubType;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -56,8 +54,8 @@ public class GoHomeBehavior extends AbstractBehavior
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
-      goHomePublisher = createPublisher(new GoHomeMessagePubSubType(), "/ihmc/go_home");
-      stopAllTrajectoryPublisher = createPublisher(new StopAllTrajectoryMessagePubSubType(), "/ihmc/stop_all_trajectory");
+      goHomePublisher = createPublisherForController(GoHomeMessage.class);
+      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(GoHomeMessage goHomeMessage)

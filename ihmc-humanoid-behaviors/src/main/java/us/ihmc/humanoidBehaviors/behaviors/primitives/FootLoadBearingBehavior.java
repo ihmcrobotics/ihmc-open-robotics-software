@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -21,7 +20,7 @@ public class FootLoadBearingBehavior extends AbstractBehavior
    public FootLoadBearingBehavior(String robotName, String prefix, Ros2Node ros2Node)
    {
       super(robotName, prefix, ros2Node);
-      publisher = createPublisher(new FootLoadBearingMessagePubSubType(), "/ihmc/foot_load_bearing");
+      publisher = createPublisherForController(FootLoadBearingMessage.class);
    }
 
    public void setInput(FootLoadBearingMessage endEffectorLoadBearingMessage)

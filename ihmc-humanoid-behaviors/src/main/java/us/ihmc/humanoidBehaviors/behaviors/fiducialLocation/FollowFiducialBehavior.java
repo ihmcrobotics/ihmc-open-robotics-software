@@ -1,16 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import controller_msgs.msg.dds.UIPositionCheckerPacketPubSubType;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
@@ -40,6 +35,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -139,13 +135,13 @@ public class FollowFiducialBehavior extends AbstractBehavior
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      createSubscriber(footstepStatusQueue, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");
+      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusQueue::put);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
-      createSubscriber(planarRegionsListQueue, new PlanarRegionsListMessagePubSubType(), "/ihmc/planar_regions_list");
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegionsListQueue::put);
 
-      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
-      uiPositionCheckerPublisher = createPublisher(new UIPositionCheckerPacketPubSubType(), "/ihmc/ui_position_checker");
-      headTrajectoryPublisher = createPublisher(new HeadTrajectoryMessagePubSubType(), "/ihmc/head_trajectory");
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      uiPositionCheckerPublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
+      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
    }
 
    private FootstepPlanner createFootstepPlanner()

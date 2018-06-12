@@ -2,11 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -46,9 +43,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
 
-      createSubscriber(footPlanStatusQueue, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
-      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
-      footstepPlanningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
+      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }

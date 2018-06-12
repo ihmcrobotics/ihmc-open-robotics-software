@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoSource;
@@ -23,7 +22,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 
-      createSubscriber(cameraData, new VideoPacketPubSubType(), "/ihmc/video");
+      createSubscriber(VideoPacket.class, "/ihmc/video", cameraData::put);
    }
 
    @Override
