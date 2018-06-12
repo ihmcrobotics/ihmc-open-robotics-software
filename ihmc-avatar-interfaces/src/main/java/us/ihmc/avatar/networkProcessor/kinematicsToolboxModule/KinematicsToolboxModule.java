@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -26,7 +27,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
-      super(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer);
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
                                                                             registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
@@ -36,9 +37,11 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data",
+      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status",
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator,
                                            s -> kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData()));
    }
 
@@ -99,10 +102,10 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik/input";
+         private final String prefix = toolboxRosTopicNamePrefix + "/ik/input";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }
@@ -114,10 +117,10 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik/output";
+         private final String prefix = toolboxRosTopicNamePrefix + "/ik/output";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }

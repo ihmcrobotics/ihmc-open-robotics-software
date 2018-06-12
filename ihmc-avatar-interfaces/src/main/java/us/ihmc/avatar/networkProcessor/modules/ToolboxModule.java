@@ -19,7 +19,6 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -53,14 +52,15 @@ public abstract class ToolboxModule
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
-   public static final String TOOLBOX_ROS_TOPIC_PREFIX = "/ihmc/toolbox";
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
+   protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
 
+   public final String toolboxRosTopicNamePrefix;
    protected final RealtimeRos2Node realtimeRos2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
@@ -82,14 +82,19 @@ public abstract class ToolboxModule
    private final boolean startYoVariableServer;
    private YoVariableServer yoVariableServer;
 
-   public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer) throws IOException
-   {
-      this(fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
-   }
-
-   public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer, int updatePeriodMilliseconds)
+   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
          throws IOException
    {
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
+   }
+
+   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+                        int updatePeriodMilliseconds)
+         throws IOException
+   {
+      this.robotName = robotName;
+      toolboxRosTopicNamePrefix = getToolboxRosTopicNamePrefix(robotName);
+
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
@@ -393,7 +398,12 @@ public abstract class ToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract MessageTopicNameGenerator getPublisherTopicNameGenerator();
+   public abstract ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator();
 
-   public abstract MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+   public abstract ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+
+   public static String getToolboxRosTopicNamePrefix(String robotName)
+   {
+      return "/ihmc/" + robotName + "/toolbox";
+   }
 }

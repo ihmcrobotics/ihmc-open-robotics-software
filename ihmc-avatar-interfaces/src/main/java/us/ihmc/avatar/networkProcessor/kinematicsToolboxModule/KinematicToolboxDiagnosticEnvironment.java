@@ -10,8 +10,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -58,9 +60,11 @@ public class KinematicToolboxDiagnosticEnvironment
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
       PeriodicNonRealtimeThreadScheduler scheduler1 = new PeriodicNonRealtimeThreadScheduler(threadName);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
       final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
-                                                                           realtimeRos2Node, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
-                                                                           robotMotionStatusFromController, sensorInformation, scheduler1);
+                                                                           publisherTopicNameGenerator, realtimeRos2Node, sensorOutputMapReadOnly,
+                                                                           sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation,
+                                                                           scheduler1);
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
       scheduler2.schedule(new Runnable()
       {

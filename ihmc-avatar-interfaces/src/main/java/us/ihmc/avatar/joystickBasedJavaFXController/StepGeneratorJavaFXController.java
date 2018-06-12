@@ -24,14 +24,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PauseWalkingMessagePubSubType;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessagePubSubType;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -44,6 +41,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -98,7 +96,7 @@ public class StepGeneratorJavaFXController
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
+   public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
                                         HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
    {
@@ -117,11 +115,15 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setSupportFootBasedFootstepAdjustment(false);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
-      ROS2Tools.createCallbackSubscription(ros2Node, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status",
+
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class, controllerPubGenerator,
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
 
-      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, new PauseWalkingMessagePubSubType(), "/ihmc/pause_walking");
-      footstepPublisher = ROS2Tools.createPublisher(ros2Node, new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
 
       swingHeight = messager.createInput(WalkingSwingHeight, 0.05);
       swingDuration = messager.createInput(WalkingSwingDuration, walkingControllerParameters.getDefaultSwingTime());
@@ -201,13 +203,12 @@ public class StepGeneratorJavaFXController
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateTurningVelocity);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new WalkingControllerFailureStatusMessagePubSubType(), "/ihmc/walking_controller_failure",
-                                           s -> stopWalking(true));
+      ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
       messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
-      ROS2Tools.createCallbackSubscription(ros2Node, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status", s -> {
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
          CapturabilityBasedStatus status = s.readNextData();
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
          isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());

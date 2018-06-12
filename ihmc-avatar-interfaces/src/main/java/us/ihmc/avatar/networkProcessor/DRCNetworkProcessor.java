@@ -2,7 +2,7 @@ package us.ihmc.avatar.networkProcessor;
 
 import java.io.IOException;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -89,7 +90,7 @@ public class DRCNetworkProcessor
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_mocap_localization_node");
-         ROS2Tools.createCallbackSubscription(ros2Node, new PlanarRegionsListMessagePubSubType(), "/ihmc/planar_regions_list",
+         ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
          new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
 
@@ -160,7 +161,7 @@ public class DRCNetworkProcessor
    private void setupHeightQuadTreeToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isHeightQuadTreeToolboxEnabled())
-         new HeightQuadTreeToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
+         new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
    }
 
    protected void connect(PacketCommunicator communicator)

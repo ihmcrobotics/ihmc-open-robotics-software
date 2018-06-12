@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacketPubSubTyp
 import controller_msgs.msg.dds.StateEstimatorModePacketPubSubType;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -114,7 +115,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
-   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
+   public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              WholeBodyControllerParameters wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
                              SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
                              PeriodicThreadScheduler poseCommunicatorScheduler, RealtimeRos2Node realtimeRos2Node, JointDesiredOutputWriter outputWriter,
@@ -227,7 +228,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
                                                                                                            forceSensorDataHolderToSend);
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader, realtimeRos2Node,
+         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader,
+                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
                                                     sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation,
                                                     poseCommunicatorScheduler);
          estimatorController.setRawOutputWriter(poseCommunicator);

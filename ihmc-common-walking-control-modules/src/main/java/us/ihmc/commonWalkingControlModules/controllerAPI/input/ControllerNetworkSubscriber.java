@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -60,11 +61,11 @@ public class ControllerNetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   private final MessageTopicNameGenerator subscriberTopicNameGenerator;
-   private final MessageTopicNameGenerator publisherTopicNameGenerator;
+   private final ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator;
+   private final ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator;
 
-   public ControllerNetworkSubscriber(MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
-                                      MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
+                                      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
@@ -101,6 +102,13 @@ public class ControllerNetworkSubscriber
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
+                                                                            MessageUnpacker<T> messageUnpacker)
+   {
+      registerSubcriberWithMessageUnpacker(multipleMessageType, subscriberTopicNameGenerator, expectedMessageSize, messageUnpacker);
+   }
+
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                            MessageTopicNameGenerator subscriberTopicNameGenerator, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       TopicDataType<T> multipleMessageTopicDataType = ROS2Tools.newMessageTopicDataTypeInstance(multipleMessageType);
@@ -281,10 +289,5 @@ public class ControllerNetworkSubscriber
    public static interface MessageValidator
    {
       String validate(Object message);
-   }
-
-   public static interface MessageTopicNameGenerator
-   {
-      String generateTopicName(Class<? extends Settable<?>> messageType);
    }
 }

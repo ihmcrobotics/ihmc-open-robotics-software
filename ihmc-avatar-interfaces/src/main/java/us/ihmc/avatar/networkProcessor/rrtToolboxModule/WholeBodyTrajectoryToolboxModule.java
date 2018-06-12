@@ -11,7 +11,6 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -32,7 +31,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer)
          throws IOException
    {
-      super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer);
+      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
@@ -96,14 +95,14 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
-         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik_trajectory/input";
+         private final String prefix = toolboxRosTopicNamePrefix + "/ik_trajectory/input";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }
@@ -111,14 +110,14 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return new MessageTopicNameGenerator()
+      return new ROS2Tools.MessageTopicNameGenerator()
       {
-         private final String prefix = TOOLBOX_ROS_TOPIC_PREFIX + "/ik_trajectory/output";
+         private final String prefix = toolboxRosTopicNamePrefix + "/ik_trajectory/output";
 
          @Override
-         public String generateTopicName(Class<? extends Settable<?>> messageType)
+         public String generateTopicName(Class<?> messageType)
          {
             return ROS2Tools.appendTypeToTopicName(prefix, messageType);
          }

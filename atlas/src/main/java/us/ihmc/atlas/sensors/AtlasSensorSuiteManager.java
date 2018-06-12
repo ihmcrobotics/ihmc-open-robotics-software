@@ -3,7 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -42,10 +43,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final FullHumanoidRobotModelFactory modelFactory;
 
-   public AtlasSensorSuiteManager(FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+   private final String robotName;
+
+   public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
                                   DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
                                   DRCRobotJointMap jointMap, RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
    {
+      this.robotName = robotName;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -53,7 +57,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node);
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+      lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
 
@@ -65,7 +70,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
 
       SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory,
                                                                            sensorInformation.getCameraParameters(0).getSensorNameInSdf(),
@@ -84,7 +90,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (rosCoreURI == null)
          throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data", s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 
@@ -97,10 +104,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode,
-                                                                                    ros2Node, ppsTimestampOffsetProvider,
-                                                                                    multisenseLeftEyeCameraParameters, multisenseLidarParameters,
-                                                                                    multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
+      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
+                                                                                    ppsTimestampOffsetProvider, multisenseLeftEyeCameraParameters,
+                                                                                    multisenseLidarParameters, multisenseStereoParameters,
+                                                                                    sensorInformation.setupROSParameterSetters());
 
       DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
