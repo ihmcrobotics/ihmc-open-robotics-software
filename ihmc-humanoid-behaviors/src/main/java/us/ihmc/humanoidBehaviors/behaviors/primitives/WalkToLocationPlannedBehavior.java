@@ -1,8 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,13 +8,12 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLocationStates>
@@ -26,7 +23,6 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       SETUP, PLAN_PATH, PLAN_FAILED, WALK_PATH, DONE
    }
 
-   private final FullRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
    private final ResetRobotBehavior resetRobotBehavior;
 
@@ -37,17 +33,16 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final FootstepListBehavior footstepListBehavior;
    private final PlanPathToLocationBehavior planPathToLocationBehavior;
 
-   public WalkToLocationPlannedBehavior(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-                                        HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
+   public WalkToLocationPlannedBehavior(Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                        WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
    {
-      super("WalkToLocationBehavior", WalkToLocationStates.class, yoTime, outgoingCommunicationBridge);
+      super("WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
 
-      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
-      planPathToLocationBehavior = new PlanPathToLocationBehavior(outgoingCommunicationBridge, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      footstepListBehavior = new FootstepListBehavior(ros2Node, walkingControllerParameters);
+      planPathToLocationBehavior = new PlanPathToLocationBehavior(ros2Node, yoTime);
       setupStateMachine();
    }
 
@@ -67,7 +62,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    protected WalkToLocationStates configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkToLocationStates, BehaviorAction> factory)
    {
-      BehaviorAction setUpState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge));
+      BehaviorAction setUpState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node));
 
       BehaviorAction planFootSteps = new BehaviorAction(planPathToLocationBehavior)
       {
@@ -81,8 +76,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 
             planPathToLocationBehavior.setInputs(goalPose, stanceFootPose, initialStanceSide);
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Planning Path");
-            sendPacket(p1);
+            publishTextToSpeack("Planning Path");
          }
       };
 
@@ -92,27 +86,24 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             footstepListBehavior.set(planPathToLocationBehavior.getFootStepList());
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking Path");
-            sendPacket(p1);
+            publishTextToSpeack("Walking Path");
          }
       };
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Walking");
-            sendPacket(p1);
+            publishTextToSpeack("Finished Walking");
          }
       };
-      BehaviorAction planFailedState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction planFailedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
             walkSucceded = false;
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Plan Failed");
-            sendPacket(p1);
+            publishTextToSpeack("Plan Failed");
          }
       };
 

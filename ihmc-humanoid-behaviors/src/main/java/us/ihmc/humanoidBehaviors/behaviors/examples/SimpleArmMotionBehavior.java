@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,11 +11,11 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,14 +29,13 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
    private final ResetRobotBehavior resetRobotBehavior;
 
-   public SimpleArmMotionBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public SimpleArmMotionBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
 
    }
 
@@ -65,8 +63,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Joint Angles Movement");
-            sendPacket(p1);
+            publishTextToSpeack("Joint Angles Movement");
          }
       };
 
@@ -92,13 +89,13 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket(description);
-      sendPacket(p1);
+      publishTextToSpeack(description);
 
       FramePose3D point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 
       HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
-            point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+                                                                                                     point.getOrientation(),
+                                                                                                     CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);

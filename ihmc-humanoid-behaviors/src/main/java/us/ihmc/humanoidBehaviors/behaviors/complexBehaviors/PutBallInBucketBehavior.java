@@ -4,13 +4,13 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -20,10 +20,10 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PutBallInBucketBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
+   public PutBallInBucketBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
+                                  Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeLine();
@@ -33,9 +33,9 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    {
 
       HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.CLOSE,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+                                                                                atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
       HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN,
-            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior);
+                                                                               atlasPrimitiveActions.rightHandDesiredConfigurationBehavior);
 
       double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
             -0.7657081703756509, -0.7098631227127279};
@@ -70,7 +70,7 @@ public class PutBallInBucketBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(rightHandBucketLocation2Task);
       pipeLine.submitSingleTaskStage(leftHandBucketLocation2Task);
- 
+
       pipeLine.submitSingleTaskStage(openHand);
       pipeLine.submitSingleTaskStage(closeHand);
       pipeLine.submitSingleTaskStage(openHand);
@@ -116,5 +116,4 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    {
    }
 
-   
 }

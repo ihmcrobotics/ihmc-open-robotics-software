@@ -2,11 +2,11 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.DoorLocationPacketPubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,7 +19,6 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehav
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -28,6 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,18 +63,21 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    RobotSide side = RobotSide.RIGHT;
 
-   public WalkThroughDoorBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+   private final IHMCROS2Publisher<DoorLocationPacket> publisher;
+
+   public WalkThroughDoorBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
                                   HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
                                   AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, communicationBridge);
+      super("walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
 
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      searchForDoorBehavior = new SearchForDoorBehavior(communicationBridge);
-      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      searchForDoorBehavior = new SearchForDoorBehavior(ros2Node);
+      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, ros2Node, atlasPrimitiveActions);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      publisher = createPublisher(new DoorLocationPacketPubSubType(), "/ihmc/door_location");
       setupStateMachine();
    }
 
@@ -115,8 +118,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             super.doTransitionOutOfAction();
             //found the door location, inform the UI of its location
 
-            DoorLocationPacket doorLocationPacket = HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation());
-            communicationBridge.sendPacketToUI(doorLocationPacket);
+            publisher.publish(HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation()));
 
          }
       };
@@ -129,8 +131,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             super.doTransitionOutOfAction();
             //found the door location, inform the UI of its location
 
-            DoorLocationPacket doorLocationPacket = HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation());
-            communicationBridge.sendPacketToUI(doorLocationPacket);
+            publisher.publish(HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation()));
 
          }
       };
@@ -177,23 +178,21 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking Through Door Failed");
-            sendPacket(p1);
+            publishTextToSpeack("Walking Through Door Failed");
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Walking Through Door");
-            sendPacket(p1);
+            publishTextToSpeack("Finished Walking Through Door");
          }
       };
 

@@ -4,7 +4,8 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import controller_msgs.msg.dds.ValveLocationPacket;
-import us.ihmc.communication.packets.MessageTools;
+import controller_msgs.msg.dds.ValveLocationPacketPubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +16,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -25,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,22 +61,24 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final GetUserValidationBehavior userValidationExampleBehavior;
 
    RobotSide side = RobotSide.RIGHT;
+   private final IHMCROS2Publisher<ValveLocationPacket> publisher;
 
-   public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-                                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
+   public TurnValveBehaviorStateMachine(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                                        HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                        AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, communicationBridge);
+      super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, ros2Node);
 
-      communicationBridge.addListeners(this);
-//      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
+      //      ros2Node.addListeners(this); // FIXME I broke it when switching to pub-sub (Sylvain)
+      //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
-      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
-      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
+      searchForValveBehavior = new SearchForValveBehavior(ros2Node);
+      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, ros2Node, atlasPrimitiveActions);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, ros2Node, atlasPrimitiveActions);
+      userValidationExampleBehavior = new GetUserValidationBehavior(ros2Node);
+      publisher = createPublisher(new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
       setupStateMachine();
    }
 
@@ -111,9 +114,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(),
-                                                                                                     searchForValveBehavior.getValveRadius());
-            communicationBridge.sendPacketToUI(valveLocationPacket);
+            publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 
          }
       };
@@ -125,9 +126,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(),
-                                                                                                     searchForValveBehavior.getValveRadius());
-            communicationBridge.sendPacketToUI(valveLocationPacket);
+            publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 
          }
       };
@@ -155,12 +154,12 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Finished Turning Valve"));
+            publishTextToSpeack("Finished Turning Valve");
          }
       };
 
@@ -169,7 +168,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            sendPacket(MessageTools.createTextToSpeechPacket("Did I Turn It Far Enough?"));
+            publishTextToSpeack("Did I Turn It Far Enough?");
          }
       };
 
@@ -180,8 +179,10 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       factory.addStateAndDoneTransition(TurnValveBehaviorState.TURNING_VALVE, graspAndTurnValve, TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION);
 
       factory.addState(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, getUserValidation);
-      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, time -> isValidationDone() && hasUserValidated());
-      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.TURNING_VALVE, time -> isValidationDone() && !hasUserValidated());
+      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.BACK_AWAY_FROM_VALVE,
+                            time -> isValidationDone() && hasUserValidated());
+      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.TURNING_VALVE,
+                            time -> isValidationDone() && !hasUserValidated());
 
       factory.addState(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, doneState);
 

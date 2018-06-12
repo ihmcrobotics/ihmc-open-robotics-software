@@ -4,8 +4,6 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -17,7 +15,6 @@ import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior.Te
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -25,6 +22,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,11 +61,11 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
 
    private RobotSide side = RobotSide.LEFT;
 
-   public TestSmoothICPPlannerBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-                                       FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                       WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
+   public TestSmoothICPPlannerBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                                       HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                       AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("testSmoothICPPlannerBehavior", TestSmoothICPPlannerBehaviorState.class, yoTime, communicationBridge);
+      super("testSmoothICPPlannerBehavior", TestSmoothICPPlannerBehaviorState.class, yoTime, ros2Node);
 
       //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
@@ -88,7 +86,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       finalTransferTime = new YoDouble("TestSmoothICPPlannerFinalTransferTime", registry);
       finalTransferTime.set(defaultFinalTransferTime);
 
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
       setupStateMachine();
    }
 
@@ -152,13 +150,12 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Walking Forward");
-            sendPacket(p1);
+            publishTextToSpeack("Finished Walking Forward");
          }
       };
 

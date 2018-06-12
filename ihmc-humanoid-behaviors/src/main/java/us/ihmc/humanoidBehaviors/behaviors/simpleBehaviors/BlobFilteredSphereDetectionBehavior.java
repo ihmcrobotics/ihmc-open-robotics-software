@@ -5,21 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.PointCloudWorldPacket;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.PointCloudWorldPacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.Ros2Node;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 {
@@ -34,14 +32,14 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
-   public BlobFilteredSphereDetectionBehavior(CommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
+   public BlobFilteredSphereDetectionBehavior(Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
          FullHumanoidRobotModel fullRobotModel)
    {
-      super(behaviorCommunicationBridge, referenceFrames);
+      super(ros2Node, referenceFrames);
 
-      attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
 
-      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(behaviorCommunicationBridge);
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(ros2Node);
 
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }
@@ -148,10 +146,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 //      DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
 //      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
 //      sendPacket(depthDataStateCommand);
-      
-      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
-      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH.ordinal());
-      sendPacket(textToSpeechPacket);
+
+      publishTextToSpeack("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
    }
 
    @Override

@@ -2,7 +2,9 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.UIPositionCheckerPacketPubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -12,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -20,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -44,18 +46,15 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    //   private final PassPacketBehavior passPacketBehavior;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
-
-
-   public GraspAndTurnValveBehavior(YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public GraspAndTurnValveBehavior(YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      //      passPacketBehavior = new PassPacketBehavior(outgoingCommunicationBridge);
-
+      resetRobotBehavior = new ResetRobotBehavior(ros2Node, yoTime);
+      uiPositionCheckerPacketpublisher = createPublisher(new UIPositionCheckerPacketPubSubType(), "/ihmc/ui_position_checker");
    }
 
    @Override
@@ -70,15 +69,15 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //CLOSE_HAND
       HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.CLOSE,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+                                                                                atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
 
       HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.OPEN,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+                                                                               atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
       HandDesiredConfigurationTask openFingersOnly = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.OPEN_FINGERS,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+                                                                                      atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
 
       HandDesiredConfigurationTask closeThumb = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.CLOSE_THUMB,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+                                                                                 atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
 
       //    MOVE_HAND_TO_APPROACH_POINT, using joint angles to make sure wrist is in proper turn location
 
@@ -93,8 +92,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Moving Hand To Approach Location");
-            sendPacket(p1);
+            publishTextToSpeack("Moving Hand To Approach Location");
          }
       };
 
@@ -138,8 +136,6 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //    MOVE_HAND_ABOVE_VALVE,
       pipeLine.submitSingleTaskStage(moveHandCloseToValve);
 
-
-
       //    MOVE_HAND_DOWN_TO_VALVE,
       pipeLine.submitSingleTaskStage(moveHandToValveGraspLocation);
 
@@ -173,16 +169,16 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("rotate Valve");
-            sendPacket(p1);
+            publishTextToSpeack("rotate Valve");
             FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
             GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
 
-            sendPacketToUI(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
+            uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
             HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
-                  point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+                                                                                                           point.getOrientation(),
+                                                                                                           CommonReferenceFrameIds.CHEST_FRAME.getHashId());
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
@@ -193,8 +189,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket(description);
-      sendPacket(p1);
+      publishTextToSpeack(description);
 
       //      Vector3d orient = new Vector3d();
       //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
@@ -203,10 +198,11 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       FramePose3D point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-      sendPacketToUI(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
       HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
-            point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+                                                                                                     point.getOrientation(),
+                                                                                                     CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);

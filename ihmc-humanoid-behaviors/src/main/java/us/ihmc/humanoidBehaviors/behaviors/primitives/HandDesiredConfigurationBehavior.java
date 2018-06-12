@@ -1,13 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessagePubSubType;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,10 +24,11 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final YoBoolean trajectoryTimeElapsed;
 
    private final boolean DEBUG = false;
+   private final IHMCROS2Publisher<HandDesiredConfigurationMessage> publisher;
 
-   public HandDesiredConfigurationBehavior(String name, CommunicationBridgeInterface outgoingCommunicationBridgeInterface, YoDouble yoTime)
+   public HandDesiredConfigurationBehavior(String name, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(name,outgoingCommunicationBridgeInterface);
+      super(name,ros2Node);
       this.yoTime = yoTime;
 
       hasInputBeenSet = new YoBoolean(getName() + "hasInputBeenSet", registry);
@@ -38,6 +40,8 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
 
       trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
+
+      publisher = createPublisher(new HandDesiredConfigurationMessagePubSubType(), "/ihmc/hand_desired_configuration");
    }
 
    public void setInput(HandDesiredConfigurationMessage handDesiredConfigurationMessage)
@@ -60,12 +64,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-
-//         sendPacketToController(outgoingHandDesiredConfigurationMessage);
-         
-         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST.ordinal());
-         
-         sendPacket(outgoingHandDesiredConfigurationMessage);
+         publisher.publish(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
 
@@ -80,10 +79,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopMessage.setDestination(PacketDestination.UI.ordinal());
-         sendPacketToController(stopMessage);
-         sendPacket(stopMessage);
+         publisher.publish(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP));
       }
       isAborted.set(true);
    }
@@ -95,10 +91,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopMessage.setDestination(PacketDestination.UI.ordinal());
-         sendPacketToController(stopMessage);
-         sendPacket(stopMessage);
+         publisher.publish(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP));
       }
       isPaused.set(true);
 

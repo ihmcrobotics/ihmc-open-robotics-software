@@ -1,8 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.ObjectWeightPacket;
+import controller_msgs.msg.dds.ObjectWeightPacketPubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ObjectWeightBehavior extends AbstractBehavior
@@ -10,10 +12,13 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet" + behaviorName, registry);
    private final YoBoolean packetAvailable = new YoBoolean("packetAvailable" + behaviorName, registry);
    private ObjectWeightPacket objectWeightPacket;
-   
-   public ObjectWeightBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   private IHMCROS2Publisher<ObjectWeightPacket> publisher;
+
+   public ObjectWeightBehavior(Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
+
+      publisher = createPublisher(new ObjectWeightPacketPubSubType(), "/ihmc/object_weight");
    }
 
    @Override
@@ -23,22 +28,20 @@ public class ObjectWeightBehavior extends AbstractBehavior
       {
          return;
       }
-      
+
       if (packetAvailable.getBooleanValue())
       {
-         sendPacketToController(objectWeightPacket);
+         publisher.publish(objectWeightPacket);
          packetAvailable.set(false);
       }
    }
-   
+
    public void setInput(ObjectWeightPacket packet)
    {
       objectWeightPacket = packet;
       packetAvailable.set(true);
       hasInputBeenSet.set(true);
    }
-
-
 
    @Override
    public boolean isDone()

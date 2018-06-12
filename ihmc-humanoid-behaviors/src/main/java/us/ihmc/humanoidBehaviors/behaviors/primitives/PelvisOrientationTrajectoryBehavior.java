@@ -3,9 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import us.ihmc.communication.packets.PacketDestination;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessagePubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -19,9 +20,11 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeElapsed;
 
-   public PelvisOrientationTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   private final IHMCROS2Publisher<PelvisOrientationTrajectoryMessage> publisher;
+
+   public PelvisOrientationTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
@@ -31,6 +34,8 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+
+      publisher = createPublisher(new PelvisOrientationTrajectoryMessagePubSubType(), "/ihmc/pelvis_orientation_trajectory");
    }
 
    public void setInput(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
@@ -51,9 +56,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingPelvisOrientationTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
-         sendPacket(outgoingPelvisOrientationTrajectoryMessage);
-         sendPacketToController(outgoingPelvisOrientationTrajectoryMessage);
+         publisher.publish(outgoingPelvisOrientationTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingPelvisOrientationTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
@@ -67,7 +70,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
 
       isPaused.set(false);
       isAborted.set(false);
-      
+
       hasBeenInitialized.set(true);
    }
 
@@ -83,8 +86,6 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
-
-
 
    @Override //TODO: Not currently implemented for this behavior
    public void onBehaviorResumed()
@@ -104,7 +105,6 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   
    public boolean hasInputBeenSet()
    {
       return outgoingPelvisOrientationTrajectoryMessage != null;

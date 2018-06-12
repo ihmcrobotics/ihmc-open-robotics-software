@@ -11,7 +11,6 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickObjectOffG
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -19,6 +18,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -38,17 +38,17 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final double standingDistance = 0.4;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
+   public WalkToPickObjectOffGroundLocationBehavior(YoDouble yoTime, HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
                                                     WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
                                                     AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("WalkState", WalkState.class, yoTime, outgoingCommunicationBridge);
+      super("WalkState", WalkState.class, yoTime, ros2Node);
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.referenceFrames = referenceFrames;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
+      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
                                                           wholeBodyControllerParameters.getWalkingControllerParameters());
       setupStateMachine();
    }

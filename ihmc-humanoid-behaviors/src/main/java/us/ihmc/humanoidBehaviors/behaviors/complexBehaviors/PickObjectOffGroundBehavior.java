@@ -2,8 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,7 +10,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
@@ -21,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,15 +27,14 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
-
    private Point3D grabLocation = null;
    private double objectRadius = 0;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public PickObjectOffGroundBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
+   public PickObjectOffGroundBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
+                                      Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeline();
@@ -45,11 +42,12 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
 
    private void setupPipeline()
    {
-      
-      HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
-      HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.CLOSE, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
 
-      
+      HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN,
+                                                                               atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+      HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.CLOSE,
+                                                                                atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
+
       double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774,
             -0.2153318563363089, -1.2957848304397805};
 
@@ -58,18 +56,15 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, atlasPrimitiveActions.leftArmTrajectoryBehavior);
       ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, atlasPrimitiveActions.leftArmTrajectoryBehavior);
 
-      
-   // GO TO INITIAL POICKUP LOCATION *******************************************
+      // GO TO INITIAL POICKUP LOCATION *******************************************
       BehaviorAction goToPickUpBallInitialLocationTask = new BehaviorAction(atlasPrimitiveActions.wholeBodyBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Picking Up The Ball");
-            sendPacket(p1);
-            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
-                  grabLocation.getY(),
-                  grabLocation.getZ() + objectRadius + 0.25);
+            publishTextToSpeack("Picking Up The Ball");
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(), grabLocation.getY(),
+                                                  grabLocation.getZ() + objectRadius + 0.25);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
             FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
@@ -84,9 +79,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
-                  grabLocation.getY(),
-                  grabLocation.getZ() + objectRadius);
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(), grabLocation.getY(), grabLocation.getZ() + objectRadius);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
             FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
@@ -136,7 +129,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      pipeLine.doControl();      
+      pipeLine.doControl();
    }
 
    @Override

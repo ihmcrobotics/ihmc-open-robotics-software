@@ -16,15 +16,15 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDet
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KickBallBehavior extends AbstractBehavior
 {
@@ -58,10 +58,10 @@ public class KickBallBehavior extends AbstractBehavior
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+   public KickBallBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                           HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      super(behaviorCommunicationBridge);
+      super(ros2Node);
 
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
@@ -69,23 +69,22 @@ public class KickBallBehavior extends AbstractBehavior
       // create sub-behaviors:
       if (USE_BLOB_FILTERING)
       {
-         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames,
-               fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(ros2Node, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
          sphereDetectionBehavior.addHSVRange(new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255)));
          this.sphereDetectionBehavior = sphereDetectionBehavior;
       }
       else
       {
-         sphereDetectionBehavior = new SphereDetectionBehavior(communicationBridge, referenceFrames);
+         sphereDetectionBehavior = new SphereDetectionBehavior(ros2Node, referenceFrames);
       }
 
       behaviors.add(sphereDetectionBehavior);
 
-      walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
-            wholeBodyControllerParameters.getWalkingControllerParameters());
+      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
+                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
 
-      kickBehavior = new KickBehavior(communicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
+      kickBehavior = new KickBehavior(ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
       behaviors.add(kickBehavior);
 
       for (AbstractBehavior behavior : behaviors)
@@ -100,8 +99,7 @@ public class KickBallBehavior extends AbstractBehavior
          registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
          registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
-         waitForUserValidationBehavior = new WaitForUserValidationBehavior(communicationBridge, coactiveElement.validClicked,
-               coactiveElement.validAcknowledged);
+         waitForUserValidationBehavior = new WaitForUserValidationBehavior(ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
          behaviors.add(waitForUserValidationBehavior);
 
       }
@@ -203,7 +201,7 @@ public class KickBallBehavior extends AbstractBehavior
    private FramePose2D getoffsetPoint()
    {
       FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
-            sphereDetectionBehavior.getBallLocation().getY());
+                                                     sphereDetectionBehavior.getBallLocation().getY());
       FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2D walkingDirection = new FrameVector2D(worldFrame);
@@ -251,7 +249,7 @@ public class KickBallBehavior extends AbstractBehavior
       {
          behavior.onBehaviorAborted();
       }
-      
+
    }
 
    @Override
@@ -268,8 +266,6 @@ public class KickBallBehavior extends AbstractBehavior
    {
       return pipeLine.isDone();
    }
-
-   
 
    public boolean isUseBlobFiltering()
    {

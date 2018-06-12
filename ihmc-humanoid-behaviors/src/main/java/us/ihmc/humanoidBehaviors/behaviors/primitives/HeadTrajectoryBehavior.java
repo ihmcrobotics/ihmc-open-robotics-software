@@ -3,9 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import us.ihmc.communication.packets.PacketDestination;
+import controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,16 +18,17 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    private final YoDouble yoTime;
    private final YoDouble startTime;
    private final YoDouble trajectoryTime;
+   private final IHMCROS2Publisher<HeadTrajectoryMessage> publisher;
 
-   public HeadTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public HeadTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, outgoingCommunicationBridge, yoTime);
+      this(null, ros2Node, yoTime);
    }
-   
-   public HeadTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+
+   public HeadTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, outgoingCommunicationBridge);
-      
+      super(namePrefix, ros2Node);
+
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
       packetHasBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
@@ -34,6 +36,8 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       startTime.set(Double.NaN);
       trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
+
+      publisher = createPublisher(new HeadTrajectoryMessagePubSubType(), "/ihmc/head_trajectory");
    }
 
    public void setInput(HeadTrajectoryMessage headTrajectoryMessage)
@@ -44,7 +48,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-            if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadTrajectoryMessage != null))
+      if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadTrajectoryMessage != null))
       {
          sendHeadOrientationPacketToController();
       }
@@ -52,12 +56,10 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
 
    private void sendHeadOrientationPacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
-         sendPacket(outgoingHeadTrajectoryMessage);
-         sendPacketToController(outgoingHeadTrajectoryMessage);
-         
+         publisher.publish(outgoingHeadTrajectoryMessage);
+
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingHeadTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
@@ -68,10 +70,10 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
-      
+
       isPaused.set(false);
       isAborted.set(false);
-      
+
       hasBeenInitialized.set(true);
    }
 
@@ -83,10 +85,9 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
 
       isPaused.set(false);
       isAborted.set(false);
-      
-      trajectoryTime.set(Double.NaN);      
-   }
 
+      trajectoryTime.set(Double.NaN);
+   }
 
    @Override
    public boolean isDone()
@@ -96,14 +97,12 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed && !isPaused.getBooleanValue();
    }
 
-   
-
-   
-   public boolean hasInputBeenSet() {
-	   if (outgoingHeadTrajectoryMessage != null)
-		   return true;
-	   else
-		   return false;
+   public boolean hasInputBeenSet()
+   {
+      if (outgoingHeadTrajectoryMessage != null)
+         return true;
+      else
+         return false;
    }
 
    @Override

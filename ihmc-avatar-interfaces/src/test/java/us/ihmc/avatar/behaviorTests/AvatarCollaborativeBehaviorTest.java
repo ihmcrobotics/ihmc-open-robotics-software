@@ -1,6 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -8,17 +8,17 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestInterface{
 
@@ -42,8 +42,8 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
 		
 		HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 		WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-		CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-		CollaborativeBehavior collaborativeBehavior = new CollaborativeBehavior(communicationBridge, referenceFrames, fullRobotModel, robotSensorInfo, walkingControllerParameters, null);
+		Ros2Node ros2Node = drcBehaviorTestHelper.getRos2Node();
+		CollaborativeBehavior collaborativeBehavior = new CollaborativeBehavior(ros2Node, referenceFrames, fullRobotModel, robotSensorInfo, walkingControllerParameters, null);
 		scs.addYoVariableRegistry(collaborativeBehavior.getYoVariableRegistry());
 		
 		drcBehaviorTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 1.0), new Point3D(10.0, 10.0, 3.0));

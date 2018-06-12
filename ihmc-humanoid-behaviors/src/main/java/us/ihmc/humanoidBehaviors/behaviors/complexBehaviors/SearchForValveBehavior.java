@@ -1,12 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.ValveLocationPacket;
-import us.ihmc.communication.packets.MessageTools;
+import controller_msgs.msg.dds.ValveLocationPacketPubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.ros2.Ros2Node;
 
 public class SearchForValveBehavior extends AbstractBehavior
 {
@@ -16,17 +15,16 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>(10);
 
-   public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
+   public SearchForValveBehavior(Ros2Node ros2Node)
    {
-      super("SearchForSpehereFar", behaviorCommunicationBridge);
-      attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
+      super("SearchForSpehereFar", ros2Node);
+      createSubscriber(valveLocationQueue, new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Searching For The Valve");
-      sendPacket(p1);
+      publishTextToSpeack("Searching For The Valve");
    }
 
    @Override
@@ -62,8 +60,7 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    private void recievedValveLocation(ValveLocationPacket valveLocationPacket)
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Valve Location From UI");
-      sendPacket(p1);
+      publishTextToSpeack("Recieved Valve Location From UI");
       valveTransformToWorld = valveLocationPacket.getValvePoseInWorld();
 
       valveRadius = valveLocationPacket.getValveRadius();

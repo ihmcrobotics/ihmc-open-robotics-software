@@ -3,12 +3,14 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessagePubSubType;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -30,14 +32,17 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    protected final YoBoolean hasStatusBeenReceived;
    private final YoBoolean isDone;
 
-   public HandTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   private final IHMCROS2Publisher<HandTrajectoryMessage> handTrajectoryPublisher;
+   private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+
+   public HandTrajectoryBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, outgoingCommunicationBridge, yoTime);
+      this(null, ros2Node, yoTime);
    }
 
-   public HandTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public HandTrajectoryBehavior(String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, outgoingCommunicationBridge);
+      super(namePrefix, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
@@ -52,6 +57,9 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
+
+      handTrajectoryPublisher = createPublisher(new HandTrajectoryMessagePubSubType(), "/ihmc/hand_trajectory");
+      stopAllTrajectoryPublisher = createPublisher(new StopAllTrajectoryMessagePubSubType(), "/ihmc/stop_all_trajectory");
    }
 
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)
@@ -88,10 +96,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-        // outgoingMessage.setDestination(PacketDestination.UI);
-
-         //sendPacketToController(outgoingMessage);
-         sendPacket(outgoingMessage);
+         handTrajectoryPublisher.publish(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -104,9 +109,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    {
       if (outgoingMessage != null)
       {
-         StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-         sendPacketToController(pausePacket);
+         stopAllTrajectoryPublisher.publish(new StopAllTrajectoryMessage());
       }
    }
 
@@ -190,8 +193,6 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    {
       return isDone.getBooleanValue();
    }
-
-   
 
    public boolean hasInputBeenSet()
    {

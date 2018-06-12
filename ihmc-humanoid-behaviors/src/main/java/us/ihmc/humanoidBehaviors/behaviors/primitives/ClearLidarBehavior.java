@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
@@ -12,9 +12,9 @@ public class ClearLidarBehavior extends AbstractBehavior
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
 //   private DepthDataClearCommand clearLidarPacket;
 
-   public ClearLidarBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public ClearLidarBehavior(Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
    }
 

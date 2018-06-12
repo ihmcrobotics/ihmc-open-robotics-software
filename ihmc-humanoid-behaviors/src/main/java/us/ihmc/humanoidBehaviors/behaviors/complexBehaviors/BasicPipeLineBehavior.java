@@ -10,13 +10,13 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableLidarBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,16 +37,16 @@ public class BasicPipeLineBehavior extends AbstractBehavior
 
    private BasicStates currentState = BasicStates.ENABLE_LIDAR;
 
-   public BasicPipeLineBehavior(String name, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+   public BasicPipeLineBehavior(String name, YoDouble yoTime, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
-      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
-      clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
-            wholeBodyControllerParameters.getWalkingControllerParameters());
-      armGoHomeLeftBehavior = new GoHomeBehavior(outgoingCommunicationBridge, yoTime);
+      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(ros2Node);
+      clearLidarBehavior = new ClearLidarBehavior(ros2Node);
+      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
+                                                          wholeBodyControllerParameters.getWalkingControllerParameters());
+      armGoHomeLeftBehavior = new GoHomeBehavior(ros2Node, yoTime);
 
       setUpPipeline();
    }
@@ -59,7 +59,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             // FIXME
-//            enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
+            //            enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
             currentState = BasicStates.ENABLE_LIDAR;
          }
       };
@@ -163,5 +163,4 @@ public class BasicPipeLineBehavior extends AbstractBehavior
    {
    }
 
-  
 }

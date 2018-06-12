@@ -1,27 +1,26 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInterface
 {
@@ -67,8 +66,8 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 21.5)
@@ -112,7 +111,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 2.0;
 
-      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getRos2Node());
 
       highLevelStateBehavior.initialize();
       highLevelStateBehavior.setInput(HumanoidMessageTools.createHighLevelStateMessage(desiredState));
@@ -125,7 +124,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
       assertTrue(highLevelStateBehavior.isDone());
       assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
-            desiredState.equals(actualState));
+                 desiredState.equals(actualState));
    }
 
    private HighLevelControllerName getCurrentHighLevelState()

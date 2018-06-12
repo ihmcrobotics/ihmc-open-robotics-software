@@ -3,16 +3,26 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
+import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
+import controller_msgs.msg.dds.WalkOverTerrainGoalPacketPubSubType;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessagePubSubType;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -28,7 +38,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -40,6 +49,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -71,30 +81,37 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
    private final YoDouble transferTime = new YoDouble("transferTime", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private final IHMCROS2Publisher<RequestPlanarRegionsListMessage> planarRegionsRequestPublisher;
+   private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridgeInterface communicationBridge, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, HumanoidReferenceFrames referenceFrames)
+   public WalkOverTerrainStateMachineBehavior(Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                              HumanoidReferenceFrames referenceFrames)
    {
-      super(communicationBridge);
+      super(ros2Node);
 
-      communicationBridge.attachListener(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
-      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
-      communicationBridge.attachListener(PlanarRegionsListMessage.class, planarRegions::set);
-
+      createSubscriber(plannerResult::set, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
+      createSubscriber((packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())),
+                       new WalkOverTerrainGoalPacketPubSubType(), "/ihmc/walk_over_terrain_goal");
+      createSubscriber(planarRegions::set, new PlanarRegionsListMessagePubSubType(), "/ihmc/planar_regions_list");
 
       waitState = new WaitState(yoTime);
       planFromDoubleSupportState = new PlanFromDoubleSupportState();
       planFromSingleSupportState = new PlanFromSingleSupportState();
-
-      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
-      {
-         goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation()));
-      });
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
       this.referenceFrames = referenceFrames;
 
       swingTime.set(defaultSwingTime);
       transferTime.set(defaultTransferTime);
+
+      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
+      planningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
+      planarRegionsRequestPublisher = createPublisher(new RequestPlanarRegionsListMessagePubSubType(), "/ihmc/request_planar_regions_list");
+      headTrajectoryPublisher = createPublisher(new HeadTrajectoryMessagePubSubType(), "/ihmc/head_trajectory");
 
       stateMachine = setupStateMachine(yoTime);
    }
@@ -103,13 +120,15 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    {
       StateMachineFactory<WalkOverTerrainState, State> factory = new StateMachineFactory<>(WalkOverTerrainState.class);
       factory.setNamePrefix(getName() + "StateMachine").setRegistry(registry).buildYoClock(timeProvider);
-      
+
       factory.addState(WalkOverTerrainState.WAIT, waitState);
       factory.addState(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, planFromDoubleSupportState);
       factory.addState(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromSingleSupportState);
 
-      StateTransitionCondition planFromDoubleSupportToWait = (time) -> plannerResult.get() != null && !FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
-      StateTransitionCondition planFromDoubleSupportToWalking = (time) -> plannerResult.get() != null && FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWait = (time) -> plannerResult.get() != null
+            && !FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWalking = (time) -> plannerResult.get() != null
+            && FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
 
       factory.addTransition(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, WalkOverTerrainState.WAIT, planFromDoubleSupportToWait);
       factory.addTransition(WalkOverTerrainState.PLAN_FROM_DOUBLE_SUPPORT, WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
@@ -194,7 +213,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
          stopwatch.reset();
 
-         if(hasWalkedBetweenWaiting.getBooleanValue())
+         if (hasWalkedBetweenWaiting.getBooleanValue())
          {
             waitTime.set(initialWaitTime);
             hasWalkedBetweenWaiting.set(false);
@@ -212,16 +231,17 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
          Quaternion headOrientation = new Quaternion();
          headOrientation.set(orientationAxisAngle);
-         HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(), referenceFrames.getChestFrame());
+         HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+                                                                                                        referenceFrames.getChestFrame());
          headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-         sendPacket(headTrajectoryMessage);
+         headTrajectoryPublisher.publish(headTrajectoryMessage);
       }
 
       private void clearPlanarRegionsList()
       {
          RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CLEAR);
          requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
-         sendPacket(requestPlanarRegionsListMessage);
+         planarRegionsRequestPublisher.publish(requestPlanarRegionsListMessage);
       }
 
       @Override
@@ -242,12 +262,12 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       @Override
       public void doAction(double timeInState)
       {
-         if(!goalHasBeenSet())
+         if (!goalHasBeenSet())
          {
             return;
          }
 
-         if(!planningRequestHasBeenSent.getBooleanValue())
+         if (!planningRequestHasBeenSent.getBooleanValue())
          {
             PrintTools.info("sending planning request...");
             MovingReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -287,15 +307,18 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       PlanFromSingleSupportState()
       {
-         communicationBridge.attachListener(FootstepStatusMessage.class, footstepStatus::set);
-         communicationBridge.attachListener(WalkingStatusMessage.class, packet -> { walkingStatus.set(packet); waitState.hasWalkedBetweenWaiting.set(true);});
+         createSubscriber(footstepStatus::set, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");
+         createSubscriber(packet -> {
+            walkingStatus.set(packet);
+            waitState.hasWalkedBetweenWaiting.set(true);
+         }, new WalkingStatusMessagePubSubType(), "/ihmc/walking_status");
       }
 
       @Override
       public void doAction(double timeInState)
       {
          FootstepStatusMessage footstepStatus = this.footstepStatus.getAndSet(null);
-         if(footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.STARTED.toByte())
+         if (footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.STARTED.toByte())
          {
             Point3D touchdownPosition = footstepStatus.getDesiredFootPositionInWorld();
             Quaternion touchdownOrientation = footstepStatus.getDesiredFootOrientationInWorld();
@@ -305,7 +328,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          }
 
          FootstepPlanningToolboxOutputStatus plannerResult = WalkOverTerrainStateMachineBehavior.this.plannerResult.get();
-         if(plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.getFootstepPlanningResult()).validForExecution())
+         if (plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.getFootstepPlanningResult()).validForExecution())
          {
             sendFootstepPlan();
          }
@@ -341,27 +364,26 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
 
       footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      communicationBridge.sendPacket(footstepDataListMessage);
+      footstepPublisher.publish(footstepDataListMessage);
    }
 
    private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
-      ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
-      wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
-      communicationBridge.sendPacket(wakeUp);
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       planId.increment();
-      FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose.get(), FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose.get(),
+                                                                                                       FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
       request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
       request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
-      communicationBridge.sendPacket(request);
+      planningRequestPublisher.publish(request);
       plannerResult.set(null);
    }
 
    private void sendTextToSpeechPacket(String text)
    {
-      sendPacketToUI(MessageTools.createTextToSpeechPacket(text));
+      publishTextToSpeack(text);
    }
 }

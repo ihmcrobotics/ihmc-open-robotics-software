@@ -90,8 +90,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
 
       fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
@@ -108,7 +108,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(success);
 
       PrintTools.debug(this, "Dispatching Behavior");
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),getRobotModel().getWalkingControllerParameters());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
@@ -163,7 +164,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       PrintTools.debug(this, "Dispatching Behavior");
       drcBehaviorTestHelper.updateRobotModel();
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
@@ -224,7 +226,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       PrintTools.debug(this, "Dispatching Behavior");
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
@@ -266,15 +269,17 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private boolean areFootstepsTooFarApart(FootstepListBehavior footstepListBehavior, ArrayList<Footstep> desiredFootsteps)
    {
       ArrayList<Double> footStepLengths = footstepListBehavior.getFootstepLengths(createFootstepDataList(desiredFootsteps),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel().getWalkingControllerParameters());
+                                                                                  drcBehaviorTestHelper.getSDFFullRobotModel(),
+                                                                                  getRobotModel().getWalkingControllerParameters());
 
-      if(DEBUG)
-      for (double footStepLength : footStepLengths)
-      {
-         PrintTools.debug(this, "foot step length : " + footStepLength);
-      }
+      if (DEBUG)
+         for (double footStepLength : footStepLengths)
+         {
+            PrintTools.debug(this, "foot step length : " + footStepLength);
+         }
 
-      boolean footStepsAreTooFarApart = footstepListBehavior.areFootstepsTooFarApart(createFootstepDataList(desiredFootsteps), fullRobotModel, getRobotModel().getWalkingControllerParameters());
+      boolean footStepsAreTooFarApart = footstepListBehavior.areFootstepsTooFarApart(createFootstepDataList(desiredFootsteps), fullRobotModel,
+                                                                                     getRobotModel().getWalkingControllerParameters());
 
       return footStepsAreTooFarApart;
    }
@@ -292,7 +297,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       xOffsets.add(0.2);
       xOffsets.add(0.3);
 
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel().getWalkingControllerParameters());
       SideDependentList<FramePose2D> desiredFinalFootPoses = new SideDependentList<FramePose2D>();
 
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
@@ -319,7 +325,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       double stopPercent = 100.0 * stepNumberToStopOn / desiredFootsteps.size();
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getFootFrame(RobotSide.LEFT);
       StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, footstepListBehavior, pausePercent, pauseDuration,
-            stopPercent, desiredFinalFootPoses.get(RobotSide.LEFT), frameToKeepTrackOf);
+                                                                                       stopPercent, desiredFinalFootPoses.get(RobotSide.LEFT),
+                                                                                       frameToKeepTrackOf);
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
       PrintTools.debug(this, "Behavior should be done");
 
@@ -369,7 +376,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private Footstep generateFootstepOnFlatGround(RobotSide robotSide, FramePose2D desiredFootPose2d)
    {
       Footstep ret = generateFootstep(desiredFootPose2d, fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide), robotSide, 0.0,
-            new Vector3D(0.0, 0.0, 1.0));
+                                      new Vector3D(0.0, 0.0, 1.0));
 
       return ret;
    }
@@ -425,7 +432,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+                   orientationThreshold);
    }
 
 }

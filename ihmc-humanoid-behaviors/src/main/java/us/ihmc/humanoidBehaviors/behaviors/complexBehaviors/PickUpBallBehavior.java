@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -35,7 +33,6 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDet
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
@@ -49,6 +46,7 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -88,11 +86,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ReferenceFrame chestCoMFrame;
    private final ReferenceFrame pelvisZUpFrame;
 
-   public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
+   public PickUpBallBehavior(Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          FullHumanoidRobotModelFactory robotModelFactory)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
       this.yoTime = yoTime;
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -101,17 +99,17 @@ public class PickUpBallBehavior extends AbstractBehavior
       this.referenceFrames = referenceFrames;
 
       // create sub-behaviors:
-      setLidarParametersBehavior = new SetLidarParametersBehavior(outgoingCommunicationBridge);
+      setLidarParametersBehavior = new SetLidarParametersBehavior(ros2Node);
       behaviors.add(setLidarParametersBehavior);
 
-      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
+      enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(ros2Node);
       behaviors.add(enableBehaviorOnlyLidarBehavior);
 
-      clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
+      clearLidarBehavior = new ClearLidarBehavior(ros2Node);
       behaviors.add(clearLidarBehavior);
 
-      blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel);
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(ros2Node, referenceFrames, fullRobotModel);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(ros2Node, referenceFrames);
       blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_ORANGE_BALL);
       blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_BLUE_BALL);
       blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_RED_BALL);
@@ -119,30 +117,30 @@ public class PickUpBallBehavior extends AbstractBehavior
       blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_GREEN_BALL);
       behaviors.add(FILTER_KNOWN_COLORS_TO_SPEED_UP ? blobFilteredSphereDetectionBehavior : initialSphereDetectionBehavior);
 
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
+      walkToLocationBehavior = new WalkToLocationBehavior(ros2Node, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(robotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(robotModelFactory, yoTime, ros2Node, fullRobotModel);
 
       behaviors.add(wholeBodyBehavior);
 
-      chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(ros2Node, yoTime);
       behaviors.add(chestTrajectoryBehavior);
 
-      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior("chest", ros2Node, yoTime);
       behaviors.add(chestGoHomeBehavior);
 
-      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", ros2Node, yoTime);
       behaviors.add(pelvisGoHomeBehavior);
 
-      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
+      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", ros2Node, yoTime);
       behaviors.add(armGoHomeLeftBehavior);
-      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
+      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", ros2Node, yoTime);
       behaviors.add(armGoHomeRightBehavior);
-      armTrajectoryBehavior = new ArmTrajectoryBehavior("handTrajectory", outgoingCommunicationBridge, yoTime);
+      armTrajectoryBehavior = new ArmTrajectoryBehavior("handTrajectory", ros2Node, yoTime);
       behaviors.add(armTrajectoryBehavior);
 
-      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("left", outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("left", ros2Node, yoTime);
       behaviors.add(handDesiredConfigurationBehavior);
 
       coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSideOLD();
@@ -150,7 +148,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
       registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(ros2Node, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
       behaviors.add(waitForUserValidationBehavior);
 
@@ -224,8 +222,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("LOOKING FOR BALL");
-            sendPacket(p1);
+            publishTextToSpeack("LOOKING FOR BALL");
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -266,8 +263,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To The Ball");
-            sendPacket(p1);
+            publishTextToSpeack("Walking To The Ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -288,7 +284,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
 
-      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(ros2Node, yoTime);
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(message);
@@ -311,7 +307,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage messageHeadUp = HumanoidMessageTools.createHeadTrajectoryMessage(1, desiredHeadUpQuat, worldFrame, chestCoMFrame);
 
-      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(ros2Node, yoTime);
 
       headTrajectoryUpBehavior.initialize();
       headTrajectoryUpBehavior.setInput(messageHeadUp);
@@ -360,8 +356,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Looking for the ball");
-            sendPacket(p1);
+            publishTextToSpeack("Looking for the ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -401,8 +396,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   initialSphereDetectionBehavior.getBallLocation().getY()+" "+
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("I think i found the ball");
-            sendPacket(p1);
+            publishTextToSpeack("I think i found the ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
@@ -492,8 +486,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Putting The Ball In The Bucket");
-            sendPacket(p1);
+            publishTextToSpeack("Putting The Ball In The Bucket");
             coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -652,9 +645,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("YAY IM ALL DONE");
-      sendPacket(p1);
-
+      publishTextToSpeack("YAY IM ALL DONE");
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);

@@ -1,23 +1,23 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SleepBehavior extends AbstractBehavior
 {
    private final YoDouble sleepTime;
    private final YoStopwatch stopwatch;
 
-   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public SleepBehavior(Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(outgoingCommunicationBridge, yoTime, 1.0);
+      this(ros2Node, yoTime, 1.0);
    }
 
-   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, double sleepTime)
+   public SleepBehavior(Ros2Node ros2Node, YoDouble yoTime, double sleepTime)
    {
-      super(outgoingCommunicationBridge);
+      super(ros2Node);
 
       this.sleepTime = new YoDouble("sleepTime", registry);
       this.sleepTime.set(sleepTime);
