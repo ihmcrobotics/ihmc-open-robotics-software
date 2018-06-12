@@ -8,12 +8,14 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.TextToSpeechPacketPubSubType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -61,6 +63,16 @@ public abstract class AbstractBehavior implements RobotController
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    protected final String robotName;
 
+   private final String toolboxTopicNamePrefix;
+   private final String footstepPlanningToolboxOutputPrefix, footstepPlanningToolboxInputPrefix;
+   private final String kinematicsToolboxOutputPrefix, kinematicsToolboxInputPrefix;
+
+   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+
+   protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
+   protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
+
    public AbstractBehavior(String robotName, Ros2Node ros2Node)
    {
       this(robotName, null, ros2Node);
@@ -82,13 +94,49 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      textToSpeechPublisher = createPublisher(new TextToSpeechPacketPubSubType(), "/ihmc/text_to_speech");
+      toolboxTopicNamePrefix = "/ihmc/" + robotName + "/toolbox";
+      footstepPlanningToolboxOutputPrefix = toolboxTopicNamePrefix + "/footstep_plan/output";
+      footstepPlanningToolboxInputPrefix = toolboxTopicNamePrefix + "/footstep_plan/input";
+      kinematicsToolboxOutputPrefix = toolboxTopicNamePrefix + "/ik/output";
+      kinematicsToolboxInputPrefix = toolboxTopicNamePrefix + "/ik/input";
+
+      footstepPlanningToolboxSubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(footstepPlanningToolboxInputPrefix, messageType);
+      footstepPlanningToolboxPubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(footstepPlanningToolboxOutputPrefix, messageType);
+      kinematicsToolboxSubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(kinematicsToolboxInputPrefix, messageType);
+      kinematicsToolboxPubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(kinematicsToolboxOutputPrefix, messageType);
+
+      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      behaviorSubGenerator = IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName);
+      behaviorPubGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
+
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, "/ihmc/text_to_speech");
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   {
+      return createPublisher(messageType, controllerSubGenerator);
+   }
+
+   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
+   {
+      return createPublisher(messageType, behaviorPubGenerator);
+   }
+
+   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicSuffix)
+   {
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName) + topicSuffix);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   {
+      return createPublisher(messageType, topicNameGenerator.generateTopicName(messageType));
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(TopicDataType<T> pubSubType, String topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
    {
-      Class<T> messageType = (Class<T>) pubSubType.createData().getClass();
+      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
       MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
 
@@ -100,13 +148,29 @@ public abstract class AbstractBehavior implements RobotController
       return publisher;
    }
 
-   public <T> void createSubscriber(ConcurrentListeningQueue<T> queue, TopicDataType<T> pubSubType, String topicName)
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> queue.put(s.readNextData()));
+      createSubscriber(messageType, controllerPubGenerator, consumer);
    }
 
-   public <T> void createSubscriber(ObjectConsumer<T> consumer, TopicDataType<T> pubSubType, String topicName)
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
    {
+      createSubscriber(messageType, behaviorSubGenerator, consumer);
+   }
+
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, String topicSuffix, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
+   {
+      TopicDataType<T> pubSubType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
       ROS2Tools.createCallbackSubscription(ros2Node, pubSubType, topicName, s -> consumer.consumeObject(s.readNextData()));
    }
 

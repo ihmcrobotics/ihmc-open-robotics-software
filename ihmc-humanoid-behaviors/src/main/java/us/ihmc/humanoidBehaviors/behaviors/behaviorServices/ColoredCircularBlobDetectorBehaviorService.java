@@ -9,9 +9,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.producers.JPEGCompressor;
@@ -49,10 +47,10 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       super(robotName, ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
-      createSubscriber(robotConfigurationDataQueue, new RobotConfigurationDataPubSubType(), "/ihmc/robot_configuration_data");
-      
-      videoPublisher = createPublisher(new VideoPacketPubSubType(), "/ihmc/video");
+      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
+      createSubscriberFromController(RobotConfigurationData.class, robotConfigurationDataQueue::put);
+
+      videoPublisher = createBehaviorOutputPublisher(VideoPacket.class, "/video");
 
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);

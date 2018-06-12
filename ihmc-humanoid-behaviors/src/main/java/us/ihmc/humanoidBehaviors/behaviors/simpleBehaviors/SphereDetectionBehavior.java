@@ -11,9 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import controller_msgs.msg.dds.DetectedObjectPacket;
-import controller_msgs.msg.dds.DetectedObjectPacketPubSubType;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
-import controller_msgs.msg.dds.PointCloudWorldPacketPubSubType;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
@@ -60,14 +58,14 @@ public class SphereDetectionBehavior extends AbstractBehavior
 
    // temp vars
    private final Point3D chestPosition = new Point3D();
-  
+
    private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
 
    public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
-      createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
-      detectedObjectPublisher = createPublisher(new DetectedObjectPacketPubSubType(), "/ihmc/detected_object");
+      createSubscriber(PointCloudWorldPacket.class, "/ihmc/point_cloud_world", pointCloudQueue::put);
+      detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class, "/detected_object");
 
       this.humanoidReferenceFrames = referenceFrames;
    }
@@ -147,7 +145,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       groundQuadTree[0] = new Point3D();
       HumanoidMessageTools.setGroundQuadTreeSupport(groundQuadTree, pointCloudWorldPacket);
 
-//      sendPacket(pointCloudWorldPacket); FIXME I don't get what's going on here, I commented this code when switching to pub-sub (Sylvain)
+      //      sendPacket(pointCloudWorldPacket); FIXME I don't get what's going on here, I commented this code when switching to pub-sub (Sylvain)
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3D32[] fullPoints)

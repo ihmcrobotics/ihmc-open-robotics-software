@@ -8,7 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
@@ -16,7 +15,6 @@ import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
-import controller_msgs.msg.dds.StampedPosePacketPubSubType;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -420,10 +418,10 @@ public class DiagnosticBehavior extends AbstractBehavior
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
-      createSubscriber(inputListeningQueue, new CapturabilityBasedStatusPubSubType(), "/ihmc/capturability_based_status");
+      createSubscriberFromController(CapturabilityBasedStatus.class, inputListeningQueue::put);
       new SleepBehavior(robotName, ros2Node, yoTime);
 
-      stampedPosePublisher = createPublisher(new StampedPosePacketPubSubType(), "/ihmc/stamped_pose");
+      stampedPosePublisher = createPublisherForController(StampedPosePacket.class);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)

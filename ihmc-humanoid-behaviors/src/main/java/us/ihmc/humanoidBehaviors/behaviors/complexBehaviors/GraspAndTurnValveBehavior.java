@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import controller_msgs.msg.dds.UIPositionCheckerPacketPubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis;
@@ -54,7 +53,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      uiPositionCheckerPacketpublisher = createPublisher(new UIPositionCheckerPacketPubSubType(), "/ihmc/ui_position_checker");
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
    }
 
    @Override

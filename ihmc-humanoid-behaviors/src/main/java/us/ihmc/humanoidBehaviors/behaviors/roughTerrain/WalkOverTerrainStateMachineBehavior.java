@@ -3,24 +3,15 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessagePubSubType;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacketPubSubType;
+import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessagePubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
@@ -42,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -87,15 +79,15 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<RequestPlanarRegionsListMessage> planarRegionsRequestPublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
-   public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime,
-                                              WholeBodyControllerParameters wholeBodyControllerParameters, HumanoidReferenceFrames referenceFrames)
+   public WalkOverTerrainStateMachineBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                              HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
 
-      createSubscriber(plannerResult::set, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
-      createSubscriber((packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())),
-                       new WalkOverTerrainGoalPacketPubSubType(), "/ihmc/walk_over_terrain_goal");
-      createSubscriber(planarRegions::set, new PlanarRegionsListMessagePubSubType(), "/ihmc/planar_regions_list");
+      createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
+      createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
+                                    (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 
       waitState = new WaitState(yoTime);
       planFromDoubleSupportState = new PlanFromDoubleSupportState();
@@ -107,11 +99,11 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       swingTime.set(defaultSwingTime);
       transferTime.set(defaultTransferTime);
 
-      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
-      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
-      planningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
-      planarRegionsRequestPublisher = createPublisher(new RequestPlanarRegionsListMessagePubSubType(), "/ihmc/request_planar_regions_list");
-      headTrajectoryPublisher = createPublisher(new HeadTrajectoryMessagePubSubType(), "/ihmc/head_trajectory");
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
+      planarRegionsRequestPublisher = createPublisher(RequestPlanarRegionsListMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
 
       stateMachine = setupStateMachine(yoTime);
    }
@@ -307,11 +299,11 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       PlanFromSingleSupportState()
       {
-         createSubscriber(footstepStatus::set, new FootstepStatusMessagePubSubType(), "/ihmc/footstep_status");
-         createSubscriber(packet -> {
+         createSubscriberFromController(FootstepStatusMessage.class, footstepStatus::set);
+         createSubscriberFromController(WalkingStatusMessage.class, packet -> {
             walkingStatus.set(packet);
             waitState.hasWalkedBetweenWaiting.set(true);
-         }, new WalkingStatusMessagePubSubType(), "/ihmc/walking_status");
+         });
       }
 
       @Override

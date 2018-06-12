@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -29,7 +28,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
 
-      publisher = createPublisher(new PelvisHeightTrajectoryMessagePubSubType(), "/ihmc/pelvis_height_trajectory");
+      publisher = createPublisherForController(PelvisHeightTrajectoryMessage.class);
    }
 
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)

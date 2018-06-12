@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.PointCloudWorldPacket;
-import controller_msgs.msg.dds.PointCloudWorldPacketPubSubType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,15 +28,15 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double MUTLISENSE_HORIZONTAL_FOV = Math.toRadians(80.0);
    private static final double MULTISENSE_VERTICAL_FOV = Math.toRadians(45.0);
-   
+
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
-   
-   public BlobFilteredSphereDetectionBehavior(String robotName, Ros2Node ros2Node,
-         HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel)
+
+   public BlobFilteredSphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
+                                              FullHumanoidRobotModel fullRobotModel)
    {
       super(robotName, ros2Node, referenceFrames);
 
-      createSubscriber(pointCloudQueue, new PointCloudWorldPacketPubSubType(), "/ihmc/point_cloud_world");
+      createSubscriber(PointCloudWorldPacket.class, "/ihmc/point_cloud_world", pointCloudQueue::put); // FIXME That stream is no more
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(robotName, ros2Node);
 
@@ -64,7 +63,6 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
          Point3D32[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
 
-         
          findBallsAndSaveResult(filteredPointCloud);
       }
    }
@@ -73,15 +71,14 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       if (fullPointCloud.length == 0)
       { // FIXME
-//         DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
-//         enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
-//         sendPacket(enableBehaviorLidar);
-         
+         //         DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
+         //         enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
+         //         sendPacket(enableBehaviorLidar);
+
          ThreadTools.sleep(100);
-         
+
          return new Point3D32[0];
       }
-      
 
       List<Point3D32> filteredPoints = new ArrayList<Point3D32>();
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
@@ -92,7 +89,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          int cameraPixelWidth = latestCameraImage.getWidth();
          int cameraPixelHeight = latestCameraImage.getHeight();
-         
+
          synchronized (coloredCircularBlobDetectorBehaviorService.getBallListConch())
          {
             for (Point2D latestBallPosition2d : coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet())
@@ -124,7 +121,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                }
             }
          }
-   
+
          Point3D32[] filteredPointArray = new Point3D32[filteredPoints.size()];
          filteredPoints.toArray(filteredPointArray);
 
@@ -143,9 +140,9 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       coloredCircularBlobDetectorBehaviorService.run();
 
       // FIXME
-//      DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
-//      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
-//      sendPacket(depthDataStateCommand);
+      //      DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
+      //      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
+      //      sendPacket(depthDataStateCommand);
 
       publishTextToSpeack("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
    }

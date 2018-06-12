@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.HighLevelStateMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -16,7 +15,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
    public HighLevelStateBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
-      publisher = createPublisher(new HighLevelStateMessagePubSubType(), "/ihmc/high_level_state");
+      publisher = createPublisherForController(HighLevelStateMessage.class);
    }
 
    public void setInput(HighLevelStateMessage highLevelStatePacket)

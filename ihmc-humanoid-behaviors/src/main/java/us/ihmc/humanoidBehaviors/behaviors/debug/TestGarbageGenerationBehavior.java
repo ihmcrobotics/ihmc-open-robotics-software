@@ -1,11 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessagePubSubType;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
@@ -41,9 +38,9 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
       super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
       timer = new YoStopwatch(yoTime);
-      armPublisher = createPublisher(new ArmTrajectoryMessagePubSubType(), "/ihmc/arm_trajectory");
-      chestPublisher = createPublisher(new ChestTrajectoryMessagePubSubType(), "/ihmc/chest_trajectory");
-      footstepPublisher = createPublisher(new FootstepDataListMessagePubSubType(), "/ihmc/footstep_data_list");
+      armPublisher = createPublisherForController(ArmTrajectoryMessage.class);
+      chestPublisher = createPublisherForController(ChestTrajectoryMessage.class);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override

@@ -70,11 +70,11 @@ public class WalkToGoalBehavior extends AbstractBehavior
       havePlanToExecute = new YoBoolean("havePlanToExecute", registry);
       transitionBackToWaitingState = new YoBoolean("transitionBackToWaitingState", registry);
 
-      createSubscriber(walkToGoalPacketQueue, new WalkToGoalBehaviorPacketPubSubType(), "/ihmc/walk_to_goal_behavior");
-      createSubscriber(planningOutputStatusQueue, new FootstepPlanningToolboxOutputStatusPubSubType(), "/ihmc/footstep_planning_toolbox_output_status");
+      createBehaviorInputSubscriber(WalkToGoalBehaviorPacket.class, walkToGoalPacketQueue::put);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, planningOutputStatusQueue::put);
 
-      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
-      planningRequestPublisher = createPublisher(new FootstepPlanningRequestPacketPubSubType(), "/ihmc/footstep_planning_request");
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
 
       stateMachine = setupStateMachine(yoTime);
    }

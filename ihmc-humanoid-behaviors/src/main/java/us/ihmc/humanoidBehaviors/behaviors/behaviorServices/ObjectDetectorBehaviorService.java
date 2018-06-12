@@ -11,12 +11,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
-import controller_msgs.msg.dds.BoundingBoxesPacketPubSubType;
 import controller_msgs.msg.dds.HeatMapPacket;
-import controller_msgs.msg.dds.HeatMapPacketPubSubType;
-import controller_msgs.msg.dds.ObjectDetectorResultPacketPubSubType;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -53,7 +50,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super(robotName, ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
+      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
@@ -62,7 +59,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
 
-      createSubscriber(objectDetectorFromCameraImages, new ObjectDetectorResultPacketPubSubType(), "/ihmc/objet_detector_result");
+      createSubscriber(ObjectDetectorResultPacket.class, "/ihmc/objet_detector_result", objectDetectorFromCameraImages);
 
       String prefix = "fiducial";
       locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());
@@ -72,8 +69,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       locationEnabled.set(false);
 
-      IHMCROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createPublisher(new BoundingBoxesPacketPubSubType(), "/ihmc/bounding_boxes");
-      IHMCROS2Publisher<HeatMapPacket> heatMapPublisher = createPublisher(new HeatMapPacketPubSubType(), "/ihmc/heat_map");
+      IHMCROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
+      IHMCROS2Publisher<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
 
       objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
          boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());

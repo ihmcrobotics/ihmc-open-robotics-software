@@ -45,6 +45,7 @@ public class MultiSenseSensorManager
       while (!rosOnline)
       {
          registerCameraReceivers(ros2Node);
+
          if (setROSParameters)
          {
             multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);

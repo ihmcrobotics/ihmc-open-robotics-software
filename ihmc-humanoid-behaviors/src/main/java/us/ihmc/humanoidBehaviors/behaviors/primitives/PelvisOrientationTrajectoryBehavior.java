@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -35,7 +34,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
 
-      publisher = createPublisher(new PelvisOrientationTrajectoryMessagePubSubType(), "/ihmc/pelvis_orientation_trajectory");
+      publisher = createPublisherForController(PelvisOrientationTrajectoryMessage.class);
    }
 
    public void setInput(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)

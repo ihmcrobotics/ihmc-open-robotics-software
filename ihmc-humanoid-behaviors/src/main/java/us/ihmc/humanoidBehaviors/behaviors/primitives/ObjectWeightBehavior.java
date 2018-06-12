@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.ObjectWeightPacket;
-import controller_msgs.msg.dds.ObjectWeightPacketPubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -18,7 +17,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
 
-      publisher = createPublisher(new ObjectWeightPacketPubSubType(), "/ihmc/object_weight");
+      publisher = createPublisher(ObjectWeightPacket.class, "/ihmc/object_weight");
    }
 
    @Override

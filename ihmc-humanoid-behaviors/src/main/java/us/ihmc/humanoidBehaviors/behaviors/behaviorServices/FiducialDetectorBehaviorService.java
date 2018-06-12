@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,7 +29,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super(robotName, FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(videoPacketQueue, new VideoPacketPubSubType(), "/ihmc/video");
+      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),

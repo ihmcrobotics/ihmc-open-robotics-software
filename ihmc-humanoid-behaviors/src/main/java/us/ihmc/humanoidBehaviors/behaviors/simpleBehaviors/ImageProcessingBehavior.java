@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.VideoPacketPubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
@@ -24,7 +23,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    {
       super(robotName, namePrefix, ros2Node);
 
-      IHMCROS2Publisher<VideoPacket> publisher = createPublisher(new VideoPacketPubSubType(), "/ihmc/video");
+      IHMCROS2Publisher<VideoPacket> publisher = createBehaviorOutputPublisher(VideoPacket.class);
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler(publisher));
    }
 

@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import controller_msgs.msg.dds.ValveLocationPacket;
-import controller_msgs.msg.dds.ValveLocationPacketPubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -78,7 +77,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
       userValidationExampleBehavior = new GetUserValidationBehavior(robotName, ros2Node);
-      publisher = createPublisher(new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
+      publisher = createBehaviorOutputPublisher(ValveLocationPacket.class);
       setupStateMachine();
    }
 

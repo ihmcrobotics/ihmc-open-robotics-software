@@ -1,13 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.ToolboxStateMessagePubSubType;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -113,10 +109,10 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
-      createSubscriber(kinematicsToolboxOutputQueue, new KinematicsToolboxOutputStatusPubSubType(), "/ihmc/kinematics_toolbox_output_status");
-      toolboxStatePublisher = createPublisher(new ToolboxStateMessagePubSubType(), "/ihmc/toolbox_state");
-      kinematicsToolboxRigidBodyPublisher = createPublisher(new KinematicsToolboxRigidBodyMessagePubSubType(), "/ihmc/kinematics_toolbox_rigid_body");
-      wholeBodyTrajectoryPublisher = createPublisher(new WholeBodyTrajectoryMessagePubSubType(), "/ihmc/whole_body_trajectory");
+      createSubscriber(KinematicsToolboxOutputStatus.class, kinematicsToolboxPubGenerator, kinematicsToolboxOutputQueue::put);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsToolboxSubGenerator);
+      kinematicsToolboxRigidBodyPublisher = createPublisher(KinematicsToolboxRigidBodyMessage.class, kinematicsToolboxSubGenerator);
+      wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
 
       clear();
    }

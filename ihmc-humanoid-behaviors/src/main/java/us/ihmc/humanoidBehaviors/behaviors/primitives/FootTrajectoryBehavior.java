@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -39,7 +38,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
 
-      publisher = createPublisher(new FootTrajectoryMessagePubSubType(), "/ihmc/foot_trajectory");
+      publisher = createPublisherForController(FootTrajectoryMessage.class);
    }
 
    public void setInput(FootTrajectoryMessage message)

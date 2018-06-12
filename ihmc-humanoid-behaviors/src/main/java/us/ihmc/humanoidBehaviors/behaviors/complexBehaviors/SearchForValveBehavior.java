@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ValveLocationPacket;
-import controller_msgs.msg.dds.ValveLocationPacketPubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -18,7 +17,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    public SearchForValveBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, "SearchForSpehereFar", ros2Node);
-      createSubscriber(valveLocationQueue, new ValveLocationPacketPubSubType(), "/ihmc/valve_location");
+      createBehaviorInputSubscriber(ValveLocationPacket.class, valveLocationQueue::put);
    }
 
    @Override

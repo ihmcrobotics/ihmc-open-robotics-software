@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
@@ -37,7 +36,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
 
-      publisher = createPublisher(new HeadTrajectoryMessagePubSubType(), "/ihmc/head_trajectory");
+      publisher = createPublisherForController(HeadTrajectoryMessage.class);
    }
 
    public void setInput(HeadTrajectoryMessage headTrajectoryMessage)
