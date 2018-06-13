@@ -34,6 +34,13 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
    }
 
+   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.highLevelControllerName = stateEnum;
+      jointSettingsHelper = null;
+   }
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
