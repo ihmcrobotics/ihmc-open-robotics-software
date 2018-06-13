@@ -336,7 +336,7 @@ public class IHMCHumanoidBehaviorManager
 
    public static String getBehaviorRosTopicPrefix(String robotName)
    {
-      return "/ihmc/" + robotName + "/behavior";
+      return "/ihmc/" + robotName.toLowerCase() + "/behavior";
    }
 
    public static String getBehaviorOutputRosTopicPrefix(String robotName)

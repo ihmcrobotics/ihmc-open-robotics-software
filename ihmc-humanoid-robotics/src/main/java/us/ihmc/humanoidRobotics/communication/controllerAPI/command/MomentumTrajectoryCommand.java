@@ -20,9 +20,9 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    }
 
    @Override
-   public void set(MomentumTrajectoryMessage message)
+   public void setFromMessage(MomentumTrajectoryMessage message)
    {
-      angularMomentumTrajectory.set(message.getAngularMomentumTrajectory());
+      angularMomentumTrajectory.setFromMessage(message.getAngularMomentumTrajectory());
    }
    
    @Override

@@ -42,7 +42,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    }
 
    @Override
-   public void set(PlanarRegionMessage message)
+   public void setFromMessage(PlanarRegionMessage message)
    {
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 

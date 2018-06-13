@@ -26,7 +26,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    }
 
    @Override
-   public void set(QuadrupedTimedStepListMessage message)
+   public void setFromMessage(QuadrupedTimedStepListMessage message)
    {
       clear();
 
@@ -35,7 +35,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
       if (stepList != null)
       {
          for (int i = 0; i < stepList.size(); i++)
-            stepCommands.add().set(stepList.get(i));
+            stepCommands.add().setFromMessage(stepList.get(i));
       }
 
       setQueueableCommandVariables(message.getQueueingProperties());

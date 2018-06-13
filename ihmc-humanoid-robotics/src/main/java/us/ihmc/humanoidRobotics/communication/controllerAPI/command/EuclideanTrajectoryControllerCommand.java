@@ -95,7 +95,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
       ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(linearSelectionFrame);
@@ -105,7 +105,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
-   public void set(EuclideanTrajectoryMessage message)
+   public void setFromMessage(EuclideanTrajectoryMessage message)
    {
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -130,7 +130,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
    }
 
    /**

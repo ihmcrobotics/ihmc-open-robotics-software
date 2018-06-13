@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -22,6 +23,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 public class FootstepPlanningToolboxModule extends ToolboxModule
 {
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
+   private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
                                         boolean startYoVariableServer)
@@ -32,6 +34,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, registry,
                                                                                 yoGraphicsListRegistry,
                                                                                 Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningToolboxController.setTextToSpeechPublisher(textToSpeechPublisher);
       startYoVariableServer();
    }
 
@@ -40,7 +43,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
-      footstepPlanningToolboxController.setTextToSpeechPublisher(ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, "/ihmc/text_to_speech"));
+      textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, "/ihmc/text_to_speech");
    }
 
    @Override

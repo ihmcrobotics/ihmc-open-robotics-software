@@ -34,9 +34,9 @@ public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, S
    }
 
    @Override
-   public void set(SpineTrajectoryMessage message)
+   public void setFromMessage(SpineTrajectoryMessage message)
    {
-      jointspaceTrajectory.set(message.getJointspaceTrajectory());
+      jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()

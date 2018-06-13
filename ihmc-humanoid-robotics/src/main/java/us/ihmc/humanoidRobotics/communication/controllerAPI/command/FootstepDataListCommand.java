@@ -40,7 +40,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    }
 
    @Override
-   public void set(FootstepDataListMessage message)
+   public void setFromMessage(FootstepDataListMessage message)
    {
       clear();
 

@@ -133,7 +133,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * @param message the message to copy from
     */
    @Override
-   public void set(ClearDelayQueueMessage message)
+   public void setFromMessage(ClearDelayQueueMessage message)
    {
       throw new UnsupportedOperationException("A " + ClearDelayQueueConverter.class.getSimpleName() + " has to be used to convert a " + ClearDelayQueueMessage.class.getSimpleName() + " into a " + getClass().getSimpleName());
    }

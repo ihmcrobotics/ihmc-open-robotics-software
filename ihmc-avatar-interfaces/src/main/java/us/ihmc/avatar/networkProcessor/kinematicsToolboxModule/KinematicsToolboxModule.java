@@ -39,10 +39,14 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator,
-                                           s -> kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+         if (kinematicsToolBoxController != null)
+            kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+         if (kinematicsToolBoxController != null)
+            kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData());
+      });
    }
 
    /**
