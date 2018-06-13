@@ -15,6 +15,7 @@ import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -46,8 +47,6 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class LidarScanPublisher
 {
-   private static final String IHMC_LIDAR_SCAN_TOPIC_NAME = "/ihmc/lidar_scan";
-
    private static final double DEFAULT_SHADOW_ANGLE_THRESHOLD = Math.toRadians(12.0);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -74,6 +73,7 @@ public class LidarScanPublisher
    public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       robotName = modelFactory.getRobotDescription().getName();
+      PrintTools.info(robotName);
       fullRobotModel = modelFactory.createFullRobotModel();
 
       lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
@@ -82,7 +82,7 @@ public class LidarScanPublisher
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, IHMC_LIDAR_SCAN_TOPIC_NAME);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    public void start()

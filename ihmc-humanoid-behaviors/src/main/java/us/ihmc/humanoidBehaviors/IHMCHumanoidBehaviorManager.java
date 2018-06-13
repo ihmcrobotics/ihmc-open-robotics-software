@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
@@ -334,28 +335,28 @@ public class IHMCHumanoidBehaviorManager
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static String getBehaviorRosTopicPrefix(String robotName)
+   public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
    {
-      return "/ihmc/" + robotName.toLowerCase() + "/behavior";
+      return ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
    }
 
    public static String getBehaviorOutputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName) + "/output";
+      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.OUTPUT);
    }
 
    public static String getBehaviorInputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName) + "/input";
+      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.INPUT);
    }
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorOutputRosTopicPrefix(robotName), messageType);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return messageType -> ROS2Tools.appendTypeToTopicName(getBehaviorInputRosTopicPrefix(robotName), messageType);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE, ROS2TopicQualifier.INPUT);
    }
 }

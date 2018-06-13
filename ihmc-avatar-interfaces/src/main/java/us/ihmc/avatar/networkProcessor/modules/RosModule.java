@@ -49,11 +49,13 @@ public class RosModule
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
+   private final String robotName;
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
-      String rosTopicPrefix = "/ihmc_ros/" + robotModel.getSimpleRobotName().toLowerCase();
+      robotName = robotModel.getSimpleRobotName().toLowerCase();
+      String rosTopicPrefix = "/ihmc_ros/" + robotName;
       String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName())
                                                    .generateTopicName(RobotConfigurationData.class);
 
@@ -117,9 +119,9 @@ public class RosModule
 
    private void setupRosLocalization()
    {
-      new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, ros2Node, ppsTimestampOffsetProvider);
+      new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, ppsTimestampOffsetProvider);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, "/ihmc/localization",
+      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(),
                                            s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
    }
 

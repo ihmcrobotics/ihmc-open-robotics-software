@@ -24,6 +24,8 @@ import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
@@ -35,7 +37,6 @@ import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppi
 
 public class QuadrupedControllerAPIDefinition
 {
-
    private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
    private static final List<Class<? extends Settable<?>>> quadrupedSupportedStatusMessages;
 
@@ -81,32 +82,14 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedStatusMessages;
    }
 
-   public static ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
-      {
-         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.INPUT);
    }
 
-   public static ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
-      {
-         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control/output";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
    }
 
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()

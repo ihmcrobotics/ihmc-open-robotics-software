@@ -8,13 +8,12 @@ import us.ihmc.ros2.Ros2Node;
 
 public class TextToSpeechNetworkModule
 {
-   public static final String IHMC_TEXT_TO_SPEECH_TOPIC_NAME = "/ihmc/text_to_speech";
    private final TextToSpeechClient ttsClient = new TextToSpeechClient();
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_text_to_speech_node");
 
    public TextToSpeechNetworkModule()
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, TextToSpeechPacket.class, IHMC_TEXT_TO_SPEECH_TOPIC_NAME, s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
    }
 
    public void receivedPacket(TextToSpeechPacket packet)

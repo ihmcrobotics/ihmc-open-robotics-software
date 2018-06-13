@@ -55,7 +55,6 @@ public abstract class ToolboxModule
    protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   public final String toolboxRosTopicNamePrefix;
    protected final RealtimeRos2Node realtimeRos2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
@@ -86,7 +85,6 @@ public abstract class ToolboxModule
          throws IOException
    {
       this.robotName = robotName;
-      toolboxRosTopicNamePrefix = getToolboxRosTopicNamePrefix(robotName);
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
@@ -379,9 +377,4 @@ public abstract class ToolboxModule
    public abstract ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator();
 
    public abstract ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator();
-
-   public static String getToolboxRosTopicNamePrefix(String robotName)
-   {
-      return "/ihmc/" + robotName.toLowerCase() + "/toolbox";
-   }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoSource;
@@ -22,7 +23,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 
-      createSubscriber(VideoPacket.class, "/ihmc/video", cameraData::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
    }
 
    @Override

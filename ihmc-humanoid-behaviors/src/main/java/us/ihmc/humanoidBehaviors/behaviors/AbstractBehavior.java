@@ -13,6 +13,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -62,10 +63,6 @@ public abstract class AbstractBehavior implements RobotController
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    protected final String robotName;
 
-   private final String toolboxTopicNamePrefix;
-   private final String footstepPlanningToolboxOutputPrefix, footstepPlanningToolboxInputPrefix;
-   private final String kinematicsToolboxOutputPrefix, kinematicsToolboxInputPrefix;
-
    private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
    private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
 
@@ -93,23 +90,17 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      toolboxTopicNamePrefix = "/ihmc/" + robotName + "/toolbox";
-      footstepPlanningToolboxOutputPrefix = toolboxTopicNamePrefix + "/footstep_plan/output";
-      footstepPlanningToolboxInputPrefix = toolboxTopicNamePrefix + "/footstep_plan/input";
-      kinematicsToolboxOutputPrefix = toolboxTopicNamePrefix + "/ik/output";
-      kinematicsToolboxInputPrefix = toolboxTopicNamePrefix + "/ik/input";
-
-      footstepPlanningToolboxSubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(footstepPlanningToolboxInputPrefix, messageType);
-      footstepPlanningToolboxPubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(footstepPlanningToolboxOutputPrefix, messageType);
-      kinematicsToolboxSubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(kinematicsToolboxInputPrefix, messageType);
-      kinematicsToolboxPubGenerator = messageType -> ROS2Tools.appendTypeToTopicName(kinematicsToolboxOutputPrefix, messageType);
+      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
+      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
 
       controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       behaviorSubGenerator = IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName);
       behaviorPubGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
 
-      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, "/ihmc/text_to_speech");
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
@@ -120,11 +111,6 @@ public abstract class AbstractBehavior implements RobotController
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorPubGenerator);
-   }
-
-   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicSuffix)
-   {
-      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName) + topicSuffix);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)

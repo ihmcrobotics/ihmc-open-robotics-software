@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -109,16 +110,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik/output";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -129,15 +121,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik/input";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
    }
 }

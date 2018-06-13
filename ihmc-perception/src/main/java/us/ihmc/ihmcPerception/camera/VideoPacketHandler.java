@@ -21,7 +21,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    public VideoPacketHandler(Ros2Node ros2Node)
    {
-      publisher = ROS2Tools.createPublisher(ros2Node, VideoPacket.class, "/ihmc/video");
+      publisher = ROS2Tools.createPublisher(ros2Node, VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    private Stopwatch timer;

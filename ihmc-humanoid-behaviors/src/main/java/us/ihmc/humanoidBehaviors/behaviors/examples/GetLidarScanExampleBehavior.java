@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import controller_msgs.msg.dds.PointCloudWorldPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -22,7 +23,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
-      createSubscriber(PointCloudWorldPacket.class, "/ihmc/point_cloud_world", pointCloudQueue::put);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
    }
 
    @Override

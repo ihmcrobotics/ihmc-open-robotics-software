@@ -67,6 +67,8 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
@@ -167,32 +169,14 @@ public class ControllerAPIDefinition
       return controllerSupportedStatusMessages;
    }
 
-   public static ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
-      {
-         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.INPUT);
    }
 
    public static ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
-      {
-         private final String prefix = "/ihmc/" + robotName.toLowerCase() + "/control/output";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageValidator createDefaultMessageValidation()
