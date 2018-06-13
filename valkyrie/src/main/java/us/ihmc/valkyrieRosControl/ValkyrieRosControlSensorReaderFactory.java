@@ -7,7 +7,6 @@ import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -16,6 +15,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
@@ -225,8 +225,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       sensorReader.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
    }
 
-   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      sensorReader.setupLowLevelControlWithPacketCommunicator(packetCommunicator);
+      sensorReader.setupLowLevelControlCommunication(robotName, realtimeRos2Node);
    }
 }

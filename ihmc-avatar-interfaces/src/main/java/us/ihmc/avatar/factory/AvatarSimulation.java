@@ -4,15 +4,14 @@ import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -23,7 +22,6 @@ public class AvatarSimulation
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
    private AbstractThreadedRobotController threadedRobotController;
-   private HumanoidGlobalDataProducer humanoidGlobalDataProducer;
    private DRCEstimatorThread stateEstimationThread;
    private DRCControllerThread controllerThread;
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
@@ -50,11 +48,6 @@ public class AvatarSimulation
    {
       threadedRobotController.stop();
 
-      if (humanoidGlobalDataProducer != null)
-      {
-         humanoidGlobalDataProducer.stop();
-      }
-
       stateEstimationThread.dispose();
       stateEstimationThread = null;
 
@@ -62,7 +55,6 @@ public class AvatarSimulation
       controllerThread = null;
 
       threadedRobotController = null;
-      humanoidGlobalDataProducer = null;
 
       closeableAndDisposableRegistry.closeAndDispose();
       closeableAndDisposableRegistry = null;
@@ -147,11 +139,6 @@ public class AvatarSimulation
    public void setThreadedRobotController(AbstractThreadedRobotController threadedRobotController)
    {
       this.threadedRobotController = threadedRobotController;
-   }
-
-   public void setHumanoidGlobalDataProducer(HumanoidGlobalDataProducer humanoidGlobalDataProducer)
-   {
-      this.humanoidGlobalDataProducer = humanoidGlobalDataProducer;
    }
 
    public void setStateEstimationThread(DRCEstimatorThread stateEstimationThread)
