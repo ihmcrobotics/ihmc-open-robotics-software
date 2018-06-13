@@ -599,7 +599,6 @@ public class QuadrupedSimulationFactory
          viewportConfiguration.addCameraView("ThirdPersonViewBehind", 0, 0, 1, 1);
          viewportConfiguration.addCameraView("Right Side", 1, 0, 1, 1);
          scs.setupViewport(viewportConfiguration);
-         scs.selectViewport("Multi-View");
       }
 
       InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
