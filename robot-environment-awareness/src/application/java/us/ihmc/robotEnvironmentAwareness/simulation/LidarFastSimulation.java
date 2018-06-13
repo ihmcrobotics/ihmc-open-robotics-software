@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Random;
 
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -37,7 +38,7 @@ public class LidarFastSimulation
    public static final boolean VISUALIZE_GPU_LIDAR = false;
    private static final GroundType DEFAULT_GROUND = GroundType.OBSTACLE_COURSE;
 
-   private final Ros2Node ros2Node = new Ros2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    public LidarFastSimulation() throws IOException
    {
