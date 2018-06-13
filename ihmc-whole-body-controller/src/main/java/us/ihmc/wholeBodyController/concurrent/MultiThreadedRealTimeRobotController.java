@@ -24,6 +24,7 @@ public class MultiThreadedRealTimeRobotController implements MultiThreadedRobotC
       robotControllers.add(new ImmutableTriple<MultiThreadedRobotControlElement, PriorityParameters, Processor>(robotController, priorityParameters, processor));
    }
    
+   @Override
    public void read()
    {
       long timestamp = RealtimeThread.getCurrentMonotonicClockTime();
@@ -36,6 +37,7 @@ public class MultiThreadedRealTimeRobotController implements MultiThreadedRobotC
       sensorReader.write(RealtimeThread.getCurrentMonotonicClockTime());
    }
    
+   @Override
    public void start()
    {
       for(int i = 0; i < robotControllers.size(); i++)

@@ -91,9 +91,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final YoLong lastEstimatorClockStartTime = new YoLong("lastEstimatorClockStartTime", registry);
    private final YoLong lastControllerClockTime = new YoLong("lastControllerClockTime", registry);
    private final YoLong controllerStartTime = new YoLong("controllerStartTime", registry);
-   private final YoLong actualControlDT = new YoLong("actualControlDT", registry);
    private final YoLong timePassedSinceEstimator = new YoLong("timePassedSinceEstimator", registry);
    private final YoLong timePassedBetweenEstimatorTicks = new YoLong("timePassedBetweenEstimatorTicks", registry);
+
+   private long lastReadSystemTime = 0L;
+   private final YoDouble actualControlDT = new YoDouble("actualControlDTInMillis", registry);
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 
@@ -308,10 +310,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             }
             else
             {
+               long nanoTime = System.nanoTime();
+               actualControlDT.set(Conversions.nanosecondsToMilliseconds((double) (nanoTime - lastReadSystemTime)));
+               lastReadSystemTime = nanoTime;
+
                long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
                controllerTimestamp.set(threadDataSynchronizer.getTimestamp());
                controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
-               actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
 
                if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
                {
