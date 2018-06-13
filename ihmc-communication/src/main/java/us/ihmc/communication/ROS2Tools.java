@@ -66,6 +66,8 @@ public class ROS2Tools
    };
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
+   private static final int DOMAIN_ID = new RTPSCommunicationFactory().getDomainId();
+
    public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return createRealtimeRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
@@ -75,7 +77,7 @@ public class ROS2Tools
    {
       try
       {
-         return new RealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, NAMESPACE);
+         return new RealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, NAMESPACE, DOMAIN_ID);
       }
       catch (IOException e)
       {
@@ -93,7 +95,7 @@ public class ROS2Tools
    {
       try
       {
-         return new Ros2Node(pubSubImplementation, nodeName, NAMESPACE);
+         return new Ros2Node(pubSubImplementation, nodeName, NAMESPACE, DOMAIN_ID);
       }
       catch (IOException e)
       {
