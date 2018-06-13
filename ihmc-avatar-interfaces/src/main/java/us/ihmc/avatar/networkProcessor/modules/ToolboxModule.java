@@ -11,8 +11,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
@@ -26,7 +24,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -40,7 +37,6 @@ import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as
@@ -64,8 +60,6 @@ public abstract class ToolboxModule
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
-
-   protected final YoEnum<PacketDestination> activeMessageSource = new YoEnum<>("activeMessageSource", registry, PacketDestination.class, true);
 
    protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;
@@ -106,7 +100,6 @@ public abstract class ToolboxModule
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
-      activeMessageSource.set(null);
       timeWithoutInputsBeforeGoingToSleep.set(0.5);
       commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
@@ -226,18 +219,15 @@ public abstract class ToolboxModule
 
    public void receivedPacket(ToolboxStateMessage message)
    {
-      if (toolboxTaskScheduled != null && activeMessageSource.getOrdinal() != message.getSource())
+      if (toolboxTaskScheduled != null)
       {
-         if (DEBUG)
-            PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
-                  + PacketDestination.values[message.getDestination()]);
          return;
       }
 
       switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
       {
       case WAKE_UP:
-         wakeUp(message.getSource());
+         wakeUp();
          break;
       case REINITIALIZE:
          reinitialize();
@@ -248,12 +238,7 @@ public abstract class ToolboxModule
       }
    }
 
-   public void wakeUp(int packetDestination)
-   {
-      wakeUp(PacketDestination.values[packetDestination]);
-   }
-
-   public void wakeUp(PacketDestination packetDestination)
+   public void wakeUp()
    {
       if (toolboxTaskScheduled != null)
       {
@@ -268,7 +253,6 @@ public abstract class ToolboxModule
       createToolboxRunnable();
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
       reinitialize();
-      activeMessageSource.set(packetDestination);
       receivedInput.set(true);
    }
 
@@ -284,7 +268,6 @@ public abstract class ToolboxModule
          PrintTools.debug(this, "Going to sleep");
 
       destroyToolboxRunnable();
-      activeMessageSource.set(null);
 
       if (toolboxTaskScheduled == null)
       {
