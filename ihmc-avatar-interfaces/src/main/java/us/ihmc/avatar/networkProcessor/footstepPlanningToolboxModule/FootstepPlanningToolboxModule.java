@@ -67,9 +67,14 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    @Override
    public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
+      return getPublisherTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/footstep_plan/input";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/footstep_plan/output";
 
          @Override
          public String generateTopicName(Class<?> messageType)
@@ -82,9 +87,14 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    @Override
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
+      return getSubscriberTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/footstep_plan/output";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/footstep_plan/input";
 
          @Override
          public String generateTopicName(Class<?> messageType)

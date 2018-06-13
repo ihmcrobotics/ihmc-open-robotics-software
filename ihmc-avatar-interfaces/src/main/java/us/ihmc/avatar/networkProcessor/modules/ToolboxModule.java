@@ -272,7 +272,6 @@ public abstract class ToolboxModule
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
       reinitialize();
       activeMessageSource.set(packetDestination);
-      getToolboxController().setPacketDestination(packetDestination);
       receivedInput.set(true);
    }
 
