@@ -133,18 +133,11 @@ public class DRCSimulationTestHelper
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
-      try
+      for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
-         for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
-         {
-            Class<?> messageClass = command.newInstance().getMessageClass();
-            IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
-            defaultControllerPublishers.put(messageClass, defaultPublisher);
-         }
-      }
-      catch (InstantiationException | IllegalAccessException e)
-      {
-         e.printStackTrace();
+         Class<?> messageClass = ROS2Tools.newMessageInstance(command).getMessageClass();
+         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
    }
 

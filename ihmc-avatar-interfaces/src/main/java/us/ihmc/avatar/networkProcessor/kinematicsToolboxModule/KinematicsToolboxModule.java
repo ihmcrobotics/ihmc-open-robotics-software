@@ -100,9 +100,14 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
+      return getPublisherTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/ik/input";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik/output";
 
          @Override
          public String generateTopicName(Class<?> messageType)
@@ -115,9 +120,14 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
+      return getSubscriberTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
       return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/ik/output";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik/input";
 
          @Override
          public String generateTopicName(Class<?> messageType)

@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -95,11 +96,16 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
+      return getPublisherTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
+      return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/ik_trajectory/input";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik_trajectory/output";
 
          @Override
          public String generateTopicName(Class<?> messageType)
@@ -110,11 +116,16 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return new ROS2Tools.MessageTopicNameGenerator()
+      return getSubscriberTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
+      return new MessageTopicNameGenerator()
       {
-         private final String prefix = toolboxRosTopicNamePrefix + "/ik_trajectory/output";
+         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik_trajectory/input";
 
          @Override
          public String generateTopicName(Class<?> messageType)
