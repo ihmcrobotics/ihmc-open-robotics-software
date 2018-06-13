@@ -3,6 +3,8 @@ package us.ihmc.avatar;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
+import java.util.ArrayList;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
@@ -26,8 +28,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import java.util.ArrayList;
 
 public class DRCFlatGroundWalkingTrack
 {
@@ -79,7 +79,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       HeightMap heightMapForFootstepZ = null;
@@ -123,6 +122,8 @@ public class DRCFlatGroundWalkingTrack
 
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+
+      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
