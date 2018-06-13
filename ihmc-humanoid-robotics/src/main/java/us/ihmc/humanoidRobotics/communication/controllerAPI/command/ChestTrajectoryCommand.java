@@ -36,9 +36,9 @@ public class ChestTrajectoryCommand
    }
 
    @Override
-   public void set(ChestTrajectoryMessage message)
+   public void setFromMessage(ChestTrajectoryMessage message)
    {
-      so3Trajectory.set(message.getSo3Trajectory());
+      so3Trajectory.setFromMessage(message.getSo3Trajectory());
    }
 
    @Override

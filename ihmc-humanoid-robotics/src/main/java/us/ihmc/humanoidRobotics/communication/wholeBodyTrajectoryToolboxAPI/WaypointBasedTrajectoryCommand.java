@@ -65,7 +65,7 @@ public class WaypointBasedTrajectoryCommand
    }
 
    @Override
-   public void set(WaypointBasedTrajectoryMessage message)
+   public void setFromMessage(WaypointBasedTrajectoryMessage message)
    {
       set(message, null, null);
    }

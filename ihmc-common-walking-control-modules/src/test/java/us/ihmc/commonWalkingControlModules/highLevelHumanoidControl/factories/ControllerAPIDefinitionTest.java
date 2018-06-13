@@ -42,7 +42,7 @@ public class ControllerAPIDefinitionTest
                queueableCommand.setPreviousCommandId(random.nextInt(1000));
             }
                
-            otherCommand.set(command);
+            otherCommand.setFromMessage(command);
             
             assertEquals(otherCommand.getClass() + " set method doesn't set delayTime correctly", delayTime, otherCommand.getExecutionDelayTime(), 1e-8);
             if(otherCommand instanceof QueueableCommand)

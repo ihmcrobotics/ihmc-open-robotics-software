@@ -20,7 +20,7 @@ public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWa
    }
 
    @Override
-   public void set(AbortWalkingMessage message)
+   public void setFromMessage(AbortWalkingMessage message)
    {
       abortWalkingRequested = true;
    }

@@ -122,10 +122,7 @@ public abstract class ToolboxModule
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      String topicName = "/ihmc/" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
-      topicName += CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ToolboxStateMessage.class.getSimpleName());
-      topicName = StringUtils.removeEnd(topicName, "Message");
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, topicName, s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
       registerExtraPuSubs(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
@@ -402,6 +399,6 @@ public abstract class ToolboxModule
 
    public static String getToolboxRosTopicNamePrefix(String robotName)
    {
-      return "/ihmc/" + robotName + "/toolbox";
+      return "/ihmc/" + robotName.toLowerCase() + "/toolbox";
    }
 }

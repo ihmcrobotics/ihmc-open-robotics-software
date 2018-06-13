@@ -23,7 +23,7 @@ public class AutomaticManipulationAbortCommand implements Command<AutomaticManip
    }
 
    @Override
-   public void set(AutomaticManipulationAbortMessage message)
+   public void setFromMessage(AutomaticManipulationAbortMessage message)
    {
       enable = message.getEnable();
    }

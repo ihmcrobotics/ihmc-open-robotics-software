@@ -228,7 +228,7 @@ public class CommandInputManager
 
       if (!performCustomConversion(message, nextCommand))
       {
-         nextCommand.set(message);
+         nextCommand.setFromMessage(message);
       }
 
       buffer.commit();

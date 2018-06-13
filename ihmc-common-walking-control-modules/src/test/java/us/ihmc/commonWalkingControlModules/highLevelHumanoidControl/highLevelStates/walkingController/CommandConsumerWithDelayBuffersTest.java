@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,8 +21,8 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.commons.lists.SupplierBuilder;
@@ -47,7 +51,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -96,9 +100,10 @@ public class CommandConsumerWithDelayBuffersTest
       
    }
 
+   @SuppressWarnings("unchecked")
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -166,9 +171,10 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends Settable<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(10);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -244,7 +250,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testQueueingManually()
+   public <C extends Command<C, ?>, M extends Settable<M>> void testQueueingManually()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -300,7 +306,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testClearAllQueues()
+   public <C extends Command<C, ?>, M extends Settable<M>> void testClearAllQueues()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -346,7 +352,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testClearSingleQueue()
+   public <C extends Command<C, ?>, M extends Settable<M>> void testClearSingleQueue()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -410,7 +416,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testFlushCommands()
+   public <C extends Command<C, ?>, M extends Settable<M>> void testFlushCommands()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -451,7 +457,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public <C extends Command<C, ?>, M extends Packet<M>> void testAddingTooManyCommands()
+   public <C extends Command<C, ?>, M extends Settable<M>> void testAddingTooManyCommands()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -483,7 +489,7 @@ public class CommandConsumerWithDelayBuffersTest
       
    }
    
-   private <M extends Packet<M>> Command<?, M> getCommand(Random random, Class clazz)
+   private <M extends Settable<M>> Command<?, M> getCommand(Random random, Class clazz)
          throws InstantiationException, IllegalAccessException, InvocationTargetException
    {
       Command<?, M> command;
@@ -495,10 +501,10 @@ public class CommandConsumerWithDelayBuffersTest
          if(!command.isCommandValid())
          {
             Class<?> messageClass = command.getMessageClass();
-            Packet<M> message = (Packet<M>) getInstanceUsingRandomConstructor(random, messageClass);
+            Settable<M> message = (Settable<M>) getInstanceUsingRandomConstructor(random, messageClass);
             if(message != null)
             {
-               command.set((M) message);
+               command.setFromMessage((M) message);
             }
          }
       }

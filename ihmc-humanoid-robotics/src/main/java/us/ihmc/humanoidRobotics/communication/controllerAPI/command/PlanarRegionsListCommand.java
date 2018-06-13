@@ -24,7 +24,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    }
 
    @Override
-   public void set(PlanarRegionsListMessage message)
+   public void setFromMessage(PlanarRegionsListMessage message)
    {
       clear();
 

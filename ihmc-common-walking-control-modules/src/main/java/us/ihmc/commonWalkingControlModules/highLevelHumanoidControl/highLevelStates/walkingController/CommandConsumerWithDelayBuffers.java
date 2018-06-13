@@ -67,6 +67,7 @@ public class CommandConsumerWithDelayBuffers
     * You MUST call this method each tick or you wont get any commands!
     * Polls commands from the commandInputManager and puts them in the delay queue. 
     */
+   @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> void update()
    {
       for(int i = 0; i < listOfSupportedCommands.size(); i++)
@@ -155,7 +156,7 @@ public class CommandConsumerWithDelayBuffers
     * @param command
     */
    @SuppressWarnings("unchecked")
-   private void queueCommand(Command<?,?> command)
+   private <C extends Command<C, ?>> void queueCommand(C command)
    {
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
@@ -164,7 +165,7 @@ public class CommandConsumerWithDelayBuffers
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
-      Command commandCopy = recyclingArrayList.add();
+      C commandCopy = (C) recyclingArrayList.add();
       commandCopy.set(command);
 
       //not all commands implement setExecution time, if they don't the execution time will be 0 and should move to the front of the queue

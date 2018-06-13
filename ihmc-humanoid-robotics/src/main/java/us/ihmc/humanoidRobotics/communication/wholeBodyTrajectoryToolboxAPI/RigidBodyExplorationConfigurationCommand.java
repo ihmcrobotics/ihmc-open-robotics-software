@@ -65,7 +65,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    }
 
    @Override
-   public void set(RigidBodyExplorationConfigurationMessage message)
+   public void setFromMessage(RigidBodyExplorationConfigurationMessage message)
    {
       set(message, null, null);
    }

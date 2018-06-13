@@ -69,7 +69,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    }
 
    @Override
-   public void set(FootstepDataMessage message)
+   public void setFromMessage(FootstepDataMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
@@ -149,7 +149,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
-      set(message);
+      setFromMessage(message);
    }
 
    public void setRobotSide(RobotSide robotSide)
