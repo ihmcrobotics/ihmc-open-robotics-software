@@ -43,7 +43,7 @@ public class LIDARBasedREAModule
    private static final double OCTREE_RESOLUTION = 0.02;
    protected static final boolean DEBUG = true;
 
-   private final Ros2Node ros2Node = new Ros2Node(PubSubImplementation.FAST_RTPS, "REA_module");
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "REA_module");
 
    private final NormalOcTree mainOctree = new NormalOcTree(OCTREE_RESOLUTION);
 

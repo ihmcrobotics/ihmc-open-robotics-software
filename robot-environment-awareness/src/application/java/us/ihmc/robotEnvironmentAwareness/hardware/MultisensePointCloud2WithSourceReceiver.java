@@ -21,7 +21,7 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSubscriber<PointCloud2WithSource>
 {
-   private final Ros2Node ros2Node = new Ros2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
