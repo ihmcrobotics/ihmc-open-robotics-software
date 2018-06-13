@@ -12,12 +12,14 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -76,7 +78,6 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2Node = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<HumanoidGlobalDataProducer> humanoidGlobalDataProducer = new RequiredFactoryField<>("humanoidGlobalDataProducer");
 
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
    private final OptionalFactoryField<Boolean> doSlowIntegrationForTorqueOffset = new OptionalFactoryField<>("doSlowIntegrationForTorqueOffset");
@@ -210,29 +211,28 @@ public class AvatarSimulationFactory
 
    private void setupStateEstimationThread()
    {
-      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSimpleRobotName(), robotModel.get().getSensorInformation(),
-                                                     robotModel.get().getContactPointParameters(), robotModel.get(),
-                                                     robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
-                                                     new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), realtimeRos2Node.get(),
-                                                     simulationOutputWriter, yoVariableServer, gravity.get());
+      String robotName = robotModel.get().getSimpleRobotName();
+      stateEstimationThread = new DRCEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
+                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
+                                                     threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"),
+                                                     realtimeRos2Node.get(), simulationOutputWriter, yoVariableServer, gravity.get());
 
-      if (humanoidGlobalDataProducer.get() != null)
-      {
-         PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(humanoidGlobalDataProducer.get());
-         humanoidGlobalDataProducer.get().attachListener(StampedPosePacket.class, pelvisPoseCorrectionCommunicator);
-         stateEstimationThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
-      }
-      else
-      {
-         stateEstimationThread.setExternalPelvisCorrectorSubscriber(null);
-      }
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+
+      PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(),
+                                                                                                                        publisherTopicNameGenerator);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(), StampedPosePacket.class, subscriberTopicNameGenerator,
+                                           s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+      stateEstimationThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
    }
 
    private void setupControllerThread()
    {
-      controllerThread = new DRCControllerThread(robotModel.get(), robotModel.get().getSensorInformation(), highLevelHumanoidControllerFactory.get(),
-                                                 threadDataSynchronizer, simulationOutputProcessor, humanoidGlobalDataProducer.get(), yoVariableServer,
-                                                 gravity.get(), robotModel.get().getEstimatorDT());
+      String robotName = robotModel.get().getSimpleRobotName();
+      controllerThread = new DRCControllerThread(robotName, robotModel.get(), robotModel.get().getSensorInformation(), highLevelHumanoidControllerFactory.get(),
+                                                 threadDataSynchronizer, simulationOutputProcessor, realtimeRos2Node.get(), yoVariableServer, gravity.get(),
+                                                 robotModel.get().getEstimatorDT());
    }
 
    private void createClosableAndDisposableRegistry()
@@ -258,8 +258,7 @@ public class AvatarSimulationFactory
       threadedRobotController.addController(stateEstimationThread, estimatorTicksPerSimulationTick, false);
       threadedRobotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
       MultiThreadedRobotControlElement simulatedHandController = robotModel.get().createSimulatedHandController(humanoidFloatingRootJointRobot,
-                                                                                                                threadDataSynchronizer,
-                                                                                                                humanoidGlobalDataProducer.get(),
+                                                                                                                threadDataSynchronizer, realtimeRos2Node.get(),
                                                                                                                 closeableAndDisposableRegistry);
       if (simulatedHandController != null)
       {
@@ -457,7 +456,6 @@ public class AvatarSimulationFactory
       avatarSimulation.setCloseableAndDisposableRegistry(closeableAndDisposableRegistry);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setStateEstimationThread(stateEstimationThread);
-      avatarSimulation.setHumanoidGlobalDataProducer(humanoidGlobalDataProducer.get());
       avatarSimulation.setThreadedRobotController(threadedRobotController);
       avatarSimulation.setHumanoidFloatingRootJointRobot(humanoidFloatingRootJointRobot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
@@ -501,11 +499,6 @@ public class AvatarSimulationFactory
    public void setRealtimeRos2Node(RealtimeRos2Node realtimeRos2Node)
    {
       this.realtimeRos2Node.set(realtimeRos2Node);
-   }
-
-   public void setHumanoidGlobalDataProducer(HumanoidGlobalDataProducer humanoidGlobalDataProducer)
-   {
-      this.humanoidGlobalDataProducer.set(humanoidGlobalDataProducer);
    }
 
    public void setDoSlowIntegrationForTorqueOffset(boolean doSlowIntegrationForTorqueOffset)

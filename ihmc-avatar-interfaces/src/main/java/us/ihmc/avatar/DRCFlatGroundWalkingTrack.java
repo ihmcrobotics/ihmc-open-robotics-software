@@ -96,7 +96,6 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
