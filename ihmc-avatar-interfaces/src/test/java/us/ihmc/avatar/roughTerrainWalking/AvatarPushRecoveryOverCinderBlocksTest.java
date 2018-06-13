@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -64,8 +63,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
 
       FootstepDataListMessage footsteps = createFlatBlocksFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -79,8 +78,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       FootstepDataListMessage footsteps = createFlatBlocksForwardFootstepDataListMessage(swingTime, transferTime);
       footsteps.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -93,8 +92,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
 
       FootstepDataListMessage footsteps = createTiltedBlocksFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -107,8 +106,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
 
       FootstepDataListMessage footsteps = createTiltedBlocksForwardFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -131,14 +130,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-      drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),

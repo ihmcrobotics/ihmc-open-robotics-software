@@ -80,9 +80,9 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
       double desiredHeight = pelvisPosition.getZ();
-      simulationTestHelper.send(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
-      simulationTestHelper.send(footsteps);
+      simulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();

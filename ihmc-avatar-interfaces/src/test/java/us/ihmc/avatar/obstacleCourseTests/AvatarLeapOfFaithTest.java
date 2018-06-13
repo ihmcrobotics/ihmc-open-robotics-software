@@ -86,7 +86,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -132,7 +132,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
 
       message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
@@ -162,7 +162,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -202,7 +202,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
 
       message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
@@ -232,7 +232,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -273,7 +273,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
 
       message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
@@ -304,7 +304,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -344,7 +344,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
 
       message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
@@ -415,7 +415,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
-      drcSimulationTestHelper.send(pelvisHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeight);
 
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;
@@ -460,7 +460,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
 
       //message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
@@ -563,7 +563,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       message.getFootstepDataList().add().set(footstepData);
       executionDuration += transferTime + swingTime;
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));

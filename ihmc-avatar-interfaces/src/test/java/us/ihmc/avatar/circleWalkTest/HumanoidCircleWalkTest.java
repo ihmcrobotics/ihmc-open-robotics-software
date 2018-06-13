@@ -188,10 +188,10 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.send(leftHandMessage);
-      drcSimulationTestHelper.send(rightHandMessage);
+      drcSimulationTestHelper.publishToController(leftHandMessage);
+      drcSimulationTestHelper.publishToController(rightHandMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      drcSimulationTestHelper.send(footMessage);
+      drcSimulationTestHelper.publishToController(footMessage);
       int numberOfFootsteps = footMessage.getFootstepDataList().size();
       double defaultSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double defaultTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();

@@ -280,7 +280,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 

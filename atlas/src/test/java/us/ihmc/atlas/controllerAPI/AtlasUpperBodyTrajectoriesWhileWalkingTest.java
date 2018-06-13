@@ -126,7 +126,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          handHoldMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          Vector3D zeroVelocity = new Vector3D();
          handHoldMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(11.0, position, orientation, zeroVelocity, zeroVelocity));
-         drcSimulationTestHelper.send(handHoldMessage);
+         drcSimulationTestHelper.publishToController(handHoldMessage);
       }
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
       assertTrue(success);
@@ -194,7 +194,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                }
             }
             messageList.add(armTrajectoryMessage);
-            drcSimulationTestHelper.send(armTrajectoryMessage);
+            drcSimulationTestHelper.publishToController(armTrajectoryMessage);
 
             success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT());
             assertTrue(success);
@@ -218,7 +218,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
 
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
