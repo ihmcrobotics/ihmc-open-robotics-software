@@ -16,6 +16,7 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -64,8 +65,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
    public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
-      createSubscriber(PointCloudWorldPacket.class, "/ihmc/point_cloud_world", pointCloudQueue::put);
-      detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class, "/detected_object");
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
+      detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class);
 
       this.humanoidReferenceFrames = referenceFrames;
    }

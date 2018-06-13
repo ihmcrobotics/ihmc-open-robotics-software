@@ -14,6 +14,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -43,7 +44,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
-      textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, "/ihmc/text_to_speech");
+      textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
    }
 
    @Override
@@ -75,16 +76,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/footstep_plan/output";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -95,15 +87,6 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/footstep_plan/input";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
    }
 }

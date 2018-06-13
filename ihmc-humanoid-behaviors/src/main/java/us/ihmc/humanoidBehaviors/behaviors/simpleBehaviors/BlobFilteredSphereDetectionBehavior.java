@@ -7,6 +7,7 @@ import java.util.List;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -36,7 +37,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       super(robotName, ros2Node, referenceFrames);
 
-      createSubscriber(PointCloudWorldPacket.class, "/ihmc/point_cloud_world", pointCloudQueue::put); // FIXME That stream is no more
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put); // FIXME That stream is no more
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(robotName, ros2Node);
 

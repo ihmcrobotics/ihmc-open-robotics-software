@@ -18,6 +18,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -50,7 +51,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super(robotName, ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
@@ -59,7 +60,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
 
-      createSubscriber(ObjectDetectorResultPacket.class, "/ihmc/objet_detector_result", objectDetectorFromCameraImages);
+      createSubscriber(ObjectDetectorResultPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), objectDetectorFromCameraImages);
 
       String prefix = "fiducial";
       locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());

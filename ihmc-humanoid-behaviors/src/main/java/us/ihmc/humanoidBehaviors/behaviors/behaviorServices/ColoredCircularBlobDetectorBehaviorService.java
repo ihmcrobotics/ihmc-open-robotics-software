@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
@@ -47,7 +48,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       super(robotName, ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
       createSubscriberFromController(RobotConfigurationData.class, robotConfigurationDataQueue::put);
 
       videoPublisher = createBehaviorOutputPublisher(VideoPacket.class, "/video");

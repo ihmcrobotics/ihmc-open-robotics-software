@@ -13,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -103,16 +104,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik_trajectory/output";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -123,15 +115,6 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return new MessageTopicNameGenerator()
-      {
-         private final String prefix = getToolboxRosTopicNamePrefix(robotName) + "/ik_trajectory/input";
-
-         @Override
-         public String generateTopicName(Class<?> messageType)
-         {
-            return ROS2Tools.appendTypeToTopicName(prefix, messageType);
-         }
-      };
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX, ROS2TopicQualifier.INPUT);
    }
 }

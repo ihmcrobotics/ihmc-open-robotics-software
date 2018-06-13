@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -27,7 +28,7 @@ public class CollaborativeBehavior extends AbstractBehavior
                                 WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(robotName, ros2Node);
-      createSubscriber(VideoPacket.class, "/ihmc/video", cameraData::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
       DRCRobotCameraParameters[] robotCameraParameters = robotSensorInfo.getCameraParameters();
    }
 

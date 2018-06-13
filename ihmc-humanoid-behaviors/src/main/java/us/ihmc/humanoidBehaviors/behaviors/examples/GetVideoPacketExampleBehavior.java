@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -20,7 +21,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
 //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
-      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
    }
 
    @Override

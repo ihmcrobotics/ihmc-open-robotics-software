@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.LocalizationStatusPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -32,12 +33,12 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
    private final IHMCROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
 
-   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, Ros2Node ros2Node, final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
+   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, "/ihmc/localization", s -> receivedPacket(s.readNextData()));
-      localizationPointMapPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationPointMapPacket.class, "/ihmc/localization_point_map");
+      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.readNextData()));
+      localizationPointMapPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
 
-      IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, "/ihmc/stamped_pose");
+      IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override
@@ -59,7 +60,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
 
       IHMCROS2Publisher<LocalizationStatusPacket> localizationStatusPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationStatusPacket.class,
-                                                                                                          "/ihmc/localization_status");
+                                                                                                          ROS2Tools.getDefaultTopicNameGenerator());
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)
       {
          @Override

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -29,7 +30,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super(robotName, FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, "/ihmc/video", videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
