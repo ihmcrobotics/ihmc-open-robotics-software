@@ -66,7 +66,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
       assertEquals(defaultControlState, findControllerState(scs));
 
-      drcSimulationTestHelper.send(desiredAccelerationsMessage);
+      drcSimulationTestHelper.publishToController(desiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 

@@ -65,7 +65,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
          desiredJointVelcoties[i] = 0.0;
       }
       NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(0.5, desiredJointPositions);
-      drcSimulationTestHelper.send(neckTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(neckTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.55);
       assertTrue(success);
 
@@ -75,7 +75,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, scs));
 
-      drcSimulationTestHelper.send(neckDesiredAccelerationsMessage);
+      drcSimulationTestHelper.publishToController(neckDesiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 

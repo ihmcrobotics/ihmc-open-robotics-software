@@ -147,7 +147,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D()));
       se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
 
-      drcSimulationTestHelper.send(handTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(handTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + 2.0 * trajectoryTime);
       assertTrue(success);

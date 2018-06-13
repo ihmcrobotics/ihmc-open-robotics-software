@@ -136,7 +136,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          pushController.applyForceDelayed(time -> true, initialTransferTime + swingTime / 2.0, direction, 200.0, 0.1);
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + (1.0 - lastPortion / 2.0) * swingTime));
       Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPortion));
@@ -151,7 +151,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       double robotScale = getLegLength();
       double pelvisTrajectoryTime = 0.5;
       PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(pelvisTrajectoryTime, 1.1 * robotScale);
-      drcSimulationTestHelper.send(pelvisHeightMessage);
+      drcSimulationTestHelper.publishToController(pelvisHeightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryTime));
 
       double swingTime = 2.0;
@@ -233,7 +233,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       MessageTools.copyData(waypoints, footstep.getSwingTrajectory());
 
       footstepDataList.getFootstepDataList().add().set(footstep);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();

@@ -62,7 +62,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>(fullRobotModel.getSoleFrames());
-      drcSimulationTestHelper.send(createFootsteps(soleFrames));
+      drcSimulationTestHelper.publishToController(createFootsteps(soleFrames));
 
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
@@ -102,7 +102,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
                      AdjustFootstepMessage adjustFootstepMessage = HumanoidMessageTools.createAdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
-                     drcSimulationTestHelper.send(adjustFootstepMessage);
+                     drcSimulationTestHelper.publishToController(adjustFootstepMessage);
                      adjustedFootstep = true;
                   }
                }

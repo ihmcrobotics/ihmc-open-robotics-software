@@ -3,7 +3,6 @@ package us.ihmc.avatar.roughTerrainWalking;
 import static junit.framework.TestCase.assertTrue;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -16,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -71,14 +69,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-      drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestPlanarRegionsListMessage packet)
-         {
-            drcSimulationTestHelper.send(planarRegionsListMessage);
-         }
-      });
+      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
@@ -112,8 +103,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       FootstepDataListMessage footsteps = createFootstepDataListMessage(swingTime, transferTime);
-      drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.send(planarRegionsListMessage);
+      drcSimulationTestHelper.publishToController(footsteps);
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
    }

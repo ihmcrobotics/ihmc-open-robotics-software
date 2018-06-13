@@ -102,7 +102,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       for (RobotSide robotSide : RobotSide.values)
       {

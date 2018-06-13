@@ -3,9 +3,11 @@ package us.ihmc.avatar.testTools;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.avatar.DRCStartingLocation;
@@ -20,30 +22,32 @@ import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
@@ -66,11 +70,11 @@ public class DRCSimulationTestHelper
    private HumanoidFloatingRootJointRobot sdfRobot;
    private AvatarSimulation avatarSimulation;
 
-   protected final PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-         new IHMCCommunicationKryoNetClassList());
    private CommonAvatarEnvironmentInterface testEnvironment = new DefaultCommonAvatarEnvironment();
 
    private final SimulationTestingParameters simulationTestingParameters;
+
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -97,12 +101,16 @@ public class DRCSimulationTestHelper
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
    protected final String robotName;
 
+   @SuppressWarnings("rawtypes")
+   private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
+
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
       this(simulationTestParameters, robotModel, null);
    }
 
-   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel, CommonAvatarEnvironmentInterface testEnvironment)
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel,
+                                  CommonAvatarEnvironmentInterface testEnvironment)
    {
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -121,10 +129,29 @@ public class DRCSimulationTestHelper
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
       networkProcessorParameters.enableNetworkProcessor(false);
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
+
+      List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
+
+      try
+      {
+         for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
+         {
+            Class<?> messageClass = command.newInstance().getMessageClass();
+            IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+            defaultControllerPublishers.put(messageClass, defaultPublisher);
+         }
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    /**
-    * Use {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)} instead.
+    * Use
+    * {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)}
+    * instead.
     */
    @Deprecated
    public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
@@ -155,15 +182,6 @@ public class DRCSimulationTestHelper
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
-
-      try
-      {
-         controllerCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
 
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
@@ -330,11 +348,6 @@ public class DRCSimulationTestHelper
          {
             simulatedSensorCommunicator.disconnect();
          }
-
-      }
-      if (controllerCommunicator != null)
-      {
-         controllerCommunicator.disconnect();
       }
 
       simulationStarter.close();
@@ -372,7 +385,7 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-   
+
    public void createVideo(String videoName)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -409,7 +422,7 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      
+
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
@@ -461,21 +474,6 @@ public class DRCSimulationTestHelper
    public Exception getCaughtException()
    {
       return caughtException;
-   }
-
-   public void send(Packet<?> packet)
-   {
-      controllerCommunicator.send(packet);
-   }
-
-   public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
-   {
-      controllerCommunicator.attachListener(clazz, listener);
-   }
-
-   public PacketCommunicator getControllerCommunicator()
-   {
-      return controllerCommunicator;
    }
 
    public ArrayList<RobotController> getFootForceSensorHysteresisCreators()
@@ -571,5 +569,46 @@ public class DRCSimulationTestHelper
    public String getRobotName()
    {
       return robotName;
+   }
+
+   public Ros2Node getRos2Node()
+   {
+      return ros2Node;
+   }
+
+   @SuppressWarnings("unchecked")
+   public void publishToController(Object message)
+   {
+      defaultControllerPublishers.get(message.getClass()).publish(message);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   {
+      return createPublisher(messageType, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator generator)
+   {
+      return ROS2Tools.createPublisher(ros2Node, messageType, generator);
+   }
+
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   {
+      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+   }
+
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.readNextData()));
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.readNextData()));
    }
 }

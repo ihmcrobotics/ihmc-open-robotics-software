@@ -171,10 +171,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.10);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -210,7 +210,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
 
@@ -245,7 +245,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallWall();
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
 
@@ -281,14 +281,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoSmallPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOffOfSmallPlatform(scriptedFootstepGenerator);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
@@ -326,7 +326,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoMediumPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -363,7 +363,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
@@ -409,7 +409,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Quaternion desiredChestQuat = new Quaternion(desiredChestFrameOrientation);
 
       double trajectoryTime = 0.5;
-      drcSimulationTestHelper.send(HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
@@ -423,7 +423,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   double swingTime = 1.0;
       double transferTime = 0.6;
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(scriptedFootstepGenerator, swingTime, transferTime);
-	   drcSimulationTestHelper.send(footstepDataList);
+	   drcSimulationTestHelper.publishToController(footstepDataList);
 
 	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
