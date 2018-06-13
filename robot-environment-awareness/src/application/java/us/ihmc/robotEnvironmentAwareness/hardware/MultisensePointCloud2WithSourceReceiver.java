@@ -33,7 +33,7 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
       rosMainNode.attachSubscriber("/singleScanAsCloudWithSource", this);
       rosMainNode.execute();
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    @Override
