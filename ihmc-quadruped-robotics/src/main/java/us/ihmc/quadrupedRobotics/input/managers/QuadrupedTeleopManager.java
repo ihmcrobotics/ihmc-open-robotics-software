@@ -241,11 +241,7 @@ public class QuadrupedTeleopManager
    {
       plannedStepsSortedByEndTime.clear();
       PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = stepStream.getFootstepPlan().getPlannedSteps();
-      for (int i = 0; i < plannedSteps.size(); i++)
-      {
-         plannedStepsSortedByEndTime.add(plannedSteps.get(i));
-      }
-
+      plannedStepsSortedByEndTime.addAll(plannedSteps);
       TimeIntervalTools.sortByEndTime(plannedStepsSortedByEndTime);
       return plannedStepsSortedByEndTime;
    }

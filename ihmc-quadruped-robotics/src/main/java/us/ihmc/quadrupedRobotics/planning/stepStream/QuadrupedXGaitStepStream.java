@@ -23,6 +23,7 @@ public class QuadrupedXGaitStepStream
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final Vector3D desiredPlanarVelocity = new Vector3D();
+   private final YoDouble timeShiftOnTransitionToWalk;
 
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final QuadrupedPlanarFootstepPlan footstepPlan;
@@ -37,6 +38,9 @@ public class QuadrupedXGaitStepStream
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
       minimumStepClearance.set(0.075);
+
+      this.timeShiftOnTransitionToWalk = new YoDouble("timeShiftOnTransitionToWalk", registry);
+      timeShiftOnTransitionToWalk.set(0.5);
 
       if (parentRegistry != null)
       {
@@ -60,7 +64,7 @@ public class QuadrupedXGaitStepStream
    {
       // initialize step queue
       updateXGaitSettings();
-      double initialTime = timestamp.getDoubleValue();
+      double initialTime = timestamp.getDoubleValue() + timeShiftOnTransitionToWalk.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
       xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
