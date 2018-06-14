@@ -82,30 +82,23 @@ public class DataConsumerParticipant
       {
          Announcement announcement = new Announcement();
          SampleInfo info = new SampleInfo();
-         try
+         if (subscriber.takeNextData(announcement, info))
          {
-            if (subscriber.takeNextData(announcement, info))
+            announcementLock.lock();
+            GuidPrefix guid = info.getSampleIdentity().getGuid().getGuidPrefix();
+            if (announcements.containsKey(guid))
             {
-               announcementLock.lock();
-               GuidPrefix guid = info.getSampleIdentity().getGuid().getGuidPrefix();
-               if (announcements.containsKey(guid))
-               {
-                  // Ignore duplicate announcements
-               }
-               else
-               {
-                  announcements.put(guid, announcement);
-                  if (logAnnouncementListener != null)
-                  {
-                     logAnnouncementListener.logSessionCameOnline(announcement);
-                  }
-               }
-               announcementLock.unlock();
+               // Ignore duplicate announcements
             }
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
+            else
+            {
+               announcements.put(guid, announcement);
+               if (logAnnouncementListener != null)
+               {
+                  logAnnouncementListener.logSessionCameOnline(announcement);
+               }
+            }
+            announcementLock.unlock();
          }
       }
 
