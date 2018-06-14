@@ -28,7 +28,7 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket()
    {
-      data_ = new us.ihmc.idl.IDLSequence.Byte (65536, "type_9");
+      data_ = new us.ihmc.idl.IDLSequence.Byte (131072, "type_9");
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
