@@ -17,7 +17,6 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -51,7 +50,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Publisher;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -237,9 +235,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private void sendMessageToUI(String message)
    {
-      TextToSpeechPacket packet = MessageTools.createTextToSpeechPacket(message);
-      packet.setDestination(PacketDestination.UI.ordinal());
-      textToSpeechPublisher.publish(packet);
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(message));
    }
 
    @Override
