@@ -50,6 +50,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Subscription;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
@@ -105,6 +106,9 @@ public class DRCSimulationTestHelper
 
    @SuppressWarnings("rawtypes")
    private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
+
+   // TODO Remove when Ros2Nodes are destroyable.
+   private final List<Ros2Subscription> allSubscriptions = new ArrayList<>();
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
@@ -347,6 +351,8 @@ public class DRCSimulationTestHelper
             simulatedSensorCommunicator.disconnect();
          }
       }
+
+      allSubscriptions.forEach(subscription -> subscription.remove());
 
       simulationStarter.close();
    }
@@ -602,11 +608,13 @@ public class DRCSimulationTestHelper
 
    public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      Ros2Subscription<T> newSubscription = ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      allSubscriptions.add(newSubscription);
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      Ros2Subscription<T> newSubscription = ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      allSubscriptions.add(newSubscription);
    }
 }
