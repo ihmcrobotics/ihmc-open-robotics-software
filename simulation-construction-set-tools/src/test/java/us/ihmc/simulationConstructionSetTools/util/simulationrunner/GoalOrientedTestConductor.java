@@ -150,22 +150,22 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       StringBuffer message = new StringBuffer();
       message.append("Assertion failed:");
-      for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
+      for (int i = 0; i < sustainGoalsNotMeeting.size(); i++)
       {
          message.append("\nGoal not sustained: ");
-         message.append(goal.toString());
+         message.append(sustainGoalsNotMeeting.get(i).toString());
       }
-      for (YoVariableTestGoal goal : waypointGoalsNotMet)
+      for (int i = 0; i < waypointGoalsNotMet.size(); i++)
       {
          message.append("\nWaypoint not met: ");
-         message.append(goal.toString());
+         message.append(waypointGoalsNotMet.get(i).toString());
       }
-      for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
+      for (int i = 0; i < terminalGoalsNotMeeting.size(); i++)
       {
          message.append("\nTerminal goal not met: ");
-         message.append(goal.toString());
+         message.append(terminalGoalsNotMeeting.get(i).toString());
       }
-      
+
       assertionFailedMessage = message.toString();
    }
 
