@@ -16,6 +16,7 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2QosProfile;
+import us.ihmc.ros2.Ros2Subscription;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
@@ -155,29 +156,31 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
-                                                     NewMessageListener<T> newMessageListener)
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+                                                                    NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
-      createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, NewMessageListener<T> newMessageListener)
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
+                                                                    NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> void createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, NewMessageListener<T> newMessageListener,
-                                                     ExceptionHandler exceptionHandler)
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
+                                                                    NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
    {
       try
       {
          TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
-         ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
+         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
       }
       catch (IOException e)
       {
          exceptionHandler.handleException(e);
+         return null;
       }
    }
 
