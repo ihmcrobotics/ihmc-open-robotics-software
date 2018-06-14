@@ -291,7 +291,6 @@ public class QuadrupedSimulationFactory
       {
          PubSubImplementation pubSubImplementation = useLocalCommunicator.get() ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
          realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_quadruped_simulation");
-         realtimeRos2Node.spin();
       }
    }
 
@@ -508,6 +507,9 @@ public class QuadrupedSimulationFactory
       createSimulationController();
       setupSDFRobot();
       setupJointElasticity();
+
+      if (useNetworking.get())
+         realtimeRos2Node.spin();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
       if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE || providedTerrainObject3D.hasValue())
