@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
@@ -158,6 +159,7 @@ public class GenericQuadrupedAllocationTest implements AllocationTest
       methodsToIgnore.add(RecyclingArrayList.class.getName() + ".ensureCapacity");
       methodsToIgnore.add(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
       methodsToIgnore.add(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
+      methodsToIgnore.add(TDoubleArrayList.class.getName() + ".ensureCapacity");
 
       // Ignore the following methods as they are related to printouts.
       methodsToIgnore.add(Throwable.class.getName() + ".printStackTrace");
