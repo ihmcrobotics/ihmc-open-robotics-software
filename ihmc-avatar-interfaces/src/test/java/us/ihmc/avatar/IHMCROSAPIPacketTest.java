@@ -338,11 +338,11 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                   new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), realtimeRos2Node, null,
                                                                   robotVisualizer, gravity);
 
-      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
-                                                                     outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());
-
-      robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
-      robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
+//      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
+//                                                                     outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());
+//
+//      robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
+//      robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
 
       return robotController;
    }

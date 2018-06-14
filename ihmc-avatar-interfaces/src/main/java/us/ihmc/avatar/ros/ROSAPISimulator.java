@@ -94,8 +94,8 @@ abstract public class ROSAPISimulator
 
       if (REDIRECT_UI_PACKETS_TO_ROS)
       {
-         PacketRouter<PacketDestination> packetRouter = simulationStarter.getPacketRouter();
-         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator, packetRouter, DEFAULT_PREFIX + "/" + robotModel.getSimpleRobotName().toLowerCase());
+//         PacketRouter<PacketDestination> packetRouter = simulationStarter.getPacketRouter();
+//         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator, packetRouter, DEFAULT_PREFIX + "/" + robotModel.getSimpleRobotName().toLowerCase());
       }
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
