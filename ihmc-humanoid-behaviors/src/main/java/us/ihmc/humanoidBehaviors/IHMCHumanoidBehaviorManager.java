@@ -116,7 +116,7 @@ public class IHMCHumanoidBehaviorManager
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> robotDataReceiver.receivedPacket(s.readNextData()));
+                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
@@ -128,7 +128,7 @@ public class IHMCHumanoidBehaviorManager
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator,
-                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.readNextData()));
+                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
@@ -164,9 +164,9 @@ public class IHMCHumanoidBehaviorManager
       MessageTopicNameGenerator behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, behaviorSubGenerator,
-                                           s -> desiredBehaviorControlSubscriber.receivedPacket(s.readNextData()));
+                                           s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, behaviorSubGenerator,
-                                           s -> desiredBehaviorSubscriber.receivedPacket(s.readNextData()));
+                                           s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
       {

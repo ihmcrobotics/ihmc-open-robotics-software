@@ -63,7 +63,7 @@ public class RosModule
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
-                                           s -> ppsTimestampOffsetProvider.receivedPacket(s.readNextData()));
+                                           s -> ppsTimestampOffsetProvider.receivedPacket(s.takeNextData()));
 
       sensorInformation = robotModel.getSensorInformation();
 
@@ -122,7 +122,7 @@ public class RosModule
       new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, ppsTimestampOffsetProvider);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
       ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(),
-                                           s -> rosLocalizationServiceClient.receivedPacket(s.readNextData()));
+                                           s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
    }
 
    //   private void setupFootstepServiceClient()

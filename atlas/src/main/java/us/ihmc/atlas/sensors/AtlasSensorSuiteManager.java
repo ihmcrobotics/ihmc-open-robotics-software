@@ -71,7 +71,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory,
                                                                            sensorInformation.getCameraParameters(0).getSensorNameInSdf(),
@@ -91,7 +91,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 

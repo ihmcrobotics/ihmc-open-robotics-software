@@ -81,7 +81,7 @@ public class LidarScanPublisher
       lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
