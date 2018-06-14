@@ -48,7 +48,7 @@ public class StereoVisionPointCloudPublisher
       fullRobotModel = modelFactory.createFullRobotModel();
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.readNextData()));
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator(robotName));
    }
 

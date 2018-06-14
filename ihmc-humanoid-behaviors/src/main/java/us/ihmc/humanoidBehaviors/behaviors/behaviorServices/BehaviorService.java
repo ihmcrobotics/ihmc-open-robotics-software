@@ -69,12 +69,12 @@ public abstract class BehaviorService
 
    public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicNameGenerator, s -> consumer.consumeObject(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicNameGenerator, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    protected Ros2Node getRos2Node()

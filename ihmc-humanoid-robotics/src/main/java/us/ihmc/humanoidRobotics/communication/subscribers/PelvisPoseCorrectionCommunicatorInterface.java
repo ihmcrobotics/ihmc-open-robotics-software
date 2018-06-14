@@ -20,6 +20,6 @@ public interface PelvisPoseCorrectionCommunicatorInterface extends NewMessageLis
    @Override
    default void onNewDataMessage(Subscriber<StampedPosePacket> subscriber)
    {
-      receivedPacket(subscriber.readNextData());
+      receivedPacket(subscriber.takeNextData());
    }
 }

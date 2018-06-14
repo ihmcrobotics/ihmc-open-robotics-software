@@ -209,7 +209,7 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
       ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
-         CapturabilityBasedStatus status = s.readNextData();
+         CapturabilityBasedStatus status = s.takeNextData();
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
          isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
       });

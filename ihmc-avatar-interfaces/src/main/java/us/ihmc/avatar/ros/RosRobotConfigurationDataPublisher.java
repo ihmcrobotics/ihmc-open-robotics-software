@@ -140,7 +140,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
       }
 
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.takeNextData()));
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
       t.start();

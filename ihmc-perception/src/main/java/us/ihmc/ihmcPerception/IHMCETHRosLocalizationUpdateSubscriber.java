@@ -35,7 +35,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
    public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
 
       IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
