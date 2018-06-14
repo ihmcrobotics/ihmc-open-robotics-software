@@ -185,6 +185,7 @@ public class DRCSimulationTestHelper
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
 
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
