@@ -36,7 +36,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
 
       for (int regionIndex = 0; regionIndex < message.getRegionId().size(); regionIndex++)
       {
-         PlanarRegionCommand planarRegionCommand = planarRegions.get(regionIndex);
+         PlanarRegionCommand planarRegionCommand = planarRegions.add();
          int regionId = message.getRegionId().get(regionIndex);
          Point3D origin = message.getRegionOrigin().get(regionIndex);
          Vector3D normal = message.getRegionNormal().get(regionIndex);
