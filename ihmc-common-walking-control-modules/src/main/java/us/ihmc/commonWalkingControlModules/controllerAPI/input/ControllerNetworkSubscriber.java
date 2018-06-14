@@ -117,9 +117,8 @@ public class ControllerNetworkSubscriber
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
 
-   @SuppressWarnings("unchecked")
    private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
-                                                           List<? extends Settable<?>> unpackedMessages, T multipleMessageHolder)
+                                                           List<Settable<?>> unpackedMessages, T multipleMessageHolder)
    {
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this,
@@ -135,7 +134,7 @@ public class ControllerNetworkSubscriber
 
       if (testMessageWithMessageFilter(multipleMessageHolder))
       {
-         messageUnpacker.unpackMessage(multipleMessageHolder, (List<Object>) unpackedMessages);
+         messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
 
          for (int i = 0; i < unpackedMessages.size(); i++)
          {
