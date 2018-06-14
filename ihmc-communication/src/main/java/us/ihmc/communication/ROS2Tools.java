@@ -17,6 +17,8 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2QosProfile;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
@@ -68,16 +70,65 @@ public class ROS2Tools
 
    private static final int DOMAIN_ID = new RTPSCommunicationFactory().getDomainId();
 
+   /**
+    * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
+    * not be run in a real-time environment</b>.
+    * 
+    * @param pubSubImplementation the implementation to use.
+    * @param nodeName the name of the new ROS node.
+    * @return the ROS node.
+    */
    public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return createRealtimeRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
+   /**
+    * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
+    * not be run in a real-time environment</b>.
+    * 
+    * @param pubSubImplementation the implementation to use.
+    * @param nodeName the name of the new ROS node.
+    * @param exceptionHandler how to handle exceptions thrown during the instantiation.
+    * @return the ROS node.
+    */
    public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   {
+      return createRealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, exceptionHandler);
+   }
+
+   /**
+    * Creates a ROS2 node that is meant to run in real-time environment if the given
+    * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
+    * 
+    * @param pubSubImplementation the implementation to use.
+    * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
+    * @param nodeName the name of the new ROS node.
+    * @return the ROS node.
+    */
+   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory, String nodeName)
+   {
+      return createRealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
+   }
+
+   /**
+    * Creates a ROS2 node that is meant to run in real-time environment if the given
+    * {@code periodicThreadSchedulerFactory} is a {@link PeriodicRealtimeThreadSchedulerFactory}.
+    * 
+    * @param pubSubImplementation the implementation to use.
+    * @param periodicThreadSchedulerFactory the factory used to create a periodic thread.
+    * @param nodeName the name of the new ROS node.
+    * @param exceptionHandler how to handle exceptions thrown during the instantiation.
+    * @return the ROS node.
+    */
+   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory, String nodeName,
+                                                         ExceptionHandler exceptionHandler)
    {
       try
       {
-         return new RealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, NAMESPACE, DOMAIN_ID);
+         return new RealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID);
       }
       catch (IOException e)
       {

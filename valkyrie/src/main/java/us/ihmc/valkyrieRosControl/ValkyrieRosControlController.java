@@ -113,7 +113,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    public static final double gravity = 9.80665;
 
-   public static final String VALKYRIE_IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
+   public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
    public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_ihmc_controller";
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
@@ -293,9 +293,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create network servers/clients
        */
-      RealtimeRos2Node estimatorRealtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS,
-                                                                                    VALKYRIE_IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
-      RealtimeRos2Node controllerRealtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
+      PeriodicRealtimeThreadSchedulerFactory realtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
+      RealtimeRos2Node estimatorRealtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, realtimeThreadFactory,
+                                                                                    VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME);
+      RealtimeRos2Node controllerRealtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, realtimeThreadFactory,
+                                                                                     VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
