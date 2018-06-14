@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -139,6 +141,9 @@ public class DRCSimulationTestHelper
          IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
+
+      defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
+      defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
    }
 
    /**
