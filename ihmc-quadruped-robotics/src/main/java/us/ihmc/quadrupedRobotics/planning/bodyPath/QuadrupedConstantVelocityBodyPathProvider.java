@@ -42,6 +42,9 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
    private final YoDouble startTime = new YoDouble("startTime", registry);
 
+   // flag to allow for an initial transfer time during which the body setpoint stays constant
+   private final YoBoolean startedWalkingFlag = new YoBoolean("startedWalkingFlag", registry);
+
    private final YoFramePoint3D achievedStepAdjustment = new YoFramePoint3D("achievedStepAdjustment", worldFrame, registry);
    private final YoEnum<RobotQuadrant> mostRecentTouchdown = new YoEnum<>("mostRecentTouchdown", registry, RobotQuadrant.class);
    private final YoFrameVector3D desiredPlanarVelocity = new YoFrameVector3D("desiredPlanarVelocity", worldFrame, registry);
@@ -106,6 +109,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       recomputeInitialPose.set(false);
       footstepPlanHasBeenComputed.set(false);
       recomputeStepAdjustment.set(false);
+      startedWalkingFlag.set(false);
    }
 
    public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -131,8 +135,15 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          setStartConditionsFromCurrent();
       }
 
-      initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
-      extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
+      if(startedWalkingFlag.getBooleanValue())
+      {
+         initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
+         extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
+      }
+      else
+      {
+         poseToPack.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+      }
    }
 
    private static void extrapolatePose(double time, FramePose2D poseToPack, FramePose2D initialPose, Tuple3DReadOnly planarVelocity)
@@ -184,7 +195,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       double previousStartTime = startTime.getDoubleValue();
       double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
 
-      startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
       startTime.set(newStartTime);
 
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
@@ -198,6 +208,17 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       tempVector.applyTransform(tempTransform);
       tempVector.add(latestMessageSoleDesiredPosition);
       startPoint.set(tempVector);
+
+      if(startedWalkingFlag.getBooleanValue())
+      {
+         // if already walking, update yaw setpoint normally
+         startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
+      }
+      else
+      {
+         // if this is the first footstep status, don't update yaw
+         startedWalkingFlag.set(true);
+      }
    }
 
    private void computeStepAdjustmentFromFootstepStatus()
