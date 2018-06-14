@@ -42,10 +42,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
@@ -75,12 +71,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final static int getCdrSerializedSize(controller_msgs.msg.dds.PlanarRegionsListMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -122,10 +112,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_2(data.getSource());
-
-      cdr.write_type_2(data.getDestination());
-
       cdr.write_type_4(data.getSequenceId());
 
       if(data.getRegionId().size() <= 300)
@@ -160,10 +146,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSource(cdr.read_type_2());
-      	
-      data.setDestination(cdr.read_type_2());
-      	
       data.setSequenceId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getRegionId());	
@@ -179,8 +161,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_2("source", data.getSource());
-      ser.write_type_2("destination", data.getDestination());
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("region_id", data.getRegionId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
@@ -194,8 +174,6 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PlanarRegionsListMessage data)
    {
-      data.setSource(ser.read_type_2("source"));
-      data.setDestination(ser.read_type_2("destination"));
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("region_id", data.getRegionId());
       ser.read_type_e("region_origin", data.getRegionOrigin());
