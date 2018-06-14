@@ -4,6 +4,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.euclid.interfaces.Settable;
 
 public final class MessageUnpackingTools
 {
@@ -16,7 +17,7 @@ public final class MessageUnpackingTools
       return new MessageUnpacker<WholeBodyTrajectoryMessage>()
       {
          @Override
-         public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<Object> messagesToPack)
+         public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<Settable<?>> messagesToPack)
          {
             if (multipleMessageHolder.getLeftHandTrajectoryMessage() != null && !multipleMessageHolder.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(multipleMessageHolder.getLeftHandTrajectoryMessage());
@@ -45,7 +46,7 @@ public final class MessageUnpackingTools
       return new MessageUnpacker<WholeBodyTrajectoryToolboxMessage>()
       {
          @Override
-         public void unpackMessage(WholeBodyTrajectoryToolboxMessage multipleMessageHolder, List<Object> messagesToPack)
+         public void unpackMessage(WholeBodyTrajectoryToolboxMessage multipleMessageHolder, List<Settable<?>> messagesToPack)
          {
             if (multipleMessageHolder.getConfiguration() != null)
                messagesToPack.add(multipleMessageHolder.getConfiguration());
@@ -75,6 +76,6 @@ public final class MessageUnpackingTools
        * 
        * @param messagesToPack the list the messages should be stored once unpacked.
        */
-      public void unpackMessage(T multipleMessageHolder, List<Object> messagesToPack);
+      public void unpackMessage(T multipleMessageHolder, List<Settable<?>> messagesToPack);
    }
 }
