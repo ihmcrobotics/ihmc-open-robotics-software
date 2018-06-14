@@ -19,8 +19,16 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
 
    public PelvisPoseCorrectionCommunicator(RealtimeRos2Node realtimeRos2Node, MessageTopicNameGenerator topicNameGenerator)
    {
-      poseErrorPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
-      localizationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
+      if (realtimeRos2Node != null && topicNameGenerator != null)
+      {
+         poseErrorPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
+         localizationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
+      }
+      else
+      {
+         poseErrorPublisher = null;
+         localizationPublisher = null;
+      }
    }
 
    @Override
@@ -50,12 +58,14 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    @Override
    public void sendPelvisPoseErrorPacket(PelvisPoseErrorPacket pelvisPoseErrorPacket)
    {
-      poseErrorPublisher.publish(pelvisPoseErrorPacket);
+      if (poseErrorPublisher != null)
+         poseErrorPublisher.publish(pelvisPoseErrorPacket);
    }
 
    @Override
    public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
    {
-      localizationPublisher.publish(localizationPacket);
+      if (localizationPublisher != null)
+         localizationPublisher.publish(localizationPacket);
    }
 }
