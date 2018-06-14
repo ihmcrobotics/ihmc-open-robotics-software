@@ -26,11 +26,11 @@ public class RTPSCommunicationFactory
     * Creates an RTPSCommunicationFactory. Loads the default RTPS Domain ID from the Network
     * Parameter File on disk. This file is typically located in the user home directory
     * /.ihmc/IHMCNetworkParameters.ini If the domain ID is not found, a random ID is generated
-    * between 800 and 900
+    * between 200 and 229
     */
    public RTPSCommunicationFactory()
    {
-      int rtpsDomainID = new Random().nextInt(50) + START_OF_RANDOM_DOMAIN_RANGE;
+      int rtpsDomainID = new Random().nextInt(30) + START_OF_RANDOM_DOMAIN_RANGE;
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
