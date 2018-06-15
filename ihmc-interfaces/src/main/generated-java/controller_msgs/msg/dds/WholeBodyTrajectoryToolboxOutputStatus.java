@@ -31,7 +31,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    {
       trajectory_times_ = new us.ihmc.idl.IDLSequence.Double (50, "type_6");
 
-      robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (50, controller_msgs.msg.dds.KinematicsToolboxOutputStatus.class, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
+      robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (50, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
 
    }
 

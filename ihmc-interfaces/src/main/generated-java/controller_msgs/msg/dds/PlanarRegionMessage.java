@@ -31,7 +31,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
    {
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1000, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1000, new geometry_msgs.msg.dds.PointPubSubType());
       convex_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
 
 

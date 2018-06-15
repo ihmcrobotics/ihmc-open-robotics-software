@@ -49,8 +49,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       pelvis_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (50, controller_msgs.msg.dds.SpatialVectorMessage.class, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
-      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (50, controller_msgs.msg.dds.IMUPacket.class, new controller_msgs.msg.dds.IMUPacketPubSubType());
+      force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> (50, new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
+      imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> (50, new controller_msgs.msg.dds.IMUPacketPubSubType());
 
    }
 

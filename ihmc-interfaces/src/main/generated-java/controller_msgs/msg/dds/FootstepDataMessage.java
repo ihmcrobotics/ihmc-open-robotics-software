@@ -105,9 +105,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
-      custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
-      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (10, controller_msgs.msg.dds.SE3TrajectoryPointMessage.class, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (10, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
 
    }
 
