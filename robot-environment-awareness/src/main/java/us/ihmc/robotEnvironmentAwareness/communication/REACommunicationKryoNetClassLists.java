@@ -32,7 +32,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicID;
@@ -116,7 +116,7 @@ public class REACommunicationKryoNetClassLists
       privateNetClassList.registerPacketField(IDLSequence.Long.class);
       privateNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
       privateNetClassList.registerPacketField(TopicDataType.class);
-      privateNetClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      privateNetClassList.registerPacketField(RecyclingArrayList.class);
       privateNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
    }
 
@@ -168,7 +168,7 @@ public class REACommunicationKryoNetClassLists
       publicNetClassList.registerPacketField(IDLSequence.Long.class);
       publicNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
       publicNetClassList.registerPacketField(TopicDataType.class);
-      publicNetClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      publicNetClassList.registerPacketField(RecyclingArrayList.class);
       publicNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
    }
 

@@ -185,7 +185,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -222,7 +222,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(IDLSequence.Long.class);
       registerPacketField(IDLSequence.StringBuilderHolder.class);
       registerPacketField(TopicDataType.class);
-      registerPacketField(RecyclingArrayListPubSub.class);
+      registerPacketField(RecyclingArrayList.class);
       registerPacketField(us.ihmc.idl.CDR.class);
       
 

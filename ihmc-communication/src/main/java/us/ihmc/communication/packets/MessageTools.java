@@ -34,6 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -50,7 +51,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -531,7 +531,7 @@ public class MessageTools
 
    /**
     * Performs a deep copy of the data from {@code source} to {@code destination} after calling
-    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
     * @param source the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
@@ -540,7 +540,7 @@ public class MessageTools
     *            {@code StringBuilder}, {@code Settable<T>}.
     */
    @SuppressWarnings("unchecked")
-   public static <T> void copyData(List<T> source, RecyclingArrayListPubSub<T> destination)
+   public static <T> void copyData(List<T> source, RecyclingArrayList<T> destination)
    {
       destination.clear();
 
@@ -572,19 +572,19 @@ public class MessageTools
       else
       {
          throw new IllegalArgumentException(MessageTools.class.getSimpleName() + ".copyData(...) can only be used with "
-               + RecyclingArrayListPubSub.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
+               + RecyclingArrayList.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
                + Settable.class.getSimpleName());
       }
    }
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayListPubSub<T> destination)
+   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayList<T> destination)
    {
       destination.clear();
 
@@ -607,12 +607,12 @@ public class MessageTools
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static void copyData(String[] source, RecyclingArrayListPubSub<StringBuilder> destination)
+   public static void copyData(String[] source, RecyclingArrayList<StringBuilder> destination)
    {
       destination.clear();
 
@@ -629,12 +629,12 @@ public class MessageTools
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static void copyData(StringBuilder[] source, RecyclingArrayListPubSub<StringBuilder> destination)
+   public static void copyData(StringBuilder[] source, RecyclingArrayList<StringBuilder> destination)
    {
       destination.clear();
 
@@ -649,7 +649,7 @@ public class MessageTools
       }
    }
 
-   public static <T> List<T> toList(RecyclingArrayListPubSub<T> original)
+   public static <T> List<T> toList(RecyclingArrayList<T> original)
    {
       List<T> list = new ArrayList<>();
       for (int i = 0; i < original.size(); i++)
@@ -657,7 +657,7 @@ public class MessageTools
       return list;
    }
 
-   public static <T extends EpsilonComparable<T>> boolean epsilonEquals(RecyclingArrayListPubSub<T> listOne, RecyclingArrayListPubSub<T> listTwo, double epsilon)
+   public static <T extends EpsilonComparable<T>> boolean epsilonEquals(RecyclingArrayList<T> listOne, RecyclingArrayList<T> listTwo, double epsilon)
    {
       if (listOne.size() != listTwo.size())
          return false;
