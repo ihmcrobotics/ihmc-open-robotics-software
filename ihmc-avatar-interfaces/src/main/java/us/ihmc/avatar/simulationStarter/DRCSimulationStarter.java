@@ -569,7 +569,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       if (realtimeRos2Node != null)
       {
-         realtimeRos2Node.stopSpinning();
+         realtimeRos2Node.destroy();
       }
    }
 
