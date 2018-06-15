@@ -25,7 +25,7 @@ mainDependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.19.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.0"
