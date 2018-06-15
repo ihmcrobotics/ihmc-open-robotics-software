@@ -29,15 +29,15 @@ mainDependencies {
    compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
    compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.1'
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
    compile group: 'us.ihmc', name: 'robot-environment-awareness', version: "source"
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
 }
@@ -46,6 +46,6 @@ testDependencies {
    compile ihmc.sourceSetProject("visualizers")
    compile group: 'junit', name: 'junit', version: '4.12'
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.2"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: "source"
 }
