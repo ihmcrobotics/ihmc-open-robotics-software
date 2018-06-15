@@ -77,6 +77,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    private QuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
+   private String robotName;
 
    public GenericQuadrupedTestFactory()
    {
@@ -113,6 +114,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
             fullRobotModel.getTotalMass());
+      robotName = sdfRobot.getName();
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
@@ -174,7 +176,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
 
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
-         String robotName = sdfRobot.getName();
 
          graphicsListRegistry = new YoGraphicsListRegistry();
          stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
@@ -265,5 +266,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public QuadrupedTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
+   }
+
+   @Override
+   public String getRobotName()
+   {
+      return robotName;
    }
 }
