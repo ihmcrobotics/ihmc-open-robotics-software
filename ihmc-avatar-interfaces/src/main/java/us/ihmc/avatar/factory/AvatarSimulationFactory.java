@@ -58,7 +58,6 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
@@ -214,8 +213,7 @@ public class AvatarSimulationFactory
       String robotName = robotModel.get().getSimpleRobotName();
       stateEstimationThread = new DRCEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
                                                      robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
-                                                     threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"),
-                                                     realtimeRos2Node.get(), simulationOutputWriter, yoVariableServer, gravity.get());
+                                                     threadDataSynchronizer, realtimeRos2Node.get(), simulationOutputWriter, yoVariableServer, gravity.get());
 
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);

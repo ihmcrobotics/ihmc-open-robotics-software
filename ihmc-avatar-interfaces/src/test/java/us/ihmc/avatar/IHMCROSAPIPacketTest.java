@@ -57,9 +57,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -334,9 +332,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), robotModel.getSensorInformation(),
                                                                   robotModel.getContactPointParameters(), robotModel, robotModel.getStateEstimatorParameters(),
-                                                                  sensorReaderFactory, threadDataSynchronizer,
-                                                                  new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), realtimeRos2Node, null,
-                                                                  robotVisualizer, gravity);
+                                                                  sensorReaderFactory, threadDataSynchronizer, realtimeRos2Node, null, robotVisualizer,
+                                                                  gravity);
 
 //      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
 //                                                                     outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());

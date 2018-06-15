@@ -113,9 +113,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
-                             SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-                             PeriodicThreadScheduler poseCommunicatorScheduler, RealtimeRos2Node realtimeRos2Node, JointDesiredOutputWriter outputWriter,
-                             RobotVisualizer robotVisualizer, double gravity)
+                             SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
+                             JointDesiredOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
@@ -226,8 +225,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
-                                                    sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation,
-                                                    poseCommunicatorScheduler);
+                                                    sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
       }
       else
@@ -420,10 +418,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public void dispose()
    {
-      if (poseCommunicator != null)
-      {
-         poseCommunicator.stop();
-      }
    }
 
    /**

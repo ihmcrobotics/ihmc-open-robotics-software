@@ -59,12 +59,10 @@ public class KinematicToolboxDiagnosticEnvironment
       SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-      PeriodicNonRealtimeThreadScheduler scheduler1 = new PeriodicNonRealtimeThreadScheduler(threadName);
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
       final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
                                                                            publisherTopicNameGenerator, realtimeRos2Node, sensorOutputMapReadOnly,
-                                                                           sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation,
-                                                                           scheduler1);
+                                                                           sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
       scheduler2.schedule(new Runnable()
       {
