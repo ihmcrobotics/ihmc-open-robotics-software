@@ -1,16 +1,22 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import java.io.IOException;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -30,6 +36,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -43,8 +50,6 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.io.IOException;
 
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 {
@@ -168,11 +173,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          YoVariableRegistry teleopRegistry = new YoVariableRegistry("TeleopRegistry");
          sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
 
-         PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
-         packetCommunicator.connect();
+         Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
+         String robotName = sdfRobot.getName();
 
          graphicsListRegistry = new YoGraphicsListRegistry();
-         stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
+         stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }

@@ -1,7 +1,11 @@
 package us.ihmc.quadrupedRobotics.planning.bodyPath;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -9,15 +13,19 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlanarBodyPathProvider
 {
@@ -47,8 +55,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final Vector3D tempVector = new Vector3D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
-   public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
-                                                    PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
+   public QuadrupedConstantVelocityBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
+                                                    Ros2Node ros2Node, YoVariableRegistry parentRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
@@ -58,7 +66,10 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          footstepCompleteStatuses.set(quadrant, new AtomicReference<>());
       }
 
-      packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) -> {
+      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
+         QuadrupedFootstepStatusMessage packet = s.takeNextData();
          if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
          {
             RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
@@ -67,7 +78,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          }
       });
 
-      packetCommunicator.attachListener(QuadrupedFootstepStatusMessage.class, (packet) -> {
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator, s -> {
+         QuadrupedFootstepStatusMessage packet = s.takeNextData();
          if (packet.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          {
             RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) packet.getFootstepQuadrant());
