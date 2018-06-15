@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class KinematicsToolboxModule extends ToolboxModule
@@ -28,7 +29,13 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer);
+      this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
                                                                             registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
