@@ -84,13 +84,19 @@ public abstract class ToolboxModule
                         int updatePeriodMilliseconds)
          throws IOException
    {
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
+   }
+
+   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+                        int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
+         throws IOException
+   {
       this.robotName = robotName;
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS,
-                                                          "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(getSubscriberTopicNameGenerator(), commandInputManager, getPublisherTopicNameGenerator(),
