@@ -50,7 +50,15 @@ public class FrameTupleArrayList<T extends FrameTuple3DBasics> extends Recycling
 
    public void copyFromListAndTrimSize(List<? extends FrameTuple3DReadOnly> otherList)
    {
-      copyFromListAndTrimSize(otherList);
+      for (int i = 0; i < otherList.size(); i++)
+      {
+         getAndGrowIfNeeded(i).setIncludingFrame(otherList.get(i));
+      }
+
+      while(size() > otherList.size())
+      {
+         remove(size() - 1);
+      }
    }
 
    public static FrameTupleArrayList<FramePoint3D> createFramePointArrayList()

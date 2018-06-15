@@ -57,7 +57,15 @@ public class FrameTuple2dArrayList<T extends FrameTuple2DBasics> extends Recycli
 
    public void copyFromListAndTrimSize(List<? extends FrameTuple2DReadOnly> otherList)
    {
-      copyFromListAndTrimSize(otherList);
+      for (int i = 0; i < otherList.size(); i++)
+      {
+         getAndGrowIfNeeded(i).setIncludingFrame(otherList.get(i));
+      }
+
+      while(size() > otherList.size())
+      {
+         remove(size() - 1);
+      }
    }
 
    public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2DReadOnly> otherList)
