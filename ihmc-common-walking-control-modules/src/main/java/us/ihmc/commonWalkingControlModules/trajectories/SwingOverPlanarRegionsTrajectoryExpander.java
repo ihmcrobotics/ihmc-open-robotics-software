@@ -121,7 +121,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
+      originalWaypoints.add();
+      originalWaypoints.add();
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
+      adjustedWaypoints.add();
+      adjustedWaypoints.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
       closestPolygonPointMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D>();
