@@ -1,22 +1,21 @@
 package us.ihmc.exampleSimulations.genericQuadruped.simulation;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.swing.JFrame;
+
 import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.util.NetworkPorts;
+
+import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedSimulationFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
-import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.input.QuadrupedBodyTeleopNode;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
-import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedSimulationFactory;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-
-import javax.swing.*;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * To run with simulation, make sure {@link GenericQuadrupedSimulationFactory#USE_NETWORKING} is true
@@ -27,16 +26,14 @@ public class GenericQuadrupedTeleopNode
 
    private GenericQuadrupedTeleopNode() throws IOException, InterruptedException
    {
-      String host = "localhost";
-      NetworkPorts port = NetworkPorts.CONTROLLER_PORT;
-      NetClassList netClassList = new QuadrupedNetClassList();
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       GenericQuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
+      String robotName = modelFactory.getRobotDescription().getName();
       Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-      QuadrupedBodyTeleopNode eventListener = new QuadrupedBodyTeleopNode(host, port, netClassList, joystick, fullRobotModel, xGaitSettings, physicalProperties);
+      QuadrupedBodyTeleopNode eventListener = new QuadrupedBodyTeleopNode(robotName, joystick, fullRobotModel, xGaitSettings, physicalProperties);
 
       InputStream parameterFile = getClass().getResourceAsStream(parameterResourcePath);
       ParameterLoaderHelper.loadParameters(this, parameterFile, eventListener.getRegistry());

@@ -9,6 +9,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ComPositionPacket;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
@@ -22,17 +24,15 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class QuadrupedControllerInputProviderTest
 {
@@ -48,7 +48,8 @@ public class QuadrupedControllerInputProviderTest
       Vector3D randomBodyAngularVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
       Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
 
-      ComPositionPacket comPositionPacket = new ComPositionPacket(randomComPosition);
+      ComPositionPacket comPositionPacket = new ComPositionPacket();
+      comPositionPacket.getPosition().set(randomComPosition);
       ComVelocityPacket comVelocityPacket = new ComVelocityPacket(randomComVelocity);
       PlanarVelocityPacket planarVelocityPacket = new PlanarVelocityPacket(randomPlanarVelocity);
       
