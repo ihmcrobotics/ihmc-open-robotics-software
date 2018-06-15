@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
@@ -26,7 +26,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    {
       clear();
 
-      RecyclingArrayListPubSub<PlanarRegionMessage> dataList = message.getPlanarRegions();
+      RecyclingArrayList<PlanarRegionMessage> dataList = message.getPlanarRegions();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)

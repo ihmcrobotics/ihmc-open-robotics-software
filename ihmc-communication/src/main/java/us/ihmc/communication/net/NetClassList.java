@@ -10,11 +10,11 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class NetClassList
 {
@@ -99,7 +99,7 @@ public class NetClassList
       kryo.addDefaultSerializer(IMUPacket.class, IMUPacketSerializer.class);
       kryo.addDefaultSerializer(SpatialVectorMessage.class, SpatialVectorMessageSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Object.class, IDLSequenceObjectSerializer.class);
-      kryo.addDefaultSerializer(RecyclingArrayListPubSub.class, RecyclingArrayListPubSubSerializer.class);
+      kryo.addDefaultSerializer(RecyclingArrayList.class, RecyclingArrayListPubSubSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Boolean.class, IDLSequenceBooleanSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Double.class, IDLSequenceDoubleSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Float.class, IDLSequenceFloatSerializer.class);
