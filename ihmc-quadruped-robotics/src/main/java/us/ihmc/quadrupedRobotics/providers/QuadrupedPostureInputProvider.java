@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.providers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.ComPositionPacket;
+import controller_msgs.msg.dds.ComVelocityPacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -83,11 +83,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comVelocityPacket.set(packet);
                yoComVelocityInputX.set(
-                     MathTools.clamp(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.getX(), comVelocityUpperLimitsParameter.getX()));
+                     MathTools.clamp(comVelocityPacket.get().getVelocity().getX(), comVelocityLowerLimitsParameter.getX(), comVelocityUpperLimitsParameter.getX()));
                yoComVelocityInputY.set(
-                     MathTools.clamp(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.getY(), comVelocityUpperLimitsParameter.getY()));
+                     MathTools.clamp(comVelocityPacket.get().getVelocity().getY(), comVelocityLowerLimitsParameter.getY(), comVelocityUpperLimitsParameter.getY()));
                yoComVelocityInputZ.set(
-                     MathTools.clamp(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.getZ(), comVelocityUpperLimitsParameter.getZ()));
+                     MathTools.clamp(comVelocityPacket.get().getVelocity().getZ(), comVelocityLowerLimitsParameter.getZ(), comVelocityUpperLimitsParameter.getZ()));
             }
          });
 
