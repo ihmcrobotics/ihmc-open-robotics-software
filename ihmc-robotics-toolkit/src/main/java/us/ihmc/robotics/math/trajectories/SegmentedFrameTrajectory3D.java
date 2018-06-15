@@ -46,6 +46,13 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       currentSegmentIndex = -1;
       segments = new RecyclingArrayList<>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
+
+      /*
+       * FIXME Workaround to deal with a change of RecyclingArrayList that used to start with size()
+       * == initialCapacity. This change causes the test ReferenceCMPTrajectoryGeneratorTest.
+       */
+      while (segments.size() < maxNumberOfSegments)
+         segments.add();
    }
 
    public void reset()
