@@ -1,9 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.next;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.removeAllExclusive;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.subListInclusive;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.removeAllExclusive;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.subListInclusive;
 
 import java.util.ArrayList;
 import java.util.List;

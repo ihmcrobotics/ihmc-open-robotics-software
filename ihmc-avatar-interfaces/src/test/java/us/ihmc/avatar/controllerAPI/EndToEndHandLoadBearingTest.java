@@ -77,7 +77,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       Quaternion chestOrientation = new Quaternion();
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
-      drcSimulationTestHelper.send(chestTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
 
@@ -91,7 +91,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
-      drcSimulationTestHelper.send(handTrajectoryMessage1);
+      drcSimulationTestHelper.publishToController(handTrajectoryMessage1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
@@ -101,7 +101,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
-      drcSimulationTestHelper.send(handTrajectoryMessage2);
+      drcSimulationTestHelper.publishToController(handTrajectoryMessage2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
 
@@ -115,7 +115,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
       loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
       loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
-      drcSimulationTestHelper.send(loadBearingMessage);
+      drcSimulationTestHelper.publishToController(loadBearingMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 

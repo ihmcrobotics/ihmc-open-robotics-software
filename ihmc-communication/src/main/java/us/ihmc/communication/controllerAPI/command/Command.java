@@ -4,22 +4,22 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.lists.Settable;
+import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * A Command has to be used when interacting with the {@link CommandInputManager} that represents notably the walking controller input API.
  * As a {@link Packet}, a Command holds onto the required data execute a body trajectory for instance.
- * Unlike a {@link Packet}, a Command HAS to be garbage free, and to be able to copy the data held in a message through the {@link #set(Packet)} method.
+ * Unlike a {@link Packet}, a Command HAS to be garbage free, and to be able to copy the data held in a message through the {@link #setFromMessage(Packet)} method.
  * When a new {@link Packet} is created and one wants it to be consumed by the controller, the corresponding Command has to be created and registered to the input API.
  *
  * Any implementation of {@link Command} MUST have only ONE EMPTY constructor.
  *
  * @author Sylvain
  *
- * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(M)}.
+ * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #setFromMessage(M)}.
  * @param <M> Type of the corresponding {@link Packet} that this Command can copy.
  */
-public interface Command<C extends Command<C, M>, M extends Packet<M>> extends Settable<C>
+public interface Command<C extends Command<C, M>, M extends Settable<M>> extends Settable<C>
 {
    /**
     * Clear all the data held in this Command.
@@ -32,7 +32,7 @@ public interface Command<C extends Command<C, M>, M extends Packet<M>> extends S
     * Copy the data held in a message.
     * @param message message to copy the data from.
     */
-   public abstract void set(M message);
+   public abstract void setFromMessage(M message);
 
    /**
     * Informs which {@link Packet} class this Command is associated with.

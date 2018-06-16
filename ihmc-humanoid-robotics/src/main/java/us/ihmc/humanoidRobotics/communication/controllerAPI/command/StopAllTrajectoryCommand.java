@@ -26,7 +26,7 @@ public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryComman
    }
 
    @Override
-   public void set(StopAllTrajectoryMessage message)
+   public void setFromMessage(StopAllTrajectoryMessage message)
    {
       stopAllTrajectory = true;
    }

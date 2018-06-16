@@ -1,12 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -33,16 +31,10 @@ public class QuadrupedXGaitStepStream
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp,
                                    QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
    {
-      this(xGaitSettings, Double.NaN, timestamp, bodyPathProvider, parentRegistry);
-   }
-
-   public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, double controlDT, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
-   {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
+      this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
 
       if (parentRegistry != null)
@@ -70,7 +62,7 @@ public class QuadrupedXGaitStepStream
       double initialTime = timestamp.getDoubleValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
-      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();
       this.process();
    }
@@ -83,7 +75,7 @@ public class QuadrupedXGaitStepStream
       footstepPlan.updateCurrentSteps(timestamp.getDoubleValue());
 
       updateXGaitSettings();
-      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime, xGaitSettings);
+      xGaitStepPlanner.computeOnlinePlan(footstepPlan, currentTime);
    }
 
    public List<? extends QuadrupedTimedStep> getSteps()
@@ -96,7 +88,7 @@ public class QuadrupedXGaitStepStream
       return footstepPlan;
    }
 
-   public void setStepSnapper(QuadrupedStepSnapper snapper)
+   public void setStepSnapper(PointFootSnapper snapper)
    {
       xGaitStepPlanner.setStepSnapper(snapper);
    }

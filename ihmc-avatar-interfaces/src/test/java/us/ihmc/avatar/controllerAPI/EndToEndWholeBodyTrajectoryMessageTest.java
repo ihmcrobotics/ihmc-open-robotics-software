@@ -10,6 +10,7 @@ import org.junit.Before;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.MessageCollectionNotification;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -75,10 +76,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
-      drcSimulationTestHelper.send(footTrajectoryMessage);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createAutomaticManipulationAbortMessage(false));
+      drcSimulationTestHelper.publishToController(footTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createAutomaticManipulationAbortMessage(false));
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0
+            + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -89,9 +91,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       if (footSide == RobotSide.LEFT)
-         wholeBodyTrajectoryMessage.getLeftFootTrajectoryMessage().set(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
+         wholeBodyTrajectoryMessage.getLeftFootTrajectoryMessage()
+                                   .set(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
       else
-         wholeBodyTrajectoryMessage.getRightFootTrajectoryMessage().set(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
+         wholeBodyTrajectoryMessage.getRightFootTrajectoryMessage()
+                                   .set(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
 
       SideDependentList<FramePose3D> desiredHandPoses = new SideDependentList<>();
 
@@ -114,11 +118,14 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredOrientation = new Quaternion();
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          if (robotSide == RobotSide.LEFT)
-            wholeBodyTrajectoryMessage.getLeftHandTrajectoryMessage().set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
+            wholeBodyTrajectoryMessage.getLeftHandTrajectoryMessage()
+                                      .set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation,
+                                                                                            worldFrame));
          else
-            wholeBodyTrajectoryMessage.getRightHandTrajectoryMessage().set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
+            wholeBodyTrajectoryMessage.getRightHandTrajectoryMessage()
+                                      .set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation,
+                                                                                            worldFrame));
       }
-
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -131,7 +138,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredOrientation = new Quaternion();
       desiredPelvisPose.changeFrame(worldFrame);
       desiredPelvisPose.get(desiredPosition, desiredOrientation);
-      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().set(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
+      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage()
+                                .set(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
@@ -140,7 +148,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       wholeBodyTrajectoryMessage.getChestTrajectoryMessage().set(chestTrajectoryMessage);
 
-      drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -159,7 +167,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
       EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
-//      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
+      //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -201,10 +209,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
-      drcSimulationTestHelper.send(footTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(footTrajectoryMessage);
       //drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0
+            + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -236,9 +245,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
-         messageCollectionMessenger.addMessage(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
+         messageCollectionMessenger.addMessage(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation,
+                                                                                                worldFrame));
       }
-
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -260,7 +269,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       messageCollectionMessenger.addMessage(chestTrajectoryMessage);
 
-      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper.getControllerCommunicator(), false);
+      drcSimulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
+      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper::publishToController, false);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -279,7 +289,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
       EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
-//      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
+      //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -321,9 +331,10 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
-      drcSimulationTestHelper.send(footTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(footTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0
+            + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
 
       // Now we can do the usual test.
@@ -355,11 +366,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition,
+                                                                                                        desiredOrientation, worldFrame);
          handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionDelayTime(5.0);
          messageCollectionMessenger.addMessage(handTrajectoryMessage);
       }
-
 
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -381,7 +392,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       messageCollectionMessenger.addMessage(chestTrajectoryMessage);
 
-      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper.getControllerCommunicator(), false);
+      drcSimulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
+      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper::publishToController, false);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -400,7 +412,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
       EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
-//      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
+      //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getPosition(), desiredFootPose.getOrientation(), scs);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0 + trajectoryTime);
@@ -439,11 +451,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       so3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSO3TrajectoryPointMessage(0.10, new Quaternion(), new Vector3D()));
       so3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSO3TrajectoryPointMessage(0.00, new Quaternion(), new Vector3D()));
 
-
-
-
       wholeBodyTrajectoryMessage.getChestTrajectoryMessage().set(chestTrajectoryMessage);
-      drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -460,13 +469,18 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
-      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
-      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
-      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.20, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
-      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
-      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                             .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                             .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                             .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.20, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                             .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+      pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                             .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().set(pelvisTrajectoryMessage);
-      drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);

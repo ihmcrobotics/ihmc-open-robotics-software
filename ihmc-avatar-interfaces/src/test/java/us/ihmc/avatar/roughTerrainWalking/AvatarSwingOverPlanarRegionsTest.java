@@ -145,7 +145,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
       Point3D rootJointPosition = new Point3D(2.81, 0.0, 0.83);

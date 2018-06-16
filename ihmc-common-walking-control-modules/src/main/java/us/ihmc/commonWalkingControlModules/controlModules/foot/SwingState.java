@@ -29,7 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -650,17 +650,23 @@ public class SwingState extends AbstractFootControlState
          }
       }
 
-      modifyFinalOrientationForTouchdown(finalOrientation);
-
       // append footstep pose if not provided in the waypoints
       if (appendFootstepPose)
       {
+         modifyFinalOrientationForTouchdown(finalOrientation);
          blendedSwingTrajectory.appendPositionWaypoint(swingDuration, finalPosition, finalLinearVelocity);
          blendedSwingTrajectory.appendOrientationWaypoint(swingDuration, finalOrientation, finalAngularVelocity);
       }
+      else
+      {
+         // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
+         FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
+         lastPoint.getPositionIncludingFrame(finalPosition);
+         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
+         lastPoint.getOrientationIncludingFrame(finalOrientation);
+      }
 
-      // setup touchdown trajectory
-      // TODO: revisit the touchdown velocity and accelerations
+      // Setup touchdown trajectory.
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 

@@ -46,7 +46,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
-   private final IMUYawDriftEstimator imuYawDriftEstimator;
+   private final YawDriftProvider imuYawDriftEstimator;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
@@ -58,7 +58,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, IMUYawDriftEstimator imuYawDriftEstimator, double dt, YoVariableRegistry parentRegistry)
+         IMUBiasProvider imuBiasProvider, YawDriftProvider imuYawDriftEstimator, double dt, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.imuYawDriftEstimator = imuYawDriftEstimator;

@@ -147,14 +147,14 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       TimingChecker timingChecker1 = new TimingChecker(scs, footstepMessage1, footstepMessage2);
       yoTime.addVariableChangedListener(timingChecker1);
 
-      drcSimulationTestHelper.send(footstepMessage1);
+      drcSimulationTestHelper.publishToController(footstepMessage1);
 
       boolean hasMessageBeenSent = false;
       while (!timingChecker1.isDone())
       {
          if(scs.getTime() > timeToSendSecondMessage && !hasMessageBeenSent)
          {
-            drcSimulationTestHelper.send(footstepMessage2);
+            drcSimulationTestHelper.publishToController(footstepMessage2);
             hasMessageBeenSent = true;
          }
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2));
@@ -282,7 +282,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(minimumTransferTime / 2.0));
       checkTransferTimes(scs, minimumTransferTime);
    }

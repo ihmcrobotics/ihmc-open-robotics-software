@@ -9,4 +9,4 @@ byte REQUEST_SOLE_WAYPOINT = 2
 uint32 sequence_id
 
 # Specifies the which state the controller should transition into.
-byte quadruped_stepping_state 255
+byte quadruped_stepping_requested_event 255

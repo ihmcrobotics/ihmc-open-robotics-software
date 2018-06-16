@@ -24,10 +24,10 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    }
 
    @Override
-   public void set(QuadrupedTimedStepMessage message)
+   public void setFromMessage(QuadrupedTimedStepMessage message)
    {
-      stepCommand.set(message.getQuadrupedStepMessage());
-      timeIntervalCommand.set(message.getTimeInterval());
+      stepCommand.setFromMessage(message.getQuadrupedStepMessage());
+      timeIntervalCommand.setFromMessage(message.getTimeInterval());
    }
 
    @Override

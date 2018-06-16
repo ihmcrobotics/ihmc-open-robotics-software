@@ -16,10 +16,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -35,7 +32,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
@@ -51,10 +48,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedSteppingState implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -193,8 +187,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
-            quadrupedSteppingStateChangeMessage.setInitialSteppingControllerName(fromByte);
-            quadrupedSteppingStateChangeMessage.setEndSteppingControllerName(toByte);
+            quadrupedSteppingStateChangeMessage.setInitialQuadrupedSteppingStateEnum(fromByte);
+            quadrupedSteppingStateChangeMessage.setEndQuadrupedSteppingStateEnum(toByte);
             statusMessageOutputManager.reportStatusMessage(quadrupedSteppingStateChangeMessage);
          }
       });
@@ -237,15 +231,21 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       // report footstep status message
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
-      controllerToolbox.getReferenceFrames().getSoleFrame(thisStepQuadrant).getTransformToDesiredFrame(tempTransform, worldFrame);
-      tempTransform.getTranslation(tempVector);
+      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
+      tempPoint.changeFrame(worldFrame);
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
 
+      footstepStatusMessage.setFootstepQuadrant(thisStepQuadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
       footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
-      footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempVector);
+      footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempPoint);
+      footstepStatusMessage.getDesiredTouchdownPositionInWorld().add(balanceManager.getStepAdjustment(thisStepQuadrant));
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
+
+      stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
+
+      balanceManager.completedStep(thisStepQuadrant);
    }
 
    @Override
@@ -331,7 +331,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // update controller state machine
       stateMachine.doActionAndTransition();
 
-      updateManagers();
+      jointSpaceManager.compute();
 
       handleChangeInContactState();
 
@@ -360,20 +360,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       statusMessageOutputManager.reportStatusMessage(groundPlaneMessage);
    }
 
-   private void updateManagers()
-   {
-      // update desired horizontal com forces
-      balanceManager.compute();
-
-      // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute();
-
-      // update desired contact state and sole forces
-      feetManager.compute();
-
-      jointSpaceManager.compute();
-   }
-
    private void handleChangeInContactState()
    {
       // update accumulated step adjustment
@@ -384,7 +370,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-         balanceManager.completedStep();
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

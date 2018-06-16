@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.List;
+import java.util.PriorityQueue;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
@@ -26,7 +27,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
@@ -696,6 +697,8 @@ public class ConvexPolygonTools
             return false; // No intersection.
          }
       }
+
+      PriorityQueue p;
 
       boolean success = constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
       return success;

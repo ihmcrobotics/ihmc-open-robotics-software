@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -42,7 +42,7 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(IDLSequence.Long.class);
       registerPacketField(IDLSequence.StringBuilderHolder.class);
       registerPacketField(TopicDataType.class);
-      registerPacketField(RecyclingArrayListPubSub.class);
+      registerPacketField(RecyclingArrayList.class);
       registerPacketField(us.ihmc.idl.CDR.class);
       registerPacketField(ArrayList.class);
 

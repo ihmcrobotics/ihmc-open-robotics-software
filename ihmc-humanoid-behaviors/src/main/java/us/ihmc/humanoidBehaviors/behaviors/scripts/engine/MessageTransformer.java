@@ -9,9 +9,9 @@ import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.idl.PreallocatedList;
 
 /**
  * This is an highly inefficient way of enabling the transformation of messages using a

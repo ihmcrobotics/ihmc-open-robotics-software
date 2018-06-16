@@ -24,7 +24,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistan
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class ClusterTools
 {

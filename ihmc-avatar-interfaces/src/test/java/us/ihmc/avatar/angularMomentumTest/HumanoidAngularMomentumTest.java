@@ -61,7 +61,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       footMessage.setFinalTransferDuration(defaultFinalTransferDuration);
       angularMomentumSpy.setFootstepList(footMessage);
       double testTime = numberOfFootstepsToTake * 2.0 + 1.0;
-      drcSimulationTestHelper.send(footMessage);
+      drcSimulationTestHelper.publishToController(footMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(testTime);
       destroySimulationAndRecycleMemory();
    }

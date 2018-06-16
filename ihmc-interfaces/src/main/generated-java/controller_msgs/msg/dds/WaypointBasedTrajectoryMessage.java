@@ -29,7 +29,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    {
       waypoint_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
-      waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, us.ihmc.euclid.geometry.Pose3D.class, new geometry_msgs.msg.dds.PosePubSubType());
+      waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();

@@ -128,7 +128,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       double timeUntilDone = totalTime;
       for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
       {
-         drcSimulationTestHelper.send(messages.get(messageIdx));
+         drcSimulationTestHelper.publishToController(messages.get(messageIdx));
          expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());

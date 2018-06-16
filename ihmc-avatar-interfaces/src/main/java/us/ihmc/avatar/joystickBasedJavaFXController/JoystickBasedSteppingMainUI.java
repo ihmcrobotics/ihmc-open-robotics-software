@@ -2,7 +2,6 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.io.IOException;
 
-import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -14,29 +13,20 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 
 public class JoystickBasedSteppingMainUI
 {
-   private static final String HOST = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
-   private static final NetworkPorts PORT = NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING;
-   private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
-
-   private final PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(HOST, PORT, NET_CLASS_LIST);
-
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -49,7 +39,7 @@ public class JoystickBasedSteppingMainUI
    @FXML
    private StepGeneratorParametersPaneController stepGeneratorParametersPaneController;
 
-   public JoystickBasedSteppingMainUI(Stage primaryStage, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
                                       HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
          throws Exception
@@ -70,7 +60,8 @@ public class JoystickBasedSteppingMainUI
       mainPane.setCenter(subScene);
 
       javaFXRobotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      packetCommunicator.attachListener(RobotConfigurationData.class, javaFXRobotVisualizer::submitNewConfiguration);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
       Translate rootJointOffset = new Translate();
@@ -89,7 +80,7 @@ public class JoystickBasedSteppingMainUI
          }
       };
 
-      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(messager, walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer,
+      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName, messager, walkingControllerParameters, ros2Node, javaFXRobotVisualizer,
                                                                         kickMessenger, punchMessenger, lowLevelMessenger);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
@@ -114,7 +105,6 @@ public class JoystickBasedSteppingMainUI
       javaFXRobotVisualizer.start();
       stepGeneratorJavaFXController.start();
       cameraTracking.start();
-      packetCommunicator.connect();
    }
 
    public void stop()
@@ -131,12 +121,6 @@ public class JoystickBasedSteppingMainUI
       javaFXRobotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
       cameraTracking.stop();
-      packetCommunicator.send(HumanoidMessageTools.createBDIBehaviorCommandPacket(true));
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      packetCommunicator.send(pauseWalkingMessage);
       ThreadTools.sleep(100); // Give some time to send the message.:
-      packetCommunicator.disconnect();
-      packetCommunicator.closeConnection();
    }
 }

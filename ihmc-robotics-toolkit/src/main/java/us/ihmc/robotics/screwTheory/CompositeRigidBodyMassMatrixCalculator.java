@@ -70,7 +70,6 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          RigidBody currentBody = allBodiesExceptRoot[bodyIndex];
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
          CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
-         GeometricJacobian motionSubspace = parentJoint.getMotionSubspace();
 
          setUnitMomenta(currentBodyInertia, parentJoint);
          setDiagonalTerm(bodyIndex, parentJoint);

@@ -67,7 +67,7 @@ public class ParameterLoaderHelper
       HashSet<String> unmatchedParameters = new HashSet<>();
       reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
 
-      if (!unmatchedParameters.isEmpty())
+      if (!unmatchedParameters.isEmpty() && !debugLoading)
       {
          String message = "I think something is off in your parameter file.";
          String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" +
@@ -78,6 +78,7 @@ public class ParameterLoaderHelper
 
       if (debugLoading)
       {
+         PrintTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
          PrintTools.info("\n---> Unmatched in XML <---");
          unmatchedParameters.forEach(parameter -> PrintTools.info(parameter));
          PrintTools.info("\n---> Default Values: <---");

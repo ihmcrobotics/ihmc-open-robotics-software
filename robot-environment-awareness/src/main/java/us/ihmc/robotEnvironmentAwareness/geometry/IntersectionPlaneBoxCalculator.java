@@ -1,14 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gnu.trove.list.array.TDoubleArrayList;
 import javafx.util.Pair;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class IntersectionPlaneBoxCalculator
 {
@@ -78,7 +78,7 @@ public class IntersectionPlaneBoxCalculator
 
    private final Vector3D edgeVector = new Vector3D();
    private final Vector3D fromPlaneCenterToEdgeStart = new Vector3D();
-   private final RecyclingArrayList<Point3D> unorderedIntersections = new RecyclingArrayList<>(GenericTypeBuilder.createBuilderWithEmptyConstructor(Point3D.class));
+   private final RecyclingArrayList<Point3D> unorderedIntersections = new RecyclingArrayList<>(0, SupplierBuilder.createFromEmptyConstructor(Point3D.class));
 
    public List<Point3D> computeIntersections()
    {

@@ -139,7 +139,7 @@
   </library_lights>
   <library_images>
     <image id="whiteTexture_png">
-      <init_from>./images/0_whiteTexture.png</init_from>
+      <init_from>./images/WhiteTexture.png</init_from>
     </image>
   </library_images>
   <library_visual_scenes>

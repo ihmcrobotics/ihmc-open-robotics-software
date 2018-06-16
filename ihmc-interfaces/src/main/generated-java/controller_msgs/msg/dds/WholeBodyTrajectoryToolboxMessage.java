@@ -24,9 +24,9 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    public WholeBodyTrajectoryToolboxMessage()
    {
       configuration_ = new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage();
-      end_effector_trajectories_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage> (10, controller_msgs.msg.dds.WaypointBasedTrajectoryMessage.class, new controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType());
-      exploration_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage> (10, controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage.class, new controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType());
-      reaching_manifolds_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ReachingManifoldMessage> (10, controller_msgs.msg.dds.ReachingManifoldMessage.class, new controller_msgs.msg.dds.ReachingManifoldMessagePubSubType());
+      end_effector_trajectories_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage> (10, new controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType());
+      exploration_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage> (10, new controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType());
+      reaching_manifolds_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ReachingManifoldMessage> (10, new controller_msgs.msg.dds.ReachingManifoldMessagePubSubType());
 
    }
 

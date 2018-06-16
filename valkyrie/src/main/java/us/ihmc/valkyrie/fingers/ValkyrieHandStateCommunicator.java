@@ -1,70 +1,46 @@
 package us.ihmc.valkyrie.fingers;
 
 import java.util.EnumMap;
-import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieHandStateCommunicator implements RobotController
 {
-   private final PeriodicRealtimeThreadScheduler scheduler;
-   private final SideDependentList<ConcurrentRingBuffer<HandJointAnglePacket>> packetBuffers = new SideDependentList<>();
-   private final SideDependentList<HandJointAnglePacket> packetsForPublish = new SideDependentList<>();
-
    private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> handJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private final PacketCommunicator packetCommunicator;
 
-   private boolean isRunning = false;
+   private final HandJointAnglePacket packet;
+   private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
 
-   public ValkyrieHandStateCommunicator(FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, PacketCommunicator packetCommunicator, PeriodicRealtimeThreadScheduler scheduler)
+   public ValkyrieHandStateCommunicator(String robotName, FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, RealtimeRos2Node realtimeRos2Node)
    {
-      this.packetCommunicator = packetCommunicator;
-      this.scheduler = scheduler;
+      publisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
 
       for (RobotSide robotside : RobotSide.values)
       {
-         HandJointAnglePacketBuilder builder = new HandJointAnglePacketBuilder();
-         packetsForPublish.put(robotside, builder.newInstance());
-         packetBuffers.put(robotside, new ConcurrentRingBuffer<>(builder, 4));
-
          for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {
             OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotside));
             handJoints.get(robotside).put(jointEnum, joint);
          }
       }
-   }
 
-   public void start()
-   {
-      if (isRunning)
-         return;
-
-      scheduler.schedule(this::publish, 10, TimeUnit.MILLISECONDS);
-      isRunning = true;
-   }
-
-   public void stop()
-   {
-      scheduler.shutdown();
-      isRunning = false;
+      packet = HumanoidMessageTools.createHandJointAnglePacket(null, false, false, new double[ValkyrieHandJointName.values.length]);
    }
 
    @Override
    public void initialize()
    {
-      start();
    }
 
    @Override
@@ -72,46 +48,15 @@ public class ValkyrieHandStateCommunicator implements RobotController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ConcurrentRingBuffer<HandJointAnglePacket> buffer = packetBuffers.get(robotSide);
-         HandJointAnglePacket packet = buffer.next();
-         if (packet != null)
+         packet.setRobotSide(robotSide.toByte());
+         packet.getJointAngles().reset();
+
+         for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {
-            packet.setRobotSide(robotSide.toByte());
-            packet.getJointAngles().reset();
-
-            for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
-            {
-               double q = handJoints.get(robotSide).get(jointEnum).getQ();
-               packet.getJointAngles().add(q);
-            }
-            buffer.commit();
+            double q = handJoints.get(robotSide).get(jointEnum).getQ();
+            packet.getJointAngles().add(q);
          }
-      }
-   }
-
-   private void publish()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ConcurrentRingBuffer<HandJointAnglePacket> buffer = packetBuffers.get(robotSide);
-
-         if (buffer.poll())
-         {
-            boolean hasPacketToPublish = false;
-            HandJointAnglePacket packet;
-
-            while ((packet = buffer.read()) != null)
-            {
-               hasPacketToPublish = true;
-               packetsForPublish.get(robotSide).set(packet);
-            }
-            buffer.flush();
-
-            if (hasPacketToPublish)
-            {
-               packetCommunicator.send(packetsForPublish.get(robotSide));
-            }
-         }
+         publisher.publish(packet);
       }
    }
 
@@ -131,15 +76,5 @@ public class ValkyrieHandStateCommunicator implements RobotController
    public YoVariableRegistry getYoVariableRegistry()
    {
       return null;
-   }
-
-   private class HandJointAnglePacketBuilder implements Builder<HandJointAnglePacket>
-   {
-      @Override
-      public HandJointAnglePacket newInstance()
-      {
-         double[] handJoints = new double[ValkyrieHandJointName.values.length];
-         return HumanoidMessageTools.createHandJointAnglePacket(null, false, false, handJoints);
-      }
    }
 }

@@ -25,8 +25,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyControllerCore
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry,
-                                                                                                WholeBodyControllerCoreMode.class);
+   private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final YoInteger numberOfFBControllerEnabled = new YoInteger("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
@@ -41,6 +40,11 @@ public class WholeBodyControllerCore
    private OneDoFJoint[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   {
+      this(toolbox, allPossibleCommands, null, parentRegistry);
+   }
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
                                   JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
@@ -284,29 +288,29 @@ public class WholeBodyControllerCore
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-//         System.out.println("Checking " + joint.getName());
+         //         System.out.println("Checking " + joint.getName());
 
          // Zero out joint for testing purposes
          joint.setqDesired(Double.NaN);
          joint.setQdDesired(Double.NaN);
          joint.setQddDesired(Double.NaN);
          joint.setTau(Double.NaN);
-         
-         if(joint.getKp() != 0.0)
+
+         if (joint.getKp() != 0.0)
          {
             throw new RuntimeException(joint.toString() + " is not zero kp " + joint.getKp() + " - function is removed");
          }
-         if(joint.getKd() != 0.0)
+         if (joint.getKd() != 0.0)
          {
             throw new RuntimeException(joint.toString() + " is not zero kd " + joint.getKd() + " - function is removed");
          }
-         
-         if(joint.isUnderPositionControl())
+
+         if (joint.isUnderPositionControl())
          {
             throw new RuntimeException(joint.toString() + " is under position control - function is removed");
          }
-         
-         if(!joint.isUseFeedBackForceControl())
+
+         if (!joint.isUseFeedBackForceControl())
          {
             throw new RuntimeException(joint.toString() + " disabled feedback force control - function is removed");
          }

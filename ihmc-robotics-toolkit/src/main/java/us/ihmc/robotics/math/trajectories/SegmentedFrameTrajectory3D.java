@@ -1,14 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
-import java.util.List;
-
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * <p>Provides a basic frame work to create and access a list of {@link FrameTrajectory3D}. 
@@ -43,6 +46,13 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       currentSegmentIndex = -1;
       segments = new RecyclingArrayList<>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
+
+      /*
+       * FIXME Workaround to deal with a change of RecyclingArrayList that used to start with size()
+       * == initialCapacity. This change causes the test ReferenceCMPTrajectoryGeneratorTest.
+       */
+      while (segments.size() < maxNumberOfSegments)
+         segments.add();
    }
 
    public void reset()
@@ -97,6 +107,9 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
 
    public List<FrameTrajectory3D> getSegments()
    {
+      Collection<FrameTrajectory3D> c = new ArrayList<FrameTrajectory3D>();
+      Collections.unmodifiableCollection(null);
+
       return segments;
    }
 
@@ -219,10 +232,10 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       return ret;
    }
 
-   private class FrameTrajectory3DBuilder extends GenericTypeBuilder<FrameTrajectory3D>
+   private class FrameTrajectory3DBuilder implements Supplier<FrameTrajectory3D>
    {
       @Override
-      public FrameTrajectory3D newInstance()
+      public FrameTrajectory3D get()
       {
          FrameTrajectory3D frameTrajectory3D = new FrameTrajectory3D(maxNumberOfCoefficients, worldFrame);
          frameTrajectory3D.reset();

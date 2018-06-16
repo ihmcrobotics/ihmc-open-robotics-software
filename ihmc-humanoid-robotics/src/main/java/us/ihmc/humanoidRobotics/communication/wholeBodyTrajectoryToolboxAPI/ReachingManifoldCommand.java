@@ -69,7 +69,7 @@ public class ReachingManifoldCommand
    }
 
    @Override
-   public void set(ReachingManifoldMessage message)
+   public void setFromMessage(ReachingManifoldMessage message)
    {
       set(message, null, null);
    }

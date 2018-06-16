@@ -39,8 +39,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegme
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 
 /**
  * Created by adrien on 11/21/16.
@@ -75,7 +75,7 @@ public class OcTreeMeshBuilder implements Runnable
 
    private final TextureColorPalette1D normalBasedColorPalette1D = new TextureColorPalette1D();
 
-   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(GenericTypeBuilder.createBuilderWithEmptyConstructor(Point3D.class));
+   private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(0, SupplierBuilder.createFromEmptyConstructor(Point3D.class));
    private final IntersectionPlaneBoxCalculator intersectionPlaneBoxCalculator = new IntersectionPlaneBoxCalculator();
 
    private final AtomicReference<NormalOcTreeMessage> ocTreeState;

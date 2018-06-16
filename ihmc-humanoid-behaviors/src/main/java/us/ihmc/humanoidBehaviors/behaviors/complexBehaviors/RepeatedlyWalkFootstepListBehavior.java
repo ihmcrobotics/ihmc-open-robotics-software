@@ -8,16 +8,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,15 +48,16 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public RepeatedlyWalkFootstepListBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames,
-                                             YoVariableRegistry parentRegistry)
+   public RepeatedlyWalkFootstepListBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
-      super(communicationBridge);
+      super(robotName, ros2Node);
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      communicationBridge.attachListener(FootstepStatusMessage.class, footstepStatusMessage::set);
+      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusMessage::set);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
 
       walkingForward.set(true);
       initialSwingSide.set(defaultInitialSwingSide);
@@ -76,7 +78,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       computeForwardFootstepList();
       computeBackwardFootstepList();
 
-      sendPacket(forwardFootstepList);
+      footstepPublisher.publish(forwardFootstepList);
       walkingForward.set(true);
       stepsAlongPath.set(0);
    }
@@ -89,7 +91,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       for (int i = 0; i < numberOfStepsToTake.getIntegerValue(); i++)
       {
-         FootstepDataMessage footstepDataMessage = constructFootstepDataMessage(midFootZUpFrame, footstepLength.getDoubleValue() * (i + 1), 0.5 * swingSide.negateIfRightSide(footstepWidth.getDoubleValue()), swingSide);
+         FootstepDataMessage footstepDataMessage = constructFootstepDataMessage(midFootZUpFrame, footstepLength.getDoubleValue() * (i + 1),
+                                                                                0.5 * swingSide.negateIfRightSide(footstepWidth.getDoubleValue()), swingSide);
          forwardFootstepList.getFootstepDataList().add().set(footstepDataMessage);
 
          swingSide = swingSide.getOppositeSide();
@@ -115,8 +118,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       Collections.reverse(footstepDataList);
 
       RobotSide initialStanceSide = initialSwingSide.getEnumValue().getOppositeSide();
-      FootstepDataMessage initialStanceFoot = constructFootstepDataMessage(soleFrames.get(initialStanceSide), 0.0, 0.0,
-                                                                           initialStanceSide);
+      FootstepDataMessage initialStanceFoot = constructFootstepDataMessage(soleFrames.get(initialStanceSide), 0.0, 0.0, initialStanceSide);
       footstepDataList.add(initialStanceFoot);
       MessageTools.copyData(footstepDataList, backwardFootstepList.getFootstepDataList());
 
@@ -143,35 +145,35 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if(isDone())
+      if (isDone())
       {
          return;
       }
 
       FootstepStatusMessage footstepStatus = this.footstepStatusMessage.getAndSet(null);
-      if(footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+      if (footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
          stepsAlongPath.increment();
       }
 
-      if(stepsAlongPath.getIntegerValue() == forwardFootstepList.getFootstepDataList().size())
+      if (stepsAlongPath.getIntegerValue() == forwardFootstepList.getFootstepDataList().size())
       {
          stepsAlongPath.set(0);
 
-         if(walkingForward.getBooleanValue())
+         if (walkingForward.getBooleanValue())
          {
-            sendPacket(backwardFootstepList);
+            footstepPublisher.publish(backwardFootstepList);
             walkingForward.set(false);
          }
          else
          {
             iterationCounter.increment();
-            if(isDone())
+            if (isDone())
             {
                return;
             }
 
-            sendPacket(forwardFootstepList);
+            footstepPublisher.publish(forwardFootstepList);
             walkingForward.set(true);
          }
       }

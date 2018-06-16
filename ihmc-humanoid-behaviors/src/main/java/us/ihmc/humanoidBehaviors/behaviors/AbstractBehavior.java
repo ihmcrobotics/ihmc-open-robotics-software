@@ -3,45 +3,53 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.commons.FormattingTools;
 
 /**
- * Any behavior needs to implement this abstract class.
- * It helps in setting up the communications to receive and send packets to the other modules as the controller or the network processor.
+ * Any behavior needs to implement this abstract class. It helps in setting up the communications to
+ * receive and send packets to the other modules as the controller or the network processor.
  *
  */
 public abstract class AbstractBehavior implements RobotController
 {
-   private final boolean DEBUG = false;
-
    public static enum BehaviorStatus
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
 
-   protected final CommunicationBridge communicationBridge;
+   protected final Ros2Node ros2Node;
+   private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
    protected final String behaviorName;
 
    /**
-    * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
+    * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be
+    * visualized in SCS.
     */
    protected final YoVariableRegistry registry;
 
@@ -52,15 +60,24 @@ public abstract class AbstractBehavior implements RobotController
    protected final YoDouble percentCompleted;
 
    private final List<BehaviorService> behaviorsServices;
+   private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   protected final String robotName;
 
-   public AbstractBehavior(CommunicationBridgeInterface communicationBridge)
+   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+
+   protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
+   protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
+
+   public AbstractBehavior(String robotName, Ros2Node ros2Node)
    {
-      this(null, communicationBridge);
+      this(robotName, null, ros2Node);
    }
 
-   public AbstractBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge)
+   public AbstractBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
    {
-      this.communicationBridge = (CommunicationBridge) communicationBridge;
+      this.robotName = robotName;
+      this.ros2Node = ros2Node;
 
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
@@ -72,30 +89,72 @@ public abstract class AbstractBehavior implements RobotController
       percentCompleted = new YoDouble("percentCompleted", registry);
 
       behaviorsServices = new ArrayList<>();
+
+      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
+      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+
+      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      behaviorSubGenerator = IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName);
+      behaviorPubGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
+
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
-   public void sendPacketToController(Packet<?> obj)
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      communicationBridge.sendPacketToController(obj);
+      return createPublisher(messageType, controllerSubGenerator);
    }
 
-   public void sendPacket(Packet<?> obj)
+   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
-      communicationBridge.sendPacket(obj);
+      return createPublisher(messageType, behaviorPubGenerator);
    }
 
-   public void sendPacketToUI(Packet<?> obj)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
-      communicationBridge.sendPacketToUI(obj);
+      return createPublisher(messageType, topicNameGenerator.generateTopicName(messageType));
    }
 
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue<?> queue, Class<?> key)
+   @SuppressWarnings("unchecked")
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
    {
-      if (!localListeningNetworkQueues.containsKey(key))
-      {
-         localListeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue<?>>());
-      }
-      localListeningNetworkQueues.get(key).add(queue);
+      MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
+      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
+
+      if (publisher != null)
+         return publisher;
+
+      publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+      publishers.put(key, publisher);
+      return publisher;
+   }
+
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, controllerPubGenerator, consumer);
+   }
+
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, behaviorSubGenerator, consumer);
+   }
+
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, String topicSuffix, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
@@ -117,8 +176,6 @@ public abstract class AbstractBehavior implements RobotController
          behaviorService.run();
       }
 
-      addAllLocalListenersToCommunicationBridge();
-
       onBehaviorEntered();
    }
 
@@ -131,8 +188,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Aborting Behavior");
-      sendPacket(p1);
+      publishTextToSpeack("Aborting Behavior");
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
@@ -145,13 +201,13 @@ public abstract class AbstractBehavior implements RobotController
    public abstract void onBehaviorAborted();
 
    /**
-    * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
-    * The behavior should be resumable.
+    * The implementation of this method should result in pausing the behavior (pause current action
+    * and no more actions sent to the controller, the robot remains still). The behavior should be
+    * resumable.
     */
    public final void pause()
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Pausing Behavior");
-      sendPacket(p1);
+      publishTextToSpeack("Pausing Behavior");
       isPaused.set(true);
 
       for (BehaviorService behaviorService : behaviorsServices)
@@ -170,8 +226,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void resume()
    {
-      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Resuming Behavior");
-      sendPacket(p1);
+      publishTextToSpeack("Resuming Behavior");
       isPaused.set(false);
       isPaused.set(false);
 
@@ -181,6 +236,11 @@ public abstract class AbstractBehavior implements RobotController
       }
 
       onBehaviorResumed();
+   }
+
+   public void publishTextToSpeack(String textToSpeak)
+   {
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
 
    public abstract void onBehaviorResumed();
@@ -198,8 +258,6 @@ public abstract class AbstractBehavior implements RobotController
          behaviorService.pause();
       }
 
-      removeAllLocalListenersFromCommunicationBridge();
-
       onBehaviorExited();
    }
 
@@ -207,6 +265,7 @@ public abstract class AbstractBehavior implements RobotController
 
    /**
     * Only method to check if the behavior is done.
+    * 
     * @return
     */
    public abstract boolean isDone();
@@ -216,48 +275,9 @@ public abstract class AbstractBehavior implements RobotController
       return isPaused.getBooleanValue() || isAborted.getBooleanValue();
    }
 
-   private void addAllLocalListenersToCommunicationBridge()
-   {
-      if (DEBUG)
-      {
-         System.out.println("***************************************************************************");
-         System.out.println("AbstractBehavior " + behaviorName + " addAllLocalListenersToCommunicationBridge");
-      }
-      for (Class<?> key : localListeningNetworkQueues.keySet())
-      {
-         for (ConcurrentListeningQueue<?> queue : localListeningNetworkQueues.get(key))
-         {
-            if (DEBUG)
-               System.out.println("-- adding listener for " + key);
-            communicationBridge.attachNetworkListeningQueue(queue, key);
-         }
-      }
-   }
-
-   private void removeAllLocalListenersFromCommunicationBridge()
-   {
-      if (DEBUG)
-      {
-         System.out.println("--------------------------------------------------------------------------------");
-         System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
-      }
-      for (Class<?> key : localListeningNetworkQueues.keySet())
-      {
-         for (ConcurrentListeningQueue<?> queue : localListeningNetworkQueues.get(key))
-         {
-            communicationBridge.detachNetworkListeningQueue(queue, key);
-         }
-      }
-   }
-
    public BehaviorStatus getBehaviorStatus()
    {
       return yoBehaviorStatus.getEnumValue();
-   }
-
-   public CommunicationBridge getCommunicationBridge()
-   {
-      return communicationBridge;
    }
 
    public CoactiveElement getCoactiveElement()
@@ -281,5 +301,36 @@ public abstract class AbstractBehavior implements RobotController
    public String getDescription()
    {
       return this.getClass().getCanonicalName();
+   }
+
+   public static class MessageTopicPair<T> extends Pair<Class<T>, String>
+   {
+      private static final long serialVersionUID = 7511864115932037512L;
+      private final Class<T> messageType;
+      private final String topicName;
+
+      public MessageTopicPair(Class<T> messageType, String topicName)
+      {
+         this.messageType = messageType;
+         this.topicName = topicName;
+      }
+
+      @Override
+      public Class<T> getLeft()
+      {
+         return messageType;
+      }
+
+      @Override
+      public String getRight()
+      {
+         return topicName;
+      }
+
+      @Override
+      public String setValue(String value)
+      {
+         throw new UnsupportedOperationException();
+      }
    }
 }

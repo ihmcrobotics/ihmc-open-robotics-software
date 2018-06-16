@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;

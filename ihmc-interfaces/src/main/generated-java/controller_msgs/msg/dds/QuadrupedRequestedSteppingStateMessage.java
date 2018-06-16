@@ -22,7 +22,7 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    /**
             * Specifies the which state the controller should transition into.
             */
-   public byte quadruped_stepping_state_ = (byte) 255;
+   public byte quadruped_stepping_requested_event_ = (byte) 255;
 
    public QuadrupedRequestedSteppingStateMessage()
    {
@@ -38,7 +38,7 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    {
       sequence_id_ = other.sequence_id_;
 
-      quadruped_stepping_state_ = other.quadruped_stepping_state_;
+      quadruped_stepping_requested_event_ = other.quadruped_stepping_requested_event_;
 
    }
 
@@ -60,16 +60,16 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    /**
             * Specifies the which state the controller should transition into.
             */
-   public void setQuadrupedSteppingState(byte quadruped_stepping_state)
+   public void setQuadrupedSteppingRequestedEvent(byte quadruped_stepping_requested_event)
    {
-      quadruped_stepping_state_ = quadruped_stepping_state;
+      quadruped_stepping_requested_event_ = quadruped_stepping_requested_event;
    }
    /**
             * Specifies the which state the controller should transition into.
             */
-   public byte getQuadrupedSteppingState()
+   public byte getQuadrupedSteppingRequestedEvent()
    {
-      return quadruped_stepping_state_;
+      return quadruped_stepping_requested_event_;
    }
 
 
@@ -92,7 +92,7 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_stepping_state_, other.quadruped_stepping_state_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_stepping_requested_event_, other.quadruped_stepping_requested_event_, epsilon)) return false;
 
 
       return true;
@@ -109,7 +109,7 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.quadruped_stepping_state_ != otherMyClass.quadruped_stepping_state_) return false;
+      if(this.quadruped_stepping_requested_event_ != otherMyClass.quadruped_stepping_requested_event_) return false;
 
 
       return true;
@@ -123,8 +123,8 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
       builder.append("QuadrupedRequestedSteppingStateMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("quadruped_stepping_state=");
-      builder.append(this.quadruped_stepping_state_);
+      builder.append("quadruped_stepping_requested_event=");
+      builder.append(this.quadruped_stepping_requested_event_);
       builder.append("}");
       return builder.toString();
    }

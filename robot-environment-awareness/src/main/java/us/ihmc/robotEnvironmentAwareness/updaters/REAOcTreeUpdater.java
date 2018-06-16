@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -42,7 +41,7 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, Messager reaMessager, PacketCommunicator publicPacketCommunicator)
+   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer buffer, Messager reaMessager)
    {
       this.referenceOctree = octree;
       reaOcTreeBuffer = buffer;
@@ -60,8 +59,6 @@ public class REAOcTreeUpdater
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
-
-      publicPacketCommunicator.attachListener(LidarScanMessage.class, this::handlePacket);
 
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
    }
@@ -191,8 +188,8 @@ public class REAOcTreeUpdater
       referenceOctree.setBoundingBox(boundingBox);
    }
 
-   private void handlePacket(LidarScanMessage lidarScanMessage)
+   public void handleLidarScanMessage(LidarScanMessage message)
    {
-      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.getLidarPosition(), lidarScanMessage.getLidarOrientation()));
+      latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
    }
 }

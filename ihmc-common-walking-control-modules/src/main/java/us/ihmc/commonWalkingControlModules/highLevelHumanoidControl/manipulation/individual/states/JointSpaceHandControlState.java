@@ -11,8 +11,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
@@ -77,7 +77,7 @@ public class JointSpaceHandControlState extends HandControlState
          jointTrajectoryGenerators.put(joint, multiWaypointTrajectoryGenerator);
 
          numberOfQueuedCommands.put(joint, new YoInteger(joint.getName() + "NumberOfQueuedCommands", registry));
-         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class));
+         commandQueues.put(joint, new RecyclingArrayDeque<>(OneDoFJointTrajectoryCommand.class, OneDoFJointTrajectoryCommand::set));
       }
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);

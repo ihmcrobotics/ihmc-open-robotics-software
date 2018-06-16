@@ -1,8 +1,12 @@
 package us.ihmc.quadrupedRobotics.planning.bodyPath;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -10,20 +14,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBodyPathProvider
 {
@@ -45,7 +46,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    private final ReferenceFrame supportFrame;
    private final FramePose3D supportPose = new FramePose3D();
 
-   public QuadrupedWaypointBasedBodyPathProvider(QuadrupedReferenceFrames referenceFrames, PacketCommunicator packetCommunicator, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedWaypointBasedBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, Ros2Node ros2Node, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.timestamp = timestamp;
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
@@ -75,7 +76,8 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
       }
 
-      packetCommunicator.attachListener(QuadrupedBodyPathPlanMessage.class, bodyPathPlanMessage::set);
+      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedBodyPathPlanMessage.class, publisherTopicNameGenerator, s -> bodyPathPlanMessage.set(s.takeNextData()));
       parentRegistry.addChild(registry);
    }
 

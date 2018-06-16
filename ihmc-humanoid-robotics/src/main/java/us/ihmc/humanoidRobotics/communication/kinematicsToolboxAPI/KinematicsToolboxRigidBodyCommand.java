@@ -49,7 +49,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    }
 
    @Override
-   public void set(KinematicsToolboxRigidBodyMessage message)
+   public void setFromMessage(KinematicsToolboxRigidBodyMessage message)
    {
       set(message, null, null);
    }

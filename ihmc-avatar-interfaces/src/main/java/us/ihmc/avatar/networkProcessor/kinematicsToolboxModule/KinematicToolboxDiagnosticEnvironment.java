@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,16 +10,17 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -37,6 +37,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class KinematicToolboxDiagnosticEnvironment
 {
    private final String threadName = "NonRealtimeScheduler";
+   private final RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
 
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
@@ -45,8 +46,7 @@ public class KinematicToolboxDiagnosticEnvironment
       HumanoidFloatingRootJointRobot humanoidFloatingRobotModel = drcRobotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = drcRobotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       robotInitialSetup.initializeRobot(humanoidFloatingRobotModel, jointMap);
-      SDFPerfectSimulatedSensorReader sdfPerfectReader = new SDFPerfectSimulatedSensorReader(humanoidFloatingRobotModel, humanoidFullRobotModel,
-                                                                                             null);
+      SDFPerfectSimulatedSensorReader sdfPerfectReader = new SDFPerfectSimulatedSensorReader(humanoidFloatingRobotModel, humanoidFullRobotModel, null);
       sdfPerfectReader.read();
 
       ForceSensorDefinition[] forceSensorDefinitionArray = humanoidFullRobotModel.getForceSensorDefinitions();
@@ -54,27 +54,15 @@ public class KinematicToolboxDiagnosticEnvironment
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitionList);
       JointConfigurationGatherer jointConfigurationGatherer = new JointConfigurationGatherer(humanoidFullRobotModel, forceSensorDataHolder);
 
-      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
-      try
-      {
-         controllerPacketCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
       AuxiliaryRobotDataProvider auxiliaryRobotDataProvider = initializeAuxiliaryRobotDataProvider();
-      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-      PeriodicNonRealtimeThreadScheduler scheduler1 = new PeriodicNonRealtimeThreadScheduler(threadName);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
       final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
-                                                                     dataProducer, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
-                                                                     robotMotionStatusFromController, sensorInformation, scheduler1, netClassList);
+                                                                           publisherTopicNameGenerator, realtimeRos2Node, sensorOutputMapReadOnly,
+                                                                           sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
       scheduler2.schedule(new Runnable()
       {
@@ -91,6 +79,7 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
+      parameters.setEnableJoystickBasedStepping(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
@@ -157,7 +146,7 @@ public class KinematicToolboxDiagnosticEnvironment
          @Override
          public List<? extends IMUSensorReadOnly> getIMURawOutputs()
          {
-            return Collections.<IMUSensorReadOnly>emptyList();
+            return Collections.<IMUSensorReadOnly> emptyList();
          }
 
          @Override

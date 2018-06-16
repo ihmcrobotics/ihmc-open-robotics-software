@@ -89,11 +89,11 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
@@ -108,11 +108,11 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
@@ -130,12 +130,12 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
 
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
@@ -152,12 +152,12 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
-      drcSimulationTestHelper.send(pauseWalkingMessage);
+      drcSimulationTestHelper.publishToController(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
@@ -175,7 +175,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
                   footstepMessage);
       footstepMessage.setFinalTransferDuration(getFinalTransferDuration());
-      drcSimulationTestHelper.send(footstepMessage);
+      drcSimulationTestHelper.publishToController(footstepMessage);
    }
 
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)

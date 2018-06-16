@@ -45,7 +45,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -303,7 +303,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(FootstepDataMessage.class);
       netClassList.registerPacketField(FootstepDataMessage[].class);
       netClassList.registerPacketField(Class.class);
-      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(RecyclingArrayList.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
@@ -328,7 +328,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(IDLSequence.Long.class);
       netClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
       netClassList.registerPacketField(TopicDataType.class);
-      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(RecyclingArrayList.class);
       netClassList.registerPacketField(us.ihmc.idl.CDR.class);
       netClassList.registerPacketField(PointPubSubType.class);
       netClassList.registerPacketField(SE3TrajectoryMessagePubSubType.class);
