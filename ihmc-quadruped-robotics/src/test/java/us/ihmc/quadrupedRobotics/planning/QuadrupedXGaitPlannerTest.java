@@ -8,10 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedConstantVelocityBodyPathProvider;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedPlanarBodyPathProvider;
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.QuadrupedStepSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPlanarFootstepPlan;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -29,8 +26,6 @@ public class QuadrupedXGaitPlannerTest
    public void testInitialForwardVelocityPlan()
    {
       ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
-      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
-      xGaitPlanner.setStepSnapper((x, y) -> 0.0);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.25);
@@ -38,6 +33,11 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setStepDuration(0.25);
       xGaitSettings.setEndDoubleSupportDuration(0);
       xGaitSettings.setEndPhaseShift(90);
+      QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
+
+      xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
+
+
 
       RobotQuadrant initialStepQuadrant = RobotQuadrant.HIND_RIGHT;
       FramePoint3D supportCentroidAtSoS = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -47,7 +47,7 @@ public class QuadrupedXGaitPlannerTest
       QuadrupedPlanarFootstepPlan footstepPlan = new QuadrupedPlanarFootstepPlan(4);
       bodyPathProvider.initialPose.setToZero(ReferenceFrame.getWorldFrame());
       bodyPathProvider.desiredForwardMotion = 1.0;
-      xGaitPlanner.computeInitialPlan(footstepPlan, initialStepQuadrant, timeAtSoS, xGaitSettings);
+      xGaitPlanner.computeInitialPlan(footstepPlan, initialStepQuadrant, timeAtSoS);
 
       ArrayList<QuadrupedTimedOrientedStep> nominalSteps = new ArrayList<>();
       for (int i = 0; i < 4; i++)
@@ -92,8 +92,6 @@ public class QuadrupedXGaitPlannerTest
       public void testOnlineForwardVelocityPlan()
       {
          ForwardMotionBodyPathProvider bodyPathProvider = new ForwardMotionBodyPathProvider();
-         QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider);
-         xGaitPlanner.setStepSnapper((x, y) -> 0.0);
          QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
          xGaitSettings.setStanceLength(1.0);
          xGaitSettings.setStanceWidth(0.25);
@@ -101,6 +99,8 @@ public class QuadrupedXGaitPlannerTest
          xGaitSettings.setStepDuration(0.25);
          xGaitSettings.setEndDoubleSupportDuration(0);
          xGaitSettings.setEndPhaseShift(90);
+         QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
+         xGaitPlanner.setStepSnapper((x, y) -> new Point3D(x, y, 0.0));
 
          double currentTime = 0.125;
          double currentYaw = 0.0;
@@ -127,7 +127,7 @@ public class QuadrupedXGaitPlannerTest
 
          bodyPathProvider.initialPose.setToZero(ReferenceFrame.getWorldFrame());
          bodyPathProvider.desiredForwardMotion = 1.0;
-         xGaitPlanner.computeOnlinePlan(footstepPlan, currentTime, xGaitSettings);
+         xGaitPlanner.computeOnlinePlan(footstepPlan, currentTime);
 
          ArrayList<QuadrupedTimedStep> nominalSteps = new ArrayList<>();
          for (int i = 0; i < 2; i++)

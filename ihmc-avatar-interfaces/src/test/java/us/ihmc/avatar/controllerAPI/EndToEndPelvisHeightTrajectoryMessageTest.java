@@ -77,7 +77,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
 
-      drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 + trajectoryTime);
       assertTrue(success);
@@ -136,7 +136,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());
 
       pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
-      drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
@@ -185,7 +185,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          // Move pelvis through message
          double desiredHeight = initialPelvisHeight + offset2;
          PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight);
-         drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());

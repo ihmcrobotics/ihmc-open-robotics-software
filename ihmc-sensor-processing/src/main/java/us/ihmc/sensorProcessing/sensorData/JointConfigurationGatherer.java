@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -102,7 +102,7 @@ public class JointConfigurationGatherer
       jointConfigurationData.setTimestamp(timestamp);
       jointConfigurationData.setSensorHeadPpsTimestamp(sensorHeadPPSTimestamp);
 
-      RecyclingArrayListPubSub<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
+      RecyclingArrayList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
       momentAndForceDataAllForceSensors.clear();
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)

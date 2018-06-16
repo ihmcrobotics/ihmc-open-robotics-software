@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,6 +42,7 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble frozenOffsetDecayAlpha = new YoDouble("frozenOffsetDecayAlpha", registry);
 
    private final YoFramePoint2D desiredPelvisPosition = new YoFramePoint2D("desiredPelvis", worldFrame, registry);
+   private final YoFramePoint2D currentPelvisPosition = new YoFramePoint2D("currentPelvis", worldFrame, registry);
 
    private final YoDouble initialPelvisPositionTime = new YoDouble("initialPelvisPositionTime", registry);
 
@@ -88,13 +89,13 @@ public class PelvisICPBasedTranslationManager
 
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class);
+   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class, PelvisTrajectoryCommand::set);
 
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(pelvisTranslationICPSupportPolygonSafeMargin);
       frozenOffsetDecayAlpha.set(0.998);
-      
+
       yoTime = controllerToolbox.getYoTime();
       controlDT = controllerToolbox.getControlDT();
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
@@ -134,6 +135,10 @@ public class PelvisICPBasedTranslationManager
 
    public void compute(RobotSide supportLeg, FramePoint2D actualICP)
    {
+      tempPosition2d.setToZero(pelvisZUpFrame);
+      tempPosition2d.changeFrame(worldFrame);
+      currentPelvisPosition.set(tempPosition2d);
+
       if (isFrozen.getBooleanValue())
       {
          icpOffsetForFreezing.scale(frozenOffsetDecayAlpha.getDoubleValue());

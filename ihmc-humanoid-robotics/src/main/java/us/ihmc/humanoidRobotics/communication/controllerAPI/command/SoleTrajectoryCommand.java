@@ -33,9 +33,9 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    }
 
    @Override
-   public void set(SoleTrajectoryMessage message)
+   public void setFromMessage(SoleTrajectoryMessage message)
    {
-      positionTrajectory.set(message.getPositionTrajectory());
+      positionTrajectory.setFromMessage(message.getPositionTrajectory());
       robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
    }
 

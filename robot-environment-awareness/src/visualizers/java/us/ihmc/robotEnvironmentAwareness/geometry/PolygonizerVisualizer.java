@@ -74,7 +74,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class PolygonizerVisualizer extends Application
 {

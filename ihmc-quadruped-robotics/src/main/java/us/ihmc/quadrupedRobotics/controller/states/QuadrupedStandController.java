@@ -44,6 +44,14 @@ public class QuadrupedStandController implements QuadrupedController
    @Override
    public void doAction(double timeInState)
    {
+      // update desired horizontal com forces
+      balanceManager.compute();
+
+      // update desired body orientation, angular velocity, and torque
+      bodyOrientationManager.compute();
+
+      // update desired contact state and sole forces
+      feetManager.compute();
    }
 
    @Override

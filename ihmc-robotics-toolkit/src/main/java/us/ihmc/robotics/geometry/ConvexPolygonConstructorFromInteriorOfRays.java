@@ -8,7 +8,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class ConvexPolygonConstructorFromInteriorOfRays
 {

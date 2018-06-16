@@ -11,6 +11,6 @@ byte STEPPING = 5
 byte FALL = 6
 
 # Specifies the controller's state prior to transition.
-byte initial_controller_name 255
+byte initial_quadruped_controller_enum 255
 # Specifies the state the controller has transitioned into.
-byte end_controller_name 255
+byte end_quadruped_controller_enum 255

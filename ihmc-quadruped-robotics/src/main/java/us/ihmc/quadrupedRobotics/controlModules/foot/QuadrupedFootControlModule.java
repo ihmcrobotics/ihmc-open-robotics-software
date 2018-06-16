@@ -14,6 +14,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -44,6 +45,11 @@ public class QuadrupedFootControlModule
    private final EventTrigger eventTrigger;
    private final StateMachine<QuadrupedFootStates, QuadrupedFootState> footStateMachine;
 
+   // window after support is triggered by touchdown but before step time is up to make sure swing isn't triggered again
+   // TODO find a better solution. could be done by indexing steps
+   private static final double supportToSwingGlitchWindow = 0.15;
+   private final YoBoolean isFirstStep;
+
    public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox,
                                      YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -54,8 +60,7 @@ public class QuadrupedFootControlModule
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
       // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant), stepCommandIsValid,
-                                                                     controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), currentStepCommand);
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant));
       QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry,
                                                                registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
@@ -82,6 +87,8 @@ public class QuadrupedFootControlModule
 
       eventTrigger = factory.buildEventTrigger();
       footStateMachine = factory.build(QuadrupedFootStates.SUPPORT);
+      isFirstStep = new YoBoolean(robotQuadrant.getShortName() + "_FirstStep", registry);
+      isFirstStep.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -133,14 +140,29 @@ public class QuadrupedFootControlModule
    {
       stepCommandIsValid.set(false);
       footStateMachine.resetToInitialState();
+      isFirstStep.set(true);
    }
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT)
+      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger())
       {
          this.currentStepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
+         requestSwing();
+      }
+   }
+
+   private boolean isValidTrigger()
+   {
+      if(isFirstStep.getBooleanValue())
+      {
+         isFirstStep.set(false);
+         return true;
+      }
+      else
+      {
+         return footStateMachine.getTimeInCurrentState() > supportToSwingGlitchWindow;
       }
    }
 

@@ -20,9 +20,9 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    }
 
    @Override
-   public void set(CenterOfMassTrajectoryMessage message)
+   public void setFromMessage(CenterOfMassTrajectoryMessage message)
    {
-      euclideanTrajectory.set(message.getEuclideanTrajectory());
+      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
    }
 
    @Override

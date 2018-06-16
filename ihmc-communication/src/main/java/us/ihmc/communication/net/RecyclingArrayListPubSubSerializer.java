@@ -10,10 +10,10 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.commons.lists.RecyclingArrayList;
 
 @SuppressWarnings("rawtypes")
-public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArrayListPubSub>
+public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArrayList>
 {
    private boolean elementsCanBeNull = true;
    private Serializer serializer;
@@ -66,7 +66,7 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
          genericType = generics[0];
    }
 
-   public void write(Kryo kryo, Output output, RecyclingArrayListPubSub collection)
+   public void write(Kryo kryo, Output output, RecyclingArrayList collection)
    {
       int length = collection.size();
       output.writeInt(length, true);
@@ -107,13 +107,13 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
     * uses {@link Kryo#newInstance(Class)}.
     */
    @SuppressWarnings("unchecked")
-   protected RecyclingArrayListPubSub create(Kryo kryo, Input input, Class<RecyclingArrayListPubSub> type)
+   protected RecyclingArrayList create(Kryo kryo, Input input, Class<RecyclingArrayList> type)
    {
-      return new RecyclingArrayListPubSub(elementClass, () -> kryo.newInstance(elementClass), 0);
+      return new RecyclingArrayList(0, () -> kryo.newInstance(elementClass));
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayListPubSub read(Kryo kryo, Input input, Class<RecyclingArrayListPubSub> type)
+   public RecyclingArrayList read(Kryo kryo, Input input, Class<RecyclingArrayList> type)
    {
       if (genericType != null)
       {
@@ -126,11 +126,11 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
       }
 
       int length = input.readInt(true);
-      RecyclingArrayListPubSub resultList;
+      RecyclingArrayList resultList;
 
       if (length == 0)
       {
-         resultList = new RecyclingArrayListPubSub<>();
+         resultList = new RecyclingArrayList<>();
       }
       else
       {
@@ -156,7 +156,7 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
          }
          
          Class elementClass = tempList.get(0).getClass();
-         resultList = new RecyclingArrayListPubSub(elementClass, () -> kryo.newInstance(elementClass), length);
+         resultList = new RecyclingArrayList(length, () -> kryo.newInstance(elementClass));
          for (int i = 0; i < length; i++)
             addElementToList(resultList, tempList.get(i), kryo);
       }
@@ -172,15 +172,15 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
     * customize object creation, eg to call a constructor with arguments. The default implementation
     * uses {@link Kryo#newInstance(Class)}.
     */
-   protected RecyclingArrayListPubSub createCopy(Kryo kryo, RecyclingArrayListPubSub original)
+   protected RecyclingArrayList createCopy(Kryo kryo, RecyclingArrayList original)
    {
       return kryo.newInstance(original.getClass());
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayListPubSub copy(Kryo kryo, RecyclingArrayListPubSub original)
+   public RecyclingArrayList copy(Kryo kryo, RecyclingArrayList original)
    {
-      RecyclingArrayListPubSub copy;
+      RecyclingArrayList copy;
       if (original.isEmpty())
       {
          return createCopy(kryo, original);
@@ -188,7 +188,7 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
       else
       {
          Class elementClass = original.get(0).getClass();
-         copy = new RecyclingArrayListPubSub(elementClass, () -> kryo.newInstance(elementClass), original.size());
+         copy = new RecyclingArrayList(original.size(), () -> kryo.newInstance(elementClass));
       }
 
       kryo.reference(copy);
@@ -201,7 +201,7 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
    }
 
    @SuppressWarnings("unchecked")
-   private void addElementToList(RecyclingArrayListPubSub list, Object element, Kryo kryo)
+   private void addElementToList(RecyclingArrayList list, Object element, Kryo kryo)
    {
       if (element instanceof Settable)
       {

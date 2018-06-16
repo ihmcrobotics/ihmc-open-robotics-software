@@ -54,7 +54,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -152,7 +152,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(humanoidReferenceFrames.getChestFrame());
@@ -208,7 +208,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
          drcSimulationTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(sphere);
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
       }
@@ -239,7 +239,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
          drcSimulationTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(sphere);
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
       }
@@ -335,7 +335,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          handTrajectoryMessages.put(robotSide, handTrajectoryMessage);
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
 
       }
 
@@ -426,7 +426,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
             time = time + 0.05;
          }
-         drcSimulationTestHelper.send(message);
+         drcSimulationTestHelper.publishToController(message);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
@@ -449,7 +449,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
             time = time + 0.05;
          }
-         drcSimulationTestHelper.send(message);
+         drcSimulationTestHelper.publishToController(message);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
@@ -569,7 +569,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
 
          handTrajectoryMessages.add(handTrajectoryMessage);
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
          assertTrue(success);
       }
@@ -755,7 +755,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             }
 
             handTrajectoryMessages.get(robotSide).add(handTrajectoryMessage);
-            drcSimulationTestHelper.send(handTrajectoryMessage);
+            drcSimulationTestHelper.publishToController(handTrajectoryMessage);
             success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
             assertTrue(success);
          }
@@ -870,7 +870,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                calculatorIndex++;
             }
 
-            drcSimulationTestHelper.send(handTrajectoryMessage);
+            drcSimulationTestHelper.publishToController(handTrajectoryMessage);
             success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
             assertTrue(success);
          }
@@ -897,7 +897,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          overridingPoses.put(robotSide, desiredHandPose);
       }
 
@@ -1006,7 +1006,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-         drcSimulationTestHelper.send(handTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime / 2.0);
          assertTrue(success);
@@ -1024,7 +1024,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             actualJointPositions[i] = armJoints[i].getQ();
          }
 
-         drcSimulationTestHelper.send(new StopAllTrajectoryMessage());
+         drcSimulationTestHelper.publishToController(new StopAllTrajectoryMessage());
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);

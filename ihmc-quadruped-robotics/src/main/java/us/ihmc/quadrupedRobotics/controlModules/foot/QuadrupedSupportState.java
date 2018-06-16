@@ -20,22 +20,13 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final RobotQuadrant robotQuadrant;
    private final YoPlaneContactState contactState;
 
-   private final YoBoolean stepCommandIsValid;
-   private final YoDouble timestamp;
-   private final YoQuadrupedTimedStep currentStepCommand;
-   private boolean triggerSwing;
 
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
-   private final FramePoint3D nextStepGoalPosition = new FramePoint3D(worldFrame);
 
-   public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoPlaneContactState contactState, YoBoolean stepCommandIsValid, YoDouble timestamp,
-                                YoQuadrupedTimedStep stepCommand)
+   public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoPlaneContactState contactState)
    {
       this.robotQuadrant = robotQuadrant;
       this.contactState = contactState;
-      this.stepCommandIsValid = stepCommandIsValid;
-      this.timestamp = timestamp;
-      this.currentStepCommand = stepCommand;
    }
 
    @Override
@@ -43,7 +34,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
-      triggerSwing = false;
 
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
@@ -52,28 +42,18 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public void doAction(double timeInState)
    {
-      // trigger swing phase
-      if (stepCommandIsValid.getBooleanValue() && currentStepCommand.getTimeInterval().intervalContains(timestamp.getDoubleValue()))
-      {
-         if (stepTransitionCallback != null)
-         {
-            currentStepCommand.getGoalPosition(nextStepGoalPosition);
-            stepTransitionCallback.onLiftOff(currentStepCommand);
-         }
-         triggerSwing = true;
-      }
+
    }
 
    @Override
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
-      return triggerSwing ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
+      return null;
    }
 
    @Override
    public void onExit()
    {
-      triggerSwing = false;
    }
 
    @Override

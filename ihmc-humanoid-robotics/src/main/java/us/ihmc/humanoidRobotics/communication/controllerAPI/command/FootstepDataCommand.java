@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -69,7 +69,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    }
 
    @Override
-   public void set(FootstepDataMessage message)
+   public void setFromMessage(FootstepDataMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
@@ -149,7 +149,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
-      set(message);
+      setFromMessage(message);
    }
 
    public void setRobotSide(RobotSide robotSide)

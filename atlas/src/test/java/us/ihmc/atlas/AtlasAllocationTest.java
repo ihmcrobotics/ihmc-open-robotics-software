@@ -46,8 +46,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.allocations.AllocationTest;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.allocations.AllocationTest;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -96,7 +96,7 @@ public class AtlasAllocationTest implements AllocationTest
       double defaultTransferDuration = 0.1;
 
       int warmupSteps = 4;
-      testHelper.send(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
+      testHelper.publishToController(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       int steps = 4;
@@ -105,7 +105,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(footsteps);
+            testHelper.publishToController(footsteps);
             testHelper.simulateAndBlockAndCatchExceptions(4.0);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -130,7 +130,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -156,7 +156,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -177,7 +177,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)
@@ -198,7 +198,7 @@ public class AtlasAllocationTest implements AllocationTest
       testInternal(() -> {
          try
          {
-            testHelper.send(message);
+            testHelper.publishToController(message);
             testHelper.simulateAndBlockAndCatchExceptions(duration + 0.25);
          }
          catch (SimulationExceededMaximumTimeException e)

@@ -9,31 +9,52 @@ import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 public class KinematicsToolboxModule extends ToolboxModule
 {
-   private static final PacketDestination PACKET_DESTINATION = PacketDestination.KINEMATICS_TOOLBOX_MODULE;
-   private static final NetworkPorts NETWORK_PORT = NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT;
-
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
-      super(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry, registry);
+      this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
+                                                                            registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
-      packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController::updateRobotConfigurationData);
-      packetCommunicator.attachListener(CapturabilityBasedStatus.class, kinematicsToolBoxController::updateCapturabilityBasedStatus);
       startYoVariableServer();
+   }
+
+   @Override
+   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   {
+      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+         if (kinematicsToolBoxController != null)
+            kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+         if (kinematicsToolBoxController != null)
+            kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData());
+      });
    }
 
    /**
@@ -65,14 +86,14 @@ public class KinematicsToolboxModule extends ToolboxModule
     * directed to the source the of the input messages.
     */
    @Override
-   public List<Class<? extends Packet<?>>> createListOfSupportedStatus()
+   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   public static List<Class<? extends Packet<?>>> supportedStatus()
+   public static List<Class<? extends Settable<?>>> supportedStatus()
    {
-      List<Class<? extends Packet<?>>> status = new ArrayList<>();
+      List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }
@@ -86,5 +107,27 @@ public class KinematicsToolboxModule extends ToolboxModule
    public CommandInputManager getCommandInputManager()
    {
       return commandInputManager;
+   }
+
+   @Override
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      return getPublisherTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+   }
+
+   @Override
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      return getSubscriberTopicNameGenerator(robotName);
+   }
+
+   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
    }
 }

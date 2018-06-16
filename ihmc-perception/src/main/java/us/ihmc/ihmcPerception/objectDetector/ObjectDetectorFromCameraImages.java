@@ -25,7 +25,7 @@ import georegression.struct.se.Se3_F64;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
@@ -47,7 +47,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 
-public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
+public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
    private boolean visualize = true;
 
@@ -394,8 +394,8 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
    }
 
    @Override
-   public void receivedPacket(ObjectDetectorResultPacket packet)
+   public void consumeObject(ObjectDetectorResultPacket object)
    {
-      results.add(packet);
+      results.add(object);
    }
 }

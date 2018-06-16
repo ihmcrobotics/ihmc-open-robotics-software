@@ -59,7 +59,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
-         drcSimulationTestHelper.send(footTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(footTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
@@ -67,7 +67,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          // Now we can do the usual test.
          FootLoadBearingMessage footLoadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
 
-         drcSimulationTestHelper.send(footLoadBearingMessage);
+         drcSimulationTestHelper.publishToController(footLoadBearingMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
          assertTrue(success);

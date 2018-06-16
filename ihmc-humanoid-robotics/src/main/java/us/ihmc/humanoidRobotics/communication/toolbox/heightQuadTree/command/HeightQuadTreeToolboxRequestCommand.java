@@ -23,7 +23,7 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    }
 
    @Override
-   public void set(HeightQuadTreeToolboxRequestMessage message)
+   public void setFromMessage(HeightQuadTreeToolboxRequestMessage message)
    {
       
       requestClearQuadTree = message.getRequestClearQuadTree();

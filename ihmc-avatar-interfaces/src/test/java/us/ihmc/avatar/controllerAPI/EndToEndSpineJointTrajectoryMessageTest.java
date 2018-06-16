@@ -256,7 +256,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double controllerDT = getRobotModel().getControllerDT();
       for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
       {
-         drcSimulationTestHelper.send(messages[msgIdx]);
+         drcSimulationTestHelper.publishToController(messages[msgIdx]);
          drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
 
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -315,7 +315,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       // send message
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -426,7 +426,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private void executeMessage(SpineTrajectoryMessage message) throws SimulationExceededMaximumTimeException
    {
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double trajectoryTime = 0.0;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -454,7 +454,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private void executeMessage(ChestTrajectoryMessage message, RigidBody chest) throws SimulationExceededMaximumTimeException
    {
       double controllerDT = getRobotModel().getControllerDT();
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double trajectoryTime = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));

@@ -1,26 +1,27 @@
 package us.ihmc.robotics.robotSide;
 
-import java.lang.reflect.Array;
+import us.ihmc.commons.lists.SupplierBuilder;
 
-import us.ihmc.robotics.lists.GenericTypeBuilder;
+import java.lang.reflect.Array;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class RecyclingQuadrantDependentList<V>
 {
    private final V[] elementStorageForWhenNull;
-   private final GenericTypeBuilder<V> builder;   
+   private final Supplier<V> builder;
    private final V[][] valueArrays;
    private final QuadrantDependentList<V> quadrantDependentList;
 
    public RecyclingQuadrantDependentList(Class<V> clazz)
    {
       quadrantDependentList = new QuadrantDependentList<>();
-      builder = GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz);
+      builder = SupplierBuilder.createFromEmptyConstructor(clazz);
       
       elementStorageForWhenNull = (V[]) Array.newInstance(clazz, 4);
       for (int i = 0; i < 4; i++)
       {
-         V newInstance = builder.newInstance();
+         V newInstance = builder.get();
          
          elementStorageForWhenNull[i] = newInstance;
       }

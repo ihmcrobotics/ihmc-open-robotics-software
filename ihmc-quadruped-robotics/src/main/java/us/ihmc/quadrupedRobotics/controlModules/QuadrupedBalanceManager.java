@@ -15,20 +15,16 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -40,6 +36,7 @@ import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicTy
 
 public class QuadrupedBalanceManager
 {
+   private static final boolean debug = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
@@ -51,15 +48,10 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedCenterOfMassHeightManager centerOfMassHeightManager;
    private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
+   private final QuadrupedStepAdjustmentController stepAdjustmentController;
 
    private final DCMPlanner dcmPlanner;
 
-   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
-
-   private final YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D("instantaneousStepAdjustment", worldFrame, registry);
-   private final YoFrameVector3D accumulatedStepAdjustment = new YoFrameVector3D("accumulatedStepAdjustment", worldFrame, registry);
-
-   private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
@@ -71,15 +63,11 @@ public class QuadrupedBalanceManager
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
-   private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final GroundPlaneEstimator groundPlaneEstimator;
    private final ReferenceFrame supportFrame;
 
    private final QuadrupedControllerToolbox controllerToolbox;
 
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    // footstep graphics
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
@@ -104,28 +92,18 @@ public class QuadrupedBalanceManager
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
-      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
-
       double nominalHeight = physicalProperties.getNominalCoMHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
-                                  yoGraphicsListRegistry);
+                                  yoGraphicsListRegistry, debug);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
+      stepAdjustmentController = new QuadrupedStepAdjustmentController(controllerToolbox, registry);
 
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
-
-      adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
-      {
-         @Override
-         public QuadrupedStep newInstance()
-         {
-            return new QuadrupedStep();
-         }
-      });
+      adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep::new);
       adjustedActiveSteps.clear();
 
       if (yoGraphicsListRegistry != null)
@@ -234,9 +212,6 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
-
-      // initialize timed contact sequence
-      accumulatedStepAdjustment.setToZero();
    }
 
    public void initializeForStanding()
@@ -251,7 +226,11 @@ public class QuadrupedBalanceManager
    {
       initialize();
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
+   }
 
+   public void completedStep(RobotQuadrant robotQuadrant)
+   {
+      stepAdjustmentController.completedStep(robotQuadrant);
    }
 
    public void compute()
@@ -266,6 +245,9 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
+      if (debug)
+         runDebugChecks();
+
       double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
 
       momentumRateOfChangeModule.setDCMEstimate(dcmPositionEstimate);
@@ -274,42 +256,18 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredCMP);
    }
 
-   public void completedStep()
+   private void runDebugChecks()
    {
-      accumulatedStepAdjustment.add(instantaneousStepAdjustment);
-      accumulatedStepAdjustment.setZ(0);
+      if (yoDesiredDCMPosition.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Position contains NaN");
+
+      if (yoDesiredDCMVelocity.containsNaN())
+         throw new IllegalArgumentException("Desired DCM Velocity contains NaN");
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps)
    {
-      adjustedActiveSteps.clear();
-      if (robotTimestamp.getDoubleValue() > dcmPlanner.getFinalTime())
-      {
-         // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         dcmPositionSetpoint.setIncludingFrame(yoDesiredDCMPosition);
-         dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-         dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-
-         instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
-         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.getValue());
-         instantaneousStepAdjustment.setZ(0);
-
-         // adjust nominal step goal positions in foot state machine
-         for (int i = 0; i < activeSteps.size(); i++)
-         {
-            YoQuadrupedTimedStep activeStep = activeSteps.get(i);
-            QuadrupedStep adjustedStep = adjustedActiveSteps.add();
-            adjustedStep.set(activeStep);
-
-            RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
-            activeStep.getGoalPosition(tempPoint);
-            tempPoint.changeFrame(worldFrame);
-            tempPoint.add(instantaneousStepAdjustment);
-            crossoverProjection.project(tempPoint, robotQuadrant);
-            groundPlaneEstimator.projectZ(tempPoint);
-            adjustedStep.setGoalPosition(tempPoint);
-         }
-      }
+      RecyclingArrayList<QuadrupedStep> adjustedActiveSteps = stepAdjustmentController.computeStepAdjustment(activeSteps, yoDesiredDCMPosition);
 
       adjustActiveFootstepGraphics(activeSteps);
       return adjustedActiveSteps;
@@ -320,13 +278,13 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.computeAchievedCMP(achievedLinearMomentumRate, yoAchievedCMP);
    }
 
-   public FrameVector3DReadOnly getAccumulatedStepAdjustment()
-   {
-      return accumulatedStepAdjustment;
-   }
-
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return momentumRateOfChangeModule.getMomentumRateCommand();
+   }
+
+   public FrameVector3DReadOnly getStepAdjustment(RobotQuadrant robotQuadrant)
+   {
+      return stepAdjustmentController.getStepAdjustment(robotQuadrant);
    }
 }

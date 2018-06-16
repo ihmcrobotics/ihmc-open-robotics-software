@@ -132,7 +132,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       assertTrue(success);
@@ -172,7 +172,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       testSingleWaypintInternal();
 
       StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
-      drcSimulationTestHelper.send(stopAll);
+      drcSimulationTestHelper.publishToController(stopAll);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -222,7 +222,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
       pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, desiredPosition, desiredOrientation, new Vector3D(), new Vector3D()));
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * robotModel.getControllerDT());
       assertTrue(success);
@@ -276,7 +276,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
 
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
@@ -371,7 +371,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          finalHeight = z;
       }
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * getRobotModel().getControllerDT());
       assertTrue(success);
@@ -518,7 +518,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          finalHeight = z;
       }
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * robotModel.getControllerDT());
       assertTrue(success);
@@ -642,7 +642,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          finalHeight = z;
       }
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * robotModel.getControllerDT());
       assertTrue(success);
@@ -695,6 +695,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int numberOfWaypoints = 100;
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
       pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
+      pelvisTrajectoryMessage.setEnableUserPelvisControl(true);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -747,6 +748,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          desiredPose.setIncludingFrame(pelvisZUp, position, orientation);
          desiredPose.changeFrame(worldFrame);
+         desiredPose.setZ(desiredPose.getZ() - 0.03);
          desiredPose.get(position, orientation);
 
          desiredLinearVelocity.setIncludingFrame(pelvisZUp, linearVelocity);
@@ -797,7 +799,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       referenceFrames.updateFrames();
       MovingReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       PelvisTrajectoryMessage pelvisTrajectoryMessage = generateHoolaHoopTrajectory(scs, pelvisZUpFrame);
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
@@ -938,7 +940,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -1054,14 +1056,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
-      drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
       assertEquals(PelvisOrientationControlMode.WALKING_CONTROLLER, orientationControlMode.getEnumValue());
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime / 2.0);
       assertTrue(success);
 
       StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-      drcSimulationTestHelper.send(stopAllTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(stopAllTrajectoryMessage);
 
       assertEquals(PelvisOrientationControlMode.USER, orientationControlMode.getEnumValue());
       assertFalse(findControllerStopBooleanForXY(scs));
@@ -1130,7 +1132,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          desiredPelvisPose.setZ(desiredHeight);
          desiredPelvisPose.get(desiredPosition, desiredOrientation);
          PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.5, desiredPosition, desiredOrientation);
-         drcSimulationTestHelper.send(pelvisTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());

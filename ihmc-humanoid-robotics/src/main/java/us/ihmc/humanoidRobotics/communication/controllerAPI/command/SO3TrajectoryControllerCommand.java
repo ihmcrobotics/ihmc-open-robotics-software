@@ -99,7 +99,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
       ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(selectionFrame);
@@ -108,7 +108,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
-   public void set(SO3TrajectoryMessage message)
+   public void setFromMessage(SO3TrajectoryMessage message)
    {
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 

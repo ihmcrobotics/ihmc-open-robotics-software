@@ -116,8 +116,15 @@ public abstract class GeneralizedRigidBodyInertia
 
    public void getCenterOfMassOffset(FramePoint3D centerOfMassOffsetToPack)
    {
-      centerOfMassOffsetToPack.setIncludingFrame(expressedInframe, crossPart);
-      centerOfMassOffsetToPack.scale(-1.0 / mass); // comOffset = -1/m * c
+      if (mass < 1.0e-10)
+      {
+         centerOfMassOffsetToPack.setToZero(expressedInframe);
+      }
+      else
+      {
+         centerOfMassOffsetToPack.setIncludingFrame(expressedInframe, crossPart);
+         centerOfMassOffsetToPack.scale(-1.0 / mass); // comOffset = -1/m * c
+      }
    }
 
    public void setCenterOfMassOffset(FramePoint3D centerOfMassOffset)

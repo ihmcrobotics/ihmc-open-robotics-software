@@ -798,7 +798,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForRotatedStepInTheAir(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
@@ -825,7 +825,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -858,7 +858,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 //      drcSimulationTestHelper.send(new ComHeightPacket(0.08, 1.0));
 
 
@@ -898,7 +898,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);

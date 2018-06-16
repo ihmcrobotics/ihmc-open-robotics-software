@@ -19,11 +19,11 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
    /**
             * Specifies the controller's state prior to transition.
             */
-   public byte initial_stepping_controller_name_ = (byte) 255;
+   public byte initial_quadruped_stepping_state_enum_ = (byte) 255;
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public byte end_stepping_controller_name_ = (byte) 255;
+   public byte end_quadruped_stepping_state_enum_ = (byte) 255;
 
    public QuadrupedSteppingStateChangeMessage()
    {
@@ -37,40 +37,40 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
 
    public void set(QuadrupedSteppingStateChangeMessage other)
    {
-      initial_stepping_controller_name_ = other.initial_stepping_controller_name_;
+      initial_quadruped_stepping_state_enum_ = other.initial_quadruped_stepping_state_enum_;
 
-      end_stepping_controller_name_ = other.end_stepping_controller_name_;
+      end_quadruped_stepping_state_enum_ = other.end_quadruped_stepping_state_enum_;
 
    }
 
    /**
             * Specifies the controller's state prior to transition.
             */
-   public void setInitialSteppingControllerName(byte initial_stepping_controller_name)
+   public void setInitialQuadrupedSteppingStateEnum(byte initial_quadruped_stepping_state_enum)
    {
-      initial_stepping_controller_name_ = initial_stepping_controller_name;
+      initial_quadruped_stepping_state_enum_ = initial_quadruped_stepping_state_enum;
    }
    /**
             * Specifies the controller's state prior to transition.
             */
-   public byte getInitialSteppingControllerName()
+   public byte getInitialQuadrupedSteppingStateEnum()
    {
-      return initial_stepping_controller_name_;
+      return initial_quadruped_stepping_state_enum_;
    }
 
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public void setEndSteppingControllerName(byte end_stepping_controller_name)
+   public void setEndQuadrupedSteppingStateEnum(byte end_quadruped_stepping_state_enum)
    {
-      end_stepping_controller_name_ = end_stepping_controller_name;
+      end_quadruped_stepping_state_enum_ = end_quadruped_stepping_state_enum;
    }
    /**
             * Specifies the state the controller has transitioned into.
             */
-   public byte getEndSteppingControllerName()
+   public byte getEndQuadrupedSteppingStateEnum()
    {
-      return end_stepping_controller_name_;
+      return end_quadruped_stepping_state_enum_;
    }
 
 
@@ -91,9 +91,9 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_stepping_controller_name_, other.initial_stepping_controller_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_quadruped_stepping_state_enum_, other.initial_quadruped_stepping_state_enum_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_stepping_controller_name_, other.end_stepping_controller_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_quadruped_stepping_state_enum_, other.end_quadruped_stepping_state_enum_, epsilon)) return false;
 
 
       return true;
@@ -108,9 +108,9 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
 
       QuadrupedSteppingStateChangeMessage otherMyClass = (QuadrupedSteppingStateChangeMessage) other;
 
-      if(this.initial_stepping_controller_name_ != otherMyClass.initial_stepping_controller_name_) return false;
+      if(this.initial_quadruped_stepping_state_enum_ != otherMyClass.initial_quadruped_stepping_state_enum_) return false;
 
-      if(this.end_stepping_controller_name_ != otherMyClass.end_stepping_controller_name_) return false;
+      if(this.end_quadruped_stepping_state_enum_ != otherMyClass.end_quadruped_stepping_state_enum_) return false;
 
 
       return true;
@@ -122,10 +122,10 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuadrupedSteppingStateChangeMessage {");
-      builder.append("initial_stepping_controller_name=");
-      builder.append(this.initial_stepping_controller_name_);      builder.append(", ");
-      builder.append("end_stepping_controller_name=");
-      builder.append(this.end_stepping_controller_name_);
+      builder.append("initial_quadruped_stepping_state_enum=");
+      builder.append(this.initial_quadruped_stepping_state_enum_);      builder.append(", ");
+      builder.append("end_quadruped_stepping_state_enum=");
+      builder.append(this.end_quadruped_stepping_state_enum_);
       builder.append("}");
       return builder.toString();
    }

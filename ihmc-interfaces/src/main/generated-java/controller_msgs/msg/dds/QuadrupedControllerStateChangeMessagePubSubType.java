@@ -69,17 +69,17 @@ public class QuadrupedControllerStateChangeMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_9(data.getInitialControllerName());
+      cdr.write_type_9(data.getInitialQuadrupedControllerEnum());
 
-      cdr.write_type_9(data.getEndControllerName());
+      cdr.write_type_9(data.getEndQuadrupedControllerEnum());
 
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setInitialControllerName(cdr.read_type_9());
+      data.setInitialQuadrupedControllerEnum(cdr.read_type_9());
       	
-      data.setEndControllerName(cdr.read_type_9());
+      data.setEndQuadrupedControllerEnum(cdr.read_type_9());
       	
 
    }
@@ -87,15 +87,15 @@ public class QuadrupedControllerStateChangeMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("initial_controller_name", data.getInitialControllerName());
-      ser.write_type_9("end_controller_name", data.getEndControllerName());
+      ser.write_type_9("initial_quadruped_controller_enum", data.getInitialQuadrupedControllerEnum());
+      ser.write_type_9("end_quadruped_controller_enum", data.getEndQuadrupedControllerEnum());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data)
    {
-      data.setInitialControllerName(ser.read_type_9("initial_controller_name"));
-      data.setEndControllerName(ser.read_type_9("end_controller_name"));
+      data.setInitialQuadrupedControllerEnum(ser.read_type_9("initial_quadruped_controller_enum"));
+      data.setEndQuadrupedControllerEnum(ser.read_type_9("end_quadruped_controller_enum"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage src, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage dest)

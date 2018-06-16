@@ -148,4 +148,10 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
          savingNode.setRegistries(localRegistries);
       }
    }
+
+   @Override
+   public void changeRootRegistries(List<String> rootRegistryNames)
+   {
+      savingNode.setRootRegistries(rootRegistryNames);
+   }
 }

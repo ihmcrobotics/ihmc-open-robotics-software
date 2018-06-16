@@ -29,7 +29,7 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
 
    public QuadrupedBodyPathPlanMessage()
    {
-      body_path_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> (1, controller_msgs.msg.dds.EuclideanTrajectoryPointMessage.class, new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
+      body_path_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> (1, new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
 
    }
 

@@ -160,7 +160,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       addFootstep(new Point3D(xOffset, yOffset * 2.0, -0.02), RobotSide.LEFT, message);
       addFootstep(new Point3D(xOffset, 0.0, -0.02), RobotSide.RIGHT, message);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       double simulationTime = 1.0 * message.getFootstepDataList().size() + 2.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
@@ -202,7 +202,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setRobotSide(stepSide.toByte());
       message.getFootstepDataList().add().set(footstepData);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       // push the robot

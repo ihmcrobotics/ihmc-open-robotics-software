@@ -1,7 +1,8 @@
 package us.ihmc.quadrupedRobotics.input.mode;
 
+import java.util.Map;
+
 import net.java.games.input.Event;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -9,11 +10,10 @@ import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.Map;
 
 public class QuadrupedStepTeleopMode
 {
@@ -38,10 +38,10 @@ public class QuadrupedStepTeleopMode
    private final QuadrupedTeleopManager stepTeleopManager;
    private InputValueIntegrator comZ;
 
-   public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+   public QuadrupedStepTeleopMode(String robotName, Ros2Node ros2Node, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, registry);
+      this.stepTeleopManager = new QuadrupedTeleopManager(robotName, ros2Node, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, graphicsListRegistry, registry);
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);

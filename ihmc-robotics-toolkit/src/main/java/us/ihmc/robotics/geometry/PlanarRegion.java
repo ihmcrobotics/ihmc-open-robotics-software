@@ -456,6 +456,38 @@ public class PlanarRegion
    }
 
    /**
+    * Computes the distance of the point to the region projected onto the world xy-plane.
+    *
+    * @param point2d query coordinates.
+    * @return distance to this region. If 0.0, point is in the region.
+    */
+   public double distanceToPointByProjectionOntoXYPlane(Point2DReadOnly point2d)
+   {
+      return distanceToPointByProjectionOntoXYPlane(point2d.getX(), point2d.getY());
+   }
+
+   private final Point3D localPoint = new Point3D();
+   private final Point2D localPoint2D = new Point2D();
+   /**
+    * Computes the distance of the point to the region projected onto the world xy-plane.
+    *
+    * @param x x-coordinate of the query.
+    * @param y y-coordinate of the query.
+    * @return distance to this region. If 0.0, point is in the region.
+    */
+   public double distanceToPointByProjectionOntoXYPlane(double x, double y)
+   {
+      localPoint.setX(x);
+      localPoint.setY(y);
+      localPoint.setZ(getPlaneZGivenXY(x, y));
+
+      fromWorldToLocalTransform.transform(localPoint);
+      localPoint2D.set(localPoint);
+
+      return distanceToPoint(localPoint2D);
+   }
+
+   /**
     * Given a 3D point in world coordinates, computes whether the point is in this region.
     *
     * @param point3dInWorld query expressed in world coordinates.
@@ -544,6 +576,25 @@ public class PlanarRegion
       return false;
    }
 
+
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this
+    * region.
+    *
+    * @param localPoint Coordinate of the 2D point in planar region local frame
+    * @return shortest distance from the point to the planar region
+    */
+   public double distanceToPoint(Point2DReadOnly localPoint)
+   {
+      double shortestDistanceToPoint = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < convexPolygons.size(); i++)
+      {
+         double distance = convexPolygons.get(i).distance(localPoint);
+         if (distance < shortestDistanceToPoint)
+            shortestDistanceToPoint = distance;
+      }
+      return shortestDistanceToPoint;
+   }
    /**
     * Computes the z-coordinate in world of the plane for a given xy-coordinates in world.
     *

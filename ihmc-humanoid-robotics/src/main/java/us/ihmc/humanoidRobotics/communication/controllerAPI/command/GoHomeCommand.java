@@ -73,7 +73,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
 
    /** {@inheritDoc} */
    @Override
-   public void set(GoHomeMessage message)
+   public void setFromMessage(GoHomeMessage message)
    {
       clear();
       executionDelayTime = message.getExecutionDelayTime();

@@ -104,6 +104,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final MovingReferenceFrame endEffectorFrame;
 
    private final double dt;
+   private final boolean isRootBody;
 
    public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                         YoVariableRegistry parentRegistry)
@@ -111,9 +112,15 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       this.endEffector = endEffector;
 
       if (toolbox.getRootJoint() != null)
-         rootBody = toolbox.getRootJoint().getSuccessor();
+      {
+         this.rootBody = toolbox.getRootJoint().getSuccessor();
+         isRootBody = this.endEffector.getName().equals(rootBody.getName());
+      }
       else
+      {
+         isRootBody = false;
          rootBody = null;
+      }
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -324,7 +331,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       computeFeedbackTorque();
 
-      if (endEffector.getName().equals(rootBody.getName()))
+      if (isRootBody)
       {
          desiredAngularTorque.changeFrame(worldFrame);
 
@@ -524,6 +531,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return (endEffector.getName().equals(rootBody.getName())) ? virtualModelControlRootOutput : virtualModelControlOutput;
+      return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 }

@@ -18,7 +18,6 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -38,6 +37,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -71,9 +71,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final String[] resourceDirectories;
    {
-         resourceDirectories = new String[]{
-               "models/stickRobot/sdf"
-            };
+      resourceDirectories = new String[] {"models/stickRobot/sdf"};
    }
 
    private final JaxbSDFLoader loader;
@@ -82,12 +80,12 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    // One of the three constructors below calls the fourth constructor with different configuration settings
    public StickRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
-      this(target,headless, "DEFAULT", simulationContactPoints);
+      this(target, headless, "DEFAULT", simulationContactPoints);
    }
 
    public StickRobotModel(RobotTarget target, boolean headless)
    {
-      this(target,headless, "DEFAULT", null);
+      this(target, headless, "DEFAULT", null);
    }
 
    public StickRobotModel(RobotTarget target, boolean headless, String model)
@@ -107,20 +105,20 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       // physical robot dimensions required for calculations
       InputStream sdf = null;
 
-      if(model.equalsIgnoreCase("DEFAULT"))
+      if (model.equalsIgnoreCase("DEFAULT"))
       {
-         System.out.println("Loading robot model from: '"+getSdfFile()+"'");
-         sdf=getSdfFileAsStream();
+         System.out.println("Loading robot model from: '" + getSdfFile() + "'");
+         sdf = getSdfFileAsStream();
       }
       else
       {
-         System.out.println("Loading robot model from: '"+model+"'");
-         sdf=getClass().getClassLoader().getResourceAsStream(model);
-         if(sdf==null)
+         System.out.println("Loading robot model from: '" + model + "'");
+         sdf = getClass().getClassLoader().getResourceAsStream(model);
+         if (sdf == null)
          {
             try
             {
-               sdf=new FileInputStream(model);
+               sdf = new FileInputStream(model);
             }
             catch (FileNotFoundException e)
             {
@@ -152,10 +150,10 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
+                                                                                        useCollisionMeshes);
       return robotDescription;
    }
-
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
@@ -182,7 +180,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return resourceDirectories;
    }
-
 
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
@@ -347,7 +344,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
                                                                          ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         HumanoidGlobalDataProducer globalDataProducer,
+                                                                         RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       return null;

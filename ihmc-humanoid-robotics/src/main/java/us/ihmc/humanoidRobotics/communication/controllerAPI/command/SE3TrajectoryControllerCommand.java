@@ -115,7 +115,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       ReferenceFrame dataFrame = resolver.getReferenceFrameFromNameBaseHashCode(dataFrameId);
 
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
 
       ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
       ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
@@ -146,7 +146,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
-   public void set(SE3TrajectoryMessage message)
+   public void setFromMessage(SE3TrajectoryMessage message)
    {
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -198,7 +198,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
-      set(message);
+      setFromMessage(message);
    }
 
    /**

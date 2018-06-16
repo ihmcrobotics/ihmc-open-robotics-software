@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
@@ -165,14 +165,14 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationKryoNetClassLists.getPrivateNetClassList());
+      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
 
    public static LIDARBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationKryoNetClassLists.getPrivateNetClassList());
+      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }

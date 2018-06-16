@@ -8,7 +8,7 @@ import java.util.Map;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -65,7 +65,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Only converting {@link KinematicsToolboxRigidBodyMessage}.
     */
    @Override
-   public <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
    {
       return message instanceof KinematicsToolboxRigidBodyMessage;
    }
@@ -74,7 +74,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Retrieves the end-effector and convert the message into its command counterpart.
     */
    @Override
-   public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
    {
       KinematicsToolboxRigidBodyMessage rigiBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
       KinematicsToolboxRigidBodyCommand rigiBodyCommand = (KinematicsToolboxRigidBodyCommand) command;

@@ -23,7 +23,10 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
-      lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
+      if (lowLevelControllerOutput != null)
+         lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
+      else
+         lowLevelOneDoFJointDesiredDataHolder = new JointDesiredOutputList(controlledOneDoFJoints);
    }
 
    public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBody rigidBody)

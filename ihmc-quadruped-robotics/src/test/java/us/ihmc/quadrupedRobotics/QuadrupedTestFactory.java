@@ -37,4 +37,6 @@ public interface QuadrupedTestFactory
    void setScsParameters(SimulationConstructionSetParameters scsParameters);
 
    void setInitialOffset(QuadrupedInitialOffsetAndYaw initialOffset);
+
+   String getRobotName();
 }

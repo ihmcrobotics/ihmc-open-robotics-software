@@ -33,9 +33,9 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
    }
 
    @Override
-   public void set(NeckTrajectoryMessage message)
+   public void setFromMessage(NeckTrajectoryMessage message)
    {
-      jointspaceTrajectory.set(message.getJointspaceTrajectory());
+      jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()

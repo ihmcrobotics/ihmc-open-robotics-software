@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -72,7 +72,7 @@ public class RigidBodyJointControlHelper
          String jointName = joint.getName();
          jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, RigidBodyJointspaceControlState.maxPointsInGenerator, registry));
 
-         RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, SimpleTrajectoryPoint1D.class);
+         RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, SimpleTrajectoryPoint1D.class, SimpleTrajectoryPoint1D::set);
          pointQueue.clear();
          pointQueues.add(pointQueue);
 

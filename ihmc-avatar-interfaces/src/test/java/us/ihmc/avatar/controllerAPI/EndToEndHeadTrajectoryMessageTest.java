@@ -64,7 +64,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame chestCoMFrame = chest.getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, chestCoMFrame);
       headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-      drcSimulationTestHelper.send(headTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(headTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -114,18 +114,18 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       HeadTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookLeftMessage);
+      drcSimulationTestHelper.publishToController(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
       HeadTrajectoryMessage lookRightMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), chestCoMFrame);
-      drcSimulationTestHelper.send(lookRightMessage);
+      drcSimulationTestHelper.publishToController(lookRightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
-      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);

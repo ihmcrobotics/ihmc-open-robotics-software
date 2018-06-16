@@ -84,7 +84,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsWithHighSwing();
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(23.0);
 

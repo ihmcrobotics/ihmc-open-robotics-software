@@ -108,7 +108,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -148,7 +148,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
 

@@ -47,11 +47,11 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    }
 
    @Override
-   public void set(PelvisTrajectoryMessage message)
+   public void setFromMessage(PelvisTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(message.getEnableUserPelvisControl());
-      se3Trajectory.set(message.getSe3Trajectory());
+      se3Trajectory.setFromMessage(message.getSe3Trajectory());
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()

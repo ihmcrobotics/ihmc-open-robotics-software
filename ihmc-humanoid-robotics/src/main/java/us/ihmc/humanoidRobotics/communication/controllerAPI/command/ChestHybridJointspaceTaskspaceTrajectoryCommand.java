@@ -39,16 +39,16 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void setFromMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.setToOrientationTrajectory(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.setToOrientationTrajectory(resolver, message.getTaskspaceTrajectoryMessage());
    }
 

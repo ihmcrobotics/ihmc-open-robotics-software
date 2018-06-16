@@ -27,7 +27,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 
 public class PlanarRegionTools
 {

@@ -1,13 +1,11 @@
 package us.ihmc.quadrupedRobotics.providers;
 
+import controller_msgs.msg.dds.PlanarVelocityPacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -46,7 +44,7 @@ public class QuadrupedPlanarVelocityInputProvider
             @Override
             public void receivedPacket(PlanarVelocityPacket packet)
             {
-               packet.get(planarVelocityInput);
+               planarVelocityInput.set(packet.getVelocity());
                updateVelocity();
             }
          });

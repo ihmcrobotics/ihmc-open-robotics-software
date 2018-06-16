@@ -36,9 +36,9 @@ public class HeadTrajectoryCommand
    }
 
    @Override
-   public void set(HeadTrajectoryMessage message)
+   public void setFromMessage(HeadTrajectoryMessage message)
    {
-      so3Trajectory.set(message.getSo3Trajectory());
+      so3Trajectory.setFromMessage(message.getSo3Trajectory());
    }
 
    @Override

@@ -170,7 +170,12 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
       }
    }
 
-   private void readAndUpdateIMUSensors()
+   protected ArrayList<ImmutablePair<IMUMount, IMUSensor>> getImus()
+   {
+      return imus;
+   }
+
+   protected void readAndUpdateIMUSensors()
    {
       for(int i = 0; i < imus.size(); i++)
       {
