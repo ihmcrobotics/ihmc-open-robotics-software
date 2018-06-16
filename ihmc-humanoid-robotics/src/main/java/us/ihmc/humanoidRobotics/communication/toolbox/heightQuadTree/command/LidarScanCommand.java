@@ -37,7 +37,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    }
 
    @Override
-   public void set(LidarScanMessage message)
+   public void setFromMessage(LidarScanMessage message)
    {
       timestamp = message.getRobotTimestamp();
       lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());

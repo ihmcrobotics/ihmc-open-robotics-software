@@ -31,7 +31,7 @@ module controller_msgs
         /**
          * Defines the list of footstep to perform.
          */
-        sequence<controller_msgs::msg::dds::FootstepDataMessage, 1> footstep_data_list;
+        sequence<controller_msgs::msg::dds::FootstepDataMessage, 50> footstep_data_list;
         /**
          * When CONTROL_DURATIONS is chosen:
          * The controller will try to achieve the swing_duration and the transfer_duration specified in the message.

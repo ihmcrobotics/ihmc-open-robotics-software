@@ -134,7 +134,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
@@ -164,7 +164,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       assertTrue(success);
 
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
@@ -225,7 +225,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.setDefaultTransferDuration(transferDuration);
       message.setDefaultSwingDuration(swingDuration);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
@@ -320,7 +320,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
       //message.setOffsetFootstepsWithExecutionError(true);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
@@ -413,7 +413,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
       //message.setOffsetFootstepsWithExecutionError(true);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
@@ -508,7 +508,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       message.getFootstepDataList().add().set(footstepData);
 
       //message.setOffsetFootstepsWithExecutionError(true);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);

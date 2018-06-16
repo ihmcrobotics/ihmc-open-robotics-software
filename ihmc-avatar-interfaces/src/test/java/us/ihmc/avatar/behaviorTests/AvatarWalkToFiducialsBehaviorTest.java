@@ -1,6 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -10,6 +10,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,15 +18,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.FiducialsFlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTestInterface
 {
@@ -80,22 +80,24 @@ public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTes
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
+      Ros2Node ros2Node = drcBehaviorTestHelper.getRos2Node();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, yoGraphicsListRegistry);
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(drcBehaviorTestHelper.getRobotName(), ros2Node,
+                                                                                                            yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      FollowFiducialBehavior followFiducialBehavior = new FollowFiducialBehavior(communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      FollowFiducialBehavior followFiducialBehavior = new FollowFiducialBehavior(drcBehaviorTestHelper.getRobotName(), ros2Node, fullRobotModel,
+                                                                                 referenceFrames, fiducialDetectorBehaviorService);
       followFiducialBehavior.initialize();
-      
+
       drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
       drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(followFiducialBehavior.getYoVariableRegistry());
-      
+
       assertTrue(drcBehaviorTestHelper.executeBehaviorUntilDone(followFiducialBehavior));
 
       assertTrue(followFiducialBehavior.isDone());

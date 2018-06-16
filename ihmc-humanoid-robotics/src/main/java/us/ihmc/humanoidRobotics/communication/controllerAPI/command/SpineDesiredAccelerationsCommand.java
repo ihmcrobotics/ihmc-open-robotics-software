@@ -20,9 +20,9 @@ public class SpineDesiredAccelerationsCommand implements Command<SpineDesiredAcc
    }
 
    @Override
-   public void set(SpineDesiredAccelerationsMessage message)
+   public void setFromMessage(SpineDesiredAccelerationsMessage message)
    {
-      desiredAccelerations.set(message.getDesiredAccelerations());
+      desiredAccelerations.setFromMessage(message.getDesiredAccelerations());
    }
 
    public DesiredAccelerationsCommand getDesiredAccelerations()

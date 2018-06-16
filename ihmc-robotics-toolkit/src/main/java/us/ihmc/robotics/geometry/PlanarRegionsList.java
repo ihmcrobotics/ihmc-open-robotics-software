@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -322,5 +323,21 @@ public class PlanarRegionsList
       {
          regions.get(i).transform(rigidBodyTransform);
       }
+   }
+
+   public static PlanarRegionsList generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons,
+                                                                                                  double maxAbsoluteXYForPolygons,
+                                                                                                  int numberOfPossiblePointsForPolygons,
+                                                                                                  int numberOfPossiblePlanarRegions)
+   {
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      int numberOfPlanarRegions = random.nextInt(numberOfPossiblePlanarRegions) + 1;
+      while (planarRegionsList.getNumberOfPlanarRegions() < numberOfPlanarRegions)
+      {
+         planarRegionsList.addPlanarRegion(PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfRandomlyGeneratedPolygons,
+                                                                                                                  maxAbsoluteXYForPolygons,
+                                                                                                                  numberOfPossiblePointsForPolygons));
+      }
+      return planarRegionsList;
    }
 }

@@ -121,7 +121,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setRobotSide(robotSide.toByte());
          message.getFootstepDataList().add().set(footstepData);
 
-         drcSimulationTestHelper.send(message);
+         drcSimulationTestHelper.publishToController(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
       }
@@ -167,7 +167,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setRobotSide(robotSide.toByte());
          message.getFootstepDataList().add().set(footstepData);
 
-         drcSimulationTestHelper.send(message);
+         drcSimulationTestHelper.publishToController(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
       }
@@ -215,7 +215,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setRobotSide(robotSide.toByte());
          message.getFootstepDataList().add().set(footstepData);
 
-         drcSimulationTestHelper.send(message);
+         drcSimulationTestHelper.publishToController(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
          assertTrue(success);
       }
@@ -395,7 +395,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
             jointTrajectory.getTrajectoryPoints().add().set(trajectoryPoint);
             armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(jointTrajectory);
          }
-         drcSimulationTestHelper.send(armTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(armTrajectoryMessage);
       }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.6);

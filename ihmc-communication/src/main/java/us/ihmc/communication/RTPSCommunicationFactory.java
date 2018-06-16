@@ -21,15 +21,16 @@ public class RTPSCommunicationFactory
    private final Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
    private final TIntObjectHashMap<Participant> participants = new TIntObjectHashMap<>();
    private final int defaultDomainID;
-   
+
    /**
-    * Creates an RTPSCommunicationFactory. Loads the default RTPS Domain ID from the Network Parameter File on disk.
-    * This file is typically located in the user home directory /.ihmc/IHMCNetworkParameters.ini
-    * If the domain ID is not found, a random ID is generated between 800 and 900
+    * Creates an RTPSCommunicationFactory. Loads the default RTPS Domain ID from the Network
+    * Parameter File on disk. This file is typically located in the user home directory
+    * /.ihmc/IHMCNetworkParameters.ini If the domain ID is not found, a random ID is generated
+    * between 200 and 229
     */
    public RTPSCommunicationFactory()
    {
-      int rtpsDomainID = new Random().nextInt(50) + START_OF_RANDOM_DOMAIN_RANGE;
+      int rtpsDomainID = new Random().nextInt(30) + START_OF_RANDOM_DOMAIN_RANGE;
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
@@ -37,37 +38,40 @@ public class RTPSCommunicationFactory
       }
       else
       {
-         PrintTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to " + rtpsDomainID);
+         PrintTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to "
+               + rtpsDomainID);
       }
-      
+
       defaultDomainID = rtpsDomainID;
       createParticipant(rtpsDomainID);
    }
-   
+
    /**
     * Returns a handle on the singleton instance of the Domain
+    * 
     * @return
     */
    public Domain getDomain()
    {
       return domain;
    }
-   
+
    /**
-    * Returns a participant attached to the domain. 
+    * Returns a participant attached to the domain.
     */
    public Participant getOrCreateParticipant(int domainID)
    {
-      if(!participants.containsKey(domainID))
+      if (!participants.containsKey(domainID))
       {
          createParticipant(domainID);
       }
       return participants.get(domainID);
    }
-   
+
    /**
-    * creates a participant using the default domain ID. The Default domain ID is either loaded from file or
-    * randomly generated in the 800-900 range
+    * creates a participant using the default domain ID. The Default domain ID is either loaded from
+    * file or randomly generated in the 800-900 range
+    * 
     * @return the default participant
     */
    public Participant getDefaultParticipant()
@@ -77,6 +81,7 @@ public class RTPSCommunicationFactory
 
    /**
     * Creates a participant attached to the domain using the specified domain ID
+    * 
     * @param domainId the id to use for the domain
     * @return a new participant attached to the domain
     */
@@ -93,9 +98,15 @@ public class RTPSCommunicationFactory
          throw new RuntimeException(e);
       }
    }
-   
+
+   int getDomainId()
+   {
+      return defaultDomainID;
+   }
+
    /**
     * Quick test method to ensure the factory correctly loads the rtps domain ID.
+    * 
     * @param args none needed
     */
    public static void main(String[] args)

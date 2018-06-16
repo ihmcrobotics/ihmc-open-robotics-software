@@ -74,7 +74,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          }
       }
 
-      drcSimulationTestHelper.send(armTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(armTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);

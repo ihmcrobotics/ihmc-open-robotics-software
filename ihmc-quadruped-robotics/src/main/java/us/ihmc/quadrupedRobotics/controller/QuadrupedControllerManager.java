@@ -1,18 +1,26 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
-import us.ihmc.quadrupedRobotics.controller.states.*;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedJointInitializationController;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlController;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedStandPrepController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSteppingState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -27,22 +35,20 @@ import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
- * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
+ * A {@link RobotController} for switching between other robot controllers according to an internal
+ * finite state machine.
  * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
@@ -72,7 +78,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final AtomicReference<QuadrupedControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                     QuadrupedInitialPositionParameters initialPositionParameters) throws IOException
+                                     QuadrupedInitialPositionParameters initialPositionParameters)
+         throws IOException
    {
       this(runtimeEnvironment, null, physicalProperties, null, initialPositionParameters, QuadrupedControllerEnum.JOINT_INITIALIZATION,
            QuadrupedControlMode.FORCE);
@@ -149,7 +156,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    }
 
    /**
-    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpreted code paths
+    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the
+    * JIT compiler and avoids expensive interpreted code paths
     */
    public void warmup(int iterations)
    {
@@ -364,14 +372,15 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       return factory.build(initialState);
    }
 
-   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
-                                                                                                packetCommunicator);
-      //      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator, commandInputManager,
+                                                                                                publisherTopicNameGenerator, statusMessageOutputManager,
+                                                                                                realtimeRos2Node);
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
-      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
    }
 
    @Override

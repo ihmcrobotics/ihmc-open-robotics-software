@@ -27,7 +27,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public FootstepPlanRequestPacket()
    {
       start_footstep_ = new controller_msgs.msg.dds.FootstepDataMessage();
-      goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, controller_msgs.msg.dds.FootstepDataMessage.class, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
+      goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
 
    }
 

@@ -70,14 +70,14 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame, orientation);
       pelvisOrientation.changeFrame(worldFrame);
       PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, message.getSo3Trajectory().getTaskspaceTrajectoryPoints().get(0), scs, epsilon);
 
       GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
-      drcSimulationTestHelper.send(goHomeMessage);
+      drcSimulationTestHelper.publishToController(goHomeMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
 
       humanoidReferenceFrames.updateFrames();
@@ -106,7 +106,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
       SO3TrajectoryPointMessage waypoint = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().get(0);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
 
       String pelvisName = fullRobotModel.getPelvis().getName();
@@ -127,7 +127,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, true);
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.0);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
@@ -166,7 +166,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       int steps = 2;
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, false);
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.5);
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
 
@@ -231,7 +231,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          trajectoryPoint.getAngularVelocity().set(angularVelocity);
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       String pelvisName = fullRobotModel.getPelvis().getName();
@@ -261,13 +261,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       message.setEnableUserPelvisControlDuringWalking(true);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createCircularWalkingMessage(8, footsteps, true);
-      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.publishToController(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime / 2.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
    }
@@ -285,12 +285,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FrameQuaternion chestOrientation = new FrameQuaternion(chestFrame);
       chestOrientation.changeFrame(worldFrame);
       ChestTrajectoryMessage holdChestInWorldMessage = HumanoidMessageTools.createChestTrajectoryMessage(0.0, chestOrientation, worldFrame, worldFrame);
-      drcSimulationTestHelper.send(holdChestInWorldMessage);
+      drcSimulationTestHelper.publishToController(holdChestInWorldMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       // now hold the pelvis in chest frame
       PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, desiredOrientation, chestFrame);
-      drcSimulationTestHelper.send(holdPelvisInChestMessage);
+      drcSimulationTestHelper.publishToController(holdPelvisInChestMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
       // finally pitch the chest forward and assert that the pelvis follows
@@ -301,7 +301,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       frameChestOrientation.changeFrame(worldFrame);
       desiredChestOrientation.set(frameChestOrientation);
       ChestTrajectoryMessage chestMessage = HumanoidMessageTools.createChestTrajectoryMessage(chestTrajectoryTime, desiredChestOrientation, worldFrame, worldFrame);
-      drcSimulationTestHelper.send(chestMessage);
+      drcSimulationTestHelper.publishToController(chestMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(chestTrajectoryTime + 1.0);
 
       String pelvisName = fullRobotModel.getPelvis().getName();

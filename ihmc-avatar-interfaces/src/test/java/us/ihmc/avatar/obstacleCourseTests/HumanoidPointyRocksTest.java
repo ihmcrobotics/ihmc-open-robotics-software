@@ -143,7 +143,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             jointTrajectory.getTrajectoryPoints().add().set(trajectoryPoint);
             armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(jointTrajectory);
          }
-         drcSimulationTestHelper.send(armTrajectoryMessage);
+         drcSimulationTestHelper.publishToController(armTrajectoryMessage);
       }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
@@ -201,7 +201,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       contacts = generateContactPointsForAllOfFoot();
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, RobotSide.RIGHT, contacts, stepLocation, true);
       message.getFootstepDataList().add().set(footstepData);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
 
       Vector3D rootVelocity = new Vector3D();
@@ -277,7 +277,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       desiredPosition.changeFrame(worldFrame);
       Quaternion desiredOrientation = new Quaternion();
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(RobotSide.RIGHT, 1.0, desiredPosition, desiredOrientation);
-      drcSimulationTestHelper.send(footTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(footTrajectoryMessage);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
       //      pushController.applyForce(new Vector3D(0.0, 1.0, 0.0), 200.0, 0.025);
@@ -326,7 +326,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       for (FootstepDataListMessage footstepDataList : footstepDataLists)
       {
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
 
@@ -759,7 +759,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          robotSide = robotSide.getOppositeSide();
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * 2.0);
 
       assertTrue(success);
@@ -1051,7 +1051,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
                                                                    setPredictedContactPoints);
       message.getFootstepDataList().add().set(footstepData);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
       changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName, robotSide);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

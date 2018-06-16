@@ -6,12 +6,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerSetController.GraspState;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
@@ -73,11 +75,12 @@ public class ValkyrieFingerController implements RobotController
       parentRegistry.addChild(registry);
    }
 
-   public void setupCommunication(PacketCommunicator packetCommunicator)
+   public void setupCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, subscribers.get(robotSide));
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class,
+                                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName), subscribers.get(robotSide));
       }
    }
 

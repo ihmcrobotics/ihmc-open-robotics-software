@@ -17,8 +17,6 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanParametersMessage;
 import controller_msgs.msg.dds.ObjectDetectorResultPacket;
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
@@ -90,7 +88,7 @@ public class MessageTools
       return message;
    }
 
-   public static InvalidPacketNotificationPacket createInvalidPacketNotificationPacket(Class<? extends Packet<?>> packetClass, String errorMessage)
+   public static InvalidPacketNotificationPacket createInvalidPacketNotificationPacket(Class<?> packetClass, String errorMessage)
    {
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
       message.setPacketClassSimpleName(packetClass.getSimpleName());
@@ -408,13 +406,6 @@ public class MessageTools
       }
       if (destination != null)
          message.setDestination(destination.ordinal());
-      return message;
-   }
-
-   public static PlanarRegionsListMessage createPlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
-   {
-      PlanarRegionsListMessage message = new PlanarRegionsListMessage();
-      copyData(planarRegions, message.getPlanarRegions());
       return message;
    }
 

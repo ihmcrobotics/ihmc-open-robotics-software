@@ -35,15 +35,15 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    }
 
    @Override
-   public void set(HandLoadBearingMessage message)
+   public void setFromMessage(HandLoadBearingMessage message)
    {
-      loadBearingCommand.set(message.getLoadBearingMessage());
+      loadBearingCommand.setFromMessage(message.getLoadBearingMessage());
       executionDelayTime = message.getExecutionDelayTime();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       useJointspaceCommand = message.getUseJointspaceCommand();
       if (message.getJointspaceTrajectory() != null)
       {
-         jointspaceTrajectory.set(message.getJointspaceTrajectory());
+         jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
       }
    }
 

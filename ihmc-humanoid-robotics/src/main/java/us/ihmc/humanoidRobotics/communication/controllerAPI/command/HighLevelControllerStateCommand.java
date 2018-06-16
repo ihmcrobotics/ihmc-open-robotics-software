@@ -21,7 +21,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    }
 
    @Override
-   public void set(HighLevelStateMessage message)
+   public void setFromMessage(HighLevelStateMessage message)
    {
       highLevelControllerName = HighLevelControllerName.fromByte(message.getHighLevelControllerName());
    }

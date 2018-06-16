@@ -73,8 +73,8 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
    }
 
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
@@ -84,7 +84,8 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       ReferenceFrame pelvisZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisZUpFrame();
 
       Quaternion desiredChestQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(),
+                                                                                                        pelvisZUpFrame);
 
       ChestTrajectoryBehavior chestOrientationBehavior = testChestOrientationBehavior(chestTrajectoryMessage);
 
@@ -97,8 +98,9 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      final ChestTrajectoryBehavior chestTrajectoryBehavior = new ChestTrajectoryBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getYoTime());
+      final ChestTrajectoryBehavior chestTrajectoryBehavior = new ChestTrajectoryBehavior(drcBehaviorTestHelper.getRobotName(),
+                                                                                          drcBehaviorTestHelper.getRos2Node(),
+                                                                                          drcBehaviorTestHelper.getYoTime());
 
       chestTrajectoryBehavior.initialize();
       chestTrajectoryBehavior.setInput(chestTrajectoryMessage);
@@ -149,6 +151,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       {
          assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
       }
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,
+                   ORIENTATION_THRESHOLD);
    }
 }

@@ -200,7 +200,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       }
 
       // Send footsteps to controller
-      drcSimulationTestHelper.send(snappedFootstepDataList);
+      drcSimulationTestHelper.publishToController(snappedFootstepDataList);
 
       // Check for success
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);

@@ -6,33 +6,37 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class SimulatedRobotiqHandsController implements MultiThreadedRobotControlElement, RobotController
 {
    private final boolean DEBUG = false;
-   
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -42,7 +46,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kdMap = new LinkedHashMap<>();
-   
+
    private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
    private final long controlDTInNS;
@@ -62,24 +66,27 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
-   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel,
+                                          ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
+                                          MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator,
+                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
       this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
 
-      if(globalDataProducer != null)
+      if (realtimeRos2Node != null)
       {
-         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot, closeableAndDisposableRegistry);
-      }      
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
+                                                                                                         pubTopicNameGenerator);
+         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot, closeableAndDisposableRegistry);
+      }
       else
       {
          jointAngleProducer = null;
       }
       fingerTrajectoryTime.set(0.5);
-      
 
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
@@ -104,11 +111,14 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
-            if (globalDataProducer != null)
-               globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
+            if (realtimeRos2Node != null)
+            {
+               ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
+                                                    handDesiredConfigurationSubscriber);
+            }
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
-                  simulatedRobot, registry);
+                                                                                                           simulatedRobot, registry);
             individualHandControllers.put(robotSide, individualHandController);
          }
       }
@@ -159,7 +169,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       kdThumbJoint1.set(1.0);
       kdThumbJoint2.set(0.5);
       kdThumbJoint3.set(0.2);
-      
+
       kdEnumMap.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, kdFingerJoint1);
       kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, kdFingerJoint1);
       kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, kdFingerJoint2);
@@ -203,9 +213,9 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          handControllerTime.add(Conversions.nanosecondsToSeconds(controlDTInNS));
       }
 
-      if(jointAngleProducer != null)
+      if (jointAngleProducer != null)
       {
-         jointAngleProducer.sendHandJointAnglesPacket();         
+         jointAngleProducer.sendHandJointAnglesPacket();
       }
    }
 
@@ -233,85 +243,86 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationSubscriber.pollMessage().getDesiredHandConfiguration());
-            
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationSubscriber.pollMessage()
+                                                                                                                      .getDesiredHandConfiguration());
+
             if (DEBUG)
                PrintTools.debug(this, "Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);
             switch (handDesiredConfiguration)
             {
-               case OPEN:
-                  individualRobotiqHandController.open();
-                  break;
+            case OPEN:
+               individualRobotiqHandController.open();
+               break;
 
-               case OPEN_INDEX:
-                  //TODO
-                  break;
+            case OPEN_INDEX:
+               //TODO
+               break;
 
-               case OPEN_MIDDLE:
-                //TODO
-                  break;
-                  
-               case OPEN_FINGERS:
-                  individualRobotiqHandController.openFingers();
-                  break;
+            case OPEN_MIDDLE:
+               //TODO
+               break;
 
-               case OPEN_THUMB:
-                  individualRobotiqHandController.openThumb();
-                  break;
+            case OPEN_FINGERS:
+               individualRobotiqHandController.openFingers();
+               break;
 
-               case CLOSE:
-                  individualRobotiqHandController.close();
-                  break;
+            case OPEN_THUMB:
+               individualRobotiqHandController.openThumb();
+               break;
 
-               case CLOSE_FINGERS:
-                  individualRobotiqHandController.closeFingers();
-                  break;
+            case CLOSE:
+               individualRobotiqHandController.close();
+               break;
 
-               case CLOSE_THUMB:
-                  individualRobotiqHandController.closeThumb();
-                  break;
+            case CLOSE_FINGERS:
+               individualRobotiqHandController.closeFingers();
+               break;
 
-               case RESET:
-                  individualRobotiqHandController.reset();
-                  break;
+            case CLOSE_THUMB:
+               individualRobotiqHandController.closeThumb();
+               break;
 
-               case HOOK:
-                  individualRobotiqHandController.hook();
-                  break;
+            case RESET:
+               individualRobotiqHandController.reset();
+               break;
 
-               case CRUSH:
-                  individualRobotiqHandController.crush();
-                  break;
+            case HOOK:
+               individualRobotiqHandController.hook();
+               break;
 
-               case CRUSH_INDEX:
-                //TODO
-                  break;
+            case CRUSH:
+               individualRobotiqHandController.crush();
+               break;
 
-               case CRUSH_MIDDLE:
-                //TODO
-                  break;
+            case CRUSH_INDEX:
+               //TODO
+               break;
 
-               case CRUSH_THUMB:
-                  individualRobotiqHandController.crushThumb();
-                  break;
-                  
-               case STOP:
-                  individualRobotiqHandController.stop();
-                  
-               case PINCH_GRIP:
-                  individualRobotiqHandController.pinchGrip();
-                  break;
-                  
-               case BASIC_GRIP:
-                  individualRobotiqHandController.basicGrip();
-                  break;
-                  
-               case WIDE_GRIP:
-                  individualRobotiqHandController.wideGrip();
-                  break;
+            case CRUSH_MIDDLE:
+               //TODO
+               break;
 
-               default:
-                  break;
+            case CRUSH_THUMB:
+               individualRobotiqHandController.crushThumb();
+               break;
+
+            case STOP:
+               individualRobotiqHandController.stop();
+
+            case PINCH_GRIP:
+               individualRobotiqHandController.pinchGrip();
+               break;
+
+            case BASIC_GRIP:
+               individualRobotiqHandController.basicGrip();
+               break;
+
+            case WIDE_GRIP:
+               individualRobotiqHandController.wideGrip();
+               break;
+
+            default:
+               break;
             }
          }
       }

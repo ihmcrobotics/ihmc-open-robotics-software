@@ -3,6 +3,7 @@ package us.ihmc.communication.controllerAPI.command;
 import controller_msgs.msg.dds.QueueableMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * A QueueableCommand is a {@link Command} that can be queued for execution inside the controller. It implements command
@@ -13,7 +14,7 @@ import us.ihmc.communication.packets.Packet;
  * @param <C> Type of the final implementation of this command (see {@link Command}).
  * @param <M> Type of the network message associated with this command (see {@link Command}).
  */
-public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends Packet<M>> implements Command<C, M>
+public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends Settable<M>> implements Command<C, M>
 {
    /** The ID of this command. Used to make sure only consecutive commands are queued. */
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;

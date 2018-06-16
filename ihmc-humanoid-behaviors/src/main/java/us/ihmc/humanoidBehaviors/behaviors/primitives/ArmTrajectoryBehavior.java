@@ -5,11 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -31,14 +31,17 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    protected final YoBoolean hasStatusBeenReceived;
    private final YoBoolean isDone;
 
-   public ArmTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
+   private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+
+   public ArmTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
-      this(null, outgoingCommunicationBridge, yoTime);
+      this(robotName, null, ros2Node, yoTime);
    }
 
-   public ArmTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime)
+   public ArmTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
    {
-      super(namePrefix, outgoingCommunicationBridge);
+      super(robotName, namePrefix, ros2Node);
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
@@ -53,6 +56,9 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
+
+      armTrajectoryPublisher = createPublisherForController(ArmTrajectoryMessage.class);
+      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(ArmTrajectoryMessage armTrajectoryMessage)
@@ -89,10 +95,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-//         outgoingMessage.setDestination(PacketDestination.UI);
-
-//         sendPacketToController(outgoingMessage);
-         sendPacket(outgoingMessage);
+         armTrajectoryPublisher.publish(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -105,9 +108,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       if (outgoingMessage != null)
       {
-         StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-         sendPacketToController(pausePacket);
+         stopAllTrajectoryPublisher.publish(new StopAllTrajectoryMessage());
       }
    }
 
@@ -191,7 +192,6 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       return isDone.getBooleanValue();
    }
-
 
    public boolean hasInputBeenSet()
    {

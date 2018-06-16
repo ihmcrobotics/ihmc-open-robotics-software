@@ -174,7 +174,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
          FootstepDataListMessage footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          maxHeights[i] = testController.getMaxFootHeight();
          assertTrue(success);
@@ -215,7 +215,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       assertTrue(success);
 
@@ -244,7 +244,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       assertTrue(success);
 
@@ -356,7 +356,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          swingSide = swingSide.getOppositeSide();
       }
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       double simulationTime = initialTransfer + steps * stepTime + 0.5;
       while (drcSimulationTestHelper.getYoVariable("t").getValueAsDouble() < simulationTime)
       {

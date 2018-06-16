@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 
 public class AdditionBehavior extends AbstractBehavior
 {
@@ -12,14 +12,14 @@ public class AdditionBehavior extends AbstractBehavior
    double value2;
    double result;
 
-   public AdditionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public AdditionBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
    }
 
-   public AdditionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, double value1, double value2)
+   public AdditionBehavior(String robotName, Ros2Node ros2Node, double value1, double value2)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
       setInput(value1, value2);
    }

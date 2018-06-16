@@ -19,7 +19,7 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
 
    public Polygon2DMessage()
    {
-      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

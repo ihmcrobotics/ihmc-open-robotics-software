@@ -13,11 +13,10 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -76,21 +75,19 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private final PacketCommunicator packetCommunicator;
    private double dt;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel,
-                                            StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                            StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
+                                            YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
-      this.packetCommunicator = packetCommunicator;
       this.contactPointParameters = drcRobotModel.getContactPointParameters();
       this.dt = dt;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
-      packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, latestRequestReference::set);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
@@ -99,8 +96,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
-      plannerMap
-            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH,
+                     new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
@@ -133,7 +130,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    @Override
    protected void updateInternal()
-   {      
+   {
       toolboxTime.add(dt);
       if (toolboxTime.getDoubleValue() > 20.0)
       {
@@ -238,9 +235,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private void sendMessageToUI(String message)
    {
-      TextToSpeechPacket packet = MessageTools.createTextToSpeechPacket(message);
-      packet.setDestination(PacketDestination.UI.ordinal());
-      packetCommunicator.send(packet);
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(message));
    }
 
    @Override
@@ -285,4 +280,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return footPolygons;
    }
 
+   public void processRequest(FootstepPlanningRequestPacket request)
+   {
+      latestRequestReference.set(request);
+   }
+
+   public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)
+   {
+      textToSpeechPublisher = publisher;
+   }
 }

@@ -168,7 +168,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.send(footMessage);
+      drcSimulationTestHelper.publishToController(footMessage);
       double simulationTime = intitialTransfer + (transfer + swing) * steps + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
@@ -207,7 +207,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      drcSimulationTestHelper.send(footMessage);
+      drcSimulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
       boolean success;
