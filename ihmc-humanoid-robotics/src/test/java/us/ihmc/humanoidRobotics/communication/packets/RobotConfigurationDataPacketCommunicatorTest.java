@@ -61,8 +61,9 @@ public class RobotConfigurationDataPacketCommunicatorTest
 
       client.connect();
       server.connect();
-      
-      ThreadTools.sleep(10); // these waits ensure all the messages have time to get over, lengthen a little if it fails
+
+      while (!client.isConnected() && !server.isConnected())
+         ThreadTools.sleep(10); // these waits ensure all the messages have time to get over, lengthen a little if it fails
 
       for (int i = 0; i < NUMBER_OF_MESSAGES_TO_SEND; i++)
       {
@@ -81,7 +82,7 @@ public class RobotConfigurationDataPacketCommunicatorTest
          ThreadTools.sleep(10); // these waits ensure all the messages have time to get over, lengthen a little if it fails
       }
       
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(200);
       
       assertEquals("all messages not received.", NUMBER_OF_MESSAGES_TO_SEND, messageReceived.intValue(), 0);
    }
