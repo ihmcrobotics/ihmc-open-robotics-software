@@ -11,6 +11,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
@@ -91,6 +92,11 @@ public class JoystickBasedSteppingMainUI
       primaryStage.setOnCloseRequest(event -> stop());
 
       start();
+   }
+
+   public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
+   {
+      stepGeneratorJavaFXController.setActiveSecondaryControlOption(activeSecondaryControlOption);
    }
 
    public void start() throws IOException

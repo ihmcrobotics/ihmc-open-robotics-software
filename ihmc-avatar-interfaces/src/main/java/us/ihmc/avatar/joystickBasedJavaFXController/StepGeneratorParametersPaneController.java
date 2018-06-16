@@ -32,7 +32,7 @@ public class StepGeneratorParametersPaneController
 
    public void initialize(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters)
    {
-      swingHeightSlider.setValue(0.05);
+      swingHeightSlider.setValue(0.025);
       swingDurationSlider.setValue(0.7);
       transferDurationSlider.setValue(0.3);
       trajectoryDurationSlider.setValue(1.0);

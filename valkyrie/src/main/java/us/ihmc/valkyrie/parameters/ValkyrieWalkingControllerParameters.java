@@ -33,6 +33,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -181,7 +182,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setIntegralLeakRatio(kiBleedOff);
 
       if (target == RobotTarget.REAL_ROBOT)
-         gains.setFeedbackPartMaxRate(1.0);
+         gains.setFeedbackPartMaxRate(1.5);
 
       return gains;
    }
@@ -271,8 +272,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double zeta = runningOnRealRobot ? 1.0 : 0.7;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
       armGains.setKp(kp);
       armGains.setZeta(zeta);
@@ -617,9 +618,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.UpperNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LowerNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.NeckYaw]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+            if (!ValkyrieRosControlController.HAS_FOREARMS_ON)
+            {
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
+               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+            }
          }
       }
 
