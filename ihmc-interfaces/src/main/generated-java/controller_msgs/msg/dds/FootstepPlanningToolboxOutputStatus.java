@@ -33,7 +33,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose2D();
 
    }

@@ -61,7 +61,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
-         drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
+         drcSimulationTestHelper.publishToController(armDesiredAccelerationsMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);

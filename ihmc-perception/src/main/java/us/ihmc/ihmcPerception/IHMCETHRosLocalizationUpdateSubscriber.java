@@ -8,14 +8,17 @@ import controller_msgs.msg.dds.LocalizationStatusPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -28,60 +31,66 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    private double overlap = 1.0;
 
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
-   private final PacketCommunicator rosModulePacketCommunicator; 
-   
-   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicator rosModulePacketCommunicator,
-         final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
-   {
-      this.rosModulePacketCommunicator = rosModulePacketCommunicator;
-      rosModulePacketCommunicator.attachListener(LocalizationPacket.class, this);
-      
-	   RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
-	   {
-		   @Override
-		   protected void newPose(String frameID,
-				   TimeStampedTransform3D timeStampedTransform)
-		   {
-			   long timestamp = timeStampedTransform.getTimeStamp();
-			   timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
-			   timeStampedTransform.setTimeStamp(timestamp);
-			   
-			   StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);
-			   posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-			   if (DEBUG) System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
-			   
-			   rosModulePacketCommunicator.send(posePacket);
-		   }
-	   };
-	   
-	   rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
+   private final IHMCROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
 
-      AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE) {
+   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      localizationPointMapPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
+
+      IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
+      {
          @Override
-         public void onNewMessage(std_msgs.Float64 message) {
+         protected void newPose(String frameID, TimeStampedTransform3D timeStampedTransform)
+         {
+            long timestamp = timeStampedTransform.getTimeStamp();
+            timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
+            timeStampedTransform.setTimeStamp(timestamp);
+
+            StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);
+            posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
+            if (DEBUG)
+               System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
+
+            stampedPosePublisher.publish(posePacket);
+         }
+      };
+
+      rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
+
+      IHMCROS2Publisher<LocalizationStatusPacket> localizationStatusPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationStatusPacket.class,
+                                                                                                          ROS2Tools.getDefaultTopicNameGenerator());
+      AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)
+      {
+         @Override
+         public void onNewMessage(std_msgs.Float64 message)
+         {
             overlap = message.getData();
             LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, null);
-            rosModulePacketCommunicator.send(localizationOverlapPacket);
+            localizationStatusPublisher.publish(localizationOverlapPacket);
          }
       };
       rosMainNode.attachSubscriber(RosLocalizationConstants.OVERLAP_UPDATE_TOPIC, overlapSubscriber);
 
-      AbstractRosTopicSubscriber<std_msgs.String> statusSubscriber = new AbstractRosTopicSubscriber<std_msgs.String>(std_msgs.String._TYPE) {
+      AbstractRosTopicSubscriber<std_msgs.String> statusSubscriber = new AbstractRosTopicSubscriber<std_msgs.String>(std_msgs.String._TYPE)
+      {
 
          @Override
-         public void onNewMessage(std_msgs.String message) {
+         public void onNewMessage(std_msgs.String message)
+         {
             String status = message.getData();
             LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, status);
-            rosModulePacketCommunicator.send(localizationOverlapPacket);
+            localizationStatusPublisher.publish(localizationOverlapPacket); // FIXME probably should not be using the same publisher as in the previous subscriber.
          }
 
       };
-      
+
       rosMainNode.attachSubscriber(RosLocalizationConstants.STATUS_UPDATE_TOPIC, statusSubscriber);
-      
+
       RosPointCloudSubscriber pointMapSubscriber = new RosPointCloudSubscriber()
       {
-         
+
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
@@ -91,18 +100,18 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
       };
       rosMainNode.attachSubscriber(RosLocalizationConstants.NAV_POSE_MAP, pointMapSubscriber);
-      
-//      Thread localizationMapPublishingThread = new Thread(this);
-//      localizationMapPublishingThread.start();  
-      
+
+      //      Thread localizationMapPublishingThread = new Thread(this);
+      //      localizationMapPublishingThread.start();  
+
    }
-   
+
    private void processAndSendPointCloud(UnpackedPointCloud pointCloudData)
    {
       Point3D[] points = pointCloudData.getPoints();
       LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
       HumanoidMessageTools.packLocalizationPointMap(points, localizationMapPacket);
-      rosModulePacketCommunicator.send(localizationMapPacket);
+      localizationPointMapPublisher.publish(localizationMapPacket);
    }
 
    @Override
@@ -111,7 +120,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       while (true)
       {
          UnpackedPointCloud pointCloud = localizationMapPointCloud.get();
-         if(pointCloud != null)
+         if (pointCloud != null)
          {
             processAndSendPointCloud(pointCloud);
          }
@@ -122,9 +131,9 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    @Override
    public void receivedPacket(LocalizationPacket packet)
    {
-      if(packet.getReset())
+      if (packet.getReset())
       {
          localizationMapPointCloud.set(null);
-      }      
+      }
    }
 }

@@ -2,29 +2,25 @@ package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.awt.Color;
 import java.net.URI;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.RequestStereoPointCloudMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -38,23 +34,22 @@ public class StereoVisionPointCloudPublisher
 
    private final AtomicReference<ColorPointCloudData> pointCloudDataToPublish = new AtomicReference<>(null);
 
-   private final PacketCommunicator packetCommunicator;
-   private final ConcurrentLinkedDeque<PacketDestination> listeners = new ConcurrentLinkedDeque<>();
-
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
-   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
+   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
+
+   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
-      this.packetCommunicator = packetCommunicator;
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
 
-      packetCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
-      packetCommunicator.attachListener(RequestStereoPointCloudMessage.class, createRequestStereoPointCloudMessageConsumer());
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator(robotName));
    }
 
    public void start()
@@ -112,18 +107,7 @@ public class StereoVisionPointCloudPublisher
             if (pointCloudData == null)
                return;
 
-            if (listeners.isEmpty())
-               return;
-
             int count = 0;
-            Set<PacketDestination> listenerSet = EnumSet.noneOf(PacketDestination.class);
-
-            while (!listeners.isEmpty() && count < MAX_NUMBER_OF_LISTENERS)
-            {
-               listenerSet.add(listeners.poll());
-               count++;
-            }
-            listeners.clear();
 
             long robotTimestamp;
 
@@ -142,32 +126,11 @@ public class StereoVisionPointCloudPublisher
                   return;
             }
 
-            for (PacketDestination destination : listenerSet)
-            {
-               float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
+            float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
 
-               int[] colors = pointCloudData.getColors();
-               StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
-
-               message.setDestination(destination.ordinal());
-               packetCommunicator.send(message);
-            }
-
-            listeners.clear();
-         }
-      };
-
-   }
-
-   private PacketConsumer<RequestStereoPointCloudMessage> createRequestStereoPointCloudMessageConsumer()
-   {
-      return new PacketConsumer<RequestStereoPointCloudMessage>()
-      {
-         @Override
-         public void receivedPacket(RequestStereoPointCloudMessage packet)
-         {
-            if (packet != null)
-               listeners.add(PacketDestination.fromOrdinal(packet.getSource()));
+            int[] colors = pointCloudData.getColors();
+            StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
+            pointcloudPublisher.publish(message);
          }
       };
    }

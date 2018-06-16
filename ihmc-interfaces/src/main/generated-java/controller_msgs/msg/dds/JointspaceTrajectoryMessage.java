@@ -30,7 +30,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
    public JointspaceTrajectoryMessage()
    {
-      joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage.class, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
+      joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
 
    }

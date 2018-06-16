@@ -44,8 +44,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
-      left_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
-      right_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, us.ihmc.euclid.tuple3D.Point3D.class, new geometry_msgs.msg.dds.PointPubSubType());
+      left_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
+      right_foot_support_polygon_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

@@ -3,14 +3,17 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.List;
 
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
+import controller_msgs.msg.dds.HandCollisionDetectedPacketPubSubType;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
@@ -21,6 +24,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -60,10 +64,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final YoDouble yoImpactStiffnessThreshold_NperM;
    private final YoDouble yoImpactForceThreshold_N;
 
-   private final PacketCommunicator controllerCommunicator;
+   private final IHMCROS2Publisher<HandCollisionDetectedPacket> publisher;
 
-   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
-         ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicator behaviorPacketCommunicator, YoVariableRegistry registry)
+   public WristForceSensorFilteredUpdatable(String robotName, RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
+                                            ForceSensorDataHolder forceSensorDataHolder, double DT, Ros2Node ros2Node, YoVariableRegistry registry)
    {
       this.DT = DT;
       this.robotSide = robotSide;
@@ -92,9 +96,11 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
       yoWristSensorForceMagnitude = new YoDouble(forceSensorName + "ForceMag", registry);
-      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS, registry);
+      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS,
+                                                                         registry);
       yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered", "",
-            forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, DT, registry);
+                                                                                             forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz,
+                                                                                             DT, registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);
 
@@ -112,7 +118,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
-      this.controllerCommunicator = behaviorPacketCommunicator;
+      publisher = ROS2Tools.createPublisher(ros2Node, HandCollisionDetectedPacket.class, IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName));
 
       initialize();
    }
@@ -227,7 +233,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
             yoImpactDetected.set(true);
             yoImpactTime.set(time);
 
-            controllerCommunicator.send(HumanoidMessageTools.createHandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
+            publisher.publish(HumanoidMessageTools.createHandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
             if (DEBUG)
                PrintTools.debug(this, "Sending Collision Detected Packet.  FilteredForce = " + yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
 

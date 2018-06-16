@@ -19,6 +19,10 @@ import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import geometry_msgs.msg.dds.PointPubSubType;
 import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -32,7 +36,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.javaFXToolkit.messager.Message;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.TopicID;
@@ -52,8 +55,11 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 /**
  * Created by adrien on 11/18/16.
  */
-public class REACommunicationKryoNetClassLists
+public class REACommunicationProperties
 {
+   public static final MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2TopicQualifier.OUTPUT);
+   public static final MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2TopicQualifier.INPUT);
+
    private static final NetClassList privateNetClassList = new NetClassList();
    static
    {

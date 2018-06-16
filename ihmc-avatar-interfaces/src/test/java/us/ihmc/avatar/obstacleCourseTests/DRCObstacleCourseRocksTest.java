@@ -71,14 +71,14 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheRocks(scriptedFootstepGenerator);
-      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.5);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOntoTheRocks(scriptedFootstepGenerator);
-         drcSimulationTestHelper.send(footstepDataList);
+         drcSimulationTestHelper.publishToController(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }

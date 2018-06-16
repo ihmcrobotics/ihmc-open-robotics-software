@@ -20,9 +20,9 @@ public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccel
    }
 
    @Override
-   public void set(NeckDesiredAccelerationsMessage message)
+   public void setFromMessage(NeckDesiredAccelerationsMessage message)
    {
-      desiredAccelerations.set(message.getDesiredAccelerations());
+      desiredAccelerations.setFromMessage(message.getDesiredAccelerations());
    }
 
    public DesiredAccelerationsCommand getDesiredAccelerations()

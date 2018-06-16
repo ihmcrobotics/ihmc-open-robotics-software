@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.MessageCollectionNotification;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.idl.IDLSequence;
 
 /**
@@ -35,9 +35,9 @@ public class MessageCollector
     */
    private final TLongHashSet expectedMessageIDs;
    /** The list of the collection messages that have already been collected. */
-   private final List<Packet<?>> interceptedMessages;
+   private final List<Settable<?>> interceptedMessages;
    /** A view list of {@link #interceptedMessages}, it is for read-only purposes. */
-   private final List<Packet<?>> interceptedMessagesView;
+   private final List<Settable<?>> interceptedMessagesView;
    /**
     * The internal buffer used to save a copy of the intercepted messages without holding onto the
     * reference of a message that was created outside this collector.
@@ -80,7 +80,7 @@ public class MessageCollector
     * @param messageIDExtractor provides the method for getting the IDs from the messages.
     * @param supportedMessages the list of messages that this collector can handle.
     */
-   public MessageCollector(MessageIDExtractor messageIDExtractor, List<Class<? extends Packet<?>>> supportedMessages)
+   public MessageCollector(MessageIDExtractor messageIDExtractor, List<Class<? extends Settable<?>>> supportedMessages)
    {
       this.messageIDExtractor = messageIDExtractor;
       messagePool = new MessagePool(supportedMessages);
@@ -150,7 +150,7 @@ public class MessageCollector
     *         current collection gathered by this collector.
     */
    @SuppressWarnings({"unchecked", "rawtypes"})
-   public boolean interceptMessage(Packet<?> message)
+   public boolean interceptMessage(Settable<?> message)
    {
       if (messagePool == null)
          return false;
@@ -164,7 +164,7 @@ public class MessageCollector
 
       if (intercept)
       {
-         Packet copy = messagePool.requestMessage(message.getClass());
+         Settable copy = messagePool.requestMessage(message.getClass());
          copy.set(message);
          interceptedMessages.add(copy);
       }
@@ -197,7 +197,7 @@ public class MessageCollector
     * 
     * @return the collected messages.
     */
-   public List<Packet<?>> getCollectedMessages()
+   public List<Settable<?>> getCollectedMessages()
    {
       return interceptedMessagesView;
    }
@@ -221,6 +221,6 @@ public class MessageCollector
        * @param message the message to get the ID of.
        * @return the ID or {@link #NO_ID} if the message should not be processed.
        */
-      public long getMessageID(Packet<?> message);
+      public long getMessageID(Object message);
    }
 }

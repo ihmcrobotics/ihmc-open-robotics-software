@@ -290,7 +290,7 @@ public abstract class DRCPushRecoveryTest
       Quaternion desiredFootOrientation = new Quaternion();
       footPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
-      drcSimulationTestHelper.send(footPosePacket);
+      drcSimulationTestHelper.publishToController(footPosePacket);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       // push timing:

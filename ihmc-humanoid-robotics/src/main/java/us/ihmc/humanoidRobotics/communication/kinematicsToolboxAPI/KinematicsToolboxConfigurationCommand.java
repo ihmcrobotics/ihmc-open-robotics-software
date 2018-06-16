@@ -54,7 +54,7 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    }
 
    @Override
-   public void set(KinematicsToolboxConfigurationMessage message)
+   public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
       hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
       if (hasPrivilegedRootJointPosition)

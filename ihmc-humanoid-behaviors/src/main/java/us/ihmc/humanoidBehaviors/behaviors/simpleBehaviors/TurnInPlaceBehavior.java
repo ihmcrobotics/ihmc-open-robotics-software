@@ -8,23 +8,20 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class TurnInPlaceBehavior extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final boolean DEBUG = false;
-   private final FullRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private double swingTime;
@@ -42,20 +39,20 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private FrameOrientation2D targetOrientationInWorldFrame;
 
-   public TurnInPlaceBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
+   public TurnInPlaceBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+                              HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(robotName, ros2Node);
 
-      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
 
-      this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength(), walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0,
-            Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+                                               walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0, Math.toRadians(20.0),
+                                               Math.toRadians(10.0), 0.4); // 10 5 0.4
+      footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -114,7 +111,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       midFeetPoint.setToZero(referenceFrames.getMidFeetZUpFrame());
       midFeetPoint.changeFrame(worldFrame);
 
-      for(Footstep footstep : footsteps)
+      for (Footstep footstep : footsteps)
       {
          footstep.setZ(midFeetPoint.getZ());
       }
@@ -134,16 +131,11 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-
-
-
    @Override
    public void onBehaviorAborted()
    {
       footstepListBehavior.onBehaviorAborted();
    }
-
-
 
    @Override
    public void onBehaviorPaused()

@@ -1,22 +1,26 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootLoadBearingBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private FootLoadBearingMessage outgoingFootLoadBearingMessage;
+   private final IHMCROS2Publisher<FootLoadBearingMessage> publisher;
 
-   public FootLoadBearingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public FootLoadBearingBehavior(String robotName, Ros2Node ros2Node)
    {
-      super(outgoingCommunicationBridge);
+      this(robotName, null, ros2Node);
    }
-   public FootLoadBearingBehavior(String prefix, CommunicationBridgeInterface outgoingCommunicationBridge)
+
+   public FootLoadBearingBehavior(String robotName, String prefix, Ros2Node ros2Node)
    {
-      super(prefix,outgoingCommunicationBridge);
+      super(robotName, prefix, ros2Node);
+      publisher = createPublisherForController(FootLoadBearingMessage.class);
    }
 
    public void setInput(FootLoadBearingMessage endEffectorLoadBearingMessage)
@@ -35,13 +39,12 @@ public class FootLoadBearingBehavior extends AbstractBehavior
 
    private void sendFootStateToController()
    {
-      if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToController(outgoingFootLoadBearingMessage);
+         publisher.publish(outgoingFootLoadBearingMessage);
          packetHasBeenSent.set(true);
       }
    }
-
 
    @Override
    public void onBehaviorExited()
@@ -53,33 +56,35 @@ public class FootLoadBearingBehavior extends AbstractBehavior
       isAborted.set(false);
    }
 
-
    @Override
    public boolean isDone()
    {
-      return packetHasBeenSent.getBooleanValue() &&!isPaused.getBooleanValue();
+      return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   
-   
-   public boolean hasInputBeenSet() {
-	   if (outgoingFootLoadBearingMessage != null)
-		   return true;
-	   else
-		   return false;
+   public boolean hasInputBeenSet()
+   {
+      if (outgoingFootLoadBearingMessage != null)
+         return true;
+      else
+         return false;
    }
+
    @Override
    public void onBehaviorEntered()
    {
    }
+
    @Override
    public void onBehaviorAborted()
    {
    }
+
    @Override
    public void onBehaviorPaused()
    {
    }
+
    @Override
    public void onBehaviorResumed()
    {

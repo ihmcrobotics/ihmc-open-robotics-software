@@ -49,7 +49,7 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
    public EuclideanTrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> (1, controller_msgs.msg.dds.EuclideanTrajectoryPointMessage.class, new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
+      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> (1, new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
       selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       frame_information_ = new controller_msgs.msg.dds.FrameInformation();
       weight_matrix_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();

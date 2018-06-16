@@ -26,8 +26,8 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> imple
    public FootstepPathPlanPacket()
    {
       start_ = new controller_msgs.msg.dds.FootstepDataMessage();
-      original_goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, controller_msgs.msg.dds.FootstepDataMessage.class, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
-      path_plan_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, controller_msgs.msg.dds.FootstepDataMessage.class, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
+      original_goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
+      path_plan_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (100, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
       footstep_unknown_ = new us.ihmc.idl.IDLSequence.Boolean (100, "type_7");
 
 

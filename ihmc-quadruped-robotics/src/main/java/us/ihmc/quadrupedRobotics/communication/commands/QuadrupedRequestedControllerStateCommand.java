@@ -21,7 +21,7 @@ public class QuadrupedRequestedControllerStateCommand implements Command<Quadrup
    }
 
    @Override
-   public void set(QuadrupedRequestedControllerStateMessage message)
+   public void setFromMessage(QuadrupedRequestedControllerStateMessage message)
    {
       requestedControllerState = QuadrupedControllerRequestedEvent.fromByte(message.getQuadrupedControllerRequestedEvent());
    }

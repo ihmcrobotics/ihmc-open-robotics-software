@@ -66,8 +66,8 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       }
       handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionDelayTime(0.1);
       footstepDataListMessage.getQueueingProperties().setExecutionDelayTime(0.1);
-      drcSimulationTestHelper.send(handTrajectoryMessage);
-      drcSimulationTestHelper.send(footstepDataListMessage);
+      drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
 
       assertEquals(0, (int) footsteps.getValueAsLongBits());
@@ -75,7 +75,7 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
 
       // clear hand trajectory
       ClearDelayQueueMessage clearHandTrajectory = HumanoidMessageTools.createClearDelayQueueMessage(HandTrajectoryMessage.class);
-      drcSimulationTestHelper.send(clearHandTrajectory);
+      drcSimulationTestHelper.publishToController(clearHandTrajectory);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
 
       assertEquals(10, (int) footsteps.getValueAsLongBits());

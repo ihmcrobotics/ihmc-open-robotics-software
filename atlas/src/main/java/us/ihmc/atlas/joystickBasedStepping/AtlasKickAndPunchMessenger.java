@@ -4,13 +4,17 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotLowLevelMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -19,11 +23,26 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.ros2.Ros2Node;
 
 public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger, HumanoidRobotLowLevelMessenger
 {
+   private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
+   private final IHMCROS2Publisher<FootTrajectoryMessage> footTrajectoryPublisher;
+   private final IHMCROS2Publisher<FootLoadBearingMessage> footLoadBearingPublisher;
+   private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> atlasLowLevelControlModePublisher;
+
+   public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
+   {
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      armTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footLoadBearingPublisher = ROS2Tools.createPublisher(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
+      atlasLowLevelControlModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
+   }
+
    @Override
-   public void sendArmHomeConfiguration(PacketCommunicator packetCommunicator, double trajectoryDuration, RobotSide... robotSides)
+   public void sendArmHomeConfiguration(double trajectoryDuration, RobotSide... robotSides)
    {
       for (RobotSide robotSide : robotSides)
       {
@@ -37,12 +56,12 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
          jointAngles[index++] = robotSide.negateIfRightSide(0.207730); // ArmJointName.WRIST_ROLL          
          jointAngles[index++] = -0.026599; // ArmJointName.SECOND_WRIST_PITCH
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration, jointAngles);
-         packetCommunicator.send(message);
+         armTrajectoryPublisher.publish(message);
       }
    }
 
    @Override
-   public void sendArmStraightConfiguration(PacketCommunicator packetCommunicator, double trajectoryDuration, RobotSide robotSide)
+   public void sendArmStraightConfiguration(double trajectoryDuration, RobotSide robotSide)
    {
       double[] jointAngles0 = new double[7];
       int index = 0;
@@ -70,11 +89,11 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = createTrajectoryPoint1DMessage(trajectoryDuration, jointAngles1[i], 0.0);
          jointTrajectoryMessages.get(i).getTrajectoryPoints().add().set(trajectoryPoint1DMessage);
       }
-      packetCommunicator.send(message);
+      armTrajectoryPublisher.publish(message);
    }
 
    @Override
-   public void sendFlamingoHomeStance(PacketCommunicator packetCommunicator, RobotSide robotSide, double trajectoryDuration, double stanceWidth,
+   public void sendFlamingoHomeStance(RobotSide robotSide, double trajectoryDuration, double stanceWidth,
                                       SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
    {
       FramePose3D footPose = new FramePose3D(soleFrames.get(robotSide.getOppositeSide()));
@@ -82,11 +101,11 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration, footPose);
-      packetCommunicator.send(message);
+      footTrajectoryPublisher.publish(message);
    }
 
    @Override
-   public void sendKick(PacketCommunicator packetCommunicator, RobotSide robotSide, double trajectoryDuration, double stanceWidth,
+   public void sendKick(RobotSide robotSide, double trajectoryDuration, double stanceWidth,
                         SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
    {
       FramePose3D footPose = new FramePose3D(soleFrames.get(robotSide.getOppositeSide()));
@@ -95,11 +114,11 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.33 * trajectoryDuration, footPose);
-      packetCommunicator.send(message);
+      footTrajectoryPublisher.publish(message);
    }
 
    @Override
-   public void sendPutFootDown(PacketCommunicator packetCommunicator, RobotSide robotSide, double trajectoryDuration, double stanceWidth,
+   public void sendPutFootDown(RobotSide robotSide, double trajectoryDuration, double stanceWidth,
                                SegmentDependentList<RobotSide, ? extends ReferenceFrame> soleFrames)
    {
       FramePose3D footPose = new FramePose3D(soleFrames.get(robotSide.getOppositeSide()));
@@ -107,24 +126,24 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryDuration, footPose);
-      packetCommunicator.send(message);
+      footTrajectoryPublisher.publish(message);
 
-      packetCommunicator.send(HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD));
+      footLoadBearingPublisher.publish(HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD));
    }
 
    @Override
-   public void sendFreezeRequest(PacketCommunicator packetCommunicator)
+   public void sendFreezeRequest()
    {
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
       message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.FREEZE.toByte());
-      packetCommunicator.send(message);
+      atlasLowLevelControlModePublisher.publish(message);
    }
 
    @Override
-   public void sendStandRequest(PacketCommunicator packetCommunicator)
+   public void sendStandRequest()
    {
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
       message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
-      packetCommunicator.send(message);      
+      atlasLowLevelControlModePublisher.publish(message);
    }
 }

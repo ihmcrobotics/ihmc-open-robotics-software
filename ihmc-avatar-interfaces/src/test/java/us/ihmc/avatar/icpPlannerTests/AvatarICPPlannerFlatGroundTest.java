@@ -238,13 +238,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration));
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
 
@@ -306,13 +306,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.8 * transferDuration);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps + 1) * (swingDuration + transferDuration));
 
@@ -374,13 +374,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       double swingDuration = 1.0;
       double transferDuration = 0.3;
       FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration) + 0.8 * transferDuration);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(true));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(true));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      drcSimulationTestHelper.send(HumanoidMessageTools.createPauseWalkingMessage(false));
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPauseWalkingMessage(false));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
 
@@ -517,7 +517,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
       message.getFootstepDataList().add().set(footstepData);
 
-      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.publishToController(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
       changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName, robotSide);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

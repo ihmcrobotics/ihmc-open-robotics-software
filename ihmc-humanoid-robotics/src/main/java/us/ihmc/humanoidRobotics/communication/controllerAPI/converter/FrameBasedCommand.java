@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public interface FrameBasedCommand<M extends Packet<M>>
+public interface FrameBasedCommand<M extends Settable<M>>
 {
    public void set(ReferenceFrameHashCodeResolver resolver, M message);
 }

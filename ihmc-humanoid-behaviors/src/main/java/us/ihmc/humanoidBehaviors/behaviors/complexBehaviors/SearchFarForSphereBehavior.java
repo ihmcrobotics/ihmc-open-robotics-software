@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
@@ -10,11 +8,11 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarState>
@@ -30,19 +28,19 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final boolean requireUserValidation;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public SearchFarForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement, HumanoidReferenceFrames referenceFrames,
-                                     CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
-                                     AtlasPrimitiveActions atlasPrimitiveActions)
+   public SearchFarForSphereBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+                                     HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
+                                     boolean requireUserValidation, AtlasPrimitiveActions atlasPrimitiveActions)
    {
-      super("SearchForSpehereFar", SearchFarState.class, yoTime, outgoingCommunicationBridge);
+      super(robotName, "SearchForSpehereFar", SearchFarState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
 
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
-                                                                        coactiveElement.validAcknowledged);
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node,
+                                                                        coactiveElement.validClicked, coactiveElement.validAcknowledged);
       setupStateMachine();
    }
 
@@ -82,8 +80,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("LOOKING FOR BALL");
-            sendPacket(p1);
+            publishTextToSpeack("LOOKING FOR BALL");
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
