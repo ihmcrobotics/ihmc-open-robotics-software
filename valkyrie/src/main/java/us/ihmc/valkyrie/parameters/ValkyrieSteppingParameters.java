@@ -66,7 +66,7 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6; // 0.4;
+      return 0.4; // 0.4;
    }
 
    @Override
@@ -94,6 +94,15 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    }
 
    @Override
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      if (target == RobotTarget.REAL_ROBOT)
+         return 0.025;
+      else
+         return SteppingParameters.super.getMinSwingHeightFromStanceFoot();
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI / 3.0;
@@ -102,7 +111,7 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnInwards()
    {
-      return Math.toRadians(30.0);
+      return -Math.toRadians(30.0);
    }
 
    @Override

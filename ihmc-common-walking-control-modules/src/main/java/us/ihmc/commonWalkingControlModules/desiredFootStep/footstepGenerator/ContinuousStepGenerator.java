@@ -539,7 +539,6 @@ public class ContinuousStepGenerator implements Updatable
          public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
-            currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
             adjustedPose.setZ(currentSupportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
@@ -574,7 +573,6 @@ public class ContinuousStepGenerator implements Updatable
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
-            currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
             currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
             yawPitchRoll[0] = footstepPose.getYaw();
             adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
@@ -682,5 +680,25 @@ public class ContinuousStepGenerator implements Updatable
 
          footstepSideDependentVisualizers.put(robotSide, visualizers);
       }
+   }
+
+   /**
+    * Gets the read-only reference to the pose of the current support foot.
+    * 
+    * @return the current foot pose.
+    */
+   public FramePose3DReadOnly getCurrentSupportFootPose()
+   {
+      return currentSupportFootPose;
+   }
+
+   /**
+    * Gets the side of the current support foot.
+    * 
+    * @return the support foot side.
+    */
+   public RobotSide getCurrentSupportSide()
+   {
+      return currentSupportSide.getEnumValue();
    }
 }

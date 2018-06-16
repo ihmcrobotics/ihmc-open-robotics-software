@@ -48,6 +48,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -88,8 +90,16 @@ public class StepGeneratorJavaFXController
 
    private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
-   private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<AtomicBoolean>(isLeftFootInSupport, isRightFootInSupport);
+   private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
+
+   public enum SecondaryControlOption
+   {
+      KICK, PUNCH
+   };
+
+   private SecondaryControlOption activeSecondaryControlOption = SecondaryControlOption.KICK;
+
    private final HumanoidRobotKickMessenger kickMessenger;
    private final HumanoidRobotPunchMessenger punchMessenger;
 
@@ -108,11 +118,7 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
       inPlaceStepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
-      double min = 0.20;
-      double max = 0.50;
-      continuousStepGenerator.setStepWidths(inPlaceStepWidth, min, max);
-      continuousStepGenerator.setMaxStepLength(0.50);
-      continuousStepGenerator.setSupportFootBasedFootstepAdjustment(false);
+      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
 
@@ -162,36 +168,8 @@ public class StepGeneratorJavaFXController
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
 
-      messager.registerTopicListener(ButtonXState, state -> {
-         if (state == ButtonState.PRESSED)
-         {
-            if (isInDoubleSupport.getValue())
-               flamingoHomeStance(RobotSide.LEFT);
-            else if (!isLeftFootInSupport.get())
-               putFootDown(RobotSide.LEFT);
-         }
-      });
-      messager.registerTopicListener(ButtonBState, state -> {
-         if (state == ButtonState.PRESSED)
-         {
-            if (isInDoubleSupport.getValue())
-               flamingoHomeStance(RobotSide.RIGHT);
-            else if (!isRightFootInSupport.get())
-               putFootDown(RobotSide.RIGHT);
-         }
-      });
-
-      messager.registerTopicListener(ButtonYState, state -> {
-         if (isInDoubleSupport.getValue())
-            return;
-
-         RobotSide kickSide = isRightFootInSupport.get() ? RobotSide.LEFT : RobotSide.RIGHT;
-
-         if (state == ButtonState.PRESSED)
-            kick(kickSide);
-         else if (state == ButtonState.RELEASED)
-            flamingoHomeStance(kickSide);
-      });
+      setupKickAction(messager);
+      setupPunchAction(messager);
 
       messager.registerTopicListener(ButtonLeftBumperState, state -> {
          if (state == ButtonState.PRESSED)
@@ -213,6 +191,33 @@ public class StepGeneratorJavaFXController
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
          isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
       });
+   }
+
+   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose)
+   {
+      FramePose3D adjustedPose = new FramePose3D();
+      adjustedPose.getPosition().set(footstepPose.getPosition());
+      adjustedPose.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ() - 0.02);
+      adjustedPose.setOrientation(footstepPose.getOrientation());
+      return adjustedPose;
+   }
+
+   public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
+   {
+      this.activeSecondaryControlOption = activeSecondaryControlOption;
+   }
+
+   private void setupPunchAction(JavaFXMessager messager)
+   {
+      messager.registerTopicListener(ButtonXState, state -> processPunch(RobotSide.LEFT, state));
+      messager.registerTopicListener(ButtonYState, state -> processPunch(RobotSide.RIGHT, state));
+   }
+
+   private void setupKickAction(JavaFXMessager messager)
+   {
+      messager.registerTopicListener(ButtonXState, state -> processToggleFlamingoMode(RobotSide.LEFT, state));
+      messager.registerTopicListener(ButtonBState, state -> processToggleFlamingoMode(RobotSide.RIGHT, state));
+      messager.registerTopicListener(ButtonYState, state -> processKick(state));
    }
 
    private void updateForwardVelocity(double alpha)
@@ -304,8 +309,37 @@ public class StepGeneratorJavaFXController
       return meshView;
    }
 
+   private void processToggleFlamingoMode(RobotSide robotSide, ButtonState state)
+   {
+      if (activeSecondaryControlOption != SecondaryControlOption.KICK)
+         return;
+      if (state != ButtonState.PRESSED)
+         return;
+      if (isInDoubleSupport.getValue())
+         flamingoHomeStance(robotSide);
+      else if (!isFootInSupport.get(robotSide).get())
+         putFootDown(robotSide);
+   }
+
+   private void processKick(ButtonState state)
+   {
+      if (activeSecondaryControlOption != SecondaryControlOption.KICK)
+         return;
+      if (isInDoubleSupport.getValue())
+         return;
+
+      RobotSide kickSide = isRightFootInSupport.get() ? RobotSide.LEFT : RobotSide.RIGHT;
+
+      if (state == ButtonState.PRESSED)
+         kick(kickSide);
+      else if (state == ButtonState.RELEASED)
+         flamingoHomeStance(kickSide);
+   }
+
    private void processPunch(RobotSide robotSide, ButtonState state)
    {
+      if (activeSecondaryControlOption != SecondaryControlOption.PUNCH)
+         return;
       if (state == ButtonState.PRESSED)
          sendArmStraightConfiguration(robotSide);
       else
