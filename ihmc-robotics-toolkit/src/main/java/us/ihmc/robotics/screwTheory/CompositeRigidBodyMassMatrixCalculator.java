@@ -232,4 +232,9 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
+
+   public CompositeRigidBodyInertia getBaseBodyCompositeInertia()
+   {
+      return crbInertiasInOrder[0];
+   }
 }
