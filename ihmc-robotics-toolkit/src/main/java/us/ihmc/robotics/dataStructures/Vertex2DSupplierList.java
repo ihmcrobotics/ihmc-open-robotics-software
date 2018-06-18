@@ -73,7 +73,7 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public Point2DReadOnly getVertex(int index)
+   public T getVertex(int index)
    {
       if(useVertexIndexingAsVertexSupplier)
       {
@@ -94,15 +94,15 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public boolean add(T arg0)
+   public boolean add(T pointToAdd)
    {
-      return vertexList.add(arg0);
+      return vertexList.add(pointToAdd);
    }
 
    @Override
-   public void add(int arg0, T arg1)
+   public void add(int indexToInsertAt, T pointToInsert)
    {
-      vertexList.add(arg0, arg1);
+      vertexList.add(indexToInsertAt, pointToInsert);
    }
 
    @Override
@@ -112,27 +112,27 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public boolean contains(Object arg0)
+   public boolean contains(Object objectToCheck)
    {
-      return vertexList.contains(arg0);
+      return vertexList.contains(objectToCheck);
    }
 
    @Override
-   public boolean containsAll(Collection<?> arg0)
+   public boolean containsAll(Collection<?> collectionToCheck)
    {
-      return vertexList.contains(arg0);
+      return vertexList.contains(collectionToCheck);
    }
 
    @Override
-   public T get(int arg0)
+   public T get(int index)
    {
-      return vertexList.get(arg0);
+      return vertexList.get(index);
    }
 
    @Override
-   public int indexOf(Object arg0)
+   public int indexOf(Object object)
    {
-      return vertexList.indexOf(arg0);
+      return vertexList.indexOf(object);
    }
 
    @Override
@@ -148,9 +148,9 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public int lastIndexOf(Object o)
+   public int lastIndexOf(Object object)
    {
-      return vertexList.lastIndexOf(o);
+      return vertexList.lastIndexOf(object);
    }
 
    @Override
@@ -166,9 +166,9 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public boolean remove(Object o)
+   public boolean remove(Object object)
    {
-      return vertexList.remove(o);
+      return vertexList.remove(object);
    }
 
    @Override
@@ -178,15 +178,15 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public boolean removeAll(Collection<?> c)
+   public boolean removeAll(Collection<?> collection)
    {
-      return vertexList.removeAll(c);
+      return vertexList.removeAll(collection);
    }
 
    @Override
-   public boolean retainAll(Collection<?> c)
+   public boolean retainAll(Collection<?> collection)
    {
-      return vertexList.retainAll(c);
+      return vertexList.retainAll(collection);
    }
 
    @Override
@@ -214,9 +214,9 @@ public class Vertex2DSupplierList<T extends Point2DReadOnly> implements Vertex2D
    }
 
    @Override
-   public <T> T[] toArray(T[] a)
+   public <T> T[] toArray(T[] arrayToConvert)
    {
-      return vertexList.toArray(a);
+      return vertexList.toArray(arrayToConvert);
    }
 
    @Override

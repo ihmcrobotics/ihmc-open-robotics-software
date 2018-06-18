@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 public class FrameVertex2DSupplierList<T extends FramePoint2DReadOnly> extends Vertex2DSupplierList<T> implements FrameVertex2DSupplier
 {
    @Override
-   public FramePoint2DReadOnly getVertex(int index)
+   public T getVertex(int index)
    {
-      return (FramePoint2DReadOnly) super.getVertex(index);
+      return super.getVertex(index);
    }
 }

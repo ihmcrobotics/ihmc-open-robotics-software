@@ -11,10 +11,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3DSupplier, List<T>
 {
-   protected int firstVertexIndex;
-   protected int lastVertexIndex;
-   protected final boolean useVertexIndexingAsVertexSupplier;
-   protected final List<T> vertexList;
+   private int firstVertexIndex;
+   private int lastVertexIndex;
+   private final boolean useVertexIndexingAsVertexSupplier;
+   private final List<T> vertexList;
 
    public Vertex3DSupplierList(boolean useVertexIndexing)
    {
@@ -73,7 +73,7 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public Point3DReadOnly getVertex(int index)
+   public T getVertex(int index)
    {
       if(useVertexIndexingAsVertexSupplier)
       {
@@ -94,15 +94,15 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public boolean add(T arg0)
+   public boolean add(T pointToAdd)
    {
-      return vertexList.add(arg0);
+      return vertexList.add(pointToAdd);
    }
 
    @Override
-   public void add(int arg0, T arg1)
+   public void add(int indexToInsertAt, T pointToInsert)
    {
-      vertexList.add(arg0, arg1);
+      vertexList.add(indexToInsertAt, pointToInsert);
    }
 
    @Override
@@ -112,27 +112,27 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public boolean contains(Object arg0)
+   public boolean contains(Object obejctToCheck)
    {
-      return vertexList.contains(arg0);
+      return vertexList.contains(obejctToCheck);
    }
 
    @Override
-   public boolean containsAll(Collection<?> arg0)
+   public boolean containsAll(Collection<?> collection)
    {
-      return vertexList.contains(arg0);
+      return vertexList.contains(collection);
    }
 
    @Override
-   public T get(int arg0)
+   public T get(int index)
    {
-      return vertexList.get(arg0);
+      return vertexList.get(index);
    }
 
    @Override
-   public int indexOf(Object arg0)
+   public int indexOf(Object object)
    {
-      return vertexList.indexOf(arg0);
+      return vertexList.indexOf(object);
    }
 
    @Override
@@ -148,9 +148,9 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public int lastIndexOf(Object o)
+   public int lastIndexOf(Object objectToGetIndexOf)
    {
-      return vertexList.lastIndexOf(o);
+      return vertexList.lastIndexOf(objectToGetIndexOf);
    }
 
    @Override
@@ -166,9 +166,9 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public boolean remove(Object o)
+   public boolean remove(Object objectToRemove)
    {
-      return vertexList.remove(o);
+      return vertexList.remove(objectToRemove);
    }
 
    @Override
@@ -178,15 +178,15 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public boolean removeAll(Collection<?> c)
+   public boolean removeAll(Collection<?> collection)
    {
-      return vertexList.removeAll(c);
+      return vertexList.removeAll(collection);
    }
 
    @Override
-   public boolean retainAll(Collection<?> c)
+   public boolean retainAll(Collection<?> collection)
    {
-      return vertexList.retainAll(c);
+      return vertexList.retainAll(collection);
    }
 
    @Override
@@ -220,14 +220,14 @@ public class Vertex3DSupplierList<T extends Point3DReadOnly> implements Vertex3D
    }
 
    @Override
-   public boolean addAll(Collection<? extends T> c)
+   public boolean addAll(Collection<? extends T> collection)
    {
-      return vertexList.addAll(c);
+      return vertexList.addAll(collection);
    }
 
    @Override
-   public boolean addAll(int index, Collection<? extends T> c)
+   public boolean addAll(int index, Collection<? extends T> collection)
    {
-      return vertexList.addAll(index, c);
+      return vertexList.addAll(index, collection);
    }
 }
