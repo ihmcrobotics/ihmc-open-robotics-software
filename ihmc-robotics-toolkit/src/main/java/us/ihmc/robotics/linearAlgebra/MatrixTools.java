@@ -1219,7 +1219,7 @@ public class MatrixTools
     * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and sets them to the elements of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
-    * @param alpha row value mutliplier
+    * @param alpha row value multiplier
     * @param valuesToSet row vector to add
     * @param rowIndex row to add to
     * @param matrix matrix modify
@@ -1283,11 +1283,12 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Sets the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of rows {@param destRowIndices} of {@param matrix}.
     * </p>
     *
-    * @param valuesToAdd row vector to add
-    * @param rowIndex row to add to
+    * @param originRowIndices indices of the rows to add
+    * @param valuesToSet matrix to pull row vectors from
+    * @param destRowIndices indices of the row to add to
     * @param matrix matrix modify
     */
    public static void setRows(int[] originRowIndices, DenseMatrix64F valuesToSet, int[] destRowIndices, DenseMatrix64F matrix)
@@ -1332,11 +1333,12 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Adds the elements of row {@param originRowIndex} of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
+    * @param originRowIndex row index of vector to add
     * @param valuesToAdd row vector to add
-    * @param destRowIndex row to add to
+    * @param destRowIndex row index of vector destination
     * @param matrix matrix modify
     */
    public static void addRow(int originRowIndex, DenseMatrix64F valuesToAdd, int destRowIndex, DenseMatrix64F matrix)
@@ -1357,7 +1359,7 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Scales the elements of row {@param originRowIndex} of {@param valuesToAdd} by {@param alpha} and adds them to the elements of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
     * @param originRowIndex row index of vector to add
@@ -1385,11 +1387,12 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Adds the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of rows {@param destRowIndices} of {@param matrix}.
     * </p>
     *
-    * @param valuesToAdd row vector to add
-    * @param rowIndex row to add to
+    * @param originRowIndices indices of the rows to add
+    * @param valuesToAdd matrix to pull row vectors from
+    * @param destRowIndices indices of the row to add to
     * @param matrix matrix modify
     */
    public static void addRows(int[] originRowIndices, DenseMatrix64F valuesToAdd, int[] destRowIndices, DenseMatrix64F matrix)
