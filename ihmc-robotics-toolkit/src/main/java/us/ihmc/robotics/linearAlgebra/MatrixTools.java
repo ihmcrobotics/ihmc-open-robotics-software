@@ -1202,6 +1202,210 @@ public class MatrixTools
 
    /**
     * <p>
+    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param valuesToSet row vector to add
+    * @param rowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void setRow(DenseMatrix64F valuesToSet, int rowIndex, DenseMatrix64F matrix)
+   {
+      setRow(0, valuesToSet, rowIndex, matrix);
+   }
+
+   /**
+    * <p>
+    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and sets them to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param alpha row value mutliplier
+    * @param valuesToSet row vector to add
+    * @param rowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void setRow(double alpha, DenseMatrix64F valuesToSet, int rowIndex, DenseMatrix64F matrix)
+   {
+      setRow(0, alpha, valuesToSet, rowIndex, matrix);
+   }
+
+   /**
+    * <p>
+    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param originRowIndex row index to set
+    * @param valuesToSet row vector to add
+    * @param destRowIndex row to set to
+    * @param matrix matrix modify
+    */
+   public static void setRow(int originRowIndex, DenseMatrix64F valuesToSet, int destRowIndex, DenseMatrix64F matrix)
+   {
+      if (destRowIndex < 0 || destRowIndex >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
+
+      if (originRowIndex < 0 || originRowIndex >= valuesToSet.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToSet.getNumRows());
+
+      if (valuesToSet.getNumCols() != matrix.getNumCols())
+         throw new IllegalArgumentException("Trying to add a row that is the improper length");
+
+
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(destRowIndex, column, valuesToSet.unsafe_get(originRowIndex, column));
+   }
+
+   /**
+    * <p>
+    * Scales the elements of the {@param originRowIndex} of {@param valuesToSet} and sets them to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param originRowIndex row index to set
+    * @param valuesToSet row vector to set
+    * @param destRowIndex row index to set to
+    * @param matrix matrix modify
+    */
+   public static void setRow(int originRowIndex, double alpha, DenseMatrix64F valuesToSet, int destRowIndex, DenseMatrix64F matrix)
+   {
+      if (destRowIndex < 0 || destRowIndex >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
+
+      if (originRowIndex < 0 || originRowIndex >= valuesToSet.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToSet.getNumRows());
+
+      if (valuesToSet.getNumCols() != matrix.getNumCols())
+         throw new IllegalArgumentException("Trying to add a row that is the improper length");
+
+
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(destRowIndex, column, alpha * valuesToSet.unsafe_get(originRowIndex, column));
+   }
+
+   /**
+    * <p>
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param valuesToAdd row vector to add
+    * @param rowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void setRows(int[] originRowIndices, DenseMatrix64F valuesToSet, int[] destRowIndices, DenseMatrix64F matrix)
+   {
+      if (originRowIndices.length != destRowIndices.length)
+         throw new IllegalArgumentException("Specified indices are not of equivalent length.");
+
+      for (int i = 0; i < originRowIndices.length; i++)
+      {
+         setRow(originRowIndices[i], valuesToSet, destRowIndices[i], matrix);
+      }
+   }
+
+   /**
+    * <p>
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param valuesToAdd row vector to add
+    * @param rowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void addRow(DenseMatrix64F valuesToAdd, int rowIndex, DenseMatrix64F matrix)
+   {
+      addRow(0, valuesToAdd, rowIndex, matrix);
+   }
+
+   /**
+    * <p>
+    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and adds to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param alpha scalar multiplier of row being added
+    * @param valuesToAdd row vector to add
+    * @param rowIndex row index of vector destination
+    * @param matrix matrix modify
+    */
+   public static void addRow(double alpha, DenseMatrix64F valuesToAdd, int rowIndex, DenseMatrix64F matrix)
+   {
+      addRow(0, alpha, valuesToAdd, rowIndex, matrix);
+   }
+
+   /**
+    * <p>
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param valuesToAdd row vector to add
+    * @param destRowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void addRow(int originRowIndex, DenseMatrix64F valuesToAdd, int destRowIndex, DenseMatrix64F matrix)
+   {
+      if (destRowIndex < 0 || destRowIndex >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
+
+      if (originRowIndex < 0 || originRowIndex >= valuesToAdd.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToAdd.getNumRows());
+
+      if (valuesToAdd.getNumCols() != matrix.getNumCols())
+         throw new IllegalArgumentException("Trying to add a row that is the improper length");
+
+
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(destRowIndex, column, valuesToAdd.unsafe_get(originRowIndex, column) + matrix.unsafe_get(destRowIndex, column));
+   }
+
+   /**
+    * <p>
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param originRowIndex row index of vector to add
+    * @param alpha scalar multiplier of row
+    * @param valuesToAdd row vector to add
+    * @param destRowIndex row index of vector destination
+    * @param matrix matrix modify
+    */
+   public static void addRow(int originRowIndex, double alpha, DenseMatrix64F valuesToAdd, int destRowIndex, DenseMatrix64F matrix)
+   {
+      if (destRowIndex < 0 || destRowIndex >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
+
+      if (originRowIndex < 0 || originRowIndex >= valuesToAdd.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToAdd.getNumRows());
+
+      if (valuesToAdd.getNumCols() != matrix.getNumCols())
+         throw new IllegalArgumentException("Trying to add a row that is the improper length");
+
+
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(destRowIndex, column, alpha * valuesToAdd.unsafe_get(originRowIndex, column) + matrix.unsafe_get(destRowIndex, column));
+   }
+
+
+   /**
+    * <p>
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * </p>
+    *
+    * @param valuesToAdd row vector to add
+    * @param rowIndex row to add to
+    * @param matrix matrix modify
+    */
+   public static void addRows(int[] originRowIndices, DenseMatrix64F valuesToAdd, int[] destRowIndices, DenseMatrix64F matrix)
+   {
+      if (originRowIndices.length != destRowIndices.length)
+         throw new IllegalArgumentException("Specified indices are not of equivalent length.");
+
+      for (int i = 0; i < originRowIndices.length; i++)
+      {
+         addRow(originRowIndices[i], valuesToAdd, destRowIndices[i], matrix);
+      }
+   }
+
+
+   /**
+    * <p>
     * Zeros the elements of {@param column} of {@param matrix}.
     * </p>
     *
