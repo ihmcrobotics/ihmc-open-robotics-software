@@ -54,6 +54,7 @@ public class QuadrupedTeleopManager
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
 
    private final YoBoolean standingRequested = new YoBoolean("standingRequested", registry);
+   private final YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
    private final AtomicBoolean paused = new AtomicBoolean(false);
    private final AtomicDouble desiredBodyHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
@@ -86,8 +87,10 @@ public class QuadrupedTeleopManager
    {
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(robotName, referenceFrames, timestamp, xGaitSettings, ros2Node, graphicsListRegistry, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, registry);
+
+      firstStepDelay.set(0.5);
+      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(robotName, referenceFrames, timestamp, xGaitSettings, ros2Node, firstStepDelay, graphicsListRegistry, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, firstStepDelay, registry);
 
       desiredVelocityRateLimit.set(10.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
@@ -231,7 +234,7 @@ public class QuadrupedTeleopManager
       QuadrupedTimedStepListMessage stepsMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
       timedStepListPublisher.publish(stepsMessage);
 
-      QuadrupedBodyOrientationMessage orientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getFootstepPlan().getPlannedSteps(), limitedDesiredVelocity.getZ());
+      QuadrupedBodyOrientationMessage orientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(getPlannedStepsSortedByEndTime(), limitedDesiredVelocity.getZ());
       bodyOrientationPublisher.publish(orientationMessage);
    }
 

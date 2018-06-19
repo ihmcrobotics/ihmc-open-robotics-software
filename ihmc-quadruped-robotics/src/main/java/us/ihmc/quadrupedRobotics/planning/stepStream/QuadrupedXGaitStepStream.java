@@ -8,6 +8,7 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapp
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,24 +24,22 @@ public class QuadrupedXGaitStepStream
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final Vector3D desiredPlanarVelocity = new Vector3D();
-   private final YoDouble timeShiftOnTransitionToWalk;
+   private final DoubleProvider firstStepDelay;
 
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final QuadrupedPlanarFootstepPlan footstepPlan;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
 
    public QuadrupedXGaitStepStream(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, DoubleProvider firstStepDelay, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
       this.footstepPlan = new QuadrupedPlanarFootstepPlan(NUMBER_OF_PREVIEW_STEPS);
+      this.firstStepDelay = firstStepDelay;
       minimumStepClearance.set(0.075);
-
-      this.timeShiftOnTransitionToWalk = new YoDouble("timeShiftOnTransitionToWalk", registry);
-      timeShiftOnTransitionToWalk.set(0.5);
 
       if (parentRegistry != null)
       {
@@ -64,7 +63,7 @@ public class QuadrupedXGaitStepStream
    {
       // initialize step queue
       updateXGaitSettings();
-      double initialTime = timestamp.getDoubleValue() + timeShiftOnTransitionToWalk.getDoubleValue();
+      double initialTime = timestamp.getDoubleValue() + firstStepDelay.getValue();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
       xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
