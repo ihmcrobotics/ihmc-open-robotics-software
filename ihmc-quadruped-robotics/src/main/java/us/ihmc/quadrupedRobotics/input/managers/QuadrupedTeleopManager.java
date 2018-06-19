@@ -46,6 +46,7 @@ public class QuadrupedTeleopManager
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
    private final YoBoolean walking = new YoBoolean("walking", registry);
+   private final Ros2Node ros2Node;
 
    private final YoBoolean xGaitRequested = new YoBoolean("xGaitRequested", registry);
    private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("teleopDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -86,6 +87,7 @@ public class QuadrupedTeleopManager
                                  YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
+      this.ros2Node = ros2Node;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
 
       firstStepDelay.set(0.5);
@@ -324,5 +326,15 @@ public class QuadrupedTeleopManager
    public boolean isPaused()
    {
       return paused.get();
+   }
+
+   public QuadrupedReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
+
+   public Ros2Node getRos2Node()
+   {
+      return ros2Node;
    }
 }

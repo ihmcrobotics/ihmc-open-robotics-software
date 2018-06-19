@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.HeightMapFootSnapper;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -449,7 +450,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
-   }
+   } 
 
    public void testTrottingOverAggressiveBumpyTerrain() throws IOException
    {
@@ -464,18 +465,19 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      //      stepTeleopManager.setStepSnapper(new HeightMapFootSnapper(groundProfile));
+      stepTeleopManager.setStepSnapper(new PlanarGroundPointFootSnapper(quadrupedTestFactory.getRobotName(), stepTeleopManager.getReferenceFrames(), stepTeleopManager.getRos2Node()));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
+      stepTeleopManager.setDesiredBodyHeight(0.52);
 
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.07);
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
       stepTeleopManager.getXGaitSettings().setStepDuration(0.25);
-      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
+      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.08);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.4, 0.0, 0.0);
       conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));
