@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
    compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: "source"
