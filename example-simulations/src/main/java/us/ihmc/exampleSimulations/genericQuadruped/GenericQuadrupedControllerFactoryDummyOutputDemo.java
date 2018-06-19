@@ -141,7 +141,6 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
          stateEstimatorFactory.setSensorOutputMapReadOnly(sensorOutputMapReadOnly);
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-         stateEstimatorFactory.setYoVariableRegistry(registry);
          simulationStateEstimator = stateEstimatorFactory.createStateEstimator();
       }
       else

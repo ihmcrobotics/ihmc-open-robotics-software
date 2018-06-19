@@ -264,7 +264,6 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-         stateEstimatorFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
          stateEstimator = stateEstimatorFactory.createStateEstimator();
       }
       else
