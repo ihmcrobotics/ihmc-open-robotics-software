@@ -24,7 +24,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
