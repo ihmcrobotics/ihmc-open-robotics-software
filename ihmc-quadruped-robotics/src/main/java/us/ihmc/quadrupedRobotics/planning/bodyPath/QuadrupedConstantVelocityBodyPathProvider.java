@@ -19,6 +19,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -41,9 +42,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoFramePoint2D startPoint = new YoFramePoint2D("startPoint", worldFrame, registry);
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
    private final YoDouble startTime = new YoDouble("startTime", registry);
-
-   // flag to allow for an initial transfer time during which the body setpoint stays constant
-   private final YoBoolean startedWalkingFlag = new YoBoolean("startedWalkingFlag", registry);
+   private final DoubleProvider firstStepDelay;
 
    private final YoFramePoint3D achievedStepAdjustment = new YoFramePoint3D("achievedStepAdjustment", worldFrame, registry);
    private final YoEnum<RobotQuadrant> mostRecentTouchdown = new YoEnum<>("mostRecentTouchdown", registry, RobotQuadrant.class);
@@ -58,10 +57,11 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final Vector3D tempVector = new Vector3D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
-   public QuadrupedConstantVelocityBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoDouble timestamp,
-                                                    Ros2Node ros2Node, YoVariableRegistry parentRegistry)
+   public QuadrupedConstantVelocityBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                                    DoubleProvider firstStepDelay, YoDouble timestamp, Ros2Node ros2Node, YoVariableRegistry parentRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      this.firstStepDelay = firstStepDelay;
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -109,7 +109,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       recomputeInitialPose.set(false);
       footstepPlanHasBeenComputed.set(false);
       recomputeStepAdjustment.set(false);
-      startedWalkingFlag.set(false);
    }
 
    public void setPlanarVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
@@ -135,15 +134,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          setStartConditionsFromCurrent();
       }
 
-      if(startedWalkingFlag.getBooleanValue())
-      {
-         initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
-         extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
-      }
-      else
-      {
-         poseToPack.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
-      }
+      initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
+      extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
    }
 
    private static void extrapolatePose(double time, FramePose2D poseToPack, FramePose2D initialPose, Tuple3DReadOnly planarVelocity)
@@ -181,7 +173,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private void setStartConditionsFromCurrent()
    {
       RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
-      startTime.set(timestamp.getDoubleValue());
+      startTime.set(timestamp.getDoubleValue() + firstStepDelay.getValue() + xGaitSettings.getStepDuration());
       startYaw.set(supportTransform.getRotationMatrix().getYaw());
       startPoint.set(supportTransform.getTranslationVector());
    }
@@ -191,11 +183,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
       if (latestStatusMessage == null)
          return;
-
-      double previousStartTime = startTime.getDoubleValue();
-      double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
-
-      startTime.set(newStartTime);
 
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
       Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
@@ -209,16 +196,10 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       tempVector.add(latestMessageSoleDesiredPosition);
       startPoint.set(tempVector);
 
-      if(startedWalkingFlag.getBooleanValue())
-      {
-         // if already walking, update yaw setpoint normally
-         startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
-      }
-      else
-      {
-         // if this is the first footstep status, don't update yaw
-         startedWalkingFlag.set(true);
-      }
+      double previousStartTime = startTime.getDoubleValue();
+      double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
+      startTime.set(newStartTime);
+      startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
    }
 
    private void computeStepAdjustmentFromFootstepStatus()
