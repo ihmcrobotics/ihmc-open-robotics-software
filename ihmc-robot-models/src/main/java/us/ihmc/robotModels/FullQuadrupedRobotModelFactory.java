@@ -1,8 +1,9 @@
 package us.ihmc.robotModels;
 
-public interface FullQuadrupedRobotModelFactory extends FullRobotModelFactory
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+public interface FullQuadrupedRobotModelFactory extends FullLeggedRobotModelFactory<RobotQuadrant>
 {
    @Override
-   public FullQuadrupedRobotModel createFullRobotModel();
-
+   FullQuadrupedRobotModel createFullRobotModel();
 }
