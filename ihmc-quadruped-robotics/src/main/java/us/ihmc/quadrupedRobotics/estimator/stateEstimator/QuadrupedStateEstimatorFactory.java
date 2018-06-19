@@ -34,7 +34,6 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<QuadrantDependentList<FootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
-   private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
 
    public DRCKinematicsBasedStateEstimator createStateEstimator()
@@ -72,8 +71,6 @@ public class QuadrupedStateEstimatorFactory
                                                                                              imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
                                                                                              centerOfPressureDataHolder , robotMotionStatusFromController, feetMap,
                                                                                              yoGraphicsListRegistry.get());
-
-      yoVariableRegistry.get().addChild(stateEstimator.getYoVariableRegistry());
 
       FactoryTools.disposeFactory(this);
       
@@ -118,11 +115,6 @@ public class QuadrupedStateEstimatorFactory
    public void setEstimatorDT(double estimatorDT)
    {
       this.estimatorDT.set(estimatorDT);
-   }
-
-   public void setYoVariableRegistry(YoVariableRegistry yoVariableRegistry)
-   {
-      this.yoVariableRegistry.set(yoVariableRegistry);
    }
 
    public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
