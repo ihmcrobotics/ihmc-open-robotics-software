@@ -3,9 +3,9 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.trajectory.OneWaypointSwingGenerator;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
@@ -37,7 +36,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean debug = false;
 
-   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
+//   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
+   private final TwoWaypointSwingGenerator swingTrajectoryWaypointCalculator;
    private final MultipleWaypointsBlendedPositionTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPositionTrajectoryGenerator touchdownTrajectory;
 
@@ -127,7 +127,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
-      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
+//      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
+      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, new double[]{0.33, 0.66}, new double[]{0.25, 0.75}, 0.04, 0.3, registry, graphicsListRegistry);
+      FramePoint3D dummyPoint = new FramePoint3D();
+      dummyPoint.setToNaN();
+      swingTrajectoryWaypointCalculator.setStanceFootPosition(dummyPoint);
 
       MultipleWaypointsPositionTrajectoryGenerator baseTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(),
                                                                                                                      true, worldFrame, registry);
@@ -156,6 +160,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       timeInState.set(0.0);
       controllerToolbox.getFootContactState(robotQuadrant).clear();
+      footSwitch.reset();
 
       lastStepPosition.setIncludingFrame(finalPosition);
       if (lastStepPosition.containsNaN())
@@ -186,7 +191,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       if (checkStepUpOrDown(finalPosition))
          activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
 
-      fillAndInitializeTrajectories();
+      fillAndInitializeTrajectories(true);
 
       touchdownTrigger.set(false);
       isSwingPastDone.set(false);
@@ -202,6 +207,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private boolean checkStepUpOrDown(FramePoint3DReadOnly finalPosition)
    {
+      lastStepPosition.changeFrame(worldFrame);
+      lastStepPosition.checkReferenceFrameMatch(finalPosition);
       double zDifference = Math.abs(finalPosition.getZ() - lastStepPosition.getZ());
       return zDifference > minHeightDifferenceForObstacleClearance.getValue();
    }
@@ -219,6 +226,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
          activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
+
+      if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryWaypointCalculator.doOptimizationUpdate()) // haven't finished original planning
+         fillAndInitializeTrajectories(false);
 
       activeTrajectory.compute(timeInState);
       activeTrajectory.getPosition(desiredPosition);
@@ -260,20 +270,22 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
    }
 
-   private void fillAndInitializeTrajectories()
+   private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
-
       blendedSwingTrajectory.clearTrajectory(worldFrame);
       blendedSwingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
 
       finalLinearVelocity.setIncludingFrame(touchdownVelocity);
 
-      swingTrajectoryWaypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
-      swingTrajectoryWaypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
-      swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
-      swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
-      swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
-      swingTrajectoryWaypointCalculator.initialize();
+      if (initializeOptimizer)
+      {
+         swingTrajectoryWaypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
+         swingTrajectoryWaypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
+         swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
+         swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
+         swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         swingTrajectoryWaypointCalculator.initialize();
+      }
 
       for (int i = 0; i < swingTrajectoryWaypointCalculator.getNumberOfWaypoints(); i++)
       {

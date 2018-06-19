@@ -6,6 +6,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitWalkOverRoughTerrainTest;
 
@@ -18,28 +19,28 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    @Test(timeout = 2000000)
    public void testWalkingOverTiledGround() throws IOException, AssertionFailedError
    {
-      super.testWalkingOverTiledGround();
+      super.testWalkingOverTiledGround(new GenericQuadrupedXGaitSettings());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
    public void testWalkingOverSingleStepUp() throws IOException, AssertionFailedError
    {
-      super.testWalkingOverSingleStepUp();
+      super.testWalkingOverSingleStepUp(new GenericQuadrupedXGaitSettings());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
    public void testWalkingOverConsecutiveRamps() throws IOException, AssertionFailedError
    {
-      super.testWalkingOverConsecutiveRamps();
+      super.testWalkingOverConsecutiveRamps(new GenericQuadrupedXGaitSettings());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
    public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
    {
-      super.testWalkingOverCinderBlockField();
+      super.testWalkingOverCinderBlockField(new GenericQuadrupedXGaitSettings());
    }
 
    @Override

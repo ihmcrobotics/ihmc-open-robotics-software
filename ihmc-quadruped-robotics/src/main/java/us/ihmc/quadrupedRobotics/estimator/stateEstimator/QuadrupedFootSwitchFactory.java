@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTou
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -25,15 +24,38 @@ public class QuadrupedFootSwitchFactory
          "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
+   private final RequiredFactoryField<QuadrantDependentList<Boolean>> kneeOrientationsOutward = new RequiredFactoryField<>("kneeOrientationsOutward");
 
    // Private fields
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
-   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>(5.0, 5.0, -5.0, -5.0);
+   private static final double torqueThreshold = 20.0;
+   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>();
 
    protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         double sign;
+         if (kneeOrientationsOutward.get().get(robotQuadrant))
+         {
+            if (robotQuadrant.isQuadrantInFront())
+               sign = 1.0;
+            else
+               sign = -1.0;
+         }
+         else
+         {
+            if (robotQuadrant.isQuadrantInFront())
+               sign = -1.0;
+            else
+               sign = 1.0;
+         }
+
+         defaultJointTorqueTouchdownThresholds.put(robotQuadrant, sign * torqueThreshold);
+      }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -125,5 +147,10 @@ public class QuadrupedFootSwitchFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setKneeOrientationsOutward(QuadrantDependentList<Boolean> kneeOrientationsOutward)
+   {
+      this.kneeOrientationsOutward.set(kneeOrientationsOutward);
    }
 }

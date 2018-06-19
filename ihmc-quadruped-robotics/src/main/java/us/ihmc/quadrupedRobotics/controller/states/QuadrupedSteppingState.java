@@ -277,6 +277,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       }
       groundPlaneEstimator.compute();
 
+      controllerCore.initialize();
       feetManager.registerStepTransitionCallback(this);
 
       stateMachine.resetToInitialState();
