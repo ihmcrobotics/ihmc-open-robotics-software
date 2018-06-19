@@ -66,7 +66,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             stepTeleopManager.setDesiredBodyOrientation(yaw, pitch, roll, 0.0);
-            stepTeleopManager.setDesiredCoMHeight(0.03 * Math.sin(variables.getYoTime().getDoubleValue()) + 0.55);
+            stepTeleopManager.setDesiredBodyHeight(0.03 * Math.sin(variables.getYoTime().getDoubleValue()) + 0.55);
             double planarVelocityInputX = 0.2 * Math.sin(variables.getYoTime().getDoubleValue() + Math.PI) + 0.3;
             double planarVelocityInputY = 0.2 * Math.cos(variables.getYoTime().getDoubleValue() + Math.PI);
             double planarVelocityInputZ = 0.2 * Math.cos(variables.getYoTime().getDoubleValue());

@@ -22,7 +22,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -42,9 +43,12 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    @Before
    public void setUp()
    {
-      cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, 0.001);
+      PlanarRegionsListExamples.generateCinderBlockField(generator, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
                                                                             CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
-                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03);
+                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03, 0.6);
+      cinderBlockField = generator.getPlanarRegionsList();
 
       SimulationTestingParameters parameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestHelper = new DRCSimulationTestHelper(parameters, getRobotModel(), createCommonAvatarInterface(cinderBlockField));

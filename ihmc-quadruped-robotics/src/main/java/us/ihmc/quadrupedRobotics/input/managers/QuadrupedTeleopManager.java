@@ -8,21 +8,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.ComPositionPacket;
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
-import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedControllerStateMessage;
-import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
@@ -31,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.bodyPath.QuadrupedBodyPathMultiplexer;
@@ -38,10 +31,13 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPo
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.*;
 
 public class QuadrupedTeleopManager
 {
@@ -51,12 +47,16 @@ public class QuadrupedTeleopManager
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
    private final YoBoolean walking = new YoBoolean("walking", registry);
 
-   private final AtomicBoolean xGaitRequested = new AtomicBoolean();
-   private final AtomicBoolean standingRequested = new AtomicBoolean();
-   private final AtomicDouble desiredVelocityX = new AtomicDouble();
-   private final AtomicDouble desiredVelocityY = new AtomicDouble();
-   private final AtomicDouble desiredVelocityZ = new AtomicDouble();
-   private final AtomicDouble desiredCoMHeight = new AtomicDouble();
+   private final YoBoolean xGaitRequested = new YoBoolean("xGaitRequested", registry);
+   private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("teleopDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble desiredVelocityRateLimit = new YoDouble("teleopDesiredVelocityRateLimit", registry);
+   private final YoEnum<QuadrupedControllerRequestedEvent> controllerRequestedEvent = new YoEnum<>("teleopControllerRequestedEvent", registry, QuadrupedControllerRequestedEvent.class, true);
+   private final RateLimitedYoFrameVector limitedDesiredVelocity;
+
+   private final YoBoolean standingRequested = new YoBoolean("standingRequested", registry);
+   private final YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
+   private final AtomicBoolean paused = new AtomicBoolean(false);
+   private final AtomicDouble desiredBodyHeight = new AtomicDouble();
    private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
    private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
    private final AtomicDouble desiredOrientationRoll = new AtomicDouble();
@@ -66,7 +66,6 @@ public class QuadrupedTeleopManager
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicLong timestampNanos = new AtomicLong();
 
-   private final ComPositionPacket comPositionPacket = new ComPositionPacket();
    private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
@@ -74,23 +73,52 @@ public class QuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
    private IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
    private IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
-   private IHMCROS2Publisher<ComPositionPacket> comPositionPublisher;
+   private IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
 
    public QuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                 double initialCoMHeight, QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                 double initialBodyHeight, QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   {
+      this(robotName, ros2Node, defaultXGaitSettings, initialBodyHeight, referenceFrames, 0.01, graphicsListRegistry, parentRegistry);
+   }
+
+   public QuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double initialBodyHeight,
+                                 QuadrupedReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry graphicsListRegistry,
+                                 YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(robotName, referenceFrames, timestamp, xGaitSettings, ros2Node, graphicsListRegistry, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, registry);
 
-      desiredCoMHeight.set(initialCoMHeight);
+      firstStepDelay.set(0.5);
+      this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(robotName, referenceFrames, timestamp, xGaitSettings, ros2Node, firstStepDelay, graphicsListRegistry, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, firstStepDelay, registry);
+
+      desiredVelocityRateLimit.set(10.0);
+      limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
+
+      controllerRequestedEvent.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            QuadrupedControllerRequestedEvent requestedEvent = controllerRequestedEvent.getEnumValue();
+            if (requestedEvent != null)
+            {
+               controllerRequestedEvent.set(null);
+               QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+               controllerMessage.setQuadrupedControllerRequestedEvent(requestedEvent.toByte());
+               controllerStatePublisher.publish(controllerMessage);
+            }
+         }
+      });
+
+      desiredBodyHeight.set(initialBodyHeight);
       stepStream.setStepSnapper(new PlanarGroundPointFootSnapper(robotName, referenceFrames, ros2Node));
 
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedControllerStateChangeMessage.class, controllerPubGenerator, s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator, s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> timestampNanos.set(s.takeNextData().timestamp_));
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedRequestedControllerStateMessage.class, controllerPubGenerator, s -> paused.set(true));
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
@@ -98,7 +126,7 @@ public class QuadrupedTeleopManager
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
-      comPositionPublisher = ROS2Tools.createPublisher(ros2Node, ComPositionPacket.class, controllerSubGenerator);
+      bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
 
       parentRegistry.addChild(registry);
    }
@@ -110,37 +138,48 @@ public class QuadrupedTeleopManager
 
    public void update()
    {
+      limitedDesiredVelocity.update();
+
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-      bodyPathMultiplexer.setPlanarVelocityForJoystickPath(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
+      bodyPathMultiplexer.setPlanarVelocityForJoystickPath(limitedDesiredVelocity.getX(), limitedDesiredVelocity.getY(), limitedDesiredVelocity.getZ());
       referenceFrames.updateFrames();
 
-      if (xGaitRequested.getAndSet(false) && !isInStepState())
+      if(paused.get())
       {
+         return;
+      }
+      else if (xGaitRequested.getValue() && !isInStepState())
+      {
+         xGaitRequested.set(false);
          stepStream.onEntry();
          sendSteps();
          walking.set(true);
       }
-      else if(standingRequested.getAndSet(false))
+      else if (standingRequested.getBooleanValue())
       {
+         standingRequested.set(false);
          requestStopWalking();
          walking.set(false);
       }
-      else if (isInStepState() && walking.getBooleanValue())
+      else if (isInBalancingState())
       {
-         stepStream.process();
-         sendSteps();
-      }
-      else if (!walking.getBooleanValue())
-      {
-         sendBodyPose();
+         sendDesiredBodyHeight();
+
+         if(walking.getBooleanValue())
+         {
+            stepStream.process();
+            sendSteps();
+         }
+         else
+         {
+            sendDesiredBodyOrientation();
+         }
       }
    }
 
    public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
    {
-      this.desiredVelocityX.set(desiredVelocityX);
-      this.desiredVelocityY.set(desiredVelocityY);
-      this.desiredVelocityZ.set(desiredVelocityZ);
+      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY, desiredVelocityZ);
    }
 
    public void requestSteppingState()
@@ -162,13 +201,17 @@ public class QuadrupedTeleopManager
       xGaitRequested.set(true);
    }
 
-   private boolean isInStepState()
+   private boolean isInBalancingState()
    {
       QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
-      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte());
+   }
 
-      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte()) &&
-            (steppingStateChangeMessage != null && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STEP.toByte());
+   private boolean isInStepState()
+   {
+      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+      return isInBalancingState() && (steppingStateChangeMessage != null
+            && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STEP.toByte());
    }
 
    public boolean isWalking()
@@ -191,13 +234,24 @@ public class QuadrupedTeleopManager
       QuadrupedTimedStepListMessage stepsMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
       timedStepListPublisher.publish(stepsMessage);
 
-      QuadrupedBodyOrientationMessage orientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getFootstepPlan().getPlannedSteps(), desiredVelocityZ.get());
+      QuadrupedBodyOrientationMessage orientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(getPlannedStepsSortedByEndTime(), limitedDesiredVelocity.getZ());
       bodyOrientationPublisher.publish(orientationMessage);
    }
 
-   public void setDesiredCoMHeight(double desiredCoMHeight)
+   private final List<QuadrupedTimedOrientedStep> plannedStepsSortedByEndTime = new ArrayList<>();
+
+   private List<QuadrupedTimedOrientedStep> getPlannedStepsSortedByEndTime()
    {
-      this.desiredCoMHeight.set(desiredCoMHeight);
+      plannedStepsSortedByEndTime.clear();
+      PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps = stepStream.getFootstepPlan().getPlannedSteps();
+      plannedStepsSortedByEndTime.addAll(plannedSteps);
+      TimeIntervalTools.sortByEndTime(plannedStepsSortedByEndTime);
+      return plannedStepsSortedByEndTime;
+   }
+
+   public void setDesiredBodyHeight(double desiredBodyHeight)
+   {
+      this.desiredBodyHeight.set(desiredBodyHeight);
    }
 
    public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
@@ -208,21 +262,31 @@ public class QuadrupedTeleopManager
       desiredOrientationTime.set(time);
    }
 
-   private void sendBodyPose()
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private void sendDesiredBodyHeight()
    {
-      double comHeight = desiredCoMHeight.getAndSet(Double.NaN);
+      double bodyHeight = desiredBodyHeight.getAndSet(Double.NaN);
+
+      if (!Double.isNaN(bodyHeight))
+      {
+         tempPoint.setIncludingFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), 0.0, 0.0, bodyHeight);
+         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, tempPoint.getZ());
+         bodyHeightMessage.setControlBodyHeight(true);
+         bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
+         bodyHeightPublisher.publish(bodyHeightMessage);
+      }
+   }
+
+   private void sendDesiredBodyOrientation()
+   {
       double desiredYaw = desiredOrientationYaw.getAndSet(Double.NaN);
       double desiredPitch = desiredOrientationPitch.getAndSet(Double.NaN);
       double desiredRoll = desiredOrientationRoll.getAndSet(Double.NaN);
       double desiredTime = desiredOrientationTime.getAndSet(Double.NaN);
 
-      if(!Double.isNaN(comHeight))
-      {
-         comPositionPacket.getPosition().set(0.0, 0.0, comHeight);
-         comPositionPublisher.publish(comPositionPacket);
-      }
-
-      if(!Double.isNaN(desiredYaw))
+      if (!Double.isNaN(desiredYaw))
       {
          offsetBodyOrientationMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().clear();
          offsetBodyOrientationMessage.setIsAnOffsetOrientation(true);
@@ -247,5 +311,18 @@ public class QuadrupedTeleopManager
    {
       bodyPathMultiplexer.initialize();
       bodyPathMultiplexer.handleBodyPathPlanMessage(bodyPathPlanMessage);
+   }
+
+   public void setPaused(boolean pause)
+   {
+      paused.set(pause);
+
+      steppingStateChangeMessage.set(null);
+      walking.set(false);
+   }
+
+   public boolean isPaused()
+   {
+      return paused.get();
    }
 }

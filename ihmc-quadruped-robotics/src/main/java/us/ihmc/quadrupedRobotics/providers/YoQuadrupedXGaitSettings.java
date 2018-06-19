@@ -131,4 +131,13 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
       yoEndPhaseShift.set(endPhaseShift);
    }
 
+   public void set(QuadrupedXGaitSettingsReadOnly other)
+   {
+      yoStanceLength.set(other.getStanceLength());
+      yoStanceWidth.set(other.getStanceWidth());
+      yoStepGroundClearance.set(other.getStepGroundClearance());
+      yoStepDuration.set(other.getStepDuration());
+      yoEndDoubleSupportDuration.set(other.getEndDoubleSupportDuration());
+      yoEndPhaseShift.set(other.getEndPhaseShift());
+   }
 }

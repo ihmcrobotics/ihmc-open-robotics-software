@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -18,13 +19,20 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final PlanarRegion planarRegion;
    private final double allowablePenetrationThickness;
    private final Graphics3DObject linkGraphics;
+   private final AppearanceDefinition appearance;
 
    private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public PlanarRegionTerrainObject(PlanarRegion planarRegion, double allowablePenetrationThickness)
    {
+      this(planarRegion, allowablePenetrationThickness, YoAppearance.Gray());
+   }
+
+   public PlanarRegionTerrainObject(PlanarRegion planarRegion, double allowablePenetrationThickness, AppearanceDefinition appearance)
+   {
       this.planarRegion = planarRegion;
       this.allowablePenetrationThickness = allowablePenetrationThickness;
+      this.appearance = appearance;
       this.linkGraphics = setupLinkGraphics();
 
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
@@ -117,7 +125,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private Graphics3DObject setupLinkGraphics()
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, YoAppearance.Gray());
+      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, appearance);
       return graphics3DObject;
    }
 }
