@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -13,21 +14,28 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootswitch
 {
+   private static final int defaultGlitchWindow = 20;
+
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
-   private final YoBoolean touchdownDetected;
+   private final GlitchFilteredYoBoolean touchdownDetected;
    private final YoBoolean trustTouchdownDetectors;
    private boolean touchdownDetectorsUpdated = false;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, double totalRobotWeight, YoVariableRegistry parentRegistry)
+   {
+      this(robotQuadrant, foot, defaultGlitchWindow, totalRobotWeight, parentRegistry);
+   }
+
+   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, int glitchWindow, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
 
       this.foot = foot;
       this.totalRobotWeight = totalRobotWeight;
       yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-      touchdownDetected = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
+      touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
    }
 
@@ -53,7 +61,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
             touchdownDetector.update();
             touchdown &= touchdownDetector.hasTouchedDown();
          }
-         touchdownDetected.set(touchdown);
+         touchdownDetected.update(touchdown);
 
          touchdownDetectorsUpdated = true;
       }
@@ -111,5 +119,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       {
          touchdownDetectors.get(i).reset();
       }
+
+      touchdownDetected.set(false);
    }
 }
