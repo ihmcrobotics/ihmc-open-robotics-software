@@ -22,7 +22,7 @@ public class Announcement extends Packet<Announcement> implements Settable<Annou
       name_ = new java.lang.StringBuilder(255);
       hostName_ = new java.lang.StringBuilder(255);
       reconnectKey_ = new java.lang.StringBuilder(255);
-      cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, us.ihmc.robotDataLogger.CameraAnnouncement.class, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
+      cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
       modelFileDescription_ = new us.ihmc.robotDataLogger.ModelFileDescription();
 
    }
