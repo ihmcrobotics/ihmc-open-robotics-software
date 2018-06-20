@@ -84,6 +84,7 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSimulationFactory
 {
@@ -127,6 +128,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
 
    // TO CONSTRUCT
+   private YoVariableRegistry rootRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
@@ -159,6 +161,7 @@ public class QuadrupedSimulationFactory
 
    private void setupYoRegistries()
    {
+      rootRegistry = sdfRobot.get().getRobotsYoVariableRegistry();
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
@@ -188,7 +191,6 @@ public class QuadrupedSimulationFactory
       SensorReader sensorReader;
       if (useStateEstimator.get())
       {
-
          FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
          IMUDefinition[] imuDefinitions = fullRobotModel.get().getIMUDefinitions();
          ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.get().getForceSensorDefinitions();
@@ -601,7 +603,7 @@ public class QuadrupedSimulationFactory
       }
 
       InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
-      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, rootRegistry);
       scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
 
       FactoryTools.disposeFactory(this);
