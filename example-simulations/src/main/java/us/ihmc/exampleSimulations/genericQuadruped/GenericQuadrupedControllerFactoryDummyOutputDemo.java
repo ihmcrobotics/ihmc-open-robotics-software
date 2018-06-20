@@ -92,7 +92,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       /*
        * Create EtherCAT loop
        */
-      GenericQuadrupedStateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
+      GenericQuadrupedStateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, 1e-3);
 
       /*
        * Create controller
