@@ -43,7 +43,7 @@ public class JointSettingsHelper
                               HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
-           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, stateEnum.toString()), parentRegistry);
+           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stateEnum.toString()), parentRegistry);
    }
 
    public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJoint> joints, JointLoadStatusProvider jointLoadStatusProvider,
