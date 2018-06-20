@@ -52,10 +52,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.sensors.*;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -137,6 +134,7 @@ public class QuadrupedSimulationFactory
    private List<ContactablePlaneBody> contactablePlaneBodies;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
    private DRCKinematicsBasedStateEstimator stateEstimator;
+   private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private PacketCommunicator packetCommunicator;
    private GlobalDataProducer globalDataProducer;
    private RealtimeRos2Node realtimeRos2Node;
@@ -256,6 +254,8 @@ public class QuadrupedSimulationFactory
    {
       if (useStateEstimator.get())
       {
+         centerOfMassDataHolder = new CenterOfMassDataHolder();
+
          QuadrupedStateEstimatorFactory stateEstimatorFactory = new QuadrupedStateEstimatorFactory();
          stateEstimatorFactory.setEstimatorDT(controlDT.get());
          stateEstimatorFactory.setFootContactableBodies(contactableFeet);
@@ -265,6 +265,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setSensorInformation(sensorInformation.get());
          stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
+         stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
       }
@@ -345,7 +346,8 @@ public class QuadrupedSimulationFactory
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
                                                                                        yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
-                                                                                       contactableFeet, contactablePlaneBodies, footSwitches, gravity.get());
+                                                                                       contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
+                                                                                       footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
