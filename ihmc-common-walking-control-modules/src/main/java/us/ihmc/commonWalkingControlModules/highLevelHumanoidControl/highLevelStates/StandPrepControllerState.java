@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import com.google.common.base.CaseFormat;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -12,6 +14,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandPrepControllerState extends HighLevelControllerState
@@ -49,12 +53,11 @@ public class StandPrepControllerState extends HighLevelControllerState
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
+         String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
 
-         YoPolynomial trajectory = new YoPolynomial(jointName + "_StandPrepTrajectory", 4, registry);
-         YoDouble standPrepFinalConfiguration = new YoDouble(jointName + "_StandPrepFinalConfiguration", registry);
-         YoDouble standPrepDesiredConfiguration = new YoDouble(jointName + "_StandPrepDesiredConfiguration", registry);
-
-         standPrepFinalConfiguration.set(standPrepParameters.getSetpoint(jointName));
+         YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
+         DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition", registry, standPrepParameters.getSetpoint(jointName));
+         YoDouble standPrepDesiredConfiguration = new YoDouble(namePrefix + "StandPrepCurrentDesired", registry);
 
          TrajectoryData jointData = new TrajectoryData(standPrepFinalConfiguration, standPrepDesiredConfiguration, trajectory);
          jointsData.add(controlledJoint, jointData);
@@ -69,10 +72,10 @@ public class StandPrepControllerState extends HighLevelControllerState
       {
          OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
-         YoDouble standPrepFinal = trajectoryData.getFinalJointConfiguration();
+         DoubleProvider standPrepFinal = trajectoryData.getFinalJointConfiguration();
          YoPolynomial trajectory = trajectoryData.getJointTrajectory();
 
-         double desiredFinalPosition = standPrepFinal.getDoubleValue();
+         double desiredFinalPosition = standPrepFinal.getValue();
          double desiredFinalVelocity = 0.0;
 
          JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
@@ -134,18 +137,18 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private class TrajectoryData
    {
-      private final YoDouble finalJointConfiguration;
+      private final DoubleProvider finalJointConfiguration;
       private final YoDouble desiredJointConfiguration;
       private final YoPolynomial jointTrajectory;
 
-      public TrajectoryData(YoDouble finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
+      public TrajectoryData(DoubleProvider finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
       {
          this.finalJointConfiguration = finalJointConfiguration;
          this.desiredJointConfiguration = desiredJointConfiguration;
          this.jointTrajectory = jointTrajectory;
       }
 
-      public YoDouble getFinalJointConfiguration()
+      public DoubleProvider getFinalJointConfiguration()
       {
          return finalJointConfiguration;
       }
