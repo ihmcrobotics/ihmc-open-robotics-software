@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -80,12 +81,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    public GenericQuadrupedTestFactory()
    {
-      this(false);
-   }
-
-   public GenericQuadrupedTestFactory(boolean keepSCSUp)
-   {
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
    @Override
