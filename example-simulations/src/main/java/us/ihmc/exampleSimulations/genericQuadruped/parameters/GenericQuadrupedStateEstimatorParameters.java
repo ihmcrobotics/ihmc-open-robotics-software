@@ -42,16 +42,11 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
       }
    }
 
+
    @Override
    public SensorNoiseParameters getSensorNoiseParameters()
    {
       return sensorNoiseParams;
-   }
-
-   @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
    }
 
    @Override
@@ -61,21 +56,9 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    }
 
    @Override
-   public boolean trustCoPAsNonSlippingContactPoint()
+   public boolean isRunningOnRealRobot()
    {
-      return false;
-   }
-
-   @Override
-   public boolean requestFootForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<String> getFootForceSensorNames()
-   {
-      return null;
+      return runningOnRealRobot;
    }
 
    @Override
@@ -88,6 +71,18 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
+   }
+
+   @Override
+   public boolean useAccelerometerForEstimation()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean cancelGravityFromAccelerationMeasurement()
+   {
+      return true;
    }
 
    @Override
@@ -117,19 +112,7 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    @Override
    public double getIMUBiasVelocityThreshold()
    {
-      return 0.015;
-   }
-
-   @Override
-   public boolean useAccelerometerForEstimation()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean cancelGravityFromAccelerationMeasurement()
-   {
-      return true;
+      return 0.02;
    }
 
    @Override
@@ -147,13 +130,19 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    @Override
    public double getDelayTimeForTrustingFoot()
    {
-      return 0.0;
+      return 0.02;
    }
 
    @Override
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.24;
+   }
+
+   @Override
+   public boolean trustCoPAsNonSlippingContactPoint()
+   {
+      return false;
    }
 
    @Override
@@ -165,7 +154,7 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    @Override
    public double getContactThresholdForce()
    {
-      return 100.0;
+      return 120.0;
    }
 
    @Override
@@ -187,11 +176,23 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    }
 
    @Override
+   public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+   @Override
+   public SideDependentList<String> getFootForceSensorNames()
+   {
+      return null;
+   }
+
+   @Override
    public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
    {
       return true;
    }
-   
+
    @Override
    public double getCenterOfMassVelocityFusingFrequency()
    {
@@ -202,5 +203,11 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
    {
       return false;
+   }
+
+   @Override
+   public boolean correctTrustedFeetPositions()
+   {
+      return true;
    }
 }
