@@ -3,31 +3,12 @@ package us.ihmc.quadrupedRobotics.util;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.tools.lists.ListSorter;
 
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
-   static public void sortByStartTime(PreallocatedList<? extends TimeIntervalProvider> timeIntervalProviders)
-   {
-      PreallocatedListSorter.sort((PreallocatedList<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByStartTime);
-   }
-
-   static public void sortByReverseStartTime(PreallocatedList<? extends TimeIntervalProvider> timeIntervalProviders)
-   {
-      PreallocatedListSorter.sort((PreallocatedList<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByStartTime.reversed());
-   }
-
-   static public void sortByEndTime(PreallocatedList<? extends TimeIntervalProvider> timeIntervalProviders)
-   {
-      PreallocatedListSorter.sort((PreallocatedList<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByEndTime);
-   }
-
-   static public void sortByReverseEndTime(PreallocatedList<? extends TimeIntervalProvider> timeIntervalProviders)
-   {
-      PreallocatedListSorter.sort((PreallocatedList<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByEndTime.reversed());
-   }
-
    static public void sortByStartTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByStartTime);

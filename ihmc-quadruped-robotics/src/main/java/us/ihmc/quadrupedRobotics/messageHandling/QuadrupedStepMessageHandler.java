@@ -1,15 +1,14 @@
 package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -22,10 +21,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class QuadrupedStepMessageHandler
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int STEP_QUEUE_SIZE = 40;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -38,7 +37,7 @@ public class QuadrupedStepMessageHandler
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
    private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
-   private final YoPreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
+   private final PreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
 
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -46,7 +45,7 @@ public class QuadrupedStepMessageHandler
    public QuadrupedStepMessageHandler(YoDouble robotTimestamp, YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = robotTimestamp;
-      this.receivedStepSequence = new YoPreallocatedList<>("receivedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
+      this.receivedStepSequence = new PreallocatedList<>(YoQuadrupedTimedStep.class, new YoQuadrupedTimedStepSupplier("receivedStepSequence"), STEP_QUEUE_SIZE);
 
       initialTransferDurationForShifting.set(0.5);
 
@@ -190,7 +189,7 @@ public class QuadrupedStepMessageHandler
       }
    }
 
-   public YoPreallocatedList<YoQuadrupedTimedStep> getStepSequence()
+   public PreallocatedList<YoQuadrupedTimedStep> getStepSequence()
    {
       return receivedStepSequence;
    }
@@ -221,5 +220,22 @@ public class QuadrupedStepMessageHandler
    {
       haltFlag.set(false);
       receivedStepSequence.clear();
+   }
+
+   private class YoQuadrupedTimedStepSupplier implements Supplier<YoQuadrupedTimedStep>
+   {
+      final String prefix;
+      int index = 0;
+
+      public YoQuadrupedTimedStepSupplier(String prefix)
+      {
+         this.prefix = prefix;
+      }
+
+      @Override
+      public YoQuadrupedTimedStep get()
+      {
+         return new YoQuadrupedTimedStep(prefix + index++, registry);
+      }
    }
 }
