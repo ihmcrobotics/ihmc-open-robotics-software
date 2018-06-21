@@ -37,7 +37,7 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.javassist", name: "javassist", version: "3.18.1-GA"
    compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
@@ -50,5 +50,5 @@ testDependencies {
    compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
    compile group: "org.jfree", name: "jcommon", version: "1.0.21"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
 }
