@@ -66,7 +66,7 @@ public class GenericQuadrupedAllocationTest implements AllocationTest
    {
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory(false);
+         QuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
