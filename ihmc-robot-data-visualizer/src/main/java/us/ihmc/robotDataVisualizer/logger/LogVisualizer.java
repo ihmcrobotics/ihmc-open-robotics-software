@@ -15,6 +15,7 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,8 +29,6 @@ import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataVisualizer.logger.util.FileSelectionDialog;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -40,6 +39,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LogVisualizer
 {
@@ -113,7 +114,7 @@ public class LogVisualizer
 
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
-      
+
       System.out.println("This log contains " + parser.getNumberOfVariables() + " YoVariables");
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
@@ -139,7 +140,14 @@ public class LogVisualizer
 
          loader.load(modelName, modelData, resourceDirectories, resourceData, null);
 
-         generalizedSDFRobotModel = loader.createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
+         try
+         {
+            generalizedSDFRobotModel = loader.createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
+         }
+         catch (Exception e)
+         {
+            PrintTools.warn("Robot model not available.");
+         }
       }
       else if (jointStates.size() != 0)
       {
