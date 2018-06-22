@@ -51,6 +51,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -59,7 +60,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -704,6 +704,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.initialize();
    }
 
+   @Deprecated
    public void resetJointIntegrators()
    {
       for (int i = 0; i < allOneDoFjoints.length; i++)
@@ -726,7 +727,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    /**
     * Returns the currently active walking state. This is used for unit testing.
-    * 
+    *
     * @return WalkingStateEnum
     */
    public WalkingStateEnum getWalkingStateEnum()
