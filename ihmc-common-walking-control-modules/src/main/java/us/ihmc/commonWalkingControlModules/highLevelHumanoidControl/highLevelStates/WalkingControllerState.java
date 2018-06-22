@@ -151,6 +151,7 @@ public class WalkingControllerState extends HighLevelControllerState
       if (requestIntegratorReset)
       {
          stateSpecificJointSettings.requestIntegratorReset();
+         requestIntegratorReset = false;
          yoRequestingIntegratorReset.set(true);
       }
       else
