@@ -5,6 +5,7 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -13,24 +14,27 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.ParameterChangedListener;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -58,12 +62,13 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble maximumIntegralError = new YoDouble("maximumPelvisPositionIntegralError", registry);
 
    private final YoFrameVector2D desiredICPOffset = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
+   private final Vector2DReadOnly userOffset = new ParameterVector2D("userDesiredICPOffset", new Vector2D(), registry);
 
    private final YoBoolean isEnabled = new YoBoolean("isPelvisTranslationManagerEnabled", registry);
    private final YoBoolean isRunning = new YoBoolean("isPelvisTranslationManagerRunning", registry);
    private final YoBoolean isFrozen = new YoBoolean("isPelvisTranslationManagerFrozen", registry);
 
-   private final YoBoolean manualMode = new YoBoolean("manualModeICPOffset", registry);
+   private final BooleanParameter manualMode = new BooleanParameter("manualModeICPOffset", registry, false);
 
    private final YoDouble yoTime;
    private final double controlDT;
@@ -114,10 +119,10 @@ public class PelvisICPBasedTranslationManager
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addVariableChangedListener(new VariableChangedListener()
+      manualMode.addParameterChangedListener(new ParameterChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void notifyOfParameterChange(YoParameter<?> v)
          {
             initialize();
          }
@@ -162,7 +167,7 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (manualMode.getBooleanValue())
+      if (manualMode.getValue())
          return;
 
       if (isRunning.getBooleanValue())
@@ -403,7 +408,7 @@ public class PelvisICPBasedTranslationManager
 
       originalICPToModify.setIncludingFrame(desiredICPToModify);
 
-      if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getBooleanValue()))
+      if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getValue()))
       {
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
@@ -413,12 +418,10 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (manualMode.getBooleanValue())
+      if (manualMode.getValue())
       {
-         // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
-         tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
+         tempICPOffset.setIncludingFrame(supportFrame, userOffset.getX(), userOffset.getY());
       }
-
       else
       {
          tempICPOffset.setIncludingFrame(desiredICPOffset);
