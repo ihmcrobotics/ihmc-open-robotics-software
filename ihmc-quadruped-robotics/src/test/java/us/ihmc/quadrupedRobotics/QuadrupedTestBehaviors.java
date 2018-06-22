@@ -78,18 +78,6 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
-   {
-      stepTeleopManager.requestSteppingState();
-      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
-      conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.STEPPING));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-      conductor.simulate();
-   }
-
    public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
