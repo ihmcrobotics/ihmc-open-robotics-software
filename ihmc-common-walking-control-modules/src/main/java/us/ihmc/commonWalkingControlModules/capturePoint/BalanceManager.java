@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,7 +46,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -136,8 +136,7 @@ public class BalanceManager
    private final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
    private final boolean useICPOptimizationControl;
-
-   private final YoICPControlGains icpControlGains = new YoICPControlGains("", registry);
+   private final YoICPControlGains icpControlGains;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -156,8 +155,6 @@ public class BalanceManager
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      icpControlGains.set(walkingControllerParameters.createICPControlGains());
-
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -174,12 +171,15 @@ public class BalanceManager
 
       if (useICPOptimizationControl)
       {
+         icpControlGains = null;
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
                controllerToolbox.getICPControlPolygons(), contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ,
                controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
+         icpControlGains = new YoICPControlGains("", registry);
+         icpControlGains.set(walkingControllerParameters.createICPControlGains());
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
@@ -243,7 +243,7 @@ public class BalanceManager
 
       double pelvisTranslationICPSupportPolygonSafeMargin = walkingControllerParameters.getPelvisTranslationICPSupportPolygonSafeMargin();
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, pelvisTranslationICPSupportPolygonSafeMargin, bipedSupportPolygons, registry);
-      
+
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -352,7 +352,7 @@ public class BalanceManager
    {
       return icpPlanner.getTransferDuration(1);
    }
-   
+
    public double getCurrentTouchdownDuration()
    {
       return icpPlanner.getTouchdownDuration(0);
@@ -663,7 +663,7 @@ public class BalanceManager
       icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.sub(capturePoint2d);
    }
-   
+
    public boolean isPrecomputedICPPlannerActive()
    {
       return precomputedICPPlanner.isWithinInterval(yoTime.getDoubleValue());
