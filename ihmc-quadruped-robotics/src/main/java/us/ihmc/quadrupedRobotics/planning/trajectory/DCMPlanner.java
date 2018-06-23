@@ -33,7 +33,7 @@ import java.util.List;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-public class DCMPlanner
+public class DCMPlanner implements DCMPlannerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 

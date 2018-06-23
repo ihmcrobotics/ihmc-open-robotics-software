@@ -22,7 +22,7 @@ public class QuadrupedCenterOfPressureTools
                                               QuadrantDependentList<MutableDouble> contactPressure)
    {
       // Compute center of pressure given the vertical force at each contact.
-      double pressure = 1e-6;
+      double pressure = 0.0;
       copPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       copPosition.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -31,7 +31,10 @@ public class QuadrupedCenterOfPressureTools
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          copPosition.scaleAdd(contactPressure.get(robotQuadrant).doubleValue(), solePosition.get(robotQuadrant), copPosition);
       }
-      copPosition.scale(1.0 / pressure);
+      if (pressure > 0.0)
+         copPosition.scale(1.0 / pressure);
+      else
+         copPosition.setToNaN();
    }
 
    /**
@@ -39,7 +42,8 @@ public class QuadrupedCenterOfPressureTools
     * @param contactPressure nominal vertical ground reaction forces for each quadrant
     * @param contactState contact state for each quadrant
     */
-   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure, QuadrantDependentList<ContactState> contactState)
+   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure,
+                                                              QuadrantDependentList<ContactState> contactState)
    {
       // Compute vertical force distribution assuming equal loading of hind and front ends.
       int numberOfHindFeetInContact = 0;
