@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -15,7 +14,6 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
    private final TimeInterval timeInterval = new TimeInterval();
    private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
-   private final QuadrantDependentList<MutableDouble> contactPressures = new QuadrantDependentList<>();
    private final FramePoint3D copPosition = new FramePoint3D();
    private ContactState contactState = ContactState.IN_CONTACT;
 
@@ -25,7 +23,6 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
       {
          contactStates.set(robotQuadrant, ContactState.IN_CONTACT);
          solePosition.set(robotQuadrant, new FramePoint3D());
-         contactPressures.set(robotQuadrant, new MutableDouble());
       }
    }
 
@@ -34,7 +31,6 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
       setTimeInterval(other.getTimeInterval());
       setContactStates(other.getContactStates());
       setSolePosition(other.getSolePosition());
-      setContactPressures(other.getContactPressures());
       setCopPosition(other.getCopPosition());
       setContactState(other.getContactState());
    }
@@ -53,11 +49,6 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
    public QuadrantDependentList<FramePoint3D> getSolePosition()
    {
       return solePosition;
-   }
-
-   public QuadrantDependentList<MutableDouble> getContactPressures()
-   {
-      return contactPressures;
    }
 
    public FramePoint3D getCopPosition()
@@ -95,14 +86,6 @@ public class QuadrupedContactPhase implements TimeIntervalProvider
    public void setCopPosition(FramePoint3DReadOnly copPosition)
    {
       this.copPosition.setIncludingFrame(copPosition);
-   }
-
-   public void setContactPressures(QuadrantDependentList<MutableDouble> contactPressures)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         this.contactPressures.get(robotQuadrant).setValue(contactPressures.get(contactPressures).doubleValue());
-      }
    }
 
    public void setContactState(ContactState contactState)

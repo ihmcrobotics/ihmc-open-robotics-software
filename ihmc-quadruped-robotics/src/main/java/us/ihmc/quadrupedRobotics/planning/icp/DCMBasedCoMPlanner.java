@@ -44,10 +44,11 @@ public class DCMBasedCoMPlanner
    public void computeSetpoints(double currentTime, QuadrantDependentList<ContactState> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                 FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
+      contactSequence.update(stepSequence, currentContactStates, currentTime);
+
       double timeInPhase = currentTime - contactSequence.getFirst().getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
-      contactSequence.update(stepSequence, currentContactStates, currentTime);
       comTrajectoryPlanner.solveForTrajectory();
       comTrajectoryPlanner.compute(timeInPhase);
 

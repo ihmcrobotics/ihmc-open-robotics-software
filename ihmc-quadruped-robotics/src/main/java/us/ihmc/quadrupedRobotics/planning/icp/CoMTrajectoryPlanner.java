@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -22,10 +23,12 @@ public class CoMTrajectoryPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DenseMatrix64F coefficientMultipliers = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F coefficientConstants = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F coefficientVector = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F xCoefficientConstants = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F yCoefficientConstants = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F xCoefficientVector = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F yCoefficientVector = new DenseMatrix64F(0, 1);
 
-   private final FramePoint3D currentCoMPosition = new FramePoint3D();
+   private final FramePoint2D currentCoMPosition = new FramePoint2D();
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
@@ -46,7 +49,7 @@ public class CoMTrajectoryPlanner
       this.contactSequence = contactSequence;
       this.omega = omega;
 
-      registry.addChild(parentRegistry);
+      parentRegistry.addChild(registry);
    }
 
    private int numberOfConstraints = 0;
@@ -55,8 +58,10 @@ public class CoMTrajectoryPlanner
    {
       int size = 2 * contactSequence.size();
       coefficientMultipliers.reshape(size, size);
-      coefficientConstants.reshape(size, 1);
-      coefficientVector.reshape(size, 1);
+      xCoefficientConstants.reshape(size, 1);
+      yCoefficientConstants.reshape(size, 1);
+      xCoefficientVector.reshape(size, 1);
+      yCoefficientVector.reshape(size, 1);
 
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
@@ -81,13 +86,14 @@ public class CoMTrajectoryPlanner
 
       // solve for coefficients
       solver.setA(coefficientMultipliers);
-      solver.solve(coefficientConstants, coefficientVector);
+      solver.solve(xCoefficientConstants, xCoefficientVector);
+      solver.solve(yCoefficientConstants, yCoefficientVector);
 
-      firstCoefficient.setX(coefficientVector.get(getFirstXCoefficient(0)));
-      firstCoefficient.setY(coefficientVector.get(getFirstYCoefficient(0)));
+      firstCoefficient.setX(xCoefficientVector.get(getFirstCoefficient(0)));
+      firstCoefficient.setY(yCoefficientVector.get(getFirstCoefficient(0)));
 
-      secondCoefficient.setX(coefficientVector.get(getSecondXCoefficient(0)));
-      secondCoefficient.setY(coefficientVector.get(getSecondYCoefficient(0)));
+      secondCoefficient.setX(xCoefficientVector.get(getSecondCoefficient(0)));
+      secondCoefficient.setY(yCoefficientVector.get(getSecondCoefficient(0)));
    }
 
 
@@ -119,7 +125,7 @@ public class CoMTrajectoryPlanner
       desiredICPVelocity.scale(2.0 * firstCoefficientVelocityMultiplier);
    }
 
-   public void setCurrentCoMPosition(FramePoint3DReadOnly currentCoMPosition)
+   public void setCurrentCoMPosition(FramePoint2DReadOnly currentCoMPosition)
    {
       this.currentCoMPosition.setIncludingFrame(currentCoMPosition);
    }
@@ -134,7 +140,13 @@ public class CoMTrajectoryPlanner
       return desiredICPVelocity;
    }
 
-   private void setPositionEqualityInContact(int sequenceId, double timeInPhase, FramePoint3DReadOnly point)
+   public FramePoint2DReadOnly getDesiredCoMPosition()
+   {
+      return desiredCoMPosition;
+   }
+
+
+   private void setPositionEqualityInContact(int sequenceId, double timeInPhase, FramePoint2DReadOnly point)
    {
       point.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       double omega = this.omega.getDoubleValue();
@@ -153,15 +165,10 @@ public class CoMTrajectoryPlanner
       bX = point.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
       bY = point.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(sequenceId), c0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondXCoefficient(sequenceId), c1);
-      coefficientConstants.add(numberOfConstraints, 0, bX);
-
-      numberOfConstraints++;
-
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(sequenceId), c0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondYCoefficient(sequenceId), c1);
-      coefficientConstants.add(numberOfConstraints, 0, bY);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
+      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(sequenceId), c1);
+      xCoefficientConstants.add(numberOfConstraints, 0, bX);
+      yCoefficientConstants.add(numberOfConstraints, 0, bY);
 
       numberOfConstraints++;
    }
@@ -177,13 +184,9 @@ public class CoMTrajectoryPlanner
       double bX = point.getX() - contactSequence.get(sequenceId).getCopPosition().getX();
       double bY = point.getY() - contactSequence.get(sequenceId).getCopPosition().getY();
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(sequenceId), c0);
-      coefficientConstants.add(numberOfConstraints, 0, bX);
-
-      numberOfConstraints++;
-
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(sequenceId), c0);
-      coefficientConstants.add(numberOfConstraints, 0, bY);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(sequenceId), c0);
+      xCoefficientConstants.add(numberOfConstraints, 0, bX);
+      yCoefficientConstants.add(numberOfConstraints, 0, bY);
 
       numberOfConstraints++;
    }
@@ -236,19 +239,12 @@ public class CoMTrajectoryPlanner
       nextC0 = -getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
       nextC1 = -getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondXCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondXCoefficient(nextSequence), nextC1);
-      coefficientConstants.add(numberOfConstraints, 0, previousBX + nextBX);
-
-      numberOfConstraints++;
-
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondYCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondYCoefficient(nextSequence), nextC1);
-      coefficientConstants.add(numberOfConstraints, 0, previousBY + nextBY);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
+      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(nextSequence), nextC0);
+      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(nextSequence), nextC1);
+      xCoefficientConstants.add(numberOfConstraints, 0, previousBX + nextBX);
+      yCoefficientConstants.add(numberOfConstraints, 0, previousBY + nextBY);
 
       numberOfConstraints++;
    }
@@ -260,8 +256,8 @@ public class CoMTrajectoryPlanner
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
 
-      double previousC0 = getFirstCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
-      double previousC1 = getSecondCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
+      double previousC0 = getFirstCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
+      double previousC1 = getSecondCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
 
       /*
       double previousC0, previousC1;
@@ -277,8 +273,8 @@ public class CoMTrajectoryPlanner
       }
       */
 
-      double nextC0 = -getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
-      double nextC1 = -getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
+      double nextC0 = -getFirstCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
+      double nextC1 = -getSecondCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
 
       /*
       double nextC0, nextC1;
@@ -294,19 +290,12 @@ public class CoMTrajectoryPlanner
       }
       */
 
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondXCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstXCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondXCoefficient(nextSequence), nextC1);
-      coefficientConstants.add(numberOfConstraints, 0, 0.0);
-
-      numberOfConstraints++;
-
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(previousSequence), previousC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondYCoefficient(previousSequence), previousC1);
-      coefficientMultipliers.set(numberOfConstraints, getFirstYCoefficient(nextSequence), nextC0);
-      coefficientMultipliers.set(numberOfConstraints, getSecondYCoefficient(nextSequence), nextC1);
-      coefficientConstants.add(numberOfConstraints, 0, 0.0);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
+      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
+      coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(nextSequence), nextC0);
+      coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(nextSequence), nextC1);
+      xCoefficientConstants.add(numberOfConstraints, 0, 0.0);
+      yCoefficientConstants.add(numberOfConstraints, 0, 0.0);
 
       numberOfConstraints++;
    }
@@ -361,24 +350,14 @@ public class CoMTrajectoryPlanner
       }
    }
 
-   private int getFirstXCoefficient(int sequenceId)
+   private int getFirstCoefficient(int sequenceId)
    {
-      return 4 * sequenceId;
+      return 2 * sequenceId;
    }
 
-   private int getSecondXCoefficient(int sequenceId)
+   private int getSecondCoefficient(int sequenceId)
    {
-      return 4 * sequenceId + 1;
-   }
-
-   private int getFirstYCoefficient(int sequenceId)
-   {
-      return 4 * sequenceId + 2;
-   }
-
-   private int getSecondYCoefficient(int sequenceId)
-   {
-      return 4 * sequenceId + 3;
+      return 2 * sequenceId + 1;
    }
 
 }
