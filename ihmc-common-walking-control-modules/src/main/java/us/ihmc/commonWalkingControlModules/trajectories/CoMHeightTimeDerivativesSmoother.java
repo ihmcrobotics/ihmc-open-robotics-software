@@ -3,16 +3,17 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import Jama.Matrix;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
 import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
 import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CoMHeightTimeDerivativesSmoother
 {
@@ -48,36 +49,39 @@ public class CoMHeightTimeDerivativesSmoother
    private final YoDouble eigenValueThreeReal = new YoDouble("eigenValueThreeReal", registry);
    private final YoDouble eigenValueThreeImag = new YoDouble("eigenValueThreeImag", registry);
 
-   private final YoDouble maximumVelocity;
-   private final YoDouble maximumAcceleration;
-   private final YoDouble maximumJerk;
+   private final DoubleProvider maximumVelocity;
+   private final DoubleProvider maximumAcceleration;
+   private final DoubleProvider maximumJerk;
 
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
       this(null, null, null, dt, parentRegistry);
    }
 
-   public CoMHeightTimeDerivativesSmoother(YoDouble maximumVelocity, YoDouble maximumAcceleration, YoDouble maximumJerk, double dt,
+   public CoMHeightTimeDerivativesSmoother(DoubleProvider maximumVelocity, DoubleProvider maximumAcceleration, DoubleProvider maximumJerk, double dt,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
 
       if (maximumVelocity == null)
       {
-         maximumVelocity = new YoDouble("comHeightMaxVelocity", registry);
-         maximumVelocity.set(0.25); // Tried 0.25 on the real robot, looked good but need to be well tested.
+         YoDouble yoMaximumVelocity = new YoDouble("comHeightMaxVelocity", registry);
+         yoMaximumVelocity.set(0.25); // Tried 0.25 on the real robot, looked good but need to be well tested.
+         maximumVelocity = yoMaximumVelocity;
       }
 
       if (maximumAcceleration == null)
       {
-         maximumAcceleration = new YoDouble("comHeightMaxAcceleration", registry);
-         maximumAcceleration.set(0.5 * 9.81);
+         YoDouble yoMaximumAcceleration = new YoDouble("comHeightMaxAcceleration", registry);
+         yoMaximumAcceleration.set(0.5 * 9.81);
+         maximumAcceleration = yoMaximumAcceleration;
       }
 
       if (maximumJerk == null)
       {
-         maximumJerk = new YoDouble("comHeightMaxJerk", registry);
-         maximumJerk.set(0.5 * 9.81 / 0.05);
+         YoDouble yoMaximumJerk = new YoDouble("comHeightMaxJerk", registry);
+         yoMaximumJerk.set(0.5 * 9.81 / 0.05);
+         maximumJerk = yoMaximumJerk;
       }
 
       this.maximumVelocity = maximumVelocity;
@@ -160,16 +164,16 @@ public class CoMHeightTimeDerivativesSmoother
 
       double jerk = comHeightAccelerationGain.getDoubleValue() * accelerationError + comHeightVelocityGain.getDoubleValue() * velocityError
             + comHeightGain.getDoubleValue() * heightError;
-      jerk = MathTools.clamp(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
+      jerk = MathTools.clamp(jerk, -maximumJerk.getValue(), maximumJerk.getValue());
 
       smoothComHeightJerk.set(jerk);
 
       smoothComHeightAcceleration.add(jerk * dt);
-      smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue()));
+      smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getValue()));
 
       double newSmoothComHeightVelocity = smoothComHeightVelocity.getDoubleValue();
       newSmoothComHeightVelocity += smoothComHeightAcceleration.getDoubleValue() * dt;
-      newSmoothComHeightVelocity = MathTools.clamp(newSmoothComHeightVelocity, maximumVelocity.getDoubleValue());
+      newSmoothComHeightVelocity = MathTools.clamp(newSmoothComHeightVelocity, maximumVelocity.getValue());
 
       smoothComHeightAcceleration.set(newSmoothComHeightVelocity - smoothComHeightVelocity.getDoubleValue());
       smoothComHeightAcceleration.mul(1.0 / dt);

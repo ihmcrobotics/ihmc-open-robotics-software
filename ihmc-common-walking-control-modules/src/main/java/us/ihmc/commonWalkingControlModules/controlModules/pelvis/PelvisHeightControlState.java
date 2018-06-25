@@ -26,8 +26,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.AbstractPDController;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -36,6 +36,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -62,7 +63,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final Point3D tempPoint = new Point3D();
    private final RigidBodyTransform controlFrame = new RigidBodyTransform();
 
-   private final PDController linearMomentumZPDController;
+   private final AbstractPDController linearMomentumZPDController;
    private final YoSE3OffsetFrame yoControlFrame;
 
    private final YoDouble currentPelvisHeightInWorld;
@@ -70,7 +71,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final YoDouble desiredPelvisVelocityInWorld;
    private final YoDouble currentPelvisVelocityInWorld;
 
-   public PelvisHeightControlState(YoPID3DGains gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public PelvisHeightControlState(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -83,9 +84,9 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      linearMomentumZPDController = new PDController("pelvisHeightControlState_linearMomentumZPDController", registry);
-      linearMomentumZPDController.setProportionalGain(gains.getProportionalGains()[2]);
-      linearMomentumZPDController.setDerivativeGain(gains.getDerivativeGains()[2]);
+      DoubleProvider proportionalGain = () -> gains.getProportionalGains()[2];
+      DoubleProvider derivativeGain = () -> gains.getDerivativeGains()[2];
+      linearMomentumZPDController = AbstractPDController.createPDController("pelvisHeightControlState_linearMomentumZPDController", proportionalGain, derivativeGain, () -> 0.0, registry);
       yoControlFrame =  new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);

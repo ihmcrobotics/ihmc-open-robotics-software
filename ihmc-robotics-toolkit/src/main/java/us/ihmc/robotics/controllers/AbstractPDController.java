@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -77,4 +78,28 @@ public abstract class AbstractPDController
       return positionError;
    }
 
+   public static AbstractPDController createPDController(String suffix, DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider deadband,
+                                                         YoVariableRegistry registry)
+   {
+      return new AbstractPDController(suffix, registry)
+      {
+         @Override
+         public double getProportionalGain()
+         {
+            return proportionalGain.getValue();
+         }
+
+         @Override
+         public double getPositionDeadband()
+         {
+            return deadband.getValue();
+         }
+
+         @Override
+         public double getDerivativeGain()
+         {
+            return derivativeGain.getValue();
+         }
+      };
+   }
 }
