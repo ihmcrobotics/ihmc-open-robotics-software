@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -17,6 +16,8 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 import java.util.List;
 
+// This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
+// This means that the final CoP is the terminal ICP location
 public class CoMTrajectoryPlanner
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -96,7 +97,6 @@ public class CoMTrajectoryPlanner
       secondCoefficient.setY(yCoefficientVector.get(getSecondCoefficient(0)));
    }
 
-
    public void compute(double timeInPhase)
    {
       QuadrupedContactPhase currentContactPhase = contactSequence.get(0);
@@ -145,7 +145,6 @@ public class CoMTrajectoryPlanner
       return desiredCoMPosition;
    }
 
-
    private void setPositionEqualityInContact(int sequenceId, double timeInPhase, FramePoint2DReadOnly point)
    {
       point.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -193,51 +192,40 @@ public class CoMTrajectoryPlanner
 
    private void setPositionContinuity(int previousSequence, int nextSequence)
    {
-      double omega = this.omega.getDoubleValue();
-
-      double previousC0, previousC1, previousBX, previousBY;
-      double nextC0, nextC1, nextBX, nextBY;
-
       QuadrupedContactPhase previousContact = contactSequence.get(previousSequence);
       QuadrupedContactPhase nextContact = contactSequence.get(nextSequence);
 
       double previousDuration = previousContact.getTimeInterval().getDuration();
 
+      double previousBX, previousBY;
       if (previousContact.getContactState() == ContactState.IN_CONTACT)
       {
-         previousC0 = Math.exp(omega * previousDuration);
-         previousC1 = Math.exp(-omega * previousDuration);
          previousBX = -previousContact.getCopPosition().getX();
          previousBY = -previousContact.getCopPosition().getY();
       }
       else
       {
-         previousC0 = previousDuration;
-         previousC1 = 1.0;
          previousBX = 0.0;
          previousBY = 0.0;
       }
 
-      previousC0 = getFirstCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
-      previousC1 = getSecondCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
+      double previousC0 = getFirstCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
+      double previousC1 = getSecondCoefficientPositionMultiplier(previousContact.getContactState(), previousDuration);
 
+      double nextBX, nextBY;
       if (nextContact.getContactState() == ContactState.IN_CONTACT)
       {
-         nextC0 = -1.0;
-         nextC1 = -1.0;
          nextBX = nextContact.getCopPosition().getX();
          nextBY = nextContact.getCopPosition().getY();
       }
       else
       {
-         nextC0 = 0.0;
-         nextC1 = -1.0;
          nextBX = 0.0;
          nextBY = 0.0;
       }
 
-      nextC0 = -getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
-      nextC1 = -getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
+      double nextC0 = -getFirstCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
+      double nextC1 = -getSecondCoefficientPositionMultiplier(nextContact.getContactState(), 0.0);
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
       coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
@@ -259,36 +247,8 @@ public class CoMTrajectoryPlanner
       double previousC0 = getFirstCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
       double previousC1 = getSecondCoefficientVelocityMultiplier(previousContact.getContactState(), previousDuration);
 
-      /*
-      double previousC0, previousC1;
-      if (previousContact.getContactState() == ContactState.IN_CONTACT)
-      {
-         previousC0 = omega * Math.exp(omega * previousDuration);
-         previousC1 = -omega * Math.exp(-omega * previousDuration);
-      }
-      else
-      {
-         previousC0 = 1.0;
-         previousC1 = 0.0;
-      }
-      */
-
       double nextC0 = -getFirstCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
       double nextC1 = -getSecondCoefficientVelocityMultiplier(nextContact.getContactState(), 0.0);
-
-      /*
-      double nextC0, nextC1;
-      if (nextContact.getContactState() == ContactState.IN_CONTACT)
-      {
-         nextC0 = -omega;
-         nextC1 = omega;
-      }
-      else
-      {
-         nextC0 = -1.0;
-         nextC1 = 0.0;
-      }
-      */
 
       coefficientMultipliers.set(numberOfConstraints, getFirstCoefficient(previousSequence), previousC0);
       coefficientMultipliers.set(numberOfConstraints, getSecondCoefficient(previousSequence), previousC1);
@@ -311,8 +271,6 @@ public class CoMTrajectoryPlanner
          return timeInPhase;
       }
    }
-
-
 
    private double getSecondCoefficientPositionMultiplier(ContactState contactState, double timeInPhase)
    {
