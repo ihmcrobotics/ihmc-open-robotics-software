@@ -18,8 +18,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -43,6 +45,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class CenterOfMassHeightManager
 {
+   public static final String CONTROLLER_GAIN_SUFFIX = "_CoMHeight";
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
    private final YoEnum<PelvisHeightControlMode> requestedState;
@@ -69,23 +73,22 @@ public class CenterOfMassHeightManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
-      PDGains gains = walkingControllerParameters.getCoMHeightControlGains();
-      comHeightGains = new YoPDGains("_CoMHeight", registry);
+      PDGains defaultGains = walkingControllerParameters.getCoMHeightControlGains();
+      comHeightGains = new YoPDGains(CONTROLLER_GAIN_SUFFIX, registry);
       comHeightGains.createDerivativeGainUpdater(true);
-      comHeightGains.set(gains);
+      comHeightGains.set(defaultGains);
 
-      //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z
-      SymmetricYoPIDSE3Gains pidGains = new SymmetricYoPIDSE3Gains("pelvisHeightManager", registry);
-      pidGains.setProportionalGains(comHeightGains.getKp());
-      pidGains.setDampingRatios(comHeightGains.getZeta());
+      // Some nasty copying: there is a gain frame issue in the feedback controller so we turn the height gain into a symmetric 3D gain.
+      DefaultPID3DGains defaultGains3D = new DefaultPID3DGains();
+      defaultGains3D.setProportionalGains(defaultGains.getKp());
+      defaultGains3D.setDampingRatios(defaultGains.getZeta());
+      defaultGains3D.setMaxFeedbackAndFeedbackRate(defaultGains.getMaximumFeedback(), defaultGains.getMaximumFeedbackRate());
+      ParameterizedPID3DGains gains3D = new ParameterizedPID3DGains("UserPelvisHeight", GainCoupling.XYZ, false, defaultGains3D, registry);
 
-      //this affects tracking in sim, not sure if it will be needed for the real robot
-//      pidGains.setMaxFeedbackAndFeedbackRate(pdGains.getMaximumFeedback(), pdGains.getMaximumFeedbackRate());
+      // User mode
+      pelvisHeightControlState = new PelvisHeightControlState(gains3D, controllerToolbox, walkingControllerParameters, registry);
 
-      //User mode
-      pelvisHeightControlState = new PelvisHeightControlState(pidGains, controllerToolbox, walkingControllerParameters, registry);
-
-      //normal control
+      // Normal control during walking
       centerOfMassHeightControlState = new CenterOfMassHeightControlState(comHeightGains, controllerToolbox, walkingControllerParameters, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -96,10 +99,10 @@ public class CenterOfMassHeightManager
    {
       StateMachineFactory<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> factory = new StateMachineFactory<>(PelvisHeightControlMode.class);
       factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
-      
+
       factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
       factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
-      
+
       for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
          factory.addRequestedTransition(from, requestedState);
 

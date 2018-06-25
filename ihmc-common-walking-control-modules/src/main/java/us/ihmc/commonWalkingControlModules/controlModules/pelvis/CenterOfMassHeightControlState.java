@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -11,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,15 +24,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
+import us.ihmc.robotics.controllers.AbstractPDController;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -59,7 +62,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightVelocityAfterSmoothing = new YoDouble("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
-   private final PDController centerOfMassHeightController;
+   private final AbstractPDController centerOfMassHeightController;
 
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -69,7 +72,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final double gravity;
    private final RigidBody pelvis;
 
-   public CenterOfMassHeightControlState(YoPDGains comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public CenterOfMassHeightControlState(PDGainsReadOnly comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -85,15 +88,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
 
-      YoDouble kpCoMHeight = comHeightGains.getYoKp();
-      YoDouble kdCoMHeight = comHeightGains.getYoKd();
-      YoDouble maxCoMHeightAcceleration = comHeightGains.getYoMaximumFeedback();
-      YoDouble maxCoMHeightJerk = comHeightGains.getYoMaximumFeedbackRate();
-
       double controlDT = controllerToolbox.getControlDT();
-      // TODO Need to extract the maximum velocity parameter.
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(null, maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
-      this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
+      DoubleProvider maximumComVelocity = new DoubleParameter("maximumVelocity" + CenterOfMassHeightManager.CONTROLLER_GAIN_SUFFIX, parentRegistry, 0.25);
+      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(maximumComVelocity, comHeightGains::getMaximumFeedback, comHeightGains::getMaximumFeedbackRate, controlDT, registry);
+      centerOfMassHeightController = AbstractPDController.createPDController("CoMHeight", comHeightGains::getKp, comHeightGains::getKd, () -> 0.0, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -129,12 +127,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
             ankleZUpFrames, transformsFromAnkleToSole, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
       return centerOfMassTrajectoryGenerator;
-   }
-
-   public void setCoMHeightGains(double kp, double kd)
-   {
-      centerOfMassHeightController.setProportionalGain(kp);
-      centerOfMassHeightController.setDerivativeGain(kd);
    }
 
    @Override
