@@ -65,8 +65,8 @@ public class QuadrupedFootSwitchFactory
                                                                                                                                                          .get(robotQuadrant),
                                                                                                                                     totalRobotWeight, registry);
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(
-               fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH), registry);
+         boolean dontDetectTouchdownIfAtJointLimit = true;
+         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH), dontDetectTouchdownIfAtJointLimit, registry);
          jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 
