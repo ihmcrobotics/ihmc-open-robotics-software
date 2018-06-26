@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,7 +26,7 @@ public class SnapAndWiggleSingleStep
       this.planarRegionsList = planarRegionsList;
    }
 
-   public ConvexPolygon2D snapAndWiggle(FramePose3D solePose, ConvexPolygon2D footStepPolygon) throws SnappingFailedException
+   public ConvexPolygon2D snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon) throws SnappingFailedException
    {
 
       if (planarRegionsList == null)
@@ -92,8 +93,10 @@ public class SnapAndWiggleSingleStep
       return null;
    }
 
-   private class SnappingFailedException extends Exception
+   public static class SnappingFailedException extends Exception
    {
+      private static final long serialVersionUID = 6962526781987562540L;
+
       private SnappingFailedException()
       {
          super("Foot Snapping_Failed");
