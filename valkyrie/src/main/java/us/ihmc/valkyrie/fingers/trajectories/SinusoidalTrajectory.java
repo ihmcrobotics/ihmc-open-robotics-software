@@ -1,99 +1,39 @@
 package us.ihmc.valkyrie.fingers.trajectories;
 
-public class SinusoidalTrajectory implements TrajectoryInterface
+import us.ihmc.yoVariables.providers.DoubleProvider;
+
+public class SinusoidalTrajectory extends GoalPositionTrajectory
 {
-   private double max = Double.MAX_VALUE;
-   private double min = Double.MIN_VALUE;
-
-   private double initialQ;
-   private double finalQ;
-
-   private double trajectoryTime;
-   private double delayTime;
-
-   public SinusoidalTrajectory(double currentQ)
+   public SinusoidalTrajectory(DoubleProvider currentValue)
    {
-      initialQ = 0.0;
-      initialize(currentQ);
-      finalQ = 0.0;
-
-      trajectoryTime = 0.0;
-      delayTime = 0.0;
-   }
-
-   public SinusoidalTrajectory(double currentQ, double maxLimit, double minLimit)
-   {
-      this(currentQ);
-      max = maxLimit;
-      min = minLimit;
+      super(currentValue);
    }
 
    @Override
-   public void initialize(double... initialConditions)
+   protected void update(double time)
    {
-      initialQ = initialConditions[0];
-   }
+      double q, qd = 0.0;
 
-   @Override
-   public void setGoal(double trajectoryTime, double delayTime, double... goalConditions)
-   {
-      this.trajectoryTime = trajectoryTime;
-      this.delayTime = delayTime;
-      this.finalQ = goalConditions[0];
-   }
-
-   @Override
-   public double getTrajectoryTime()
-   {
-      return trajectoryTime;
-   }
-
-   @Override
-   public double getDelayTime()
-   {
-      return delayTime;
-   }
-
-   @Override
-   public double[] getGoalConditions()
-   {
-      double[] goal = new double[1];
-      goal[0] = this.finalQ;
-      return goal;
-   }
-
-   @Override
-   public double getQ(double time)
-   {
-      double q = 0.0;
-
-      if (time <= delayTime)
-         q = initialQ;
-      else if (delayTime < time && time < trajectoryTime)
-         q = initialQ + 0.5 * (finalQ - initialQ) * (1 - Math.cos(Math.PI * (time - delayTime) / (trajectoryTime - delayTime)));
-      else
-         q = finalQ;
-
-      if (q > max)
-         return max;
-      else if (q < min)
-         return min;
-      else
-         return q;
-   }
-
-   @Override
-   public double getQd(double time)
-   {
-      double qd = 0.0;
-
-      if (time <= delayTime)
+      if (time <= delayTime.getValue())
+      {
+         q = initialQ.getValue();
          qd = 0.0;
-      else if (delayTime < time && time < trajectoryTime)
-         qd = 0.5 * (finalQ - initialQ) * Math.PI / (trajectoryTime - delayTime) * Math.sin(Math.PI * (time - delayTime) / (trajectoryTime - delayTime));
+      }
+      else if (delayTime.getValue() < time && time < trajectoryTime.getValue())
+      {
+         double diff = finalQ.getValue() - initialQ.getValue();
+         double timeStamp = time - delayTime.getValue();
+         double timeDiff = trajectoryTime.getValue() - delayTime.getValue();
+         q = initialQ.getValue() + 0.5 * diff * (1 - Math.cos(Math.PI * timeStamp / timeDiff));
+         qd = 0.5 * diff * Math.PI / timeDiff * Math.sin(Math.PI * timeStamp / timeDiff);
+      }
       else
+      {
+         q = finalQ.getValue();
          qd = 0.0;
-      return qd;
-   }
+      }
 
+      currentQ.setValue(q);
+      currentQd.setValue(qd);
+   }
 }

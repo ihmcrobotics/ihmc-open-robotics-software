@@ -29,10 +29,10 @@ public class TrajectoryGeneratorTest
    private final YoDouble yoQ = new YoDouble("yoQ", registry);
    private final YoDouble yoQd = new YoDouble("yoQd", registry);
 
-   private final TrajectoryGenerator trajectoryGenerator;
-   private final TrajectoryInterface trajectory;
+   private final TrajectoryGeneratorStateMachine trajectoryGenerator;
+   private final GoalPositionTrajectory trajectory;
 
-   private final TrajectoryType testTrajectoryType = TrajectoryType.Sinusoidal;
+   private final TrajectoryType testTrajectoryType = TrajectoryType.Linear;
 
    public TrajectoryGeneratorTest()
    {
@@ -58,17 +58,20 @@ public class TrajectoryGeneratorTest
       switch (testTrajectoryType)
       {
       case Linear:
-         trajectory = new LinearTrajectory(yoQ.getDoubleValue());
+         trajectory = new LinearTrajectory(yoQ);
          break;
       case Sinusoidal:
-         trajectory = new SinusoidalTrajectory(yoQ.getDoubleValue());
+         trajectory = new SinusoidalTrajectory(yoQ);
          break;
       default:
          trajectory = null;
          assertFalse(true);
          break;
       }
-      trajectoryGenerator = new TrajectoryGenerator("aa", yoTime, registry, trajectory);
+      trajectory.setLowerLimit(0.0);
+      trajectory.setUpperLimit(7.0);
+      
+      trajectoryGenerator = new TrajectoryGeneratorStateMachine("aa", yoTime, registry, trajectory);
 
       boolean executed1 = false;
       boolean executed2 = false;
@@ -77,8 +80,8 @@ public class TrajectoryGeneratorTest
       {
          yoTime.add(dt);
          trajectoryGenerator.doControl();
-         yoQ.set(trajectoryGenerator.getDesiredQ());
-         yoQd.set(trajectoryGenerator.getDesiredQd());
+         yoQ.set(trajectoryGenerator.getValue());
+         yoQd.set(trajectoryGenerator.getVelocity());
 
          if (t > 1.0 && !executed1)
          {
