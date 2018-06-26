@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -33,17 +34,23 @@ public class QuadrupedMomentumRateOfChangeModule
 
    private double desiredCoMHeightAcceleration;
 
-   private final ParameterVector3D linearMomentumRateWeight = new ParameterVector3D("linearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
+   private final ParameterVector3D vmcLinearMomentumRateWeight = new ParameterVector3D("vmcLinearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
+   private final ParameterVector3D kinematicsLinearMomentumWeight = new ParameterVector3D("kinematicsLinearMomentumWeight", new Vector3D(5.0, 5.0, 2.5), registry);
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
+   private final FrameVector3D linearMomentum = new FrameVector3D();
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final MomentumCommand momentumCommand = new MomentumCommand();
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FrameVector3D dcmVelocitySetpoint = new FrameVector3D();
 
+   private final double controlDT;
    private final boolean debug;
+
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -53,8 +60,10 @@ public class QuadrupedMomentumRateOfChangeModule
    public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry, boolean debug)
    {
       this.debug = debug;
+      this.controllerToolbox = controllerToolbox;
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();
       mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
+      controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
@@ -66,6 +75,7 @@ public class QuadrupedMomentumRateOfChangeModule
       dcmPositionController = new DivergentComponentOfMotionController(comFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
 
       momentumRateCommand.setSelectionMatrixForLinearControl();
+      momentumCommand.setSelectionMatrixForLinearControl();
 
       parentRegistry.addChild(registry);
    }
@@ -73,6 +83,8 @@ public class QuadrupedMomentumRateOfChangeModule
    public void initialize()
    {
       dcmPositionController.reset();
+      linearMomentum.set(controllerToolbox.getCoMVelocityEstimate());
+      linearMomentum.scale(mass);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
@@ -112,12 +124,21 @@ public class QuadrupedMomentumRateOfChangeModule
          throw new IllegalArgumentException("LinearMomentum rate contains NaN.");
 
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
+      momentumRateCommand.setLinearWeights(vmcLinearMomentumRateWeight);
+
+      linearMomentum.scaleAdd(controlDT, linearMomentumRateOfChange, linearMomentum);
+      momentumCommand.setLinearMomentum(linearMomentum);
+      momentumCommand.setLinearWeights(kinematicsLinearMomentumWeight);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;
+   }
+
+   public MomentumCommand getMomentumCommand()
+   {
+      return momentumCommand;
    }
 
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
