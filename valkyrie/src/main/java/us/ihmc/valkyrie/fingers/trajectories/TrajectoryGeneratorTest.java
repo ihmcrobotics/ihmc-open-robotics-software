@@ -58,10 +58,10 @@ public class TrajectoryGeneratorTest
       switch (testTrajectoryType)
       {
       case Linear:
-         trajectory = new LinearTrajectory(yoQ);
+         trajectory = new LinearTrajectory(yoQ.getDoubleValue());
          break;
       case Sinusoidal:
-         trajectory = new SinusoidalTrajectory(yoQ);
+         trajectory = new SinusoidalTrajectory(yoQ.getDoubleValue());
          break;
       default:
          trajectory = null;

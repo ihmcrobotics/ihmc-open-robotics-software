@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SinusoidalTrajectory extends GoalPositionTrajectory
 {
-   public SinusoidalTrajectory(DoubleProvider currentValue)
+   public SinusoidalTrajectory(double currentValue)
    {
       super(currentValue);
    }

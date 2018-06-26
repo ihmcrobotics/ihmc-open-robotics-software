@@ -8,10 +8,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.valkyrie.fingers.trajectories.GoalPositionTrajectory;
 import us.ihmc.valkyrie.fingers.trajectories.LinearTrajectory;
 import us.ihmc.valkyrie.fingers.trajectories.SinusoidalTrajectory;
-import us.ihmc.valkyrie.fingers.trajectories.TrajectoryGenerator;
-import us.ihmc.valkyrie.fingers.trajectories.TrajectoryInterface;
+import us.ihmc.valkyrie.fingers.trajectories.TrajectoryGeneratorStateMachine;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -36,8 +36,8 @@ public class IndividualValkyrieFingerSetController implements RobotController
    private final YoDouble yoTime;
 
    private final TrajectoryType trajectoryType = TrajectoryType.Sinusoidal;
-   private final Map<ValkyrieFingerMotorName, TrajectoryInterface> trajectoryInterfaces = new EnumMap<>(ValkyrieFingerMotorName.class);
-   private final Map<ValkyrieFingerMotorName, TrajectoryGenerator> trajectoryGenerators = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, GoalPositionTrajectory> trajectoryInterfaces = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final Map<ValkyrieFingerMotorName, TrajectoryGeneratorStateMachine> trajectoryGenerators = new EnumMap<>(ValkyrieFingerMotorName.class);
 
    private final Map<ValkyrieFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
    private final Map<ValkyrieFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieFingerMotorName.class);
@@ -56,21 +56,24 @@ public class IndividualValkyrieFingerSetController implements RobotController
          String jointName = jointEnum.getJointName(robotSide);
          OneDegreeOfFreedomJoint fingerJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
 
-         TrajectoryInterface trajectoryInterface;
+         GoalPositionTrajectory trajectoryInterface;
          switch (trajectoryType)
          {
          case Linear:
-            trajectoryInterface = new LinearTrajectory(0.0, MAX_ACTUATOR_POSITION, MIN_ACTUATOR_POSITION);
+            trajectoryInterface = new LinearTrajectory(0.0);
             break;
          case Sinusoidal:
-            trajectoryInterface = new SinusoidalTrajectory(0.0, MAX_ACTUATOR_POSITION, MIN_ACTUATOR_POSITION);
+            trajectoryInterface = new SinusoidalTrajectory(0.0);
             break;
          default:
-            trajectoryInterface = new LinearTrajectory(0.0, MAX_ACTUATOR_POSITION, MIN_ACTUATOR_POSITION);
+            trajectoryInterface = new LinearTrajectory(0.0);
             break;
          }
+         trajectoryInterface.setUpperLimit(MAX_ACTUATOR_POSITION);
+         trajectoryInterface.setLowerLimit(MIN_ACTUATOR_POSITION);
 
-         TrajectoryGenerator trajectoryGenerator = new TrajectoryGenerator(jointName + "TrajectoryGenerator", yoTime, registry, trajectoryInterface);
+         TrajectoryGeneratorStateMachine trajectoryGenerator = new TrajectoryGeneratorStateMachine(jointName + "TrajectoryGenerator", yoTime, registry,
+                                                                                                   trajectoryInterface);
 
          trajectoryInterfaces.put(jointEnum, trajectoryInterface);
          trajectoryGenerators.put(jointEnum, trajectoryGenerator);
@@ -117,8 +120,8 @@ public class IndividualValkyrieFingerSetController implements RobotController
       for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
          trajectoryGenerators.get(jointEnum).doControl();
-         desiredAngles.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQ());
-         desiredVelocities.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQd());
+         desiredAngles.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getValue());
+         desiredVelocities.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getVelocity());
       }
    }
 
@@ -131,8 +134,9 @@ public class IndividualValkyrieFingerSetController implements RobotController
    {
       for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
-         desiredAngles.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQ());
-         desiredVelocities.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQd());
+         trajectoryGenerators.get(jointEnum).doControl();
+         desiredAngles.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getValue());
+         desiredVelocities.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getVelocity());
       }
    }
 }

@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class LinearTrajectory extends GoalPositionTrajectory
 {
-   public LinearTrajectory(DoubleProvider currentValue)
+   public LinearTrajectory(double currentValue)
    {
       super(currentValue);
    }

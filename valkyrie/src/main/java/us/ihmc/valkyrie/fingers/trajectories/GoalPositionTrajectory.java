@@ -1,9 +1,7 @@
 package us.ihmc.valkyrie.fingers.trajectories;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class GoalPositionTrajectory implements DoubleTrajectoryGenerator
 {
@@ -21,13 +19,13 @@ public abstract class GoalPositionTrajectory implements DoubleTrajectoryGenerato
    protected final SettableDoubleProvider trajectoryTime;
    protected final SettableDoubleProvider delayTime;
 
-   public GoalPositionTrajectory(DoubleProvider currentValue)
+   public GoalPositionTrajectory(double currentValue)
    {
       currentTime = new SettableDoubleProvider();
 
-      currentQ = new SettableDoubleProvider(currentValue.getValue());
+      currentQ = new SettableDoubleProvider(currentValue);
       currentQd = new SettableDoubleProvider();
-      initialQ = new SettableDoubleProvider(currentValue.getValue());
+      initialQ = new SettableDoubleProvider(currentValue);
       finalQ = new SettableDoubleProvider();
 
       trajectoryTime = new SettableDoubleProvider();
@@ -72,7 +70,6 @@ public abstract class GoalPositionTrajectory implements DoubleTrajectoryGenerato
    @Override
    public void initialize()
    {
-      PrintTools.info(""+currentQ.getValue());
       initialQ.setValue(currentQ.getValue());
    }
 
