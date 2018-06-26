@@ -3,8 +3,8 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -56,7 +56,9 @@ public class QuadrupedBalanceManager
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
+   private final YoFramePoint2D spedUpDesiredDCMPosition = new YoFramePoint2D("spedUpDesiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoTransitionFinalDCM = new YoFramePoint3D("desiredDCMPositionAtEndOfTransition", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredDCM = new YoFramePoint3D("finalDesiredDCMPosition", worldFrame, registry);
    private final YoFramePoint3D yoVrpPositionSetpoint = new YoFramePoint3D("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoDesiredCMP = new YoFramePoint3D("desiredCMP", ReferenceFrame.getWorldFrame(), registry);
@@ -128,15 +130,19 @@ public class QuadrupedBalanceManager
                                                                    YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
       YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition spedUpDcmViz = new YoGraphicPosition("Sped Up Desired DCM", yoDesiredDCMPosition, 0.01, PaleGoldenRod(),
+                                                              YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       graphicsList.add(desiredDCMViz);
       graphicsList.add(finalDesiredDCMViz);
       graphicsList.add(yoCmpPositionSetpointViz);
+      graphicsList.add(spedUpDcmViz);
 
       artifactList.add(desiredDCMViz.createArtifact());
       artifactList.add(finalDesiredDCMViz.createArtifact());
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(achievedCMPViz.createArtifact());
+      artifactList.add(spedUpDcmViz.createArtifact());
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -235,6 +241,7 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
+      spedUpDesiredDCMPosition.setToNaN();
    }
 
    public void initializeForStanding()
@@ -254,6 +261,7 @@ public class QuadrupedBalanceManager
    public void completedStep(RobotQuadrant robotQuadrant)
    {
       stepAdjustmentController.completedStep(robotQuadrant);
+      spedUpDesiredDCMPosition.setToNaN();
    }
 
    public void compute()
@@ -266,7 +274,7 @@ public class QuadrupedBalanceManager
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
-      dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
+      dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
       if (debug)
          runDebugChecks();
@@ -294,6 +302,65 @@ public class QuadrupedBalanceManager
 
       adjustActiveFootstepGraphics(activeSteps);
       return adjustedActiveSteps;
+   }
+
+   public boolean stepHasBeenAdjusted()
+   {
+      return stepAdjustmentController.stepHasBeenAdjusted();
+   }
+
+   public double estimateSwingSpeedUpTimeUnderDisturbance()
+   {
+      if (activeSteps.isEmpty())
+         return 0.0;
+
+      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
+      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(dcmPositionEstimate);
+
+      if (Double.isNaN(deltaTimeToBeAccounted))
+         return 0.0;
+
+      return deltaTimeToBeAccounted;
+   }
+
+   private final FramePoint2D desiredICP2d = new FramePoint2D();
+   private final FramePoint2D finalICP2d = new FramePoint2D();
+   private final FrameLine2D desiredICPToFinalICPLine = new FrameLine2D();
+   private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
+   private final FramePoint2D actualICP2d = new FramePoint2D();
+
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint3DReadOnly actualCapturePointPosition)
+   {
+      desiredICP2d.setIncludingFrame(yoDesiredDCMPosition);
+      finalICP2d.setIncludingFrame(yoFinalDesiredDCM);
+
+      if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
+         return Double.NaN;
+
+      desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
+      actualICP2d.setIncludingFrame(actualCapturePointPosition);
+      double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
+      if (percentAlongLineSegmentICP < 0.0)
+      {
+         desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
+         desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
+      }
+      else
+      {
+         desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
+      }
+
+      spedUpDesiredDCMPosition.set(actualCapturePointPosition);
+
+      double actualDistanceDueToDisturbance = yoVrpPositionSetpoint.distanceXY(actualICP2d);
+      double expectedDistanceAccordingToPlan = yoVrpPositionSetpoint.distanceXY(yoDesiredDCMPosition);
+
+      double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
+
+      if (distanceRatio < 1.0e-3)
+         return 0.0;
+      else
+         return Math.log(distanceRatio) / linearInvertedPendulumModel.getNaturalFrequency();
    }
 
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)

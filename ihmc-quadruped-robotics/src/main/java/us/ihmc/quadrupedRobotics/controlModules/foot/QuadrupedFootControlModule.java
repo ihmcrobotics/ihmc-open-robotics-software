@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -14,7 +12,6 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -50,8 +47,10 @@ public class QuadrupedFootControlModule
    private static final double supportToSwingGlitchWindow = 0.15;
    private final YoBoolean isFirstStep;
 
-   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox,
-                                     YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   private final QuadrupedSwingState swingState;
+
+   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoGraphicsListRegistry graphicsListRegistry,
+                                     YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
@@ -61,8 +60,7 @@ public class QuadrupedFootControlModule
 
       // state machine
       QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant));
-      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry,
-                                                               registry);
+      swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
 
       EventBasedStateMachineFactory<QuadrupedFootStates, QuadrupedFootState> factory = new EventBasedStateMachineFactory<>(QuadrupedFootStates.class);
@@ -155,7 +153,7 @@ public class QuadrupedFootControlModule
 
    private boolean isValidTrigger()
    {
-      if(isFirstStep.getBooleanValue())
+      if (isFirstStep.getBooleanValue())
       {
          isFirstStep.set(false);
          return true;
@@ -169,6 +167,22 @@ public class QuadrupedFootControlModule
    public void adjustStep(FramePoint3DReadOnly newGoalPosition)
    {
       this.currentStepCommand.setGoalPosition(newGoalPosition);
+   }
+
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link QuadrupedSwingState#minSwingTimeForDisturbanceRecovery}.
+    * @param speedUpTime
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpTime)
+   {
+      return swingState.requestSwingSpeedUp(speedUpTime);
+   }
+
+   public double computeClampedSwingSpeedUpTime(double requestedSpeedUpTime)
+   {
+      return swingState.computeClampedSpeedUpTime(requestedSpeedUpTime);
    }
 
    public ContactState getContactState()
@@ -187,7 +201,6 @@ public class QuadrupedFootControlModule
       footStateMachine.doAction();
       footStateMachine.doTransitions();
    }
-
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {

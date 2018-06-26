@@ -61,7 +61,8 @@ public class DCMPlanner
    private final ReferenceFrame supportFrame;
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
-   private final FramePoint3D finalDesiredDCM = new FramePoint3D();
+   private final FramePoint3D finalTransitionDCM = new FramePoint3D();
+   private final FramePoint3D finalDCM = new FramePoint3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
@@ -102,12 +103,12 @@ public class DCMPlanner
 
       YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.005, YoAppearance.Black(),
                                                                   YoGraphicPosition.GraphicType.SOLID_BALL);
-      yoGraphicsList.add(perfectCMPPositionViz);
-
-      artifactList.add(perfectCMPPositionViz.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
+
+      yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", perfectCMPPositionViz);
+      yoGraphicsListRegistry.registerArtifact("dcmPlanner", perfectCMPPositionViz.createArtifact());
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -181,13 +182,13 @@ public class DCMPlanner
       double transitionStartTime = Math.max(timeAtStartOfState.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
 
       dcmTrajectory.computeTrajectory(transitionEndTime);
-      dcmTrajectory.getPosition(finalDesiredDCM);
+      dcmTrajectory.getPosition(finalTransitionDCM);
 
       tempPoint.setIncludingFrame(dcmPositionAtStartOfState);
       tempPoint.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      finalDesiredDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+      finalTransitionDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
 
-      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalDesiredDCM);
+      dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalTransitionDCM);
 
       if (debug)
          runTransitionDebugChecks(transitionStartTime, transitionEndTime);
@@ -195,7 +196,7 @@ public class DCMPlanner
 
    private void runTransitionDebugChecks(double transitionStartTime, double transitionEndTime)
    {
-      if (finalDesiredDCM.containsNaN())
+      if (finalTransitionDCM.containsNaN())
          throw new IllegalArgumentException("Final DCM at end of transition contains NaN.");
       if (dcmPositionAtStartOfState.containsNaN())
          throw new IllegalArgumentException("DCM Position at start of state contains NaN.");
@@ -226,6 +227,7 @@ public class DCMPlanner
          computeDcmTrajectory(currentContactStates);
 
          double currentTime = controllerTime.getDoubleValue();
+         dcmTrajectory.computeTrajectory(controllerTime.getDoubleValue());
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
             computeTransitionTrajectory();
@@ -233,13 +235,15 @@ public class DCMPlanner
             dcmTransitionTrajectory.compute(controllerTime.getDoubleValue());
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
+
          }
          else
          {
-            dcmTrajectory.computeTrajectory(controllerTime.getDoubleValue());
             dcmTrajectory.getPosition(desiredDCMPosition);
             dcmTrajectory.getVelocity(desiredDCMVelocity);
          }
+
+         dcmTrajectory.getPositionAtEndOfSwing(finalDCM);
       }
 
       desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());
@@ -262,11 +266,14 @@ public class DCMPlanner
          throw new IllegalArgumentException("Desired DCM Velocity contains NaN.");
    }
 
-   public void getFinalDesiredDCM(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   public void getDCMAtEndOfTransition(FixedFramePoint3DBasics finalDesiredDCMToPack)
    {
-      tempPoint.setIncludingFrame(finalDesiredDCM);
-      tempPoint.changeFrame(finalDesiredDCMToPack.getReferenceFrame());
-      finalDesiredDCMToPack.set(tempPoint);
+      finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCM);
+   }
+
+   public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   {
+      finalDesiredDCMToPack.setMatchingFrame(finalDCM);
    }
 
    public double getFinalTime()
