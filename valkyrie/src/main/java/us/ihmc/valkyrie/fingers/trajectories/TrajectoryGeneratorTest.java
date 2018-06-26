@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.fingers.trajectories;
 
 import static org.junit.Assert.assertFalse;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,8 +20,8 @@ public class TrajectoryGeneratorTest
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final double wholeTime = 10.0;
-   private final double dt = 0.001;
+   private final double wholeTime = 20.0;
+   private final double dt = 0.05;
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (wholeTime / dt / recordFrequency + 2);
 
@@ -71,19 +70,26 @@ public class TrajectoryGeneratorTest
       }
       trajectoryGenerator = new TrajectoryGenerator("aa", yoTime, registry, trajectory);
 
-      boolean executed = false;
+      boolean executed1 = false;
+      boolean executed2 = false;
 
       for (double t = 0.0; t <= wholeTime; t += dt)
       {
          yoTime.add(dt);
+         trajectoryGenerator.doControl();
          yoQ.set(trajectoryGenerator.getDesiredQ());
          yoQd.set(trajectoryGenerator.getDesiredQd());
 
-         if (t > 1.0 && !executed)
+         if (t > 1.0 && !executed1)
          {
-            PrintTools.info("executed");
             trajectoryGenerator.executeTrajectory(3.0, 0.5, 5.0);
-            executed = true;
+            executed1 = true;
+         }
+
+         if (t > 10.0 && !executed2)
+         {
+            trajectoryGenerator.executeTrajectory(2.0, 1.0, 10.0);
+            executed2 = true;
          }
 
          scs.tickAndUpdate();

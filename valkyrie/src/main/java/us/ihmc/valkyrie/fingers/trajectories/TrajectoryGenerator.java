@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.fingers.trajectories;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -74,7 +75,9 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
       {
          boolean b = timeInState >= trajectory.getTrajectoryTime();
          if (b)
+         {
             requestedState.set(TrajectoryGeneratorState.DONOTHING);
+         }
          return b;
       }
 
@@ -102,7 +105,7 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
       @Override
       public void onExit()
       {
-
+         PrintTools.info("StateDonothing onExit");
       }
    }
 
