@@ -6,9 +6,13 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -29,8 +33,23 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
       String robotName = robotModel.getSimpleRobotName();
       ValkyriePunchMessenger kickAndPunchMessenger = new ValkyriePunchMessenger(robotName, ros2Node);
 
-      ui = new JoystickBasedSteppingMainUI(robotName, primaryStage, ros2Node, robotModel, robotModel.getWalkingControllerParameters(), null,
-                                           kickAndPunchMessenger, kickAndPunchMessenger);
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double footLength = steppingParameters.getFootLength();
+      double footWidth = steppingParameters.getFootWidth();
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
+      footPolygon.update();
+
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(footPolygon, footPolygon);
+
+      
+
+      ui = new JoystickBasedSteppingMainUI(robotName, primaryStage, ros2Node, robotModel, walkingControllerParameters, null,
+                                           kickAndPunchMessenger, kickAndPunchMessenger, footPolygons);
       ui.setActiveSecondaryControlOption(SecondaryControlOption.PUNCH);
    }
 

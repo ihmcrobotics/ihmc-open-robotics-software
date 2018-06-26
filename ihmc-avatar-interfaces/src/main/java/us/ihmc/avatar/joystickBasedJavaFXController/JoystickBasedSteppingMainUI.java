@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -27,6 +28,7 @@ import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 
 public class JoystickBasedSteppingMainUI
@@ -46,7 +48,8 @@ public class JoystickBasedSteppingMainUI
 
    public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
-                                      HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
+                                      HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger,
+                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -91,7 +94,7 @@ public class JoystickBasedSteppingMainUI
       };
 
       stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName, messager, walkingControllerParameters, ros2Node, robotVisualizer,
-                                                                        kickMessenger, punchMessenger, lowLevelMessenger);
+                                                                        kickMessenger, punchMessenger, lowLevelMessenger, footPolygons);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
       messager.startMessager();
