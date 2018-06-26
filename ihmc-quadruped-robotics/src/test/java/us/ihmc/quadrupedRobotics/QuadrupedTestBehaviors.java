@@ -39,6 +39,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
+   /*
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables) throws AssertionFailedError
    {
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.DO_NOTHING));
@@ -56,6 +57,7 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
       conductor.simulate();
    }
+   */
 
    public static void enterXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager) throws AssertionFailedError
    {
