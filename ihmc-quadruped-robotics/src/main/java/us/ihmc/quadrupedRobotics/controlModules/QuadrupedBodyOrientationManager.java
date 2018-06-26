@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +27,8 @@ public class QuadrupedBodyOrientationManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ParameterizedPID3DGains bodyOrientationGainsParameter;
+   private final ParameterizedPID3DGains bodyOrientationVMCGainsParameter;
+   private final ParameterizedPID3DGains bodyOrientationIKGainsParameter;
 
    private final YoBoolean useAbsoluteBodyOrientationTrajectory = new YoBoolean("useBaseBodyOrientationTrajectory", registry);
    private final MultipleWaypointsOrientationTrajectoryGenerator offsetBodyOrientationTrajectory;
@@ -54,25 +55,36 @@ public class QuadrupedBodyOrientationManager
    private final YoDouble robotTimestamp;
 
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
-   private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
+   private final YoFrameVector3D bodyVMCAngularWeight = new YoFrameVector3D("bodyAngularWeightVMC", worldFrame, registry);
+   private final YoFrameVector3D bodyIKAngularWeight = new YoFrameVector3D("bodyAngularWeightIK", worldFrame, registry);
+
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
+
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
-      DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
-      bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
-      bodyOrientationDefaultGains.setDerivativeGains(250.0, 250.0, 250.0);
-      bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
-      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
+      DefaultPID3DGains bodyOrientationVMCGains = new DefaultPID3DGains();
+      bodyOrientationVMCGains.setProportionalGains(1000.0, 1000.0, 1000.0);
+      bodyOrientationVMCGains.setDerivativeGains(250.0, 250.0, 250.0);
+      bodyOrientationVMCGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
+      bodyOrientationVMCGainsParameter = new ParameterizedPID3DGains("_bodyOrientationVMC", GainCoupling.NONE, false, bodyOrientationVMCGains, registry);
+
+      DefaultPID3DGains bodyOrientationIKGains = new DefaultPID3DGains();
+      bodyOrientationIKGains.setProportionalGains(1000.0, 1000.0, 1000.0);
+      bodyOrientationIKGains.setDerivativeGains(250.0, 250.0, 250.0);
+      bodyOrientationIKGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
+      bodyOrientationIKGainsParameter = new ParameterizedPID3DGains("_bodyOrientationIK", GainCoupling.NONE, false, bodyOrientationIKGains, registry);
 
       ReferenceFrame bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
       yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
 
-      feedbackControlCommand.setGains(bodyOrientationDefaultGains);
+      feedbackControlCommand.setGains(bodyOrientationVMCGains);
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
       feedbackControlCommand.setGainsFrame(bodyFrame);
 
@@ -86,7 +98,8 @@ public class QuadrupedBodyOrientationManager
       desiredBodyAngularVelocity = new FrameVector3D();
       desiredBodyAngularAcceleration = new FrameVector3D();
 
-      bodyAngularWeight.set(2.5, 2.5, 1.0);
+      bodyVMCAngularWeight.set(2.5, 2.5, 1.0);
+      bodyIKAngularWeight.set(2.5, 2.5, 1.0);
 
       parentRegistry.addChild(registry);
    }
@@ -206,10 +219,18 @@ public class QuadrupedBodyOrientationManager
 
       yoComTorqueFeedforwardSetpoint.setToZero();
 
-      feedbackControlCommand.setGains(bodyOrientationGainsParameter);
       feedbackControlCommand.setFeedForwardAction(yoComTorqueFeedforwardSetpoint);
       feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
+      if (controllerToolbox.isPositionControlled())
+      {
+         feedbackControlCommand.setGains(bodyOrientationIKGainsParameter);
+         feedbackControlCommand.setWeightsForSolver(bodyIKAngularWeight);
+      }
+      else
+      {
+         feedbackControlCommand.setGains(bodyOrientationVMCGainsParameter);
+         feedbackControlCommand.setWeightsForSolver(bodyVMCAngularWeight);
+      }
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
@@ -257,6 +278,11 @@ public class QuadrupedBodyOrientationManager
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
+   public InverseKinematicsCommand<?> getInverseKinematicsCommand()
    {
       return null;
    }
