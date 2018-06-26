@@ -98,7 +98,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private final QuadrupedGroundPlaneMessage groundPlaneMessage = new QuadrupedGroundPlaneMessage();
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+   private final ControllerCoreCommand controllerCoreCommand;
    private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
@@ -116,6 +116,11 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
+      if (controllerToolbox.isPositionControlled())
+         controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+      else
+         controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
                                                                                        fullRobotModel.getRootJoint(),
@@ -124,6 +129,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
       controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
+      controlCoreToolbox.setupForInverseKinematicsSolver();
+
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
@@ -408,6 +415,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotQuadrant));
          controllerCoreCommand.addVirtualModelControlCommand(feetManager.getVirtualModelControlCommand(robotQuadrant));
+         controllerCoreCommand.addInverseKinematicsCommand(feetManager.getInverseKinematicsCommand(robotQuadrant));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotQuadrant);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
@@ -417,11 +425,14 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseKinematicsCommand(bodyOrientationManager.getInverseKinematicsCommand());
 
       controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseKinematicsCommand(balanceManager.getInverseKinematicsCommand());
 
       controllerCoreCommand.addFeedbackControlCommand(jointSpaceManager.getFeedbackControlCommand());
       controllerCoreCommand.addVirtualModelControlCommand(jointSpaceManager.getVirtualModelControlCommand());
+      controllerCoreCommand.addInverseKinematicsCommand(jointSpaceManager.getInverseKinematicsCommand());
    }
 
    @Override
