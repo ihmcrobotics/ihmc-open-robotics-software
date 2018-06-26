@@ -24,6 +24,10 @@ import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -70,6 +74,11 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final ReferenceFrame nextSoleFrame;
 
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
+
+   private final BooleanProvider useManualRotations = new BooleanParameter("UseManualPelvisRotation", registry, false);
+   private final DoubleProvider desiredYawOffset = new DoubleParameter("UserDesiredYawOffset", registry, 0.0);
+   private final DoubleProvider desiredPitchOffset = new DoubleParameter("UserDesiredPitchOffset", registry, 0.0);
+   private final DoubleProvider desiredRollOffset = new DoubleParameter("UserDesiredRollOffset", registry, 0.0);
 
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -185,6 +194,13 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       leapOfFaithModule.updateAngularOffsets();
       leapOfFaithModule.addAngularOffset(tempOrientation);
       leapOfFaithModule.relaxAngularWeight(tempWeight);
+
+      if (useManualRotations.getValue())
+      {
+         tempOrientation.prependRollRotation(desiredRollOffset.getValue());
+         tempOrientation.prependPitchRotation(desiredPitchOffset.getValue());
+         tempOrientation.prependYawRotation(desiredYawOffset.getValue());
+      }
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
