@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -14,6 +15,11 @@ public abstract class QuadrupedFootState implements EventState
    protected QuadrupedWaypointCallback waypointCallback = null;
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
+   public InverseKinematicsCommand<?> getInverseKinematicsCommand()
    {
       return null;
    }
