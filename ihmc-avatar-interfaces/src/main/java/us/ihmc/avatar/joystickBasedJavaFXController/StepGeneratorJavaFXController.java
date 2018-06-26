@@ -28,6 +28,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
@@ -46,18 +47,23 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
@@ -74,7 +80,6 @@ public class StepGeneratorJavaFXController
    private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty", 0.0);
 
    private final AnimationTimer animationTimer;
-   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final AtomicReference<List<Node>> footstepsToVisualizeReference = new AtomicReference<>(null);
 
    private final Group rootNode = new Group();
@@ -107,13 +112,19 @@ public class StepGeneratorJavaFXController
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
+   private final AtomicReference<PlanarRegionsList> latestPlanarRegions = new AtomicReference<>(null);
+   private final SnapAndWiggleSingleStep snapAndWiggleSingleStep = new SnapAndWiggleSingleStep();
+   private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+
    public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
-                                        HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger)
+                                        HumanoidRobotPunchMessenger punchMessenger, HumanoidRobotLowLevelMessenger lowLevelMessenger,
+                                        SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
    {
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
       this.kickMessenger = kickMessenger;
       this.punchMessenger = punchMessenger;
+      this.footPolygons = footPolygons;
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
       continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocityProperty.get());
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
@@ -128,6 +139,8 @@ public class StepGeneratorJavaFXController
 
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class, controllerPubGenerator,
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> latestPlanarRegions.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(s.takeNextData())));
 
       pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
       footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
@@ -160,15 +173,6 @@ public class StepGeneratorJavaFXController
          }
       };
 
-      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
-      footPolygon.update();
-
       setupKickAction(messager);
       setupPunchAction(messager);
 
@@ -196,11 +200,37 @@ public class StepGeneratorJavaFXController
 
    private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
    {
-      FramePose3D adjustedPose = new FramePose3D();
-      adjustedPose.getPosition().set(footstepPose.getPosition());
-      adjustedPose.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ() - 0.02);
-      adjustedPose.setOrientation(footstepPose.getOrientation());
-      return adjustedPose;
+      FramePose3D result = null;
+
+      FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
+      adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
+      adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ() - 0.02);
+      adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
+      result = adjustedBasedOnStanceFoot;
+
+      PlanarRegionsList planarRegionsList = latestPlanarRegions.get();
+
+      if (planarRegionsList != null)
+      {
+         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+         FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
+         try
+         {
+            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygons.get(footSide));
+            if (!wiggledPose.containsNaN())
+               result = wiggledPose;
+         }
+         catch (SnappingFailedException e)
+         {
+            /*
+             * It's fine if the snap & wiggle fails, can be because there no
+             * planar regions around the footstep. Let's just keep the adjusted
+             * footstep based on the pose of the current stance foot.
+             */
+         }
+      }
+
+      return result;
    }
 
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
@@ -295,11 +325,11 @@ public class StepGeneratorJavaFXController
 
    private Node createFootstep(FootstepDataMessage footstepDataMessage)
    {
-      return createFootstep(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation(),
-                            footColors.get(RobotSide.fromByte(footstepDataMessage.getRobotSide())));
+      RobotSide footSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
+      return createFootstep(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation(), footColors.get(footSide), footPolygons.get(footSide));
    }
 
-   private Node createFootstep(Point3DReadOnly position, QuaternionReadOnly orientation, Color footColor)
+   private Node createFootstep(Point3DReadOnly position, QuaternionReadOnly orientation, Color footColor, ConvexPolygon2DReadOnly footPolygon)
    {
       MeshDataHolder polygon = MeshDataGenerator.ExtrudedPolygon(footPolygon, 0.025);
       polygon = MeshDataHolder.rotate(polygon, orientation);
