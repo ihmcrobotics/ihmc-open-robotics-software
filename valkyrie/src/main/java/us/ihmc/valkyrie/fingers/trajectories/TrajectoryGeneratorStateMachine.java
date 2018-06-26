@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.fingers.trajectories;
 
+import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -8,21 +9,21 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class TrajectoryGenerator implements RobotController, DesiredTrajectoryInterface
+public class TrajectoryGeneratorStateMachine implements RobotController, DoubleTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
 
    private final StateMachine<TrajectoryGeneratorState, State> stateMachine;
    private final YoEnum<TrajectoryGeneratorState> requestedState;
 
-   private final TrajectoryInterface trajectory;
+   private final GoalPositionTrajectory trajectory;
 
    enum TrajectoryGeneratorState
    {
       WORKING, DONOTHING
    }
 
-   public TrajectoryGenerator(String name, YoDouble yoTime, YoVariableRegistry parentRegistry, TrajectoryInterface trajectory)
+   public TrajectoryGeneratorStateMachine(String name, YoDouble yoTime, YoVariableRegistry parentRegistry, GoalPositionTrajectory trajectory)
    {
       registry = new YoVariableRegistry(name);
 
@@ -38,6 +39,7 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
 
       factory.addState(TrajectoryGeneratorState.WORKING, stateWorking);
       factory.addState(TrajectoryGeneratorState.DONOTHING, stateDonothing);
+      factory.addRequestedTransition(TrajectoryGeneratorState.WORKING, TrajectoryGeneratorState.WORKING, requestedState, false);
       factory.addRequestedTransition(TrajectoryGeneratorState.WORKING, TrajectoryGeneratorState.DONOTHING, requestedState, true);
       factory.addRequestedTransition(TrajectoryGeneratorState.DONOTHING, TrajectoryGeneratorState.WORKING, requestedState, false);
 
@@ -48,9 +50,9 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
       this.trajectory = trajectory;
    }
 
-   public void executeTrajectory(double trajectoryTime, double delayTime, double... goalConditions)
+   public void executeTrajectory(double trajectoryTime, double delayTime, double goalPosition)
    {
-      trajectory.setGoal(trajectoryTime, delayTime, goalConditions);
+      trajectory.setGoalPosition(trajectoryTime, delayTime, goalPosition);
       requestedState.set(TrajectoryGeneratorState.WORKING);
       stateMachine.doTransitions();
    }
@@ -72,16 +74,15 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
       @Override
       public boolean isDone(double timeInState)
       {
-         boolean b = timeInState >= trajectory.getTrajectoryTime();
-         if (b)
+         if (trajectory.isDone())
             requestedState.set(TrajectoryGeneratorState.DONOTHING);
-         return b;
+         return trajectory.isDone();
       }
 
       @Override
       public void onExit()
       {
-         trajectory.initialize(trajectory.getGoalConditions());
+         trajectory.initialize();
       }
    }
 
@@ -133,30 +134,38 @@ public class TrajectoryGenerator implements RobotController, DesiredTrajectoryIn
    @Override
    public void doControl()
    {
+      if (stateMachine.getCurrentStateKey() == TrajectoryGeneratorState.WORKING)
+         compute(stateMachine.getTimeInCurrentState());
       stateMachine.doActionAndTransition();
    }
 
    @Override
-   public double getDesiredQ()
+   public void compute(double time)
    {
-      return trajectory.getQ(getTime());
+      trajectory.compute(time);
    }
 
    @Override
-   public double getDesiredQd()
+   public boolean isDone()
    {
-      return trajectory.getQd(getTime());
+      return false;
    }
 
-   private double getTime()
+   @Override
+   public double getValue()
    {
-      if (stateMachine.getCurrentStateKey() == TrajectoryGeneratorState.WORKING)
-      {
-         return stateMachine.getTimeInCurrentState();
-      }
-      else
-      {
-         return 0.0;
-      }
+      return trajectory.getValue();
+   }
+
+   @Override
+   public double getVelocity()
+   {
+      return trajectory.getVelocity();
+   }
+
+   @Override
+   public double getAcceleration()
+   {
+      return 0;
    }
 }
