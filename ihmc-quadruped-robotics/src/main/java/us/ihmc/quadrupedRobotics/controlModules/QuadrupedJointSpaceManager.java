@@ -1,6 +1,9 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -12,7 +15,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedJointSpaceManager
 {
-   private static final double VISCOUS_DAMPING = 1.0;
+   private static final double VMC_VISCOUS_DAMPING = 1.0;
+   private static final double KINEMATICS_VISCOUS_DAMPING = 1.0;
    private static final double POSITION_LIMIT_DAMPING = 10.0;
    private static final double POSITION_LIMIT_STIFFNESS = 100.0;
 
@@ -20,19 +24,24 @@ public class QuadrupedJointSpaceManager
 
    private final OneDoFJoint[] controlledJoints;
 
-   private final VirtualModelControlCommandList commandList = new VirtualModelControlCommandList();
+   private final VirtualModelControlCommandList virtualModelControlCommandList = new VirtualModelControlCommandList();
    private final JointLimitEnforcementCommand jointLimitEnforcementCommand = new JointLimitEnforcementCommand();
-   private final JointTorqueCommand jointDampingCommand = new JointTorqueCommand();
+   private final JointTorqueCommand vmcJointDampingCommand = new JointTorqueCommand();
 
-   private final YoDouble jointViscousDamping = new YoDouble("jointViscousDamping", registry);
+   private final YoDouble vmcJointViscousDamping = new YoDouble("vmcJointViscousDamping", registry);
    private final YoDouble jointPositionLimitDamping = new YoDouble("jointPositionLimitDamping", registry);
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
+
+   private final InverseKinematicsCommandList inverseKinematicsCommandList = new InverseKinematicsCommandList();
+   private final JointspaceVelocityCommand jointspaceVelocityCommand = new JointspaceVelocityCommand();
+
+   private final YoDouble kinematicsJointViscousDamping = new YoDouble("kinematicsJointViscousDamping", registry);
 
    public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
 
-      jointViscousDamping.set(VISCOUS_DAMPING);
+      vmcJointViscousDamping.set(VMC_VISCOUS_DAMPING);
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);
 
@@ -41,13 +50,17 @@ public class QuadrupedJointSpaceManager
 
    public void compute()
    {
-      jointDampingCommand.clear();
+      vmcJointDampingCommand.clear();
       jointLimitEnforcementCommand.clear();
+
+      jointspaceVelocityCommand.clear();
 
       for (OneDoFJoint joint : controlledJoints)
       {
-         jointDampingCommand.addJoint(joint, -jointViscousDamping.getDoubleValue() * joint.getQd());
+         vmcJointDampingCommand.addJoint(joint, -vmcJointViscousDamping.getDoubleValue() * joint.getQd());
          jointLimitEnforcementCommand.addJoint(joint, jointPositionLimitStiffness.getDoubleValue(), jointPositionLimitDamping.getDoubleValue());
+
+         jointspaceVelocityCommand.addJoint(joint, -kinematicsJointViscousDamping.getDoubleValue() * joint.getQd());
       }
    }
 
@@ -63,10 +76,18 @@ public class QuadrupedJointSpaceManager
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
-      commandList.clear();
-      commandList.addCommand(jointLimitEnforcementCommand);
-      commandList.addCommand(jointDampingCommand);
+      virtualModelControlCommandList.clear();
+      virtualModelControlCommandList.addCommand(jointLimitEnforcementCommand);
+      virtualModelControlCommandList.addCommand(vmcJointDampingCommand);
 
-      return commandList;
+      return virtualModelControlCommandList;
+   }
+
+   public InverseKinematicsCommand<?> getInverseKinematicsCommand()
+   {
+      inverseKinematicsCommandList.clear();
+      inverseKinematicsCommandList.addCommand(jointspaceVelocityCommand);
+
+      return inverseKinematicsCommandList;
    }
 }
