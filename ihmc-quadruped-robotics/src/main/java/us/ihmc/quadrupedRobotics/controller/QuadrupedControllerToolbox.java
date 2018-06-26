@@ -24,6 +24,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -67,6 +68,7 @@ public class QuadrupedControllerToolbox
 
    private final YoFrameVector3D yoCoMVelocityEstimate;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
+   private final YoBoolean isPositionControlled;
 
    public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -77,9 +79,11 @@ public class QuadrupedControllerToolbox
       yoCoMVelocityEstimate = new YoFrameVector3D("yoCoMVelocityEstimate", ReferenceFrame.getWorldFrame(), registry);
 
       this.runtimeEnvironment = runtimeEnvironment;
+      isPositionControlled = new YoBoolean("isPositionControlled", registry);
+      isPositionControlled.set(runtimeEnvironment.isPositionControlledOnStartup());
 
       fullRobotModel = runtimeEnvironment.getFullRobotModel();
-      footControlModuleParameters = new QuadrupedFootControlModuleParameters();
+      footControlModuleParameters = new QuadrupedFootControlModuleParameters(isPositionControlled);
       registry.addChild(footControlModuleParameters.getYoVariableRegistry());
 
       supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
@@ -258,5 +262,10 @@ public class QuadrupedControllerToolbox
    public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
    {
       return soleForceEstimator.getSoleContactForce(robotQuadrant);
+   }
+
+   public boolean isPositionControlled()
+   {
+      return isPositionControlled.getBooleanValue();
    }
 }
