@@ -56,7 +56,6 @@ public class QuadrupedBalanceManager
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
-   private final YoFramePoint2D spedUpDesiredDCMPosition = new YoFramePoint2D("spedUpDesiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
    private final YoFramePoint3D yoTransitionFinalDCM = new YoFramePoint3D("desiredDCMPositionAtEndOfTransition", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredDCM = new YoFramePoint3D("finalDesiredDCMPosition", worldFrame, registry);
@@ -241,7 +240,6 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
-      spedUpDesiredDCMPosition.setToNaN();
    }
 
    public void initializeForStanding()
@@ -261,7 +259,6 @@ public class QuadrupedBalanceManager
    public void completedStep(RobotQuadrant robotQuadrant)
    {
       stepAdjustmentController.completedStep(robotQuadrant);
-      spedUpDesiredDCMPosition.setToNaN();
    }
 
    public void compute()
@@ -273,6 +270,7 @@ public class QuadrupedBalanceManager
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
+      dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
@@ -329,31 +327,47 @@ public class QuadrupedBalanceManager
    private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
    private final FramePoint2D actualICP2d = new FramePoint2D();
 
+   /** FIXME This is a hack 6/26/2018 Robert Griffin **/
+   private final FramePoint2D dcmError2d = new FramePoint2D();
+   private final FrameLine2D adjustedICPDynamicsLine = new FrameLine2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
+
    private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint3DReadOnly actualCapturePointPosition)
    {
       desiredICP2d.setIncludingFrame(yoDesiredDCMPosition);
       finalICP2d.setIncludingFrame(yoFinalDesiredDCM);
+      actualICP2d.setIncludingFrame(actualCapturePointPosition);
+      dcmPlanner.getPerfectCMPPosition(perfectCMP);
+      perfectCMP.changeFrame(worldFrame);
+
+      /**
+       * FIXME This is a hack 6/26/2018 Robert Griffin
+       * The ICP plan is not being updated with the step adjustment. We approximate the step adjustment here by offsetting the final ICP and then projecting
+       * the desired ICP onto these dynamics. Without this, the foot will not be set down more quickly for lateral errors
+       */
+      dcmError2d.sub(actualICP2d, desiredICP2d);
+
+      double estimatedDesiredExponential = perfectCMP.distance(finalICP2d) / perfectCMP.distance(desiredICP2d);
+      finalICP2d.scaleAdd(estimatedDesiredExponential, dcmError2d, finalICP2d);
+      adjustedICPDynamicsLine.set(actualICP2d, finalICP2d);
+      adjustedICPDynamicsLine.orthogonalProjection(desiredICP2d); // projects the desired icp onto this dynamics line
 
       if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
+      {
          return Double.NaN;
+      }
 
       desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
-      actualICP2d.setIncludingFrame(actualCapturePointPosition);
       double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
       if (percentAlongLineSegmentICP < 0.0)
       {
          desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
          desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
       }
-      else
-      {
-         desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
-      }
 
-      spedUpDesiredDCMPosition.set(actualCapturePointPosition);
 
-      double actualDistanceDueToDisturbance = yoVrpPositionSetpoint.distanceXY(actualICP2d);
-      double expectedDistanceAccordingToPlan = yoVrpPositionSetpoint.distanceXY(yoDesiredDCMPosition);
+      double actualDistanceDueToDisturbance = perfectCMP.distance(actualICP2d);
+      double expectedDistanceAccordingToPlan = perfectCMP.distance(desiredICP2d);
 
       double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
 
