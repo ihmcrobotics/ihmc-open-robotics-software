@@ -50,9 +50,9 @@ public class TrajectoryGeneratorStateMachine implements RobotController, DoubleT
       this.trajectory = trajectory;
    }
 
-   public void executeTrajectory(double trajectoryTime, double delayTime, double... goalConditions)
+   public void executeTrajectory(double trajectoryTime, double delayTime, double goalPosition)
    {
-      trajectory.setGoalPosition(trajectoryTime, delayTime, goalConditions[0]);
+      trajectory.setGoalPosition(trajectoryTime, delayTime, goalPosition);
       requestedState.set(TrajectoryGeneratorState.WORKING);
       stateMachine.doTransitions();
    }
