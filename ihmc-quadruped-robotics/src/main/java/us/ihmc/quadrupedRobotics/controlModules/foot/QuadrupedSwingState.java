@@ -380,7 +380,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
    }
 
-   // FIXME
    /**
     * Request the swing trajectory to speed up using the given speed up factor.
     * It is clamped w.r.t. to {@param #getMinimumSwingTimeForDisturbanceRecovery}.

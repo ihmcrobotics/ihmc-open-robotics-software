@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -274,6 +275,11 @@ public class DCMPlanner
    public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
    {
       finalDesiredDCMToPack.setMatchingFrame(finalDCM);
+   }
+
+   public void getPerfectCMPPosition(FramePoint2D perfectCMPPositionToPack)
+   {
+      perfectCMPPositionToPack.setIncludingFrame(perfectCMPPosition);
    }
 
    public double getFinalTime()
