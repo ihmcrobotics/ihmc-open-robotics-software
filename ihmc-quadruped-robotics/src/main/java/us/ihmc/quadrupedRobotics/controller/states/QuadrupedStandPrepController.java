@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -38,16 +39,18 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
    private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
 
-   private final YoBoolean yoUseForceFeedbackControl;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters,
-                                       QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
+   public QuadrupedStandPrepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedInitialPositionParameters initialPositionParameters,
+                                       YoVariableRegistry parentRegistry)
    {
+      QuadrupedRuntimeEnvironment environment = controllerToolbox.getRuntimeEnvironment();
+      this.controllerToolbox = controllerToolbox;
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
@@ -59,8 +62,6 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectories.add(new MinimumJerkTrajectory());
       }
 
-      yoUseForceFeedbackControl = new YoBoolean("useForceControlStandPrep", registry);
-      yoUseForceFeedbackControl.set(controlMode == QuadrupedControlMode.FORCE);
 
       parentRegistry.addChild(registry);
    }
@@ -86,7 +87,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
 
          jointDesiredOutput.clear();
-         if (yoUseForceFeedbackControl.getBooleanValue())
+         if (!controllerToolbox.isPositionControlled())
             jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          else
             jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);

@@ -107,7 +107,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
-      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
       fullRobotModel = modelFactory.createFullRobotModel();
@@ -190,7 +189,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          stepTeleopManager = null;
       }
 
-      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
 
