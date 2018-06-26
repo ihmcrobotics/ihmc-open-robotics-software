@@ -17,7 +17,7 @@ import java.io.IOException;
 public abstract class QuadrupedPositionTurning720Test implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
 
    @Before
@@ -32,7 +32,7 @@ public abstract class QuadrupedPositionTurning720Test implements QuadrupedMultiR
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
-         variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         variables = new QuadrupedTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
