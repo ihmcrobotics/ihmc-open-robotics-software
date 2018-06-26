@@ -101,6 +101,7 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
       switch(controlMode)
       {
       case FORCE:
+      case POSITION:
          return "/parameters/simulation_force_controller.xml";
       default:
          throw new RuntimeException("No parameter file exists for control mode: " + controlMode);
