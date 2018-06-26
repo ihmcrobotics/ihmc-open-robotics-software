@@ -116,6 +116,7 @@ public class IndividualValkyrieFingerSetController implements RobotController
    {
       for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
+         trajectoryGenerators.get(jointEnum).doControl();
          desiredAngles.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQ());
          desiredVelocities.get(jointEnum).set(trajectoryGenerators.get(jointEnum).getDesiredQd());
       }

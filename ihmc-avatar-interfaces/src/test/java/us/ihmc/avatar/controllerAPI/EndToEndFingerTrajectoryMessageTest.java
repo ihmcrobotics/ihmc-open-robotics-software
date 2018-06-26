@@ -54,6 +54,30 @@ public abstract class EndToEndFingerTrajectoryMessageTest implements MultiRobotT
       // publish
       drcSimulationTestHelper.publishToController(fingerTrajectoryMessage);
 
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+
+      // define trajectories
+      trajectoryTimes = new double[] {2.0, 3.0, 4.0};
+      delayTimes = new double[] {1.0, 1.5, 2.0};
+      desiredPositions = new double[] {-1.0, -1.0, -1.0};
+
+      // messages
+      fingerTrajectoryMessage = HumanoidMessageTools.createFingerTrajectoryMessage(robotSide, trajectoryTimes, delayTimes, desiredPositions);
+
+      drcSimulationTestHelper.publishToController(fingerTrajectoryMessage);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+
+      // define trajectories
+      trajectoryTimes = new double[] {2.0, 3.0, 4.0};
+      delayTimes = new double[] {1.0, 1.5, 2.0};
+      desiredPositions = new double[] {1.0, 1.0, 1.0};
+
+      // messages
+      fingerTrajectoryMessage = HumanoidMessageTools.createFingerTrajectoryMessage(robotSide, trajectoryTimes, delayTimes, desiredPositions);
+
+      // publish
+      drcSimulationTestHelper.publishToController(fingerTrajectoryMessage);
+
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -119,7 +143,7 @@ public abstract class EndToEndFingerTrajectoryMessageTest implements MultiRobotT
    public void destroySimulationAndRecycleMemory()
    {
       //if (simulationTestingParameters.getKeepSCSUp())
-      if(true)
+      if (true)
       {
          ThreadTools.sleepForever();
       }
