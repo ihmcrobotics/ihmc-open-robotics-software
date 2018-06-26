@@ -27,9 +27,6 @@ public class QuadrupedFreezeController implements QuadrupedController
    private final DoubleParameter freezeJointStiffness = new DoubleParameter("freezeJointStiffness", registry, 500.0);
    private final DoubleParameter freezeJointDamping = new DoubleParameter("freezeJointDamping", registry, 25.0);
 
-   // Yo variables
-   private final YoBoolean yoUseForceFeedbackControl;
-
    private final QuadrupedFeetManager feetManager;
 
    private final FullQuadrupedRobotModel fullRobotModel;
@@ -40,14 +37,10 @@ public class QuadrupedFreezeController implements QuadrupedController
    private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
 
    public QuadrupedFreezeController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                    QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
+                                    YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
-
-      // Yo variables
-      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
-      yoUseForceFeedbackControl.set(controlMode == QuadrupedControlMode.FORCE);
 
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
@@ -60,8 +53,6 @@ public class QuadrupedFreezeController implements QuadrupedController
             desiredFreezePositions.add(new YoDouble(joint.getName() + "FreezePosition", registry));
          }
       }
-
-
 
       parentRegistry.addChild(registry);
    }
@@ -101,7 +92,7 @@ public class QuadrupedFreezeController implements QuadrupedController
          jointDesiredOutput.setDamping(freezeJointDamping.getValue());
          jointDesiredOutput.setDesiredPosition(desiredFreezePositions.get(i).getDoubleValue());
 
-         if (yoUseForceFeedbackControl.getBooleanValue())
+         if (!controllerToolbox.isPositionControlled())
             jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          else
             jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
@@ -117,7 +108,6 @@ public class QuadrupedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      yoUseForceFeedbackControl.set(true);
       for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);

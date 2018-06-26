@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import java.util.BitSet;
 
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
@@ -25,7 +26,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    private final FullQuadrupedRobotModel fullRobotModel;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final YoBoolean forceFeedbackControlEnabled;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
@@ -33,14 +34,12 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
     */
    private final BitSet initialized;
 
-   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment, QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
+   public QuadrupedJointInitializationController(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this.fullRobotModel = environment.getFullRobotModel();
-      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
+      this.controllerToolbox = controllerToolbox;
+      this.fullRobotModel = controllerToolbox.getFullRobotModel();
+      this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
       this.initialized = new BitSet(fullRobotModel.getOneDoFJoints().length);
-
-      forceFeedbackControlEnabled = new YoBoolean("useForceFeedbackControl", registry);
-      forceFeedbackControlEnabled.set(controlMode == QuadrupedControlMode.FORCE);
 
       parentRegistry.addChild(registry);
    }
@@ -54,10 +53,11 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          OneDoFJoint joint = joints[i];
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
-            if (forceFeedbackControlEnabled.getBooleanValue())
-               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
-            else
+            if (controllerToolbox.isPositionControlled())
                jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+
          }
       }
    }

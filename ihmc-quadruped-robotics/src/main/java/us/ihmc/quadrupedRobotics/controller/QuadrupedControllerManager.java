@@ -81,30 +81,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      QuadrupedInitialPositionParameters initialPositionParameters)
-         throws IOException
    {
-      this(runtimeEnvironment, null, physicalProperties, null, initialPositionParameters, QuadrupedControllerEnum.JOINT_INITIALIZATION,
-           QuadrupedControlMode.FORCE);
-   }
-
-   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, FullQuadrupedRobotModelFactory modelFactory,
-                                     QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
-                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControlMode controlMode)
-   {
-      this(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, initialPositionParameters,
-           QuadrupedControllerEnum.JOINT_INITIALIZATION, controlMode);
+      this(runtimeEnvironment, physicalProperties, initialPositionParameters, QuadrupedControllerEnum.JOINT_INITIALIZATION);
    }
 
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControllerEnum initialState)
-   {
-      this(runtimeEnvironment, null, physicalProperties, null, initialPositionParameters, initialState, QuadrupedControlMode.FORCE);
-   }
-
-   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, FullQuadrupedRobotModelFactory modelFactory,
-                                     QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
-                                     QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedControllerEnum initialState,
-                                     QuadrupedControlMode controlMode)
    {
       this.controllerToolbox = new QuadrupedControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
@@ -153,8 +135,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          }
       });
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment, modelFactory, physicalProperties, initialState, initialPositionParameters,
-                                            crawlControllerParameters, controlMode);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, initialState, initialPositionParameters);
    }
 
    /**
@@ -285,30 +266,17 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    }
 
    private StateMachine<QuadrupedControllerEnum, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-                                                                                        FullQuadrupedRobotModelFactory modelFactory,
-                                                                                        QuadrupedPhysicalProperties physicalProperties,
                                                                                         QuadrupedControllerEnum initialState,
-                                                                                        QuadrupedInitialPositionParameters initialPositionParameters,
-                                                                                        QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
-                                                                                        QuadrupedControlMode controlMode)
+                                                                                        QuadrupedInitialPositionParameters initialPositionParameters)
    {
       // Initialize controllers.
-      final QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment, controlMode, registry);
-      final QuadrupedController doNothingController = new QuadrupedDoNothingController(controlManagerFactory.getOrCreateFeetManager(), runtimeEnvironment,
-                                                                                       controlMode, registry);
-      final QuadrupedController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, initialPositionParameters, controlMode, registry);
-      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, controlMode, registry);
+      final QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(controllerToolbox, registry);
+      final QuadrupedController doNothingController = new QuadrupedDoNothingController(controllerToolbox, registry);
+      final QuadrupedController standPrepController = new QuadrupedStandPrepController(controllerToolbox, initialPositionParameters, registry);
+      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, registry);
 
-      final QuadrupedController steppingController;
-      if (controlMode == QuadrupedControlMode.FORCE)
-      {
-         steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager, statusMessageOutputManager,
-                                                         controlManagerFactory, registry);
-      }
-      else
-      {
-         steppingController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
-      }
+      final QuadrupedController steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager,
+                                                                                statusMessageOutputManager, controlManagerFactory, registry);
 
       EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
       factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
