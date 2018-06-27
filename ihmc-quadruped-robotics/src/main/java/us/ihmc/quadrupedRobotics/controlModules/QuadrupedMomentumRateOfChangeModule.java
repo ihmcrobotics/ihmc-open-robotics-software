@@ -35,7 +35,7 @@ public class QuadrupedMomentumRateOfChangeModule
    private double desiredCoMHeightAcceleration;
 
    private final ParameterVector3D vmcLinearMomentumRateWeight = new ParameterVector3D("vmcLinearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
-   private final ParameterVector3D kinematicsLinearMomentumWeight = new ParameterVector3D("kinematicsLinearMomentumWeight", new Vector3D(5.0, 5.0, 2.5), registry);
+   private final ParameterVector3D kinematicsLinearMomentumWeight = new ParameterVector3D("ikLinearMomentumWeight", new Vector3D(100.0, 100.0, 50.0), registry);
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();

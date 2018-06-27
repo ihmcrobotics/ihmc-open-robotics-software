@@ -16,7 +16,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedJointSpaceManager
 {
    private static final double VMC_VISCOUS_DAMPING = 1.0;
-   private static final double KINEMATICS_VISCOUS_DAMPING = 1.0;
+   private static final double IK_VISCOUS_DAMPING = 0.1;
+   private static final double IK_DAMPING_WEIGHT = 1.0;
+
    private static final double POSITION_LIMIT_DAMPING = 10.0;
    private static final double POSITION_LIMIT_STIFFNESS = 100.0;
 
@@ -33,9 +35,10 @@ public class QuadrupedJointSpaceManager
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
 
    private final InverseKinematicsCommandList inverseKinematicsCommandList = new InverseKinematicsCommandList();
-   private final JointspaceVelocityCommand jointspaceVelocityCommand = new JointspaceVelocityCommand();
+   private final JointspaceVelocityCommand ikJointVelocityCommand = new JointspaceVelocityCommand();
 
-   private final YoDouble kinematicsJointViscousDamping = new YoDouble("kinematicsJointViscousDamping", registry);
+   private final YoDouble ikJointViscousDamping = new YoDouble("ikJointViscousDamping", registry);
+   private final YoDouble ikJointWeight = new YoDouble("ikJointWeight", registry);
 
    public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -45,6 +48,9 @@ public class QuadrupedJointSpaceManager
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);
 
+      ikJointViscousDamping.set(IK_VISCOUS_DAMPING);
+      ikJointWeight.set(IK_DAMPING_WEIGHT);
+
       parentRegistry.addChild(registry);
    }
 
@@ -53,15 +59,16 @@ public class QuadrupedJointSpaceManager
       vmcJointDampingCommand.clear();
       jointLimitEnforcementCommand.clear();
 
-      jointspaceVelocityCommand.clear();
+      ikJointVelocityCommand.clear();
 
       for (OneDoFJoint joint : controlledJoints)
       {
          vmcJointDampingCommand.addJoint(joint, -vmcJointViscousDamping.getDoubleValue() * joint.getQd());
          jointLimitEnforcementCommand.addJoint(joint, jointPositionLimitStiffness.getDoubleValue(), jointPositionLimitDamping.getDoubleValue());
 
-         jointspaceVelocityCommand.addJoint(joint, -kinematicsJointViscousDamping.getDoubleValue() * joint.getQd());
+         ikJointVelocityCommand.addJoint(joint, -ikJointViscousDamping.getDoubleValue() * joint.getQd());
       }
+      ikJointVelocityCommand.setWeight(ikJointWeight.getDoubleValue());
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
@@ -86,7 +93,7 @@ public class QuadrupedJointSpaceManager
    public InverseKinematicsCommand<?> getInverseKinematicsCommand()
    {
       inverseKinematicsCommandList.clear();
-      inverseKinematicsCommandList.addCommand(jointspaceVelocityCommand);
+      inverseKinematicsCommandList.addCommand(ikJointVelocityCommand);
 
       return inverseKinematicsCommandList;
    }
