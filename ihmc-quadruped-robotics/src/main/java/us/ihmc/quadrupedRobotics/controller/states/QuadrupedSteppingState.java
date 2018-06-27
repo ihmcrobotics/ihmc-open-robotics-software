@@ -35,6 +35,8 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
@@ -122,9 +124,11 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
 
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      // FIXME this will be wrong if we add in neck joints
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
-                                                                                       fullRobotModel.getRootJoint(),
-                                                                                       fullRobotModel.getControllableOneDoFJoints(),
+                                                                                       fullRobotModel.getRootJoint(), allJoints,
                                                                                        controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
