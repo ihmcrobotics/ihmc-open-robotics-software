@@ -6,6 +6,7 @@ import java.net.URI;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
@@ -29,6 +30,8 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
+   private static final boolean ENABLE_STEREO_PUBLISHER = false;
+
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
 
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -36,6 +39,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final LidarScanPublisher lidarScanPublisher;
+   private final StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
 
    private final String robotName;
 
@@ -54,6 +58,16 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
+
+      if (ENABLE_STEREO_PUBLISHER)
+      {
+         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
+         stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
+      }
+      else
+      {
+         stereoVisionPointCloudPublisher = null;
+      }
    }
 
    @Override
@@ -98,6 +112,12 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
       lidarScanPublisher.setScanFrameToWorldFrame();
       lidarScanPublisher.start();
+
+      if (ENABLE_STEREO_PUBLISHER)
+      {
+         stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+         stereoVisionPointCloudPublisher.start();
+      }
 
       multiSenseSensorManager.initializeParameterListeners();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
