@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
@@ -13,12 +14,15 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationException;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyInverseKinematicsSolver
 {
@@ -37,6 +41,11 @@ public class WholeBodyInverseKinematicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final JointIndexHandler jointIndexHandler;
 
+   private final YoFrameVector3D yoDesiredMomentumLinear;
+   private final YoFrameVector3D yoDesiredMomentumAngular;
+   private final YoFrameVector3D yoAchievedMomentumLinear;
+   private final YoFrameVector3D yoAchievedMomentumAngular;
+
    public WholeBodyInverseKinematicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       rootJoint = toolbox.getRootJoint();
@@ -48,6 +57,11 @@ public class WholeBodyInverseKinematicsSolver
 
       optimizationControlModule = new InverseKinematicsOptimizationControlModule(toolbox, registry);
       integrator = new RobotJointVelocityAccelerationIntegrator(toolbox.getControlDT());
+
+      yoDesiredMomentumLinear = toolbox.getYoDesiredMomentumLinear();
+      yoDesiredMomentumAngular = toolbox.getYoDesiredMomentumAngular();
+      yoAchievedMomentumLinear = toolbox.getYoAchievedMomentumLinear();
+      yoAchievedMomentumAngular = toolbox.getYoAchievedMomentumAngular();
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -86,6 +100,10 @@ public class WholeBodyInverseKinematicsSolver
       DenseMatrix64F jointVelocities = inverseKinematicsSolution.getJointVelocities();
 
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
+
+      SpatialForceVector centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
+      yoAchievedMomentumLinear.set(centroidalMomentumSolution.getLinearPart());
+      yoAchievedMomentumAngular.set(centroidalMomentumSolution.getAngularPart());
 
       DenseMatrix64F jointConfigurations = integrator.getJointConfigurations();
       jointVelocities = integrator.getJointVelocities();
@@ -129,6 +147,7 @@ public class WholeBodyInverseKinematicsSolver
             break;
          case MOMENTUM:
             optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
+            recordMomentumRate((MomentumCommand) command);
             break;
          case PRIVILEGED_CONFIGURATION:
             optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
@@ -146,6 +165,13 @@ public class WholeBodyInverseKinematicsSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+   }
+
+   private void recordMomentumRate(MomentumCommand command)
+   {
+      DenseMatrix64F momentumRate = command.getMomentum();
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumAngular, momentumRate, 0);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumLinear, momentumRate, 3);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
