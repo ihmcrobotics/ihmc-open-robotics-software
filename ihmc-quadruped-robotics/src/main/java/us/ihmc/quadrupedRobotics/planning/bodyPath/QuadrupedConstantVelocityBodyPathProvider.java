@@ -4,10 +4,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,6 +39,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoDouble timestamp;
    private final ReferenceFrame supportFrame;
    private final YoBoolean footstepPlanHasBeenComputed = new YoBoolean("footstepPlanHasBeenComputed", registry);
+   private final YoBoolean shiftPlanBasedOnStepAdjustment = new YoBoolean("shiftPlanBasedOnStepAdjustment", registry);
 
    private final YoFramePoint2D startPoint = new YoFramePoint2D("startPoint", worldFrame, registry);
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
@@ -54,7 +56,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final AtomicBoolean recomputeInitialPose = new AtomicBoolean();
    private final AtomicBoolean recomputeStepAdjustment = new AtomicBoolean();
 
-   private final Vector3D tempVector = new Vector3D();
+   private final FramePose2D tempPose = new FramePose2D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
    public QuadrupedConstantVelocityBodyPathProvider(String robotName, QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
@@ -134,7 +136,12 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          setStartConditionsFromCurrent();
       }
 
-      initialPose.set(startPoint.getX() + achievedStepAdjustment.getX(), startPoint.getY() + achievedStepAdjustment.getY(), startYaw.getDoubleValue());
+      initialPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+      if(shiftPlanBasedOnStepAdjustment.getBooleanValue())
+      {
+         initialPose.prependTranslation(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
+      }
+
       extrapolatePose(time - startTime.getDoubleValue(), poseToPack, initialPose, desiredPlanarVelocity);
    }
 
@@ -184,22 +191,31 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       if (latestStatusMessage == null)
          return;
 
-      RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
-      Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
-
-      double halfStanceLength = quadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
-      double halfStanceWidth = quadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
-
-      tempVector.set(halfStanceLength, halfStanceWidth, 0.0);
-      tempTransform.setRotationYaw(startYaw.getDoubleValue());
-      tempVector.applyTransform(tempTransform);
-      tempVector.add(latestMessageSoleDesiredPosition);
-      startPoint.set(tempVector);
-
       double previousStartTime = startTime.getDoubleValue();
       double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
       startTime.set(newStartTime);
-      startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
+
+      if(shiftPlanBasedOnStepAdjustment.getBooleanValue())
+      {
+         RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
+         Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
+         double halfStanceLength = quadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
+         double halfStanceWidth = quadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
+
+         tempPose.set(halfStanceLength, halfStanceWidth, 0.0);
+         tempTransform.setRotationYaw(startYaw.getDoubleValue());
+         tempPose.applyTransform(tempTransform);
+         tempPose.prependTranslation(latestMessageSoleDesiredPosition.getX(), latestMessageSoleDesiredPosition.getY());
+         startPoint.set(tempPose.getPosition());
+         startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
+      }
+      else
+      {
+         tempPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+         extrapolatePose(newStartTime - previousStartTime, tempPose, tempPose, desiredPlanarVelocity);
+         startPoint.set(tempPose.getPosition());
+         startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
+      }
    }
 
    private void computeStepAdjustmentFromFootstepStatus()
@@ -248,5 +264,10 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          }
       }
       return latestMessage;
+   }
+
+   public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
+   {
+      this.shiftPlanBasedOnStepAdjustment.set(shiftPlanBasedOnStepAdjustment);
    }
 }

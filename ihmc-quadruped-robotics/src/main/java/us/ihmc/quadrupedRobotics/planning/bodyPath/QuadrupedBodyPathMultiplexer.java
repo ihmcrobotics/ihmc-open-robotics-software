@@ -25,6 +25,7 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
    {
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(robotName, referenceFrames, ros2Node, timestamp, graphicsListRegistry, registry);
       joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(robotName, referenceFrames, xGaitSettings, firstStepDelay, timestamp, ros2Node, registry);
+      joystickBasedPath.setShiftPlanBasedOnStepAdjustment(true);
 
       parentRegistry.addChild(registry);
    }
@@ -70,6 +71,11 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
    public void setPlanarVelocityForJoystickPath(double desiredVelocityX, double desiredVelocityY, double desiredVelocityYaw)
    {
       joystickBasedPath.setPlanarVelocity(desiredVelocityX, desiredVelocityY, desiredVelocityYaw);
+   }
+
+   public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
+   {
+      joystickBasedPath.setShiftPlanBasedOnStepAdjustment(shiftPlanBasedOnStepAdjustment);
    }
 
    public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
