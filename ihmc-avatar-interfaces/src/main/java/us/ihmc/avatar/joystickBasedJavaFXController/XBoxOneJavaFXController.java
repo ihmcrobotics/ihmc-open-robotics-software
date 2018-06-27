@@ -1,6 +1,7 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import net.java.games.input.Event;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.Category;
@@ -37,6 +38,7 @@ public class XBoxOneJavaFXController
 
    private static final TypedTopicTheme<ButtonState> State = apiFactory.createTypedTopicTheme("State");
    private static final TypedTopicTheme<Double> Axis = apiFactory.createTypedTopicTheme("Axis");
+   private static final TypedTopicTheme<Boolean> Reconnect = apiFactory.createTypedTopicTheme("Reconnect");
 
    public static final Topic<ButtonState> ButtonAState = Root.child(Button).child(A).topic(State);
    public static final Topic<ButtonState> ButtonBState = Root.child(Button).child(B).topic(State);
@@ -57,15 +59,43 @@ public class XBoxOneJavaFXController
    public static final Topic<Double> LeftTriggerAxis = Root.child(LeftTrigger).topic(Axis);
    public static final Topic<Double> RightTriggerAxis = Root.child(RightTrigger).topic(Axis);
 
+   public static final Topic<Boolean> XBoxControllerReconnect = Root.topic(Reconnect);
+
    public static final MessagerAPI XBoxOneControllerAPI = apiFactory.getAPIAndCloseFactory();
 
    private final Messager messager;
-   private final Joystick joystick;
+   private Joystick joystick;
 
    public XBoxOneJavaFXController(Messager messager) throws JoystickNotFoundException
    {
       this.messager = messager;
 
+      messager.registerTopicListener(XBoxControllerReconnect, value -> reconnectJoystick());
+
+      connectJoystick();
+   }
+
+   public void reconnectJoystick()
+   {
+      if (joystick != null)
+      {
+         joystick.clearEventListeners();
+         joystick.shutdown();
+         joystick = null;
+      }
+
+      try
+      {
+         connectJoystick();
+      }
+      catch (JoystickNotFoundException e)
+      {
+         PrintTools.warn("Could not reconnect joystick, try again.");
+      }
+   }
+
+   private void connectJoystick() throws JoystickNotFoundException
+   {
       joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1));
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1));
@@ -148,6 +178,7 @@ public class XBoxOneJavaFXController
 
    public void stop()
    {
-      joystick.shutdown();
+      if (joystick != null)
+         joystick.shutdown();
    }
 }
