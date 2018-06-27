@@ -618,4 +618,10 @@ public class MotionQPInputCalculator
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
       return centroidalMomentumHandler.getCentroidalMomentumRate();
    }
+
+   public SpatialForceVector computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
+   {
+      centroidalMomentumHandler.computeCentroidalMomentum(jointsToOptimizeFor, jointVelocities);
+      return centroidalMomentumHandler.getCentroidalMomentum();
+   }
 }
