@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -33,7 +34,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       try
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          if(terrainObject3D != null)

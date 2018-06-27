@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -99,7 +100,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       quadrupedTestFactory.setUseNetworking(true);
 
       conductor = quadrupedTestFactory.createTestConductor();

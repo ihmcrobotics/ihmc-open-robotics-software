@@ -9,6 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -54,12 +55,15 @@ public class QuadrupedDoNothingController implements QuadrupedController
       {
          OneDoFJoint joint = legJoints.get(i);
          JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-         if (controllerToolbox.isPositionControlled())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         jointDesiredOutput.setStiffness(0.0);
-         jointDesiredOutput.setDamping(0.0);
+
+         jointDesiredOutput.setControlMode(controllerToolbox.getJointControlParameters().getDoNothingJointMode());
+         PDGainsReadOnly pdGainsReadOnly = controllerToolbox.getJointControlParameters().getDoNothingJointGains();
+
+         jointDesiredOutput.setStiffness(pdGainsReadOnly.getKp());
+         jointDesiredOutput.setDamping(pdGainsReadOnly.getKd());
+         jointDesiredOutput.setMaxPositionError(pdGainsReadOnly.getMaximumFeedback());
+         jointDesiredOutput.setMaxVelocityError(pdGainsReadOnly.getMaximumFeedbackRate());
+
          jointDesiredOutput.setDesiredTorque(0.0);
       }
 

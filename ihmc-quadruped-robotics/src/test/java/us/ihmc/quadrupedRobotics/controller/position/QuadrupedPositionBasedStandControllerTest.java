@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.position;
 import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
@@ -47,7 +48,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -57,7 +58,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -67,7 +68,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -77,7 +78,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -146,7 +147,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingHumanPowerKickToFace() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -171,7 +172,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);
@@ -218,7 +219,7 @@ public abstract class QuadrupedPositionBasedStandControllerTest implements Quadr
          throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();

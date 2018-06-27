@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.genericQuadruped.model;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
@@ -96,12 +98,12 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public String getParameterResourceName(QuadrupedControlMode controlMode)
+   public String getParameterResourceName(WholeBodyControllerCoreMode controlMode)
    {
       switch(controlMode)
       {
-      case FORCE:
-      case POSITION:
+      case INVERSE_KINEMATICS:
+      case VIRTUAL_MODEL:
          return "/parameters/simulation_force_controller.xml";
       default:
          throw new RuntimeException("No parameter file exists for control mode: " + controlMode);
@@ -109,7 +111,7 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public InputStream getParameterInputStream(QuadrupedControlMode controlMode)
+   public InputStream getParameterInputStream(WholeBodyControllerCoreMode controlMode)
    {
       return getClass().getResourceAsStream(getParameterResourceName(controlMode));
    }

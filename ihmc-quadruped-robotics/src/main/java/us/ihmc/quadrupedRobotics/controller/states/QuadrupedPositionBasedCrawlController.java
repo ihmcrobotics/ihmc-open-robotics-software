@@ -35,6 +35,7 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKin
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.DefaultGaitSwingLegChooser;

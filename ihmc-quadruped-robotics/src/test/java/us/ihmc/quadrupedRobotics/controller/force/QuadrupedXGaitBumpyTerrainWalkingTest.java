@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -45,21 +46,10 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    {
       double xAmp1 = 0.01, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
       double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.01, yFreq2 = 0.37;
-<<<<<<< HEAD
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.2);
 
       setup(groundProfile);
-=======
-      BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2);
-      
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      quadrupedTestFactory.setUseNetworking(true);
-      conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedTestYoVariables(conductor.getScs());
-      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
->>>>>>> removed the position yo variables
+
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -74,7 +64,8 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    private void setup(BumpyGroundProfile groundProfile) throws IOException
    {
       quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();

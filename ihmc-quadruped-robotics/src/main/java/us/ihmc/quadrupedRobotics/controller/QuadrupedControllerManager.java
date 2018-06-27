@@ -1,27 +1,17 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSteppingState;
+import us.ihmc.quadrupedRobotics.controller.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -29,7 +19,6 @@ import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
@@ -46,6 +35,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal

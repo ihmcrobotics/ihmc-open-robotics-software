@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -32,7 +33,7 @@ public abstract class QuadrupedPositionBumpyGroundWalkingTest implements Quadrup
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.ROLLING_HILLS);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedTestYoVariables(conductor.getScs());

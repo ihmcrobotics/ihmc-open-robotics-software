@@ -5,7 +5,9 @@ import java.util.List;
 
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointControlParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -36,10 +38,9 @@ public class QuadrupedStandPrepController implements QuadrupedController
    private final List<MinimumJerkTrajectory> trajectories;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final DoubleParameter standPrepJointStiffness = new DoubleParameter("standPrepJointStiffness", registry, 500.0);
-   private final DoubleParameter standPrepJointDamping = new DoubleParameter("standPrepJointDamping", registry, 25.0);
-
    private final QuadrupedControllerToolbox controllerToolbox;
+
+   private final QuadrupedJointControlParameters jointControlParameters;
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
@@ -51,6 +52,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
    {
       QuadrupedRuntimeEnvironment environment = controllerToolbox.getRuntimeEnvironment();
       this.controllerToolbox = controllerToolbox;
+      this.jointControlParameters = controllerToolbox.getJointControlParameters();
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
@@ -87,10 +89,7 @@ public class QuadrupedStandPrepController implements QuadrupedController
          trajectory.setMoveParameters(initialPosition, initialVelocity, initialAcceleration, desiredPosition, 0.0, 0.0, trajectoryTimeParameter.getValue());
 
          jointDesiredOutput.clear();
-         if (!controllerToolbox.isPositionControlled())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         jointDesiredOutput.setControlMode(jointControlParameters.getStandPrepJointMode());
       }
 
       // This is a new trajectory. We start at time 0.
@@ -108,13 +107,18 @@ public class QuadrupedStandPrepController implements QuadrupedController
          MinimumJerkTrajectory trajectory = trajectories.get(i);
 
          trajectory.computeTrajectory(timeInTrajectory);
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(trajectory.getPosition());
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredVelocity(trajectory.getVelocity());
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         jointDesiredOutput.setDesiredPosition(trajectory.getPosition());
+         jointDesiredOutput.setDesiredVelocity(trajectory.getVelocity());
+         jointDesiredOutput.setDesiredTorque(0.0);
 
-         jointDesiredOutputList.getJointDesiredOutput(joint).setStiffness(standPrepJointStiffness.getValue());
-         jointDesiredOutputList.getJointDesiredOutput(joint).setDamping(standPrepJointDamping.getValue());
+         jointDesiredOutput.setControlMode(jointControlParameters.getStandPrepJointMode());
+         PDGainsReadOnly pdGainsReadOnly = jointControlParameters.getStandPrepJointGains();
 
+         jointDesiredOutput.setStiffness(pdGainsReadOnly.getKp());
+         jointDesiredOutput.setDamping(pdGainsReadOnly.getKd());
+         jointDesiredOutput.setMaxPositionError(pdGainsReadOnly.getMaximumFeedback());
+         jointDesiredOutput.setMaxVelocityError(pdGainsReadOnly.getMaximumFeedbackRate());
       }
 
       timeInTrajectory += dt;

@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 
 import java.io.IOException;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
@@ -23,7 +24,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    public SimulationConstructionSet createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
-      testFactory.setControlMode(QuadrupedControlMode.FORCE);
+      testFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       testFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       testFactory.setUsePushRobotController(true);
       testFactory.setUseStateEstimator(true);
