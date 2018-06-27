@@ -42,8 +42,8 @@ public class QuadrupedJointControlParameters
    {
       this.controllerCoreMode = controllerCoreMode;
       PDGains ikStandPrep = new PDGains();
-      ikStandPrep.setKp(500.0);
-      ikStandPrep.setKd(25.0);
+      ikStandPrep.setKp(1000.0);
+      ikStandPrep.setKd(100.0);
       positionStandPrepGains = new ParameterizedPDGains("positionStandPrep", ikStandPrep, registry);
 
       PDGains effortStandPrep = new PDGains();
@@ -52,8 +52,8 @@ public class QuadrupedJointControlParameters
       effortStandPrepGains = new ParameterizedPDGains("effortStandPrep", effortStandPrep, registry);
 
       PDGains positionFreeze = new PDGains();
-      positionFreeze.setKp(500.0);
-      positionFreeze.setKd(25.0);
+      positionFreeze.setKp(1000.0);
+      positionFreeze.setKd(100.0);
       positionFreezeGains = new ParameterizedPDGains("positionFreeze", positionFreeze, registry);
 
       PDGains positionDoNothing = new PDGains();
@@ -77,8 +77,8 @@ public class QuadrupedJointControlParameters
       vmcUnloadedGains = new ParameterizedPDGains("vmcUnloaded", vmcUnloaded, registry);
 
       PDGains ikLoaded = new PDGains();
-      ikLoaded.setKp(500.0);
-      ikLoaded.setKd(25.0);
+      ikLoaded.setKp(1000.0);
+      ikLoaded.setKd(100.0);
       ikLoadedGains = new ParameterizedPDGains("ikLoaded", ikLoaded, registry);
 
       PDGains ikUnloaded = new PDGains();

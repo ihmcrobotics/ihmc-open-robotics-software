@@ -27,7 +27,7 @@ public abstract class QuadrupedPositionFlatGroundWalkingTest implements Quadrupe
       try
       {
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
