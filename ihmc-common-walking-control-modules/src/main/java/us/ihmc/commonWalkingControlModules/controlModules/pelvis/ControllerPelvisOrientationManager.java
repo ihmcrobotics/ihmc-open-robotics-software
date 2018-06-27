@@ -182,6 +182,13 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
       pelvisOrientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
 
+      if (useManualRotations.getValue())
+      {
+         tempOrientation.prependRollRotation(desiredRollOffset.getValue());
+         tempOrientation.prependPitchRotation(desiredPitchOffset.getValue());
+         tempOrientation.prependYawRotation(desiredYawOffset.getValue());
+      }
+
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
       tempAngularAcceleration.changeFrame(worldFrame);
@@ -194,13 +201,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       leapOfFaithModule.updateAngularOffsets();
       leapOfFaithModule.addAngularOffset(tempOrientation);
       leapOfFaithModule.relaxAngularWeight(tempWeight);
-
-      if (useManualRotations.getValue())
-      {
-         tempOrientation.prependRollRotation(desiredRollOffset.getValue());
-         tempOrientation.prependPitchRotation(desiredPitchOffset.getValue());
-         tempOrientation.prependYawRotation(desiredYawOffset.getValue());
-      }
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
