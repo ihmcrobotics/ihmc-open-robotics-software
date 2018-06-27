@@ -1,5 +1,6 @@
-package us.ihmc.quadrupedRobotics.controlModules.foot;
+package us.ihmc.quadrupedRobotics.parameters;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -8,6 +9,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedFootControlModuleParameters
 {
@@ -26,11 +28,11 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleParameter minimumStepAdjustmentTimeParameter = new DoubleParameter("minimumStepAdjustmentTime", finalRegistry, 0.1);
    private final DoubleParameter stepGoalOffsetZParameter = new DoubleParameter("stepGoalOffsetZ", finalRegistry, 0.0);
 
-   private final YoBoolean isPositionControlled;
+   private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode;
 
-   public QuadrupedFootControlModuleParameters(YoBoolean isPositionControlled)
+   public QuadrupedFootControlModuleParameters(YoEnum<WholeBodyControllerCoreMode> controllerCoreMode)
    {
-      this.isPositionControlled = isPositionControlled;
+      this.controllerCoreMode = controllerCoreMode;
 
       DefaultPID3DGains solePositionVMCGains = new DefaultPID3DGains();
       solePositionVMCGains.setProportionalGains(10000.0, 10000.0, 5000.0);
@@ -52,10 +54,15 @@ public class QuadrupedFootControlModuleParameters
 
    public PID3DGainsReadOnly getSolePositionGains()
    {
-      if (isPositionControlled.getBooleanValue())
-         return solePositionGainsIK;
-      else
+      switch (controllerCoreMode.getEnumValue())
+      {
+      case VIRTUAL_MODEL:
          return solePositionGainsVMC;
+      case INVERSE_KINEMATICS:
+         return solePositionGainsIK;
+      default:
+         throw new RuntimeException("The controller core mode " + controllerCoreMode.getEnumValue() + " does not have foot control gains.");
+      }
    }
 
    public double getTouchdownPressureLimitParameter()

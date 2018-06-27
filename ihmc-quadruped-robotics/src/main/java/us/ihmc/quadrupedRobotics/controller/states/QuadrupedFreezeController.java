@@ -7,6 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -23,9 +24,6 @@ import java.util.ArrayList;
 public class QuadrupedFreezeController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedFreezeController.class.getSimpleName());
-
-   private final DoubleParameter freezeJointStiffness = new DoubleParameter("freezeJointStiffness", registry, 500.0);
-   private final DoubleParameter freezeJointDamping = new DoubleParameter("freezeJointDamping", registry, 25.0);
 
    private final QuadrupedFeetManager feetManager;
 
@@ -88,14 +86,16 @@ public class QuadrupedFreezeController implements QuadrupedController
          OneDoFJoint oneDoFJoint = joints.get(i);
          JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
          jointDesiredOutput.clear();
-         jointDesiredOutput.setStiffness(freezeJointStiffness.getValue());
-         jointDesiredOutput.setDamping(freezeJointDamping.getValue());
-         jointDesiredOutput.setDesiredPosition(desiredFreezePositions.get(i).getDoubleValue());
 
-         if (!controllerToolbox.isPositionControlled())
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
-         else
-            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         jointDesiredOutput.setControlMode(controllerToolbox.getJointControlParameters().getFreezeJointMode());
+         PDGainsReadOnly pdGainsReadOnly = controllerToolbox.getJointControlParameters().getFreezeJointGains();
+
+         jointDesiredOutput.setStiffness(pdGainsReadOnly.getKp());
+         jointDesiredOutput.setDamping(pdGainsReadOnly.getKd());
+         jointDesiredOutput.setMaxPositionError(pdGainsReadOnly.getMaximumFeedback());
+         jointDesiredOutput.setMaxVelocityError(pdGainsReadOnly.getMaximumFeedbackRate());
+
+         jointDesiredOutput.setDesiredPosition(desiredFreezePositions.get(i).getDoubleValue());
       }
    }
 

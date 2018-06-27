@@ -16,7 +16,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -29,13 +28,16 @@ import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointControlParameters;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -43,13 +45,16 @@ import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedSteppingState implements QuadrupedController, QuadrupedStepTransitionCallback
@@ -102,6 +107,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand;
    private final WholeBodyControllerCore controllerCore;
+   private final JointDesiredOutputList jointDesiredOutputList;
+
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
@@ -112,16 +119,14 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
       this.controlManagerFactory = controlManagerFactory;
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
 
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
-      if (controllerToolbox.isPositionControlled())
-         controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
-      else
-         controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+      controllerCoreCommand = new ControllerCoreCommand(controllerToolbox.getControllerCoreMode());
 
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
       // FIXME this will be wrong if we add in neck joints
@@ -136,7 +141,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       controlCoreToolbox.setupForInverseKinematicsSolver();
 
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
-      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, jointDesiredOutputList, registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
@@ -274,10 +279,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       onLiftOffTriggered.set(false);
       onTouchDownTriggered.set(false);
 
-      JointDesiredOutputList jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
-      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
-         jointDesiredOutputList.getJointDesiredOutput(i).setControlMode(JointDesiredControlMode.EFFORT);
-
       stepMessageHandler.clearFootTrajectory();
       stepMessageHandler.clearSteps();
 
@@ -363,6 +364,36 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
+
+      setLowLevelJointControlParameters();
+   }
+
+   private void setLowLevelJointControlParameters()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         QuadrupedJointControlParameters jointControlParameters = controllerToolbox.getJointControlParameters();
+         PDGainsReadOnly gains;
+         if (controllerToolbox.getFootContactState(robotQuadrant).inContact())
+            gains = jointControlParameters.getSteppingLoadedJointGains();
+         else
+            gains = jointControlParameters.getSteppingUnloadedJointGains();
+
+
+         FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+         List<OneDoFJoint> legJoints = fullRobotModel.getLegJointsList(robotQuadrant);
+         for (int i = 0; i < legJoints.size(); i++)
+         {
+            OneDoFJoint legJoint = legJoints.get(i);
+            JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(legJoint);
+            jointDesiredOutput.setStiffness(gains.getKp());
+            jointDesiredOutput.setDamping(gains.getKd());
+            jointDesiredOutput.setMaxPositionError(gains.getMaximumFeedback());
+            jointDesiredOutput.setMaxVelocityError(gains.getMaximumFeedbackRate());
+
+            jointDesiredOutput.setControlMode(jointControlParameters.getSteppingJointMode());
+         }
+      }
    }
 
    private void updateAndReportGroundPlaneEstimate()

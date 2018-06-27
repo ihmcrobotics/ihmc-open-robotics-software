@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
@@ -23,7 +24,7 @@ public class GenericQuadrupedCircleWalkingDemo
       try
       {
          GenericQuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          GoalOrientedTestConductor conductor = quadrupedTestFactory.createTestConductor();

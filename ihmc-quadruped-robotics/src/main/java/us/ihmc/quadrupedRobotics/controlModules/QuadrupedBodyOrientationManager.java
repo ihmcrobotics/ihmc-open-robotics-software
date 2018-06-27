@@ -221,15 +221,19 @@ public class QuadrupedBodyOrientationManager
 
       feedbackControlCommand.setFeedForwardAction(yoComTorqueFeedforwardSetpoint);
       feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      if (controllerToolbox.isPositionControlled())
+
+      switch (controllerToolbox.getControllerCoreMode())
       {
+      case INVERSE_KINEMATICS:
          feedbackControlCommand.setGains(bodyOrientationIKGainsParameter);
          feedbackControlCommand.setWeightsForSolver(bodyIKAngularWeight);
-      }
-      else
-      {
+         break;
+      case VIRTUAL_MODEL:
          feedbackControlCommand.setGains(bodyOrientationVMCGainsParameter);
          feedbackControlCommand.setWeightsForSolver(bodyVMCAngularWeight);
+         break;
+      default:
+         throw new RuntimeException("The controller core mode " + controllerToolbox.getControllerCoreMode() + " is not implemented for the body orientation manager.");
       }
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);
