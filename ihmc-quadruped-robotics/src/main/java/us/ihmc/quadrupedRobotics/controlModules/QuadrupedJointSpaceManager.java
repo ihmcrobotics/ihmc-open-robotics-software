@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointVelocityIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
@@ -36,6 +37,7 @@ public class QuadrupedJointSpaceManager
 
    private final InverseKinematicsCommandList inverseKinematicsCommandList = new InverseKinematicsCommandList();
    private final JointspaceVelocityCommand ikJointVelocityCommand = new JointspaceVelocityCommand();
+   private final JointVelocityIntegrationCommand ikJointIntegrationCommand = new JointVelocityIntegrationCommand();
 
    private final YoDouble ikJointViscousDamping = new YoDouble("ikJointViscousDamping", registry);
    private final YoDouble ikJointWeight = new YoDouble("ikJointWeight", registry);
@@ -50,6 +52,11 @@ public class QuadrupedJointSpaceManager
 
       ikJointViscousDamping.set(IK_VISCOUS_DAMPING);
       ikJointWeight.set(IK_DAMPING_WEIGHT);
+
+      for (OneDoFJoint controlledJoint : controlledJoints)
+      {
+         ikJointIntegrationCommand.addJointToComputeDesiredPositionFor(controlledJoint);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -94,6 +101,7 @@ public class QuadrupedJointSpaceManager
    {
       inverseKinematicsCommandList.clear();
       inverseKinematicsCommandList.addCommand(ikJointVelocityCommand);
+      inverseKinematicsCommandList.addCommand(ikJointIntegrationCommand);
 
       return inverseKinematicsCommandList;
    }

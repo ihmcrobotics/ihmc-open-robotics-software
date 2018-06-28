@@ -126,6 +126,7 @@ public class QuadrupedMomentumRateOfChangeModule
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setLinearWeights(vmcLinearMomentumRateWeight);
 
+      linearMomentumRateOfChange.addZ(mass * gravity);
       linearMomentum.scaleAdd(controlDT, linearMomentumRateOfChange, linearMomentum);
       momentumCommand.setLinearMomentum(linearMomentum);
       momentumCommand.setLinearWeights(kinematicsLinearMomentumWeight);
