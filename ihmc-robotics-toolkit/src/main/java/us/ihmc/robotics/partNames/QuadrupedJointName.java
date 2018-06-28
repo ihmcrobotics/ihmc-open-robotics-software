@@ -79,6 +79,11 @@ public enum QuadrupedJointName
       }
    }
 
+   public LegJointName getLegJointName()
+   {
+      return legJointName;
+   }
+
    @SuppressWarnings("incomplete-switch")
    public static QuadrupedJointName getName(RobotQuadrant quadrant, LegJointName legJointName)
    {
