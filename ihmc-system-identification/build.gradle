@@ -27,7 +27,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.4"
 }
 
 testDependencies {

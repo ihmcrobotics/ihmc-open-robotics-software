@@ -34,7 +34,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.3'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
