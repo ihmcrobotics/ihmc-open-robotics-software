@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointVelocityIntegrationCalculator;
@@ -184,6 +183,6 @@ public class JointVelocityIntegrationCommand implements InverseKinematicsCommand
    @Override
    public ControllerCoreCommandType getCommandType()
    {
-      return ControllerCoreCommandType.JOINT_ACCELERATION_INTEGRATION;
+      return ControllerCoreCommandType.JOINT_VELOCITY_INTEGRATION;
    }
 }
