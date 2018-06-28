@@ -84,7 +84,7 @@ public class QuadrupedSwingTrajectoryGenerator
       bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint3DReadOnly swingInitial, double swingHeight, FramePoint3DReadOnly swingTarget, FrameVector3D desiredFinalVelocity)
+   public void initializeSwing(double swingTime, FramePoint3DReadOnly swingInitial, double swingHeight, FramePoint3D swingTarget, FrameVector3D desiredFinalVelocity)
    {
       bagOfBalls.reset();
       
