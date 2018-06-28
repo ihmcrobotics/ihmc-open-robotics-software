@@ -72,7 +72,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "robotiq-hand-drivers", version: "source"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.4"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.1"
