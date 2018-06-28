@@ -19,7 +19,7 @@ $ docker build --build-arg ROS_VERSION_ARG=ardent -t ros2_ihmc_runtime:ardent .
 And to run the container after building:
 
 ```bash
-$ docker run ros2_ihmc_runtime:ardent 
+$ docker run -it ros2_ihmc_runtime:ardent /bin/bash 
 ```
 
 ### Generating Messages
