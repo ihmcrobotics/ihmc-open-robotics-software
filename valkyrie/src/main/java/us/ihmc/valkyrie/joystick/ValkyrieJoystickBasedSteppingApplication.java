@@ -46,10 +46,8 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(footPolygon, footPolygon);
 
-      
-
-      ui = new JoystickBasedSteppingMainUI(robotName, primaryStage, ros2Node, robotModel, walkingControllerParameters, null,
-                                           kickAndPunchMessenger, kickAndPunchMessenger, footPolygons);
+      ui = new JoystickBasedSteppingMainUI(robotName, primaryStage, ros2Node, robotModel, walkingControllerParameters, null, kickAndPunchMessenger,
+                                           kickAndPunchMessenger, footPolygons);
       ui.setActiveSecondaryControlOption(SecondaryControlOption.PUNCH);
    }
 
