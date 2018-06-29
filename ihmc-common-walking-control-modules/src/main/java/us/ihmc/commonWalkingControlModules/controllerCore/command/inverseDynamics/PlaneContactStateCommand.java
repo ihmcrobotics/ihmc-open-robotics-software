@@ -19,8 +19,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>,
-      InverseKinematicsCommand<PlaneContactStateCommand>
+public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
 {
    private RigidBody rigidBody;
    private String rigidBodyName;

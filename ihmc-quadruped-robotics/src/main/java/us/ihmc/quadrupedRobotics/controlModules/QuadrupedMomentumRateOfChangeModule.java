@@ -45,7 +45,7 @@ public class QuadrupedMomentumRateOfChangeModule
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentumEstimate = new FrameVector3D();
 
-   private final YoDouble momentumIntegrationBreakFrequency = new YoDouble("momentumIntegrationBreakFrequency", registry);
+   private final YoFrameVector3D momentumIntegrationBreakFrequency = new YoFrameVector3D("momentumIntegrationBreakFrequency", worldFrame, registry);
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final MomentumCommand momentumCommand = new MomentumCommand();
 
@@ -72,7 +72,7 @@ public class QuadrupedMomentumRateOfChangeModule
       controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       // higher leaks to 0
-      momentumIntegrationBreakFrequency.set(25.0);
+      momentumIntegrationBreakFrequency.set(0.1, 0.1, 0.1);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
@@ -149,11 +149,11 @@ public class QuadrupedMomentumRateOfChangeModule
    {
       linearMomentumEstimate.set(controllerToolbox.getCoMVelocityEstimate());
       linearMomentumEstimate.scale(mass);
-      double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getDoubleValue(), controlDT);
 
       for (int i = 0; i < 3; i++)
       {
-//         double momentumReference = linearMomentumEstimate.getElement(i);
+         double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getElement(i), controlDT);
+         //         double momentumReference = linearMomentumEstimate.getElement(i);
          double momentumReference = 0.0;
          double desiredMomentum = linearMomentum.getElement(i);
          desiredMomentum = desiredMomentum * momentumAlpha + (1.0 - momentumAlpha) * momentumReference;
