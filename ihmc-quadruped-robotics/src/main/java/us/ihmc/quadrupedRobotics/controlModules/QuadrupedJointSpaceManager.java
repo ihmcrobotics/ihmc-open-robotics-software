@@ -104,7 +104,6 @@ public class QuadrupedJointSpaceManager
    public InverseKinematicsCommand<?> getInverseKinematicsCommand()
    {
       inverseKinematicsCommandList.clear();
-      inverseKinematicsCommandList.addCommand(ikJointVelocityCommand);
       inverseKinematicsCommandList.addCommand(ikJointIntegrationCommand);
 
       return inverseKinematicsCommandList;
