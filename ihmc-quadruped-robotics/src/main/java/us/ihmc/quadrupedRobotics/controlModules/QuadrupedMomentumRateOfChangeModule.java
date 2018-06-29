@@ -135,17 +135,15 @@ public class QuadrupedMomentumRateOfChangeModule
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setLinearWeights(vmcLinearMomentumRateWeight);
 
-//      linearMomentumRateOfChange.addZ(mass * gravity);
       yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
 
-      integrateMomentum();
+      integrateMomentum(linearMomentum);
 
-//      linearMomentum.setToZero();
       momentumCommand.setLinearMomentum(linearMomentum);
       momentumCommand.setLinearWeights(kinematicsLinearMomentumWeight);
    }
 
-   private void integrateMomentum()
+   private void integrateMomentum(FrameVector3D linearMomentumToPack)
    {
       linearMomentumEstimate.set(controllerToolbox.getCoMVelocityEstimate());
       linearMomentumEstimate.scale(mass);
@@ -153,12 +151,11 @@ public class QuadrupedMomentumRateOfChangeModule
       for (int i = 0; i < 3; i++)
       {
          double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getElement(i), controlDT);
-         //         double momentumReference = linearMomentumEstimate.getElement(i);
          double momentumReference = 0.0;
-         double desiredMomentum = linearMomentum.getElement(i);
+         double desiredMomentum = linearMomentumToPack.getElement(i);
          desiredMomentum = desiredMomentum * momentumAlpha + (1.0 - momentumAlpha) * momentumReference;
          desiredMomentum += yoLinearMomentumRateOfChange.getElement(i) * controlDT;
-         linearMomentum.setElement(i, desiredMomentum);
+         linearMomentumToPack.setElement(i, desiredMomentum);
       }
    }
 

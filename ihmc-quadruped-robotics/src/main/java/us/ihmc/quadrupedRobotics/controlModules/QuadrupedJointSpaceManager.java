@@ -17,8 +17,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedJointSpaceManager
 {
    private static final double VMC_VISCOUS_DAMPING = 1.0;
-   private static final double IK_VISCOUS_DAMPING = 0.00;
-   private static final double IK_DAMPING_WEIGHT = 0.0;
 
    private static final double POSITION_LIMIT_DAMPING = 10.0;
    private static final double POSITION_LIMIT_STIFFNESS = 100.0;
@@ -36,11 +34,10 @@ public class QuadrupedJointSpaceManager
    private final YoDouble jointPositionLimitStiffness = new YoDouble("jointPositionLimitStiffness", registry);
 
    private final InverseKinematicsCommandList inverseKinematicsCommandList = new InverseKinematicsCommandList();
-   private final JointspaceVelocityCommand ikJointVelocityCommand = new JointspaceVelocityCommand();
    private final JointVelocityIntegrationCommand ikJointIntegrationCommand = new JointVelocityIntegrationCommand();
 
-   private final YoDouble ikJointViscousDamping = new YoDouble("ikJointViscousDamping", registry);
-   private final YoDouble ikJointWeight = new YoDouble("ikJointWeight", registry);
+   private final YoDouble ikVelocityIntegrationBreakFrequency = new YoDouble("ikVelocityIntegrationBreakFrequency", registry);
+   private final YoDouble ikAccelerationDifferentiationBreakFrequency = new YoDouble("ikAccelerationDifferentiationBreakFrequency", registry);
 
    public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -50,17 +47,19 @@ public class QuadrupedJointSpaceManager
       jointPositionLimitDamping.set(POSITION_LIMIT_DAMPING);
       jointPositionLimitStiffness.set(POSITION_LIMIT_STIFFNESS);
 
-      ikJointViscousDamping.set(IK_VISCOUS_DAMPING);
-      ikJointWeight.set(IK_DAMPING_WEIGHT);
-
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          ikJointIntegrationCommand.addJointToComputeDesiredPositionFor(controlledJoint);
       }
 
+      ikVelocityIntegrationBreakFrequency.set(0.1);
+      ikAccelerationDifferentiationBreakFrequency.set(5.0);
+
       for (int i = 0; i < ikJointIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
          ikJointIntegrationCommand.setJointMaxima(i, 1.0, 100.0);
+         ikJointIntegrationCommand
+               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getDoubleValue(), ikAccelerationDifferentiationBreakFrequency.getDoubleValue());
       }
 
       parentRegistry.addChild(registry);
@@ -71,16 +70,16 @@ public class QuadrupedJointSpaceManager
       vmcJointDampingCommand.clear();
       jointLimitEnforcementCommand.clear();
 
-      ikJointVelocityCommand.clear();
-
-      for (OneDoFJoint joint : controlledJoints)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
+         OneDoFJoint joint = controlledJoints[i];
+
          vmcJointDampingCommand.addJoint(joint, -vmcJointViscousDamping.getDoubleValue() * joint.getQd());
          jointLimitEnforcementCommand.addJoint(joint, jointPositionLimitStiffness.getDoubleValue(), jointPositionLimitDamping.getDoubleValue());
 
-         ikJointVelocityCommand.addJoint(joint, -ikJointViscousDamping.getDoubleValue() * joint.getQd());
+         ikJointIntegrationCommand
+               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getDoubleValue(), ikAccelerationDifferentiationBreakFrequency.getDoubleValue());
       }
-      ikJointVelocityCommand.setWeight(ikJointWeight.getDoubleValue());
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
