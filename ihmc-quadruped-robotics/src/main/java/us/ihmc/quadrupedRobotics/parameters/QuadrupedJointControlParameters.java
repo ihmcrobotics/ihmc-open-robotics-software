@@ -77,13 +77,13 @@ public class QuadrupedJointControlParameters
       vmcUnloadedGains = new ParameterizedPDGains("vmcUnloaded", vmcUnloaded, registry);
 
       PDGains ikLoaded = new PDGains();
-      ikLoaded.setKp(1000.0);
+      ikLoaded.setKp(5000.0);
       ikLoaded.setKd(100.0);
       ikLoadedGains = new ParameterizedPDGains("ikLoaded", ikLoaded, registry);
 
       PDGains ikUnloaded = new PDGains();
-      ikUnloaded.setKp(0.0);
-      ikUnloaded.setKd(0.0);
+      ikUnloaded.setKp(5000.0);
+      ikUnloaded.setKd(100.0);
       ikUnloadedGains = new ParameterizedPDGains("ikUnloaded", ikUnloaded, registry);
 
       parentRegistry.addChild(registry);

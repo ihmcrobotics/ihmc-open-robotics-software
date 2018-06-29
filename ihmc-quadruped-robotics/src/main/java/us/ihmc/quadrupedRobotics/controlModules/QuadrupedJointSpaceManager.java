@@ -17,8 +17,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedJointSpaceManager
 {
    private static final double VMC_VISCOUS_DAMPING = 1.0;
-   private static final double IK_VISCOUS_DAMPING = 0.1;
-   private static final double IK_DAMPING_WEIGHT = 1.0;
+   private static final double IK_VISCOUS_DAMPING = 0.00;
+   private static final double IK_DAMPING_WEIGHT = 0.0;
 
    private static final double POSITION_LIMIT_DAMPING = 10.0;
    private static final double POSITION_LIMIT_STIFFNESS = 100.0;
@@ -56,6 +56,11 @@ public class QuadrupedJointSpaceManager
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          ikJointIntegrationCommand.addJointToComputeDesiredPositionFor(controlledJoint);
+      }
+
+      for (int i = 0; i < ikJointIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
+      {
+         ikJointIntegrationCommand.setJointMaxima(i, 1.0, 100.0);
       }
 
       parentRegistry.addChild(registry);

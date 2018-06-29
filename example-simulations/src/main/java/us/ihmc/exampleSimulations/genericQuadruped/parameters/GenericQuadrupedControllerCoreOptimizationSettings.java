@@ -5,6 +5,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class GenericQuadrupedControllerCoreOptimizationSettings implements ControllerCoreOptimizationSettings
 {
+   private static final double jointVelocityWeight = 0.01; // used for IK
    private static final double jointAccelerationWeight = 0.005;
    private static final double jointJerkWeight = 1.0E-7;
 
@@ -45,6 +46,12 @@ public class GenericQuadrupedControllerCoreOptimizationSettings implements Contr
    public double getJointAccelerationWeight()
    {
       return jointAccelerationWeight;
+   }
+
+   @Override
+   public double getJointVelocityWeight()
+   {
+      return jointVelocityWeight;
    }
 
    @Override

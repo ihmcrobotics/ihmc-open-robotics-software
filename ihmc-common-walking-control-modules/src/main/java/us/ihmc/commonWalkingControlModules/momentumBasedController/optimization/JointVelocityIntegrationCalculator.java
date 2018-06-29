@@ -19,9 +19,9 @@ import java.util.List;
 
 public class JointVelocityIntegrationCalculator
 {
-   public static final double DEFAULT_POSITION_BREAK_FREQUENCY = 0.016;
+   public static final double DEFAULT_POSITION_BREAK_FREQUENCY = 0.1;
    public static final double DEFAULT_ACCELERATION_BREAK_FREQUENCY = 2.04;
-   public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
+   public static final double DEFAULT_MAX_POSITION_ERROR = 0.5;
    public static final double DEFAULT_MAX_ACCELERATION = 100.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -56,7 +56,6 @@ public class JointVelocityIntegrationCalculator
       previousDesiredVelocity.clear();
    }
 
-   /** TODO **/
    public void submitJointVelocityIntegrationCommand(JointVelocityIntegrationCommand command)
    {
       for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJointsToComputeDesiredPositionFor(); commandJointIndex++)

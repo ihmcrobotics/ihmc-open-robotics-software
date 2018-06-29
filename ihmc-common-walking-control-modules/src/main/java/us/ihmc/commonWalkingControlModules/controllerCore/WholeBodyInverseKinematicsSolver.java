@@ -6,6 +6,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
@@ -179,6 +180,7 @@ public class WholeBodyInverseKinematicsSolver
    }
 
 
+
    public void submitInverseKinematicsCommandList(InverseKinematicsCommandList inverseKinematicsCommandList)
    {
       while (inverseKinematicsCommandList.getNumberOfCommands() > 0)
@@ -189,6 +191,9 @@ public class WholeBodyInverseKinematicsSolver
          {
          case TASKSPACE:
             optimizationControlModule.submitSpatialVelocityCommand((SpatialVelocityCommand) command);
+            break;
+         case PLANE_CONTACT_STATE:
+            optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
             break;
          case JOINTSPACE:
             optimizationControlModule.submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);

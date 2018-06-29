@@ -12,8 +12,11 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedMomentumRateOfChangeModule
 {
@@ -38,8 +41,11 @@ public class QuadrupedMomentumRateOfChangeModule
    private final ParameterVector3D kinematicsLinearMomentumWeight = new ParameterVector3D("ikLinearMomentumWeight", new Vector3D(100.0, 100.0, 50.0), registry);
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
+   private final YoFrameVector3D yoLinearMomentumRateOfChange = new YoFrameVector3D("desiredLinearMomentumRateOfChange", worldFrame, registry);
    private final FrameVector3D linearMomentum = new FrameVector3D();
+   private final FrameVector3D linearMomentumEstimate = new FrameVector3D();
 
+   private final YoDouble momentumIntegrationBreakFrequency = new YoDouble("momentumIntegrationBreakFrequency", registry);
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final MomentumCommand momentumCommand = new MomentumCommand();
 
@@ -64,6 +70,9 @@ public class QuadrupedMomentumRateOfChangeModule
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();
       mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
       controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
+
+      // higher leaks to 0
+      momentumIntegrationBreakFrequency.set(25.0);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
@@ -126,10 +135,31 @@ public class QuadrupedMomentumRateOfChangeModule
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setLinearWeights(vmcLinearMomentumRateWeight);
 
-      linearMomentumRateOfChange.addZ(mass * gravity);
-      linearMomentum.scaleAdd(controlDT, linearMomentumRateOfChange, linearMomentum);
+//      linearMomentumRateOfChange.addZ(mass * gravity);
+      yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
+
+      integrateMomentum();
+
+//      linearMomentum.setToZero();
       momentumCommand.setLinearMomentum(linearMomentum);
       momentumCommand.setLinearWeights(kinematicsLinearMomentumWeight);
+   }
+
+   private void integrateMomentum()
+   {
+      linearMomentumEstimate.set(controllerToolbox.getCoMVelocityEstimate());
+      linearMomentumEstimate.scale(mass);
+      double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getDoubleValue(), controlDT);
+
+      for (int i = 0; i < 3; i++)
+      {
+//         double momentumReference = linearMomentumEstimate.getElement(i);
+         double momentumReference = 0.0;
+         double desiredMomentum = linearMomentum.getElement(i);
+         desiredMomentum = desiredMomentum * momentumAlpha + (1.0 - momentumAlpha) * momentumReference;
+         desiredMomentum += yoLinearMomentumRateOfChange.getElement(i) * controlDT;
+         linearMomentum.setElement(i, desiredMomentum);
+      }
    }
 
    public MomentumRateCommand getMomentumRateCommand()

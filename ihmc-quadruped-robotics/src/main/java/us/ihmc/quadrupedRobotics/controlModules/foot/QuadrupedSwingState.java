@@ -297,6 +297,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       feedbackControlCommand.set(desiredPosition, desiredVelocity);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
+      feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 
       updateEndOfStateConditions(time);
    }

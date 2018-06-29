@@ -457,6 +457,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          controllerCoreCommand.addVirtualModelControlCommand(planeContactStateCommand);
+         controllerCoreCommand.addInverseKinematicsCommand(planeContactStateCommand);
       }
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
