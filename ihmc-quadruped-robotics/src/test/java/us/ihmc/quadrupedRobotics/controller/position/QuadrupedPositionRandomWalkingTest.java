@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.position;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -56,18 +57,17 @@ public abstract class QuadrupedPositionRandomWalkingTest implements QuadrupedMul
 
    private double randomValidVelocity(Random random)
    {
-      double velocity = random.nextDouble() * 2.0 - 1.0;
-      return velocity * 0.8;
+      return RandomNumbers.nextDouble(random, 0.3);
    }
 
    private double randomValidYawRate(Random random)
    {
-      return random.nextDouble() * 1.0 - 0.5;
+      return RandomNumbers.nextDouble(random, 0.1);
    }
 
    private double randomSimulationDuration(Random random)
    {
-      return random.nextDouble() * 2.0 + 0.25;
+      return RandomNumbers.nextDouble(random, 0.25, 2.25);
    }
 
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException

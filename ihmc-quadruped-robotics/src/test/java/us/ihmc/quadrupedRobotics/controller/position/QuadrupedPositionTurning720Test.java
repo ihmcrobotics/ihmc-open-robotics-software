@@ -62,7 +62,7 @@ public abstract class QuadrupedPositionTurning720Test implements QuadrupedMultiR
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      stepTeleopManager.setDesiredVelocity(0.0, 0.0, -0.5);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, -0.3);
 
       int numSpins = 2;
       for (int i = 0; i < numSpins; i++)
@@ -90,7 +90,7 @@ public abstract class QuadrupedPositionTurning720Test implements QuadrupedMultiR
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.5);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.3);
 
       int numSpins = 2;
       for (int i = 0; i < numSpins; i++)
