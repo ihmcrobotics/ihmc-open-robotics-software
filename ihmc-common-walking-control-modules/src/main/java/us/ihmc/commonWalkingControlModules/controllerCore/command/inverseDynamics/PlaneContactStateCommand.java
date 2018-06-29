@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,7 +19,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
+public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>,
+      InverseKinematicsCommand<PlaneContactStateCommand>
 {
    private RigidBody rigidBody;
    private String rigidBodyName;

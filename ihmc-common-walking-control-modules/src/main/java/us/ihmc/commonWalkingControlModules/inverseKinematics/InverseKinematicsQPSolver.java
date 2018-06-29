@@ -92,6 +92,7 @@ public class InverseKinematicsQPSolver
          addJointAccelerationRegularization();
    }
 
+
    private void addJointAccelerationRegularization()
    {
       double factor = dt * dt / jointAccelerationRegularization.getDoubleValue();

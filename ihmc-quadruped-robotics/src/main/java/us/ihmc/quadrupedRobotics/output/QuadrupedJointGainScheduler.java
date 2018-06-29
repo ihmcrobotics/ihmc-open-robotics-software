@@ -37,7 +37,7 @@ public class QuadrupedJointGainScheduler
    {
       for (int i = 0; i < QuadrupedJointGains.values.length; i++)
       {
-         if (stiffness <= QuadrupedJointGains.values[i].stiffness)
+         if (stiffness < QuadrupedJointGains.values[i].stiffness)
          {
             if (i > 0)
                return QuadrupedJointGains.values[i - 1];

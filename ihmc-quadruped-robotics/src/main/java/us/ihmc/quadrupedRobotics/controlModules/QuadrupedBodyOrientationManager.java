@@ -99,7 +99,7 @@ public class QuadrupedBodyOrientationManager
       desiredBodyAngularAcceleration = new FrameVector3D();
 
       bodyVMCAngularWeight.set(2.5, 2.5, 1.0);
-      bodyIKAngularWeight.set(2.5, 2.5, 1.0);
+      bodyIKAngularWeight.set(1.0, 1.0, 1.0);
 
       parentRegistry.addChild(registry);
    }
