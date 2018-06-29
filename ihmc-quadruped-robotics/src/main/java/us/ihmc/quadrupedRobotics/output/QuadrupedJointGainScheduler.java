@@ -5,8 +5,9 @@ public class QuadrupedJointGainScheduler
    enum QuadrupedJointGains
    {
       NONE(0.0, 0.0),
-      SOFT(100.0, 1.0),
-      MEDIUM1(500.0, 50.0),
+      SOFT1(100.0, 20.0),
+      SOFT2(250.0, 50.0),
+      MEDIUM1(500.0, 100.0),
       MEDIUM2(1000.0, 50.0),
       HARD1(5000.0, 50.0),
       HARD(10000.0, 100.0);

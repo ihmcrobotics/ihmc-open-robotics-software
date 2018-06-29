@@ -111,8 +111,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public InverseKinematicsCommand<?> getInverseKinematicsCommand()
    {
-      return null;
-//      return spatialVelocityCommand;
+//      return null;
+      return spatialVelocityCommand;
    }
 
 

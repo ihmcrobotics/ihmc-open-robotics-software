@@ -192,9 +192,6 @@ public class WholeBodyInverseKinematicsSolver
          case TASKSPACE:
             optimizationControlModule.submitSpatialVelocityCommand((SpatialVelocityCommand) command);
             break;
-         case PLANE_CONTACT_STATE:
-            optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
-            break;
          case JOINTSPACE:
             optimizationControlModule.submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
             break;
