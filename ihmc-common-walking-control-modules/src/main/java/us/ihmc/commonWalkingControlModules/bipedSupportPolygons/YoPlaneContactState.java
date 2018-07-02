@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
    private static final double THRESHOLD = 1e-7;
-   private final YoVariableRegistry registry;
+   protected final YoVariableRegistry registry;
    private final RigidBody rigidBody;
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
