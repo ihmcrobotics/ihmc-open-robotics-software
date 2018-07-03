@@ -72,38 +72,6 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
                                                         simulationTestingParameters, getRobotModel());
    }
-   
-   public void testCloseAndOpenHand() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-      RobotSide robotSide = RobotSide.LEFT;
-      double trajectoryTime = 5.0;
-
-      double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
-                                                                                                                                                  HandConfiguration.CLOSE), trajectoryTime);
-      
-      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 10.0);
-      
-      HandDesiredConfigurationBehavior openBehavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
-                                                                                                                                                  HandConfiguration.OPEN), trajectoryTime);
-      
-      drcBehaviorTestHelper.executeBehaviorUntilDone(openBehavior);
-      
-      assertTrue(success);
-      double fingerJointQFinal = getTotalFingerJointQ(robotSide);
-
-      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
-      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
-
-      assertTrue(fingerJointQFinal > fingerJointQInitial);
-      assertTrue(behavior.isDone());
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
 
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {

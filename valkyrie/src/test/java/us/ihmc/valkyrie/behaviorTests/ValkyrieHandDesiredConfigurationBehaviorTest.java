@@ -25,12 +25,12 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-
+   
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
-   public void testCloseAndOpenHand() throws SimulationExceededMaximumTimeException
+   public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
-      super.testCloseAndOpenHand();
+      super.testCloseHand();
    }
 }

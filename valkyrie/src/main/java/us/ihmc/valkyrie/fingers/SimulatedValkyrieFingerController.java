@@ -48,8 +48,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    private final SideDependentList<EnumMap<ValkyrieHandJointName, DoubleProvider>> sideDependentControlSpaceHandlers = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> closedAngles = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> openedAngles = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private final double delayTime = 2.0;
-   private final double trajectoryTime = 3.0;
+   private final double delayTime = 1.0;
+   private final double trajectoryTime = 1.0;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
