@@ -18,10 +18,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -72,7 +74,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final AxisAngle normalContactVectorRotation = new AxisAngle();
 
    private final ReferenceFrame centerOfMassFrame;
-   private final ReferenceFrame planeFrame;
+   private final PoseReferenceFrame planeFrame;
 
    private final YoFramePoint3D desiredCoP;
    private final YoFramePoint3D previousCoP;
@@ -128,7 +130,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
 
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-      planeFrame = contactablePlaneBody.getSoleFrame();
+      planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
+      planeFrame.setPoseAndUpdate(((ContactablePlaneBody) contactablePlaneBody).getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
       yoPlaneContactState.clear();
       yoPlaneContactState.computeSupportPolygon();
@@ -174,6 +177,10 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    public void setPlaneContactStateCommand(PlaneContactStateCommand command)
    {
+      RigidBodyTransform contactFramePose = command.getContactFramePoseInBodyFixedFrame();
+      if (!contactFramePose.containsNaN())
+         planeFrame.setPoseAndUpdate(contactFramePose);
+
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
       yoPlaneContactState.computeSupportPolygon();
 
