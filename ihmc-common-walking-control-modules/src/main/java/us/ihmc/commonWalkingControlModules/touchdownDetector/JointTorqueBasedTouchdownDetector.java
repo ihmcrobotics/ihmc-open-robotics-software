@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -12,11 +13,25 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private final YoDouble torqueThreshold;
    private final YoBoolean touchdownDetected;
 
+   private final boolean dontDetectTouchdownIfAtJointLimit;
    private double signum;
 
    public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, YoVariableRegistry registry)
    {
+      this(joint, false, registry);
+   }
+
+   /**
+    * @param joint joint used to detect touchdown
+    * @param dontDetectTouchdownIfAtJointLimit if true, this detector will not detect a touchdown if the joint is past a joint limit. this is to avoid
+    *                                          false-positive touchdown signals given by simulated torques at joint limits
+    * @param registry
+    */
+   public JointTorqueBasedTouchdownDetector(OneDoFJoint joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
+   {
       this.joint = joint;
+      this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
+
       jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
       torqueThreshold = new YoDouble(joint.getName() + "_touchdownTorqueThreshold", registry);
       touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetected", registry);
@@ -42,6 +57,14 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       return touchdownDetected.getBooleanValue();
    }
 
+   private boolean isAtJointLimit()
+   {
+      double q = joint.getQ();
+      double jointLimitLower = joint.getJointLimitLower();
+      double jointLimitUpper = joint.getJointLimitUpper();
+      return !MathTools.intervalContains(q, jointLimitLower, jointLimitUpper, false, false);
+   }
+
    @Override
    public void update()
    {
@@ -50,7 +73,14 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 
       jointTorque.set(joint.getTauMeasured());
 
-      touchdownDetected.set(torque > threshold);
+      if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
+      {
+         touchdownDetected.set(false);
+      }
+      else
+      {
+         touchdownDetected.set(torque > threshold);
+      }
    }
 
    @Override
