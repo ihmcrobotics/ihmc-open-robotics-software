@@ -61,7 +61,7 @@ public class JUnitTools
       {
          for (int j = 0; j < expected.getNumCols(); j++)
          {
-            assertEquals(message, actual.get(i, j), expected.get(i, j), delta);
+            assertEquals(message, expected.get(i, j), actual.get(i, j), delta);
          }
       }
    }
