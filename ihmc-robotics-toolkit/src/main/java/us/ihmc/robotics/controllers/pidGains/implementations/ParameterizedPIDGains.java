@@ -31,7 +31,7 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
 
       if (defaults == null)
       {
-         ki = new DoubleParameter("ki" + suffix, registry);
+         ki = new DoubleParameter("ki" + suffix, registry, 0.0);
          maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
          integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, 1.0);
       }
@@ -47,7 +47,7 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
    {
       super(suffix, defaults, registry);
 
-      ki = new DoubleParameter("ki" + suffix, registry);
+      ki = new DoubleParameter("ki" + suffix, registry, 0.0);
       maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, Double.POSITIVE_INFINITY);
       integralLeakRatio = new DoubleParameter("integralLeakRatio" + suffix, registry, 1.0);
    }
