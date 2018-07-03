@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -15,7 +14,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -74,9 +72,39 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
                                                         simulationTestingParameters, getRobotModel());
    }
+   
+   public void testCloseAndOpenHand() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 5.0;
+
+      double fingerJointQInitial = getTotalFingerJointQ(robotSide);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
+                                                                                                                                                  HandConfiguration.CLOSE), trajectoryTime);
+      
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 10.0);
+      
+      HandDesiredConfigurationBehavior openBehavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
+                                                                                                                                                  HandConfiguration.OPEN), trajectoryTime);
+      
+      drcBehaviorTestHelper.executeBehaviorUntilDone(openBehavior);
+      
+      assertTrue(success);
+      double fingerJointQFinal = getTotalFingerJointQ(robotSide);
+
+      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
+      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
+
+      assertTrue(fingerJointQFinal > fingerJointQInitial);
+      assertTrue(behavior.isDone());
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -103,8 +131,6 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -145,8 +171,6 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
