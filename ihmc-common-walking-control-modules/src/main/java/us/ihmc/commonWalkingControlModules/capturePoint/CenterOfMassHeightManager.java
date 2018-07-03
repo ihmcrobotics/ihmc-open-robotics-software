@@ -22,7 +22,6 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -54,8 +53,6 @@ public class CenterOfMassHeightManager
 
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
-
-   private final DoubleProvider maximumComVelocity = new DoubleParameter("maximumVelocityComHeight", registry, 0.25);
 
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
@@ -268,9 +265,9 @@ public class CenterOfMassHeightManager
       return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
-   public void setComHeightGains(PIDGainsReadOnly gains)
+   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity, PIDGainsReadOnly userModeComHeightGains)
    {
-      pelvisHeightControlState.setGains(gains);
-      centerOfMassHeightControlState.setGains(gains, maximumComVelocity);
+      pelvisHeightControlState.setGains(userModeComHeightGains);
+      centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
    }
 }
