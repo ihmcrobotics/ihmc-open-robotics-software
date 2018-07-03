@@ -13,14 +13,13 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements RobotController
 {
-   private final String name = getClass().getSimpleName();
+   private final String name;
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
@@ -36,11 +35,12 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       JOINTSPACE
    }
 
-   public ProposedValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, EnumMap<T, DoubleProvider> fingerControlSpaceMap,
+   public ProposedValkyrieFingerSetController(String suffix, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
                                               YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;
-      registry = new YoVariableRegistry(this.robotSide.getCamelCaseName() + name);
+      name = robotSide.getLowerCaseName() + suffix;
+      registry = new YoVariableRegistry(name);
 
       trajectoryGenerators = new HashMap<String, MultipleWaypointsTrajectoryGenerator>();
       this.fingerControlSpace = new HashMap<String, SettableDoubleProvider>();
@@ -156,7 +156,7 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
    public void setDesired(String controlSpaceName, double time, double delayTime, double goal)
    {
       String controlSpaceNameWithRobotSide = robotSide.getLowerCaseName() + controlSpaceName;
-      
+
       trajectoryGenerators.get(controlSpaceNameWithRobotSide).clear();
       trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(delayTime, fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue(), 0.0);
       trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(delayTime + time, goal, 0.0);
