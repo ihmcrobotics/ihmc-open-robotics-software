@@ -22,5 +22,15 @@ And to run the container after building:
 $ docker run -it ros2_ihmc_runtime:ardent /bin/bash 
 ```
 
+### Trying out some examples
+
+```bash
+$ ros2 run ihmc_demo_py rcd_pub
+```
+
+```bash
+$ ros2 run ihmc_demo_py rcd_sub
+```
+
 ### Generating Messages
 `gradle generateMessages`

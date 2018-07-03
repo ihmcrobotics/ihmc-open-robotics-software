@@ -62,9 +62,17 @@ ARG ROS_VERSION_ARG
 
 ENV ROS_VERSION ${ROS_VERSION_ARG}
 
+WORKDIR /root/ihmc_ros2_ws/
+
+# Compile ihmc controller messages
 COPY src/main/messages/ihmc_interfaces/controller_msgs /root/ihmc_ros2_ws/src/controller_msgs
 
-WORKDIR /root/ihmc_ros2_ws/
+RUN /bin/bash -c "source /opt/ros/${ROS_VERSION}/setup.bash \
+                  && source /root/ros2_ws/install/local_setup.bash\
+                  && ament build --cmake-args -DCMAKE_BUILD_TYPE=Release"
+
+# Compile ihmc python demo
+COPY src/ihmc_demo_py /root/ihmc_ros2_ws/src/ihmc_demo_py
 
 RUN /bin/bash -c "source /opt/ros/${ROS_VERSION}/setup.bash \
                   && source /root/ros2_ws/install/local_setup.bash\
