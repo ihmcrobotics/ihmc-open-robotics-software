@@ -18,14 +18,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -45,8 +42,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class CenterOfMassHeightManager
 {
-   public static final String CONTROLLER_GAIN_SUFFIX = "_CoMHeight";
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
    private final YoEnum<PelvisHeightControlMode> requestedState;
@@ -60,7 +55,7 @@ public class CenterOfMassHeightManager
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
 
-   private final YoPDGains comHeightGains;
+   private final DoubleProvider maximumComVelocity = new DoubleParameter("maximumVelocityComHeight", registry, 0.25);
 
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
@@ -73,23 +68,11 @@ public class CenterOfMassHeightManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
-      PDGains defaultGains = walkingControllerParameters.getCoMHeightControlGains();
-      comHeightGains = new YoPDGains(CONTROLLER_GAIN_SUFFIX, registry);
-      comHeightGains.createDerivativeGainUpdater(true);
-      comHeightGains.set(defaultGains);
-
-      // Some nasty copying: there is a gain frame issue in the feedback controller so we turn the height gain into a symmetric 3D gain.
-      DefaultPID3DGains defaultGains3D = new DefaultPID3DGains();
-      defaultGains3D.setProportionalGains(defaultGains.getKp());
-      defaultGains3D.setDampingRatios(defaultGains.getZeta());
-      defaultGains3D.setMaxFeedbackAndFeedbackRate(defaultGains.getMaximumFeedback(), defaultGains.getMaximumFeedbackRate());
-      ParameterizedPID3DGains gains3D = new ParameterizedPID3DGains("UserPelvisHeight", GainCoupling.XYZ, false, defaultGains3D, registry);
-
       // User mode
-      pelvisHeightControlState = new PelvisHeightControlState(gains3D, controllerToolbox, walkingControllerParameters, registry);
+      pelvisHeightControlState = new PelvisHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
       // Normal control during walking
-      centerOfMassHeightControlState = new CenterOfMassHeightControlState(comHeightGains, controllerToolbox, walkingControllerParameters, registry);
+      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
       enableUserPelvisControlDuringWalking.set(false);
@@ -285,8 +268,9 @@ public class CenterOfMassHeightManager
       return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
-   public YoPDGains getComHeightGains()
+   public void setComHeightGains(PIDGainsReadOnly gains)
    {
-      return comHeightGains;
+      pelvisHeightControlState.setGains(gains);
+      centerOfMassHeightControlState.setGains(gains, maximumComVelocity);
    }
 }

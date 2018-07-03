@@ -27,7 +27,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AbstractPDController;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricPID3DGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -71,7 +72,9 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final YoDouble desiredPelvisVelocityInWorld;
    private final YoDouble currentPelvisVelocityInWorld;
 
-   public PelvisHeightControlState(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   private final SymmetricPID3DGains symmetric3DGains = new SymmetricPID3DGains();
+
+   public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -84,13 +87,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      DoubleProvider proportionalGain = () -> gains.getProportionalGains()[2];
-      DoubleProvider derivativeGain = () -> gains.getDerivativeGains()[2];
+      DoubleProvider proportionalGain = () -> symmetric3DGains.getProportionalGains()[2];
+      DoubleProvider derivativeGain = () -> symmetric3DGains.getDerivativeGains()[2];
       linearMomentumZPDController = AbstractPDController.createPDController("pelvisHeightControlState_linearMomentumZPDController", proportionalGain, derivativeGain, () -> 0.0, registry);
       yoControlFrame =  new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
-      taskspaceControlState.setGains(null, gains);
 
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
       double soleToAnkleZHeight = computeSoleToAnkleMeanZHeight(controllerToolbox, fullRobotModel);
@@ -104,6 +106,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       currentPelvisVelocityInWorld = new YoDouble("currentPelvisVelocityInWorld", registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setGains(PIDGainsReadOnly gains)
+   {
+      symmetric3DGains.setGains(gains);
+      taskspaceControlState.setGains(null, symmetric3DGains);
    }
 
    /**

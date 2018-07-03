@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,6 +86,7 @@ public class HighLevelControlManagerFactory
    private PIDSE3GainsReadOnly swingFootGains;
    private PIDSE3GainsReadOnly holdFootGains;
    private PIDSE3GainsReadOnly toeOffFootGains;
+   private PIDGainsReadOnly comHeightGains;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -126,6 +128,8 @@ public class HighLevelControlManagerFactory
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
       toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
+
+      comHeightGains = new ParameterizedPIDGains("ComHeight", walkingControllerParameters.getCoMHeightControlGains(), registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -168,6 +172,7 @@ public class HighLevelControlManagerFactory
       Vector3DReadOnly pelvisLinearWeight = taskspaceAngularWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
+      centerOfMassHeightManager.setComHeightGains(comHeightGains);
       return centerOfMassHeightManager;
    }
 
