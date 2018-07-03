@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -24,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.AbstractPDController;
+import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,7 +31,6 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -62,7 +60,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightVelocityAfterSmoothing = new YoDouble("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
-   private final AbstractPDController centerOfMassHeightController;
+   private final PDControllerWithGainSetter centerOfMassHeightController;
 
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -72,8 +70,9 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final double gravity;
    private final RigidBody pelvis;
 
-   public CenterOfMassHeightControlState(PDGainsReadOnly comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+
+   public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+                                         YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -89,9 +88,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       controlPelvisHeightInsteadOfCoMHeight.set(true);
 
       double controlDT = controllerToolbox.getControlDT();
-      DoubleProvider maximumComVelocity = new DoubleParameter("maximumVelocity" + CenterOfMassHeightManager.CONTROLLER_GAIN_SUFFIX, parentRegistry, 0.25);
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(maximumComVelocity, comHeightGains::getMaximumFeedback, comHeightGains::getMaximumFeedbackRate, controlDT, registry);
-      centerOfMassHeightController = AbstractPDController.createPDController("CoMHeight", comHeightGains::getKp, comHeightGains::getKd, () -> 0.0, registry);
+      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
+      centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -302,5 +300,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(desiredCenterOfMassHeightPoint);
+   }
+
+   public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
+   {
+      centerOfMassHeightController.setGains(gains);
+      coMHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
    }
 }

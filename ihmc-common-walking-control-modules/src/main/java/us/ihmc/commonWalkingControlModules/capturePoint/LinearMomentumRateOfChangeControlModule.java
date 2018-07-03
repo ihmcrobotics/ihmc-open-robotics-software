@@ -45,9 +45,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final YoFrameVector3D controlledCoMAcceleration;
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
-   private final SelectionMatrix6D linearXYSelectionMatrix = new SelectionMatrix6D();
-   private final SelectionMatrix6D linearXYAndAngularZSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    protected double omega0 = 0.0;
    private double totalMass;
@@ -104,16 +102,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       yoSafeAreaPolygon = new YoFrameConvexPolygon2D("yoSafeAreaPolygon", worldFrame, 10, registry);
       yoProjectionPolygon = new YoFrameConvexPolygon2D("yoProjectionPolygon", worldFrame, 10, registry);
-
-      linearAndAngularZSelectionMatrix.selectAngularX(false);
-      linearAndAngularZSelectionMatrix.selectAngularY(false);
-
-      linearXYSelectionMatrix.setToLinearSelectionOnly();
-      linearXYSelectionMatrix.selectLinearZ(false); // remove height
-
-      linearXYAndAngularZSelectionMatrix.setToLinearSelectionOnly();
-      linearXYAndAngularZSelectionMatrix.selectLinearZ(false); // remove height
-      linearXYAndAngularZSelectionMatrix.selectAngularZ(true);
 
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
@@ -299,20 +287,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
       linearMomentumRateOfChange.changeFrame(worldFrame);
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
 
-      if (minimizeAngularMomentumRateZ.getBooleanValue())
-      {
-         if (!controlHeightWithMomentum)
-            momentumRateCommand.setSelectionMatrix(linearXYAndAngularZSelectionMatrix);
-         else
-            momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
-      }
-      else
-      {
-         if (!controlHeightWithMomentum)
-            momentumRateCommand.setSelectionMatrix(linearXYSelectionMatrix);
-         else
-            momentumRateCommand.setSelectionMatrixForLinearControl();
-      }
+      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+      selectionMatrix.selectAngularZ(minimizeAngularMomentumRateZ.getBooleanValue());
+      momentumRateCommand.setSelectionMatrix(selectionMatrix);
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
