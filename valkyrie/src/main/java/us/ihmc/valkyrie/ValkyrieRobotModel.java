@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
@@ -56,6 +57,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
+import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -427,8 +429,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          RealtimeRos2Node realtimeRos2Node,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      return null;
-      //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
+      return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+                                                   ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                   ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
 
    @Override
