@@ -6,6 +6,8 @@ import Jama.Matrix;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
 import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
@@ -49,44 +51,12 @@ public class CoMHeightTimeDerivativesSmoother
    private final YoDouble eigenValueThreeReal = new YoDouble("eigenValueThreeReal", registry);
    private final YoDouble eigenValueThreeImag = new YoDouble("eigenValueThreeImag", registry);
 
-   private final DoubleProvider maximumVelocity;
-   private final DoubleProvider maximumAcceleration;
-   private final DoubleProvider maximumJerk;
+   private PDGainsReadOnly gains;
+   private DoubleProvider maximumVelocity;
 
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
-      this(null, null, null, dt, parentRegistry);
-   }
-
-   public CoMHeightTimeDerivativesSmoother(DoubleProvider maximumVelocity, DoubleProvider maximumAcceleration, DoubleProvider maximumJerk, double dt,
-         YoVariableRegistry parentRegistry)
-   {
       this.dt = dt;
-
-      if (maximumVelocity == null)
-      {
-         YoDouble yoMaximumVelocity = new YoDouble("comHeightMaxVelocity", registry);
-         yoMaximumVelocity.set(0.25); // Tried 0.25 on the real robot, looked good but need to be well tested.
-         maximumVelocity = yoMaximumVelocity;
-      }
-
-      if (maximumAcceleration == null)
-      {
-         YoDouble yoMaximumAcceleration = new YoDouble("comHeightMaxAcceleration", registry);
-         yoMaximumAcceleration.set(0.5 * 9.81);
-         maximumAcceleration = yoMaximumAcceleration;
-      }
-
-      if (maximumJerk == null)
-      {
-         YoDouble yoMaximumJerk = new YoDouble("comHeightMaxJerk", registry);
-         yoMaximumJerk.set(0.5 * 9.81 / 0.05);
-         maximumJerk = yoMaximumJerk;
-      }
-
-      this.maximumVelocity = maximumVelocity;
-      this.maximumAcceleration = maximumAcceleration;
-      this.maximumJerk = maximumJerk;
 
       //      comHeightGain.set(200.0); // * 0.001/dt); //200.0;
       //      comHeightVelocityGain.set(80.0); // * 0.001/dt); // 80.0;
@@ -101,6 +71,8 @@ public class CoMHeightTimeDerivativesSmoother
       computeEigenvalues();
 
       hasBeenInitialized.set(false);
+
+      createDefaultGains();
    }
 
    public void computeGainsByPolePlacement(double w0, double w1, double zeta1)
@@ -164,12 +136,12 @@ public class CoMHeightTimeDerivativesSmoother
 
       double jerk = comHeightAccelerationGain.getDoubleValue() * accelerationError + comHeightVelocityGain.getDoubleValue() * velocityError
             + comHeightGain.getDoubleValue() * heightError;
-      jerk = MathTools.clamp(jerk, -maximumJerk.getValue(), maximumJerk.getValue());
+      jerk = MathTools.clamp(jerk, gains.getMaximumFeedbackRate());
 
       smoothComHeightJerk.set(jerk);
 
       smoothComHeightAcceleration.add(jerk * dt);
-      smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getValue()));
+      smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), gains.getMaximumFeedback()));
 
       double newSmoothComHeightVelocity = smoothComHeightVelocity.getDoubleValue();
       newSmoothComHeightVelocity += smoothComHeightAcceleration.getDoubleValue() * dt;
@@ -200,5 +172,20 @@ public class CoMHeightTimeDerivativesSmoother
    public void reset()
    {
       hasBeenInitialized.set(false);
+   }
+
+   public void setGains(PDGainsReadOnly gains, DoubleProvider maximumVelocity)
+   {
+      this.gains = gains;
+      this.maximumVelocity = maximumVelocity;
+   }
+
+   public void createDefaultGains()
+   {
+      PDGains gains = new PDGains();
+      gains.setMaximumFeedback(0.5 * 9.81);
+      gains.setMaximumFeedbackRate(0.5 * 9.81 / 0.05);
+      DoubleProvider maxVelocity = () -> 0.25;
+      setGains(gains, maxVelocity);
    }
 }
