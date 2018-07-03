@@ -117,6 +117,8 @@ public class StepGeneratorJavaFXController
    private static final double closestDistanceToCliff = 0.05;
    private static final double cliffHeightToAvoid = 0.05;
    private static final double wiggleInsideDelta = 0.03;
+   private static final double maxPlanarRegionAngle = Math.toRadians(25.0); // 0 degrees being a vertical normal
+   private static final double minPlanarRegionArea = 0.1;
 
    public enum SecondaryControlOption
    {
@@ -160,7 +162,7 @@ public class StepGeneratorJavaFXController
       maxStepWidth = steppingParameters.getMaxStepWidth();
       maxAngleTurnInwards = steppingParameters.getMaxAngleTurnInwards();
       maxAngleTurnOutwards = steppingParameters.getMaxAngleTurnOutwards();
-      
+
       snapAndWiggleSingleStep.getWiggleParameters().deltaInside = wiggleInsideDelta;
 
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
@@ -242,6 +244,10 @@ public class StepGeneratorJavaFXController
 
       if (planarRegionsList != null)
       {
+         planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getConvexHull().getArea() < minPlanarRegionArea);
+         planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getNormal().getZ() < Math.cos(maxPlanarRegionAngle));
+
+         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
          if (isOnBoundaryOfPlanarRegions(planarRegionsList, footPolygonToWiggle, wiggledPose))
          {
