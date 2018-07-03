@@ -56,7 +56,7 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedInitialPositionParameters initialPositionParameters = new GenericQuadrupedDefaultInitialPosition();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
-      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
+      StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
