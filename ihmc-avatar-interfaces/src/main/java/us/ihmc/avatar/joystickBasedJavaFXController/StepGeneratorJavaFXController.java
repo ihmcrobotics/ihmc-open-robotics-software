@@ -116,6 +116,7 @@ public class StepGeneratorJavaFXController
    private static final double wiggleInWrongDirectionThreshold = 0.04;
    private static final double closestDistanceToCliff = 0.05;
    private static final double cliffHeightToAvoid = 0.05;
+   private static final double wiggleInsideDelta = 0.03;
 
    public enum SecondaryControlOption
    {
@@ -160,7 +161,7 @@ public class StepGeneratorJavaFXController
       maxAngleTurnInwards = steppingParameters.getMaxAngleTurnInwards();
       maxAngleTurnOutwards = steppingParameters.getMaxAngleTurnOutwards();
       
-      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = 0.05;
+      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = wiggleInsideDelta;
 
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
@@ -262,7 +263,7 @@ public class StepGeneratorJavaFXController
             if (!wiggledPose.containsNaN())
             {
                result = checkAndHandleTopOfCliff(adjustedBasedOnStanceFoot, wiggledPose, footSide);
-               result = checkAndHandleBottomOfCliff(planarRegionsList, wiggledPose, footPolygons.get(footSide));
+               result = checkAndHandleBottomOfCliff(planarRegionsList, result);
             }
          }
          catch (SnappingFailedException e)
@@ -326,7 +327,7 @@ public class StepGeneratorJavaFXController
       if(projectionScale < - wiggleInWrongDirectionThreshold)
       {
          FramePose3D shiftedPose = new FramePose3D(inputPose);
-         desiredHeading.scale(footLength);
+         desiredHeading.scale(footLength + snapAndWiggleSingleStep.getWiggleParameters().deltaInside);
          shiftedPose.prependTranslation(desiredHeading.getX(), desiredHeading.getY(), 0.0);
          snapAndWiggleSingleStep.snapAndWiggle(shiftedPose, footPolygons.get(footSide));
          return shiftedPose;
@@ -337,7 +338,7 @@ public class StepGeneratorJavaFXController
       }
    }
 
-   private FramePose3D checkAndHandleBottomOfCliff(PlanarRegionsList planarRegionsList, FramePose3D footPose, ConvexPolygon2DReadOnly footPolygon)
+   private FramePose3D checkAndHandleBottomOfCliff(PlanarRegionsList planarRegionsList, FramePose3D footPose)
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       footPose.get(soleTransform);
