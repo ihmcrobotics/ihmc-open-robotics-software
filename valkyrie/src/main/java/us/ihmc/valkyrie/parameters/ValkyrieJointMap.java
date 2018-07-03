@@ -21,7 +21,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -38,9 +37,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
    private final NeckJointName[] neckJoints = { NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH };
-   private final ValkyrieHandJointName[] lastFingerJoints = {ValkyrieHandJointName.ThumbPitch3, ValkyrieHandJointName.IndexFingerPitch3,
-         ValkyrieHandJointName.MiddleFingerPitch3, ValkyrieHandJointName.PinkyPitch3};
-   
+
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
 
@@ -287,9 +284,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
       for (RobotSide robotSide : RobotSide.values)
-         for (int i = 0; i < lastFingerJoints.length; i++)
-            lastSimulatedJoints.add(robotSide.getLowerCaseName() + lastFingerJoints[i].name());
-
+         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
       return lastSimulatedJoints;
    }
 

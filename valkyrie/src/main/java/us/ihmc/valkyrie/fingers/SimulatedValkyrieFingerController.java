@@ -15,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -58,8 +57,6 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
 
    private final SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = new SideDependentList<>();
 
-   private final YoPIDGains gains = new YoPIDGains("Hand", registry);
-
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
                                             RealtimeRos2Node realtimeRos2Node, CloseableAndDisposableRegistry closeableAndDisposableRegistry,
                                             DRCRobotModel robotModel, MessageTopicNameGenerator pubTopicNameGenerator,
@@ -79,10 +76,6 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       {
          jointAngleProducer = null;
       }
-
-      gains.setKp(5.0);
-      gains.setKi(1.0);
-      gains.setKd(1.0);
 
       // ValkyrieFingerSetController
       for (RobotSide robotSide : RobotSide.values)
@@ -194,9 +187,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
          for (int i = 0; i < oneSideFingerJoints.size(); i++)
          {
             OneDegreeOfFreedomJoint joint = oneSideFingerJoints.get(i);
-            joint.setKp(gains.getKp());
-            joint.setKd(gains.getKd());
-            joint.setqDesired(fingerSetControllers.get(robotSide).getDesired(joint.getName()));
+            double desiredQ = fingerSetControllers.get(robotSide).getDesired(joint.getName());
+            joint.getQYoVariable().set(desiredQ);
          }
       }
    }
@@ -291,7 +283,6 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
 
                break;
             }
-
          }
       }
    }

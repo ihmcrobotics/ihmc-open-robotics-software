@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -522,141 +521,16 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
             }
          }
 
-         double modifiedFingerLinkMass = 0.01;
-         double ixx = 0.005;
-         double ixy = 0.0001;
-         double ixz = 0.0001;
-         double iyy = 0.001;
-         double iyz = 0.0001;
-         double izz = 0.003;
-
-         Matrix3D fingerLinkInertia = new Matrix3D(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz);
          switch (linkHolder.getName())
          {
          case "hokuyo_link":
             modifyHokuyoInertia(linkHolder);
             break;
-         case "leftIndexFingerPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftIndexFingerPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftIndexFingerPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftMiddleFingerPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftMiddleFingerPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftMiddleFingerPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftPinkyPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftPinkyPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftPinkyPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftThumbRollLink":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftThumbPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftThumbPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "leftThumbPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-
-         case "rightIndexFingerPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightIndexFingerPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightIndexFingerPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightMiddleFingerPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightMiddleFingerPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightMiddleFingerPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightPinkyPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightPinkyPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightPinkyPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightThumbRollLink":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightThumbPitch1Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightThumbPitch2Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-         case "rightThumbPitch3Link":
-            modifyLinkMass(linkHolder, modifiedFingerLinkMass);
-            modifyLinkInertia(linkHolder, fingerLinkInertia);
-            break;
-
          default:
             break;
          }
 
       }
-   }
-
-   private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3D inertia)
-   {
-      linkHolder.setInertia(inertia);
-   }
-
-   private void modifyLinkMass(SDFLinkHolder linkHolder, double mass)
-   {
-      linkHolder.setMass(mass);
    }
 
    @Override
