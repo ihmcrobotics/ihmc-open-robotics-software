@@ -88,7 +88,7 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.22.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: "source"
