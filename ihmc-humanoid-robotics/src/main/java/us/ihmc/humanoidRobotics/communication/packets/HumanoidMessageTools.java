@@ -44,6 +44,7 @@ import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
@@ -296,6 +297,19 @@ public class HumanoidMessageTools
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+   
+   /**
+    * User will send desired trajectories for each finger.
+    * The region of trajectories is 0 to 1.
+    */
+   public static HandFingerTrajectoryMessage createHandFingerTrajectoryMessage(RobotSide robotSide,
+                                                                               OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
+   {
+      HandFingerTrajectoryMessage message = new HandFingerTrajectoryMessage();
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(jointTrajectory1DListMessages));
       message.setRobotSide(robotSide.toByte());
       return message;
    }
