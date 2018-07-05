@@ -1,0 +1,68 @@
+#ifndef __controller_msgs__msg__ValkyrieHandFingerTrajectoryMessage__idl__
+#define __controller_msgs__msg__ValkyrieHandFingerTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * This message commands the finger controller to move robot valkyrie finger.
+       */
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      const octet THUMB_MOTOR_ROLL =
+      0;
+
+      const octet THUMB_MOTOR_PITCH1 =
+      1;
+
+      const octet THUMB_MOTOR_PITCH2 =
+      2;
+
+      const octet INDEX_FINGER_MOTOR_PITCH1 =
+      3;
+
+      const octet MIDDLE_FINGER_MOTOR_PITCH1 =
+      4;
+
+      const octet PINKY_MOTOR_PITCH1 =
+      5;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::ValkyrieHandFingerTrajectoryMessage_")
+      struct ValkyrieHandFingerTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the side of the robot that will execute the trajectory.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Specifies the list of finger motor names that we want to control.
+         */
+        sequence<octet> finger_motor_names;
+        /**
+         * The indexing for the joints refers the list of finger motor names.
+         */
+        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
+        /**
+         * The list of times for trajectory execution delay.
+         */
+        sequence<double> delay_times;
+      };
+    };
+  };
+};
+
+#endif

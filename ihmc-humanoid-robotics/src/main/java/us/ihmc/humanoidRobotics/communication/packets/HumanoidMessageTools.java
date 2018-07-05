@@ -44,7 +44,6 @@ import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
@@ -77,7 +76,6 @@ import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.QueueableMessage;
 import controller_msgs.msg.dds.ReachingManifoldMessage;
 import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
@@ -91,6 +89,7 @@ import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StateEstimatorModePacket;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.ValveLocationPacket;
 import controller_msgs.msg.dds.VehiclePosePacket;
 import controller_msgs.msg.dds.VideoPacket;
@@ -302,26 +301,24 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static HandFingerTrajectoryMessage createHandFingerTrajectoryMessage(RobotSide robotSide, double[] trajectoryTimes, double[] desiredJointPositions,
-                                                                               double[] executionDelayTimes)
+   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
+                                                                                               double trajectoryTime, double[] desiredJointPositions,
+                                                                                               double[] executionDelayTimes)
    {
-      HandFingerTrajectoryMessage message = new HandFingerTrajectoryMessage();
+      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
 
       message.setRobotSide(robotSide.toByte());
 
-      for (int jointIndex = 0; jointIndex < trajectoryTimes.length; jointIndex++)
-         message.getJointTrajectoryMessages().add().set(createOneDoFJointTrajectoryMessage(trajectoryTimes[jointIndex], desiredJointPositions[jointIndex]));
+      int dimension = valkyrieFingerMotorNames.length;
 
-      for (int jointIndex = 0; jointIndex < trajectoryTimes.length; jointIndex++)
-         message.getListQueueingProperties().add().set(createQueueableMessage(executionDelayTimes[jointIndex]));
+      for (int i = 0; i < dimension; i++)
+         message.getFingerMotorNames().add(valkyrieFingerMotorNames[i]);
 
-      return message;
-   }
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
 
-   public static QueueableMessage createQueueableMessage(double executionDelayTime)
-   {
-      QueueableMessage message = new QueueableMessage();
-      message.setExecutionDelayTime(executionDelayTime);
+      for (int i = 0; i < dimension; i++)
+         message.getDelayTimes().add(desiredJointPositions[i]);
+
       return message;
    }
 
