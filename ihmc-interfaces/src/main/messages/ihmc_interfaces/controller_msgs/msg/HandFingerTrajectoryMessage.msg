@@ -11,5 +11,6 @@ uint32 sequence_id
 byte robot_side 255
 
 # Trajectories for each joint(finger motors).
-# The indexing for the joints is defined in "ValkyrieFingerMotorName".
-JointspaceTrajectoryMessage jointspace_trajectory
+OneDoFJointTrajectoryMessage[] joint_trajectory_messages
+# Properties for queueing trajectories.
+QueueableMessage[] list_queueing_properties

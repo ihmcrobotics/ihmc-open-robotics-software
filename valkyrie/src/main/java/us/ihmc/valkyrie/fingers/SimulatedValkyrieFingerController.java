@@ -5,7 +5,10 @@ import java.util.EnumMap;
 import java.util.List;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -15,6 +18,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
+import us.ihmc.humanoidRobotics.communication.subscribers.HandFingerTrajectoryMessageSubscriber;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,11 +54,12 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoDouble>> sideDependentFingerMotorHandlers = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoDouble>> closedFingerMotorAngles = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
    private final SideDependentList<EnumMap<ValkyrieFingerMotorName, YoDouble>> openedFingerMotorAngles = SideDependentList.createListOfEnumMaps(ValkyrieFingerMotorName.class);
-   
+
    private final double delayTime = 1.0;
    private final double trajectoryTime = 1.0;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
+   private final SideDependentList<HandFingerTrajectoryMessageSubscriber> handFingerTrajectoryMessageSubscribers = new SideDependentList<>();
 
    private final SideDependentList<ProposedValkyrieFingerSetController<ValkyrieHandJointName>> handJointFingerSetControllers = new SideDependentList<>();
    private final SideDependentList<ProposedValkyrieFingerSetController<ValkyrieFingerMotorName>> fingerSetControllers = new SideDependentList<>();
@@ -131,10 +137,15 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       {
          HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
          handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
+
+         HandFingerTrajectoryMessageSubscriber handFingerTrajectoryMessageSubscriber = new HandFingerTrajectoryMessageSubscriber(robotSide);
+         handFingerTrajectoryMessageSubscribers.put(robotSide, handFingerTrajectoryMessageSubscriber);
          if (realtimeRos2Node != null)
          {
             ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
                                                  handDesiredConfigurationSubscriber);
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandFingerTrajectoryMessage.class, subTopicNameGenerator,
+                                                 handFingerTrajectoryMessageSubscriber);
          }
       }
       constructDesiredHandFingerJointMap();
@@ -156,7 +167,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             closedAngle.set(ValkyrieFingerControlParameters.getClosedDesiredHandJointDefinition(robotSide).get(jointEnum));
             closedHandJointAngles.get(robotSide).put(jointEnum, closedAngle);
          }
-         
+
          openedFingerMotorAngles.put(robotSide, new EnumMap<>(ValkyrieFingerMotorName.class));
          closedFingerMotorAngles.put(robotSide, new EnumMap<>(ValkyrieFingerMotorName.class));
          for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
@@ -169,7 +180,6 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             closedAngle.set(ValkyrieFingerControlParameters.getClosedDesiredDefinition(robotSide).get(jointEnum));
             closedFingerMotorAngles.get(robotSide).put(jointEnum, closedAngle);
          }
-         
       }
    }
 
@@ -203,6 +213,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    public void run()
    {
       checkForNewHandDesiredConfigurationRequested();
+      checkForNewHandFingerTrajectoryRequested();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -310,7 +321,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                      delayTime = this.delayTime;
                   else
                      delayTime = 0.0;
-                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName.toString(), trajectoryTime, delayTime, closedAnglesMap.get(fingerMotorName).getDoubleValue());
+                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName.toString(), trajectoryTime, delayTime,
+                                                                 closedAnglesMap.get(fingerMotorName).getDoubleValue());
                }
 
                break;
@@ -337,12 +349,44 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                      delayTime = 0.0;
                   else
                      delayTime = this.delayTime;
-                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName.toString(), trajectoryTime, delayTime, openedAnglesMap.get(fingerMotorName).getDoubleValue());
+                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName.toString(), trajectoryTime, delayTime,
+                                                                 openedAnglesMap.get(fingerMotorName).getDoubleValue());
                }
                break;
             default:
 
                break;
+            }
+         }
+      }
+   }
+
+   private void checkForNewHandFingerTrajectoryRequested()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (handFingerTrajectoryMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
+         {
+            EnumMap<ValkyrieFingerMotorName, Double> desiredPositionMap = new EnumMap<>(ValkyrieFingerMotorName.class);
+            EnumMap<ValkyrieFingerMotorName, Double> trajectoryTimeMap = new EnumMap<>(ValkyrieFingerMotorName.class);
+            EnumMap<ValkyrieFingerMotorName, Double> delayTimeMap = new EnumMap<>(ValkyrieFingerMotorName.class);
+
+            HandFingerTrajectoryMessage handFingerTrajectoryMessage = handFingerTrajectoryMessageSubscribers.get(robotSide).pollMessage();
+            ValkyrieFingerMotorName[] valkyrieFingerMotorNames = ValkyrieFingerMotorName.values;
+            Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointTrajectoryMessages();
+            for (int i = 0; i < jointTrajectoryMessages.size(); i++)
+            {
+               Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(i).getTrajectoryPoints();
+
+               desiredPositionMap.put(valkyrieFingerMotorNames[i], trajectoryPoints.get(0).getPosition());
+               trajectoryTimeMap.put(valkyrieFingerMotorNames[i], trajectoryPoints.get(0).getTime());
+               delayTimeMap.put(valkyrieFingerMotorNames[i], handFingerTrajectoryMessage.getListQueueingProperties().get(i).getExecutionDelayTime());
+            }
+
+            for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+            {
+               fingerSetControllers.get(robotSide).setDesired(fingerMotorName.getJointName(robotSide), trajectoryTimeMap.get(fingerMotorName),
+                                                              delayTimeMap.get(fingerMotorName), desiredPositionMap.get(fingerMotorName));
             }
          }
       }
