@@ -56,6 +56,8 @@ task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
    tag = "ihmc/ros1-bridge-build"
 }
 
+def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
+
 task generateMessages {
    doFirst {
       delete("src/main/generated-idl")
@@ -73,10 +75,9 @@ task generateMessages {
 
       if (!foundDependency)
       {
-         throw new GradleException("Could not find ros2-common-interfaces in configurations.compile!")
+         throw new org.gradle.api.GradleException("Could not find ros2-common-interfaces in configurations.compile!")
       }
 
-      def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
 
       generator.addPackageRoot(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath());
       generator.addPackageRoot(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath());
