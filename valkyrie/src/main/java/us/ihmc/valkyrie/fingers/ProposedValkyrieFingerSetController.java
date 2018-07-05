@@ -155,7 +155,6 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
 
    public void setDesired(String controlSpaceName, double time, double delayTime, double goal)
    {
-      //String controlSpaceNameWithRobotSide = robotSide.getLowerCaseName() + controlSpaceName;
       String controlSpaceNameWithRobotSide = controlSpaceName;
 
       trajectoryGenerators.get(controlSpaceNameWithRobotSide).clear();
@@ -165,9 +164,26 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
 
       requestedState.set(TrajectoryGeneratorMode.JOINTSPACE);
    }
+   
+   public void setStop(String controlSpaceName, double current)
+   {
+      String controlSpaceNameWithRobotSide = controlSpaceName;
+
+      trajectoryGenerators.get(controlSpaceNameWithRobotSide).clear();
+      trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(0.0, fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue(), 0.0);
+      
+      trajectoryGenerators.get(controlSpaceNameWithRobotSide).initialize();
+
+      requestedState.set(TrajectoryGeneratorMode.JOINTSPACE);
+   }
 
    public double getDesired(String controlSpaceNameWithRobotSide)
    {
       return fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue();
+   }
+   
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
    }
 }

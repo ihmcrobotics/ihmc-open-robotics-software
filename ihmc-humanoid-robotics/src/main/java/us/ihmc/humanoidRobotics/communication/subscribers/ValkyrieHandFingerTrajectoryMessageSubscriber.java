@@ -2,28 +2,28 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller_msgs.msg.dds.HandFingerTrajectoryMessage;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
 
-public class HandFingerTrajectoryMessageSubscriber implements NewMessageListener<HandFingerTrajectoryMessage>
+public class ValkyrieHandFingerTrajectoryMessageSubscriber implements NewMessageListener<ValkyrieHandFingerTrajectoryMessage>
 {
-   private final ConcurrentLinkedQueue<HandFingerTrajectoryMessage> messageQueue = new ConcurrentLinkedQueue<HandFingerTrajectoryMessage>();
+   private final ConcurrentLinkedQueue<ValkyrieHandFingerTrajectoryMessage> messageQueue = new ConcurrentLinkedQueue<ValkyrieHandFingerTrajectoryMessage>();
    private RobotSide robotSide;
 
-   public HandFingerTrajectoryMessageSubscriber(RobotSide robotSide)
+   public ValkyrieHandFingerTrajectoryMessageSubscriber(RobotSide robotSide)
    {
       this.robotSide = robotSide;
    }
 
    @Override
-   public void onNewDataMessage(Subscriber<HandFingerTrajectoryMessage> subscriber)
+   public void onNewDataMessage(Subscriber<ValkyrieHandFingerTrajectoryMessage> subscriber)
    {
       receivedPacket(subscriber.takeNextData());
    }
 
-   public void receivedPacket(HandFingerTrajectoryMessage ihmcMessage)
+   public void receivedPacket(ValkyrieHandFingerTrajectoryMessage ihmcMessage)
    {
       if (this.robotSide == null)
          messageQueue.add(ihmcMessage);
@@ -31,7 +31,7 @@ public class HandFingerTrajectoryMessageSubscriber implements NewMessageListener
          messageQueue.add(ihmcMessage);
    }
 
-   public HandFingerTrajectoryMessage pollMessage()
+   public ValkyrieHandFingerTrajectoryMessage pollMessage()
    {
       return messageQueue.poll();
    }

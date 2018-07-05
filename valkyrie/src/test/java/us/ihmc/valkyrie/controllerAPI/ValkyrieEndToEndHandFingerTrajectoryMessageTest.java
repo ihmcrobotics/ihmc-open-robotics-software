@@ -2,20 +2,18 @@ package us.ihmc.valkyrie.controllerAPI;
 
 import org.junit.Test;
 
-import controller_msgs.msg.dds.HandFingerTrajectoryMessage;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerControlParameters;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerMotorName;
+import us.ihmc.valkyrie.fingers.ValkyrieHandFingerTrajectoryMessageConversion;
 
 public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHandFingerTrajectoryMessageTest
 {
@@ -36,45 +34,34 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
-   public void testMessageConverter() throws SimulationExceededMaximumTimeException
+   public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
    {
-      super.testMessageConverter();
+      super.testCloseAndStopAndOpen();
+   }
+   
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   public void testBasicGrip() throws SimulationExceededMaximumTimeException
+   {
+      super.testBasicGrip();
+   }
+   
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
+   {
+      super.testCloseAndOpenFingers();
    }
 
    @Override
-   public HandFingerTrajectoryMessage createHandFingerTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
+   public Packet<?> createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
    {
-      ValkyrieFingerMotorName[] valkyrieFingerMotorNames = ValkyrieFingerMotorName.values;
-      int numberOfFingerMotors = valkyrieFingerMotorNames.length;
+      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
 
-      double trajectoryTime = 3.0;
-      double delayTime = 2.0;
+      ValkyrieHandFingerTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, message);
 
-      double[] trajectoryTimes = new double[numberOfFingerMotors];
-      double[] desiredJointPositions = new double[numberOfFingerMotors];
-      double[] executionDelayTimes = new double[numberOfFingerMotors];
-
-      for (int i = 0; i < numberOfFingerMotors; i++)
-      {
-         trajectoryTimes[i] = trajectoryTime;
-
-         switch (handConfiguration)
-         {
-         case CLOSE:
-            desiredJointPositions[i] = ValkyrieFingerControlParameters.getClosedDesiredDefinition(robotSide).get(valkyrieFingerMotorNames[i]);
-            if (valkyrieFingerMotorNames[i].getFingerName() == FingerName.THUMB)
-               executionDelayTimes[i] = delayTime;
-            break;
-         case OPEN:
-            desiredJointPositions[i] = ValkyrieFingerControlParameters.getOpenDesiredDefinition(robotSide).get(valkyrieFingerMotorNames[i]);
-            if (valkyrieFingerMotorNames[i].getFingerName() != FingerName.THUMB)
-               executionDelayTimes[i] = delayTime;
-            break;
-         default:
-            break;
-         }
-      }
-
-      return HumanoidMessageTools.createHandFingerTrajectoryMessage(robotSide, trajectoryTimes, desiredJointPositions, executionDelayTimes);
+      return message;
    }
 }
