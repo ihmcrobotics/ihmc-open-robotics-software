@@ -10,13 +10,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ActualCMPComputer extends SimpleRobotController
 {
@@ -25,7 +25,7 @@ public class ActualCMPComputer extends SimpleRobotController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final HumanoidFloatingRootJointRobot simulatedRobot;
+   private final FloatingRootJointRobot simulatedRobot;
    private final double simulateDT;
    private final double gravity;
 
@@ -42,7 +42,7 @@ public class ActualCMPComputer extends SimpleRobotController
 
    private final YoFrameVector2D yoCmp = new YoFrameVector2D("actualCMP", worldFrame, registry);
 
-   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, HumanoidFloatingRootJointRobot simulatedRobot)
+   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, FloatingRootJointRobot simulatedRobot)
    {
       this.simulatedRobot = simulatedRobot;
       simulateDT = scs.getDT();
