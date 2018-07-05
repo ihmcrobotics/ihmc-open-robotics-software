@@ -77,6 +77,7 @@ import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.msg.dds.QueueableMessage;
 import controller_msgs.msg.dds.ReachingManifoldMessage;
 import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
@@ -300,17 +301,27 @@ public class HumanoidMessageTools
       message.setRobotSide(robotSide.toByte());
       return message;
    }
-   
-   /**
-    * User will send desired trajectories for each finger.
-    * The region of trajectories is 0 to 1.
-    */
-   public static HandFingerTrajectoryMessage createHandFingerTrajectoryMessage(RobotSide robotSide,
-                                                                               OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
+
+   public static HandFingerTrajectoryMessage createHandFingerTrajectoryMessage(RobotSide robotSide, double[] trajectoryTimes, double[] desiredJointPositions,
+                                                                               double[] executionDelayTimes)
    {
       HandFingerTrajectoryMessage message = new HandFingerTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(jointTrajectory1DListMessages));
+
       message.setRobotSide(robotSide.toByte());
+
+      for (int jointIndex = 0; jointIndex < trajectoryTimes.length; jointIndex++)
+         message.getJointTrajectoryMessages().add().set(createOneDoFJointTrajectoryMessage(trajectoryTimes[jointIndex], desiredJointPositions[jointIndex]));
+
+      for (int jointIndex = 0; jointIndex < trajectoryTimes.length; jointIndex++)
+         message.getListQueueingProperties().add().set(createQueueableMessage(executionDelayTimes[jointIndex]));
+
+      return message;
+   }
+
+   public static QueueableMessage createQueueableMessage(double executionDelayTime)
+   {
+      QueueableMessage message = new QueueableMessage();
+      message.setExecutionDelayTime(executionDelayTime);
       return message;
    }
 

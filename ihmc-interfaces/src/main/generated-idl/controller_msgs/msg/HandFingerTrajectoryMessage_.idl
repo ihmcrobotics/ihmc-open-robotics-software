@@ -1,7 +1,8 @@
 #ifndef __controller_msgs__msg__HandFingerTrajectoryMessage__idl__
 #define __controller_msgs__msg__HandFingerTrajectoryMessage__idl__
 
-#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./OneDoFJointTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./QueueableMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -33,9 +34,12 @@ module controller_msgs
         octet robot_side;
         /**
          * Trajectories for each joint(finger motors).
-         * The indexing for the joints is defined in "ValkyrieFingerMotorName".
          */
-        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
+        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage> joint_trajectory_messages;
+        /**
+         * Properties for queueing trajectories.
+         */
+        sequence<controller_msgs::msg::dds::QueueableMessage> list_queueing_properties;
       };
     };
   };

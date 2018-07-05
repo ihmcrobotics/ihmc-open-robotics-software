@@ -40,7 +40,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+      //if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }

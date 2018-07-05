@@ -24,13 +24,18 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
    public byte robot_side_ = (byte) 255;
    /**
             * Trajectories for each joint(finger motors).
-            * The indexing for the joints is defined in "ValkyrieFingerMotorName".
             */
-   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  joint_trajectory_messages_;
+   /**
+            * Properties for queueing trajectories.
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueueableMessage>  list_queueing_properties_;
 
    public HandFingerTrajectoryMessage()
    {
-      jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
+      joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
+      list_queueing_properties_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueueableMessage> (100, new controller_msgs.msg.dds.QueueableMessagePubSubType());
+
    }
 
    public HandFingerTrajectoryMessage(HandFingerTrajectoryMessage other)
@@ -45,7 +50,8 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
 
       robot_side_ = other.robot_side_;
 
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
+      joint_trajectory_messages_.set(other.joint_trajectory_messages_);
+      list_queueing_properties_.set(other.list_queueing_properties_);
    }
 
    /**
@@ -81,11 +87,19 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
 
    /**
             * Trajectories for each joint(finger motors).
-            * The indexing for the joints is defined in "ValkyrieFingerMotorName".
             */
-   public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  getJointTrajectoryMessages()
    {
-      return jointspace_trajectory_;
+      return joint_trajectory_messages_;
+   }
+
+
+   /**
+            * Properties for queueing trajectories.
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueueableMessage>  getListQueueingProperties()
+   {
+      return list_queueing_properties_;
    }
 
 
@@ -110,7 +124,20 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
+      if (this.joint_trajectory_messages_.size() != other.joint_trajectory_messages_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.joint_trajectory_messages_.size(); i++)
+         {  if (!this.joint_trajectory_messages_.get(i).epsilonEquals(other.joint_trajectory_messages_.get(i), epsilon)) return false; }
+      }
+
+      if (this.list_queueing_properties_.size() != other.list_queueing_properties_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.list_queueing_properties_.size(); i++)
+         {  if (!this.list_queueing_properties_.get(i).epsilonEquals(other.list_queueing_properties_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -128,7 +155,8 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
+      if (!this.joint_trajectory_messages_.equals(otherMyClass.joint_trajectory_messages_)) return false;
+      if (!this.list_queueing_properties_.equals(otherMyClass.list_queueing_properties_)) return false;
 
       return true;
    }
@@ -143,8 +171,10 @@ public class HandFingerTrajectoryMessage extends Packet<HandFingerTrajectoryMess
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("jointspace_trajectory=");
-      builder.append(this.jointspace_trajectory_);
+      builder.append("joint_trajectory_messages=");
+      builder.append(this.joint_trajectory_messages_);      builder.append(", ");
+      builder.append("list_queueing_properties=");
+      builder.append(this.list_queueing_properties_);
       builder.append("}");
       return builder.toString();
    }

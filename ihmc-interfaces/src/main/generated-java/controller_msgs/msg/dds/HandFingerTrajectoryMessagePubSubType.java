@@ -44,8 +44,12 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -65,7 +69,15 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getJointTrajectoryMessages().size(); ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointTrajectoryMessages().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getListQueueingProperties().size(); ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getListQueueingProperties().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -77,7 +89,14 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
       cdr.write_type_9(data.getRobotSide());
 
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
+      if(data.getJointTrajectoryMessages().size() <= 100)
+      cdr.write_type_e(data.getJointTrajectoryMessages());else
+          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
+
+      if(data.getListQueueingProperties().size() <= 100)
+      cdr.write_type_e(data.getListQueueingProperties());else
+          throw new RuntimeException("list_queueing_properties field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.HandFingerTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -86,7 +105,8 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectory(), cdr);	
+      cdr.read_type_e(data.getJointTrajectoryMessages());	
+      cdr.read_type_e(data.getListQueueingProperties());	
 
    }
 
@@ -95,8 +115,8 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
-
+      ser.write_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
+      ser.write_type_e("list_queueing_properties", data.getListQueueingProperties());
    }
 
    @Override
@@ -104,8 +124,8 @@ public class HandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
-
+      ser.read_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
+      ser.read_type_e("list_queueing_properties", data.getListQueueingProperties());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandFingerTrajectoryMessage src, controller_msgs.msg.dds.HandFingerTrajectoryMessage dest)
