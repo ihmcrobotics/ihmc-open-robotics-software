@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.fingers;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -123,8 +122,6 @@ public class ValkyrieHandFingerTrajectoryMessageConversion
          throw new IllegalArgumentException("Message conversion for the desired HandConfiguration is not implemented");
       }
 
-      PrintTools.info("aa");
-
       if (valkyrieFingerMotorNames != null)
       {
          int dimension = valkyrieFingerMotorNames.length;
@@ -135,7 +132,5 @@ public class ValkyrieHandFingerTrajectoryMessageConversion
             messageToPack.getDelayTimes().add(executionDelayTimes[i]);
          }
       }
-
-      PrintTools.info("packed");
    }
 }
