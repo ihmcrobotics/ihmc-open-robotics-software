@@ -45,7 +45,8 @@ public class QuadrupedMomentumRateOfChangeModule
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentumEstimate = new FrameVector3D();
 
-   private final YoFrameVector3D momentumIntegrationBreakFrequency = new YoFrameVector3D("momentumIntegrationBreakFrequency", worldFrame, registry);
+   // higher leaks to 0
+   private final DoubleParameter momentumIntegrationBreakFrequency = new DoubleParameter("momentumIntegrationBreakFrequency", registry, 0.1);
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final MomentumCommand momentumCommand = new MomentumCommand();
 
@@ -70,9 +71,6 @@ public class QuadrupedMomentumRateOfChangeModule
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();
       mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
       controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
-
-      // higher leaks to 0
-      momentumIntegrationBreakFrequency.set(0.1, 0.1, 0.1);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
@@ -148,9 +146,9 @@ public class QuadrupedMomentumRateOfChangeModule
       linearMomentumEstimate.set(controllerToolbox.getCoMVelocityEstimate());
       linearMomentumEstimate.scale(mass);
 
+      double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getValue(), controlDT);
       for (int i = 0; i < 3; i++)
       {
-         double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getElement(i), controlDT);
          double momentumReference = 0.0;
          double desiredMomentum = linearMomentumToPack.getElement(i);
          desiredMomentum = desiredMomentum * momentumAlpha + (1.0 - momentumAlpha) * momentumReference;

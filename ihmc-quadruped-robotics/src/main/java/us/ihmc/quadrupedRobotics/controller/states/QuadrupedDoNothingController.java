@@ -77,6 +77,8 @@ public class QuadrupedDoNothingController implements QuadrupedController
          OneDoFJoint joint = legJoints.get(i);
          JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          jointDesiredOutput.setDesiredTorque(desiredDoNothingTorques.get(i).getDoubleValue());
+         jointDesiredOutput.setDesiredPosition(joint.getQ());
+         jointDesiredOutput.setDesiredVelocity(joint.getQd());
       }
    }
 
