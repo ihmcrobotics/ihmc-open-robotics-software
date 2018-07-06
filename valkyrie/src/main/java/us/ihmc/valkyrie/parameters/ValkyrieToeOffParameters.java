@@ -22,7 +22,7 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
       // Used to be: target != RobotTarget.REAL_ROBOT;
       // Trying to see if that's really necessary (Sylvain)
       // It delays the toe-off to some extent which can cause some issues.
-      return false;
+      return true;
    }
 
    @Override
