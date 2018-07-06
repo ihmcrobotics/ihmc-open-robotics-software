@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -14,6 +15,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -40,7 +42,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      //if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -73,13 +75,15 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
                                                         simulationTestingParameters, getRobotModel());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 27.7)
+   @Test(timeout = 83115)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      RobotSide robotSide = RobotSide.LEFT;
+      RobotSide robotSide = RobotSide.RIGHT;
       double trajectoryTime = 2.0;
 
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -99,6 +103,8 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 27.7)
+   @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -107,7 +113,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.LEFT;
+      RobotSide robotSide = RobotSide.RIGHT;
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
@@ -139,6 +145,8 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 27.7)
+   @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -147,7 +155,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.LEFT;
+      RobotSide robotSide = RobotSide.RIGHT;
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
