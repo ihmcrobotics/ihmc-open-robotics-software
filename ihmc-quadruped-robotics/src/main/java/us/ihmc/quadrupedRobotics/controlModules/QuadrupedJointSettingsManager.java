@@ -11,10 +11,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedJointSpaceManager
+public class QuadrupedJointSettingsManager
 {
    private static final double VMC_VISCOUS_DAMPING = 1.0;
 
@@ -36,10 +37,14 @@ public class QuadrupedJointSpaceManager
    private final InverseKinematicsCommandList inverseKinematicsCommandList = new InverseKinematicsCommandList();
    private final JointVelocityIntegrationCommand ikJointIntegrationCommand = new JointVelocityIntegrationCommand();
 
-   private final YoDouble ikVelocityIntegrationBreakFrequency = new YoDouble("ikVelocityIntegrationBreakFrequency", registry);
-   private final YoDouble ikAccelerationDifferentiationBreakFrequency = new YoDouble("ikAccelerationDifferentiationBreakFrequency", registry);
+   private final DoubleParameter ikVelocityIntegrationBreakFrequency = new DoubleParameter("ikVelocityIntegrationBreakFrequency", registry, 0.1);
+   private final DoubleParameter ikAccelerationDifferentiationBreakFrequency = new DoubleParameter("ikAccelerationDifferentiationBreakFrequency", registry,
+                                                                                                   5.0);
 
-   public QuadrupedJointSpaceManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   private final DoubleParameter ikMaxJointError = new DoubleParameter("ikMaxJointError", registry, 1.0);
+   private final DoubleParameter ikMaxJointAcceleration = new DoubleParameter("ikMaxJointAcceleration", registry, 100.0);
+
+   public QuadrupedJointSettingsManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       controlledJoints = controllerToolbox.getFullRobotModel().getControllableOneDoFJoints();
 
@@ -52,14 +57,11 @@ public class QuadrupedJointSpaceManager
          ikJointIntegrationCommand.addJointToComputeDesiredPositionFor(controlledJoint);
       }
 
-      ikVelocityIntegrationBreakFrequency.set(0.1);
-      ikAccelerationDifferentiationBreakFrequency.set(5.0);
-
       for (int i = 0; i < ikJointIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
-         ikJointIntegrationCommand.setJointMaxima(i, 1.0, 100.0);
+         ikJointIntegrationCommand.setJointMaxima(i, ikMaxJointError.getValue(), ikMaxJointAcceleration.getValue());
          ikJointIntegrationCommand
-               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getDoubleValue(), ikAccelerationDifferentiationBreakFrequency.getDoubleValue());
+               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getValue(), ikAccelerationDifferentiationBreakFrequency.getValue());
       }
 
       parentRegistry.addChild(registry);
@@ -77,8 +79,9 @@ public class QuadrupedJointSpaceManager
          vmcJointDampingCommand.addJoint(joint, -vmcJointViscousDamping.getDoubleValue() * joint.getQd());
          jointLimitEnforcementCommand.addJoint(joint, jointPositionLimitStiffness.getDoubleValue(), jointPositionLimitDamping.getDoubleValue());
 
+         ikJointIntegrationCommand.setJointMaxima(i, ikMaxJointError.getValue(), ikMaxJointAcceleration.getValue());
          ikJointIntegrationCommand
-               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getDoubleValue(), ikAccelerationDifferentiationBreakFrequency.getDoubleValue());
+               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getValue(), ikAccelerationDifferentiationBreakFrequency.getValue());
       }
    }
 
