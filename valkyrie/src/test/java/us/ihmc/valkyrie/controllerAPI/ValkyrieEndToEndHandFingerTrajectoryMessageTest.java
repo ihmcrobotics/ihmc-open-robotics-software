@@ -54,6 +54,14 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    {
       super.testCloseAndOpenFingers();
    }
+   
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   public void testClose() throws SimulationExceededMaximumTimeException
+   {
+      super.testClose();
+   }
 
    @Override
    public Packet<?> createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)

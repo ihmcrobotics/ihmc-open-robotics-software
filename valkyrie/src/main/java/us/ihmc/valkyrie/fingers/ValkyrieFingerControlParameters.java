@@ -114,4 +114,28 @@ public class ValkyrieFingerControlParameters
    {
       return closedDesiredHandJointDefinitions.get(robotSide);
    }
+
+   /**
+    * @param desiredGraspingState : if this is close to 0, return value will close to 'opened angle'.
+    * @return
+    */
+   public static double getDesiredHandJoint(RobotSide robotSide, ValkyrieHandJointName valkyrieHandJointName, double desiredGraspingState)
+   {
+      double opened = getOpenedDesiredHandJointDefinition(robotSide).get(valkyrieHandJointName);
+      double closed = getClosedDesiredHandJointDefinition(robotSide).get(valkyrieHandJointName);
+
+      return opened + (closed - opened) * desiredGraspingState;
+   }
+
+   /**
+    * @param desiredGraspingState : if this is close to 0, return value will close to 'opened angle'.
+    * @return
+    */
+   public static double getDesiredFingerMotor(RobotSide robotSide, ValkyrieFingerMotorName valkyrieFingerMotorName, double desiredGraspingState)
+   {
+      double opened = getOpenDesiredDefinition(robotSide).get(valkyrieFingerMotorName);
+      double closed = getClosedDesiredDefinition(robotSide).get(valkyrieFingerMotorName);
+
+      return opened + (closed - opened) * desiredGraspingState;
+   }
 }

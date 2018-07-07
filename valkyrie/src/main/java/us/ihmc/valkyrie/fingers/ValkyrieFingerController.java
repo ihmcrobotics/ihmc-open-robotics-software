@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
+import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,7 +34,10 @@ public class ValkyrieFingerController implements RobotController
    private final YoDouble fingerOpenDelay = new YoDouble("fingerOpenDelay", registry);
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> subscribers = new SideDependentList<>();
-   private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
+   private final SideDependentList<ValkyrieFingerSetController> fingerSetControllersOld = new SideDependentList<>();
+
+   private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> handFingerTrajectoryMessageSubscribers = new SideDependentList<>();
+   //private final SideDependentList<ProposedValkyrieFingerSetController<ValkyrieFingerMotorName>> fingerSetControllers = new SideDependentList<>();
 
    public ValkyrieFingerController(YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                    List<YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
@@ -69,8 +74,24 @@ public class ValkyrieFingerController implements RobotController
          {
             ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide, time, controlDT, fingerStateEstimator, gains, trajectoryTime,
                                                                                      thumbCloseDelay, fingerOpenDelay, jointHandleEnumMap, registry);
-            fingerSetControllers.put(robotSide, controller);
+            fingerSetControllersOld.put(robotSide, controller);
          }
+
+//         EnumMap<ValkyrieFingerMotorName, YoDouble> jointHandlerMap = new EnumMap<>(ValkyrieFingerMotorName.class);
+//         for (ValkyrieFingerMotorName valkyrieFingerMotorName : ValkyrieFingerMotorName.values())
+//         {
+//            YoDouble fingerMotorHandler = new YoDouble(valkyrieFingerMotorName.getJointName(robotSide) + "_fingerMotorHandler", registry);
+//            double currentFingerMotor = jointHandleEnumMap.get(valkyrieFingerMotorName).getQ();
+//            fingerMotorHandler.set(currentFingerMotor);
+//            jointHandlerMap.put(valkyrieFingerMotorName, fingerMotorHandler);
+//         }
+//         ProposedValkyrieFingerSetController<ValkyrieFingerMotorName> fingerSetController = new ProposedValkyrieFingerSetController<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class.getSimpleName(),
+//                                                                                                                                                             robotSide,
+//                                                                                                                                                             yoTime,
+//                                                                                                                                                             jointHandlerMap,
+//                                                                                                                                                             registry);
+//         fingerSetControllers.put(robotSide, fingerSetController);
+
       }
       parentRegistry.addChild(registry);
    }
@@ -81,6 +102,9 @@ public class ValkyrieFingerController implements RobotController
       {
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class,
                                               ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName), subscribers.get(robotSide));
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class,
+                                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName),
+                                              handFingerTrajectoryMessageSubscribers.get(robotSide));
       }
    }
 
@@ -93,12 +117,16 @@ public class ValkyrieFingerController implements RobotController
    public void doControl()
    {
       checkForNewHandDesiredConfigurationRequested();
+      checkForNewHandFingerTrajectoryRequested();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         ValkyrieFingerSetController controller = fingerSetControllersOld.get(robotSide);
          if (controller != null)
             controller.doControl();
+//         ProposedValkyrieFingerSetController<ValkyrieFingerMotorName> proposedValkyrieFingerSetController = fingerSetControllers.get(robotSide);
+//         if (proposedValkyrieFingerSetController != null)
+//            proposedValkyrieFingerSetController.doControl();
       }
    }
 
@@ -109,7 +137,7 @@ public class ValkyrieFingerController implements RobotController
          if (subscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
             HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getDesiredHandConfiguration());
-            ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+            ValkyrieFingerSetController controller = fingerSetControllersOld.get(robotSide);
             if (controller == null)
                continue;
 
@@ -128,6 +156,11 @@ public class ValkyrieFingerController implements RobotController
             }
          }
       }
+   }
+   
+   private void checkForNewHandFingerTrajectoryRequested()
+   {
+      
    }
 
    @Override

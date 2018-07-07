@@ -1,10 +1,10 @@
 package us.ihmc.valkyrie.fingers;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,8 +24,10 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
 
    private final RobotSide robotSide;
 
-   private Map<String, SettableDoubleProvider> fingerControlSpace;
-   private Map<String, MultipleWaypointsTrajectoryGenerator> trajectoryGenerators;
+   private final EnumMap<T, SettableDoubleProvider> fingerControlSpace;
+   private final EnumMap<T, MultipleWaypointsTrajectoryGenerator> trajectoryGenerators;
+
+   private final List<T> listOfKeySet;
 
    private final StateMachine<TrajectoryGeneratorMode, State> stateMachine;
    private final YoEnum<TrajectoryGeneratorMode> requestedState;
@@ -35,28 +37,31 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       JOINTSPACE
    }
 
-   public ProposedValkyrieFingerSetController(String suffix, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
+   public ProposedValkyrieFingerSetController(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
                                               YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;
-      name = robotSide.getLowerCaseName() + suffix;
-      registry = new YoVariableRegistry(name);
+      this.name = robotSide.getLowerCaseName() + enumType.getSimpleName();
 
-      trajectoryGenerators = new HashMap<String, MultipleWaypointsTrajectoryGenerator>();
-      this.fingerControlSpace = new HashMap<String, SettableDoubleProvider>();
-      Object[] array = fingerControlSpaceMap.keySet().toArray();
-      for (int i = 0; i < array.length; i++)
+      this.registry = new YoVariableRegistry(name);
+
+      this.fingerControlSpace = new EnumMap<>(enumType);
+      this.trajectoryGenerators = new EnumMap<>(enumType);
+      this.listOfKeySet = new ArrayList<T>();
+      T[] enumConstants = enumType.getEnumConstants();
+      for (int i = 0; i < enumConstants.length; i++)
       {
-         String namePrefix = robotSide.getLowerCaseName() + array[i].toString();
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(namePrefix + "trajectory", parentRegistry);
+         T key = enumConstants[i];
+         double initialValue = fingerControlSpaceMap.get(key).getDoubleValue();
+         fingerControlSpace.put(key, new SettableDoubleProvider(initialValue));
+
+         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(robotSide + key.name() + "_traj", parentRegistry);
          trajectoryGenerator.clear();
-         trajectoryGenerator.appendWaypoint(yoTime.getDoubleValue(), fingerControlSpaceMap.get(array[i]).getValue(), 0.0);
+         trajectoryGenerator.appendWaypoint(yoTime.getDoubleValue(), initialValue, 0.0);
          trajectoryGenerator.initialize();
-         trajectoryGenerators.put(namePrefix, trajectoryGenerator);
+         trajectoryGenerators.put(key, trajectoryGenerator);
 
-         SettableDoubleProvider controlSpace = new SettableDoubleProvider();
-
-         this.fingerControlSpace.put(namePrefix, controlSpace);
+         listOfKeySet.add(key);
       }
 
       requestedState = new YoEnum<>(name + "requestedState", registry, TrajectoryGeneratorMode.class, true);
@@ -80,13 +85,36 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       @Override
       public void onEntry()
       {
-
+         for (int i = 0; i < listOfKeySet.size(); i++)
+         {
+            T key = listOfKeySet.get(i);
+            trajectoryGenerators.get(key).initialize();
+         }
       }
 
       @Override
       public void doAction(double timeInState)
       {
-
+//         for (int i = 0; i < listOfKeySet.size(); i++)
+//         {
+//            T key = listOfKeySet.get(i);
+//            MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
+//            double value = multipleWaypointsTrajectoryGenerator.getValue();
+//
+//            if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
+//            {
+//               multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
+//               value = multipleWaypointsTrajectoryGenerator.getValue();
+//            }
+//            else
+//            {
+//               SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
+//               multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
+//               value = lastPoint.getPosition();
+//            }
+//
+//            fingerControlSpace.get(key).setValue(value);
+//         }
       }
 
       @Override
@@ -130,10 +158,10 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
    public void doControl()
    {
       stateMachine.doActionAndTransition();
-      Set<String> keySet = trajectoryGenerators.keySet();
-      for (int i = 0; i < trajectoryGenerators.size(); i++)
+      
+      for (int i = 0; i < listOfKeySet.size(); i++)
       {
-         Object key = keySet.toArray()[i];
+         T key = listOfKeySet.get(i);
          MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
          double value = multipleWaypointsTrajectoryGenerator.getValue();
 
@@ -152,36 +180,32 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
          fingerControlSpace.get(key).setValue(value);
       }
    }
-
-   public void setDesired(String controlSpaceName, double time, double delayTime, double goal)
-   {
-      String controlSpaceNameWithRobotSide = controlSpaceName;
-
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).clear();
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(delayTime, fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue(), 0.0);
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(delayTime + time, goal, 0.0);
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).initialize();
-
-      requestedState.set(TrajectoryGeneratorMode.JOINTSPACE);
-   }
    
-   public void setStop(String controlSpaceName, double current)
+   public void executeTrajectories()
    {
-      String controlSpaceNameWithRobotSide = controlSpaceName;
-
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).clear();
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).appendWaypoint(0.0, fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue(), 0.0);
-      
-      trajectoryGenerators.get(controlSpaceNameWithRobotSide).initialize();
-
       requestedState.set(TrajectoryGeneratorMode.JOINTSPACE);
    }
 
-   public double getDesired(String controlSpaceNameWithRobotSide)
+   public void setDesired(T controlSpace, double time, double delayTime, double goal)
    {
-      return fingerControlSpace.get(controlSpaceNameWithRobotSide).getValue();
+      trajectoryGenerators.get(controlSpace).clear();
+      trajectoryGenerators.get(controlSpace).appendWaypoint(delayTime, fingerControlSpace.get(controlSpace).getValue(), 0.0);
+      trajectoryGenerators.get(controlSpace).appendWaypoint(delayTime + time, goal, 0.0);
+      trajectoryGenerators.get(controlSpace).initialize();
    }
-   
+
+   public void setStop(T controlSpace, double current)
+   {
+      trajectoryGenerators.get(controlSpace).clear();
+      trajectoryGenerators.get(controlSpace).appendWaypoint(0.0, fingerControlSpace.get(controlSpace).getValue(), 0.0);
+      trajectoryGenerators.get(controlSpace).initialize();
+   }
+
+   public double getDesired(T controlSpace)
+   {
+      return fingerControlSpace.get(controlSpace).getValue();
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
