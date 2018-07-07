@@ -13,8 +13,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieHandFingerTrajectoryMessageConversion
 {
-   public static double trajectoryTime = 4.0;
-   public static double delayTime = 1.5;
+   public static double trajectoryTime = 0.5;
+   public static double delayTime = 0.3;
 
    public static final void convertHandDesiredConfigurationMessage(HandDesiredConfigurationMessage handDesiredConfigurationMessage,
                                                                    ValkyrieHandFingerTrajectoryMessage messageToPack)
