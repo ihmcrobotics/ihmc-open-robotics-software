@@ -23,7 +23,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
    private final RobotSide robotSide;
 
-   private final EnumMap<T, SettableDoubleProvider> fingerControlSpace;
+   private final EnumMap<T, SettableDoubleProvider> desiredQs;
+   private final EnumMap<T, SettableDoubleProvider> desiredQds;
    private final EnumMap<T, MultipleWaypointsTrajectoryGenerator> trajectoryGenerators;
 
    private final List<T> listOfKeySet;
@@ -48,7 +49,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
       this.registry = new YoVariableRegistry(name);
 
-      this.fingerControlSpace = new EnumMap<>(enumType);
+      this.desiredQs = new EnumMap<>(enumType);
+      this.desiredQds = new EnumMap<>(enumType);
       this.trajectoryGenerators = new EnumMap<>(enumType);
       this.listOfKeySet = new ArrayList<T>();
 
@@ -61,7 +63,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       {
          T key = enumConstants[i];
          double initialValue = fingerControlSpaceMap.get(key).getDoubleValue();
-         fingerControlSpace.put(key, new SettableDoubleProvider(initialValue));
+         desiredQs.put(key, new SettableDoubleProvider(initialValue));
+         desiredQds.put(key, new SettableDoubleProvider(0.0));
 
          MultipleWaypointsTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(robotSide + key.name() + "_traj", parentRegistry);
          trajectoryGenerator.clear();
@@ -100,7 +103,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          T key = listOfKeySet.get(i);
          trajectoryGenerators.get(key).clear();
          double delayTime = this.delayTimes.get(key).getDoubleValue();
-         trajectoryGenerators.get(key).appendWaypoint(delayTime, fingerControlSpace.get(key).getValue(), 0.0);
+         trajectoryGenerators.get(key).appendWaypoint(delayTime, desiredQs.get(key).getValue(), 0.0);
          ArrayList<Double> wayPointPositions = this.wayPointPositions.get(key);
          ArrayList<Double> wayPointTimes = this.wayPointTimes.get(key);
          for (int j = 0; j < wayPointPositions.size(); j++)
@@ -138,21 +141,26 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          {
             T key = listOfKeySet.get(i);
             MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
-            double value = multipleWaypointsTrajectoryGenerator.getValue();
+            double desiredQ = multipleWaypointsTrajectoryGenerator.getValue();
+            double desiredQd = multipleWaypointsTrajectoryGenerator.getVelocity();
 
             if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
             {
                multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
-               value = multipleWaypointsTrajectoryGenerator.getValue();
+               desiredQ = multipleWaypointsTrajectoryGenerator.getValue();
+               desiredQd = multipleWaypointsTrajectoryGenerator.getVelocity();
             }
             else
             {
                SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
                multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
-               value = lastPoint.getPosition();
+               desiredQ = lastPoint.getPosition();
+               desiredQd = lastPoint.getVelocity();
             }
 
-            fingerControlSpace.get(key).setValue(value);
+            desiredQs.get(key).setValue(desiredQ);
+            desiredQds.get(key).setValue(desiredQd);
+            
          }
       }
 
@@ -234,7 +242,12 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
    public double getDesired(T controlSpace)
    {
-      return fingerControlSpace.get(controlSpace).getValue();
+      return desiredQs.get(controlSpace).getValue();
+   }
+   
+   public double getDesiredVelocity(T controlSpace)
+   {
+      return desiredQds.get(controlSpace).getValue();
    }
 
    public RobotSide getRobotSide()
