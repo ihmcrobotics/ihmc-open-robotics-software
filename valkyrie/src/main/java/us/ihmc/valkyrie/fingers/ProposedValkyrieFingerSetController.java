@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,6 +28,10 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
 
    private final List<T> listOfKeySet;
 
+   private final EnumMap<T, YoDouble> delayTimes;
+   private final EnumMap<T, ArrayList<Double>> wayPointPositions;
+   private final EnumMap<T, ArrayList<Double>> wayPointTimes;
+
    private final StateMachine<TrajectoryGeneratorMode, State> stateMachine;
    private final YoEnum<TrajectoryGeneratorMode> requestedState;
 
@@ -48,6 +51,11 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       this.fingerControlSpace = new EnumMap<>(enumType);
       this.trajectoryGenerators = new EnumMap<>(enumType);
       this.listOfKeySet = new ArrayList<T>();
+
+      this.delayTimes = new EnumMap<>(enumType);
+      this.wayPointPositions = new EnumMap<>(enumType);
+      this.wayPointTimes = new EnumMap<>(enumType);
+
       T[] enumConstants = enumType.getEnumConstants();
       for (int i = 0; i < enumConstants.length; i++)
       {
@@ -62,6 +70,11 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
          trajectoryGenerators.put(key, trajectoryGenerator);
 
          listOfKeySet.add(key);
+
+         delayTimes.put(key, new YoDouble(robotSide + key.name() + "_delayTime", parentRegistry));
+         delayTimes.get(key).set(0.0);
+         wayPointPositions.put(key, new ArrayList<Double>());
+         wayPointTimes.put(key, new ArrayList<Double>());
       }
 
       requestedState = new YoEnum<>(name + "requestedState", registry, TrajectoryGeneratorMode.class, true);
@@ -80,11 +93,37 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       parentRegistry.addChild(registry);
    }
 
+   private void setTrajectories()
+   {
+      for (int i = 0; i < listOfKeySet.size(); i++)
+      {
+         T key = listOfKeySet.get(i);
+         trajectoryGenerators.get(key).clear();
+         double delayTime = this.delayTimes.get(key).getDoubleValue();
+         trajectoryGenerators.get(key).appendWaypoint(delayTime, fingerControlSpace.get(key).getValue(), 0.0);
+         ArrayList<Double> wayPointPositions = this.wayPointPositions.get(key);
+         ArrayList<Double> wayPointTimes = this.wayPointTimes.get(key);
+         for (int j = 0; j < wayPointPositions.size(); j++)
+         {
+            trajectoryGenerators.get(key).appendWaypoint(delayTime + wayPointTimes.get(j), wayPointPositions.get(j), 0.0);
+         }
+      }
+   }
+   
+   /**
+    *  setting up joint trajectory is in order of methods,
+    *  <p>clearTrajectories()
+    *  <p>setDelay() <- optional
+    *  <p>appendWayPoint() or appendStopPoint()
+    *  <p>executeTrajectories()
+    * @author shadylady
+    */
    private class JointSpaceState implements State
    {
       @Override
       public void onEntry()
       {
+         setTrajectories();
          for (int i = 0; i < listOfKeySet.size(); i++)
          {
             T key = listOfKeySet.get(i);
@@ -95,26 +134,26 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       @Override
       public void doAction(double timeInState)
       {
-//         for (int i = 0; i < listOfKeySet.size(); i++)
-//         {
-//            T key = listOfKeySet.get(i);
-//            MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
-//            double value = multipleWaypointsTrajectoryGenerator.getValue();
-//
-//            if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
-//            {
-//               multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
-//               value = multipleWaypointsTrajectoryGenerator.getValue();
-//            }
-//            else
-//            {
-//               SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
-//               multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
-//               value = lastPoint.getPosition();
-//            }
-//
-//            fingerControlSpace.get(key).setValue(value);
-//         }
+         for (int i = 0; i < listOfKeySet.size(); i++)
+         {
+            T key = listOfKeySet.get(i);
+            MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
+            double value = multipleWaypointsTrajectoryGenerator.getValue();
+
+            if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
+            {
+               multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
+               value = multipleWaypointsTrajectoryGenerator.getValue();
+            }
+            else
+            {
+               SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
+               multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
+               value = lastPoint.getPosition();
+            }
+
+            fingerControlSpace.get(key).setValue(value);
+         }
       }
 
       @Override
@@ -158,47 +197,39 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
    public void doControl()
    {
       stateMachine.doActionAndTransition();
-      
-      for (int i = 0; i < listOfKeySet.size(); i++)
-      {
-         T key = listOfKeySet.get(i);
-         MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
-         double value = multipleWaypointsTrajectoryGenerator.getValue();
-
-         if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
-         {
-            multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
-            value = multipleWaypointsTrajectoryGenerator.getValue();
-         }
-         else
-         {
-            SimpleTrajectoryPoint1D lastPoint = new SimpleTrajectoryPoint1D();
-            multipleWaypointsTrajectoryGenerator.getLastWaypoint(lastPoint);
-            value = lastPoint.getPosition();
-         }
-
-         fingerControlSpace.get(key).setValue(value);
-      }
    }
-   
+
    public void executeTrajectories()
    {
       requestedState.set(TrajectoryGeneratorMode.JOINTSPACE);
    }
 
-   public void setDesired(T controlSpace, double time, double delayTime, double goal)
+   public void clearTrajectories()
    {
-      trajectoryGenerators.get(controlSpace).clear();
-      trajectoryGenerators.get(controlSpace).appendWaypoint(delayTime, fingerControlSpace.get(controlSpace).getValue(), 0.0);
-      trajectoryGenerators.get(controlSpace).appendWaypoint(delayTime + time, goal, 0.0);
-      trajectoryGenerators.get(controlSpace).initialize();
+      for (int i = 0; i < listOfKeySet.size(); i++)
+      {
+         T key = listOfKeySet.get(i);
+         delayTimes.get(key).set(0.0);
+         wayPointPositions.get(key).clear();
+         wayPointTimes.get(key).clear();
+      }
    }
 
-   public void setStop(T controlSpace, double current)
+   public void setDelay(T controlSpace, double delayTime)
    {
-      trajectoryGenerators.get(controlSpace).clear();
-      trajectoryGenerators.get(controlSpace).appendWaypoint(0.0, fingerControlSpace.get(controlSpace).getValue(), 0.0);
-      trajectoryGenerators.get(controlSpace).initialize();
+      delayTimes.get(controlSpace).set(delayTime);
+   }
+
+   public void appendWayPoint(T controlSpace, double time, double goal)
+   {
+      wayPointPositions.get(controlSpace).add(goal);
+      wayPointTimes.get(controlSpace).add(time);
+   }
+
+   public void appendStopPoint(T controlSpace, double current)
+   {
+      wayPointPositions.get(controlSpace).add(current);
+      wayPointTimes.get(controlSpace).add(0.0);
    }
 
    public double getDesired(T controlSpace)

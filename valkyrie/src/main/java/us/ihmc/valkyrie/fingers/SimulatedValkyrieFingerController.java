@@ -46,8 +46,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
    private final SimulatedValkyrieFingerJointAngleProducer jointAngleProducer;
 
-   private final double delayTime = 0.3;
-   private final double trajectoryTime = 0.7;
+   private final double delayTime = ValkyrieHandFingerTrajectoryMessageConversion.delayTimeForSim;
+   private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTimeForSim;
 
    /*
     * The handlers corresponds to state estimators in Valkyrie ros controller.
@@ -282,29 +282,26 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
          {
             HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage()
                                                                                                                               .getDesiredHandConfiguration());
+            handJointFingerSetControllers.get(robotSide).clearTrajectories();
+            fingerSetControllers.get(robotSide).clearTrajectories();
             switch (handDesiredConfiguration)
             {
             case CLOSE:
                for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
                {
-                  double delayTime;
                   if (handJointName.getFingerName() == FingerName.THUMB)
-                     delayTime = this.delayTime;
-                  else
-                     delayTime = 0.0;
-                  handJointFingerSetControllers.get(robotSide).setDesired(handJointName, trajectoryTime, delayTime,
-                                                                          ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 1.0));
+                     handJointFingerSetControllers.get(robotSide).setDelay(handJointName, this.delayTime);
+                  handJointFingerSetControllers.get(robotSide)
+                                               .appendWayPoint(handJointName, trajectoryTime,
+                                                               ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 1.0));
                }
 
                for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
                {
-                  double delayTime;
                   if (fingerMotorName.getFingerName() == FingerName.THUMB)
-                     delayTime = this.delayTime;
-                  else
-                     delayTime = 0.0;
-                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName, trajectoryTime, delayTime,
-                                                                 ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0));
+                     fingerSetControllers.get(robotSide).setDelay(fingerMotorName, this.delayTime);
+                  fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime,
+                                                                     ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0));
                }
 
                break;
@@ -312,33 +309,29 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             case OPEN:
                for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
                {
-                  double delayTime;
-                  if (handJointName.getFingerName() == FingerName.THUMB)
-                     delayTime = 0.0;
-                  else
-                     delayTime = this.delayTime;
-                  handJointFingerSetControllers.get(robotSide).setDesired(handJointName, trajectoryTime, delayTime,
-                                                                          ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 0.0));
+                  if (handJointName.getFingerName() != FingerName.THUMB)
+                     handJointFingerSetControllers.get(robotSide).setDelay(handJointName, this.delayTime);
+                  handJointFingerSetControllers.get(robotSide)
+                                               .appendWayPoint(handJointName, trajectoryTime,
+                                                               ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 0.0));
                }
                for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
                {
-                  double delayTime;
-                  if (fingerMotorName.getFingerName() == FingerName.THUMB)
-                     delayTime = 0.0;
-                  else
-                     delayTime = this.delayTime;
-                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName, trajectoryTime, delayTime,
-                                                                 ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 0.0));
+                  if (fingerMotorName.getFingerName() != FingerName.THUMB)
+                     fingerSetControllers.get(robotSide).setDelay(fingerMotorName, this.delayTime);
+                  fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime,
+                                                                     ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 0.0));
                }
                break;
 
             case STOP:
                for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
-                  handJointFingerSetControllers.get(robotSide).setStop(handJointName,
-                                                                       sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
+                  handJointFingerSetControllers.get(robotSide)
+                                               .appendStopPoint(handJointName,
+                                                                sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
                for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
-                  fingerSetControllers.get(robotSide).setStop(fingerMotorName,
-                                                              sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
+                  fingerSetControllers.get(robotSide).appendStopPoint(fingerMotorName,
+                                                                      sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
                break;
 
             default:
@@ -358,7 +351,9 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
          if (valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
             ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide).pollMessage();
-            PrintTools.info("ValkyrieHandFingerTrajectoryMessage " + robotSide);
+
+            handJointFingerSetControllers.get(robotSide).clearTrajectories();
+            fingerSetControllers.get(robotSide).clearTrajectories();
 
             for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
             {
@@ -366,8 +361,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
 
                if (indexOfTrajectory == -1)
                {
-                  fingerSetControllers.get(robotSide).setStop(fingerMotorName,
-                                                              sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
+                  fingerSetControllers.get(robotSide).appendStopPoint(fingerMotorName,
+                                                                      sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
                   setEstimatedStopedValueOnHandJointFingerSetController(robotSide, fingerMotorName);
                }
                else
@@ -375,10 +370,15 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                   Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory()
                                                                                                             .getJointTrajectoryMessages();
                   Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
-                  fingerSetControllers.get(robotSide).setDesired(fingerMotorName, trajectoryPoints.get(0).getTime(),
-                                                                 handFingerTrajectoryMessage.getDelayTimes().get(indexOfTrajectory),
-                                                                 ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName,
-                                                                                                                       trajectoryPoints.get(0).getPosition()));
+
+                  for (int i = 0; i < trajectoryPoints.size(); i++)
+                  {
+                     TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(i);
+                     double wayPointTime = trajectoryPoint1DMessage.getTime();
+                     double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName,
+                                                                                                     trajectoryPoint1DMessage.getPosition());
+                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, wayPointTime, wayPointPosition);
+                  }
                   setEstimatedDesiredValueOnHandJointFingerSetController(robotSide, fingerMotorName, handFingerTrajectoryMessage);
                }
             }
@@ -412,10 +412,13 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
          Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
          Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
 
-         handJointFingerSetControllers.get(robotSide).setDesired(handJointName, trajectoryPoints.get(0).getTime(),
-                                                                 handFingerTrajectoryMessage.getDelayTimes().get(indexOfTrajectory),
-                                                                 ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName,
-                                                                                                                     trajectoryPoints.get(0).getPosition()));
+         for (int j = 0; j < trajectoryPoints.size(); j++)
+         {
+            TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(j);
+            double wayPointTime = trajectoryPoint1DMessage.getTime();
+            double wayPointPosition = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, trajectoryPoint1DMessage.getPosition());
+            handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, wayPointTime, wayPointPosition);
+         }
       }
    }
 
@@ -427,9 +430,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       for (int i = 1; i <= numberOfHandJoints; i++)
       {
          ValkyrieHandJointName handJointName = fingerMotorName.getCorrespondingJointName(i);
-
-         handJointFingerSetControllers.get(robotSide).setStop(handJointName,
-                                                              sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
+         handJointFingerSetControllers.get(robotSide).appendStopPoint(handJointName, sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
       }
    }
 }
