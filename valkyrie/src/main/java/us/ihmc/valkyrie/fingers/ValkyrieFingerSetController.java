@@ -3,11 +3,16 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.Map;
 
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -16,6 +21,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieFingerSetController implements RobotController
 {
+   private final double delayTime = ValkyrieHandFingerTrajectoryMessageConversion.delayTime;
+   private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTime;
+
    private static final double MIN_ACTUATOR_POSITION = 0.0;
    private static final double MAX_ACTUATOR_POSITION = 3.6;
 
@@ -26,8 +34,9 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final RobotSide robotSide;
 
-   private final Map<ValkyrieFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
-   private final Map<ValkyrieFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetTrajectoryGenerator;
+   private final EnumMap<ValkyrieFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final EnumMap<ValkyrieFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieFingerMotorName.class);
    private final Map<ValkyrieFingerMotorName, PIDController> pidControllers = new EnumMap<>(ValkyrieFingerMotorName.class);
 
    private final EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles;
@@ -52,6 +61,9 @@ public class ValkyrieFingerSetController implements RobotController
 
       mapJointsAndVariables(gains);
 
+      fingerSetTrajectoryGenerator = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class, robotSide, yoTime,
+                                                                                                       desiredAngles, registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -62,7 +74,8 @@ public class ValkyrieFingerSetController implements RobotController
          String jointName = jointEnum.getJointName(robotSide);
 
          YoDouble desiredAngle = new YoDouble("q_d_" + jointName, registry);
-         desiredAngle.setToNaN();
+         //desiredAngle.setToNaN();
+         desiredAngle.set(fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1)));
          desiredAngles.put(jointEnum, desiredAngle);
 
          YoDouble desiredVelocity = new YoDouble("qd_d_" + jointName, registry);
@@ -76,7 +89,17 @@ public class ValkyrieFingerSetController implements RobotController
    @Override
    public void doControl()
    {
+      // update trajectory generators.
+      fingerSetTrajectoryGenerator.doControl();
 
+      // set desired values.
+      for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
+      {
+         desiredAngles.get(jointEnum).set(fingerSetTrajectoryGenerator.getDesired(jointEnum));
+         desiredVelocities.get(jointEnum).set(fingerSetTrajectoryGenerator.getDesiredVelocity(jointEnum));
+      }
+
+      // PID control.
       for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
       {
          PIDController pidController = pidControllers.get(jointEnum);
@@ -131,14 +154,85 @@ public class ValkyrieFingerSetController implements RobotController
    {
       // Do nothing
    }
-   
+
    public void getDesiredHandConfiguration(HandConfiguration handConfiguration)
    {
-      
+      fingerSetTrajectoryGenerator.clearTrajectories();
+      switch (handConfiguration)
+      {
+      case CLOSE:
+         for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+         {
+            if (fingerMotorName.getFingerName() == FingerName.THUMB)
+               fingerSetTrajectoryGenerator.setDelay(fingerMotorName, this.delayTime);
+            fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, trajectoryTime,
+                                                        ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 1.0));
+         }
+
+         break;
+
+      case OPEN:
+         for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+         {
+            if (fingerMotorName.getFingerName() != FingerName.THUMB)
+               fingerSetTrajectoryGenerator.setDelay(fingerMotorName, this.delayTime);
+            fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, trajectoryTime,
+                                                        ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName, 0.0));
+         }
+         break;
+
+      case STOP:
+         for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+            fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName,
+                                                         fingerStateEstimator.getFingerJointTransmissionScale(robotSide,
+                                                                                                              fingerMotorName.getCorrespondingJointName(1)));
+         break;
+
+      default:
+
+         break;
+      }
+      fingerSetTrajectoryGenerator.executeTrajectories();
    }
-   
+
    public void getHandFingerTrajectoryMessage(ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage)
    {
-      
+      fingerSetTrajectoryGenerator.clearTrajectories();
+
+      for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+      {
+         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
+
+         if (indexOfTrajectory == -1)
+         {
+            fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName,
+                                                         fingerStateEstimator.getFingerJointTransmissionScale(robotSide,
+                                                                                                              fingerMotorName.getCorrespondingJointName(1)));
+         }
+         else
+         {
+            Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+            Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
+
+            for (int i = 0; i < trajectoryPoints.size(); i++)
+            {
+               TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(i);
+               double wayPointTime = trajectoryPoint1DMessage.getTime();
+               double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotor(robotSide, fingerMotorName,
+                                                                                               trajectoryPoint1DMessage.getPosition());
+               fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, wayPointTime, wayPointPosition);
+            }
+         }
+      }
+      fingerSetTrajectoryGenerator.executeTrajectories();
+   }
+
+   private int hasTrajectory(us.ihmc.idl.IDLSequence.Byte namesInMessage, ValkyrieFingerMotorName fingerMotorName)
+   {
+      for (int i = 0; i < namesInMessage.size(); i++)
+         if (fingerMotorName == ValkyrieFingerMotorName.fromByte(namesInMessage.get(i)))
+            return i;
+
+      return -1;
    }
 }
