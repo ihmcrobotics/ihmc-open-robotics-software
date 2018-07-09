@@ -27,7 +27,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 230000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -35,7 +35,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 51.9)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 260000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -43,7 +43,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 39.8)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 200000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
