@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements RobotController
+public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements RobotController
 {
    private final String name;
    private final YoVariableRegistry registry;
@@ -40,7 +40,7 @@ public class ProposedValkyrieFingerSetController<T extends Enum<T>> implements R
       JOINTSPACE
    }
 
-   public ProposedValkyrieFingerSetController(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
+   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
                                               YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;

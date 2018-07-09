@@ -58,8 +58,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> valkyrieHandFingerTrajectoryMessageSubscribers = new SideDependentList<>();
 
-   private final SideDependentList<ProposedValkyrieFingerSetController<ValkyrieHandJointName>> handJointFingerSetControllers = new SideDependentList<>();
-   private final SideDependentList<ProposedValkyrieFingerSetController<ValkyrieFingerMotorName>> fingerSetControllers = new SideDependentList<>();
+   private final SideDependentList<ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName>> handJointFingerSetControllers = new SideDependentList<>();
+   private final SideDependentList<ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>> fingerSetControllers = new SideDependentList<>();
 
    private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDegreeOfFreedomJoint>> allHandJointsNameToJointsMap = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> currentHandJointAngles = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
@@ -94,7 +94,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             handJointHandler.set(currentHandJoint);
             sideDependentHandJointHandlers.get(robotSide).put(valkyrieHandJointName, handJointHandler);
          }
-         ProposedValkyrieFingerSetController<ValkyrieHandJointName> handJointFingerSetController = new ProposedValkyrieFingerSetController<ValkyrieHandJointName>(ValkyrieHandJointName.class,
+         ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName> handJointFingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName>(ValkyrieHandJointName.class,
                                                                                                                                                                   robotSide,
                                                                                                                                                                   handControllerTime,
                                                                                                                                                                   sideDependentHandJointHandlers.get(robotSide),
@@ -114,7 +114,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             fingerMotorHandler.set(currentFingerMotor);
             sideDependentFingerMotorHandlers.get(robotSide).put(valkyrieFingerMotorName, fingerMotorHandler);
          }
-         ProposedValkyrieFingerSetController<ValkyrieFingerMotorName> fingerSetController = new ProposedValkyrieFingerSetController<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class,
+         ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class,
                                                                                                                                                              robotSide,
                                                                                                                                                              handControllerTime,
                                                                                                                                                              sideDependentFingerMotorHandlers.get(robotSide),
@@ -280,11 +280,11 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       {
          if (handDesiredConfigurationMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage()
+            HandConfiguration desiredHandConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage()
                                                                                                                               .getDesiredHandConfiguration());
             handJointFingerSetControllers.get(robotSide).clearTrajectories();
             fingerSetControllers.get(robotSide).clearTrajectories();
-            switch (handDesiredConfiguration)
+            switch (desiredHandConfiguration)
             {
             case CLOSE:
                for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
