@@ -178,7 +178,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      Vector3DReadOnly pelvisLinearWeight = taskspaceAngularWeightMap.get(pelvisName);
+      Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
       centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
