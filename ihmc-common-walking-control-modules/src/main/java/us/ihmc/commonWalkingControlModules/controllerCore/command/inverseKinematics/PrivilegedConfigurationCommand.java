@@ -224,6 +224,28 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       maxVelocities.add().setValue(Double.NaN);
       maxAccelerations.add().setValue(Double.NaN);
    }
+   
+   /**
+    * Adds or Updates the desired privileged configuration for a joint
+    * If the joint hasn't been registered it will be added to the command
+    *
+    * @param joint the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    */
+   public void addOrSetOneDoFJoint(OneDoFJoint joint, double privilegedConfiguration)
+   {
+      String jointName = joint.getName();
+      for(int i = 0; i < joints.size(); i++)
+      {
+         if(joints.get(i).getName().equals(jointName))
+         {
+            setOneDoFJoint(i, privilegedConfiguration);
+            return;
+         }
+      }
+      
+      addJoint(joint, privilegedConfiguration);
+   }
 
    /**
     * Updates the desired privileged configuration for a joint already registered give its index.

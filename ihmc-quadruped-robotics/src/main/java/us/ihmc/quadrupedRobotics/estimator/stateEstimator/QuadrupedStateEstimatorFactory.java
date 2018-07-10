@@ -7,7 +7,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -34,7 +33,7 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<QuadrantDependentList<FootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
-   private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
+   private final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
 
    public DRCKinematicsBasedStateEstimator createStateEstimator()
@@ -49,7 +48,6 @@ public class QuadrupedStateEstimatorFactory
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       ForceSensorDataHolder forceSensorDataHolderToUpdate = null;
-      CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
       Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
@@ -68,12 +66,10 @@ public class QuadrupedStateEstimatorFactory
 
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
                                                                                              sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
-                                                                                             estimatorCenterOfMassDataHolderToUpdate,
-                                                                                             imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                                                             centerOfPressureDataHolder , robotMotionStatusFromController, feetMap,
+                                                                                             centerOfMassDataHolder.get(), imuSensorsToUseInStateEstimator,
+                                                                                             gravityMagnitude, footSwitchMap, centerOfPressureDataHolder,
+                                                                                             robotMotionStatusFromController, feetMap,
                                                                                              yoGraphicsListRegistry.get());
-
-      yoVariableRegistry.get().addChild(stateEstimator.getYoVariableRegistry());
 
       FactoryTools.disposeFactory(this);
       
@@ -120,13 +116,13 @@ public class QuadrupedStateEstimatorFactory
       this.estimatorDT.set(estimatorDT);
    }
 
-   public void setYoVariableRegistry(YoVariableRegistry yoVariableRegistry)
-   {
-      this.yoVariableRegistry.set(yoVariableRegistry);
-   }
-
    public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry.set(yoGraphicsListRegistry);
+   }
+
+   public void setCenterOfMassDataHolder(CenterOfMassDataHolder centerOfMassDataHolder)
+   {
+      this.centerOfMassDataHolder.set(centerOfMassDataHolder);
    }
 }

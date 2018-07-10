@@ -4,7 +4,7 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInforma
 
 public class GenericQuadrupedSensorInformation implements QuadrupedSensorInformation
 {
-   private static final String[] imuNames = new String[] {"body_imu"};
+   private static final String[] imuNames = new String[] {"body_IMU"};
    
    @Override
    public String[] getImuNames()

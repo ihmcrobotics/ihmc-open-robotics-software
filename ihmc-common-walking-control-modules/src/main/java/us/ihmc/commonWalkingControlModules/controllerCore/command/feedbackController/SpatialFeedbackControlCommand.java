@@ -736,6 +736,22 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * Sets the weight to use in the optimization problem.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param angularWeight the weight value to use for the angular portion of this command.
+    * @param linearWeight the weight value to use for the linear portion of this command.
+    */
+   public void setWeightsForSolver(double angularWeight, double linearWeight)
+   {
+      spatialAccelerationCommand.setWeight(angularWeight, linearWeight);
+   }
+
+   /**
     * Sets the weights to use in the optimization problem for each individual degree of freedom.
     * <p>
     * WARNING: It is not the value of each individual command's weight that is relevant to how the

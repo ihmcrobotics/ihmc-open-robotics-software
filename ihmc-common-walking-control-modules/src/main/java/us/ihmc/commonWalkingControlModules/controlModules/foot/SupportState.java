@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,7 +19,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -26,6 +26,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,12 +81,13 @@ public class SupportState extends AbstractFootControlState
    private final FrameQuaternion footOrientation = new FrameQuaternion();
 
    // For testing:
-   private final YoBoolean assumeCopOnEdge;
-   private final YoBoolean assumeFootBarelyLoaded;
-   private final YoBoolean neverHoldRotation;
+   private final BooleanProvider assumeCopOnEdge;
+   private final BooleanProvider assumeFootBarelyLoaded;
+   private final BooleanProvider neverHoldRotation;
+   private final BooleanProvider neverHoldPosition;
 
    // For line contact walking and balancing:
-   private final YoBoolean holdFootOrientationFlat;
+   private final BooleanProvider holdFootOrientationFlat;
 
    // For foothold exploration:
    private final ExplorationHelper explorationHelper;
@@ -150,10 +153,11 @@ public class SupportState extends AbstractFootControlState
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      assumeCopOnEdge = new YoBoolean(prefix + "AssumeCopOnEdge", registry);
-      assumeFootBarelyLoaded = new YoBoolean(prefix + "AssumeFootBarelyLoaded", registry);
-      neverHoldRotation = new YoBoolean(prefix + "NeverHoldRotation", registry);
-      holdFootOrientationFlat = new YoBoolean(prefix + "HoldFlatOrientation", registry);
+      assumeCopOnEdge = new BooleanParameter(prefix + "AssumeCopOnEdge", registry, false);
+      assumeFootBarelyLoaded = new BooleanParameter(prefix + "AssumeFootBarelyLoaded", registry, false);
+      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, false);
+      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, false);
+      holdFootOrientationFlat = new BooleanParameter(prefix + "HoldFlatOrientation", registry, false);
 
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
@@ -265,12 +269,14 @@ public class SupportState extends AbstractFootControlState
       copOnEdge.set(footControlHelper.isCoPOnEdge());
       footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getDoubleValue());
 
-      if (assumeCopOnEdge.getBooleanValue())
+      if (assumeCopOnEdge.getValue())
          copOnEdge.set(true);
-      if (assumeFootBarelyLoaded.getBooleanValue())
+      if (assumeFootBarelyLoaded.getValue())
          footBarelyLoaded.set(true);
-      if (neverHoldRotation.getBooleanValue())
+      if (neverHoldRotation.getValue())
          copOnEdge.set(false);
+      if (neverHoldPosition.getValue())
+         footBarelyLoaded.set(false);
 
       updateHoldPositionSetpoints();
 
@@ -377,7 +383,7 @@ public class SupportState extends AbstractFootControlState
          desiredOrientation.set(footOrientation);
       }
 
-      if (holdFootOrientationFlat.getBooleanValue())
+      if (holdFootOrientationFlat.getValue())
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
 
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
