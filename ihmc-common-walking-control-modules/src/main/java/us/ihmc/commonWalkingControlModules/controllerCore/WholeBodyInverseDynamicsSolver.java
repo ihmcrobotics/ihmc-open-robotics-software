@@ -44,6 +44,8 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -230,6 +232,19 @@ public class WholeBodyInverseDynamicsSolver
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
+   }
+
+   public void submitResetIntegratorRequests(JointDesiredOutputListReadOnly jointDesiredOutputList)
+   {
+      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         OneDoFJoint joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i);
+         if (jointDesiredOutputList.hasDataForJoint(joint))
+         {
+            JointDesiredOutputReadOnly jointDesiredOutputOther = jointDesiredOutputList.getJointDesiredOutput(joint);
+            lowLevelOneDoFJointDesiredDataHolder.setResetJointIntegrators(joint, jointDesiredOutputOther.peekResetIntegratorsRequest());
+         }
+      }
    }
 
    private void updateLowLevelData()
