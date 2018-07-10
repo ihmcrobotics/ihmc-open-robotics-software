@@ -32,6 +32,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricPID3DGains
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -48,6 +49,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    /** We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a point feedback command and set the selection matrix to Z only**/
    private final PointFeedbackControlCommand pointFeedbackCommand = new PointFeedbackControlCommand();
    private final SelectionMatrix6D linearZSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix3D temp3DSelection = new SelectionMatrix3D();
    private final WeightMatrix6D linearZWeightMatrix = new WeightMatrix6D();
 
    /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
@@ -343,6 +345,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       pointFeedbackCommand.setGainsFrame(baseFrame);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
+
+      temp3DSelection.clearSelection();
+      temp3DSelection.selectZAxis(true);
+      pointFeedbackCommand.setSelectionMatrix(temp3DSelection);
 
       return pointFeedbackCommand;
 //      return null;
