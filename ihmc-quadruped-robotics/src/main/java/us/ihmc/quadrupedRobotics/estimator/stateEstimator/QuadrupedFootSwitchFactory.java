@@ -7,6 +7,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -42,16 +43,16 @@ public class QuadrupedFootSwitchFactory
          if (kneeOrientationsOutward.get().get(robotQuadrant))
          {
             if (robotQuadrant.isQuadrantInFront())
-               sign = 1.0;
-            else
                sign = -1.0;
+            else
+               sign = 1.0;
          }
          else
          {
             if (robotQuadrant.isQuadrantInFront())
-               sign = -1.0;
-            else
                sign = 1.0;
+            else
+               sign = -1.0;
          }
 
          defaultJointTorqueTouchdownThresholds.put(robotQuadrant, sign * torqueThreshold);
@@ -63,10 +64,9 @@ public class QuadrupedFootSwitchFactory
                                                                                                                                     footContactableBodies.get()
                                                                                                                                                          .get(robotQuadrant),
                                                                                                                                     totalRobotWeight, registry);
-
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(
-               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
+         boolean dontDetectTouchdownIfAtJointLimit = true;
+         jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH), dontDetectTouchdownIfAtJointLimit, registry);
          jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 

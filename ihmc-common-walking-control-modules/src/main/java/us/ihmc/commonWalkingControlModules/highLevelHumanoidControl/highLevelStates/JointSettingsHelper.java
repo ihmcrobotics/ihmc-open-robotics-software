@@ -132,6 +132,8 @@ public class JointSettingsHelper
       {
          JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
+         boolean wasLoaded = jointsLoaded[jointIdx].getValue();
+         jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
          jointsLoaded[jointIdx].set(isLoaded);
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];

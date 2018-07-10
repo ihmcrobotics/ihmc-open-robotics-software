@@ -18,9 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -56,8 +54,6 @@ public class CenterOfMassHeightManager
    /** if the manager is in user mode before walking then stay in it while walking (PelvisHeightControlState) **/
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("centerOfMassHeightManagerEnableUserPelvisControlDuringWalking", registry);
 
-   private final YoPDGains comHeightGains;
-
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
 
@@ -69,24 +65,11 @@ public class CenterOfMassHeightManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
-      PDGains gains = walkingControllerParameters.getCoMHeightControlGains();
-      comHeightGains = new YoPDGains("_CoMHeight", registry);
-      comHeightGains.createDerivativeGainUpdater(true);
-      comHeightGains.set(gains);
+      // User mode
+      pelvisHeightControlState = new PelvisHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
-      //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z
-      SymmetricYoPIDSE3Gains pidGains = new SymmetricYoPIDSE3Gains("pelvisHeightManager", registry);
-      pidGains.setProportionalGains(comHeightGains.getKp());
-      pidGains.setDampingRatios(comHeightGains.getZeta());
-
-      //this affects tracking in sim, not sure if it will be needed for the real robot
-//      pidGains.setMaxFeedbackAndFeedbackRate(pdGains.getMaximumFeedback(), pdGains.getMaximumFeedbackRate());
-
-      //User mode
-      pelvisHeightControlState = new PelvisHeightControlState(pidGains, controllerToolbox, walkingControllerParameters, registry);
-
-      //normal control
-      centerOfMassHeightControlState = new CenterOfMassHeightControlState(comHeightGains, controllerToolbox, walkingControllerParameters, registry);
+      // Normal control during walking
+      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
       enableUserPelvisControlDuringWalking.set(false);
@@ -96,10 +79,10 @@ public class CenterOfMassHeightManager
    {
       StateMachineFactory<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> factory = new StateMachineFactory<>(PelvisHeightControlMode.class);
       factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
-      
+
       factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
       factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
-      
+
       for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
          factory.addRequestedTransition(from, requestedState);
 
@@ -282,8 +265,9 @@ public class CenterOfMassHeightManager
       return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
-   public YoPDGains getComHeightGains()
+   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity, PIDGainsReadOnly userModeComHeightGains)
    {
-      return comHeightGains;
+      pelvisHeightControlState.setGains(userModeComHeightGains);
+      centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
    }
 }

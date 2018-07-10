@@ -29,8 +29,9 @@ public class PiecewiseReverseDcmTrajectory
    private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
    private final List<YoFramePoint3D> vrpCornerPoints = new ArrayList<>();
 
-   private final FramePoint3D dcmPosition;
-   private final FrameVector3D dcmVelocity;
+   private final FramePoint3D dcmPosition = new FramePoint3D();
+   private final FramePoint3D dcmPositionAtEndOfSwing = new FramePoint3D();
+   private final FrameVector3D dcmVelocity = new FrameVector3D();
 
    private final List<MutableDouble> temporaryDouble;
    private final List<FramePoint3D> temporaryFramePoints;
@@ -52,8 +53,6 @@ public class PiecewiseReverseDcmTrajectory
          dcmCornerPoints.add(new YoFramePoint3D("dcmCornerPoint" + i, worldFrame, registry));
          vrpCornerPoints.add(new YoFramePoint3D("vrpCornerPoint" + i, worldFrame, registry));
       }
-      dcmPosition = new FramePoint3D(worldFrame);
-      dcmVelocity = new FrameVector3D(worldFrame);
       temporaryDouble = new ArrayList<>();
       temporaryDouble.add(new MutableDouble(0));
       temporaryFramePoints = new ArrayList<>();
@@ -153,12 +152,10 @@ public class PiecewiseReverseDcmTrajectory
       {
          if (currentTime >= timesAtStartOfSteps[i])
          {
-            dcmPosition.set(dcmCornerPoints.get(i));
-            dcmPosition.sub(vrpCornerPoints.get(i));
-            dcmPosition.scale(Math.exp(naturalFrequency * (currentTime - timesAtStartOfSteps[i])));
-            dcmPosition.add(vrpCornerPoints.get(i));
-            dcmVelocity.set(dcmPosition);
-            dcmVelocity.sub(vrpCornerPoints.get(i));
+            double exponential = Math.exp(naturalFrequency * (currentTime - timesAtStartOfSteps[i]));
+            dcmPositionAtEndOfSwing.set(dcmCornerPoints.get(i + 1));
+            dcmPosition.interpolate(vrpCornerPoints.get(i), dcmCornerPoints.get(i), exponential);
+            dcmVelocity.sub(dcmPosition, vrpCornerPoints.get(i));
             dcmVelocity.scale(naturalFrequency);
             break;
          }
@@ -183,6 +180,11 @@ public class PiecewiseReverseDcmTrajectory
    public void getPosition(FramePoint3D dcmPositionToPack)
    {
       dcmPositionToPack.setIncludingFrame(dcmPosition);
+   }
+
+   public void getPositionAtEndOfSwing(FramePoint3D dcmPositionToPack)
+   {
+      dcmPositionToPack.setIncludingFrame(dcmPositionAtEndOfSwing);
    }
 
    public void getVelocity(FrameVector3D dcmVelocityToPack)

@@ -64,6 +64,22 @@ public class SelectionMatrix3D
    }
 
    /**
+    * Creates and initializes a new selection matrix.
+    *
+    * @param selectionFrame the new frame to which the axes selection is referring to.
+    * @param xSelected whether the x-axis is an axis of interest.
+    * @param ySelected whether the y-axis is an axis of interest.
+    * @param zSelected whether the z-axis is an axis of interest.
+    * @see #setSelectionFrame(ReferenceFrame)
+    * @see #setAxisSelection(boolean, boolean, boolean)
+    */
+   public SelectionMatrix3D(ReferenceFrame selectionFrame, boolean xSelected, boolean ySelected, boolean zSelected)
+   {
+      setSelectionFrame(selectionFrame);
+      setAxisSelection(xSelected, ySelected, zSelected);
+   }
+
+   /**
     * Copy constructor.
     * 
     * @param other the selection matrix to copy. Not modified.

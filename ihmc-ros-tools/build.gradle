@@ -43,7 +43,7 @@ mainDependencies {
    compile group: 'org.ros.rosjava_messages', name: 'nav_msgs', version: '1.11.7'
    compile group: 'org.ros.rosjava_messages', name: 'tf2_msgs', version: '0.5.9'
    compile group: 'org.ros.rosjava_messages', name: 'tf', version: '1.10.8'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
@@ -52,6 +52,6 @@ mainDependencies {
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

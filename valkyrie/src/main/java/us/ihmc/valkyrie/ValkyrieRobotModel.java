@@ -132,7 +132,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints,
                              boolean useShapeCollision)
    {
-      this(target, headless, model, simulationContactPoints, useShapeCollision, false);
+      this(target, headless, model, simulationContactPoints, useShapeCollision, true);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)

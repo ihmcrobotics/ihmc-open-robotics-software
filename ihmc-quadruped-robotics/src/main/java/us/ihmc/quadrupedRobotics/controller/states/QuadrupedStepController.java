@@ -10,7 +10,11 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.List;
 
 public class QuadrupedStepController implements QuadrupedController
 {
@@ -24,6 +28,10 @@ public class QuadrupedStepController implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    private final QuadrupedControllerToolbox controllerToolbox;
+
+   private final YoDouble speedUpTime = new YoDouble("speedUpTime", registry);
+   private final YoDouble clampedSpeedUpTime = new YoDouble("clampedSpeedUpTime", registry);
+   private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
 
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
@@ -78,12 +86,42 @@ public class QuadrupedStepController implements QuadrupedController
       // update desired horizontal com forces
       balanceManager.compute();
 
-      // update step adjustment
+      // update step adjustment and swing speed up
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
-      feetManager.adjustSteps(adjustedSteps);
+      if (balanceManager.stepHasBeenAdjusted())
+      {
+         feetManager.adjustSteps(adjustedSteps);
+
+         // update swing speed up
+         requestSwingSpeedUpIfNeeded();
+      }
+
 
       // update desired body orientation, angular velocity, and torque
       bodyOrientationManager.compute();
+   }
+
+   private void requestSwingSpeedUpIfNeeded()
+   {
+      List<? extends QuadrupedTimedStep> activeSteps = stepMessageHandler.getActiveSteps();
+      double speedUpTime = balanceManager.estimateSwingSpeedUpTimeUnderDisturbance();
+      this.speedUpTime.set(speedUpTime);
+
+      double minSpeedUpTime = speedUpTime;
+      for (int i = 0; i < activeSteps.size(); i++)
+      {
+         minSpeedUpTime = Math.min(minSpeedUpTime, feetManager.computeClampedSwingSpeedUpTime(activeSteps.get(i).getRobotQuadrant(), speedUpTime));
+      }
+      this.clampedSpeedUpTime.set(minSpeedUpTime);
+
+
+      double timeRemaining = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < activeSteps.size(); i++)
+      {
+         timeRemaining = Math.max(timeRemaining, feetManager.requestSwingSpeedUp(activeSteps.get(i).getRobotQuadrant(), minSpeedUpTime));
+      }
+
+      estimatedRemainingSwingTimeUnderDisturbance.set(timeRemaining);
    }
 
    @Override

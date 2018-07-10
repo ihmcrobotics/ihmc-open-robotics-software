@@ -20,6 +20,8 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -54,6 +56,7 @@ public class QuadrupedControllerToolbox
    private final FrameVector3D comVelocityEstimate = new FrameVector3D();
 
    private final YoFrameVector3D yoCoMVelocityEstimate;
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
 
    public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -88,6 +91,7 @@ public class QuadrupedControllerToolbox
       fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
+      centerOfMassDataHolder = runtimeEnvironment.getCenterOfMassDataHolder();
 
       double coefficientOfFriction = 1.0; // TODO: magic number...
       QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
@@ -110,18 +114,23 @@ public class QuadrupedControllerToolbox
    {
       referenceFrames.updateFrames();
       soleForceEstimator.compute();
-      comJacobian.compute();
-
       updateSupportPolygon();
 
-      comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
+      if(centerOfMassDataHolder == null)
+      {
+         comJacobian.compute();
+         comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
+      }
+      else
+      {
+         centerOfMassDataHolder.getCenterOfMassVelocity(comVelocityEstimate);
+      }
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
-
       dcmPositionEstimator.compute(comVelocityEstimate);
    }
 
-   public void updateSupportPolygon()
+   private void updateSupportPolygon()
    {
       supportPolygon.clear();
 
