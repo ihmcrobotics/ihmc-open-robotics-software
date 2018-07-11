@@ -364,7 +364,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    public void initializeStanding()
    {
-      initializeTiming();
+      setToHoldCurrentDesiredInMidFeetZUpFrame();
       offsetTrajectoryWhileWalking.initializeStanding();
       leapOfFaithModule.initializeStanding();
    }
