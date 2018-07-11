@@ -66,6 +66,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -98,7 +99,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       Random random = new Random(564574L);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -158,7 +159,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       desiredPosition.setY(desiredPosition2d.getY());
       desiredOrientation.set(desiredOrientationCorrected);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 2.0);
       assertTrue(success);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
@@ -187,7 +188,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Random random = new Random(564574L);
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -303,7 +304,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(200);
@@ -449,7 +450,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(200);
@@ -573,7 +574,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(200);
@@ -759,7 +760,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          desiredAngularVelocity.changeFrame(worldFrame);
          angularVelocity.set(desiredAngularVelocity);
 
-         pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(t + 2.0, position, orientation, linearVelocity, angularVelocity));
+         SE3TrajectoryPointMessage trajectoryPointMessage = HumanoidMessageTools.createSE3TrajectoryPointMessage(t + 2.0, position, orientation, linearVelocity, angularVelocity);
+         pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(trajectoryPointMessage);
 
          Graphics3DObject sphere = new Graphics3DObject();
          sphere.translate(position);
@@ -778,7 +780,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -878,7 +880,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -1015,7 +1017,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       Random random = new Random(564574L);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -1092,7 +1094,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -1351,7 +1353,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() + getZOffset());
       return desiredRandomPelvisPose;
+   }
+
+   public double getZOffset()
+   {
+      return -0.1;
    }
 }
