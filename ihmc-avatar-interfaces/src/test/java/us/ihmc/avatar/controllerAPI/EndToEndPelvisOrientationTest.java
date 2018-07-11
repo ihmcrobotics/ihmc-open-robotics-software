@@ -37,6 +37,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -122,7 +123,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 3.0e-3;
+      double epsilon = 1.0e-5;
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -356,7 +357,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
       double stepLength = 0.6 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength();
-      double stepWidth = stepLength / 2.0;
+      double stepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -379,6 +380,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          robotSide = robotSide.getOppositeSide();
          time += swingDuration + transferDuration;
       }
+      double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      time += (finalTransferTime - transferDuration);
       return time;
    }
 
