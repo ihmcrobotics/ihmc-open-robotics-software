@@ -13,13 +13,13 @@ The docker build requires Docker 17.05 or higher, as it uses a multi-stage build
 ROS 2 release to build from source. The command for building a ROS 2 Ardent container:
 
 ```bash
-$ docker build --build-arg ROS_VERSION_ARG=ardent -t ros2_ihmc_runtime:ardent .
+$ docker build --build-arg ROS_VERSION_ARG=bouncy -t ros2_ihmc_runtime:bouncy .
 ```
 
 And to run the container after building:
 
 ```bash
-$ docker run -it ros2_ihmc_runtime:ardent /bin/bash 
+$ docker run -it ros2_ihmc_runtime:bouncy
 ```
 
 ### Trying out some examples
