@@ -11,12 +11,24 @@ RUN @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -I
 # From https://github.com/ros2/ros2/wiki/Windows-Install-Binary
 
 # Install command line utilities
-RUN choco install -y python cmake curl 7zip patch git
+RUN choco install -y python --version 3.6.5
+RUN choco install -y cmake curl 7zip patch git which
+RUN setx PATH "%PATH%;C:\Python37\Scripts"
 
-## Install OpenSSL
-#WORKDIR C:/Users/ContainerUser/Downloads
-#RUN curl -sk https://slproweb.com/download/Win64OpenSSL-1_0_2o.exe -o Win64OpenSSL.exe
-#RUN Win64OpenSSL.exe
+# Install tee (useful to see status while logging to file)
+WORKDIR C:/Users/ContainerUser/Downloads
+RUN curl -skL https://downloads.sourceforge.net/project/unxutils/unxutils/current/UnxUtils.zip -o UnxUtils.zip
+RUN 7z x UnxUtils.zip -y -oUnxUtils
+RUN md C:\tee
+RUN copy UnxUtils\usr\local\wbin\tee.exe C:\tee\tee.exe
+RUN setx PATH "%PATH%;C:\tee"
+
+# Install OpenSSL
+WORKDIR C:/Users/ContainerUser/Downloads
+RUN curl -sk https://slproweb.com/download/Win64OpenSSL-1_0_2o.exe -o Win64OpenSSL.exe
+RUN Win64OpenSSL.exe /VERYSILENT
+RUN setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
+RUN setx PATH "%PATH%;C:\OpenSSL-Win64\bin"
 
 # Install Visual Studio
 RUN choco install -y visualstudio2017community visualstudio2017-workload-nativedesktop
@@ -25,7 +37,7 @@ RUN choco install -y visualstudio2017community visualstudio2017-workload-natived
 WORKDIR C:/Users/ContainerUser/Downloads
 RUN curl -skL https://github.com/ros2/ros2/releases/download/opencv-archives/opencv-3.4.1-vc15.VS2017.zip -o opencv.zip
 RUN dir
-RUN 7z x opencv.zip -y -oc:\opencv
+RUN 7z x opencv.zip -y -oc:
 RUN setx -m OpenCV_DIR C:\opencv
 RUN setx PATH "%PATH%;C:\opencv\x64\vc15\bin"
 
@@ -38,24 +50,40 @@ RUN curl -skL https://github.com/ros2/choco-packages/releases/download/2018-06-1
 RUN choco install -y -s C:/Users/ContainerUser/Downloads asio eigen tinyxml-usestl tinyxml2
 
 # Install python dependencies
-RUN python -m pip install -U catkin_pkg empy pyparsing pyyaml setuptools
+RUN python -m pip install --upgrade setuptools pip
+RUN pip install --upgrade catkin_pkg empy pyparsing pyyaml
 
-# and  https://github.com/ros2/ros2/wiki/Windows-Development-Setup
+# From https://github.com/ros2/ros2/wiki/Windows-Development-Setup
 
+# Additional Prerequisites
+RUN setx PATH "%PATH%;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin"
 
+# Installing Developer Tools
 RUN pip install vcstool
-RUN pip install -U colcon-common-extensions
-RUN pip install -U setuptools pip
-RUN pip install catkin_pkg EmPy pyparsing pyyaml
+RUN pip install --upgrade colcon-common-extensions
+
+# Install dependencies
 RUN pip install pytest coverage mock
 RUN pip install flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions \
     flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pep8 pydocstyle
 RUN choco install -y cppcheck
+RUN setx PATH "%PATH%;C:\Program Files\Cppcheck"
 
+# Skip Install Qt5
+
+# Getting the Source Code
 ARG ROS_VERSION_ARG
-
+ENV ROS_VERSION ${ROS_VERSION_ARG}
 WORKDIR C:/
-RUN md dev/ros2
+RUN md dev\ros2\src
 WORKDIR C:/dev/ros2
+RUN curl -sk https://raw.githubusercontent.com/ros2/ros2/release-%ROS_VERSION%/ros2.repos -o ros2.repos
+RUN vcs import src < ros2.repos
 
+# Building the ROS 2 Code
+SHELL ["C:\\Windows\\System32\\cmd.exe", "/c", "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\" && "]
+RUN colcon build --merge-install --packages-skip rviz
+
+WORKDIR C:/dev/ros2
 ENTRYPOINT ["C:\\Windows\\System32\\cmd.exe", "/k", "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"]
+#ENTRYPOINT ["C:\\Windows\\System32\\cmd.exe"]
