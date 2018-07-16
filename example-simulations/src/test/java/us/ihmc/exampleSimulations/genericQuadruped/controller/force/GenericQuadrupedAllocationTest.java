@@ -41,6 +41,7 @@ import us.ihmc.tools.MemoryTools;
 
 public class GenericQuadrupedAllocationTest
 {
+   private QuadrupedTestFactory quadrupedTestFactory;
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
@@ -81,9 +82,11 @@ public class GenericQuadrupedAllocationTest
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -92,7 +95,7 @@ public class GenericQuadrupedAllocationTest
    {
       try
       {
-         QuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
+         quadrupedTestFactory = new GenericQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
