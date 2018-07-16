@@ -72,6 +72,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       quadrupedTestFactory = null;
       conductor = null;
