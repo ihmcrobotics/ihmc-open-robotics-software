@@ -815,4 +815,12 @@ public class QuadrupedSimulationFactory
    {
       this.sensorReaderWrapper = sensorReaderWrapper;
    }
+
+   public void close()
+   {
+      if(realtimeRos2Node != null)
+      {
+         realtimeRos2Node.destroy();
+      }
+   }
 }
