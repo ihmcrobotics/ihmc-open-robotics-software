@@ -26,6 +26,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
@@ -36,6 +37,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
@@ -99,9 +101,6 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
-
-
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());

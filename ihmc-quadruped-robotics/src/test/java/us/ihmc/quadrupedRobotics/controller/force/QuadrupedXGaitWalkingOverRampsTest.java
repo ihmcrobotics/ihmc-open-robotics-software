@@ -22,19 +22,23 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      quadrupedTestFactory = createQuadrupedTestFactory();
    }
    
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -54,7 +58,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
    private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseNetworking(true);
@@ -107,8 +110,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
-      
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setInitialPosition(initialPosition);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -117,9 +118,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-
-//      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-//      conductor.simulate();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
