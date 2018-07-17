@@ -78,6 +78,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private QuadrupedTeleopManager stepTeleopManager;
    private YoGraphicsListRegistry graphicsListRegistry;
    private String robotName;
+   private QuadrupedSimulationFactory simulationFactory;
 
    public GenericQuadrupedTestFactory()
    {
@@ -119,7 +120,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       QuadrantDependentList<Boolean> kneeOrientationsOutward = new QuadrantDependentList<>(false, false, false, false);
 
-      QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
+      simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(CONTROL_DT);
       simulationFactory.setSimulationDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
@@ -275,5 +276,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public FullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   @Override
+   public void close()
+   {
+      simulationFactory.close();
    }
 }

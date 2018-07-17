@@ -32,16 +32,19 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      quadrupedTestFactory = createQuadrupedTestFactory();
    }
 
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
@@ -57,7 +60,6 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
       QuadrupedInitialOffsetAndYaw initialOffset = new QuadrupedInitialOffsetAndYaw(new Vector3D(environment.getStartPosition()), environment.getStartYaw());
 
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setInitialOffset(initialOffset);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);

@@ -23,7 +23,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
-   
+
    public SimulationConstructionSet createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
