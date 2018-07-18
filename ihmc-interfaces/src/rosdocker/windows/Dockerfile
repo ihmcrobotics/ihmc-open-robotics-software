@@ -64,20 +64,20 @@ RUN pip install --upgrade colcon-common-extensions
 
 # Install dependencies
 RUN pip install pytest coverage mock
-RUN pip install flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions \
-    flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pep8 pydocstyle
+RUN pip install flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions
+RUN pip install flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pep8 pydocstyle
 RUN choco install -y cppcheck
 RUN setx PATH "%PATH%;C:\Program Files\Cppcheck"
 
 # Skip Install Qt5
 
 # Getting the Source Code
-ARG ROS_VERSION_ARG
-ENV ROS_VERSION ${ROS_VERSION_ARG}
+ARG ROS_DISTRO
+ENV ROS_DISTRO ${ROS_DISTRO}
 WORKDIR C:/
 RUN md dev\ros2\src
 WORKDIR C:/dev/ros2
-RUN curl -sk https://raw.githubusercontent.com/ros2/ros2/release-%ROS_VERSION%/ros2.repos -o ros2.repos
+RUN curl -sk https://raw.githubusercontent.com/ros2/ros2/release-%ROS_DISTRO%/ros2.repos -o ros2.repos
 RUN vcs import src < ros2.repos
 
 # Building the ROS 2 Code
