@@ -165,6 +165,15 @@
                         <parameter name="maximumFeedbackToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         <parameter name="maximumFeedbackRateToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                     </registry>
+                    <registry name="HighLevelControlManagerFactory">
+                        <registry name="CenterOfMassHeightManager">
+                            <registry name="PelvisHeightControlState">
+<parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+<parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+<parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
+                            </registry>
+                        </registry>
+                    </registry>
                 </registry>
             </registry>
         </registry>
