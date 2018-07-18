@@ -8,7 +8,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.7"
+      classpath "us.ihmc:ihmc-build:0.14.0"
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.9.0"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.8.3"
       classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
