@@ -54,10 +54,16 @@ RUN /bin/bash -c "source /opt/ros/$ROS2_DISTRO/setup.bash \
                && source /root/ihmc_catkin_ws/install/setup.bash \
                && ament build --symlink-install --only ros1_bridge --force-cmake-configure"
 
-COPY ./runtime_entrypoint.sh /
+#COPY ./runtime_entrypoint.sh /
 
-RUN ["chmod", "+x", "/runtime_entrypoint.sh"]
+COPY ./source_ros1.sh /
+COPY ./source_ros2.sh /
+COPY ./source_ros1_then_ros2.sh /
 
-RUN /bin/bash -c "echo 'source /runtime_entrypoint.sh' >> /root/.bashrc"
+RUN ["chmod", "+x", "/source_ros1.sh"]
+RUN ["chmod", "+x", "/source_ros2.sh"]
+RUN ["chmod", "+x", "/source_ros1_then_ros2.sh"]
+
+#RUN /bin/bash -c "echo 'source /runtime_entrypoint.sh' >> /root/.bashrc"
 
 CMD ["/bin/bash"]
