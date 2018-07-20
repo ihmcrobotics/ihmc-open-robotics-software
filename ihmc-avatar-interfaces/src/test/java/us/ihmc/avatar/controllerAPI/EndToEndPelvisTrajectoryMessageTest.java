@@ -163,7 +163,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
+      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs, isUsingPelvisHeightControlOnly());
    }
 
 
@@ -253,7 +253,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
+      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs, isUsingPelvisHeightControlOnly());
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
       double walkingTime = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, scs.getRootRegistry());
@@ -409,7 +409,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime() + 1.0);
       assertTrue(success);
 
-
       pelvisPosition.setToZero(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       assertEquals(finalHeight, pelvisPosition.getZ(), 0.004);
@@ -418,8 +417,19 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private void assertCenterOfMassHeightManagerIsInState(SimulationConstructionSet scs, PelvisHeightControlMode mode)
    {
+      if (isUsingPelvisHeightControlOnly())
+      {
+         // No need to assert as there is no state machine.
+         return;
+      }
+
       YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.getVariable("CenterOfMassHeightManager", "CenterOfMassHeightManagerCurrentState");
       assertEquals(mode, centerOfMassHeightManagerState.getEnumValue());
+   }
+
+   private boolean isUsingPelvisHeightControlOnly()
+   {
+      return getRobotModel().getWalkingControllerParameters().usePelvisHeightControllerOnly();
    }
 
    private SimpleSE3TrajectoryPoint findPelvisHeightTrajectoryPoint(RigidBody rigidBody, String bodyName, int trajectoryPointIndex, SimulationConstructionSet scs)
@@ -862,7 +872,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedTrajectoryPoint.set(fromMessage.getTime(), fromMessage.getPosition(), fromMessage.getOrientation(), new Vector3D(), fromMessage.getAngularVelocity());
       expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
-      SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, scs);
+      SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, scs, isUsingPelvisHeightControlOnly());
 
       // Not check the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
@@ -998,7 +1008,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedTrajectoryPoint.set(fromMessage.getTime(), fromMessage.getPosition(), fromMessage.getOrientation(), fromMessage.getLinearVelocity(), fromMessage.getAngularVelocity());
       expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
-      SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, scs);
+      SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, scs, isUsingPelvisHeightControlOnly());
 
       // Not check the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
@@ -1069,7 +1079,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       assertEquals(PelvisOrientationControlMode.USER, orientationControlMode.getEnumValue());
       assertFalse(findControllerStopBooleanForXY(scs));
-      assertFalse(findControllerStopBooleanForHeight(scs));
+      if (!isUsingPelvisHeightControlOnly())
+      {
+         assertFalse(findControllerStopBooleanForHeight(scs));
+      }
       String pelvisName = fullRobotModel.getPelvis().getName();
       Quaternion controllerDesiredOrientationBeforeStop = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(pelvisName, scs);
       Point3D controllerDesiredPelvisHeightBeforeStop = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(pelvisName, scs);
@@ -1156,7 +1169,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
    }
 
-   public static Vector3D findControllerDesiredLinearVelocity(SimulationConstructionSet scs)
+   public static Vector3D findControllerDesiredLinearVelocity(String bodyName, SimulationConstructionSet scs, boolean isUsingPelvisHeightControl)
    {
       String pelvisPrefix = "pelvisOffset";
       String subTrajectory = "SubTrajectory";
@@ -1165,10 +1178,17 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       Vector3D linearVelocity = findVector3d(subTrajectoryName, currentLinearVelocityVarNamePrefix, scs);
 
-      String pelvisHeightPrefix = "pelvisHeightOffset";
-      String offsetHeightTrajectoryName = pelvisHeightPrefix + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
-
-      linearVelocity.setZ(scs.getVariable(offsetHeightTrajectoryName, pelvisHeightPrefix + subTrajectory + "CurrentVelocity").getValueAsDouble());
+      if (isUsingPelvisHeightControl)
+      {
+         Vector3D linearVelocityZ = EndToEndHandTrajectoryMessageTest.findControllerDesiredLinearVelocity(bodyName, scs);
+         linearVelocity.setZ(linearVelocityZ.getZ());
+      }
+      else
+      {
+         String pelvisHeightPrefix = "pelvisHeightOffset";
+         String offsetHeightTrajectoryName = pelvisHeightPrefix + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
+         linearVelocity.setZ(scs.getVariable(offsetHeightTrajectoryName, pelvisHeightPrefix + subTrajectory + "CurrentVelocity").getValueAsDouble());
+      }
 
       return linearVelocity;
    }
@@ -1270,19 +1290,24 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return simpleSE3TrajectoryPoint;
    }
 
-   public static SimpleSE3TrajectoryPoint findCurrentDesiredTrajectoryPoint(String bodyName, SimulationConstructionSet scs)
+   public static SimpleSE3TrajectoryPoint findCurrentDesiredTrajectoryPoint(String bodyName, SimulationConstructionSet scs, boolean isUsingPelvisHeightControl)
    {
       SimpleSE3TrajectoryPoint simpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
       Point2D positionXY = findControllerDesiredPositionXY(scs);
       Point3D position = new Point3D(positionXY.getX(), positionXY.getY(), Double.NaN);
+      if (isUsingPelvisHeightControl)
+      {
+         Point3D positionZ = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(bodyName, scs);
+         position.setZ(positionZ.getZ());
+      }
       simpleSE3TrajectoryPoint.setPosition(position);
       simpleSE3TrajectoryPoint.setOrientation(EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(bodyName, scs));
-      simpleSE3TrajectoryPoint.setLinearVelocity(findControllerDesiredLinearVelocity(scs));
+      simpleSE3TrajectoryPoint.setLinearVelocity(findControllerDesiredLinearVelocity(bodyName, scs, isUsingPelvisHeightControl));
       simpleSE3TrajectoryPoint.setAngularVelocity(EndToEndHandTrajectoryMessageTest.findControllerDesiredAngularVelocity(bodyName, scs));
       return simpleSE3TrajectoryPoint;
    }
 
-   public static void assertSingleWaypointExecuted(String bodyName, FullHumanoidRobotModel fullRobotModel, Point3D desiredPosition, Quaternion desiredOrientation, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(String bodyName, FullHumanoidRobotModel fullRobotModel, Point3D desiredPosition, Quaternion desiredOrientation, SimulationConstructionSet scs, boolean isUsingPelvisHeightControl)
    {
       assertNumberOfWaypoints(2, scs);
 
@@ -1293,15 +1318,23 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Quaternion desiredControllerOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(bodyName, scs);
       EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, desiredControllerOrientation, EPSILON_FOR_DESIREDS);
 
-      // Hard to figure out how to verify the desired there
-//      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
-//      assertEquals(desiredPosition.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
-      // Ending up doing a rough check on the actual height
-      MovingReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);
-      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double pelvisHeight = pelvisPosition.getZ();
-      assertEquals(desiredPosition.getZ(), pelvisHeight, EPSILON_FOR_HEIGHT);
+      if (isUsingPelvisHeightControl)
+      {
+         double actualDesiredZ = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(bodyName, scs).getZ();
+         assertEquals(desiredPosition.getZ(), actualDesiredZ, EPSILON_FOR_DESIREDS);
+      }
+      else
+      {
+         // Hard to figure out how to verify the desired there
+         //      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
+         //      assertEquals(desiredPosition.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
+         // Ending up doing a rough check on the actual height
+         MovingReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
+         FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);
+         pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         double pelvisHeight = pelvisPosition.getZ();
+         assertEquals(desiredPosition.getZ(), pelvisHeight, EPSILON_FOR_HEIGHT);
+      }
    }
 
    public static void assertNumberOfWaypoints(int expectedNumberOfWaypoints, SimulationConstructionSet scs)
