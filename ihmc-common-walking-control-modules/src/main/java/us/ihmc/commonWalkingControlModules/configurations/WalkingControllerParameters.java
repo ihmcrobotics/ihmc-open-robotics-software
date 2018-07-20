@@ -800,4 +800,13 @@ public abstract class WalkingControllerParameters
    {
       return null;
    }
+
+   /**
+    * A boolean to determine whether the CoM height manager should be created or not. If this returns true
+    * the robot will use a rigid body manager to control the pelvis height only.
+    */
+   public boolean usePelvisHeightControllerOnly()
+   {
+      return false;
+   }
 }
