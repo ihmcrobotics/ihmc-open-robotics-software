@@ -14,6 +14,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -57,22 +58,34 @@ public class CenterOfMassHeightManager
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
 
+   private final boolean useStateMachine;
+
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry)
+                                    YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      String namePrefix = getClass().getSimpleName();
-      requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
+      useStateMachine = !walkingControllerParameters.usePelvisHeightControllerOnly();
+      enableUserPelvisControlDuringWalking.set(false);
 
       // User mode
-      pelvisHeightControlState = new PelvisHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+      pelvisHeightControlState = new PelvisHeightControlState(controllerToolbox, registry);
 
-      // Normal control during walking
-      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+      if (useStateMachine)
+      {
+         // Normal control during walking
+         YoDouble yoTime = controllerToolbox.getYoTime();
+         String namePrefix = getClass().getSimpleName();
+         requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
+         centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
-      stateMachine = setupStateMachine(namePrefix, yoTime);
-      enableUserPelvisControlDuringWalking.set(false);
+         stateMachine = setupStateMachine(namePrefix, yoTime);
+      }
+      else
+      {
+         requestedState = null;
+         centerOfMassHeightControlState = null;
+         stateMachine = null;
+      }
    }
 
    private StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
@@ -91,8 +104,14 @@ public class CenterOfMassHeightManager
 
    public void initialize()
    {
-      stateMachine.resetToInitialState();
-//      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+      if (useStateMachine)
+      {
+         stateMachine.resetToInitialState();
+      }
+      else
+      {
+         pelvisHeightControlState.goHome(0.5);
+      }
    }
 
    /**
@@ -106,7 +125,14 @@ public class CenterOfMassHeightManager
 
    public void compute()
    {
-      stateMachine.doActionAndTransition();
+      if (useStateMachine)
+      {
+         stateMachine.doActionAndTransition();
+      }
+      else
+      {
+         pelvisHeightControlState.doAction(Double.NaN);
+      }
    }
 
    /**
@@ -115,10 +141,15 @@ public class CenterOfMassHeightManager
     */
    public void prepareForLocomotion()
    {
+      if (!useStateMachine)
+      {
+         return;
+      }
+
       if (enableUserPelvisControlDuringWalking.getBooleanValue())
          return;
 
-      if(stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
+      if (stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
          centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
@@ -136,7 +167,14 @@ public class CenterOfMassHeightManager
 
    public void initializeDesiredHeightToCurrent()
    {
-      stateMachine.getCurrentState().initializeDesiredHeightToCurrent();
+      if (useStateMachine)
+      {
+         stateMachine.getCurrentState().initializeDesiredHeightToCurrent();
+      }
+      else
+      {
+         pelvisHeightControlState.initializeDesiredHeightToCurrent();
+      }
    }
 
    /**
@@ -146,26 +184,37 @@ public class CenterOfMassHeightManager
     */
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if(command.isEnableUserPelvisControl())
+      if (useStateMachine)
       {
-         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-
-         tempPose.setToZero(tempPosition.getReferenceFrame());
-         tempPose.setPosition(tempPosition);
-
-         if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+         if (command.isEnableUserPelvisControl())
          {
-            requestState(PelvisHeightControlMode.USER);
+            enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+            stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+
+            tempPose.setToZero(tempPosition.getReferenceFrame());
+            tempPose.setPosition(tempPosition);
+
+            if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+            {
+               requestState(PelvisHeightControlMode.USER);
+               return;
+            }
+
+            PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
             return;
          }
 
-         PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
-         return;
+         centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+         requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
-
-      centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
-      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+      else
+      {
+         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+         pelvisHeightControlState.getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+         tempPose.setToZero(tempPosition.getReferenceFrame());
+         tempPose.setPosition(tempPosition);
+         pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose);
+      }
    }
 
    /**
@@ -175,25 +224,36 @@ public class CenterOfMassHeightManager
     */
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      if(command.isEnableUserPelvisControl())
+      if (useStateMachine)
       {
-         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-
-         tempPose.setToZero(tempPosition.getReferenceFrame());
-         tempPose.setPosition(tempPosition);
-
-         if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
+         if (command.isEnableUserPelvisControl())
          {
-            requestState(PelvisHeightControlMode.USER);
+            enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+            stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+
+            tempPose.setToZero(tempPosition.getReferenceFrame());
+            tempPose.setPosition(tempPosition);
+
+            if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
+            {
+               requestState(PelvisHeightControlMode.USER);
+               return;
+            }
+            PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
             return;
          }
-         PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
-         return;
-      }
 
-      centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
-      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+         centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+         requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
+      }
+      else
+      {
+         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+         pelvisHeightControlState.getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+         tempPose.setToZero(tempPosition.getReferenceFrame());
+         tempPose.setPosition(tempPosition);
+         pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose);
+      }
    }
 
    /**
@@ -202,72 +262,145 @@ public class CenterOfMassHeightManager
     */
    public void goHome(double trajectoryTime)
    {
-      stateMachine.getCurrentState().goHome(trajectoryTime);
+      if (useStateMachine)
+      {
+         stateMachine.getCurrentState().goHome(trajectoryTime);
+      }
+      else
+      {
+         pelvisHeightControlState.goHome(trajectoryTime);
+      }
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
+      if (useStateMachine)
+      {
+         stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
+      }
+      else
+      {
+         pelvisHeightControlState.handleStopAllTrajectoryCommand(command);
+      }
    }
 
    public void setSupportLeg(RobotSide supportLeg)
    {
-      centerOfMassHeightControlState.setSupportLeg(supportLeg);
+      if (useStateMachine)
+      {
+         centerOfMassHeightControlState.setSupportLeg(supportLeg);
+      }
    }
 
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
-      centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      if (useStateMachine)
+      {
+         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      }
    }
 
-   /**
-    * The Desired acceleration of the COM. User mode returns 0, while the center of mass height manager returns the action from the internal pd controller over the height
-    * @return
-    */
    public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
-         FeetManager feetManager)
+                                                     FeetManager feetManager)
    {
-      return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
+      if (useStateMachine)
+      {
+         return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush,
+                                                                                   feetManager);
+      }
+      else
+      {
+         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
+      }
    }
 
    public boolean hasBeenInitializedWithNextStep()
    {
-      return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
+      if (useStateMachine)
+      {
+         return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return stateMachine.getCurrentState().getFeedbackControlCommand();
-   }
-
-   public FeedbackControlCommandList createFeedbackControlTemplate()
-   {
-      FeedbackControlCommandList ret = new FeedbackControlCommandList();
-      for (PelvisHeightControlMode mode : PelvisHeightControlMode.values())
+      if (useStateMachine)
       {
-         PelvisAndCenterOfMassHeightControlState state = stateMachine.getState(mode);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         return stateMachine.getCurrentState().getFeedbackControlCommand();
       }
-      return ret;
+      else
+      {
+         return pelvisHeightControlState.getFeedbackControlCommand();
+      }
    }
 
-   /**
-    * The center of mass height manager can control the pelvis in taskspace or the height of the Center of mass. When controlling
-    * the pelvis height we don't need to control the height with a momentum command. If we are using the center of mass height control state
-    * we do. When used in conjunction with the balance manager this will enable the Z component of the MomentumRateCommand that is sent
-    * to the controller core
-    * @return
-    */
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      if (useStateMachine)
+      {
+         FeedbackControlCommandList ret = new FeedbackControlCommandList();
+         for (PelvisHeightControlMode mode : PelvisHeightControlMode.values())
+         {
+            PelvisAndCenterOfMassHeightControlState state = stateMachine.getState(mode);
+            if (state != null && state.getFeedbackControlCommand() != null)
+               ret.addCommand(state.getFeedbackControlCommand());
+         }
+         return ret;
+      }
+      else
+      {
+         return pelvisHeightControlState.getFeedbackControlCommand();
+      }
+   }
+
    public boolean getControlHeightWithMomentum()
    {
-      // GW: revert this from returning true always for now to fix a test.
-      return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
+      if (useStateMachine)
+      {
+         return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
+      }
+      else
+      {
+         return false;
+      }
    }
 
-   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity, PIDGainsReadOnly userModeComHeightGains)
+   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity,
+                                 PIDGainsReadOnly userModeComHeightGains)
    {
+      if (useStateMachine)
+      {
+         centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+      }
       pelvisHeightControlState.setGains(userModeComHeightGains);
-      centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+   }
+
+   public void step(Point3DReadOnly stanceFootPosition, Point3DReadOnly touchdownPosition, double swingTime, RobotSide swingSide, double toeOffHeight)
+   {
+      if (useStateMachine || enableUserPelvisControlDuringWalking.getBooleanValue())
+      {
+         return;
+      }
+
+      pelvisHeightControlState.step(stanceFootPosition, touchdownPosition, swingTime, swingSide, toeOffHeight);
+   }
+
+   public void transfer(Point3DReadOnly transferPosition, double transferTime)
+   {
+      transfer(transferPosition, transferTime, null, 0.0);
+   }
+
+   public void transfer(Point3DReadOnly transferPosition, double transferTime, RobotSide swingSide, double toeOffHeight)
+   {
+      if (useStateMachine || enableUserPelvisControlDuringWalking.getBooleanValue())
+      {
+         return;
+      }
+
+      pelvisHeightControlState.transfer(transferPosition, transferTime, swingSide, toeOffHeight);
    }
 }

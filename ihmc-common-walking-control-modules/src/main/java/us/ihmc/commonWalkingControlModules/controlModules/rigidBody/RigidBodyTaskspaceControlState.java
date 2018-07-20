@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -751,6 +751,22 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       orientationTrajectoryGenerator.getOrientation(desiredOrientation);
       positionTrajectoryGenerator.getPosition(desiredPosition);
+      if (orientationTrajectoryGenerator.isEmpty())
+      {
+         desiredOrientation.setToZero(controlFrame);
+      }
+      else
+      {
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      }
+      if (positionTrajectoryGenerator.isEmpty())
+      {
+         desiredPosition.setToZero(controlFrame);
+      }
+      else
+      {
+         positionTrajectoryGenerator.getPosition(desiredPosition);
+      }
       desiredPoseToPack.setIncludingFrame(desiredPosition, desiredOrientation);
    }
 
