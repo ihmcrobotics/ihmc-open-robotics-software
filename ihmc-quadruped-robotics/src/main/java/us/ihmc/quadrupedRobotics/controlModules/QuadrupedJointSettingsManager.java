@@ -57,13 +57,6 @@ public class QuadrupedJointSettingsManager
          ikJointIntegrationCommand.addJointToComputeDesiredPositionFor(controlledJoint);
       }
 
-      for (int i = 0; i < ikJointIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
-      {
-         ikJointIntegrationCommand.setJointMaxima(i, ikMaxJointError.getValue(), ikMaxJointAcceleration.getValue());
-         ikJointIntegrationCommand
-               .setBreakFrequencies(i, ikVelocityIntegrationBreakFrequency.getValue(), ikAccelerationDifferentiationBreakFrequency.getValue());
-      }
-
       parentRegistry.addChild(registry);
    }
 
