@@ -69,12 +69,19 @@ public class LinkHollowCylinder extends Link
       return materialVolume * aluminumDensityKgPerCubicM;
    }
    
+   public static double computeRadius(double length, double mass)
+   {
+	   double materialVolume = mass / aluminumDensityKgPerCubicM;
+	   double ret = Math.sqrt(materialVolume / (Math.PI * length * ( 2 * wallThicknessPercentOfRadius - wallThicknessPercentOfRadius*wallThicknessPercentOfRadius)));
+	   return ret;
+   }  
+   
    public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
    {
       this(name, cylinderZAxisInWorld, mass, length, radius, attachParentJointToDistalEndOfCylinder(cylinderZAxisInWorld, length), color);
    }
 
-   private static Vector3D attachParentJointToDistalEndOfCylinder(Vector3D cylinderZAxisInWorld, double length)
+   public static Vector3D attachParentJointToDistalEndOfCylinder(Vector3D cylinderZAxisInWorld, double length)
    {
       Vector3D parentJointOffsetFromCoM = new Vector3D(cylinderZAxisInWorld);
       parentJointOffsetFromCoM.normalize();
