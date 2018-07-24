@@ -266,7 +266,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       {
          taskspaceControlState.getDesiredPose(tempPose);
          tempPose.changeFrame(ReferenceFrame.getWorldFrame());
-         double currentDesired = tempPose.getZ();
+         double currentDesired = tempPose.getZ() + adjustmentAmount.getValue();
          goToHeight(currentDesired - previousOffset, offsetTrajectoryTime.getValue());
       }
       previousOffset = offset.getValue();
