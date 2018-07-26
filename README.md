@@ -1,17 +1,16 @@
 # IHMC Open Robotics Software
 
-### 0.11 Build Info
-Build 4570
-https://bamboo.ihmc.us/browse/LIBS-IHMCOPENROBOTICSSOFTWARE-1067
+**Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
+**Test (2900+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
+
+ [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/images/download.svg?version=0.11.0) ](https://bintray.com/ihmcrobotics/maven-release/ihmc-common-walking-control-modules/0.11.0/link) <-- Latest version on Bintray
 
 ### Tested Platforms
 
 #### Robots
 
 - Atlas
-   * This release is fully tested on Atlas hardware. See 0.11 Release Notes for detailed results.
-
-**This release DOES NOT support the Valkyrie hardware platform, as we do not have hardware to test on.**
+   * This release is fully tested on Atlas hardware. See [0.11 Release Notes](docs/release-notes/0.11%20Release%20Notes.md) for detailed results.
 
 #### Developers
 
@@ -48,8 +47,8 @@ repositories {
 ### Developing with *IHMC Open Robotics Software* from source
 
 #### Requirements
-*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 8 with JavaFX. We also strongly suggest an IDE, either Eclipse Mars.1
-or IntelliJ IDEA 2017.3+ (Ultimate or Community is fine). Currently, we require **Gradle 4.1+**. We provide a versioned [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)
+*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 8 with JavaFX. We also strongly suggest an IDE, either Eclipse
+or IntelliJ (Ultimate or Community is fine). Currently, we require **Gradle 4.1+**. We provide a versioned [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)
 for getting started quickly. The Gradle wrapper will always reflect the minimum version of Gradle required to build the software; if we adopt features only present
 in newer versions of Gradle as they are release we will update the wrapper. You can also install Gradle system-wide (local installation):
 
@@ -72,7 +71,7 @@ An example workflow for developing against a local clone of the software:
 **To publish jars to your local Maven repository:**  
 ```bash
 $ cd /path/to/ihmc-open-robotics-software
-$ ./gradlew compositeTask -PtaskName=publishToMavenLocal -PcompositeSearchHeight=0 -PpublishMode=LOCAL
+$ ./gradlew publishAll -PcompositeSearchHeight=0
 ```
 
 **To depend on the jars in your local Maven repository:**
