@@ -28,7 +28,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile "org.apache.commons:commons-lang3:3.7"
-   compile "us.ihmc.thirdparty.jinput:jinput:160414"
+   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '180727'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
