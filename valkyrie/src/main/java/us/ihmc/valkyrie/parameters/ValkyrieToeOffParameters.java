@@ -4,6 +4,13 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 
 public class ValkyrieToeOffParameters extends ToeOffParameters
 {
+   private final boolean runningOnRealRobot;
+
+   public ValkyrieToeOffParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
+
    @Override
    public boolean doToeOffIfPossible()
    {
@@ -22,8 +29,15 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
       // Used to be: target != RobotTarget.REAL_ROBOT;
       // Trying to see if that's really necessary (Sylvain)
       // It delays the toe-off to some extent which can cause some issues.
-      return false;
+      return true;
    }
+
+   @Override
+   public double getECMPProximityForToeOff()
+   {
+      return runningOnRealRobot ? 0.0 : 0.03;
+   }
+
 
    @Override
    public double getMinStepLengthForToeOff()
