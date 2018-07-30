@@ -26,11 +26,11 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class HumanoidControllerWarumupTools
 {
-   public static void warmup(HumanoidControllerWarmup controllerWarumup)
+   public static void warmup(HumanoidControllerWarmup controllerWarmup)
    {
       PrintTools.info("Starting to warm up...");
       long startTime = System.currentTimeMillis();
-      controllerWarumup.runWarmup();
+      controllerWarmup.runWarmup();
       double duration = 0.001 * (System.currentTimeMillis() - startTime);
       PrintTools.info("Warmup took " + duration + "s.");
    }

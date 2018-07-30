@@ -134,7 +134,7 @@ public abstract class HumanoidControllerWarmup
       return referenceFrames;
    }
 
-   protected YoVariable<?> getYoVariable(String name)
+   public YoVariable<?> getYoVariable(String name)
    {
       return registry.getVariable(name);
    }
