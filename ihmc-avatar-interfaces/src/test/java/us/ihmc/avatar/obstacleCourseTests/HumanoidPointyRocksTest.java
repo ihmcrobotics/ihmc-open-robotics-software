@@ -870,7 +870,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
          // Set joint velocity limits on the ankle joints so that they don't flip out when doing partial footsteps. On real robots with joint velocity limits, this should
          // happen naturally.
-         double qd_max = 12.0;
+         double qd_max = 10.0;
          double b_vel_limit = 500.0;
 
          String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
