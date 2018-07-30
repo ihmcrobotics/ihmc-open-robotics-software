@@ -36,7 +36,7 @@ public class PrintStreamToRosBridge extends PrintStream
    {
       if(currentThread == null)
       {
-         currentThread = new Thread(new OutputStreamMonitor());
+         currentThread = new Thread(new OutputStreamMonitor(), "IHMC-PrintStreamToRosBridge");
          currentThread.start();
       }
    }

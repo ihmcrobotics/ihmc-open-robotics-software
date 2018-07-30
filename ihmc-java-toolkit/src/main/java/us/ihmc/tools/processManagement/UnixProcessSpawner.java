@@ -87,7 +87,7 @@ public abstract class UnixProcessSpawner extends ProcessSpawner
                e.printStackTrace();
             }
          }
-      }).start();
+      }, "IHMC-UnixProcessSpawnerWait").start();
 
       return monitorObject;
    }
@@ -114,7 +114,7 @@ public abstract class UnixProcessSpawner extends ProcessSpawner
                e.printStackTrace();
             }
          }
-      }).start();
+      }, "IHMC-UnixProcessSpawnerWait").start();
 
       return monitorObject;
    }

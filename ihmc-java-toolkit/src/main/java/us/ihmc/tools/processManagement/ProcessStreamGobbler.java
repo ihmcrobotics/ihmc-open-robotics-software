@@ -34,7 +34,7 @@ public class ProcessStreamGobbler extends Thread
             public void run()
             {
             }
-         }));
+         }, "IHMC-ProcessStreamGobblerShutdown"));
       }
 
       @Override

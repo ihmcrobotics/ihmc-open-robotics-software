@@ -71,7 +71,7 @@ public class LinkComIDActionListener implements ActionListener
             residual.showSample(20, "PostOpt CoM: " + residual.getCurrentLinkCom());
          }
 
-      });
+      }, "IHMC-LinkComIDActionListener");
       foo.start();
 
    }

@@ -85,7 +85,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
                }
             }
          }
-      });
+      }, "IHMC-StateMachinesPanel");
       repaintWhenStateChange.start();
 
    }

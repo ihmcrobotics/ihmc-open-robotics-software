@@ -14,7 +14,7 @@ public class ThreadedAtomicPacketSubscriber<T extends Packet<?>> implements Pack
 
    public ThreadedAtomicPacketSubscriber()
    {
-      Thread t = new Thread(this);
+      Thread t = new Thread(this, "IHMC-AtomicPacketSubscriber");
       t.start();
    }
 
