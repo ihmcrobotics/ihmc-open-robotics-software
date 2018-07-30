@@ -71,7 +71,7 @@ public abstract class InterruptableWorker implements Runnable
    public void startWorkOnANewThread()
    {
       setCurrentState(STATE.WORKING);
-      Thread thread = new Thread(this, "InterruptableWorker");
+      Thread thread = new Thread(this, "IHMC-InterruptableWorker");
       thread.setDaemon(true);
       thread.start();
    }
