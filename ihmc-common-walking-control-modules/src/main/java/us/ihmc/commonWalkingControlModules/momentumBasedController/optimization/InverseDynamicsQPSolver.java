@@ -78,14 +78,17 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
+   private final double dtSquaredInv;
+
    public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase,
-                                  YoVariableRegistry parentRegistry)
+                                  double dt, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
       this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
       this.problemSize = numberOfDoFs + rhoSize;
+      this.dtSquaredInv = 1.0 / (dt * dt);
 
       firstCall.set(true);
 
@@ -220,8 +223,8 @@ public class InverseDynamicsQPSolver
    {
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
-         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
+         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue() * dtSquaredInv);
+         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0) * dtSquaredInv);
       }
    }
 

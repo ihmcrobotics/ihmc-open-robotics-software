@@ -68,6 +68,8 @@ public class WrenchMatrixCalculator
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector3D> basisVectors = new ArrayList<>();
 
+   private final double dtSquaredInv;
+
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this(toolbox, toolbox.getCenterOfMassFrame(), parentRegistry);
@@ -77,8 +79,10 @@ public class WrenchMatrixCalculator
    {
       this.centerOfMassFrame = centerOfMassFrame;
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-      
-      
+
+      double dt = toolbox.getControlDT();
+      this.dtSquaredInv = 1.0 / (dt * dt);
+
       nContactableBodies = toolbox.getNumberOfContactableBodies();
       maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();        
       numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
@@ -212,6 +216,9 @@ public class WrenchMatrixCalculator
          rhoStartIndex += helper.getRhoSize();
          copStartIndex += 2;
       }
+
+      CommonOps.scale(dtSquaredInv, rhoRateWeightMatrix);
+      CommonOps.scale(dtSquaredInv, copRateWeightMatrix);
    }
 
    public Map<RigidBody, Wrench> computeWrenchesFromRho(DenseMatrix64F rho)
