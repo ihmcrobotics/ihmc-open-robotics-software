@@ -54,6 +54,19 @@ in newer versions of Gradle as they are release we will update the wrapper. You 
 
 Installing Gradle: https://gradle.org/install/
 
+Install `vcstool`. See https://github.com/dirk-thomas/vcstool#how-to-install-vcstool
+
+#### Clone repositories
+
+```
+mkdir -p dev/ihmcopen/src
+cd dev/ihmcopen
+curl -skL https://github.com/ihmcrobotics/ihmc-open-robotics-software/raw/develop/ihmc.repos -o ihmc.repos
+vcs import src < ihmc.repos
+```
+
+Import into your IDE with Gradle Import > `src/ihmc/build.gradle`
+
 #### IDE Support
 Our Gradle models are tested in IntelliJ IDEA 2017.3+ (both Community and Ultimate) with the Gradle plugin.
 Eclipse Oxygen+ or higher with the Buildship plugin. The Buildship plugin is bundled with the Eclipse IDE for Java Developers (but *not* Java EE Developers). It can always be manually installed to any version of Eclipse using the [installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
@@ -90,17 +103,24 @@ dependencies {
 }
 ```  
 
-#### Depending directly on the source
-For *IHMC Open Robotics Software* and [ihmc-build](https://github.com/ihmcrobotics/ihmc-build) to work correctly when depending directly on the source, your
+#### Creating a project
+To create a project that uses *IHMC Open Robotics Software*, your
 project hierarchy needs to take a particular form.
 
-1. In your system home folder (or C:/ drive in Windows), create a directory called `ihmc-workspace`.
-1. Initialize the `ihmc-workspace` directory as an IHMC repository group using the "Convert an existing project group" instructions in [this README] (https://github.com/ihmcrobotics/repository-group).
-1. This is also the directory where you'll put any of your own projects that need to depend
-on IHMC source code. Your directory structure should look something like:
+First be sure you have completed the section above titled "Clone repositories".
+
+Next, create your project folder:
 
 ```
-repository-group
+mkdir -p src/ihmc/my-project-a
+```
+
+Follow the project setup tutorial at https://github.com/ihmcrobotics/ihmc-build#quick-project-setup.
+
+Your directory structure should now look something like:
+
+```
+src/ihmc
 ├── my-project-a
 │   └── build.gradle
 │   └── gradle.properties
@@ -123,19 +143,23 @@ repository-group
 └── settings.gradle
 ```
 
-If this is set up correctly, you can either [apply the `ihmc-build` plugin](https://github.com/ihmcrobotics/ihmc-build)
-and use the dependency resolver methods exposed by the build extension, or you can manually identify dependencies on projects using the normal Gradle syntax for
+If this is set up correctly, you will have applied the [`ihmc-build` plugin](https://github.com/ihmcrobotics/ihmc-build)
+and use the dependency resolver methods exposed by the build extension. Alternatively, you can manually identify dependencies on projects using the normal Gradle syntax for
 project dependencies. A sample build.gradle dependency block:
 
 ```gradle
+/* Normal Gradle way */
 dependencies {
-  compile project(':ihmc-open-robotics-software:ihmc-java-toolkit') // normal Gradle way of doing things
+  compile project(':ihmc-open-robotics-software:ihmc-java-toolkit')
+  testCompile project(':ihmc-open-robotics-software:ihmc-java-toolkit-test')
 }
 
-/* OR */
-
+/* ihmc-build way */
 mainDependencies {
-  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source" // ihmc-build way of doing things
+  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+}
+testDependencies {
+  compile group: "us.ihmc", name: "ihmc-java-toolkit-test", version: "source"
 }
 ```
 
