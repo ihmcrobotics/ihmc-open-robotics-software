@@ -1,12 +1,20 @@
 repositories:
   ihmc:
     type: git
-    url: https://github.com/ihmcrobotics/repository-group.git
+    url: https://dcalvert@stash.ihmc.us/scm/libs/repository-group.git
     version: master
   ihmc/ihmc-open-robotics-software:
     type: git
     url: https://stash.ihmc.us/scm/libs/ihmc-open-robotics-software.git
     version: develop
+  ihmc/ihmc_interfaces:
+    type: git
+    url: https://github.com/ihmcrobotics/ihmc_interfaces.git
+    version: master
+  ihmc/ihmc_msgs:
+    type: git
+    url: https://github.com/ihmcrobotics/ihmc_msgs.git
+    version: master
   # ihmc/simulation-construction-set:
   #   type: git
   #   url: https://stash.ihmc.us/scm/libs/simulation-construction-set.git
