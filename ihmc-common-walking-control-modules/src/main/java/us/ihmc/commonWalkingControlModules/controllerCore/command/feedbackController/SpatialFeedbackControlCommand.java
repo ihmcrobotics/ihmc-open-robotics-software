@@ -4,14 +4,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -292,7 +294,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePose3D desiredPose)
+   public void set(FramePose3DReadOnly desiredPose)
    {
       desiredPose.checkReferenceFrameMatch(worldFrame);
 
@@ -321,7 +323,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition)
+   public void set(FramePoint3DReadOnly desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -481,7 +483,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           the desired linear velocity of {@code endEffector.getBodyFixedFrame()}'s origin.
     *           Modified.
     */
-   public void changeFrameAndSet(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity)
+   public void changeFrameAndSet(FramePoint3DBasics desiredPosition, FrameVector3DBasics desiredLinearVelocity)
    {
       desiredPosition.changeFrame(worldFrame);
       desiredLinearVelocity.changeFrame(worldFrame);
@@ -507,7 +509,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           with respect to the {@code base}. It is equivalent to the desired angular velocity
     *           of {@code endEffector.getBodyFixedFrame()}. Modified.
     */
-   public void changeFrameAndSet(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity)
+   public void changeFrameAndSet(FrameQuaternionBasics desiredOrientation, FrameVector3DBasics desiredAngularVelocity)
    {
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
@@ -533,7 +535,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           the desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin.
     *           Modified.
     */
-   public void changeFrameAndSetFeedForward(FrameVector3D feedForwardAngularAction, FrameVector3D feedForwardLinearAction)
+   public void changeFrameAndSetFeedForward(FrameVector3DBasics feedForwardAngularAction, FrameVector3DBasics feedForwardLinearAction)
    {
       changeFrameAndSetAngularFeedForward(feedForwardAngularAction);
       changeFrameAndSetLinearFeedForward(feedForwardLinearAction);
@@ -552,7 +554,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           the desired linear acceleration of {@code endEffector.getBodyFixedFrame()}'s origin.
     *           Modified.
     */
-   public void changeFrameAndSetLinearFeedForward(FrameVector3D feedForwardLinearAction)
+   public void changeFrameAndSetLinearFeedForward(FrameVector3DBasics feedForwardLinearAction)
    {
       feedForwardLinearAction.changeFrame(worldFrame);
       feedForwardLinearActionInWorld.set(feedForwardLinearAction);
@@ -569,7 +571,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           {@code controlFrame} with respect to the {@code base}. It is equivalent to the
     *           desired angular acceleration of {@code endEffector.getBodyFixedFrame()}. Modified.
     */
-   public void changeFrameAndSetAngularFeedForward(FrameVector3D feedForwardAngularAction)
+   public void changeFrameAndSetAngularFeedForward(FrameVector3DBasics feedForwardAngularAction)
    {
       feedForwardAngularAction.changeFrame(worldFrame);
       feedForwardAngularActionInWorld.set(feedForwardAngularAction);
@@ -599,7 +601,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePoint3D position)
+   public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
@@ -621,7 +623,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePoint3D position, FrameQuaternion orientation)
+   public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
@@ -643,7 +645,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param position the position of the {@code controlFrame}'s origin. Modified.
     * @param orientation the orientation of the {@code controlFrame}. Modified.
     */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint3D position, FrameQuaternion orientation)
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint3DBasics position, FrameQuaternionBasics orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.changeFrame(endEffector.getBodyFixedFrame());
@@ -665,7 +667,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePose3D pose)
+   public void setControlFrameFixedInEndEffector(FramePose3DReadOnly pose)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
@@ -683,7 +685,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param pose the of the {@code controlFrame}. Modified.
     */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose3D pose)
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose3DBasics pose)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.changeFrame(endEffector.getBodyFixedFrame());
@@ -813,41 +815,41 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setAngularWeights(angular);
    }
 
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameQuaternion desiredOrientationToPack)
+   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack, FrameQuaternionBasics desiredOrientationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack)
+   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack, FrameVector3DBasics desiredLinearVelocityToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);
    }
 
-   public void getIncludingFrame(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
+   public void getIncludingFrame(FrameQuaternionBasics desiredOrientationToPack, FrameVector3DBasics desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
       desiredAngularVelocityToPack.setIncludingFrame(worldFrame, desiredAngularVelocityInWorld);
    }
 
-   public void getFeedForwardActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack, FrameVector3D feedForwardLinearActionToPack)
+   public void getFeedForwardActionIncludingFrame(FrameVector3DBasics feedForwardAngularActionToPack, FrameVector3DBasics feedForwardLinearActionToPack)
    {
       getFeedForwardAngularActionIncludingFrame(feedForwardAngularActionToPack);
       getFeedForwardLinearActionIncludingFrame(feedForwardLinearActionToPack);
    }
 
-   public void getFeedForwardLinearActionIncludingFrame(FrameVector3D feedForwardLinearActionToPack)
+   public void getFeedForwardLinearActionIncludingFrame(FrameVector3DBasics feedForwardLinearActionToPack)
    {
       feedForwardLinearActionToPack.setIncludingFrame(worldFrame, feedForwardLinearActionInWorld);
    }
 
-   public void getFeedForwardAngularActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack)
+   public void getFeedForwardAngularActionIncludingFrame(FrameVector3DBasics feedForwardAngularActionToPack)
    {
       feedForwardAngularActionToPack.setIncludingFrame(worldFrame, feedForwardAngularActionInWorld);
    }
 
-   public void getControlFramePoseIncludingFrame(FramePoint3D position, FrameQuaternion orientation)
+   public void getControlFramePoseIncludingFrame(FramePoint3DBasics position, FrameQuaternionBasics orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOriginInEndEffectorFrame);
