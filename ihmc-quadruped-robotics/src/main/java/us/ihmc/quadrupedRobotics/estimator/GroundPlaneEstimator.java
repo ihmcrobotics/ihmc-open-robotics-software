@@ -1,10 +1,12 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -35,6 +37,9 @@ public class GroundPlaneEstimator
    private final YoFramePoint3D yoGroundPlanePoint = new YoFramePoint3D("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D yoGroundPlaneNormal = new YoFrameVector3D("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll yoGroundPlaneOrientation = new YoFrameYawPitchRoll("groundPlaneOrientation", ReferenceFrame.getWorldFrame(), registry);
+
+   private final FramePose3D groundPlanePose = new FramePose3D();
+   private final PoseReferenceFrame groundPlaneFrame = new PoseReferenceFrame("groundPlaneFrame", ReferenceFrame.getWorldFrame());
 
    public GroundPlaneEstimator()
    {
@@ -187,6 +192,10 @@ public class GroundPlaneEstimator
       groundPlane.getPoint(groundPlanePoint);
       yoGroundPlanePoint.set(groundPlanePoint);
       yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+
+      groundPlanePose.setPosition(yoGroundPlanePoint);
+      groundPlanePose.setOrientation(yoGroundPlaneOrientation.getFrameOrientation());
+      groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 
    /**
@@ -218,5 +227,10 @@ public class GroundPlaneEstimator
          groundPlanePoints.add(contactPoints.get(robotQuadrant));
       }
       compute();
+   }
+
+   public PoseReferenceFrame getGroundPlaneFrame()
+   {
+      return groundPlaneFrame;
    }
 }
