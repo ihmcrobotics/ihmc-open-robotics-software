@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -8,11 +9,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
@@ -82,6 +83,7 @@ public class QuadrupedCenterOfMassHeightManager
    private final FrameVector3D nominalVelocity;
 
    private final double controlDT;
+   private final GroundPlaneEstimator groundPlaneEstimator;
 
    public QuadrupedCenterOfMassHeightManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                              YoVariableRegistry parentRegistry)
@@ -91,7 +93,8 @@ public class QuadrupedCenterOfMassHeightManager
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      supportFrame = groundPlaneEstimator.getGroundPlaneFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -217,9 +220,23 @@ public class QuadrupedCenterOfMassHeightManager
 
       upcomingDesiredHeightInWorld.set(tempDesiredPosition.getZ());
 
+      // get the potential XY translation in height
+      double desiredZ = desiredPosition.getZ();
+      if (controlBodyHeight.getBooleanValue())
+      {
+         desiredPosition.setToZero(bodyFrame);
+      }
+      else
+      {
+         desiredPosition.setToZero(centerOfMassFrame);
+      }
+      desiredPosition.changeFrame(supportFrame);
+      desiredPosition.setZ(desiredZ);
+
       desiredPosition.changeFrame(worldFrame);
       desiredVelocity.changeFrame(worldFrame);
 
+      // fixme the upcoming stuff
       currentDesiredHeightInWorld.set(desiredPosition.getZ());
       currentDesiredVelocityInWorld.set(desiredVelocity.getZ());
 
@@ -228,7 +245,9 @@ public class QuadrupedCenterOfMassHeightManager
       double blendedHeight = InterpolationTools
             .linearInterpolate(currentDesiredHeightInWorld.getDoubleValue(), upcomingDesiredHeightInWorld.getDoubleValue(), alpha);
 
-      desiredHeightInWorld.set(blendedHeight);
+
+//      desiredHeightInWorld.set(blendedHeight);
+      desiredHeightInWorld.set(currentDesiredHeightInWorld.getDoubleValue());
       desiredVelocityInWorld.set(desiredVelocity.getZ() + getBlendedHeightVelocity());
 
       computeCurrentState();
