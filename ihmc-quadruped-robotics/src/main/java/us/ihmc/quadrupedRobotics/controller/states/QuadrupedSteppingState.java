@@ -232,6 +232,11 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // report footstep status message
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
+
+      // update ground plane estimate
+      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(tempPoint);
+
       tempPoint.changeFrame(worldFrame);
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
