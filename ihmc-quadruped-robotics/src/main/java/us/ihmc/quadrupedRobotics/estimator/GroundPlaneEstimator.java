@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -15,9 +15,6 @@ import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -27,46 +24,20 @@ import java.util.List;
 
 public class GroundPlaneEstimator
 {
-   public final static int MAX_GROUND_PLANE_POINTS = 100;
+   private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3D groundPlane = new Plane3D();
    private final Vector3D groundPlaneNormal = new Vector3D();
    private final Point3D groundPlanePoint = new Point3D();
    private final ArrayList<Point3DReadOnly> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFramePoint3D yoGroundPlanePoint = new YoFramePoint3D("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D yoGroundPlaneNormal = new YoFrameVector3D("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll yoGroundPlaneOrientation = new YoFrameYawPitchRoll("groundPlaneOrientation", ReferenceFrame.getWorldFrame(), registry);
+
+   protected final FramePoint3D groundPlaneFramePoint = new FramePoint3D();
+   protected final FrameQuaternion groundPlaneOrientation = new FrameQuaternion();
+   protected final FrameVector3D groundPlaneFrameNormal = new FrameVector3D();
 
    private final FramePose3D groundPlanePose = new FramePose3D();
    private final PoseReferenceFrame groundPlaneFrame = new PoseReferenceFrame("groundPlaneFrame", ReferenceFrame.getWorldFrame());
 
-   public GroundPlaneEstimator()
-   {
-      this(null, null);
-   }
-
-   public GroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
-   {
-      this(parentRegistry, graphicsListRegistry, YoAppearance.Glass());
-   }
-
-   public GroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
-   {
-
-      if (parentRegistry != null)
-      {
-         parentRegistry.addChild(registry);
-      }
-
-      if (graphicsListRegistry != null)
-      {
-         Graphics3DObject groundPlaneGraphic = new Graphics3DObject();
-         groundPlaneGraphic.addCylinder(0.005, 0.5, groundPlaneAppearance);
-         YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape("groundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
-         graphicsListRegistry.registerYoGraphic("groundPlaneEstimate", yoGroundPlaneGraphic);
-      }
-   }
 
    /**
     * @return pitch angle of ground plane in World Frame
@@ -188,13 +159,14 @@ public class GroundPlaneEstimator
    {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
       groundPlane.getNormal(groundPlaneNormal);
-      yoGroundPlaneNormal.set(groundPlaneNormal);
+      groundPlaneFrameNormal.set(groundPlaneNormal);
       groundPlane.getPoint(groundPlanePoint);
-      yoGroundPlanePoint.set(groundPlanePoint);
-      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
 
-      groundPlanePose.setPosition(yoGroundPlanePoint);
-      groundPlanePose.setOrientation(yoGroundPlaneOrientation.getFrameOrientation());
+      groundPlaneFramePoint.set(groundPlanePoint);
+      groundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+
+      groundPlanePose.setPosition(groundPlaneFramePoint);
+      groundPlanePose.setOrientation(groundPlaneOrientation);
       groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 
