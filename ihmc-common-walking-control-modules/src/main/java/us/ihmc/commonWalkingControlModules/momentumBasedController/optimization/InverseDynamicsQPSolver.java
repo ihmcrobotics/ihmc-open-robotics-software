@@ -78,7 +78,7 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   private final double dtSquaredInv;
+   private final double dt;
 
    public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase,
                                   double dt, YoVariableRegistry parentRegistry)
@@ -88,7 +88,7 @@ public class InverseDynamicsQPSolver
       this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
       this.problemSize = numberOfDoFs + rhoSize;
-      this.dtSquaredInv = 1.0 / (dt * dt);
+      this.dt = dt;
 
       firstCall.set(true);
 
@@ -221,10 +221,11 @@ public class InverseDynamicsQPSolver
 
    private void addJointJerkRegularization()
    {
+      double factor = dt * dt / jointJerkRegularization.getDoubleValue();
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue() * dtSquaredInv);
-         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0) * dtSquaredInv);
+         solverInput_H.add(i, i, 1.0 / factor);
+         solverInput_f.add(i, 0, -solverOutput_jointAccelerations.get(i, 0) / factor);
       }
    }
 
@@ -380,7 +381,7 @@ public class InverseDynamicsQPSolver
     * <li>[-A Q] * [qDDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = ADot * qDot -
     * &sum;W<sub>user</sub> - W<sub>gravity</sub>
     * </p>
-    * 
+    *
     * @param centroidalMomentumMatrix refers to A in the equation.
     * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be
     *           optimized for.
