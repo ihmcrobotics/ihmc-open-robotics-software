@@ -247,8 +247,9 @@ public class QuadrupedCenterOfMassHeightManager
 
 
 //      desiredHeightInWorld.set(blendedHeight);
+      //      desiredVelocityInWorld.set(desiredVelocity.getZ() + getBlendedHeightVelocity());
       desiredHeightInWorld.set(currentDesiredHeightInWorld.getDoubleValue());
-      desiredVelocityInWorld.set(desiredVelocity.getZ() + getBlendedHeightVelocity());
+      desiredVelocityInWorld.set(currentDesiredVelocityInWorld.getDoubleValue());
 
       computeCurrentState();
    }
