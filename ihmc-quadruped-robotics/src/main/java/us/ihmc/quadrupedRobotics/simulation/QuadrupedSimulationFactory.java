@@ -630,8 +630,8 @@ public class QuadrupedSimulationFactory
          scs.setupViewport(viewportConfiguration);
       }
 
-      InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
-      ParameterLoaderHelper.loadParameters(this, parameterFile, rootRegistry);
+      InputStream parameterFile = modelFactory.get().getParameterInputStream(controlMode.get());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
       scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
 
       if (yoVariableServer != null)
