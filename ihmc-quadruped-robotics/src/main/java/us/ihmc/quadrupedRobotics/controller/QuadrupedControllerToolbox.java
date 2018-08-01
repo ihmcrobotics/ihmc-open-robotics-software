@@ -36,6 +36,7 @@ public class QuadrupedControllerToolbox
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
    private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -84,6 +85,8 @@ public class QuadrupedControllerToolbox
       soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
 
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, 1.0, registry);
+//      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
+      upcomingGroundPlaneEstimator = new GroundPlaneEstimator();
       groundPlaneEstimator = new YoGroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
 
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
@@ -175,6 +178,11 @@ public class QuadrupedControllerToolbox
    public GroundPlaneEstimator getGroundPlaneEstimator()
    {
       return groundPlaneEstimator;
+   }
+
+   public GroundPlaneEstimator getUpcomingGroundPlaneEstimator()
+   {
+      return upcomingGroundPlaneEstimator;
    }
 
    public QuadrupedFallDetector getFallDetector()

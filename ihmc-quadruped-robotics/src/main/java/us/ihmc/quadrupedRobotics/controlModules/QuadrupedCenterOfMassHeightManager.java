@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
@@ -11,7 +10,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotics.controllers.PIDController;
@@ -19,9 +17,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -52,11 +47,6 @@ public class QuadrupedCenterOfMassHeightManager
    private final ReferenceFrame supportFrame;
    private final MultipleWaypointsPositionTrajectoryGenerator centerOfMassHeightTrajectory;
 
-   private final QuadrupedSupportPolygon upcomingSupportPolygon;
-   private final FramePose3D upcomingSupportPolygonCentroidWithNominalRotation = new FramePose3D(ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame upcomingSupportPolygonCentroidFrameWithNominalRotation;
-   private final ZUpFrame upcomingSupportPolygonCentroidZUpFrame;
-
    private final YoDouble currentDesiredHeightInWorld = new YoDouble("currentDesiredHeightInWorld", registry);
    private final YoDouble currentDesiredVelocityInWorld = new YoDouble("currentDesiredVelocityInWorld", registry);
    private final YoDouble upcomingDesiredHeightInWorld = new YoDouble("upcomingDesiredHeightInWorld", registry);
@@ -84,6 +74,7 @@ public class QuadrupedCenterOfMassHeightManager
 
    private final double controlDT;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
 
    public QuadrupedCenterOfMassHeightManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                              YoVariableRegistry parentRegistry)
@@ -94,6 +85,7 @@ public class QuadrupedCenterOfMassHeightManager
 
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      upcomingGroundPlaneEstimator = controllerToolbox.getUpcomingGroundPlaneEstimator();
       supportFrame = groundPlaneEstimator.getGroundPlaneFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -106,11 +98,6 @@ public class QuadrupedCenterOfMassHeightManager
 
       controlBodyHeight.set(true);
       heightCommandHasBeenReceived.set(false);
-
-      upcomingSupportPolygon = new QuadrupedSupportPolygon();
-      upcomingSupportPolygonCentroidFrameWithNominalRotation = new PoseReferenceFrame("centerOfFourFeetWithUpcomingSupportPolygonRotation",
-                                                                                      upcomingSupportPolygonCentroidWithNominalRotation);
-      upcomingSupportPolygonCentroidZUpFrame = new ZUpFrame(worldFrame, upcomingSupportPolygonCentroidFrameWithNominalRotation, "centerUpcomingFootPolygonZUp");
 
       nominalPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
       nominalVelocity = new FrameVector3D(supportFrame);
@@ -211,45 +198,64 @@ public class QuadrupedCenterOfMassHeightManager
       centerOfMassHeightTrajectory.compute(controllerTime.getDoubleValue());
       centerOfMassHeightTrajectory.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
-      updateUpcomingSupportPolygon();
-      updateUpcomingSupportFrames();
-
-      // compute desired height in upcoming support frame
-      tempDesiredPosition.setIncludingFrame(upcomingSupportPolygonCentroidZUpFrame, desiredPosition);
-      tempDesiredPosition.changeFrame(worldFrame);
-
-      upcomingDesiredHeightInWorld.set(tempDesiredPosition.getZ());
-
       // get the potential XY translation in height
-      double desiredZ = desiredPosition.getZ();
+      double desiredZHeight = desiredPosition.getZ();
       if (controlBodyHeight.getBooleanValue())
       {
          desiredPosition.setToZero(bodyFrame);
+         tempDesiredPosition.setToZero(bodyFrame);
       }
       else
       {
          desiredPosition.setToZero(centerOfMassFrame);
+         tempDesiredPosition.setToZero(centerOfMassFrame);
       }
       desiredPosition.changeFrame(supportFrame);
-      desiredPosition.setZ(desiredZ);
+      desiredPosition.setZ(desiredZHeight);
 
       desiredPosition.changeFrame(worldFrame);
       desiredVelocity.changeFrame(worldFrame);
 
-      // fixme the upcoming stuff
+
+
+      // compute desired height in upcoming support frame
+      tempDesiredPosition.changeFrame(upcomingGroundPlaneEstimator.getGroundPlaneFrame());
+      tempDesiredPosition.setZ(desiredZHeight);
+      tempDesiredPosition.changeFrame(worldFrame);
+
+
       currentDesiredHeightInWorld.set(desiredPosition.getZ());
       currentDesiredVelocityInWorld.set(desiredVelocity.getZ());
+
+      upcomingDesiredHeightInWorld.set(tempDesiredPosition.getZ());
 
       // blend between the current desired height and the upcoming desired height
       double alpha = getHeightBlendingFactor();
       double blendedHeight = InterpolationTools
             .linearInterpolate(currentDesiredHeightInWorld.getDoubleValue(), upcomingDesiredHeightInWorld.getDoubleValue(), alpha);
+      double blendedHeightVelocity = currentDesiredVelocityInWorld.getDoubleValue() + getBlendedHeightVelocity();
 
+      /*
+      if (upcomingDesiredHeightInWorld.getDoubleValue() < currentDesiredHeightInWorld.getDoubleValue()) // stepping down
+      {
+         if (desiredHeightInWorld.getDoubleValue() < blendedHeight)
+         {
+            blendedHeight = desiredHeightInWorld.getDoubleValue();
+            blendedHeightVelocity = currentDesiredVelocityInWorld.getDoubleValue();
+         }
+      }
+      else if (upcomingDesiredHeightInWorld.getDoubleValue() > currentDesiredHeightInWorld.getDoubleValue()) // stepping up
+      {
+         if (desiredHeightInWorld.getDoubleValue() > blendedHeight)
+         {
+            blendedHeight = desiredHeightInWorld.getDoubleValue();
+            blendedHeightVelocity = currentDesiredVelocityInWorld.getDoubleValue();
+         }
+      }
+      */
 
-//      desiredHeightInWorld.set(blendedHeight);
-      //      desiredVelocityInWorld.set(desiredVelocity.getZ() + getBlendedHeightVelocity());
-      desiredHeightInWorld.set(currentDesiredHeightInWorld.getDoubleValue());
-      desiredVelocityInWorld.set(currentDesiredVelocityInWorld.getDoubleValue());
+      desiredHeightInWorld.set(blendedHeight);
+      desiredVelocityInWorld.set(blendedHeightVelocity);
 
       computeCurrentState();
    }
@@ -319,31 +325,5 @@ public class QuadrupedCenterOfMassHeightManager
 
       currentHeightInWorld.set(currentPosition.getZ());
       currentVelocityInWorld.set(currentVelocity.getZ());
-   }
-
-   private final FramePoint3D tempGoalPosition = new FramePoint3D();
-
-   private void updateUpcomingSupportPolygon()
-   {
-      upcomingSupportPolygon.clearFootsteps();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         upcomingSupportPolygon.setFootstep(robotQuadrant, controllerToolbox.getSoleReferenceFrame(robotQuadrant));
-      }
-
-      // add the next steps to hit the ground
-      for (int i = 0; i < nextSteps.size(); i++)
-      {
-         QuadrupedTimedStep step = nextSteps.get(i);
-         step.getGoalPosition(tempGoalPosition);
-         upcomingSupportPolygon.setFootstep(step.getRobotQuadrant(), tempGoalPosition);
-      }
-   }
-
-   private void updateUpcomingSupportFrames()
-   {
-      upcomingSupportPolygon.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(upcomingSupportPolygonCentroidWithNominalRotation);
-      upcomingSupportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(upcomingSupportPolygonCentroidWithNominalRotation);
-      upcomingSupportPolygonCentroidZUpFrame.update();
    }
 }
