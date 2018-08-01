@@ -42,13 +42,13 @@ public class InverseKinematicsQPSolver
 
    private final int numberOfDoFs;
 
-   private final double dtSquaredInv;
+   private final double dt;
 
    public InverseKinematicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, double dt, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
-      this.dtSquaredInv = 1.0 / (dt * dt);
+      this.dt = dt;
 
       firstCall.set(true);
 
@@ -95,10 +95,11 @@ public class InverseKinematicsQPSolver
 
    private void addJointAccelerationRegularization()
    {
+      double factor = dt * dt / jointAccelerationRegularization.getDoubleValue();
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, jointAccelerationRegularization.getDoubleValue() * dtSquaredInv);
-         solverInput_f.add(i, 0, -jointAccelerationRegularization.getDoubleValue() * solverOutput.get(i, 0) * dtSquaredInv);
+         solverInput_H.add(i, i, 1.0 / factor);
+         solverInput_f.add(i, 0, -solverOutput.get(i, 0) / factor);
       }
    }
 
