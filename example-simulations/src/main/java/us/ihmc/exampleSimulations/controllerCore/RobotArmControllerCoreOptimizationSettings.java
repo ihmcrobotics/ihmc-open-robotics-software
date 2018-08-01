@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public class RobotArmControllerCoreOptimizationSettings implements ControllerCoreOptimizationSettings
 {
    private double jointAccelerationWeight = 0.005;
-   private double jointJerkWeight = 0.1;
+   private double jointJerkWeight = 2.5E-10;
 
    @Override
    public double getJointAccelerationWeight()
