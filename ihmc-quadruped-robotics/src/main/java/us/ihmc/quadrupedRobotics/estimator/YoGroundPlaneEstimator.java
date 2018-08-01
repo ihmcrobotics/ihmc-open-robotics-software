@@ -13,19 +13,23 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class YoGroundPlaneEstimator extends GroundPlaneEstimator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final YoFramePoint3D yoGroundPlanePoint = new YoFramePoint3D("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D yoGroundPlaneNormal = new YoFrameVector3D("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameYawPitchRoll yoGroundPlaneOrientation = new YoFrameYawPitchRoll("groundPlaneOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoGroundPlanePoint;
+   private final YoFrameVector3D yoGroundPlaneNormal;
+   private final YoFrameYawPitchRoll yoGroundPlaneOrientation;
 
    public YoGroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(parentRegistry, graphicsListRegistry, YoAppearance.Glass());
+      this("", parentRegistry, graphicsListRegistry, YoAppearance.Glass());
    }
 
-   public YoGroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
+   public YoGroundPlaneEstimator(String prefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
    {
+      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+
+      yoGroundPlanePoint = new YoFramePoint3D(prefix + "GroundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
+      yoGroundPlaneNormal = new YoFrameVector3D(prefix + "GroundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
+      yoGroundPlaneOrientation = new YoFrameYawPitchRoll(prefix + "GroundPlaneOrientation", ReferenceFrame.getWorldFrame(), registry);
+
       if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
@@ -35,8 +39,8 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       {
          Graphics3DObject groundPlaneGraphic = new Graphics3DObject();
          groundPlaneGraphic.addCylinder(0.005, 0.5, groundPlaneAppearance);
-         YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape("groundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
-         graphicsListRegistry.registerYoGraphic("groundPlaneEstimate", yoGroundPlaneGraphic);
+         YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape(prefix + "GroundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
+         graphicsListRegistry.registerYoGraphic(prefix + "GroundPlaneEstimate", yoGroundPlaneGraphic);
       }
    }
 
