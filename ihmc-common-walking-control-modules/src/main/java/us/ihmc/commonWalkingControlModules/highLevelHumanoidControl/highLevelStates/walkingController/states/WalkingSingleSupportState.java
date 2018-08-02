@@ -220,8 +220,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
-      double touchdownTime = footstepTiming.getTouchdownDuration();
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
+      feetManager.setContactStateForSwing(swingSide);
 
       updateFootstepParameters();
 
@@ -270,7 +269,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-
+      double touchdownTime = footstepTiming.getTouchdownDuration();
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
