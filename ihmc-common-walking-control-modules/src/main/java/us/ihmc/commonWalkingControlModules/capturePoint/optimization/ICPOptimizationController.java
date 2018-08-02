@@ -92,6 +92,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
+   private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
+
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final YoFramePose3D upcomingFootstepLocation = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
@@ -736,6 +738,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
+         solver.getDynamicsError(dynamicsError);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
