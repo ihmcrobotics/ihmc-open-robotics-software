@@ -45,9 +45,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean DEBUG = false;
-   private static final boolean COMPUTE_COST_TO_GO = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean DEBUG = true;
+   private static final boolean COMPUTE_COST_TO_GO = true;
 
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
 
@@ -91,6 +91,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+
+   private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
@@ -736,6 +738,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
+         solver.getDynamicsError(dynamicsError);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
