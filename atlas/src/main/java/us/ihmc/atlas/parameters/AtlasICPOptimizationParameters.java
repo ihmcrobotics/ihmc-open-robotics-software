@@ -34,7 +34,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 1e-6 : 1e-4;
+      return runningOnRealRobot ? 4e-9 : 4e-7;
    }
 
    /** {@inheritDoc} */
@@ -55,7 +55,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRateWeight()
    {
-      return 1e-9;
+      return 4e-13;
    }
 
    /** {@inheritDoc} */
