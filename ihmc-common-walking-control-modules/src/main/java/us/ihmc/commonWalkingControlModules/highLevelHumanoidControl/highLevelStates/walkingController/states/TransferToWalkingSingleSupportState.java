@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -27,10 +28,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                               WalkingControllerParameters walkingControllerParameters,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
-                                              YoVariableRegistry parentRegistry)
+                                              DoubleProvider unloadDuration, DoubleProvider unloadWeight, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
-            failureDetectionControlModule, parentRegistry);
+      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadDuration,
+            unloadWeight, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);
 

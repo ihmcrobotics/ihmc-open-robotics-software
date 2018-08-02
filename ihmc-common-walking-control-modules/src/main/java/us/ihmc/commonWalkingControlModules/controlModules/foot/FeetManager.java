@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -15,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -29,13 +32,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FeetManager
@@ -62,6 +64,9 @@ public class FeetManager
 
    private final FramePoint3D tempSolePosition = new FramePoint3D();
    private final DoubleParameter blindFootstepsHeightOffset;
+
+   private final List<InverseDynamicsCommand<?>> commandsToAdd = new ArrayList<>();
+   private final InverseDynamicsCommandList inverseDynamicsCommands = new InverseDynamicsCommandList();
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
@@ -213,7 +218,7 @@ public class FeetManager
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
-   
+
    public void initializeContactStatesForTouchdown(RobotSide robotSide)
    {
       footControlModules.get(robotSide).requestTouchdown();
@@ -486,7 +491,14 @@ public class FeetManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
-      return footControlModules.get(robotSide).getInverseDynamicsCommand();
+      inverseDynamicsCommands.clear();
+      for (int additionalCommandIndex = 0; additionalCommandIndex < commandsToAdd.size(); additionalCommandIndex++)
+      {
+         inverseDynamicsCommands.addCommand(commandsToAdd.get(additionalCommandIndex));
+      }
+      commandsToAdd.clear();
+      inverseDynamicsCommands.addCommand(footControlModules.get(robotSide).getInverseDynamicsCommand());
+      return inverseDynamicsCommands;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
@@ -526,5 +538,17 @@ public class FeetManager
    public boolean isInTouchdown(RobotSide swingFoot)
    {
       return footControlModules.get(swingFoot).isInTouchdown();
+   }
+
+   /**
+    * This allows walking control modules to submit inverse dynamics commands to the controller core if they have access to the feet manager.
+    * Commands added here will be submitted to the controller core the next time all commands are collected. Then the command buffer in this
+    * class will be cleared and the commands need to be re-submitted.
+    *
+    * @param command to submit to the controller core.
+    */
+   public void addCommand(InverseDynamicsCommand<?> command)
+   {
+      commandsToAdd.add(command);
    }
 }

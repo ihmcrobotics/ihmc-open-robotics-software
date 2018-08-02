@@ -70,6 +70,8 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -247,6 +249,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       SideDependentList<TransferToWalkingSingleSupportState> walkingTransferStates = new SideDependentList<>();
 
+      DoubleProvider unloadDuration = new DoubleParameter("UnloadDuration", registry, 0.05);
+      DoubleProvider unloadWeight = new DoubleParameter("UnloadWeight", registry, 0.01);
+
       for (RobotSide transferToSide : RobotSide.values)
       {
          double minimumTransferTime = walkingControllerParameters.getMinimumTransferTime();
@@ -254,7 +259,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
                                                                                                      managerFactory, walkingControllerParameters,
                                                                                                      failureDetectionControlModule, minimumTransferTime,
-                                                                                                     registry);
+                                                                                                     unloadDuration, unloadWeight, registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -277,7 +282,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
          TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingControllerParameters, walkingMessageHandler,
                                                                                          controllerToolbox, managerFactory, failureDetectionControlModule,
-                                                                                         registry);
+                                                                                         null, null, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
