@@ -238,8 +238,8 @@ public class ICPOptimizationQPSolver
       dynamicsError = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
       tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
       tmpFootstepCost = new DenseMatrix64F(2, 1);
@@ -844,8 +844,8 @@ public class ICPOptimizationQPSolver
     */
    private void addFeedbackRateTask()
    {
-//      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCoPFeedbackDeltaSolution);
-//      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCMPFeedbackDeltaSolution);
+      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCoPFeedbackDeltaSolution);
+      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCMPFeedbackDeltaSolution);
       inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
       inputCalculator.submitFeedbackRateTask(feedbackRateTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -1040,8 +1040,8 @@ public class ICPOptimizationQPSolver
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
    {
-//      previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
-//      previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
+      previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
+      previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
       CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
