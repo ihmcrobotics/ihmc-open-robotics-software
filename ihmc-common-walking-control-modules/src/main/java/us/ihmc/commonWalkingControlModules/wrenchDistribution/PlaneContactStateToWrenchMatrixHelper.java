@@ -309,47 +309,15 @@ public class PlaneContactStateToWrenchMatrixHelper
       CommonOps.mult(selectionFrameTransform, tempTaskWeight, taskWeight);
 
       // Remove the rows that are not selected. For this we need to start from the bottom so the row indices do not get mixed up as rows get removed.
-      if (!selectionMatrix.isLinearZSelected())
+      for (int axis = Wrench.SIZE - 1; axis >= 0; axis--)
       {
-         MatrixTools.removeRow(taskJacobian, 5);
-         MatrixTools.removeRow(taskObjective, 5);
-         MatrixTools.removeRow(taskWeight, 5);
-         MatrixTools.removeColumn(taskWeight, 5);
-      }
-      if (!selectionMatrix.isLinearYSelected())
-      {
-         MatrixTools.removeRow(taskJacobian, 4);
-         MatrixTools.removeRow(taskObjective, 4);
-         MatrixTools.removeRow(taskWeight, 4);
-         MatrixTools.removeColumn(taskWeight, 4);
-      }
-      if (!selectionMatrix.isLinearXSelected())
-      {
-         MatrixTools.removeRow(taskJacobian, 3);
-         MatrixTools.removeRow(taskObjective, 3);
-         MatrixTools.removeRow(taskWeight, 3);
-         MatrixTools.removeColumn(taskWeight, 3);
-      }
-      if (!selectionMatrix.isAngularZSelected())
-      {
-         MatrixTools.removeRow(taskJacobian, 2);
-         MatrixTools.removeRow(taskObjective, 2);
-         MatrixTools.removeRow(taskWeight, 2);
-         MatrixTools.removeColumn(taskWeight, 2);
-      }
-      if (!selectionMatrix.isAngularYSelected())
-      {
-         MatrixTools.removeRow(taskJacobian, 1);
-         MatrixTools.removeRow(taskObjective, 1);
-         MatrixTools.removeRow(taskWeight, 1);
-         MatrixTools.removeColumn(taskWeight, 1);
-      }
-      if (!selectionMatrix.isAngularYSelected())
-      {
-         MatrixTools.removeRow(taskJacobian, 0);
-         MatrixTools.removeRow(taskObjective, 0);
-         MatrixTools.removeRow(taskWeight, 0);
-         MatrixTools.removeColumn(taskWeight, 0);
+         if (!selectionMatrix.isAxisSelected(axis))
+         {
+            MatrixTools.removeRow(taskJacobian, axis);
+            MatrixTools.removeRow(taskObjective, axis);
+            MatrixTools.removeRow(taskWeight, axis);
+            MatrixTools.removeColumn(taskWeight, axis);
+         }
       }
    }
 

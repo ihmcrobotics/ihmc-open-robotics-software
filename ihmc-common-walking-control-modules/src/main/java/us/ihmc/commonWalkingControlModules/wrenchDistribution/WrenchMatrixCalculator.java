@@ -166,7 +166,7 @@ public class WrenchMatrixCalculator
 
    public void getAdditionalRhoTasks(DenseMatrix64F rhoTaskJacobian, DenseMatrix64F rhoTaskObjective, DenseMatrix64F rhoTaskWeight)
    {
-      // Need to compute the tasks and figure out the task size:
+      // Need to figure out the task size:
       int taskSize = 0;
       for (int i = 0; i < rigidBodies.size(); i++)
       {
