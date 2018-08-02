@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -14,10 +15,13 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,16 +56,23 @@ public abstract class TransferState extends WalkingState
 
    private final Footstep nextFootstep = new Footstep();
 
+   private final WrenchObjectiveCommand unloadingWrenchCommand;
+   private final YoBoolean isUnloading;
+   private final DoubleProvider unloadDuration;
+   private final DoubleProvider unloadWeight;
+
    public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
                         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        YoVariableRegistry parentRegistry)
+                        DoubleProvider unloadDuration, DoubleProvider unloadWeight, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
+      this.unloadDuration = unloadDuration;
+      this.unloadWeight = unloadWeight;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -73,6 +84,23 @@ public abstract class TransferState extends WalkingState
       isInTouchdown = new YoBoolean("isInTouchdown", registry);
       touchdownIsEnabled = new YoBoolean("touchdownIsEnabled", registry);
       touchdownIsEnabled.set(ENABLE_TOUCHDOWN_STATE);
+
+      if (unloadDuration != null && unloadWeight != null)
+      {
+         isUnloading = new YoBoolean(transferToSide.getOppositeSide().getLowerCaseName() + "FootIsUnloading", registry);
+         RigidBody footToUnload = controllerToolbox.getFullRobotModel().getFoot(transferToSide.getOppositeSide());
+         unloadingWrenchCommand = new WrenchObjectiveCommand();
+         unloadingWrenchCommand.setRigidBody(footToUnload);
+         unloadingWrenchCommand.getSelectionMatrix().clearSelection();
+         unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
+         unloadingWrenchCommand.getSelectionMatrix().selectLinearZ(true);
+         unloadingWrenchCommand.getWrench().setToZero(footToUnload.getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
+      }
+      else
+      {
+         isUnloading = null;
+         unloadingWrenchCommand = null;
+      }
    }
 
    @Override
@@ -103,6 +131,20 @@ public abstract class TransferState extends WalkingState
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(transferToSide);
+
+      if (isUnloading != null && unloadDuration.getValue() > 0.0)
+      {
+         double timeBeforeUnloading = stepTiming.getTransferTime() - unloadDuration.getValue();
+         isUnloading.set(timeBeforeUnloading > 0.0 && timeInState > timeBeforeUnloading);
+         if (isUnloading.getValue())
+         {
+            double timeInUnloading = timeInState - timeBeforeUnloading;
+            double percentInUnloading = MathTools.clamp(timeInUnloading / unloadDuration.getValue(), 0.0, 1.0);
+            double weight = unloadWeight.getValue() * percentInUnloading * percentInUnloading;
+            unloadingWrenchCommand.getWeightMatrix().setLinearZAxisWeight(weight);
+            feetManager.addCommand(unloadingWrenchCommand);
+         }
+      }
    }
 
    @Override
@@ -164,6 +206,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onEntry()
    {
+      walkingMessageHandler.peekTiming(0, stepTiming);
       adjustTouchdownDuration();
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
@@ -198,8 +241,6 @@ public abstract class TransferState extends WalkingState
    {
       if (!walkingMessageHandler.isNextFootstepUsingAbsoluteTiming())
          return;
-
-      walkingMessageHandler.peekTiming(0, stepTiming);
 
       double originalSwingTime = stepTiming.getSwingTime();
       double currentTime = controllerToolbox.getYoTime().getDoubleValue();
@@ -248,6 +289,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onExit()
    {
+      isUnloading.set(false);
       feetManager.reset();
    }
 
