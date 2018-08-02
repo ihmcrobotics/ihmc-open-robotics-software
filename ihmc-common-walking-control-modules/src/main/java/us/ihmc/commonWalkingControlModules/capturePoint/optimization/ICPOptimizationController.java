@@ -45,9 +45,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = true;
-   private static final boolean DEBUG = true;
-   private static final boolean COMPUTE_COST_TO_GO = true;
+   private static final boolean VISUALIZE = false;
+   private static final boolean DEBUG = false;
+   private static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
 
