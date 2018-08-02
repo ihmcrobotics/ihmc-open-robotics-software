@@ -11,6 +11,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -151,6 +152,54 @@ public class WrenchMatrixCalculator
    {
       PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getContactingRigidBody());
       helper.setCenterOfPressureCommand(command);
+   }
+
+   public void submitWrenchObjectiveCommand(WrenchObjectiveCommand command)
+   {
+      PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getRigidBody());
+      helper.submitWrenchObjectiveCommand(command);
+   }
+
+   private final DenseMatrix64F rigidBodyRhoTaskJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F rigidBodyRhoTaskObjective = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F rigidBodyRhoTaskWeight = new DenseMatrix64F(0, 0);
+
+   public void getAdditionalRhoTasks(DenseMatrix64F rhoTaskJacobian, DenseMatrix64F rhoTaskObjective, DenseMatrix64F rhoTaskWeight)
+   {
+      // Need to compute the tasks and figure out the task size:
+      int taskSize = 0;
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = rigidBodies.get(i);
+         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+         taskSize += helper.getWrenchTaskSize();
+      }
+
+      // Reshape the matrices to the correct size and zero them:
+      rhoTaskJacobian.reshape(taskSize, rhoSize);
+      rhoTaskObjective.reshape(taskSize, 1);
+      rhoTaskWeight.reshape(taskSize, taskSize);
+      CommonOps.fill(rhoTaskJacobian, 0.0);
+      CommonOps.fill(rhoTaskObjective, 0.0);
+      CommonOps.fill(rhoTaskWeight, 0.0);
+
+      // Now get the tasks for each body and add it to the matrices:
+      taskSize = 0;
+      int rhoStartIndex = 0;
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = rigidBodies.get(i);
+         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+         helper.getAdditionalRhoTasks(rigidBodyRhoTaskJacobian, rigidBodyRhoTaskObjective, rigidBodyRhoTaskWeight);
+         int bodyTaskSize = rigidBodyRhoTaskObjective.getNumRows();
+
+         CommonOps.insert(rigidBodyRhoTaskJacobian, rhoTaskJacobian, taskSize, rhoStartIndex);
+         CommonOps.insert(rigidBodyRhoTaskObjective, rhoTaskObjective, taskSize, 0);
+         CommonOps.insert(rigidBodyRhoTaskWeight, rhoTaskWeight, taskSize, taskSize);
+
+         taskSize = taskSize + bodyTaskSize;
+         rhoStartIndex = rhoStartIndex + helper.getRhoSize();
+      }
    }
 
    public boolean hasContactStateChanged()
