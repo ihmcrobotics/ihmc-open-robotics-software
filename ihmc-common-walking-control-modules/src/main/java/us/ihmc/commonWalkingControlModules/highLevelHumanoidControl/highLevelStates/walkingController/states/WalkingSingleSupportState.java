@@ -219,6 +219,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
 
+      /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
+      double touchdownTime = footstepTiming.getTouchdownDuration();
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
+
       updateFootstepParameters();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getBooleanValue());
@@ -266,8 +270,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-      double touchdownTime = footstepTiming.getTouchdownDuration();
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
+
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
@@ -371,6 +374,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateFootstepParameters()
    {
+      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
+      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
+      controllerToolbox.updateBipedSupportPolygons();
+
       feetManager.adjustHeightIfNeeded(nextFootstep);
 
       pelvisOrientationManager.setTrajectoryTime(swingTime);
@@ -389,10 +396,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       FixedFramePoint3DBasics touchdownPosition = nextFootstep.getFootstepPose().getPosition();
       double swingTime = footstepTiming.getSwingTime(); // TODO: Should be swing time remaining for step adjustments.
       comHeightManager.step(stanceFootPosition, touchdownPosition, swingTime, swingSide, extraToeOffHeight);
-
-      // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
-      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
-      controllerToolbox.updateBipedSupportPolygons();
    }
 
    @Override
