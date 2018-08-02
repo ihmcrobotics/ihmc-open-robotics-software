@@ -45,9 +45,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean DEBUG = false;
-   private static final boolean COMPUTE_COST_TO_GO = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean DEBUG = true;
+   private static final boolean COMPUTE_COST_TO_GO = true;
 
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
 
@@ -175,6 +175,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FrameVector2D currentICPVelocity = new FrameVector2D();
 
    private final double controlDT;
+   private final double controlDTSquare;
    private final DoubleProvider dynamicsObjectiveDoubleSupportWeightModifier;
 
    private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
@@ -200,6 +201,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
+      this.controlDTSquare = controlDT * controlDT;
       this.contactableFeet = contactableFeet;
 
       if (icpControlPolygons != null)
@@ -648,7 +650,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
 
       if (useFeedbackRate.getValue())
-         solver.setFeedbackRateWeight(copFeedbackRateWeight.getValue() / controlDT);
+         solver.setFeedbackRateWeight(copFeedbackRateWeight.getValue() / controlDTSquare);
    }
 
    private void submitCMPFeedbackTaskConditionsToSolver()
@@ -685,7 +687,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       if (useFootstepRate.getValue())
-         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
+         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
    private boolean solveQP()
