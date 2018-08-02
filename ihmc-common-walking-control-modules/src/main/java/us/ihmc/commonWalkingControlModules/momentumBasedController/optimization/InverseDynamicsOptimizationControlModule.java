@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -241,6 +242,10 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.addMotionInput(motionQPInput);
    }
 
+   private final DenseMatrix64F rhoTaskJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F rhoTaskObjective = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F rhoTaskWeight = new DenseMatrix64F(0, 0);
+
    private void setupRhoTasks()
    {
       DenseMatrix64F rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
@@ -256,6 +261,9 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+
+      wrenchMatrixCalculator.getAdditionalRhoTasks(rhoTaskJacobian, rhoTaskObjective, rhoTaskWeight);
+      qpSolver.addRhoTask(rhoTaskJacobian, rhoTaskObjective, rhoTaskWeight);
    }
 
    private void setupWrenchesEquilibriumConstraint()
@@ -331,5 +339,10 @@ public class InverseDynamicsOptimizationControlModule
       RigidBody rigidBody = command.getRigidBody();
       Wrench wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   public void submitWrenchObjectiveCommand(WrenchObjectiveCommand command)
+   {
+      wrenchMatrixCalculator.submitWrenchObjectiveCommand(command);
    }
 }

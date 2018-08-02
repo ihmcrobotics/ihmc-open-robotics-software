@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -11,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -25,6 +28,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -206,6 +210,147 @@ public class PlaneContactStateToWrenchMatrixHelper
       desiredCoPCommandInSoleFrame.set(command.getDesiredCoPInSoleFrame());
       desiredCoPCommandWeightInSoleFrame.set(command.getWeightInSoleFrame());
       hasReceivedCenterOfPressureCommand.set(true);
+   }
+
+   private final RecyclingArrayList<WrenchObjectiveCommand> wrenchObjectiveCommands = new RecyclingArrayList<>(WrenchObjectiveCommand.class);
+   private final MutableInt wrenchTaskSize = new MutableInt(0);
+
+   public void submitWrenchObjectiveCommand(WrenchObjectiveCommand command)
+   {
+      // Make sure the wrench is for this body!
+      command.getWrench().getBodyFrame().checkReferenceFrameMatch(getRigidBody().getBodyFixedFrame());
+
+      // At this point we can not yet compute the matrices since the order of the inverse dynamics commands is not guaranteed. This means
+      // the contact state might change. So we need to hold on to the command and wait with computing the task matrices until all inverse
+      // dynamics commands are handled.
+      wrenchObjectiveCommands.add().set(command);
+      wrenchTaskSize.add(command.getSelectionMatrix().getNumberOfSelectedAxes());
+   }
+
+   public int getWrenchTaskSize()
+   {
+      return wrenchTaskSize.intValue();
+   }
+
+   private final DenseMatrix64F commandTaskJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F commandTaskObjective = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F commandTaskWeight = new DenseMatrix64F(0, 0);
+
+   public void getAdditionalRhoTasks(DenseMatrix64F rhoTaskJacobian, DenseMatrix64F rhoTaskObjective, DenseMatrix64F rhoTaskWeight)
+   {
+      int taskSize = getWrenchTaskSize();
+      rhoTaskJacobian.reshape(taskSize, rhoSize);
+      rhoTaskObjective.reshape(taskSize, 1);
+      rhoTaskWeight.reshape(taskSize, taskSize);
+      CommonOps.fill(rhoTaskJacobian, 0.0);
+      CommonOps.fill(rhoTaskObjective, 0.0);
+      CommonOps.fill(rhoTaskWeight, 0.0);
+
+      taskSize = 0;
+      for (int wrenchObjectiveIndex = 0; wrenchObjectiveIndex < wrenchObjectiveCommands.size(); wrenchObjectiveIndex++)
+      {
+         WrenchObjectiveCommand command = wrenchObjectiveCommands.get(wrenchObjectiveIndex);
+         computeCommandMatrices(command, commandTaskJacobian, commandTaskObjective, commandTaskWeight);
+         int bodyTaskSize = commandTaskObjective.getNumRows();
+
+         CommonOps.insert(commandTaskJacobian, rhoTaskJacobian, taskSize, 0);
+         CommonOps.insert(commandTaskObjective, rhoTaskObjective, taskSize, 0);
+         CommonOps.insert(commandTaskWeight, rhoTaskWeight, taskSize, taskSize);
+
+         taskSize = taskSize + bodyTaskSize;
+      }
+
+      // Quick sanity check on the task size computation. These numbers should be the same.
+      if (taskSize != getWrenchTaskSize())
+      {
+         throw new RuntimeException("Something went wrong.");
+      }
+
+      wrenchObjectiveCommands.clear();
+      wrenchTaskSize.setValue(0);
+   }
+
+   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final DenseMatrix64F tempRotationMatrix = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F selectionFrameTransform = new DenseMatrix64F(6, 6);
+
+   private void computeCommandMatrices(WrenchObjectiveCommand command, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      // Get the matrices without considering the selection:
+      Wrench wrench = command.getWrench();
+      wrench.changeFrame(planeFrame);
+      wrench.getMatrix(tempTaskObjective);
+      command.getWeightMatrix().getFullWeightMatrixInFrame(planeFrame, tempTaskWeight);
+      tempTaskJacobian.set(wrenchJacobianMatrix);
+
+      // Pack the transformation matrix to the selection frame:
+      MatrixTools.setToZero(selectionFrameTransform);
+      SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
+      // Angular part:
+      ReferenceFrame angularSelectionFrame = selectionMatrix.getAngularSelectionFrame();
+      angularSelectionFrame.getTransformToDesiredFrame(tempTransform, planeFrame);
+      tempTransform.getRotation(tempRotationMatrix);
+      CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 0, 0);
+      // Linear part:
+      ReferenceFrame linearSelectionFrame = selectionMatrix.getLinearSelectionFrame();
+      linearSelectionFrame.getTransformToDesiredFrame(tempTransform, planeFrame);
+      tempTransform.getRotation(tempRotationMatrix);
+      CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 3, 3);
+
+      // Now transform all matrices to the selection frame:
+      taskJacobian.reshape(tempTaskJacobian.getNumRows(), tempTaskJacobian.getNumCols());
+      taskObjective.reshape(tempTaskObjective.getNumRows(), tempTaskObjective.getNumCols());
+      taskWeight.reshape(tempTaskWeight.getNumRows(), tempTaskWeight.getNumCols());
+      CommonOps.mult(selectionFrameTransform, tempTaskJacobian, taskJacobian);
+      CommonOps.mult(selectionFrameTransform, tempTaskObjective, taskObjective);
+      CommonOps.mult(selectionFrameTransform, tempTaskWeight, taskWeight);
+
+      // Remove the rows that are not selected. For this we need to start from the bottom so the row indices do not get mixed up as rows get removed.
+      if (!selectionMatrix.isLinearZSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 5);
+         MatrixTools.removeRow(taskObjective, 5);
+         MatrixTools.removeRow(taskWeight, 5);
+         MatrixTools.removeColumn(taskWeight, 5);
+      }
+      if (!selectionMatrix.isLinearYSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 4);
+         MatrixTools.removeRow(taskObjective, 4);
+         MatrixTools.removeRow(taskWeight, 4);
+         MatrixTools.removeColumn(taskWeight, 4);
+      }
+      if (!selectionMatrix.isLinearXSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 3);
+         MatrixTools.removeRow(taskObjective, 3);
+         MatrixTools.removeRow(taskWeight, 3);
+         MatrixTools.removeColumn(taskWeight, 3);
+      }
+      if (!selectionMatrix.isAngularZSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 2);
+         MatrixTools.removeRow(taskObjective, 2);
+         MatrixTools.removeRow(taskWeight, 2);
+         MatrixTools.removeColumn(taskWeight, 2);
+      }
+      if (!selectionMatrix.isAngularYSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 1);
+         MatrixTools.removeRow(taskObjective, 1);
+         MatrixTools.removeRow(taskWeight, 1);
+         MatrixTools.removeColumn(taskWeight, 1);
+      }
+      if (!selectionMatrix.isAngularYSelected())
+      {
+         MatrixTools.removeRow(taskJacobian, 0);
+         MatrixTools.removeRow(taskObjective, 0);
+         MatrixTools.removeRow(taskWeight, 0);
+         MatrixTools.removeColumn(taskWeight, 0);
+      }
    }
 
    public void computeMatrices(double defaultRhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)
