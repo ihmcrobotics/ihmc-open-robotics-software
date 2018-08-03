@@ -83,8 +83,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-//      simulationTestingParameters.setKeepSCSUp(true);
-
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
 
@@ -135,8 +133,8 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 100000)
    public void testStepInPlace() throws SimulationExceededMaximumTimeException
    {
       setupCameraSideView();
@@ -170,8 +168,8 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 49.0)
+   @Test(timeout = 100000)
    public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
    {
       setupCameraSideView();
