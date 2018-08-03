@@ -40,6 +40,7 @@ public class ICPOptimizationSolutionHandler
 
    private final YoDouble residualCostToGo;
    private final YoDouble costToGo;
+   private final YoDouble dynamicsCostToGo;
    private final YoDouble footstepCostToGo;
    private final YoDouble copFeedbackCostToGo;
    private final YoDouble cmpFeedbackCostToGo;
@@ -81,6 +82,7 @@ public class ICPOptimizationSolutionHandler
       {
          residualCostToGo = new YoDouble(yoNamePrefix + "ResidualCostToGo", registry);
          costToGo = new YoDouble(yoNamePrefix + "CostToGo", registry);
+         dynamicsCostToGo = new YoDouble(yoNamePrefix + "DynamicsCostToGo", registry);
          footstepCostToGo = new YoDouble(yoNamePrefix + "FootstepCostToGo", registry);
          copFeedbackCostToGo = new YoDouble(yoNamePrefix + "CoPFeedbackCostToGo", registry);
          cmpFeedbackCostToGo = new YoDouble(yoNamePrefix + "CMPFeedbackCostToGo", registry);
@@ -88,6 +90,7 @@ public class ICPOptimizationSolutionHandler
       else
       {
          residualCostToGo = null;
+         dynamicsCostToGo = null;
          costToGo = null;
          footstepCostToGo = null;
          copFeedbackCostToGo = null;
@@ -100,6 +103,7 @@ public class ICPOptimizationSolutionHandler
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
       clippedFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
+
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
       footstepSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);
@@ -121,6 +125,7 @@ public class ICPOptimizationSolutionHandler
       if (debug)
       {
          residualCostToGo.set(solver.getCostToGo());
+         dynamicsCostToGo.set(solver.getDynamicsCostToGo());
          costToGo.set(solver.getCostToGo());
          footstepCostToGo.set(solver.getFootstepCostToGo());
          copFeedbackCostToGo.set(solver.getCoPFeedbackCostToGo());
