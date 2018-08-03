@@ -44,10 +44,12 @@ public class SelectionCalculator
       int taskSize = 3;
       checkMatrixSizes(taskJacobian, taskObjective, taskSize);
 
-      // Pack the transformation matrix to the selection frame:
+      // Pack the transformation matrix from task frame to selection frame. Then apply these transforms to both the original
+      // task Jacobian and the objective.
       ReferenceFrame selectionFrame = selectionMatrix.getSelectionFrame();
       if (selectionFrame == null)
       {
+         // If no selection frame is provided it is assumed to be in the task frame.
          selectionFrame = taskFrame;
       }
       if (selectionFrame != taskFrame)
@@ -61,18 +63,24 @@ public class SelectionCalculator
       }
       else
       {
+         // If the selection frame equals the task frame we can skip this step.
          taskJacobianToPack.set(taskJacobian);
          taskObjectiveToPack.set(taskObjective);
       }
 
-      // Finally get the weight and transform it to the selection frame directly:
+      // Get the weight matrix in weight frame. The transform it using the transformation between weight frame and selection frame.
       ReferenceFrame weightFrame = weightMatrix.getWeightFrame();
       if (weightFrame == null)
       {
          weightFrame = taskFrame;
       }
       taskWeightToPack.reshape(taskSize, taskSize);
-      weightMatrix.getFullWeightMatrixInFrame(weightFrame, taskWeightToPack);
+      CommonOps.fill(taskWeightToPack, 0.0);
+      taskWeightToPack.set(0, 0, weightMatrix.getXAxisWeight());
+      taskWeightToPack.set(1, 1, weightMatrix.getYAxisWeight());
+      taskWeightToPack.set(2, 2, weightMatrix.getZAxisWeight());
+      // Skip the transformation if the frames match. This is helpful if the user only specifies a weight for the selected axes. In
+      // that case applying the transformation would fill the matrix with nasty NaNs.
       if (weightFrame != selectionFrame)
       {
          weightFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
@@ -81,7 +89,8 @@ public class SelectionCalculator
          CommonOps.multTransB(tempTaskWeight, tempRotationMatrix, taskWeightToPack);
       }
 
-      // Remove the rows that are not selected. For this we need to start from the bottom so the row indices do not get mixed up as rows get removed.
+      // Remove the rows (and collumns for the weight) that are not selected. For this we need to start from the bottom so the row
+      // indices do not get mixed up as rows get removed.
       for (int axis = taskSize - 1; axis >= 0; axis--)
       {
          if (!selectionMatrix.isAxisSelected(axis))
@@ -106,6 +115,7 @@ public class SelectionCalculator
       int taskSize = 6;
       checkMatrixSizes(taskJacobian, taskObjective, taskSize);
 
+      // Split the problem up into two parts (angular and linear).
       taskJacobian3D.reshape(3, problemSize);
       taskObjective3D.reshape(3, 1);
 
