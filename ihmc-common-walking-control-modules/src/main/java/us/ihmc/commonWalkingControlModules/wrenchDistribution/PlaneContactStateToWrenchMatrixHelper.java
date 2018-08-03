@@ -28,9 +28,11 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionCalculator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -272,10 +274,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final DenseMatrix64F tempRotationMatrix = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F selectionFrameTransform = new DenseMatrix64F(6, 6);
+   private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
    private void computeCommandMatrices(WrenchObjectiveCommand command, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
@@ -283,42 +282,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       Wrench wrench = command.getWrench();
       wrench.changeFrame(planeFrame);
       wrench.getMatrix(tempTaskObjective);
-      command.getWeightMatrix().getFullWeightMatrixInFrame(planeFrame, tempTaskWeight);
       tempTaskJacobian.set(wrenchJacobianMatrix);
 
-      // Pack the transformation matrix to the selection frame:
-      MatrixTools.setToZero(selectionFrameTransform);
       SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
-      // Angular part:
-      ReferenceFrame angularSelectionFrame = selectionMatrix.getAngularSelectionFrame();
-      planeFrame.getTransformToDesiredFrame(tempTransform, angularSelectionFrame);
-      tempTransform.getRotation(tempRotationMatrix);
-      CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 0, 0);
-      // Linear part:
-      ReferenceFrame linearSelectionFrame = selectionMatrix.getLinearSelectionFrame();
-      planeFrame.getTransformToDesiredFrame(tempTransform, linearSelectionFrame);
-      tempTransform.getRotation(tempRotationMatrix);
-      CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 3, 3);
-
-      // Now transform all matrices to the selection frame:
-      taskJacobian.reshape(tempTaskJacobian.getNumRows(), tempTaskJacobian.getNumCols());
-      taskObjective.reshape(tempTaskObjective.getNumRows(), tempTaskObjective.getNumCols());
-      taskWeight.reshape(tempTaskWeight.getNumRows(), tempTaskWeight.getNumCols());
-      CommonOps.mult(selectionFrameTransform, tempTaskJacobian, taskJacobian);
-      CommonOps.mult(selectionFrameTransform, tempTaskObjective, taskObjective);
-      CommonOps.mult(selectionFrameTransform, tempTaskWeight, taskWeight);
-
-      // Remove the rows that are not selected. For this we need to start from the bottom so the row indices do not get mixed up as rows get removed.
-      for (int axis = Wrench.SIZE - 1; axis >= 0; axis--)
-      {
-         if (!selectionMatrix.isAxisSelected(axis))
-         {
-            MatrixTools.removeRow(taskJacobian, axis);
-            MatrixTools.removeRow(taskObjective, axis);
-            MatrixTools.removeRow(taskWeight, axis);
-            MatrixTools.removeColumn(taskWeight, axis);
-         }
-      }
+      WeightMatrix6D weightMatrix = command.getWeightMatrix();
+      selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, planeFrame, tempTaskJacobian, tempTaskObjective, taskJacobian, taskObjective,
+                                               taskWeight);
    }
 
    public void computeMatrices(double defaultRhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)
