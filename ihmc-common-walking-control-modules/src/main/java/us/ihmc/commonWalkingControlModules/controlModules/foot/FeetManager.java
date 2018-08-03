@@ -290,7 +290,7 @@ public class FeetManager
          controllerToolbox.restorePreviousFootContactPoints(robotSide);
    }
 
-   private void setContactStateForSwing(RobotSide robotSide)
+   public void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);

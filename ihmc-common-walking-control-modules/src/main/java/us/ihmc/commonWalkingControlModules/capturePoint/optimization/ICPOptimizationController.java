@@ -92,6 +92,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
+   private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
+
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final YoFramePose3D upcomingFootstepLocation = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
@@ -175,6 +177,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FrameVector2D currentICPVelocity = new FrameVector2D();
 
    private final double controlDT;
+   private final double controlDTSquare;
    private final DoubleProvider dynamicsObjectiveDoubleSupportWeightModifier;
 
    private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
@@ -200,6 +203,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
+      this.controlDTSquare = controlDT * controlDT;
       this.contactableFeet = contactableFeet;
 
       if (icpControlPolygons != null)
@@ -648,7 +652,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
 
       if (useFeedbackRate.getValue())
-         solver.setFeedbackRateWeight(copFeedbackRateWeight.getValue() / controlDT);
+         solver.setFeedbackRateWeight(copFeedbackRateWeight.getValue() / controlDTSquare);
    }
 
    private void submitCMPFeedbackTaskConditionsToSolver()
@@ -685,7 +689,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       if (useFootstepRate.getValue())
-         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
+         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
    private boolean solveQP()
@@ -736,6 +740,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
+         solver.getDynamicsError(dynamicsError);
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
