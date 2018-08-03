@@ -300,6 +300,9 @@ public class JointPrivilegedConfigurationHandler
 
    private void processPrivilegedConfigurations()
    {
+      if (configurationCommandList.isEmpty())
+         return;
+
       for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
       {
          privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
