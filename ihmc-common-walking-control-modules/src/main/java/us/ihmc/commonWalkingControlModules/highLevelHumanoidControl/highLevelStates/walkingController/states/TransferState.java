@@ -207,7 +207,15 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onEntry()
    {
-      walkingMessageHandler.peekTiming(0, stepTiming);
+      if (walkingMessageHandler.hasUpcomingFootsteps())
+      {
+         walkingMessageHandler.peekTiming(0, stepTiming);
+      }
+      else
+      {
+         stepTiming.setTimings(Double.NaN, Double.NaN, Double.NaN);
+      }
+
       adjustTouchdownDuration();
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
@@ -290,7 +298,10 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onExit()
    {
-      isUnloading.set(false);
+      if (isUnloading != null)
+      {
+         isUnloading.set(false);
+      }
       feetManager.reset();
    }
 
