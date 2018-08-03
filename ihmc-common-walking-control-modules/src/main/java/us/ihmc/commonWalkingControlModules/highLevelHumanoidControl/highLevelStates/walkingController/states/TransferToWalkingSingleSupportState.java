@@ -18,22 +18,24 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
 
-   private final YoDouble minimumTransferTime = new YoDouble("minimumTransferTime", registry);
+   private final DoubleProvider minimumTransferTime;
 
    private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
+   private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
+
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                               WalkingControllerParameters walkingControllerParameters,
-                                              WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
+                                              WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
                                               DoubleProvider unloadDuration, DoubleProvider unloadWeight, YoVariableRegistry parentRegistry)
    {
       super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadDuration,
             unloadWeight, parentRegistry);
 
-      this.minimumTransferTime.set(minimumTransferTime);
+      this.minimumTransferTime = minimumTransferTime;
 
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
@@ -128,18 +130,22 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private void adjustTiming(FootstepTiming stepTiming)
    {
       if (!stepTiming.hasAbsoluteTime())
+      {
+         originalTransferTime.setToNaN();
          return;
+      }
 
       double originalSwingTime = stepTiming.getSwingTime();
       double originalTransferTime = stepTiming.getTransferTime();
       double originalTouchdownDuration = stepTiming.getTouchdownDuration();
+      this.originalTransferTime.set(originalTransferTime);
 
       double currentTime = controllerToolbox.getYoTime().getDoubleValue();
       double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
       double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
 
       // make sure transfer does not get too short
-      adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getDoubleValue());
+      adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getValue());
 
       // as the touchdown in part of transfer scale it according to the transfer adjustment
       double adjustmentFactor = adjustedTransferTime / originalTransferTime;

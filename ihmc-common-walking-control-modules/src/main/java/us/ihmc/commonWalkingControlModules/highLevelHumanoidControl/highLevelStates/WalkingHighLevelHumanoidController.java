@@ -252,9 +252,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       SideDependentList<TransferToWalkingSingleSupportState> walkingTransferStates = new SideDependentList<>();
 
+      DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, walkingControllerParameters.getMinimumTransferTime());
       for (RobotSide transferToSide : RobotSide.values)
       {
-         double minimumTransferTime = walkingControllerParameters.getMinimumTransferTime();
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
                                                                                                      managerFactory, walkingControllerParameters,
