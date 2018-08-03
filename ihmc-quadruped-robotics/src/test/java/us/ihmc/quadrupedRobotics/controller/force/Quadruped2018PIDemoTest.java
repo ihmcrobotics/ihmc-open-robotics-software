@@ -355,7 +355,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking  = 3.4 + numberOfSteps * stepLength + 1.2;
 
-      double bodyHeight = 0.54;
+      double bodyHeight = 0.5;
       double stanceLength = 0.65;
       double stepGroundClearance = 0.06;
       double endDoubleSupportDuration = 0.15;
