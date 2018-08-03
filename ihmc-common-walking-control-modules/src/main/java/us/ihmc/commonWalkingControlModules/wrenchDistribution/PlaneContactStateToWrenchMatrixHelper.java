@@ -291,12 +291,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
       // Angular part:
       ReferenceFrame angularSelectionFrame = selectionMatrix.getAngularSelectionFrame();
-      angularSelectionFrame.getTransformToDesiredFrame(tempTransform, planeFrame);
+      planeFrame.getTransformToDesiredFrame(tempTransform, angularSelectionFrame);
       tempTransform.getRotation(tempRotationMatrix);
       CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 0, 0);
       // Linear part:
       ReferenceFrame linearSelectionFrame = selectionMatrix.getLinearSelectionFrame();
-      linearSelectionFrame.getTransformToDesiredFrame(tempTransform, planeFrame);
+      planeFrame.getTransformToDesiredFrame(tempTransform, linearSelectionFrame);
       tempTransform.getRotation(tempRotationMatrix);
       CommonOps.insert(tempRotationMatrix, selectionFrameTransform, 3, 3);
 
