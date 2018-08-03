@@ -641,7 +641,7 @@ public class ICPOptimizationQPSolverTest
          solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 10000.0);
          solver.setMaxCMPDistanceFromEdge(0.06);
          solver.setCopSafeDistanceToEdge(0.002);
-         solver.setFeedbackRateWeight(0.0025);
+         solver.setFeedbackRateWeight(0.0025, 0.0025);
 
          // angular momentum
          solver.resetCMPFeedbackConditions();
@@ -698,7 +698,7 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
       solver.setMaxCMPDistanceFromEdge(0.06);
       solver.setCopSafeDistanceToEdge(0.002);
-      solver.setFeedbackRateWeight(0.0025);
+      solver.setFeedbackRateWeight(0.0025, 0.0025);
 
       // angular momentum
       solver.resetCMPFeedbackConditions();
