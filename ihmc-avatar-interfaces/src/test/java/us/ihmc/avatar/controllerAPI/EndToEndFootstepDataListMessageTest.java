@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -137,6 +138,41 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
+   }
+
+   protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+      DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
+      drcSimulationTestHelper.setStartingLocation(location);
+      drcSimulationTestHelper.createSimulation("MessageTest");
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      MovingReferenceFrame messageFrame = drcSimulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      transformMessageToWorld(messageFrame, messageInMidFeetZUp);
+
+      drcSimulationTestHelper.publishToController(messageInMidFeetZUp);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      int steps = (int) drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsDouble();
+      assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);
+   }
+
+   private static void transformMessageToWorld(ReferenceFrame messageFrame, FootstepDataListMessage message)
+   {
+      int steps = message.getFootstepDataList().size();
+      FramePose3D stepPose = new FramePose3D();
+      for (int i = 0; i < steps; i++)
+      {
+         FootstepDataMessage footstep = message.getFootstepDataList().get(i);
+         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
+         stepPose.changeFrame(ReferenceFrame.getWorldFrame());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+      }
    }
 
    private static void setupCamera(DRCSimulationTestHelper drcSimulationTestHelper)
