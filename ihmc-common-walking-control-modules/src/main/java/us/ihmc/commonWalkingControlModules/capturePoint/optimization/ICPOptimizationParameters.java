@@ -50,7 +50,16 @@ public abstract class ICPOptimizationParameters
    public abstract double getFeedbackLateralWeight();
 
    /**
-    * Penalization on changes feedback CMP between control ticks.
+    * Penalization on changes in the feedback CoP and CMP between control ticks.
+    * This weight is normalized by the control DT.
+    */
+   public double getCoPCMPFeedbackRateWeight()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Penalization on changes in the total feedback between control ticks.
     * This weight is normalized by the control DT.
     */
    public abstract double getFeedbackRateWeight();
