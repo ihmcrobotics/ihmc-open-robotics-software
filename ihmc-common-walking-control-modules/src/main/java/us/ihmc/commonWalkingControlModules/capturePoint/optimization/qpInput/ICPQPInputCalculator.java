@@ -316,6 +316,17 @@ public class ICPQPInputCalculator
       CommonOps.multAdd(0.5, adjustmentObjtW, adjustmentObjective, icpQPInput.residualCost);
    }
 
+   public void computeDynamicConstraintError(DenseMatrix64F solution, DenseMatrix64F errorToPack)
+   {
+      errorToPack.reshape(2, 1);
+
+      CommonOps.mult(feedbackJacobian, solution, errorToPack);
+      CommonOps.multAdd(adjustmentJacobian, solution, errorToPack);
+
+      CommonOps.addEquals(errorToPack, -1.0, feedbackObjective);
+      CommonOps.addEquals(errorToPack, -1.0, adjustmentObjective);
+   }
+
    /**
     * Submits the CoP feedback action task to the total quadratic program cost terms.
     *
