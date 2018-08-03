@@ -109,8 +109,10 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F footstepRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CoP feedback action. */
    private final DenseMatrix64F copFeedbackWeight = new DenseMatrix64F(2, 2);
-   /** Weight minimizing the CoP feedback rate. */
+   /** Weight minimizing the feedback rate. */
    private final DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
+   /** Weight minimizing the CoP and CMP feedback rate. */
+   private final DenseMatrix64F copCMPFeedbackRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CMP feedback action. */
    private final DenseMatrix64F cmpFeedbackWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
@@ -238,8 +240,8 @@ public class ICPOptimizationQPSolver
       dynamicsError = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
       tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
       tmpFootstepCost = new DenseMatrix64F(2, 1);
@@ -693,12 +695,16 @@ public class ICPOptimizationQPSolver
     * Enables the use of cop feedback rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
     * amount of CoP feedback to stabilize the ICP dynamics.
     *
-    * @param rateWeight weight placed on changes in the CMP feedback solution.
+    * @param copCMPFeedbackRateWeight weight placed on changes in the CoP and CMP feedback solution.
+    * @param feedbackRateWeight weight placed on changes in the total (CoP + CMP) feedback solution.
     */
-   public void setFeedbackRateWeight(double rateWeight)
+   public void setFeedbackRateWeight(double copCMPFeedbackRateWeight, double feedbackRateWeight)
    {
-      CommonOps.setIdentity(feedbackRateWeight);
-      CommonOps.scale(rateWeight, feedbackRateWeight);
+      CommonOps.setIdentity(this.feedbackRateWeight);
+      CommonOps.setIdentity(this.copCMPFeedbackRateWeight);
+
+      CommonOps.scale(feedbackRateWeight, this.feedbackRateWeight);
+      CommonOps.scale(copCMPFeedbackRateWeight, this.copCMPFeedbackRateWeight);
 
       hasFeedbackRateTerm = true;
    }
@@ -844,8 +850,8 @@ public class ICPOptimizationQPSolver
     */
    private void addFeedbackRateTask()
    {
-//      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCoPFeedbackDeltaSolution);
-//      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousCMPFeedbackDeltaSolution);
+      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCoPFeedbackDeltaSolution);
+      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
       inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
       inputCalculator.submitFeedbackRateTask(feedbackRateTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -1040,8 +1046,8 @@ public class ICPOptimizationQPSolver
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
    {
-//      previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
-//      previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
+      previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
+      previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
       CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
