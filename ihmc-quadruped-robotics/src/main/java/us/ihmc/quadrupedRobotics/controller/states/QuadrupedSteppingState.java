@@ -88,7 +88,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -136,13 +135,8 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // step planner
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
       upcomingGroundPlaneEstimator = controllerToolbox.getUpcomingGroundPlaneEstimator();
-      groundPlanePositions = new QuadrantDependentList<>();
-      upcomingGroundPlanePositions = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
-         upcomingGroundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "UpcomingGroundPlanePosition", worldFrame, registry));
-      }
+      groundPlanePositions = controllerToolbox.getGroundPlanePositions();
+      upcomingGroundPlanePositions = controllerToolbox.getUpcomingGroundPlanePositions();
 
       this.stateMachine = buildStateMachine();
 
@@ -242,11 +236,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // report footstep status message
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
-
-      // update ground plane estimate
-      tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
-      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(tempPoint);
-      upcomingGroundPlanePositions.get(thisStepQuadrant).setMatchingFrame(tempPoint);
 
       tempPoint.changeFrame(worldFrame);
 
