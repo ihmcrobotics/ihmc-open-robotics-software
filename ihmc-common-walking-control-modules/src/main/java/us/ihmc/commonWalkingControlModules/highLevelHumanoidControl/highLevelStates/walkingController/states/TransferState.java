@@ -94,6 +94,7 @@ public abstract class TransferState extends WalkingState
          unloadingWrenchCommand.getSelectionMatrix().clearSelection();
          unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
          unloadingWrenchCommand.getSelectionMatrix().selectLinearZ(true);
+         unloadingWrenchCommand.getWeightMatrix().setWeightFrame(ReferenceFrame.getWorldFrame());
          unloadingWrenchCommand.getWrench().setToZero(footToUnload.getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
       }
       else
