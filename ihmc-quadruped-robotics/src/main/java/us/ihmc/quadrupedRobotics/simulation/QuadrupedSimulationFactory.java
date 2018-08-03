@@ -139,7 +139,7 @@ public class QuadrupedSimulationFactory
 
 
    // TO CONSTRUCT
-   private YoVariableRegistry rootRegistry;
+   private YoVariableRegistry factoryRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
@@ -174,7 +174,7 @@ public class QuadrupedSimulationFactory
 
    private void setupYoRegistries()
    {
-      rootRegistry = sdfRobot.get().getRobotsYoVariableRegistry();
+      factoryRegistry = new YoVariableRegistry("factoryRegistry");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
@@ -214,7 +214,7 @@ public class QuadrupedSimulationFactory
          SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory;
          sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot.get(), stateEstimatorParameters.get());
          sensorReaderFactory.build(rootInverseDynamicsJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
-                                   estimatorDesiredJointDataHolder, sdfRobot.get().getRobotsYoVariableRegistry());
+                                   estimatorDesiredJointDataHolder, factoryRegistry);
 
          sensorReader = sensorReaderFactory.getSensorReader();
       }
@@ -471,6 +471,7 @@ public class QuadrupedSimulationFactory
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
                                                                poseCommunicator, headController, yoVariableServer);
+      simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
    private void setupSDFRobot()
@@ -630,8 +631,8 @@ public class QuadrupedSimulationFactory
          scs.setupViewport(viewportConfiguration);
       }
 
-      InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
-      ParameterLoaderHelper.loadParameters(this, parameterFile, rootRegistry);
+      InputStream parameterFile = modelFactory.get().getParameterInputStream(controlMode.get());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
       scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
 
       if (yoVariableServer != null)

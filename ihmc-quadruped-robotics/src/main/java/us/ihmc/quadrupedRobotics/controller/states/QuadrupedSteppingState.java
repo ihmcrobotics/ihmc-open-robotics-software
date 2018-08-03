@@ -72,7 +72,9 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    private EventTrigger trigger;
 
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
+   private final QuadrantDependentList<YoFramePoint3D> upcomingGroundPlanePositions;
 
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
@@ -86,7 +88,6 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -133,11 +134,9 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       // step planner
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
-      groundPlanePositions = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
-      }
+      upcomingGroundPlaneEstimator = controllerToolbox.getUpcomingGroundPlaneEstimator();
+      groundPlanePositions = controllerToolbox.getGroundPlanePositions();
+      upcomingGroundPlanePositions = controllerToolbox.getUpcomingGroundPlanePositions();
 
       this.stateMachine = buildStateMachine();
 
@@ -206,6 +205,11 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // update ground plane estimate
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(quadrant));
       groundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
+
+      step.getGoalPosition(tempPoint);
+      tempPoint.changeFrame(worldFrame);
+      upcomingGroundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
+
       onLiftOffTriggered.set(true);
 
       // report footstep status message
@@ -232,6 +236,7 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
       // report footstep status message
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(thisStepQuadrant);
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(thisStepQuadrant));
+
       tempPoint.changeFrame(worldFrame);
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
@@ -267,15 +272,20 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
 
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
+      upcomingGroundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          controllerToolbox.getContactStates().put(robotQuadrant, ContactState.IN_CONTACT);
 
          tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
          groundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
+         upcomingGroundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
+
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
+         upcomingGroundPlaneEstimator.addContactPoint(upcomingGroundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();
+      upcomingGroundPlaneEstimator.compute();
 
       controllerCore.initialize();
       feetManager.registerStepTransitionCallback(this);
@@ -348,11 +358,14 @@ public class QuadrupedSteppingState implements QuadrupedController, QuadrupedSte
    {
       // update ground plane estimate
       groundPlaneEstimator.clearContactPoints();
+      upcomingGroundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
+         upcomingGroundPlaneEstimator.addContactPoint(upcomingGroundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();
+      upcomingGroundPlaneEstimator.compute();
 
       groundPlaneEstimator.getPlanePoint(tempPoint);
       groundPlaneEstimator.getPlaneNormal(tempVector);
