@@ -130,8 +130,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   private final DoubleProvider unloadDuration = new DoubleParameter("UnloadDuration", registry, 0.05);
-   private final DoubleProvider unloadWeight = new DoubleParameter("UnloadWeight", registry, 0.01);
+   private final DoubleProvider unloadDuration = new DoubleParameter("UnloadDuration", registry, 0.02);
+   private final DoubleProvider unloadWeight = new DoubleParameter("UnloadWeight", registry, 0.001);
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
