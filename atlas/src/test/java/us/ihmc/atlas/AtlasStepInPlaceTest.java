@@ -46,11 +46,18 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
 
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 57.4)
-   @Test(timeout = 290000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 100000)
    public void testStepInPlace() throws SimulationExceededMaximumTimeException
    {
       super.testStepInPlace();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 49.0)
+   @Test(timeout = 100000)
+   public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
+   {
+      super.testStepInPlaceWithPush();
    }
 
 
