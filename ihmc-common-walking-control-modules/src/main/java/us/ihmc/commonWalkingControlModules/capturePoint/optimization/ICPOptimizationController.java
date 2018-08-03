@@ -101,6 +101,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D footstepLocationSubmitted = new YoFramePoint2D(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
    private final YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
+   private final DoubleProvider minICPErrorForStepAdjustment;
    private final DoubleProvider footstepAdjustmentSafetyFactor;
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
@@ -227,6 +228,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry,
                                                          icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry, icpOptimizationParameters.getMinICPErrorForStepAdjustment());
       footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
                                                            icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
       forwardFootstepWeight = new DoubleParameter(yoNamePrefix + "ForwardFootstepWeight", registry, icpOptimizationParameters.getForwardFootstepWeight());
@@ -489,6 +491,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private boolean computeWhetherToIncludeFootsteps()
    {
       if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
+         return false;
+
+      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()))
          return false;
 
       return upcomingFootsteps.size() > 0;
