@@ -104,6 +104,13 @@ public class ICPQPInputCalculator
       }
    }
 
+   public void computeCMPFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
+   {
+      if (indexHandler.hasCMPFeedbackTask())
+      computeQuadraticTask(indexHandler.getCMPFeedbackIndex(), icpQPInputToPack, rateWeight, objective);
+   }
+
+
    /**
     * Computes the angular momentum rate task in the form of the CoP-CMP difference objective.
     * This simply tries to achieve the desired CoP-CMP difference.

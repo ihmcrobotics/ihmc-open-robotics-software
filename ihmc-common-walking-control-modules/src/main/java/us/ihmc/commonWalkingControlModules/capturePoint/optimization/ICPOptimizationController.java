@@ -101,6 +101,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D footstepLocationSubmitted = new YoFramePoint2D(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
    private final YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
+   private final DoubleProvider minICPErrorForStepAdjustment;
    private final DoubleProvider footstepAdjustmentSafetyFactor;
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
@@ -115,7 +116,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
 
-   private final DoubleProvider copFeedbackRateWeight;
+   private final DoubleProvider feedbackRateWeight;
+   private final DoubleProvider copCMPFeedbackRateWeight;
    private final DoubleProvider footstepRateWeight;
    private final YoDouble scaledFootstepRateWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRateWeight", registry);
    private final DoubleProvider dynamicsObjectiveWeight;
@@ -227,6 +229,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry,
                                                          icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry, icpOptimizationParameters.getMinICPErrorForStepAdjustment());
       footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
                                                            icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
       forwardFootstepWeight = new DoubleParameter(yoNamePrefix + "ForwardFootstepWeight", registry, icpOptimizationParameters.getForwardFootstepWeight());
@@ -235,7 +238,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
       copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
-      copFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
+
+      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry, icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
+      feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
+
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
       useSmartICPIntegrator = new BooleanParameter("useSmartICPIntegrator", registry, icpOptimizationParameters.useSmartICPIntegrator());
       thresholdForStuck = new DoubleParameter(yoNamePrefix + "ThresholdForStuck", registry, icpOptimizationParameters.getICPVelocityThresholdForStuck());
@@ -491,6 +497,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
          return false;
 
+      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()))
+         return false;
+
       return upcomingFootsteps.size() > 0;
    }
 
@@ -652,7 +661,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
 
       if (useFeedbackRate.getValue())
-         solver.setFeedbackRateWeight(copFeedbackRateWeight.getValue() / controlDTSquare);
+         solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);
    }
 
    private void submitCMPFeedbackTaskConditionsToSolver()
