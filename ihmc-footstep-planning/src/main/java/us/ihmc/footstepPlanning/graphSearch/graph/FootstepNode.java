@@ -17,6 +17,10 @@ public class FootstepNode
    private final int yawIndex;
    private final RobotSide robotSide;
 
+   private double height = Double.NaN;
+   private double pitch = Double.NaN;
+   private double roll = Double.NaN;
+
    private Point2D midFootPoint;
 
    private final int hashCode;
@@ -50,6 +54,37 @@ public class FootstepNode
    {
       return gridSizeYaw * yawIndex;
    }
+
+   public boolean hasZ()
+   {
+      return !Double.isNaN(height);
+   }
+
+   public boolean hasPitch()
+   {
+      return !Double.isNaN(pitch);
+   }
+
+   public boolean hasRoll()
+   {
+      return !Double.isNaN(roll);
+   }
+
+   public double getZ()
+   {
+      return height;
+   }
+
+   public double getPitch()
+   {
+      return pitch;
+   }
+
+   public double getRoll()
+   {
+      return roll;
+   }
+
 
    public RobotSide getRobotSide()
    {
