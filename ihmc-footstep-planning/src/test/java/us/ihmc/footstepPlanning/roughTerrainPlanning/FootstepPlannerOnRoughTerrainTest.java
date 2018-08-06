@@ -122,8 +122,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       runTestAndAssert(getTestData(wall));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
    public void testDownCorridor()
    {
       runTestAndAssert(getTestData(corridor));
