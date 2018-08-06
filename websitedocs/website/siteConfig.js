@@ -11,21 +11,21 @@
 const siteConfig = {
   title: 'IHMC Open Robotics Software' /* title for your website */,
   tagline: 'Open Robotics Software Documentation',
-  url: 'https://ihmcrobotics.github.io' /* your website url */,
+  url: 'https://ihmcroboticsdocs.github.io' /* your website url */,
   baseUrl: '/ihmc-open-robotics-software/' /* base url for your project */,
 
   // Used for publishing and more
   projectName: 'ihmc-open-robotics-software',
-  organizationName: 'ihmcrobotics',
+  organizationName: 'ihmcroboticsdocs',
 
  // For no header links in the top nav bar -> headerLinks: [],
    headerLinks: [
       {
-      href: 'https://ihmcrobotics.github.io',
+      href: 'https://ihmcroboticsdocs.github.io',
       label: 'IHMC Home',
     },
      {
-      href: 'https://ihmcrobotics.github.io/docs/docshome.html',
+      href: 'https://ihmcroboticsdocs.github.io/docs/docshome.html',
       label: 'All IHMC Docs',
     },
     {
