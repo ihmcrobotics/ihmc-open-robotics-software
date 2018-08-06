@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.simple3DWalker;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.simple3dWalker.Robot.SimpleWalkerController;
-import us.ihmc.simple3dWalker.Robot.SimpleWalkerRobot;
+
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
@@ -101,8 +100,6 @@ public class SimpleWalkerSimulation
          walkerController.setDesiredBodyVelocityX(0.0);
          blockingSimulationRunner.simulateAndBlockAndCatchExceptions(3.0);
       }
-
-
 
 /*
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

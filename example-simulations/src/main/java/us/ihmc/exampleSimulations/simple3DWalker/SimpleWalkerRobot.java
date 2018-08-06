@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.simple3DWalker.Robot;
+package us.ihmc.exampleSimulations.simple3DWalker;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.Axis;
@@ -21,7 +21,6 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.ArrayList;
@@ -41,16 +40,9 @@ public class SimpleWalkerRobot extends Robot
    private SideDependentList<PinJoint> anklePitchJoints = new SideDependentList<>();
    private SideDependentList<PinJoint> ankleRollJoints = new SideDependentList<>();
    private SideDependentList<PinJoint> ankleYawJoints = new SideDependentList<>();
-   private YoGraphicVector gcReaction1Viz;
-   private YoGraphicVector gcReaction2Viz;
-   private YoGraphicVector gcReaction3Viz;
-   private YoGraphicVector gcReaction4Viz;
    private SideDependentList<YoGraphicVector> reactionForceVizs = new SideDependentList<>();
-   private SideDependentList<YoDouble> ankleXs = new SideDependentList<>();
-   private SideDependentList<YoDouble> ankleYs = new SideDependentList<>();
-   private SideDependentList<YoDouble> ankleZs = new SideDependentList<>();
-   private SideDependentList<YoFramePoint3D> anklePositions = new SideDependentList<>();
-   private SideDependentList<YoGraphicsListRegistry> yoGraphicsListRegistrySideDependentList = new SideDependentList<>();
+
+
    private GroundContactPoint gcHeelL;
    private GroundContactPoint gcHeelR;
    private GroundContactPoint gcToeL;
@@ -63,8 +55,7 @@ public class SimpleWalkerRobot extends Robot
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameVector3D bodyVelocity;
    private final YoFrameVector3D bodyAcceleration;
-   private  YoFrameVector3D reactionForce;
-   private SideDependentList<List<YoGraphicVector>> gcReactionVizs = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+
 
 
    //private PinJointDescription
@@ -78,8 +69,8 @@ public class SimpleWalkerRobot extends Robot
    private double maxLegExtension = lowerLinkLength;
    private double footZMin = -0.04;
    private double footZmax = -0.01;
-   private double footY = 0.25;
-   private double footX = 0.25;
+   private double footY = 0.3;
+   private double footX = 0.3;
    private double footOffsetPercent = 0;
    private double footForward = (footX * footOffsetPercent);
    private final Vector3D bodyOffset = new Vector3D(0.0, 0.0, 0.0);
