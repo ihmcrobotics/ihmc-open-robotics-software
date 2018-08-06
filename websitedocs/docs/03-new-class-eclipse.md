@@ -3,7 +3,7 @@ title: Create The ValkyrieDemo Class
 sidebar_label: Create the ValkyrieDemo Class
 ---
 
-<br/> 
+<br/>
  ### Open the Java Perspective
 
 You'll want to have the Java Perspective open before you create and edit your class.  After importing the Gradle Project you are often left with the Gradle Tasks window open and the Java Perspective minimized. Click the maximize perspective button on the right of the Eclipse IDE window to expand the Java Perspective.
@@ -14,7 +14,7 @@ Once expanded you should see the `GradleProject` selected on the left and `Java`
 
 ![Wizard Search](/img/quickstart/eclipseJavaPerspective.png)
 
-<br/> 
+<br/>
 ### Create a New Class to Run the Valkyrie Simulation
 
 Press `Ctrl+N` (`Cmd+N` on OS X) to bring up the "New" wizard, type out "Class" to filter down to the "Class" option, and then click `Next`.
@@ -30,4 +30,4 @@ Fill in the class to look like the following:
 <pre><code data-url-index="0" data-snippet="complete" id="ValkyrieDemo"></code></pre>
 
 
-<script id="snippetscript" src="../snippetautomation/codesnippets.js" sources=Array.of("https://rawgit.com/ihmcroboticsdocs/sampleproject/master/src/us/ihmc/testeuclid/ValkyrieDemo.java")></script>
+<script id="snippetscript" src="https://cdn.rawgit.com/ihmcrobotics/ihmcrobotics.github.io/a6a5d7c6/snippetautomation/codesnippets.js" sources=Array.of("https://rawgit.com/ihmcroboticsdocs/sampleproject/master/src/us/ihmc/testeuclid/ValkyrieDemo.java")></script>
