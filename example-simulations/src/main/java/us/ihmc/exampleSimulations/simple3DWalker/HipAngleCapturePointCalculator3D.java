@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.simple3DWalker.Robot;
+package us.ihmc.exampleSimulations.simple3DWalker;
 
 public class HipAngleCapturePointCalculator3D
 {
