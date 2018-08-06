@@ -18,7 +18,7 @@ public class CompositeFootstepCost implements FootstepCost
    {
       this.footstepCosts = footstepCosts;
    }
-   
+
    public void addFootstepCost(FootstepCost footstepCost)
    {
       footstepCosts.add(footstepCost);
