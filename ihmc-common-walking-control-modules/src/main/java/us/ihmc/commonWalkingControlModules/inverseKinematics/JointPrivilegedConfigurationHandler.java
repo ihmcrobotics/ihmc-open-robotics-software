@@ -27,10 +27,15 @@ public class JointPrivilegedConfigurationHandler
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
+   private boolean hasDefaultConfigurationWeightChanged = true;
    private final YoDouble defaultConfigurationWeight = new YoDouble("jointPrivilegedConfigurationDefaultWeight", registry);
+   private boolean hasDefaultConfigurationGainChanged = true;
    private final YoDouble defaultConfigurationGain = new YoDouble("jointPrivilegedConfigurationDefaultGain", registry);
+   private boolean hasDefaultVelocityGainChanged = true;
    private final YoDouble defaultVelocityGain = new YoDouble("jointPrivilegedVelocityDefaultGain", registry);
+   private boolean hasDefaultMaxVelocityChanged = true;
    private final YoDouble defaultMaxVelocity = new YoDouble("jointPrivilegedConfigurationDefaultMaxVelocity", registry);
+   private boolean hasDefaultMaxAccelerationChanged = true;
    private final YoDouble defaultMaxAcceleration = new YoDouble("jointPrivilegedConfigurationDefaultMaxAcceleration", registry);
 
    private final Map<OneDoFJoint, YoDouble> yoJointPrivilegedConfigurations = new HashMap<>();
@@ -63,7 +68,7 @@ public class JointPrivilegedConfigurationHandler
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-         YoVariableRegistry parentRegistry)
+                                              YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
@@ -92,6 +97,12 @@ public class JointPrivilegedConfigurationHandler
       defaultMaxVelocity.set(jointPrivilegedConfigurationParameters.getDefaultMaxVelocity());
       defaultMaxAcceleration.set(jointPrivilegedConfigurationParameters.getDefaultMaxAcceleration());
       defaultConfigurationWeight.set(jointPrivilegedConfigurationParameters.getDefaultWeight());
+
+      defaultConfigurationGain.addVariableChangedListener(v -> hasDefaultConfigurationGainChanged = true);
+      defaultVelocityGain.addVariableChangedListener(v -> hasDefaultVelocityGainChanged = true);
+      defaultMaxVelocity.addVariableChangedListener(v -> hasDefaultMaxVelocityChanged = true);
+      defaultMaxAcceleration.addVariableChangedListener(v -> hasDefaultMaxAccelerationChanged = true);
+      defaultConfigurationWeight.addVariableChangedListener(v -> hasDefaultConfigurationWeightChanged = true);
 
       for (int i = 0; i < numberOfDoFs; i++)
       {
@@ -277,6 +288,7 @@ public class JointPrivilegedConfigurationHandler
    private void processPrivilegedConfigurationCommands()
    {
       processDefaultPrivilegedConfigurationOptions();
+      processDefaultParameters();
       processPrivilegedConfigurations();
 
       configurationCommandList.clear();
@@ -298,20 +310,46 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
-   private void processPrivilegedConfigurations()
+   private void processDefaultParameters()
    {
-      if (configurationCommandList.isEmpty())
-         return;
-
-      for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+      if (hasDefaultConfigurationWeightChanged)
       {
-         privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
-         privilegedConfigurationGains.set(jointIndex, 0, defaultConfigurationGain.getDoubleValue());
-         privilegedVelocityGains.set(jointIndex, 0, defaultVelocityGain.getDoubleValue());
-         privilegedMaxVelocities.set(jointIndex, 0, defaultMaxVelocity.getDoubleValue());
-         privilegedMaxAccelerations.set(jointIndex, 0, defaultMaxAcceleration.getDoubleValue());
+         for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+            privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
+         hasDefaultConfigurationWeightChanged = false;
       }
 
+      if (hasDefaultConfigurationGainChanged)
+      {
+         for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+            privilegedConfigurationGains.set(jointIndex, 0, defaultConfigurationGain.getDoubleValue());
+         hasDefaultConfigurationGainChanged = false;
+      }
+
+      if (hasDefaultVelocityGainChanged)
+      {
+         for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+            privilegedVelocityGains.set(jointIndex, 0, defaultVelocityGain.getDoubleValue());
+         hasDefaultVelocityGainChanged = false;
+      }
+
+      if (hasDefaultMaxVelocityChanged)
+      {
+         for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+            privilegedMaxVelocities.set(jointIndex, 0, defaultMaxVelocity.getDoubleValue());
+         hasDefaultMaxVelocityChanged = false;
+      }
+
+      if (hasDefaultMaxAccelerationChanged)
+      {
+         for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+            privilegedMaxAccelerations.set(jointIndex, 0, defaultMaxAcceleration.getDoubleValue());
+         hasDefaultMaxAccelerationChanged = false;
+      }
+   }
+
+   private void processPrivilegedConfigurations()
+   {
       for (int commandIndex = 0; commandIndex < configurationCommandList.size(); commandIndex++)
       {
          PrivilegedConfigurationCommand command = configurationCommandList.get(commandIndex);
@@ -389,7 +427,7 @@ public class JointPrivilegedConfigurationHandler
       }
 
       privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-      yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);;
+      yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
    }
 
    public boolean isEnabled()
