@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -7,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -22,8 +24,9 @@ import java.util.List;
 
 public class BodyCollisionNodeChecker implements FootstepNodeChecker
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private PlanarRegionsList planarRegionsList;
-   private final PoseReferenceFrame midStanceFrame = new PoseReferenceFrame("midStanceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame midStanceFrame = new PoseReferenceFrame("midStanceFrame", worldFrame);
    private final TranslationReferenceFrame bodyCollisionFrame = new TranslationReferenceFrame("bodyCollisionFrame", midStanceFrame);
    private final Box3D bodyCollisionBox;
    private final ConvexPolytope bodyCollisionPolytope = new ConvexPolytope();
@@ -35,7 +38,7 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    public BodyCollisionNodeChecker()
    {
       bodyCollisionBox = new Box3D();
-      bodyCollisionBox.setSize(0.4, 0.8, 1.0);
+      bodyCollisionBox.setSize(0.3, 0.7, 1.0);
 
       bodyCollisionFrame.updateTranslation(new Vector3D(0.0, 0.0, 1.5));
    }
@@ -52,13 +55,13 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
       for (PlanarRegion planarRegion : planarRegions.getPlanarRegionsAsList())
       {
          ConvexPolytope planarRegionPolytope = planarRegionPolytopes.add();
-         Point2D[] pointsInPlanarRegion = planarRegion.getConcaveHull();
+         List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
          planarRegion.getTransformToWorld(tempTransform);
-         for (Point2D point : pointsInPlanarRegion)
+         for (Point2DReadOnly point : pointsInPlanarRegion)
          {
             tempPoint.setToZero();
             tempPoint.set(point.getX(), point.getY(), 0.0);
-            tempPoint.applyInverseTransform(tempTransform);
+            tempPoint.applyTransform(tempTransform);
             planarRegionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
          }
       }
@@ -70,13 +73,20 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (findMidStanceFrame(node, previousNode))
+      if (previousNode == null)
+      {
+         PrintTools.info("previousNode is null");
+         return true;
+      }
+
+      if (!findMidStanceFrame(node, previousNode))
          return false;
 
       bodyCollisionPolytope.getVertices().clear();
       for (Point3D vertex : bodyCollisionBox.getVertices())
       {
-         tempPoint.set(bodyCollisionFrame, vertex);
+         tempPoint.setIncludingFrame(bodyCollisionFrame, vertex);
+         tempPoint.changeFrame(worldFrame);
          bodyCollisionPolytope.addVertex(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
       }
 
@@ -102,6 +112,7 @@ public class BodyCollisionNodeChecker implements FootstepNodeChecker
 
    private boolean findMidStanceFrame(FootstepNode node, FootstepNode previousNode)
    {
+
       List<PlanarRegion> nodePlanes = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(node.getX(), node.getY());
       if (nodePlanes.isEmpty())
       {
