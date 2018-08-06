@@ -470,6 +470,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
 
       temp3DSelection.clearSelection();
+      temp3DSelection.setSelectionFrame(ReferenceFrame.getWorldFrame());
       temp3DSelection.selectZAxis(true);
       pointFeedbackCommand.setSelectionMatrix(temp3DSelection);
 
