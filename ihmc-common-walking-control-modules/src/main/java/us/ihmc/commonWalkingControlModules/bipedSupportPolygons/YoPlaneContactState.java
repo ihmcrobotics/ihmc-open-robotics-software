@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -523,6 +523,12 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       boolean ret = hasContactStateChanged.getBooleanValue();
       hasContactStateChanged.set(false);
       return ret;
+   }
+
+   @Override
+   public boolean peekContactHasChangedNotification()
+   {
+      return hasContactStateChanged.getValue();
    }
 
    @Override

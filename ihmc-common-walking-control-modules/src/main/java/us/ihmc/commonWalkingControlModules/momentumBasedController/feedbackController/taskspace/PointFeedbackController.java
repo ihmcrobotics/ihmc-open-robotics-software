@@ -392,7 +392,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredPosition.setIncludingFrame(yoDesiredPosition);
       desiredPosition.changeFrame(controlFrame);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      feedbackTermToPack.setIncludingFrame(desiredPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorPosition.setMatchingFrame(feedbackTermToPack);

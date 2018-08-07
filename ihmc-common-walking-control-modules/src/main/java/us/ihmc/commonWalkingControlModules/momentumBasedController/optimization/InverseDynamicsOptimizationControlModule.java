@@ -152,6 +152,11 @@ public class InverseDynamicsOptimizationControlModule
       motionQPInputCalculator.initialize();
    }
 
+   public void resetRateRegularization()
+   {
+      qpSolver.resetRateRegularization();
+   }
+
    public boolean compute()
    {
       wrenchMatrixCalculator.computeMatrices();
