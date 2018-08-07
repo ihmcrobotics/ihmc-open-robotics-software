@@ -67,7 +67,7 @@ public class SimpleWalkerRobot extends Robot
    private double bodyLength = 0.3, bodyWidth = 0.3, bodyHeight = 0.2;
    private double hipOffsetY = bodyWidth / 2.0;
    private double maxLegExtension = lowerLinkLength;
-   private double footZMin = -0.04;
+   private double footZMin = 0;
    private double footZmax = -0.01;
    private double footY = 0.3;
    private double footX = 0.3;
@@ -258,8 +258,8 @@ public class SimpleWalkerRobot extends Robot
 
       double groundKxy = 1e4;
       double groundBxy = 1e2;
-      double groundKz = 125.0;
-      double groundBz = 300.0;
+      double groundKz = 80.0;
+      double groundBz = 500.0;
       LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoVariableRegistry());
 
 
