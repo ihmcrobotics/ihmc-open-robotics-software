@@ -191,6 +191,7 @@ public class WrenchMatrixCalculator
       WrenchCommand command = wrenchCommands.get(commands - 1);
       wrenchCommands.remove(commands - 1);
       int taskSize = command.getSelectionMatrix().getNumberOfSelectedAxes();
+      inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.reshape(taskSize);
 
       computeCommandMatrices(command, rigidBodyRhoTaskJacobian, inputToPack.getTaskObjective(), inputToPack.getTaskWeightMatrix());
