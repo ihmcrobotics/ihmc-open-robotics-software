@@ -25,7 +25,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector3D wrenchEquilibriumForceError;
    private final YoFrameVector3D wrenchEquilibriumTorqueError;
 
-   private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
+   private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
@@ -90,7 +90,7 @@ public class InverseDynamicsQPSolver
       this.problemSize = numberOfDoFs + rhoSize;
       this.dt = dt;
 
-      firstCall.set(true);
+      addRateRegularization.set(false);
 
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f = new DenseMatrix64F(problemSize, 1);
@@ -209,14 +209,21 @@ public class InverseDynamicsQPSolver
 
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
-
-      if (!firstCall.getBooleanValue())
-         addJointJerkRegularization();
    }
 
    private void addRegularization()
    {
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
+
+      if (addRateRegularization.getBooleanValue())
+      {
+         addJointJerkRegularization();
+      }
+   }
+
+   public void resetRateRegularization()
+   {
+      addRateRegularization.set(false);
    }
 
    private void addJointJerkRegularization()
@@ -492,6 +499,7 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
       addRegularization();
+      addRateRegularization.set(true);
 
       numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
       numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
@@ -527,8 +535,6 @@ public class InverseDynamicsQPSolver
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
-
-      firstCall.set(false);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {

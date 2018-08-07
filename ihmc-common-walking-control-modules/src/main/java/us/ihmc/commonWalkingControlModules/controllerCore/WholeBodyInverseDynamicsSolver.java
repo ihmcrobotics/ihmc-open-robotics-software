@@ -157,6 +157,7 @@ public class WholeBodyInverseDynamicsSolver
    public void reinitialize()
    {
       initialize();
+      optimizationControlModule.resetRateRegularization();
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
    }
