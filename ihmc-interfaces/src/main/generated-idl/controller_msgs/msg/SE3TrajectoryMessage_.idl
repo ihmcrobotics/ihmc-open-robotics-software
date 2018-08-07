@@ -30,7 +30,7 @@ module controller_msgs
         /**
          * List of trajectory points (in taskpsace) to go through while executing the trajectory.
          */
-        sequence<controller_msgs::msg::dds::SE3TrajectoryPointMessage, 1> taskspace_trajectory_points;
+        sequence<controller_msgs::msg::dds::SE3TrajectoryPointMessage, 50> taskspace_trajectory_points;
         /**
          * The selection matrix for each axis of the angular part of this trajectory.
          */
