@@ -18,6 +18,14 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
+    */
+   public double getMinICPErrorForStepAdjustment()
+   {
+      return 0.0;
+   }
+
+   /**
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
@@ -50,7 +58,16 @@ public abstract class ICPOptimizationParameters
    public abstract double getFeedbackLateralWeight();
 
    /**
-    * Penalization on changes feedback CMP between control ticks.
+    * Penalization on changes in the feedback CoP and CMP between control ticks.
+    * This weight is normalized by the control DT.
+    */
+   public double getCoPCMPFeedbackRateWeight()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Penalization on changes in the total feedback between control ticks.
     * This weight is normalized by the control DT.
     */
    public abstract double getFeedbackRateWeight();

@@ -548,6 +548,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+         controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
@@ -559,7 +560,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
-         if (contactState.pollContactHasChangedNotification())
+         if (contactState.peekContactHasChangedNotification())
             haveContactStatesChanged = true;
       }
 
