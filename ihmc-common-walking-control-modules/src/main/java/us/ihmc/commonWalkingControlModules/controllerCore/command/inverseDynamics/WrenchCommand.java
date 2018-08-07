@@ -55,6 +55,7 @@ public class WrenchCommand implements InverseDynamicsCommand<WrenchCommand>
    @Override
    public void set(WrenchCommand other)
    {
+      this.constraintType = other.constraintType;
       this.rigidBody = other.rigidBody;
       this.wrench.set(other.wrench);
       this.weightMatrix.set(other.weightMatrix);
