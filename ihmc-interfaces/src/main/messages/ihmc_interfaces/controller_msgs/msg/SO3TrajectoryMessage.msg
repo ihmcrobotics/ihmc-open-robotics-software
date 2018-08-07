@@ -7,7 +7,7 @@
 uint32 sequence_id
 
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
-SO3TrajectoryPointMessage[<=1] taskspace_trajectory_points
+SO3TrajectoryPointMessage[<=50] taskspace_trajectory_points
 # The selection matrix for each axis of this trajectory.
 SelectionMatrix3DMessage selection_matrix
 # Frame information for this message.
