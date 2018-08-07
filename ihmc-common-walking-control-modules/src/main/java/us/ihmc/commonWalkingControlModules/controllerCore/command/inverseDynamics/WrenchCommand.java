@@ -1,13 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
-public class WrenchObjectiveCommand implements InverseDynamicsCommand<WrenchObjectiveCommand>
+public class WrenchCommand implements InverseDynamicsCommand<WrenchCommand>
 {
+   private ConstraintType constraintType;
+
    private RigidBody rigidBody;
    private final Wrench wrench = new Wrench();
 
@@ -17,6 +20,16 @@ public class WrenchObjectiveCommand implements InverseDynamicsCommand<WrenchObje
    public void setRigidBody(RigidBody rigidBody)
    {
       this.rigidBody = rigidBody;
+   }
+
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    public RigidBody getRigidBody()
@@ -40,7 +53,7 @@ public class WrenchObjectiveCommand implements InverseDynamicsCommand<WrenchObje
    }
 
    @Override
-   public void set(WrenchObjectiveCommand other)
+   public void set(WrenchCommand other)
    {
       this.rigidBody = other.rigidBody;
       this.wrench.set(other.wrench);

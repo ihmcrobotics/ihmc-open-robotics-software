@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -56,7 +56,7 @@ public abstract class TransferState extends WalkingState
 
    private final Footstep nextFootstep = new Footstep();
 
-   private final WrenchObjectiveCommand unloadingWrenchCommand;
+   private final WrenchCommand unloadingWrenchCommand;
    private final YoBoolean isUnloading;
    private final DoubleProvider unloadDuration;
    private final DoubleProvider unloadWeight;
@@ -89,7 +89,7 @@ public abstract class TransferState extends WalkingState
       {
          isUnloading = new YoBoolean(transferToSide.getOppositeSide().getLowerCaseName() + "FootIsUnloading", registry);
          RigidBody footToUnload = controllerToolbox.getFullRobotModel().getFoot(transferToSide.getOppositeSide());
-         unloadingWrenchCommand = new WrenchObjectiveCommand();
+         unloadingWrenchCommand = new WrenchCommand();
          unloadingWrenchCommand.setRigidBody(footToUnload);
          unloadingWrenchCommand.getSelectionMatrix().clearSelection();
          unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
