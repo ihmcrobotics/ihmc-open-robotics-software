@@ -457,7 +457,7 @@ public class InverseDynamicsQPSolver
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
       MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, offset, taskJacobian, 0, 0, taskSize, variables, sign);
-      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, offset, taskObjective, 0, 0, taskSize, 1, sign);
+      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective)
