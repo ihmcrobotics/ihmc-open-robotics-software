@@ -8,19 +8,26 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.RhoQPInput;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionCalculator;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -65,6 +72,7 @@ public class WrenchMatrixCalculator
 
    private final List<RigidBody> rigidBodies = new ArrayList<>();
    private final Map<RigidBody, PlaneContactStateToWrenchMatrixHelper> planeContactStateToWrenchMatrixHelpers = new HashMap<>();
+   private final TObjectIntMap<RigidBody> bodyRhoOffsets = new TObjectIntHashMap<RigidBody>();
 
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector3D> basisVectors = new ArrayList<>();
@@ -108,6 +116,7 @@ public class WrenchMatrixCalculator
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
 
+      int rhoOffset = 0;
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
@@ -120,6 +129,8 @@ public class WrenchMatrixCalculator
                maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
          helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
+         bodyRhoOffsets.put(rigidBody, rhoOffset);
+         rhoOffset += helper.getRhoSize();
 
          basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());
          basisVectors.addAll(helper.getBasisVectors());
@@ -154,52 +165,61 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
-   public void submitWrenchObjectiveCommand(WrenchObjectiveCommand command)
+   private final RecyclingArrayList<WrenchCommand> wrenchCommands = new RecyclingArrayList<>(WrenchCommand.class);
+
+   public void submitWrenchCommand(WrenchCommand command)
    {
-      PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getRigidBody());
-      helper.submitWrenchObjectiveCommand(command);
+      // At this point we can not yet compute the matrices since the order of the inverse dynamics commands is not guaranteed. This means
+      // the contact state might change. So we need to hold on to the command and wait with computing the task matrices until all inverse
+      // dynamics commands are handled.
+      wrenchCommands.add().set(command);
    }
 
    private final DenseMatrix64F rigidBodyRhoTaskJacobian = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F rigidBodyRhoTaskObjective = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F rigidBodyRhoTaskWeight = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-   public void getAdditionalRhoTasks(DenseMatrix64F rhoTaskJacobian, DenseMatrix64F rhoTaskObjective, DenseMatrix64F rhoTaskWeight)
+   public boolean getAdditionalRhoInput(RhoQPInput inputToPack)
    {
-      // Need to figure out the task size:
-      int taskSize = 0;
-      for (int i = 0; i < rigidBodies.size(); i++)
+      int commands = wrenchCommands.size();
+      if (commands <= 0)
       {
-         RigidBody rigidBody = rigidBodies.get(i);
-         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
-         taskSize += helper.getWrenchTaskSize();
+         return false;
       }
 
-      // Reshape the matrices to the correct size and zero them:
-      rhoTaskJacobian.reshape(taskSize, rhoSize);
-      rhoTaskObjective.reshape(taskSize, 1);
-      rhoTaskWeight.reshape(taskSize, taskSize);
-      CommonOps.fill(rhoTaskJacobian, 0.0);
-      CommonOps.fill(rhoTaskObjective, 0.0);
-      CommonOps.fill(rhoTaskWeight, 0.0);
+      WrenchCommand command = wrenchCommands.get(commands - 1);
+      wrenchCommands.remove(commands - 1);
+      int taskSize = command.getSelectionMatrix().getNumberOfSelectedAxes();
+      inputToPack.reshape(taskSize);
 
-      // Now get the tasks for each body and add it to the matrices:
-      taskSize = 0;
-      int rhoStartIndex = 0;
-      for (int i = 0; i < rigidBodies.size(); i++)
-      {
-         RigidBody rigidBody = rigidBodies.get(i);
-         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
-         helper.getAdditionalRhoTasks(rigidBodyRhoTaskJacobian, rigidBodyRhoTaskObjective, rigidBodyRhoTaskWeight);
-         int bodyTaskSize = rigidBodyRhoTaskObjective.getNumRows();
+      computeCommandMatrices(command, rigidBodyRhoTaskJacobian, inputToPack.getTaskObjective(), inputToPack.getTaskWeightMatrix());
 
-         CommonOps.insert(rigidBodyRhoTaskJacobian, rhoTaskJacobian, taskSize, rhoStartIndex);
-         CommonOps.insert(rigidBodyRhoTaskObjective, rhoTaskObjective, taskSize, 0);
-         CommonOps.insert(rigidBodyRhoTaskWeight, rhoTaskWeight, taskSize, taskSize);
+      // Add the Jacobian for the body at the right place in the big Jacobian for all bodies:
+      int rhoOffset = bodyRhoOffsets.get(command.getRigidBody());
+      DenseMatrix64F fullJacobian = inputToPack.getTaskJacobian();
+      fullJacobian.zero();
+      CommonOps.insert(rigidBodyRhoTaskJacobian, fullJacobian, 0, rhoOffset);
 
-         taskSize = taskSize + bodyTaskSize;
-         rhoStartIndex = rhoStartIndex + helper.getRhoSize();
-      }
+      return true;
+   }
+
+   private void computeCommandMatrices(WrenchCommand command, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getRigidBody());
+      ReferenceFrame planeFrame = helper.getPlaneFrame();
+      Wrench wrench = command.getWrench();
+      wrench.getBodyFrame().checkReferenceFrameMatch(helper.getRigidBody().getBodyFixedFrame());
+
+      // Get the matrices without considering the selection:
+      wrench.changeFrame(planeFrame);
+      wrench.getMatrix(tempTaskObjective);
+      tempTaskJacobian.set(helper.getWrenchJacobianMatrix());
+
+      SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
+      WeightMatrix6D weightMatrix = command.getWeightMatrix();
+      selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, planeFrame, tempTaskJacobian, tempTaskObjective, taskJacobian, taskObjective,
+                                               taskWeight);
    }
 
    public boolean hasContactStateChanged()

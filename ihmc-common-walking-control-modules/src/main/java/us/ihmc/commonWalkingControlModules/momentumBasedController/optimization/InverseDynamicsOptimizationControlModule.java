@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -52,6 +52,7 @@ public class InverseDynamicsOptimizationControlModule
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
+   private final RhoQPInput rhoQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
@@ -109,6 +110,7 @@ public class InverseDynamicsOptimizationControlModule
          basisVectorVisualizer = null;
 
       motionQPInput = new MotionQPInput(numberOfDoFs);
+      rhoQPInput = new RhoQPInput(rhoSize);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -247,10 +249,6 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private final DenseMatrix64F rhoTaskJacobian = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F rhoTaskObjective = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F rhoTaskWeight = new DenseMatrix64F(0, 0);
-
    private void setupRhoTasks()
    {
       DenseMatrix64F rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
@@ -267,8 +265,10 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
 
-      wrenchMatrixCalculator.getAdditionalRhoTasks(rhoTaskJacobian, rhoTaskObjective, rhoTaskWeight);
-      qpSolver.addRhoTask(rhoTaskJacobian, rhoTaskObjective, rhoTaskWeight);
+      while (wrenchMatrixCalculator.getAdditionalRhoInput(rhoQPInput))
+      {
+         qpSolver.addRhoInput(rhoQPInput);
+      }
    }
 
    private void setupWrenchesEquilibriumConstraint()
@@ -346,8 +346,8 @@ public class InverseDynamicsOptimizationControlModule
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
-   public void submitWrenchObjectiveCommand(WrenchObjectiveCommand command)
+   public void submitWrenchCommand(WrenchCommand command)
    {
-      wrenchMatrixCalculator.submitWrenchObjectiveCommand(command);
+      wrenchMatrixCalculator.submitWrenchCommand(command);
    }
 }
