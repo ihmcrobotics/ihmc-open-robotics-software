@@ -499,7 +499,6 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
       addRegularization();
-      addRateRegularization.set(true);
 
       numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
       numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
@@ -535,6 +534,8 @@ public class InverseDynamicsQPSolver
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
+
+      addRateRegularization.set(true);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
