@@ -125,7 +125,7 @@ public class SelectionCalculator
       taskWeightToPack.reshape(reducedProblemSize, reducedProblemSize);
 
       // Do the angular part:
-      CommonOps.extract(taskJacobian, 0, 3, 0, problemSize - 1, taskJacobian3D, 0, 0);
+      CommonOps.extract(taskJacobian, 0, 3, 0, problemSize, taskJacobian3D, 0, 0);
       CommonOps.extract(taskObjective, 0, 3, 0, 1, taskObjective3D, 0, 0);
       int offset = applySelectionToTask(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), taskFrame, taskJacobian3D, taskObjective3D,
                                         taskJacobianSelected3D, taskObjectiveSelected3D, taskWeightSelected3D);
@@ -134,7 +134,7 @@ public class SelectionCalculator
       CommonOps.insert(taskWeightSelected3D, taskWeightToPack, 0, 0);
 
       // Do the linear part:
-      CommonOps.extract(taskJacobian, 3, 6, 0, problemSize - 1, taskJacobian3D, 0, 0);
+      CommonOps.extract(taskJacobian, 3, 6, 0, problemSize, taskJacobian3D, 0, 0);
       CommonOps.extract(taskObjective, 3, 6, 0, 1, taskObjective3D, 0, 0);
       applySelectionToTask(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), taskFrame, taskJacobian3D, taskObjective3D, taskJacobianSelected3D,
                            taskObjectiveSelected3D, taskWeightSelected3D);
