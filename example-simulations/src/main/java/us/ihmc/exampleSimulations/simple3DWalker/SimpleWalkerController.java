@@ -109,12 +109,12 @@ public class SimpleWalkerController implements RobotController
    private final YoFrameVector3D centerOfMassVelocity;
    private final YoFrameVector3D centerOfMassAcceleration;
 
-   private final YoFramePoint3D desiredICP;
+   private final YoFramePoint2D desiredICP2D;
 
    private final YoFramePoint3D currentICP;
    private final YoFramePoint2D currentICP2D;
 
-   private final YoDouble currentdICP = new YoDouble("currentdICP", registry);
+   private final YoFramePoint2D desiredCoP2D;
 
    private final YoFramePoint3D currentCOP;
    private final YoFramePoint2D currentCOP2D;
@@ -135,11 +135,17 @@ public class SimpleWalkerController implements RobotController
 
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
+   private YoGraphicPosition desiredCoPGraphic;
+   private Artifact desiredCoPGraphicArtifact;
+
    private YoGraphicPosition currentCoPGraphic;
    private Artifact currentCoPGraphicArtifact;
 
    private YoGraphicPosition currentCoMGraphic;
    private Artifact currentCoMGraphicArtifact;
+
+   private YoGraphicPosition desiredICPGraphic;
+   private Artifact desiredICPGraphicArtifact;
 
    private YoGraphicPosition currentICPGraphic;
    private Artifact currentICPGraphicArtifact;
@@ -177,6 +183,7 @@ public class SimpleWalkerController implements RobotController
    private YoDouble currentFootStepX = new YoDouble("currentFootStepX",registry);
    private YoInteger footStepCounter = new YoInteger("footStepCounter",registry);
    private SimpleWalkerICPPlanner icpPlanner;
+   private final SimpleWalkerHeightStopMPC heightStopMPC;
 
 
    public SimpleWalkerController(SimpleWalkerRobot robot, double deltaT, boolean withInertiaControl, boolean withImpactControl, boolean withTwan, boolean withHeightOnly)
@@ -188,16 +195,20 @@ public class SimpleWalkerController implements RobotController
       this.withTwan = withTwan;
       this.withHeightOnly = withHeightOnly;
 
+      heightStopMPC = new SimpleWalkerHeightStopMPC(1.15,robot.nominalHeight,40,registry);
+
       centerOfMassPosition = new YoFramePoint3D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
       centerOfMassPosition2D = new YoFramePoint2D("centerOfMass2D", ReferenceFrame.getWorldFrame(), registry);
       centerOfMassVelocity  = new YoFrameVector3D("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
       centerOfMassAcceleration  = new YoFrameVector3D("centerOfMassAcceleration", ReferenceFrame.getWorldFrame(), registry);
       omega = new YoDouble("omega", registry);
 
-      desiredICP = new YoFramePoint3D("desiredICP", ReferenceFrame.getWorldFrame(), registry);
+      desiredICP2D = new YoFramePoint2D("desiredICP2D", ReferenceFrame.getWorldFrame(), registry);
 
       currentICP = new YoFramePoint3D("currentICP", ReferenceFrame.getWorldFrame(), registry);
       currentICP2D = new YoFramePoint2D("currentICP2D", ReferenceFrame.getWorldFrame(), registry);
+
+      desiredCoP2D = new YoFramePoint2D("desiredCoP2D", ReferenceFrame.getWorldFrame(), registry);
 
       currentCOP = new YoFramePoint3D("currentCOP", ReferenceFrame.getWorldFrame(), registry);
       currentCOP2D = new YoFramePoint2D("currentCOP2D", ReferenceFrame.getWorldFrame(),registry);
@@ -210,27 +221,37 @@ public class SimpleWalkerController implements RobotController
 
       YoFrameVector3D reactionForce = new YoFrameVector3D("reactionForce", ReferenceFrame.getWorldFrame(), registry);
 
-      currentCoPGraphic = new YoGraphicPosition("CoPgraph",currentCOP2D,0.05,YoAppearance.Green());
+      desiredCoPGraphic = new YoGraphicPosition("CoPrgraph",desiredCoP2D,0.02,YoAppearance.Green(),GraphicType.BALL_WITH_CROSS);
+      yoGraphicsListRegistry.registerYoGraphic("CoPrgraphrRegistry", desiredCoPGraphic);
+      desiredCoPGraphicArtifact= desiredCoPGraphic.createArtifact();
+      yoGraphicsListRegistry.registerArtifact("CoPrArtifact",desiredCoPGraphicArtifact);
+
+      currentCoPGraphic = new YoGraphicPosition("CoPgraph",currentCOP2D,0.02,YoAppearance.Green());
       yoGraphicsListRegistry.registerYoGraphic("CoPgraphRegistry", currentCoPGraphic);
       currentCoPGraphicArtifact = currentCoPGraphic.createArtifact();
       yoGraphicsListRegistry.registerArtifact("CoPArtifact", currentCoPGraphicArtifact);
 
-      currentCoMGraphic = new YoGraphicPosition("CoMgraph",centerOfMassPosition2D,0.01 ,YoAppearance.Black());
+      currentCoMGraphic = new YoGraphicPosition("CoMgraph",centerOfMassPosition2D,0.02 ,YoAppearance.Black());
       yoGraphicsListRegistry.registerYoGraphic("CoMgraphRegistry", currentCoMGraphic);
       currentCoMGraphicArtifact = currentCoMGraphic.createArtifact();
       yoGraphicsListRegistry.registerArtifact("CoPArtifact", currentCoMGraphicArtifact);
 
-      currentICPGraphic = new YoGraphicPosition("ICPgraph",currentICP2D,0.03 ,YoAppearance.Tomato());
+      desiredICPGraphic = new YoGraphicPosition("ICPrgraph",desiredICP2D,0.02,YoAppearance.Tomato(),GraphicType.BALL_WITH_CROSS);
+      yoGraphicsListRegistry.registerYoGraphic("ICPrgraphRegistry", desiredICPGraphic);
+      desiredICPGraphicArtifact= desiredICPGraphic.createArtifact();
+      yoGraphicsListRegistry.registerArtifact("ICPrArtifact",desiredICPGraphicArtifact);
+
+      currentICPGraphic = new YoGraphicPosition("ICPgraph",currentICP2D,0.02 ,YoAppearance.Tomato());
       yoGraphicsListRegistry.registerYoGraphic("ICPgraphRegistry", currentICPGraphic);
       currentICPGraphicArtifact = currentICPGraphic.createArtifact();
       yoGraphicsListRegistry.registerArtifact("ICPArtifact", currentICPGraphicArtifact);
 
-      currentLFootGraphic = new YoGraphicPosition("LFootgraph",currentLFoot2D,0.01 ,YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
+      currentLFootGraphic = new YoGraphicPosition("LFootgraph",currentLFoot2D,0.15 ,YoAppearance.Blue(), GraphicType.BALL);
       yoGraphicsListRegistry.registerYoGraphic("LFootgraphRegistry", currentLFootGraphic);
       currentLFootGraphicArtifact = currentLFootGraphic.createArtifact();
       yoGraphicsListRegistry.registerArtifact("LFootArtifact", currentLFootGraphicArtifact);
 
-      currentRFootGraphic = new YoGraphicPosition("RFootgraph", currentRFoot2D, 0.01 , YoAppearance.Red(), GraphicType.BALL_WITH_CROSS);
+      currentRFootGraphic = new YoGraphicPosition("RFootgraph", currentRFoot2D, 0.15 , YoAppearance.Red(), GraphicType.BALL);
       yoGraphicsListRegistry.registerYoGraphic("RFootgraphRegistry", currentRFootGraphic);
       currentRFootGraphicArtifact = currentRFootGraphic.createArtifact();
       yoGraphicsListRegistry.registerArtifact("RFootArtifact", currentRFootGraphicArtifact);
@@ -319,7 +340,7 @@ public class SimpleWalkerController implements RobotController
 
       desiredHeight.set(robot.nominalHeight);
       desiredKneeStance.set(robot.lowerLinkLength / 2.0);
-      swingTime.set(0.5);
+      swingTime.set(0.8);
       scaleForVelToAngle.set(0.0);
       feedForwardGain.set(0.1);
       stepToStepHipAngleDelta.set(0.3);
@@ -330,8 +351,12 @@ public class SimpleWalkerController implements RobotController
       stateMachine = initializeStateMachine();
 
       footStepCounter.set(0);
-      createEvenStepPlan(8, 0.13);
+      createEvenStepPlan(8, 0.3);
+      YoDouble numberOfSteps = new YoDouble("totalNSteps",registry);
+      numberOfSteps.set(footStepPlan.size());
       icpPlanner = new SimpleWalkerICPPlanner(footStepPlan, swingTime.getDoubleValue(), sqrt(9.81/robot.nominalHeight));
+
+
    }
 
    @Override
@@ -396,16 +421,7 @@ public class SimpleWalkerController implements RobotController
           */
          //Swing Leg
 
-         if (footStepCounter.getIntegerValue()>footStepPlan.size()-1)
-         {
-            nextFootStepX.set(footStepPlan.get(footStepPlan.size()-1));
-            currentFootStepX.set(footStepPlan.get(footStepPlan.size()-1));
-         }
-         else
-         {
-            nextFootStepX.set(footStepPlan.get(footStepCounter.getIntegerValue() + 1));
-            currentFootStepX.set(footStepPlan.get(footStepCounter.getIntegerValue()));
-         }
+
 
          if ((timeInState > swingTimeForThisStep.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
          {
@@ -468,25 +484,35 @@ public class SimpleWalkerController implements RobotController
          //foot
          if (robot.withFeet())
          {
-
-
-            //PIDController pidControllerAnkleSwingPitch = anklePitchControllers.get(swingLeg.getEnumValue());
+            PIDController pidControllerAnkleSwingPitch = anklePitchControllers.get(swingLeg.getEnumValue());
             PIDController pidControllerAnkleSwingRoll = ankleRollControllers.get(swingLeg.getEnumValue());
 
             double controlEffortAnkleSwingRoll = pidControllerAnkleSwingRoll
                   .compute(robot.getAnkleRollPosition(swingLeg.getEnumValue()), 0.0, 0.0, 0.0, deltaT);
             robot.setAnkleRollTorque(swingLeg.getEnumValue(), -controlEffortAnkleSwingRoll);
-            /*
-            double controlEffortAnkleSwingPitch = pidControllerAnkleSwingPitch
-                  .compute(robot.getAnklePitchPosition(swingLeg.getEnumValue()), 0.0, 0.0, 0.0, deltaT);
-            robot.setAnklePitchTorque(swingLeg.getEnumValue(), controlEffortAnkleSwingPitch);
-            */
 
-            double ICPd = icpPlanner.getICPReference(footStepCounter.getIntegerValue(),timeInState);
-            double dICPd = omega.getDoubleValue()*(ICPd-currentFootStepX.getDoubleValue());
-            double kp = 5;
-            double CoPd = currentICP2D.getX()-(1/omega.getDoubleValue())*dICPd+kp*(currentICP2D.getX()-ICPd);
-            robot.setAnklePitchTorque(supportLeg, -40*(currentCOP2D.getX()-CoPd) );
+
+            double tau;
+            if(footStepCounter.getIntegerValue()>8)
+            {
+               tau = -200*robot.getAnklePitchPosition(supportLeg) - 60*robot.getAnklePitchVelocity(supportLeg);
+            }
+            else
+            {
+               double ICPd = icpPlanner.getICPReference(footStepCounter.getIntegerValue(), timeInState);
+               desiredICP2D.set(ICPd,0);
+               double kp = 5;
+               double CoPd = currentFootStepX.getDoubleValue() + kp * (currentICP2D.getX() - ICPd);
+
+               //CoPd= MathTools.clamp(CoPd,robot.getAnklePositionInWorldX(supportLeg)-0.15,robot.getAnklePositionInWorldX(supportLeg)+0.15);
+               desiredCoP2D.set(CoPd,0);
+               tau = -45* (currentCOP2D.getX() - CoPd) + 9.81 * (robot.getBodyPositionX() - currentCOP.getX());
+            }
+            robot.setAnklePitchTorque(supportLeg, tau);
+
+            double controlEffortAnkleSwingPitch = pidControllerAnkleSwingPitch.compute(robot.getAnklePitchPosition(swingLeg.getEnumValue()), -desiredSwingLegHipPitchAngle.getDoubleValue(), robot.getAnklePitchVelocity(swingLeg.getEnumValue()), 0.0, deltaT);
+            robot.setAnklePitchTorque(swingLeg.getEnumValue(), controlEffortAnkleSwingPitch);
+
             addCoPRollControl(supportLeg);
             //addCoPPitchControl(supportLeg);
          }
@@ -533,70 +559,22 @@ public class SimpleWalkerController implements RobotController
          else if (withTwan)
          {
             legLength.set(robot.getLegLenght(supportLeg));
-            if ((filteredDesiredVelocityX.getDoubleValue() < (robot.getBodyVelocityX() - 0.1)) && ((robot.getHipPitchPosition(supportLeg))<0))
+            double CoPforMPC = MathTools.clamp(currentCOP2D.getX(),robot.getAnklePositionInWorldX(supportLeg)-0.14,robot.getAnklePositionInWorldX(supportLeg)+0.14);
+            x0Twan.set(centerOfMassPosition2D.getX()-CoPforMPC);
+            if ((x0Twan.getDoubleValue()<-0.03)&&(timeInState>0.02)&&((desiredICP2D.getX()-currentICP2D.getX())<-0.04))
             {
-               double xdot = robot.getBodyVelocityX();
-               double x =  legLength.getDoubleValue()* Math.sin(robot.getHipPitchPosition(supportLeg));
-               double zdot = robot.getBodyHeightVelocity();
-               double z = robot.getBodyHeight();
-               aTwan.set(xdot / x);
-               bTwan.set(zdot - aTwan.getDoubleValue() * z);
-               double a = aTwan.getDoubleValue();
-               double b = bTwan.getDoubleValue();
-               secondCriterium.set(7*9.8 + 20*a*b + sqrt(9*Math.pow(9.8,2) + 120*Math.pow(a,2)*9.8*1.1));
-
-
-               if (useHeight.getBooleanValue())
-               {
-                  if (legLength.getDoubleValue()<1.4)
-                  {
-                     uTwan.set(-7 * Math.pow(a, 2) + (3 * zfTwan * Math.pow(a, 3) + robot.getGravity() * a) / b + (10 * Math.pow(a, 3) * b) / robot.getGravity());
-                     uTwan.set(MathTools.clamp(uTwan.getDoubleValue(), 0, 1000));
-                     //controlKneeToPosition(supportLeg, (1/9.81)*legLength.getDoubleValue()*uTwan.getDoubleValue(), 0);
-                     double tau = (10) * uTwan.getDoubleValue() * legLength.getDoubleValue();
-                     tau = MathTools.clamp(tau, 0, 500);
-                     robot.setKneeTorque(supportLeg, tau);
-                  }
-               }
-
-               else if ((a<0) && (secondCriterium.getDoubleValue() < 0.0) && timeInState < 0.03)
-                  {
-
-                     x0Twan.set(legLength.getDoubleValue()* Math.sin(robot.getHipPitchPosition(supportLeg)));
-                     dx0Twan.set(robot.getBodyVelocityX());
-                     z0Twan.set(robot.getBodyHeight());
-                     dz0Twan.set(robot.getBodyHeightVelocity());
-                     useHeight.set(true);
-                     controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
-                  }
-               else
-               {
-                  controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
-               }
+               heightStopMPC.computeInvOutLoop(x0Twan.getDoubleValue(),robot.getBodyVelocityY(),robot.getBodyHeight(),robot.getBodyHeightVelocity());
+               double zdes = heightStopMPC.getDesiredHeight();
+               double dzdes = heightStopMPC.getDesiredHeighRate();
+               controlKneeToBodyHeight(supportLeg,zdes,dzdes);
             }
             else
             {
-               controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
+               controlKneeToMaintainBodyHeight(supportLeg);
             }
          }
 
-         else if (withHeightOnly)
-         {
 
-            if (robot.getHipPitchPosition(supportLeg)<0 && desiredBodyVelocityX.getDoubleValue() < 0.1 && robot.getLegLenght(supportLeg)<1.2)
-            {
-               //robot.setKneeTorque(supportLeg,30 + (robot.getBodyVelocityX()-1)*10);
-               double gain = 10000;
-               double anklePosX = robot.getBodyPositionX()-robot.getLegLenght(supportLeg)*Math.sin(robot.getHipPitchPosition(supportLeg));
-               robot.setKneeTorque(supportLeg,-robot.getBodyMass()*robot.getGravity()+(currentICP.getX()-anklePosX)*(anklePosX-robot.getBodyPositionX())*gain);
-            }
-            else
-            {
-              //controlKneeToPositionSoft(supportLeg,0.4,0);
-               controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
-            }
-
-        }
          else
          {
             //controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
@@ -659,6 +637,18 @@ public class SimpleWalkerController implements RobotController
          robot.setKneeTorque(swingLeg.getEnumValue(), -10.0);
 
          createEvenStepPlan(6, 0.2);
+
+
+         if(footStepCounter.getIntegerValue()<8)
+         {
+            nextFootStepX.set(footStepPlan.get(footStepCounter.getIntegerValue() + 1));
+            currentFootStepX.set(footStepPlan.get(footStepCounter.getIntegerValue()));
+         }
+         else
+         {
+            nextFootStepX.set(footStepPlan.get(8));
+            currentFootStepX.set(footStepPlan.get(8));
+         }
       }
 
       @Override
@@ -668,6 +658,8 @@ public class SimpleWalkerController implements RobotController
          lastStepHipRollAngle.set(desiredSwingLegHipRollAngle.getDoubleValue());
          useHeight.set(false);
          footStepCounter.set(footStepCounter.getIntegerValue()+1);
+
+
 
       }
    }
@@ -844,6 +836,15 @@ public class SimpleWalkerController implements RobotController
       robot.setKneeTorque(robotSide, controlEffort);
    }
 
+   private void controlKneeToBodyHeight(RobotSide robotSide, double desiredHeight, double desiredHeightRate)
+   {
+      double currentHeight = robot.getBodyHeight();
+      double currentHeightRate = robot.getBodyHeightVelocity();
+
+      double controlEffort = kneeControllers.get(robotSide).compute(currentHeight, desiredHeight, currentHeightRate, desiredHeightRate, deltaT);
+      robot.setKneeTorque(robotSide, controlEffort);
+   }
+
    private void controlKneeToPosition(RobotSide robotSide, double desiredPosition, double desiredVelocity)
    {
       double kneePosition = robot.getKneePosition(robotSide);
@@ -943,13 +944,11 @@ public class SimpleWalkerController implements RobotController
 
 
 
+
    }
 
    private void updateCapturePointEstimate()
    {
-      desiredICP.set(filteredDesiredVelocityX.getDoubleValue(), filteredDesiredVelocityY.getDoubleValue(), desiredHeight.getDoubleValue());
-      desiredICP.scale(1.0 / omega.getDoubleValue());
-      desiredICP.add(centerOfMassPosition);
 
       currentICP.set(centerOfMassVelocity);
       currentICP.scale(1.0 / omega.getDoubleValue());
@@ -963,6 +962,7 @@ public class SimpleWalkerController implements RobotController
       currentCOP.set(centerOfMassAcceleration);
       currentCOP.scale(-1.0 / (Math.pow(omega.getDoubleValue(), 2.0)));
       currentCOP.add(centerOfMassPosition);
+      currentCOP.scale(1);
       currentCOP2D.set(currentCOP.getX(),currentCOP.getY());
    }
 
@@ -973,6 +973,11 @@ public class SimpleWalkerController implements RobotController
       return yoGraphicsListRegistry;
    }
 
+   public Artifact getDesiredCoPGraphicArtifact()
+   {
+      return desiredCoPGraphicArtifact;
+   }
+
    public Artifact getCurrentCoPGraphicArtifact()
    {
       return currentCoPGraphicArtifact;
@@ -981,6 +986,11 @@ public class SimpleWalkerController implements RobotController
    public Artifact getCurrentCoMGraphicArtifact()
    {
       return currentCoMGraphicArtifact;
+   }
+
+   public Artifact getDesiredICPGraphicArtifact()
+   {
+      return desiredICPGraphicArtifact;
    }
 
    public Artifact getCurrentICPGraphicArtifact()

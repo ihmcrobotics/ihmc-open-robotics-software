@@ -18,14 +18,14 @@ public class SimpleWalkerSimulation
    private boolean withFeet = true;
    private boolean withInertiaControl = false;
    private boolean withImpactControl = false;
-   private boolean withTwan = false;
+   private boolean withTwan = true;
 
-   private boolean withPush = false;
-   private double PUSH_FORCE_Y = 50;
-   private double PUSH_DURATION = 0.1;
+   private boolean withPush = true;
+   private double PUSH_FORCE_Y = 60;
+   private double PUSH_DURATION = 0.2;
 
    private boolean withHeightOnly = false;
-   private boolean withVelocityChange = true;
+   private boolean withVelocityChange = false;
    private double DESIRED_VELOCITY = 1.0;
 
 
@@ -54,8 +54,10 @@ public class SimpleWalkerSimulation
 
       simulationOverheadPlotter.setDrawHistory(true);
 
+      simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getDesiredCoPGraphicArtifact());
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentCoPGraphicArtifact());
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentCoMGraphicArtifact());
+      simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getDesiredICPGraphicArtifact());
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentICPGraphicArtifact());
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentLFootGraphicArtifact());
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentRFootGraphicArtifact());
@@ -87,10 +89,11 @@ public class SimpleWalkerSimulation
          walkerController.setDesiredBodyVelocityX(DESIRED_VELOCITY);
          ExternalForcePoint externalForcePoint = new ExternalForcePoint("externalForce", robot);
          externalForcePoint.setForce(PUSH_FORCE_Y, 0, 0);
+         blockingSimulationRunner.simulateAndBlockAndCatchExceptions(6.1);
          robot.getRootJoints().get(0).addExternalForcePoint(externalForcePoint);
          blockingSimulationRunner.simulateAndBlockAndCatchExceptions(PUSH_DURATION);
          robot.getRootJoints().get(0).removeExternalForcePoint(externalForcePoint);
-         blockingSimulationRunner.simulateAndBlockAndCatchExceptions(10.0);
+         blockingSimulationRunner.simulateAndBlockAndCatchExceptions(20.0);
       }
 
       if (withVelocityChange)
