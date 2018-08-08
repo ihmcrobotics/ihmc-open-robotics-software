@@ -265,6 +265,9 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
 
+      // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
+      // contact state may yet change and the rho Jacobians need to be computed for these inputs.
+      // see also wrenchMatrixCalculator#submitWrenchCommand()
       while (wrenchMatrixCalculator.getAdditionalRhoInput(rhoQPInput))
       {
          qpSolver.addRhoInput(rhoQPInput);
