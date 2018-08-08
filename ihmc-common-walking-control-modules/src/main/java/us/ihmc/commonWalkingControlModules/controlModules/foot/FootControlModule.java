@@ -167,7 +167,6 @@ public class FootControlModule
       nominalMaxFz = 2.0 * robotWeightFz;
       minZForce = new YoDouble(robotSide.getLowerCaseName() + "MinZForce", registry);
       maxZForce = new YoDouble(robotSide.getLowerCaseName() + "MaxZForce", registry);
-      resetLoadConstraints();
    }
 
    private void setupWrenchCommand(WrenchCommand command)
@@ -277,6 +276,7 @@ public class FootControlModule
    public void initialize()
    {
       stateMachine.resetToInitialState();
+      resetLoadConstraints();
    }
 
    public void doControl()
