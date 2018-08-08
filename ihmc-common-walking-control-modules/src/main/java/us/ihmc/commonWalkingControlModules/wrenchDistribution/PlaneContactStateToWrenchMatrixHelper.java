@@ -259,10 +259,10 @@ public class PlaneContactStateToWrenchMatrixHelper
                contactPoint.getPosition(basisVectorOrigin);
                computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
-               DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector);
+               DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector, centerOfMassFrame);
                CommonOps.insert(singleRhoJacobian, rhoJacobianMatrix, 0, rhoIndex);
 
-               DenseMatrix64F singleRhoWrenchJacobian = computeSingleRhoWrenchJacobian(basisVectorOrigin, basisVector);
+               DenseMatrix64F singleRhoWrenchJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector, planeFrame);
                CommonOps.insert(singleRhoWrenchJacobian, wrenchJacobianMatrix, 0, rhoIndex);
 
                DenseMatrix64F singleRhoCoPJacobian = computeSingleRhoCoPJacobian(basisVectorOrigin, basisVector);
@@ -403,28 +403,15 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
    private final DenseMatrix64F singleRhoJacobian = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   private DenseMatrix64F computeSingleRhoJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector)
+   private DenseMatrix64F computeSingleRhoJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector, ReferenceFrame wrenchFrame)
    {
-      basisVectorOrigin.changeFrame(centerOfMassFrame);
-      basisVector.changeFrame(centerOfMassFrame);
+      basisVectorOrigin.changeFrame(wrenchFrame);
+      basisVector.changeFrame(wrenchFrame);
 
       // Compute the unit wrench corresponding to the basis vector
       unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
       unitSpatialForceVector.getMatrix(singleRhoJacobian);
       return singleRhoJacobian;
-   }
-
-   private final DenseMatrix64F singleRhoWrenchJacobian = new DenseMatrix64F(Wrench.SIZE, 1);
-
-   private DenseMatrix64F computeSingleRhoWrenchJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector)
-   {
-      basisVectorOrigin.changeFrame(planeFrame);
-      basisVector.changeFrame(planeFrame);
-
-      // Compute the unit wrench corresponding to the basis vector
-      unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
-      unitSpatialForceVector.getMatrix(singleRhoWrenchJacobian);
-      return singleRhoWrenchJacobian;
    }
 
    private final FrameVector3D forceFromRho = new FrameVector3D();
