@@ -293,7 +293,7 @@ public class WholeBodyInverseDynamicsSolver
             if (USE_DYNAMIC_MATRIX_CALCULATOR)
                dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(), ((ExternalWrenchCommand) command).getExternalWrench());
             break;
-         case WRENCH_OBJECTIVE:
+         case CONTACT_WRENCH:
             optimizationControlModule.submitWrenchCommand((WrenchCommand) command);
             break;
          case PLANE_CONTACT_STATE:
