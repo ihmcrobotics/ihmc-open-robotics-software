@@ -58,21 +58,23 @@ public abstract class TransferState extends WalkingState
 
    private final WrenchCommand unloadingWrenchCommand;
    private final YoBoolean isUnloading;
-   private final DoubleProvider unloadDuration;
-   private final DoubleProvider unloadWeight;
+   private final DoubleProvider unloadFraction;
+   private final YoDouble maxZForce;
+   private final double robotWeight;
 
    public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
                         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        DoubleProvider unloadDuration, DoubleProvider unloadWeight, YoVariableRegistry parentRegistry)
+                        DoubleProvider unloadFraction, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
-      this.unloadDuration = unloadDuration;
-      this.unloadWeight = unloadWeight;
+      this.unloadFraction = unloadFraction;
+
+      robotWeight = controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getGravityZ();
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -85,9 +87,10 @@ public abstract class TransferState extends WalkingState
       touchdownIsEnabled = new YoBoolean("touchdownIsEnabled", registry);
       touchdownIsEnabled.set(ENABLE_TOUCHDOWN_STATE);
 
-      if (unloadDuration != null && unloadWeight != null)
+      if (unloadFraction != null)
       {
          isUnloading = new YoBoolean(transferToSide.getOppositeSide().getLowerCaseName() + "FootIsUnloading", registry);
+         maxZForce = new YoDouble(transferToSide.getOppositeSide().getLowerCaseName() + "MaxZForce", registry);
          RigidBody footToUnload = controllerToolbox.getFullRobotModel().getFoot(transferToSide.getOppositeSide());
          unloadingWrenchCommand = new WrenchCommand();
          unloadingWrenchCommand.setRigidBody(footToUnload);
@@ -95,11 +98,14 @@ public abstract class TransferState extends WalkingState
          unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
          unloadingWrenchCommand.getSelectionMatrix().selectLinearZ(true);
          unloadingWrenchCommand.getWeightMatrix().setWeightFrame(ReferenceFrame.getWorldFrame());
+         unloadingWrenchCommand.getWeightMatrix().setLinearZAxisWeight(0.0);
          unloadingWrenchCommand.getWrench().setToZero(footToUnload.getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
+         unloadingWrenchCommand.setConstraintType(us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY);
       }
       else
       {
          isUnloading = null;
+         maxZForce = null;
          unloadingWrenchCommand = null;
       }
    }
@@ -133,17 +139,20 @@ public abstract class TransferState extends WalkingState
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(transferToSide);
 
-      if (isUnloading != null && unloadDuration.getValue() > 0.0)
+      if (isUnloading != null && unloadFraction.getValue() > 0.0)
       {
-         double timeBeforeUnloading = stepTiming.getTransferTime() - unloadDuration.getValue();
-         isUnloading.set(timeBeforeUnloading > 0.0 && timeInState > timeBeforeUnloading);
+         double percentInTransfer = MathTools.clamp(timeInState / stepTiming.getTransferTime(), 0.0, 1.0);
+         isUnloading.set(percentInTransfer > unloadFraction.getValue());
          if (isUnloading.getValue())
          {
-            double timeInUnloading = timeInState - timeBeforeUnloading;
-            double percentInUnloading = MathTools.clamp(timeInUnloading / unloadDuration.getValue(), 0.0, 1.0);
-            double weight = unloadWeight.getValue() * percentInUnloading * percentInUnloading;
-            unloadingWrenchCommand.getWeightMatrix().setLinearZAxisWeight(weight);
+            double percentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
+            maxZForce.set(robotWeight * (1.0 - percentInUnloading));
+            unloadingWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
             feetManager.addCommand(unloadingWrenchCommand);
+         }
+         else
+         {
+            maxZForce.setToNaN();
          }
       }
    }
