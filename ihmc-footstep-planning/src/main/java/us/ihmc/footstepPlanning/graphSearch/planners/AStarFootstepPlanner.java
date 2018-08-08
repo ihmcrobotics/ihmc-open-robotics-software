@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -383,14 +384,22 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
-      FootstepNodeCheckerOfCheckers checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
+      FootstepNodeChecker checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
-      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
+
+      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
+      costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setUseQuadraticStepCost(true);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setIncludeHeightCost(true);
+      costBuilder.setUsePitchAndRollCost(true);
+
+      FootstepCost footstepCost = costBuilder.buildCost();
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, checkerOfCheckers, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz,
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, checkerOfCheckers, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
                                                               registry);
       return planner;
    }
