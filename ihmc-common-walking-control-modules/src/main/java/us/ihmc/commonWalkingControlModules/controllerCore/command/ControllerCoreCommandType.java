@@ -153,16 +153,16 @@ public enum ControllerCoreCommandType
    /**
     * An objective for the wrench exerted by a body in contact {@link WholeBodyInverseDynamicsSolver}. This is different from the
     * {@link #EXTERNAL_WRENCH} command in that it will be added to the optimization. E.g. this can be used to request that the
-    * inverse dynamics optimization try to put a certain force on one foot. This is useful when trying to completely unload a foot.
+    * inverse dynamics optimization try to put a certain force on one foot or to constrain the foot wrench.
     */
-   WRENCH_OBJECTIVE;
+   CONTACT_WRENCH;
 
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] inverseDynamicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE,
-         JOINT_ACCELERATION_INTEGRATION, WRENCH_OBJECTIVE, COMMAND_LIST};
+         JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] virtualModelControlCommands = {MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH,
          VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, CONTROLLED_BODIES, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};
