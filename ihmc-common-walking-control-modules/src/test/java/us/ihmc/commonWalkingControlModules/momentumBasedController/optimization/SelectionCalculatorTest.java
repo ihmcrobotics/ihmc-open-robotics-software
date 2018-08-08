@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.Random;
 
@@ -8,12 +8,14 @@ import org.ejml.simple.SimpleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SelectionCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class SelectionCalculatorTest
