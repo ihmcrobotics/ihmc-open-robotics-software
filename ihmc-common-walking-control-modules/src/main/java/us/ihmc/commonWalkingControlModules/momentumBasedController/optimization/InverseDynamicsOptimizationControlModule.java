@@ -51,8 +51,8 @@ public class InverseDynamicsOptimizationControlModule
 
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
-   private final MotionQPInput motionQPInput;
-   private final RhoQPInput rhoQPInput;
+   private final QPInput motionQPInput;
+   private final QPInput rhoQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
@@ -109,8 +109,8 @@ public class InverseDynamicsOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      motionQPInput = new MotionQPInput(numberOfDoFs);
-      rhoQPInput = new RhoQPInput(rhoSize);
+      motionQPInput = new QPInput(numberOfDoFs);
+      rhoQPInput = new QPInput(rhoSize);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();

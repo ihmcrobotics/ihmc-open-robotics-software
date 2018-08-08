@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceMomentumQPSolver;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
@@ -56,7 +56,7 @@ public class VirtualModelControlOptimizationControlModule
 
    private final GroundContactForceMomentumQPSolver qpSolver;
 
-   private final MotionQPInput momentumQPInput;
+   private final QPInput momentumQPInput;
 
    private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
@@ -76,7 +76,7 @@ public class VirtualModelControlOptimizationControlModule
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
-      momentumQPInput = new MotionQPInput(SpatialForceVector.SIZE);
+      momentumQPInput = new QPInput(SpatialForceVector.SIZE);
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -187,11 +187,11 @@ public class VirtualModelControlOptimizationControlModule
    }
 
    /**
-    * Converts a {@link MomentumRateCommand} into a {@link MotionQPInput}.
+    * Converts a {@link MomentumRateCommand} into a {@link QPInput}.
     *
     * @return true if the command was successfully converted.
     */
-   private boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
+   private boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInput motionQPInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();

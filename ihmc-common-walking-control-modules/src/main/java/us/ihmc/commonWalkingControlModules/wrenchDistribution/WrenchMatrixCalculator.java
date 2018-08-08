@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.RhoQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -181,7 +181,7 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
    private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-   public boolean getAdditionalRhoInput(RhoQPInput inputToPack)
+   public boolean getAdditionalRhoInput(QPInput inputToPack)
    {
       int commands = wrenchCommands.size();
       if (commands <= 0)
