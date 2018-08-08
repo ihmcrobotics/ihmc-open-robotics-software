@@ -127,6 +127,7 @@ public class BalanceManager
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
    private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
+   private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final YoDouble maxICPErrorBeforeSingleSupportX = new YoDouble("maxICPErrorBeforeSingleSupportX", registry);
    private final YoDouble maxICPErrorBeforeSingleSupportY = new YoDouble("maxICPErrorBeforeSingleSupportY", registry);
 
@@ -639,15 +640,18 @@ public class BalanceManager
       }
    }
 
-   public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
+   public void computeNormalizedEllipticICPError(RobotSide transferToSide)
    {
       getICPError(icpError2d);
       ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
       icpError2d.changeFrame(leadingAnkleZUpFrame);
-      double ellipticErrorSquared = MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getDoubleValue())
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue());
-      boolean closeEnough = ellipticErrorSquared < 1.0;
-      return closeEnough;
+      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getDoubleValue())
+            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue()));
+   }
+
+   public double getNormalizedEllipticICPError()
+   {
+      return normalizedICPError.getValue();
    }
 
    public double getICPErrorMagnitude()
