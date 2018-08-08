@@ -49,8 +49,10 @@ public class SelectionCalculator
       // Pack the transformation matrix from task frame to selection frame. Then apply these transforms to both the original
       // task Jacobian and the objective.
       ReferenceFrame selectionFrame = selectionMatrix.getSelectionFrame();
-      if (selectionFrame == null)
+      boolean selectedAll = selectionMatrix.getNumberOfSelectedAxes() == 3;
+      if (selectedAll || selectionFrame == null)
       {
+         // If all axes are selected we can skip the transformations and just assume all axes are selected in the selection frame.
          // If no selection frame is provided it is assumed to be in the task frame.
          selectionFrame = taskFrame;
       }
