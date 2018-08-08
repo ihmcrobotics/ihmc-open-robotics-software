@@ -17,6 +17,15 @@ public class WrenchCommand implements InverseDynamicsCommand<WrenchCommand>
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
+   public WrenchCommand()
+   {
+   }
+
+   public WrenchCommand(ConstraintType constraintType)
+   {
+      setConstraintType(constraintType);
+   }
+
    public void setRigidBody(RigidBody rigidBody)
    {
       this.rigidBody = rigidBody;

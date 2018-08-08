@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.GEQ_INEQUALITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY;
+
 import java.util.Arrays;
 import java.util.EnumMap;
 
@@ -11,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -30,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -88,10 +93,18 @@ public class FootControlModule
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final UnloadedAnkleControlModule ankleControlModule;
 
+   private final DoubleProvider minWeightPerFoot;
+   private final YoDouble minZForce;
+   private final YoDouble maxZForce;
+   private final double robotWeightFz;
+   private final double nominalMaxFz;
+   private final WrenchCommand maxWrenchCommand = new WrenchCommand(LEQ_INEQUALITY);
+   private final WrenchCommand minWrenchCommand = new WrenchCommand(GEQ_INEQUALITY);
+
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+                            ExplorationParameters explorationParameters, DoubleProvider minWeightPerFoot, YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -146,6 +159,24 @@ public class FootControlModule
       {
          ankleControlModule = null;
       }
+
+      this.minWeightPerFoot = minWeightPerFoot;
+      setupWrenchCommand(maxWrenchCommand);
+      setupWrenchCommand(minWrenchCommand);
+      robotWeightFz = controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getGravityZ();
+      nominalMaxFz = 2.0 * robotWeightFz;
+      minZForce = new YoDouble(robotSide.getLowerCaseName() + "MinZForce", registry);
+      maxZForce = new YoDouble(robotSide.getLowerCaseName() + "MaxZForce", registry);
+      resetLoadConstraints();
+   }
+
+   private void setupWrenchCommand(WrenchCommand command)
+   {
+      command.setRigidBody(contactableFoot.getRigidBody());
+      command.getSelectionMatrix().clearSelection();
+      command.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
+      command.getSelectionMatrix().selectLinearZ(true);
+      command.getWrench().setToZero(contactableFoot.getRigidBody().getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
    }
 
    private void setupContactStatesMap()
@@ -395,6 +426,11 @@ public class FootControlModule
       {
          inverseDynamicsCommandList.addCommand(ankleControlModule.getInverseDynamicsCommand());
       }
+      if (stateMachine.getCurrentStateKey().isLoadBearing())
+      {
+         inverseDynamicsCommandList.addCommand(maxWrenchCommand);
+         inverseDynamicsCommandList.addCommand(minWrenchCommand);
+      }
       return inverseDynamicsCommandList;
    }
 
@@ -459,5 +495,28 @@ public class FootControlModule
          footControlHelper.getPartialFootholdControlModule().reset();
       }
       controllerToolbox.resetFootSupportPolygon(robotSide);
+   }
+
+   public void unload(double percentInUnloading)
+   {
+      minZForce.set(0.0);
+      maxZForce.set((1.0 - percentInUnloading) * nominalMaxFz);
+
+      updateWrenchCommands();
+   }
+
+   public void resetLoadConstraints()
+   {
+      minZForce.set(minWeightPerFoot.getValue() * robotWeightFz);
+      maxZForce.set(nominalMaxFz);
+
+      updateWrenchCommands();
+   }
+
+   private void updateWrenchCommands()
+   {
+      maxZForce.set(Math.max(maxZForce.getValue(), minZForce.getValue() + 1.0E-5));
+      minWrenchCommand.getWrench().setLinearPartZ(minZForce.getValue());
+      maxWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
    }
 }
