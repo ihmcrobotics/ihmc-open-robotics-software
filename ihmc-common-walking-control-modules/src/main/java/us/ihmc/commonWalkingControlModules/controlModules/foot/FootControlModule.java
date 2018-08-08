@@ -93,18 +93,19 @@ public class FootControlModule
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final UnloadedAnkleControlModule ankleControlModule;
 
-   private final DoubleProvider minWeightPerFoot;
+   private final DoubleProvider maxWeightFractionPerFoot;
+   private final DoubleProvider minWeightFractionPerFoot;
    private final YoDouble minZForce;
    private final YoDouble maxZForce;
    private final double robotWeightFz;
-   private final double nominalMaxFz;
    private final WrenchCommand maxWrenchCommand = new WrenchCommand(LEQ_INEQUALITY);
    private final WrenchCommand minWrenchCommand = new WrenchCommand(GEQ_INEQUALITY);
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, DoubleProvider minWeightPerFoot, YoVariableRegistry parentRegistry)
+                            ExplorationParameters explorationParameters, DoubleProvider minWeightFractionPerFoot, DoubleProvider maxWeightFractionPerFoot,
+                            YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -160,11 +161,11 @@ public class FootControlModule
          ankleControlModule = null;
       }
 
-      this.minWeightPerFoot = minWeightPerFoot;
+      this.maxWeightFractionPerFoot = maxWeightFractionPerFoot;
+      this.minWeightFractionPerFoot = minWeightFractionPerFoot;
       setupWrenchCommand(maxWrenchCommand);
       setupWrenchCommand(minWrenchCommand);
       robotWeightFz = controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getGravityZ();
-      nominalMaxFz = 2.0 * robotWeightFz;
       minZForce = new YoDouble(robotSide.getLowerCaseName() + "MinZForce", registry);
       maxZForce = new YoDouble(robotSide.getLowerCaseName() + "MaxZForce", registry);
    }
@@ -500,22 +501,24 @@ public class FootControlModule
    public void unload(double percentInUnloading)
    {
       minZForce.set(0.0);
-      maxZForce.set((1.0 - percentInUnloading) * nominalMaxFz);
+      maxZForce.set((1.0 - percentInUnloading) * maxWeightFractionPerFoot.getValue() * robotWeightFz);
 
       updateWrenchCommands();
    }
 
    public void resetLoadConstraints()
    {
-      minZForce.set(minWeightPerFoot.getValue() * robotWeightFz);
-      maxZForce.set(nominalMaxFz);
+      minZForce.set(minWeightFractionPerFoot.getValue() * robotWeightFz);
+      maxZForce.set(maxWeightFractionPerFoot.getValue() * robotWeightFz);
 
       updateWrenchCommands();
    }
 
    private void updateWrenchCommands()
    {
+      // Make sure the max force is always a little larger then the min force. This is to avoid sending conflicting constraints.
       maxZForce.set(Math.max(maxZForce.getValue(), minZForce.getValue() + 1.0E-5));
+
       minWrenchCommand.getWrench().setLinearPartZ(minZForce.getValue());
       maxWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
    }

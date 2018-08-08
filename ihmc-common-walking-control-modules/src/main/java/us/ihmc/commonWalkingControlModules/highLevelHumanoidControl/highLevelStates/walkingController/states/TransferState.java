@@ -123,7 +123,12 @@ public abstract class TransferState extends WalkingState
       if (isUnloading != null && unloadFraction.getValue() > 0.0)
       {
          double percentInTransfer = MathTools.clamp(timeInState / stepTiming.getTransferTime(), 0.0, 1.0);
-         isUnloading.set(percentInTransfer > unloadFraction.getValue());
+
+         if (!isUnloading.getValue())
+         {
+            isUnloading.set(percentInTransfer > unloadFraction.getValue());
+         }
+
          if (isUnloading.getValue())
          {
             double nominalPercentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
