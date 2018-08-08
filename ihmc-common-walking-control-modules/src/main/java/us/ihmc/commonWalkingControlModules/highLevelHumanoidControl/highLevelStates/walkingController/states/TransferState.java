@@ -97,8 +97,6 @@ public abstract class TransferState extends WalkingState
          unloadingWrenchCommand.getSelectionMatrix().clearSelection();
          unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
          unloadingWrenchCommand.getSelectionMatrix().selectLinearZ(true);
-         unloadingWrenchCommand.getWeightMatrix().setWeightFrame(ReferenceFrame.getWorldFrame());
-         unloadingWrenchCommand.getWeightMatrix().setLinearZAxisWeight(0.0);
          unloadingWrenchCommand.getWrench().setToZero(footToUnload.getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
          unloadingWrenchCommand.setConstraintType(us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY);
       }
