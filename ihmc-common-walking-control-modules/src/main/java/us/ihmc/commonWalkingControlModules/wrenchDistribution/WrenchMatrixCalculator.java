@@ -11,6 +11,7 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
@@ -219,6 +220,11 @@ public class WrenchMatrixCalculator
 
       SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
       WeightMatrix6D weightMatrix = command.getWeightMatrix();
+      if (command.getConstraintType() != ConstraintType.OBJECTIVE)
+      {
+         weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
+         weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
+      }
       selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, planeFrame, tempTaskJacobian, tempTaskObjective, taskJacobian, taskObjective,
                                                taskWeight);
    }
