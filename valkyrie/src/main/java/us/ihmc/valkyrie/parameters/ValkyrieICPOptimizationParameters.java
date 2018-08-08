@@ -1,17 +1,17 @@
-package us.ihmc.atlas.parameters;
+package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
+public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = true;
+   private final boolean useAngularMomentum = false;
    private final boolean useStepAdjustment = true;
 
-   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   public ValkyrieICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
@@ -34,7 +34,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 4e-9 : 4e-7;
+      return runningOnRealRobot ? 4e-7 : 4e-7;
    }
 
    /** {@inheritDoc} */
@@ -55,7 +55,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRateWeight()
    {
-      return 4e-13;
+      return 1e-8;
    }
 
    /** {@inheritDoc} */
@@ -64,7 +64,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    {
       ICPControlGains gains = new ICPControlGains();
       gains.setKpOrthogonalToMotion(1.5);
-      gains.setKpParallelToMotion(2.5);
+      gains.setKpParallelToMotion(2.0);
 
       gains.setIntegralLeakRatio(0.97);
       gains.setMaxIntegralError(0.05);
@@ -92,6 +92,13 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getAngularMomentumMinimizationWeight()
    {
       return 10.0;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public boolean getUseAngularMomentumIntegrator()
+   {
+      return false;
    }
 
    /** {@inheritDoc} */
