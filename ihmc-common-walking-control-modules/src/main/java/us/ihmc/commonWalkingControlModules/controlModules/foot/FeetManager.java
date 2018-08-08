@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -17,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -66,9 +63,6 @@ public class FeetManager
    private final FramePoint3D tempSolePosition = new FramePoint3D();
    private final DoubleParameter blindFootstepsHeightOffset;
 
-   private final List<InverseDynamicsCommand<?>> commandsToAdd = new ArrayList<>();
-   private final InverseDynamicsCommandList inverseDynamicsCommands = new InverseDynamicsCommandList();
-
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
                       YoVariableRegistry parentRegistry)
@@ -104,11 +98,13 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
 
-      DoubleProvider minWeightPerFoot = new DoubleParameter("MinWeightPerFoot", registry, 0.0);
+      DoubleProvider minWeightFractionPerFoot = new DoubleParameter("MinWeightFractionPerFoot", registry, 0.0);
+      DoubleProvider maxWeightFractionPerFoot = new DoubleParameter("MaxWeightFractionPerFoot", registry, 2.0);
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
-                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightPerFoot, registry);
+                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightFractionPerFoot,
+                                                                     maxWeightFractionPerFoot, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -493,14 +489,7 @@ public class FeetManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
-      inverseDynamicsCommands.clear();
-      for (int additionalCommandIndex = 0; additionalCommandIndex < commandsToAdd.size(); additionalCommandIndex++)
-      {
-         inverseDynamicsCommands.addCommand(commandsToAdd.get(additionalCommandIndex));
-      }
-      commandsToAdd.clear();
-      inverseDynamicsCommands.addCommand(footControlModules.get(robotSide).getInverseDynamicsCommand());
-      return inverseDynamicsCommands;
+      return footControlModules.get(robotSide).getInverseDynamicsCommand();
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
@@ -550,17 +539,5 @@ public class FeetManager
    public void resetLoadConstraints(RobotSide sideToUnload)
    {
       footControlModules.get(sideToUnload).resetLoadConstraints();
-   }
-
-   /**
-    * This allows walking control modules to submit inverse dynamics commands to the controller core if they have access to the feet manager.
-    * Commands added here will be submitted to the controller core the next time all commands are collected. Then the command buffer in this
-    * class will be cleared and the commands need to be re-submitted.
-    *
-    * @param command to submit to the controller core.
-    */
-   public void addCommand(InverseDynamicsCommand<?> command)
-   {
-      commandsToAdd.add(command);
    }
 }
