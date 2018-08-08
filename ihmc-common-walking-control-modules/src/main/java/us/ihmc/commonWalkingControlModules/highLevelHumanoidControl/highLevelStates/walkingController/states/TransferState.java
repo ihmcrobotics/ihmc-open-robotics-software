@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -15,12 +14,10 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -56,11 +53,8 @@ public abstract class TransferState extends WalkingState
 
    private final Footstep nextFootstep = new Footstep();
 
-   private final WrenchCommand unloadingWrenchCommand;
    private final YoBoolean isUnloading;
    private final DoubleProvider unloadFraction;
-   private final YoDouble maxZForce;
-   private final double robotWeight;
 
    public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
                         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -73,8 +67,6 @@ public abstract class TransferState extends WalkingState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
       this.unloadFraction = unloadFraction;
-
-      robotWeight = controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getGravityZ();
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -90,21 +82,10 @@ public abstract class TransferState extends WalkingState
       if (unloadFraction != null)
       {
          isUnloading = new YoBoolean(transferToSide.getOppositeSide().getLowerCaseName() + "FootIsUnloading", registry);
-         maxZForce = new YoDouble(transferToSide.getOppositeSide().getLowerCaseName() + "MaxZForce", registry);
-         RigidBody footToUnload = controllerToolbox.getFullRobotModel().getFoot(transferToSide.getOppositeSide());
-         unloadingWrenchCommand = new WrenchCommand();
-         unloadingWrenchCommand.setRigidBody(footToUnload);
-         unloadingWrenchCommand.getSelectionMatrix().clearSelection();
-         unloadingWrenchCommand.getSelectionMatrix().setSelectionFrame(ReferenceFrame.getWorldFrame());
-         unloadingWrenchCommand.getSelectionMatrix().selectLinearZ(true);
-         unloadingWrenchCommand.getWrench().setToZero(footToUnload.getBodyFixedFrame(), ReferenceFrame.getWorldFrame());
-         unloadingWrenchCommand.setConstraintType(us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY);
       }
       else
       {
          isUnloading = null;
-         maxZForce = null;
-         unloadingWrenchCommand = null;
       }
    }
 
@@ -144,13 +125,7 @@ public abstract class TransferState extends WalkingState
          if (isUnloading.getValue())
          {
             double percentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
-            maxZForce.set(robotWeight * (1.0 - percentInUnloading));
-            unloadingWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
-            feetManager.addCommand(unloadingWrenchCommand);
-         }
-         else
-         {
-            maxZForce.setToNaN();
+            feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading);
          }
       }
    }
@@ -308,6 +283,7 @@ public abstract class TransferState extends WalkingState
       if (isUnloading != null)
       {
          isUnloading.set(false);
+         feetManager.resetLoadConstraints(transferToSide.getOppositeSide());
       }
       feetManager.reset();
    }

@@ -38,6 +38,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FeetManager
@@ -103,10 +104,11 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
 
+      DoubleProvider minWeightPerFoot = new DoubleParameter("MinWeightPerFoot", registry, 0.0);
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
-                                                                     toeOffFootGains, controllerToolbox, explorationParameters, registry);
+                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightPerFoot, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -538,6 +540,16 @@ public class FeetManager
    public boolean isInTouchdown(RobotSide swingFoot)
    {
       return footControlModules.get(swingFoot).isInTouchdown();
+   }
+
+   public void unload(RobotSide sideToUnload, double percentInUnloading)
+   {
+      footControlModules.get(sideToUnload).unload(percentInUnloading);
+   }
+
+   public void resetLoadConstraints(RobotSide sideToUnload)
+   {
+      footControlModules.get(sideToUnload).resetLoadConstraints();
    }
 
    /**
