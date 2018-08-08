@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
@@ -34,7 +34,7 @@ public class InverseKinematicsOptimizationControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
-   private final MotionQPInput motionQPInput;
+   private final QPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
@@ -57,7 +57,7 @@ public class InverseKinematicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      motionQPInput = new MotionQPInput(numberOfDoFs);
+      motionQPInput = new QPInput(numberOfDoFs);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
