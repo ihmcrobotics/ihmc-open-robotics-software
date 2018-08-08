@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = false;
+   private final boolean useAngularMomentum = true;
    private final boolean useStepAdjustment = true;
 
    public ValkyrieICPOptimizationParameters(boolean runningOnRealRobot)
@@ -20,14 +20,14 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 20.0;
+      return runningOnRealRobot ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 20.0;
+      return runningOnRealRobot ? 7.5 : 20.0;
    }
 
    /** {@inheritDoc} */
@@ -49,6 +49,14 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    public double getFeedbackForwardWeight()
    {
       return runningOnRealRobot ? 0.5 : 0.5;
+   }
+   
+   /**
+    * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
+    */
+   public double getMinICPErrorForStepAdjustment()
+   {
+      return 0.04;
    }
 
    /** {@inheritDoc} */
