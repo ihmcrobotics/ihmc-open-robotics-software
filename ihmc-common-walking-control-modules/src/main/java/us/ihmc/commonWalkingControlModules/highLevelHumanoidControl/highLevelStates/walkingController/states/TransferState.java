@@ -118,13 +118,17 @@ public abstract class TransferState extends WalkingState
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(transferToSide);
 
+      balanceManager.computeNormalizedEllipticICPError(transferToSide);
+
       if (isUnloading != null && unloadFraction.getValue() > 0.0)
       {
          double percentInTransfer = MathTools.clamp(timeInState / stepTiming.getTransferTime(), 0.0, 1.0);
          isUnloading.set(percentInTransfer > unloadFraction.getValue());
          if (isUnloading.getValue())
          {
-            double percentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
+            double nominalPercentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
+            double icpBasedPercentInUnloading = 1.0 - MathTools.clamp(balanceManager.getNormalizedEllipticICPError() - 1.0, 0.0, 1.0);
+            double percentInUnloading = Math.min(nominalPercentInUnloading, icpBasedPercentInUnloading);
             feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading);
          }
       }
@@ -154,7 +158,7 @@ public abstract class TransferState extends WalkingState
          if (!isICPInsideSupportPolygon)
             return true;
          else
-            return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
+            return balanceManager.getNormalizedEllipticICPError() < 1.0;
       }
 
       return false;
