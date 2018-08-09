@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -98,8 +98,8 @@ public class FootControlModule
    private final YoDouble minZForce;
    private final YoDouble maxZForce;
    private final double robotWeightFz;
-   private final WrenchCommand maxWrenchCommand = new WrenchCommand(LEQ_INEQUALITY);
-   private final WrenchCommand minWrenchCommand = new WrenchCommand(GEQ_INEQUALITY);
+   private final ContactWrenchCommand maxWrenchCommand = new ContactWrenchCommand(LEQ_INEQUALITY);
+   private final ContactWrenchCommand minWrenchCommand = new ContactWrenchCommand(GEQ_INEQUALITY);
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
@@ -170,7 +170,7 @@ public class FootControlModule
       maxZForce = new YoDouble(robotSide.getLowerCaseName() + "MaxZForce", registry);
    }
 
-   private void setupWrenchCommand(WrenchCommand command)
+   private void setupWrenchCommand(ContactWrenchCommand command)
    {
       command.setRigidBody(contactableFoot.getRigidBody());
       command.getSelectionMatrix().clearSelection();

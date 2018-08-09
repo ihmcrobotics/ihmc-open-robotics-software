@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -349,8 +349,8 @@ public class InverseDynamicsOptimizationControlModule
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
-   public void submitWrenchCommand(WrenchCommand command)
+   public void submitContactWrenchCommand(ContactWrenchCommand command)
    {
-      wrenchMatrixCalculator.submitWrenchCommand(command);
+      wrenchMatrixCalculator.submitContactWrenchCommand(command);
    }
 }

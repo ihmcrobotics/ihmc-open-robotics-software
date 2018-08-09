@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SelectionCalculator;
@@ -166,14 +166,14 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
-   private final RecyclingArrayList<WrenchCommand> wrenchCommands = new RecyclingArrayList<>(WrenchCommand.class);
+   private final RecyclingArrayList<ContactWrenchCommand> contactWrenchCommands = new RecyclingArrayList<>(ContactWrenchCommand.class);
 
-   public void submitWrenchCommand(WrenchCommand command)
+   public void submitContactWrenchCommand(ContactWrenchCommand command)
    {
       // At this point we can not yet compute the matrices since the order of the inverse dynamics commands is not guaranteed. This means
       // the contact state might change. So we need to hold on to the command and wait with computing the task matrices until all inverse
       // dynamics commands are handled.
-      wrenchCommands.add().set(command);
+      contactWrenchCommands.add().set(command);
    }
 
    private final DenseMatrix64F rigidBodyRhoTaskJacobian = new DenseMatrix64F(0, 0);
@@ -183,14 +183,14 @@ public class WrenchMatrixCalculator
 
    public boolean getAdditionalRhoInput(QPInput inputToPack)
    {
-      int commands = wrenchCommands.size();
+      int commands = contactWrenchCommands.size();
       if (commands <= 0)
       {
          return false;
       }
 
-      WrenchCommand command = wrenchCommands.get(commands - 1);
-      wrenchCommands.remove(commands - 1);
+      ContactWrenchCommand command = contactWrenchCommands.get(commands - 1);
+      contactWrenchCommands.remove(commands - 1);
       int taskSize = command.getSelectionMatrix().getNumberOfSelectedAxes();
       inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.reshape(taskSize);
@@ -206,7 +206,7 @@ public class WrenchMatrixCalculator
       return true;
    }
 
-   private void computeCommandMatrices(WrenchCommand command, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   private void computeCommandMatrices(ContactWrenchCommand command, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getRigidBody());
       ReferenceFrame planeFrame = helper.getPlaneFrame();

@@ -9,25 +9,52 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * A command that contains instructions about the wrench exerted by a body in contact with the environment. The
- * command requires that the body specified is configured as a contactable body in the controller core. If that
- * is the case this command can limit the wrench (or parts of it) exerted by the body in the form of a constraint,
+ * command requires that the body specified is configured as a contactable body in the controller core. It is
+ * also required that the body is set to be in contact with the environment using a {@link PlaneContactStateCommand}.
+ * <p>
+ * This command can limit the wrench (or parts of it) exerted by the body in the form of a constraint,
  * or add an objective to the QP to prefer a certain wrench at that body.
+ * </p>
  */
-public class WrenchCommand implements InverseDynamicsCommand<WrenchCommand>
+public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenchCommand>
 {
+   /**
+    * The constraint type for this command.
+    * <p>
+    * Specifies whether the wrench provided here needs to be achieved exactly, as an objective,
+    * or if the wrench is a limit on the allowed wrench that is exerted by the rigid body.
+    * </p>
+    */
    private ConstraintType constraintType;
 
+   /**
+    * The body which exerts the wrench on the environment.
+    */
    private RigidBody rigidBody;
+
+   /**
+    * The wrench used in this command needs to have its body frame match the body frame of the
+    * rigid body exerting the wrench.
+    */
    private final Wrench wrench = new Wrench();
 
+   /**
+    * The weight matrix to be used in the optimization only if the constraint type is set to
+    * {@link ConstraintType#OBJECTIVE}.
+    */
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+
+   /**
+    * A selection matrix that allows the user to specify what components of the provided wrench
+    * should be used in the controller core.
+    */
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   public WrenchCommand()
+   public ContactWrenchCommand()
    {
    }
 
-   public WrenchCommand(ConstraintType constraintType)
+   public ContactWrenchCommand(ConstraintType constraintType)
    {
       setConstraintType(constraintType);
    }
@@ -68,7 +95,7 @@ public class WrenchCommand implements InverseDynamicsCommand<WrenchCommand>
    }
 
    @Override
-   public void set(WrenchCommand other)
+   public void set(ContactWrenchCommand other)
    {
       this.constraintType = other.constraintType;
       this.rigidBody = other.rigidBody;
