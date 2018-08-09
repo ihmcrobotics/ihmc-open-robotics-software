@@ -98,8 +98,8 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
 
-      DoubleProvider minWeightFractionPerFoot = new DoubleParameter("MinWeightFractionPerFoot", registry, 0.0);
-      DoubleProvider maxWeightFractionPerFoot = new DoubleParameter("MaxWeightFractionPerFoot", registry, 2.0);
+      DoubleProvider minWeightFractionPerFoot = new DoubleParameter("minWeightFractionPerFoot", registry, 0.0);
+      DoubleProvider maxWeightFractionPerFoot = new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0);
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
