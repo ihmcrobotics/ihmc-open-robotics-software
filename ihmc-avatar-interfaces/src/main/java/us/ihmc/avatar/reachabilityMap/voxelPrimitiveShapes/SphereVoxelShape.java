@@ -1,4 +1,4 @@
-package us.ihmc.reachabilityMap.voxelPrimitiveShapes;
+package us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes;
 
 import java.awt.Color;
 

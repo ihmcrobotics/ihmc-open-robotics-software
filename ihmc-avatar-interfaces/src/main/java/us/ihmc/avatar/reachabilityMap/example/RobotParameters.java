@@ -1,4 +1,4 @@
-package us.ihmc.reachabilityMap.example;
+package us.ihmc.avatar.reachabilityMap.example;
 
 import com.google.common.base.CaseFormat;
 

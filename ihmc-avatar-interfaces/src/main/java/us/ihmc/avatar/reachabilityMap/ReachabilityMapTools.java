@@ -1,4 +1,4 @@
-package us.ihmc.reachabilityMap;
+package us.ihmc.avatar.reachabilityMap;
 
 import java.awt.Color;
 

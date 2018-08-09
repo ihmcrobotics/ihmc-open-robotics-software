@@ -1,8 +1,10 @@
-package us.ihmc.reachabilityMap;
+package us.ihmc.avatar.reachabilityMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -14,8 +16,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
