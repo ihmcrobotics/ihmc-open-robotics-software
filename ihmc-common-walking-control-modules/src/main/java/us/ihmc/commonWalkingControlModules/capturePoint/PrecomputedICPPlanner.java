@@ -119,7 +119,7 @@ public class PrecomputedICPPlanner
          yoDesiredCoPPosition.addX(-desiredAngularMomentumRate.getY() / fZ);
          yoDesiredCoPPosition.addY(desiredAngularMomentumRate.getX() / fZ);
       }
-      precomputedCenterOfPressure2d.set(yoDesiredCMPPosition);
+      precomputedCenterOfPressure2d.set(yoDesiredCoPPosition);
    }
 
    public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
