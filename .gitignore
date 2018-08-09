@@ -10,6 +10,7 @@
 
 # Top level directories in sub-projects
 */target
+*/build
 */pit-reports
 */install
 */src/*/bin
@@ -19,6 +20,7 @@
 
 # directories to always ignore
 **/classes
+**/build
 **/bin
 **/out
 **/.gradle
