@@ -97,7 +97,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       footstepListMessage.setAreFootstepsAdjustable(true);
       footstepListMessage.setOffsetFootstepsWithExecutionError(true);
 
-      drcSimulationTestHelper.send(footstepListMessage);
+      drcSimulationTestHelper.publishToController(footstepListMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 

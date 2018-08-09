@@ -12,6 +12,7 @@ import org.junit.Before;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -20,7 +21,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -86,14 +86,14 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, stepWidth / 2.0, 0.0), new FrameQuaternion()));
 
-      drcSimulationTestHelper.send(footstepDataListMessage);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
 
       footstepDataListMessage.getFootstepDataList().clear();
       footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -stepWidth / 2.0, 0.0), new FrameQuaternion()));
 
-      drcSimulationTestHelper.send(footstepDataListMessage);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
 
@@ -137,7 +137,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
 //      footstepDataListMessage.setAreFootstepsAdjustable(true);
 
-      drcSimulationTestHelper.send(footstepDataListMessage);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0));
 
