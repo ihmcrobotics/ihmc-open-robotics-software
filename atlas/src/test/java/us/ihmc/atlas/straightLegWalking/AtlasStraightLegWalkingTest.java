@@ -1,33 +1,18 @@
 package us.ihmc.atlas.straightLegWalking;
 
-import java.util.EnumMap;
-
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasLegConfigurationParameters;
-import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.straightLegWalking.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -35,7 +20,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 300000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
@@ -43,7 +28,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 400000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
@@ -51,15 +36,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 200000000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 520000)
    public void testWalkingOverStairs() throws Exception
    {
@@ -74,11 +59,11 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 680000)
    public void testSteppingDown() throws Exception
    {
-      double stepDownHeight = 0.12;
+      double stepDownHeight = 0.2;
       super.testSteppingDown(stepDownHeight, 0.30, 1);
    }
 
@@ -149,21 +134,21 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
+      public double getMaxICPErrorBeforeSingleSupportX()
+      {
+         return 0.04;
+      }
+
+      @Override
+      public double getMaxICPErrorBeforeSingleSupportY()
+      {
+         return 0.02;
+      }
+
+      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
-      }
-
-      @Override
-      public boolean useOptimizationBasedICPController()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean editStepTimingForReachability()
-      {
-         return true;
       }
 
       @Override
@@ -202,6 +187,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return new TestToeOffParameters(jointMap);
       }
 
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return new TestSteppingParameters(jointMap);
+      }
+
    }
 
    private class TestToeOffParameters extends AtlasToeOffParameters
@@ -214,7 +205,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean checkCoPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -238,7 +229,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean checkECMPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -267,7 +258,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          super(RobotTarget.SCS, 1.0);
       }
 
-
       @Override
       public boolean useSingularityAvoidanceInSwing()
       {
@@ -285,7 +275,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
-
 
       @Override
       public boolean doToeTouchdownIfPossible()
@@ -315,18 +304,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public boolean relaxPelvisControl()
-      {
-         return true;
-      }
-
-      @Override
-      public double getRelaxationRate()
-      {
-         return 2.0;
-      }
-
-      @Override
       public double getMinimumPelvisWeight()
       {
          return 0.5;
@@ -347,22 +324,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getLegPrivilegedLowWeight()
+      public LegConfigurationGains getBentLegGains()
       {
-         return 5.0;
+         LegConfigurationGains gains = new LegConfigurationGains();
+         gains.setJointSpaceKp(150.0);
+         gains.setJointSpaceKd(6.0);
+
+         return gains;
       }
 
-      @Override
-      public double getLegPrivilegedMediumWeight()
-      {
-         return 75.0;
-      }
-
-      @Override
-      public double getLegPrivilegedHighWeight()
-      {
-         return 150.0;
-      }
    }
 
    private class TestMomentumOptimizationSettings extends AtlasMomentumOptimizationSettings
@@ -379,7 +349,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
-   private class TestICPPlannerParameters extends AtlasContinuousCMPPlannerParameters
+   private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
    {
       public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
       {
@@ -397,19 +367,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
+   }
 
-      /** {@inheritDoc} */
-      @Override
-      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
+   private class TestSteppingParameters extends AtlasSteppingParameters
+   {
+      public TestSteppingParameters(AtlasJointMap jointMap)
       {
-         Vector2D entryOffset = new Vector2D(0.0, -0.005);
-         Vector2D exitOffset = new Vector2D(0.0, 0.015);
+         super(jointMap);
+      }
 
-         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
-         copOffsets.put(entryCoPName, entryOffset);
-         copOffsets.put(exitCoPName, exitOffset);
-
-         return copOffsets;
+      @Override
+      public double getMaxStepLength()
+      {
+         return 1.0;
       }
    }
 

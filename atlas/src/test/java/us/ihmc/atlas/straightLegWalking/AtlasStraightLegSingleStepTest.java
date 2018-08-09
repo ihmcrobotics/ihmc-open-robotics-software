@@ -22,46 +22,69 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 70000)
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      double stepLength = 1.25;
+      double stepLength = 1.75;
       double stepWidth = 0.25;
 
       super.testForwardStep(stepLength, stepWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 70000)
+   public void testForwardStepWithPause() throws SimulationExceededMaximumTimeException
+   {
+      double stepLength = 1.1;
+      double stepWidth = 0.25;
+
+      super.testForwardStepWithPause(stepLength, stepWidth);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 99990000)
+   public void testForwardSteps() throws SimulationExceededMaximumTimeException
+   {
+      double startingLength = 0.4;
+      double nominalStepLength = 0.75;
+      double stepWidth = 0.2;
+      int stepsToLength = 3;
+      int totalSteps = 20;
+
+      super.testForwardSteps(startingLength, nominalStepLength, stepsToLength, stepWidth, totalSteps);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 70000)
    public void testWideStep() throws SimulationExceededMaximumTimeException
    {
-      double stepWidth = 0.6;
+      double stepWidth = 0.8;
       double stanceWidth = 0.25;
 
       super.testWideStep(stepWidth, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   @Test(timeout = 100000)
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.5;
-      double stepLength = 0.35;
+      double stepDownHeight = 0.2;
+      double stepHeight = 0.4;
+      double stepLength = 0.4;
       double stanceWidth = 0.25;
-      super.testSteppingDown(stepDownHeight, stepLength, stanceWidth);
+      super.testSteppingDown(/*stepDownHeight,*/ stepHeight, stepLength, stanceWidth);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   @Test(timeout = 100000)
    public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.5;
-      double stepLength = 0.35;
+      double stepDownHeight = 0.35;
+      double stepLength = 0.4;
       double stanceWidth = 0.25;
       super.testSteppingDownWithClosing(stepDownHeight, stepLength, stanceWidth);
    }
-
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -115,21 +138,9 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
 
       @Override
-      public boolean useOptimizationBasedICPController()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean editStepTimingForReachability()
-      {
-         return true;
-      }
-
-      @Override
       public boolean applySecondaryJointScaleDuringSwing()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -174,7 +185,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public boolean checkCoPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -192,13 +203,14 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public double getICPPercentOfStanceForSSToeOff()
       {
-         return 0.10;
+//         return 0.10;
+                  return 0.70;// for big step down
       }
 
       @Override
       public boolean checkECMPLocationToTriggerToeOff()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -214,9 +226,33 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
 
       @Override
+      public boolean doToeOffIfPossible()
+      {
+         return true;
+      }
+
+      @Override
       public double getAnkleLowerLimitToTriggerToeOff()
       {
          return -0.75;
+      }
+
+      @Override
+      public double getKneeLowerLimitToTriggerToeOff()
+      {
+         return 0.2;
+      }
+
+      @Override
+      public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean doToeOffWhenHittingLeadingKneeUpperLimit()
+      {
+         return true;
       }
    }
 
@@ -226,7 +262,6 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       {
          super(RobotTarget.SCS, 1.0);
       }
-
 
       @Override
       public boolean useSingularityAvoidanceInSwing()
@@ -246,11 +281,10 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
          return true;
       }
 
-
       @Override
       public boolean doToeTouchdownIfPossible()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -265,31 +299,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public boolean scaleFootWeight()
       {
-         return true;
-      }
-
-      @Override
-      public boolean usePelvisRotation()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean relaxPelvisControl()
-      {
-         return true;
-      }
-
-      @Override
-      public double getRelaxationRate()
-      {
-         return 2.0;
-      }
-
-      @Override
-      public double getMinimumPelvisWeight()
-      {
-         return 0.5;
+         return false;
       }
    }
 
@@ -304,24 +314,6 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       public boolean attemptToStraightenLegs()
       {
          return true;
-      }
-
-      @Override
-      public double getLegPrivilegedLowWeight()
-      {
-         return 5.0;
-      }
-
-      @Override
-      public double getLegPrivilegedMediumWeight()
-      {
-         return 75.0;
-      }
-
-      @Override
-      public double getLegPrivilegedHighWeight()
-      {
-         return 150.0;
       }
    }
 
@@ -339,7 +331,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
    }
 
-   private class TestICPPlannerParameters extends AtlasContinuousCMPPlannerParameters
+   private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
    {
       public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
       {
@@ -347,29 +339,21 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       }
 
       @Override
+      public double getTransferSplitFraction()
+      {
+         return 0.9;
+      }
+
+      @Override
       public double getExitCoPForwardSafetyMarginOnToes()
       {
-         return 0.015;
+         return 0.02;
       }
 
       @Override
       public boolean putExitCoPOnToes()
       {
          return true;
-      }
-
-      /** {@inheritDoc} */
-      @Override
-      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
-      {
-         Vector2D entryOffset = new Vector2D(0.0, -0.005);
-         Vector2D exitOffset = new Vector2D(0.0, 0.015);
-
-         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
-         copOffsets.put(entryCoPName, entryOffset);
-         copOffsets.put(exitCoPName, exitOffset);
-
-         return copOffsets;
       }
    }
 }
