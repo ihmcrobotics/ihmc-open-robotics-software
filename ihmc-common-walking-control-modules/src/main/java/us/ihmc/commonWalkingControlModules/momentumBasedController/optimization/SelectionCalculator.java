@@ -29,7 +29,9 @@ public class SelectionCalculator
 {
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final DenseMatrix64F tempRotationMatrix = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F tempRotationMatrixWithSelection = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F denseSelectionMatrix = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F taskJacobian3D = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F taskObjective3D = new DenseMatrix64F(1, 1);
@@ -45,11 +47,32 @@ public class SelectionCalculator
       int problemSize = taskJacobian.getNumCols();
       int taskSize = 3;
       checkMatrixSizes(taskJacobian, taskObjective, taskSize);
+      int reducedTaskSize = selectionMatrix.getNumberOfSelectedAxes();
+
+      boolean selectedNone = reducedTaskSize == 0;
+      if (selectedNone)
+      {
+         taskJacobianToPack.reshape(0, problemSize);
+         taskObjectiveToPack.reshape(0, 1);
+         taskWeightToPack.reshape(0, 0);
+         return 0;
+      }
+
+      // Pack the selection matrix in selection frame:
+      denseSelectionMatrix.reshape(3, 3);
+      CommonOps.setIdentity(denseSelectionMatrix);
+      for (int axis = taskSize - 1; axis >= 0; axis--)
+      {
+         if (!selectionMatrix.isAxisSelected(axis))
+         {
+            MatrixTools.removeRow(denseSelectionMatrix, axis);
+         }
+      }
 
       // Pack the transformation matrix from task frame to selection frame. Then apply these transforms to both the original
       // task Jacobian and the objective.
       ReferenceFrame selectionFrame = selectionMatrix.getSelectionFrame();
-      boolean selectedAll = selectionMatrix.getNumberOfSelectedAxes() == 3;
+      boolean selectedAll = reducedTaskSize == 3;
       if (selectedAll || selectionFrame == null)
       {
          // If all axes are selected we can skip the transformations and just assume all axes are selected in the selection frame.
@@ -60,10 +83,12 @@ public class SelectionCalculator
       {
          taskFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
          tempTransform.getRotation(tempRotationMatrix);
-         taskJacobianToPack.reshape(taskSize, problemSize);
-         taskObjectiveToPack.reshape(taskSize, 1);
-         CommonOps.mult(tempRotationMatrix, taskJacobian, taskJacobianToPack);
-         CommonOps.mult(tempRotationMatrix, taskObjective, taskObjectiveToPack);
+         tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
+         CommonOps.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
+         taskJacobianToPack.reshape(reducedTaskSize, problemSize);
+         taskObjectiveToPack.reshape(reducedTaskSize, 1);
+         CommonOps.mult(tempRotationMatrixWithSelection, taskJacobian, taskJacobianToPack);
+         CommonOps.mult(tempRotationMatrixWithSelection, taskObjective, taskObjectiveToPack);
       }
       else
       {
@@ -89,26 +114,28 @@ public class SelectionCalculator
       {
          weightFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
          tempTransform.getRotation(tempRotationMatrix);
-         CommonOps.mult(tempRotationMatrix, taskWeightToPack, tempTaskWeight);
-         CommonOps.multTransB(tempTaskWeight, tempRotationMatrix, taskWeightToPack);
+         tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
+         CommonOps.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
+         tempTaskWeight.reshape(reducedTaskSize, 3);
+         CommonOps.mult(tempRotationMatrixWithSelection, taskWeightToPack, tempTaskWeight);
+         taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
+         CommonOps.multTransB(tempTaskWeight, tempRotationMatrixWithSelection, taskWeightToPack);
       }
-
-      // Remove the rows (and collumns for the weight) that are not selected. For this we need to start from the bottom so the row
-      // indices do not get mixed up as rows get removed.
-      for (int axis = taskSize - 1; axis >= 0; axis--)
+      else
       {
-         if (!selectionMatrix.isAxisSelected(axis))
+         for (int axis = taskSize - 1; axis >= 0; axis--)
          {
-            MatrixTools.removeRow(taskJacobianToPack, axis);
-            MatrixTools.removeRow(taskObjectiveToPack, axis);
-            MatrixTools.removeRow(taskWeightToPack, axis);
-            MatrixTools.removeColumn(taskWeightToPack, axis);
+            if (!selectionMatrix.isAxisSelected(axis))
+            {
+               MatrixTools.removeRow(taskWeightToPack, axis);
+               MatrixTools.removeColumn(taskWeightToPack, axis);
+            }
          }
       }
 
       checkResult(taskJacobianToPack, taskObjectiveToPack, taskWeightToPack);
 
-      return selectionMatrix.getNumberOfSelectedAxes();
+      return reducedTaskSize;
    }
 
    public int applySelectionToTask(SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix, ReferenceFrame taskFrame, DenseMatrix64F taskJacobian,
@@ -118,15 +145,15 @@ public class SelectionCalculator
       int problemSize = taskJacobian.getNumCols();
       int taskSize = 6;
       checkMatrixSizes(taskJacobian, taskObjective, taskSize);
+      int reducedTaskSize = selectionMatrix.getNumberOfSelectedAxes();
 
       // Split the problem up into two parts (angular and linear).
       taskJacobian3D.reshape(3, problemSize);
       taskObjective3D.reshape(3, 1);
 
-      int reducedProblemSize = selectionMatrix.getNumberOfSelectedAxes();
-      taskJacobianToPack.reshape(reducedProblemSize, problemSize);
-      taskObjectiveToPack.reshape(reducedProblemSize, 1);
-      taskWeightToPack.reshape(reducedProblemSize, reducedProblemSize);
+      taskJacobianToPack.reshape(reducedTaskSize, problemSize);
+      taskObjectiveToPack.reshape(reducedTaskSize, 1);
+      taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
 
       // Do the angular part:
       CommonOps.extract(taskJacobian, 0, 3, 0, problemSize, taskJacobian3D, 0, 0);
@@ -146,7 +173,7 @@ public class SelectionCalculator
       CommonOps.insert(taskObjectiveSelected3D, taskObjectiveToPack, offset, 0);
       CommonOps.insert(taskWeightSelected3D, taskWeightToPack, offset, offset);
 
-      return reducedProblemSize;
+      return reducedTaskSize;
    }
 
    private static void checkResult(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
