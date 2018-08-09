@@ -114,18 +114,35 @@ public abstract class ToeOffParameters
    /**
     * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required.
     */
-   public boolean doToeOffWhenHittingKneeLimit()
+   public boolean doToeOffWhenHittingLeadingKneeUpperLimit()
    {
       return false;
    }
 
    /**
-    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingKneeLimit()}.
+    * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required.
+    */
+   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+   {
+      return false;
+   }
+
+   /**
+    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingLeadingKneeUpperLimit()}.
     * The maximum limit is taken between the returned value and the joint limit.
     */
    public double getKneeUpperLimitToTriggerToeOff()
    {
       return 1.2;
+   }
+
+   /**
+    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingLeadingKneeUpperLimit()}.
+    * The maximum limit is taken between the returned value and the joint limit.
+    */
+   public double getKneeLowerLimitToTriggerToeOff()
+   {
+      return 0.0;
    }
 
    /**

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.After;
 import org.junit.Before;
 
@@ -18,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -28,7 +31,6 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestInterface
 {
-   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -69,9 +71,77 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
 
       Point3D center = new Point3D(stepLength, 0.0, 0.9);
+      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
+   public void testForwardStepWithPause(double stepLength, double stepWidth) throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, stepWidth / 2.0, 0.0), new FrameQuaternion()));
+
+      drcSimulationTestHelper.send(footstepDataListMessage);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+
+      footstepDataListMessage.getFootstepDataList().clear();
+      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -stepWidth / 2.0, 0.0), new FrameQuaternion()));
+
+      drcSimulationTestHelper.send(footstepDataListMessage);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+
+      Point3D center = new Point3D(stepLength, 0.0, 0.9);
+      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
+   public void testForwardSteps(double startingLength, double nominalLength, int stepsToLength, double stepWidth, int totalSteps) throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      setupTest();
+
+      TDoubleArrayList stepLengths = new TDoubleArrayList();
+      stepsToLength++;
+
+      double length = startingLength;
+      stepLengths.add(length);
+      for (int i = 1; i < Math.max(stepsToLength, totalSteps); i++)
+      {
+         double alpha = Math.min((double) i / (double) stepsToLength, 1.0);
+         length = stepLengths.get(i - 1) + InterpolationTools.linearInterpolate(startingLength, nominalLength, alpha);
+         stepLengths.add(length);
+      }
+      stepLengths.add(length);
+
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      double width = stepWidth;
+      RobotSide side = RobotSide.LEFT;
+      for (int i = 0; i < stepLengths.size(); i++)
+      {
+         FootstepDataMessage message = footstepDataListMessage.getFootstepDataList().add();
+         message.set(HumanoidMessageTools.createFootstepDataMessage(side, new Point3D(stepLengths.get(i), width / 2.0, 0.0), new FrameQuaternion()));
+         width = -width;
+         side = side.getOppositeSide();
+
+//         message.setSwingDuration(0.5);
+      }
+
+//      footstepDataListMessage.setAreFootstepsAdjustable(true);
+
+      drcSimulationTestHelper.send(footstepDataListMessage);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0));
+
+      Point3D center = new Point3D(stepLengths.get(stepLengths.size() - 1), 0.0, 0.9);
       Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.15);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
@@ -97,9 +167,14 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
    public void testSteppingDown(double stepDownHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
    {
+      testSteppingDown(stepDownHeight, stepDownHeight, stepLength, stanceWidth);
+   }
+
+   public void testSteppingDown(double stepDownHeight, double stepHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
+   {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      double dropHeight = -stepDownHeight;
+      double dropHeight = -stepHeight;
 
       ArrayList<Double> stepHeights = new ArrayList<>();
       ArrayList<Double> stepLengths = new ArrayList<>();
@@ -121,7 +196,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       FootstepDataListMessage message = new FootstepDataListMessage();
 
-      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, -stepDownHeight), new Quaternion()));
 
       drcSimulationTestHelper.publishToController(message);
 
@@ -175,6 +250,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       setupCamera();
       ThreadTools.sleep(1000);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    private void setupCamera()
