@@ -1,8 +1,8 @@
-package us.ihmc.reachabilityMap.example;
+package us.ihmc.avatar.reachabilityMap.example;
 
+import us.ihmc.avatar.reachabilityMap.ReachabilityMapListener;
+import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapCalculator;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.reachabilityMap.ReachabilityMapListener;
-import us.ihmc.reachabilityMap.ReachabilitySphereMapCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

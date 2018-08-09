@@ -1,16 +1,16 @@
-package us.ihmc.reachabilityMap.example;
+package us.ihmc.avatar.reachabilityMap.example;
 
 import java.util.EnumMap;
 import java.util.Random;
 
+import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
+import us.ihmc.avatar.reachabilityMap.example.RobotParameters.RobotArmLinkParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.reachabilityMap.example.RobotParameters.RobotArmJointParameters;
-import us.ihmc.reachabilityMap.example.RobotParameters.RobotArmLinkParameters;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

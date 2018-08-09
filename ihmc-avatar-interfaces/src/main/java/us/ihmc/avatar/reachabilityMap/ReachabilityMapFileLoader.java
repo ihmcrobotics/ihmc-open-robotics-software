@@ -1,4 +1,4 @@
-package us.ihmc.reachabilityMap;
+package us.ihmc.avatar.reachabilityMap;
 
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -14,11 +14,11 @@ import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

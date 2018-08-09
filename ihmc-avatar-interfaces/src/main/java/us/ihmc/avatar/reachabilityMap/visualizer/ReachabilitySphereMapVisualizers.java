@@ -1,9 +1,11 @@
-package us.ihmc.reachabilityMap.visualizer;
+package us.ihmc.avatar.reachabilityMap.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -21,8 +23,6 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.simulationconstructionset.Robot;

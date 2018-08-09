@@ -1,8 +1,9 @@
-package us.ihmc.reachabilityMap;
+package us.ihmc.avatar.reachabilityMap;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
