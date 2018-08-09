@@ -12,10 +12,12 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -84,14 +86,15 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       setupCamera();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       ThreadTools.sleep(1000);
 
       double transferDuration = 0.2;
       double swingDuration = 0.7;
       double length = 0.7;
-      List<FootstepDataMessage> footsteps = getFlatGroundFootsteps(6, length, transferDuration, swingDuration);
+      int numberOfSteps = 6;
+      List<FootstepDataMessage> footsteps = getFlatGroundFootsteps(numberOfSteps, length, transferDuration, swingDuration);
       FootstepDataListMessage footstepListMessage = HumanoidMessageTools
             .createFootstepDataListMessage(footsteps, swingDuration, transferDuration, ExecutionMode.OVERRIDE);
       footstepListMessage.setAreFootstepsAdjustable(true);
@@ -99,9 +102,12 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       drcSimulationTestHelper.publishToController(footstepListMessage);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
-      assertTrue(success);
+      Point3D center = new Point3D(numberOfSteps * length, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    private ArrayList<FootstepDataMessage> getFlatGroundFootsteps(int numberOfSteps, double length, double transferDuration, double swingDuration)
@@ -155,9 +161,18 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = drcSimulationTestHelper
-            .simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
-      assertTrue(success);
+      int numberOfSteps = footsteps.getFootstepDataList().size();
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * stepTime + 2.0 * initialFinalTransfer + 1.0);
+
+      Point3D last1 = footsteps.getFootstepDataList().get(numberOfSteps - 1).getLocation();
+      Point3D last2 = footsteps.getFootstepDataList().get(numberOfSteps - 2).getLocation();
+
+      Point3D center = new Point3D();
+      center.interpolate(last1, last2, 0.5);
+      center.addZ(1.1);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
    }
 
@@ -184,11 +199,18 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = drcSimulationTestHelper
-            .simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
-      //success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10 * stepTime + 2.0 * initialFinalTransfer + 1.0);
-      assertTrue(success);
+      int numberOfSteps = footsteps.getFootstepDataList().size();
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
 
+      Point3D last1 = footsteps.getFootstepDataList().get(numberOfSteps - 1).getLocation();
+      Point3D last2 = footsteps.getFootstepDataList().get(numberOfSteps - 2).getLocation();
+
+      Point3D center = new Point3D();
+      center.interpolate(last1, last2, 0.5);
+      center.addZ(1.1);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
@@ -198,53 +220,30 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+      setupCamera();
 
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      ThreadTools.sleep(1000);
       int numberOfSteps = 6;
       double stepLength = 0.35;
       double transferDuration = 0.75;
       double swingDuration = 1.25;
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      List<FootstepDataMessage> footsteps = getFlatGroundFootsteps(numberOfSteps, stepLength, transferDuration, swingDuration);
+      FootstepDataListMessage footstepListMessage = HumanoidMessageTools
+            .createFootstepDataListMessage(footsteps, swingDuration, transferDuration, ExecutionMode.OVERRIDE);
+      footstepListMessage.setAreFootstepsAdjustable(true);
+      footstepListMessage.setOffsetFootstepsWithExecutionError(true);
 
-      setupCamera();
+      drcSimulationTestHelper.publishToController(footstepListMessage);
 
-      ThreadTools.sleep(1000);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps * (transferDuration + swingDuration) + 4.0);
 
-      FootstepDataListMessage message = new FootstepDataListMessage();
-      RobotSide robotSide = RobotSide.LEFT;
-
-      double distanceTraveled = 0.5 * stepLength;
-      double stepHeight = 0.95;
-
-      // take care of falling steps
-      for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
-      {
-         // step forward
-         distanceTraveled += stepLength;
-
-         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
-         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-         message.getFootstepDataList().add().set(footstepData);
-
-         robotSide = robotSide.getOppositeSide();
-      }
-
-      // closing step
-      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
-      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
-      message.getFootstepDataList().add().set(footstepData);
-
-      message.setDefaultTransferDuration(transferDuration);
-      message.setDefaultSwingDuration(swingDuration);
-
-      drcSimulationTestHelper.publishToController(message);
-
-      double timeOverrunFactor = 1.2;
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
-
-      assertTrue(success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      Point3D center = new Point3D(numberOfSteps * stepLength, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
@@ -335,7 +334,18 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
 
-      assertTrue(success);
+
+      numberOfSteps = message.getFootstepDataList().size();
+      Point3D last1 = message.getFootstepDataList().get(numberOfSteps - 1).getLocation();
+      Point3D last2 = message.getFootstepDataList().get(numberOfSteps - 2).getLocation();
+
+      Point3D center = new Point3D();
+      center.interpolate(last1, last2, 0.5);
+      center.addZ(1.1);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -426,7 +436,18 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
 
-      assertTrue(success);
+
+      numberOfSteps = message.getFootstepDataList().size();
+      Point3D last1 = message.getFootstepDataList().get(numberOfSteps - 1).getLocation();
+      Point3D last2 = message.getFootstepDataList().get(numberOfSteps - 2).getLocation();
+
+      Point3D center = new Point3D();
+      center.interpolate(last1, last2, 0.5);
+      center.addZ(1.1);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
