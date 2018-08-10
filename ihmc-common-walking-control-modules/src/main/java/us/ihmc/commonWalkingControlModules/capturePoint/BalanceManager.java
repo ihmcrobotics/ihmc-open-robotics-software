@@ -753,9 +753,6 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
       yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
-      double omega0 = controllerToolbox.getOmega0();
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
-      yoPerfectCoP.set(yoPerfectCMP);
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
