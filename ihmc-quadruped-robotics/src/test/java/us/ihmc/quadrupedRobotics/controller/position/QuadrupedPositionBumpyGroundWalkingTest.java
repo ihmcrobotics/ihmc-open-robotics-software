@@ -6,13 +6,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
@@ -20,11 +18,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
-public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements QuadrupedMultiRobotTestInterface
+public abstract class QuadrupedPositionBumpyGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedPositionTestYoVariables variables;
-   
+   private QuadrupedTestYoVariables variables;
+   private QuadrupedTeleopManager stepTeleopManager;
+
+
    @Before
    public void setup()
    {
@@ -33,10 +33,11 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
+         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.ROLLING_HILLS);
          conductor = quadrupedTestFactory.createTestConductor();
-         variables = new QuadrupedPositionTestYoVariables(conductor.getScs());
+         variables = new QuadrupedTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -56,10 +57,11 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
 
    public void testWalkingOverBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      variables.getYoPlanarVelocityInputX().set(0.08);
-      variables.getYoPlanarVelocityInputZ().set(0.05);
+      stepTeleopManager.requestXGait();
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90);
+      stepTeleopManager.setDesiredVelocity(0.08, 0.0, 0.05);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 35.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.4));

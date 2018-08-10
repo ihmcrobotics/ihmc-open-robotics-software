@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointVelocityIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -117,6 +118,12 @@ public enum ControllerCoreCommandType
     * {@link JointAccelerationIntegrationCommand} for the {@link WholeBodyInverseDynamicsSolver}.
     */
    JOINT_ACCELERATION_INTEGRATION,
+
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a the desired joint velocity integration approach for the solution using the
+    * {@link JointVelocityIntegrationCommand} for the {@link WholeBodyInverseKinematicsSolver}.
+    */
+   JOINT_VELOCITY_INTEGRATION,
 
    /**
     * Represents a list of commands for the {@link WholeBodyControllerCore}. This can be a {@link InverseKinematicsCommandList} for the

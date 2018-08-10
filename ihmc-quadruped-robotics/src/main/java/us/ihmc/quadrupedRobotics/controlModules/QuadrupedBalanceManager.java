@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
@@ -385,6 +386,11 @@ public class QuadrupedBalanceManager
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return momentumRateOfChangeModule.getMomentumRateCommand();
+   }
+
+   public InverseKinematicsCommand<?> getInverseKinematicsCommand()
+   {
+      return momentumRateOfChangeModule.getMomentumCommand();
    }
 
    public FrameVector3DReadOnly getStepAdjustment(RobotQuadrant robotQuadrant)

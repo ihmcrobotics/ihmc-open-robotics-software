@@ -6,26 +6,35 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitTurning720Test;
+import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionTurning720Test;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
-public class GenericQuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest extends QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+public class GenericQuadrupedPositionTurning720Test extends QuadrupedPositionTurning720Test
 {
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
       return new GenericQuadrupedTestFactory();
    }
-   
+
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 700.0)
-   @Test(timeout = 2000000)
-   public void testWalkingForwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
+   @ContinuousIntegrationTest(estimatedDuration = 370.6)
+   @Test(timeout = 1900000)
+   public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      super.testWalkingForwardStoppingAndTurning();
+      super.rotate720InPlaceRight();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 394.8)
+   @Test(timeout = 2000000)
+   public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
+   {
+      super.rotate720InPlaceLeft();
    }
 }

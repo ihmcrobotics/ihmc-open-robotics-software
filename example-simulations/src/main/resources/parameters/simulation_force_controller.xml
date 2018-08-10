@@ -7,16 +7,16 @@
                 <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="-10" max="10" value="1"/>
                 <parameter name="minimumStepAdjustmentTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                 <parameter name="stepGoalOffsetZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                <parameter name="kpX_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
-                <parameter name="kpY_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
-                <parameter name="kpZ_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                <parameter name="zetaX_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                <parameter name="zetaY_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                <parameter name="zetaZ_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.414"/>
-                <parameter name="maxDerivativeError_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                <parameter name="maxProportionalError_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                <parameter name="maximumFeedback_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                <parameter name="maximumFeedbackRate_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                <parameter name="kpX_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="kpY_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="kpZ_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                <parameter name="zetaX_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="zetaY_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="zetaZ_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="1.414"/>
+                <parameter name="maxDerivativeError_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                <parameter name="maxProportionalError_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                <parameter name="maximumFeedback_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                <parameter name="maximumFeedbackRate_solePositionVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
             </registry>
             <registry name="QuadrupedFallDetector">
                 <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
@@ -78,16 +78,16 @@
                     </registry>
                 </registry>
                 <registry name="QuadrupedBodyOrientationManager">
-                    <parameter name="kpX_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                    <parameter name="kpY_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                    <parameter name="kpZ_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                    <parameter name="zetaX_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
-                    <parameter name="zetaY_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
-                    <parameter name="zetaZ_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
-                    <parameter name="maxDerivativeError_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                    <parameter name="maxProportionalError_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                    <parameter name="maximumFeedback_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                    <parameter name="maximumFeedbackRate_bodyOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    <parameter name="kpX_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="kpY_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="kpZ_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="zetaX_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
+                    <parameter name="zetaY_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
+                    <parameter name="zetaZ_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
+                    <parameter name="maxDerivativeError_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    <parameter name="maxProportionalError_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    <parameter name="maximumFeedback_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                    <parameter name="maximumFeedbackRate_bodyOrientationVMC" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                 </registry>
                 <registry name="QuadrupedBalanceManager">
                     <registry name="DCMPlanner">
