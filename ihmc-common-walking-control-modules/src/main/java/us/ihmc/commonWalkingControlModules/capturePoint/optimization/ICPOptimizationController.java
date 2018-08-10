@@ -102,6 +102,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D unclippedFootstepSolution = new YoFramePoint2D(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final DoubleProvider minICPErrorForStepAdjustment;
+   private final DoubleProvider fractionThroughSwingForAdjustment;
+
    private final DoubleProvider footstepAdjustmentSafetyFactor;
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
@@ -230,6 +232,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                                                          icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
       minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry, icpOptimizationParameters.getMinICPErrorForStepAdjustment());
+      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry, icpOptimizationParameters.getFractionThroughSwingForAdjustment());
+
       footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
                                                            icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
       forwardFootstepWeight = new DoubleParameter(yoNamePrefix + "ForwardFootstepWeight", registry, icpOptimizationParameters.getForwardFootstepWeight());
@@ -498,6 +502,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          return false;
 
       if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()))
+         return false;
+
+      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
          return false;
 
       return upcomingFootsteps.size() > 0;
