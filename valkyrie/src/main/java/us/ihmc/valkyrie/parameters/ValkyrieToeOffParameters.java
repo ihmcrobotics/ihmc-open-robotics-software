@@ -35,7 +35,7 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    @Override
    public double getECMPProximityForToeOff()
    {
-      return runningOnRealRobot ? 0.0 : 0.04;
+      return runningOnRealRobot ? 0.02 : 0.04;
    }
 
 
