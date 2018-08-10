@@ -21,7 +21,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
    protected final LowLevelStateList lowLevelStateList;
    private final HashMap<OneDoFJoint, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
 
-//   private final List<QuadrupedJointController> quadrupedJointControllers = new ArrayList<>();
+   private final List<QuadrupedJointController> quadrupedJoints = new ArrayList<>();
 
 
    public SimulatedQuadrupedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputList jointDesiredOutputList,
@@ -41,7 +41,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
          quadrupedActuators.put(controllerJoint, actuator);
          robot.setController(actuator);
 
-//         quadrupedJointControllers.add(new QuadrupedJointController(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), registry));
+         quadrupedJoints.add(new QuadrupedJointController(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), registry));
       }
 
       robot.getRobotsYoVariableRegistry().addChild(registry);
@@ -61,10 +61,10 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
    @Override
    public void write()
    {
-//      for (int i = 0; i < controllerJoints.length; i++)
-//      {
-//         quadrupedJointControllers.get(i).computeDesiredStateFromJointController();
-//      }
+      for (int i = 0; i < controllerJoints.length; i++)
+      {
+         quadrupedJoints.get(i).computeDesiredStateFromJointController();
+      }
 
       for (OneDoFJoint controllerJoint : controllerJoints)
       {
@@ -86,15 +86,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
          if (desiredState.isVelocityValid() && jointSetpoints.hasVelocityScaling())
             desiredState.setVelocity(jointSetpoints.getVelocityScaling() * desiredState.getVelocity());
 
-         LowLevelActuatorSimulator actuator = quadrupedActuators.get(controllerJoint);
-
-         if (jointSetpoints.hasStiffness())
-         {
-            QuadrupedJointGainScheduler.QuadrupedJointGains jointGains = QuadrupedJointGainScheduler.getCorrespondingJointGains(jointSetpoints.getStiffness());
-            actuator.setKp(jointGains.stiffness());
-            actuator.setKd(jointGains.damping());
-         }
-         actuator.setActuatorMode(getDesiredActuatorMode(jointSetpoints));
+         quadrupedActuators.get(controllerJoint).setActuatorMode(getDesiredActuatorMode(jointSetpoints));
       }
    }
 

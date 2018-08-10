@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.model;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -37,15 +35,13 @@ public class QuadrupedRuntimeEnvironment
    private final List<ContactablePlaneBody> contactablePlaneBodies;
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final WholeBodyControllerCoreMode controllerCoreMode;
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
-                                      double gravity, WholeBodyControllerCoreMode controllerCoreMode)
+                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -61,7 +57,6 @@ public class QuadrupedRuntimeEnvironment
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
-      this.controllerCoreMode = controllerCoreMode;
    }
 
    public double getControlDT()
@@ -132,10 +127,5 @@ public class QuadrupedRuntimeEnvironment
    public CenterOfMassDataHolderReadOnly getCenterOfMassDataHolder()
    {
       return centerOfMassDataHolder;
-   }
-
-   public WholeBodyControllerCoreMode getControllerCoreMode()
-   {
-      return controllerCoreMode;
    }
 }

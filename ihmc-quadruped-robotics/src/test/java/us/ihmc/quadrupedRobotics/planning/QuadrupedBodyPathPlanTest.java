@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.planning;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import org.junit.After;
 import org.junit.Before;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -19,7 +18,7 @@ import java.io.IOException;
 public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedTestYoVariables variables;
+   private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -34,7 +33,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       try
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          if(terrainObject3D != null)
@@ -43,7 +42,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
          }
 
          conductor = quadrupedTestFactory.createTestConductor();
-         variables = new QuadrupedTestYoVariables(conductor.getScs());
+         variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)

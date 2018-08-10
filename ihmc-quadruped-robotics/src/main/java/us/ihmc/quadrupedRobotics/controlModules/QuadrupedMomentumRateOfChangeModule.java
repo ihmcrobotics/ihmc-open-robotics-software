@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -12,11 +11,8 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedMomentumRateOfChangeModule
 {
@@ -37,27 +33,17 @@ public class QuadrupedMomentumRateOfChangeModule
 
    private double desiredCoMHeightAcceleration;
 
-   private final ParameterVector3D vmcLinearMomentumRateWeight = new ParameterVector3D("vmcLinearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
-   private final ParameterVector3D kinematicsLinearMomentumWeight = new ParameterVector3D("ikLinearMomentumWeight", new Vector3D(100.0, 100.0, 50.0), registry);
+   private final ParameterVector3D linearMomentumRateWeight = new ParameterVector3D("linearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
 
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
-   private final YoFrameVector3D yoLinearMomentumRateOfChange = new YoFrameVector3D("desiredLinearMomentumRateOfChange", worldFrame, registry);
-   private final FrameVector3D linearMomentum = new FrameVector3D();
-   private final FrameVector3D linearMomentumEstimate = new FrameVector3D();
 
-   // higher leaks to 0
-   private final DoubleParameter momentumIntegrationBreakFrequency = new DoubleParameter("momentumIntegrationBreakFrequency", registry, 0.1);
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final MomentumCommand momentumCommand = new MomentumCommand();
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FrameVector3D dcmVelocitySetpoint = new FrameVector3D();
 
-   private final double controlDT;
    private final boolean debug;
-
-   private final QuadrupedControllerToolbox controllerToolbox;
 
    public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -67,10 +53,8 @@ public class QuadrupedMomentumRateOfChangeModule
    public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry, boolean debug)
    {
       this.debug = debug;
-      this.controllerToolbox = controllerToolbox;
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();
       mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
-      controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
@@ -82,7 +66,6 @@ public class QuadrupedMomentumRateOfChangeModule
       dcmPositionController = new DivergentComponentOfMotionController(comFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
 
       momentumRateCommand.setSelectionMatrixForLinearControl();
-      momentumCommand.setSelectionMatrixForLinearControl();
 
       parentRegistry.addChild(registry);
    }
@@ -90,8 +73,6 @@ public class QuadrupedMomentumRateOfChangeModule
    public void initialize()
    {
       dcmPositionController.reset();
-      linearMomentum.set(controllerToolbox.getCoMVelocityEstimate());
-      linearMomentum.scale(mass);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
@@ -131,40 +112,12 @@ public class QuadrupedMomentumRateOfChangeModule
          throw new IllegalArgumentException("LinearMomentum rate contains NaN.");
 
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-      momentumRateCommand.setLinearWeights(vmcLinearMomentumRateWeight);
-
-      yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
-
-      integrateMomentum(linearMomentum);
-
-      momentumCommand.setLinearMomentum(linearMomentum);
-      momentumCommand.setLinearWeights(kinematicsLinearMomentumWeight);
-   }
-
-   private void integrateMomentum(FrameVector3D linearMomentumToPack)
-   {
-      linearMomentumEstimate.set(controllerToolbox.getCoMVelocityEstimate());
-      linearMomentumEstimate.scale(mass);
-
-      double momentumAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(momentumIntegrationBreakFrequency.getValue(), controlDT);
-      for (int i = 0; i < 3; i++)
-      {
-         double momentumReference = 0.0;
-         double desiredMomentum = linearMomentumToPack.getElement(i);
-         desiredMomentum = desiredMomentum * momentumAlpha + (1.0 - momentumAlpha) * momentumReference;
-         desiredMomentum += yoLinearMomentumRateOfChange.getElement(i) * controlDT;
-         linearMomentumToPack.setElement(i, desiredMomentum);
-      }
+      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;
-   }
-
-   public MomentumCommand getMomentumCommand()
-   {
-      return momentumCommand;
    }
 
    private final FramePoint2D centerOfMass2d = new FramePoint2D();

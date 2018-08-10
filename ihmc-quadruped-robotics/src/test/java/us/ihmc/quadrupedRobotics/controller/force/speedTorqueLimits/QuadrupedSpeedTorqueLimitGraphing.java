@@ -2,11 +2,14 @@ package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 
 import java.io.IOException;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -17,20 +20,20 @@ import us.ihmc.commons.thread.ThreadTools;
 public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedTestYoVariables variables;
+   private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
    public SimulationConstructionSet createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
-      testFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+      testFactory.setControlMode(QuadrupedControlMode.FORCE);
       testFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       testFactory.setUsePushRobotController(true);
       testFactory.setUseStateEstimator(true);
       testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
-      variables = new QuadrupedTestYoVariables(conductor.getScs());
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = testFactory.getStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 

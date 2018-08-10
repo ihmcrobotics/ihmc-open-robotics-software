@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -18,7 +19,7 @@ public class QuadrupedControlManagerFactory
    private QuadrupedFeetManager feetManager;
    private QuadrupedBodyOrientationManager bodyOrientationManager;
    private QuadrupedBalanceManager balanceManager;
-   private QuadrupedJointSettingsManager jointSpaceManager;
+   private QuadrupedJointSpaceManager jointSpaceManager;
 
    public QuadrupedControlManagerFactory(QuadrupedControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties,
                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -57,12 +58,12 @@ public class QuadrupedControlManagerFactory
       return balanceManager;
    }
 
-   public QuadrupedJointSettingsManager getOrCreateJointSpaceManager()
+   public QuadrupedJointSpaceManager getOrCreateJointSpaceManager()
    {
       if (jointSpaceManager != null)
          return jointSpaceManager;
 
-      jointSpaceManager = new QuadrupedJointSettingsManager(toolbox, registry);
+      jointSpaceManager = new QuadrupedJointSpaceManager(toolbox, registry);
       return jointSpaceManager;
    }
 

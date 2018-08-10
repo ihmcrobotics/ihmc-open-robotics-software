@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -26,7 +24,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final FootSwitchInterface footSwitch;
 
-   private final SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
    private boolean footIsVerifiedAsLoaded = false;
 
@@ -46,10 +43,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
       minimumTimeInSupportState = new DoubleParameter(robotQuadrant.getShortName() + "TimeInSupportState", registry, 0.05);
 
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
-
-      spatialVelocityCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getFoot(robotQuadrant));
-      spatialVelocityCommand.setSelectionMatrixForLinearControl();
-      spatialVelocityCommand.setWeight(10.0);
    }
 
    @Override
@@ -81,7 +74,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
             upcomingGroundPlanePosition.setMatchingFrame(tempPoint);
          }
       }
-      spatialVelocityCommand.setSpatialVelocityToZero(soleFrame);
    }
 
    @Override
@@ -107,14 +99,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       return null;
    }
-
-   @Override
-   public InverseKinematicsCommand<?> getInverseKinematicsCommand()
-   {
-//      return null;
-      return spatialVelocityCommand;
-   }
-
 
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
