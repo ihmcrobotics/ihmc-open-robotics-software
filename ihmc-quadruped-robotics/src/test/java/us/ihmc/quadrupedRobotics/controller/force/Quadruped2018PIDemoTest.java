@@ -302,7 +302,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double walkingSpeed = 0.3;
       double minimumXPositionAfterWalking  = numberOfSteps * stepLength + 1.2;
 
-      double bodyHeight = 0.58;
+      double bodyHeight = 0.50;
       double stanceLength = 0.7;
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
