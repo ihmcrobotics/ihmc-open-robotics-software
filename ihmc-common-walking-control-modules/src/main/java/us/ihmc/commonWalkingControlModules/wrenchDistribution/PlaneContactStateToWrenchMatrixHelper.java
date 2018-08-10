@@ -51,6 +51,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final DenseMatrix64F rhoMatrix;
    private final DenseMatrix64F rhoJacobianMatrix;
    private final DenseMatrix64F copJacobianMatrix;
+   private final DenseMatrix64F wrenchJacobianMatrix;
 
    private final DenseMatrix64F desiredCoPMatrix = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F previousCoPMatrix = new DenseMatrix64F(2, 1);
@@ -115,6 +116,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       rhoMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
       copJacobianMatrix = new DenseMatrix64F(2, rhoSize);
+      wrenchJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, rhoSize);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
@@ -131,7 +133,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
-      planeFrame.setPoseAndUpdate(((ContactablePlaneBody) contactablePlaneBody).getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
+      planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
       yoPlaneContactState.clear();
       yoPlaneContactState.computeSupportPolygon();
@@ -257,8 +259,11 @@ public class PlaneContactStateToWrenchMatrixHelper
                contactPoint.getPosition(basisVectorOrigin);
                computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
-               DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector);
+               DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector, centerOfMassFrame);
                CommonOps.insert(singleRhoJacobian, rhoJacobianMatrix, 0, rhoIndex);
+
+               DenseMatrix64F singleRhoWrenchJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector, planeFrame);
+               CommonOps.insert(singleRhoWrenchJacobian, wrenchJacobianMatrix, 0, rhoIndex);
 
                DenseMatrix64F singleRhoCoPJacobian = computeSingleRhoCoPJacobian(basisVectorOrigin, basisVector);
                CommonOps.insert(singleRhoCoPJacobian, copJacobianMatrix, 0, rhoIndex);
@@ -340,11 +345,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorOrigin.setToZero(centerOfMassFrame);
       basisVector.setToZero(centerOfMassFrame);
 
-      for (int row = 0; row < Wrench.SIZE; row++)
-         rhoJacobianMatrix.set(row, rhoIndex, 0.0);
-
-      for (int row = 0; row < 2; row++)
-         copJacobianMatrix.set(row, rhoIndex, 0.0);
+      MatrixTools.zeroColumn(rhoIndex, rhoJacobianMatrix);
+      MatrixTools.zeroColumn(rhoIndex, copJacobianMatrix);
+      MatrixTools.zeroColumn(rhoIndex, wrenchJacobianMatrix);
 
       rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
       rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0); // FIXME why is this setting to 1.0????
@@ -353,7 +356,6 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final Wrench wrenchFromRho = new Wrench();
    private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
-   private final DenseMatrix64F singleRhoWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
    public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
@@ -362,19 +364,9 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       if (yoPlaneContactState.inContact())
       {
-         totalWrenchMatrix.zero();
-
-         for (int rhoIndex = 0; rhoIndex < rhoSize; rhoIndex++)
-         {
-            double rho = rhoMatrix.get(rhoIndex, 0);
-            CommonOps.extract(rhoJacobianMatrix, 0, SpatialForceVector.SIZE, rhoIndex, rhoIndex + 1, singleRhoWrenchMatrix, 0, 0);
-            MatrixTools.addMatrixBlock(totalWrenchMatrix, 0, 0, singleRhoWrenchMatrix, 0, 0, SpatialForceVector.SIZE, 1, rho);
-         }
-
-         RigidBody rigidBody = yoPlaneContactState.getRigidBody();
-         ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
-
-         wrenchFromRho.set(bodyFixedFrame, centerOfMassFrame, totalWrenchMatrix);
+         ReferenceFrame bodyFixedFrame = getRigidBody().getBodyFixedFrame();
+         CommonOps.mult(wrenchJacobianMatrix, rhoMatrix, totalWrenchMatrix);
+         wrenchFromRho.set(bodyFixedFrame, planeFrame, totalWrenchMatrix);
 
          CommonOps.mult(copJacobianMatrix, rhoMatrix, previousCoPMatrix);
          previousCoP.setX(previousCoPMatrix.get(0, 0));
@@ -411,10 +403,10 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
    private final DenseMatrix64F singleRhoJacobian = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   private DenseMatrix64F computeSingleRhoJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector)
+   private DenseMatrix64F computeSingleRhoJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector, ReferenceFrame wrenchFrame)
    {
-      basisVectorOrigin.changeFrame(centerOfMassFrame);
-      basisVector.changeFrame(centerOfMassFrame);
+      basisVectorOrigin.changeFrame(wrenchFrame);
+      basisVector.changeFrame(wrenchFrame);
 
       // Compute the unit wrench corresponding to the basis vector
       unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
@@ -531,5 +523,15 @@ public class PlaneContactStateToWrenchMatrixHelper
    public boolean hasReset()
    {
       return hasReset.getBooleanValue();
+   }
+
+   public DenseMatrix64F getWrenchJacobianMatrix()
+   {
+      return wrenchJacobianMatrix;
+   }
+
+   public ReferenceFrame getPlaneFrame()
+   {
+      return planeFrame;
    }
 }

@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -50,7 +51,8 @@ public class InverseDynamicsOptimizationControlModule
 
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
-   private final MotionQPInput motionQPInput;
+   private final QPInput motionQPInput;
+   private final QPInput rhoQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
@@ -107,7 +109,8 @@ public class InverseDynamicsOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      motionQPInput = new MotionQPInput(numberOfDoFs);
+      motionQPInput = new QPInput(numberOfDoFs);
+      rhoQPInput = new QPInput(rhoSize);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -261,6 +264,14 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+
+      // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
+      // contact state may yet change and the rho Jacobians need to be computed for these inputs.
+      // see also wrenchMatrixCalculator#submitWrenchCommand()
+      while (wrenchMatrixCalculator.getAdditionalRhoInput(rhoQPInput))
+      {
+         qpSolver.addRhoInput(rhoQPInput);
+      }
    }
 
    private void setupWrenchesEquilibriumConstraint()
@@ -336,5 +347,10 @@ public class InverseDynamicsOptimizationControlModule
       RigidBody rigidBody = command.getRigidBody();
       Wrench wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   public void submitContactWrenchCommand(ContactWrenchCommand command)
+   {
+      wrenchMatrixCalculator.submitContactWrenchCommand(command);
    }
 }

@@ -30,10 +30,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                               WalkingControllerParameters walkingControllerParameters,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
-                                              YoVariableRegistry parentRegistry)
+                                              DoubleProvider unloadFraction, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
-            failureDetectionControlModule, parentRegistry);
+      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
+            parentRegistry);
 
       this.minimumTransferTime = minimumTransferTime;
 

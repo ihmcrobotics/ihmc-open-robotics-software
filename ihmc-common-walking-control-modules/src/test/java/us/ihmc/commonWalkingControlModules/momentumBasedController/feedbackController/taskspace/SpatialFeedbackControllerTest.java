@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
@@ -99,7 +99,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -205,7 +205,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
