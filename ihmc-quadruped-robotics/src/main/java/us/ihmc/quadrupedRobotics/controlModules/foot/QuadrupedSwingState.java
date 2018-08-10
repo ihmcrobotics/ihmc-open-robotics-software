@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -296,6 +297,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       feedbackControlCommand.set(desiredPosition, desiredVelocity);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
+      feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 
       updateEndOfStateConditions(time);
    }
