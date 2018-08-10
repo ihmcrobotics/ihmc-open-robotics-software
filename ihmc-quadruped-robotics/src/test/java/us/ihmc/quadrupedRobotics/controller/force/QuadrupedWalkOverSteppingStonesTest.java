@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedTestYoVariables variables;
+   private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -63,12 +62,12 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setInitialOffset(initialOffset);
-      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
 
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedTestYoVariables(conductor.getScs());
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
       PacketCommunicator packetCommunicator = PacketCommunicator

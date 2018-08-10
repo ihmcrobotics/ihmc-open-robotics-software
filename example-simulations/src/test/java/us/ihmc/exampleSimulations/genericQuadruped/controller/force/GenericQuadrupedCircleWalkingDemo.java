@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -24,11 +23,11 @@ public class GenericQuadrupedCircleWalkingDemo
       try
       {
          GenericQuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseNetworking(true);
          GoalOrientedTestConductor conductor = quadrupedTestFactory.createTestConductor();
-         QuadrupedTestYoVariables variables = new QuadrupedTestYoVariables(conductor.getScs());
+         QuadrupedForceTestYoVariables variables = new QuadrupedForceTestYoVariables(conductor.getScs());
          QuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
          QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

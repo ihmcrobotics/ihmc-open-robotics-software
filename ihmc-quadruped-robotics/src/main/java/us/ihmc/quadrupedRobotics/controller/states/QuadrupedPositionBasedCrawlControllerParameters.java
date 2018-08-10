@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.quadrupedRobotics.controller.states;
 
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.SwingTargetGeneratorParameters;
 

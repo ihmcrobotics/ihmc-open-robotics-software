@@ -3,17 +3,14 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import java.util.BitSet;
 
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -28,7 +25,7 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
    private final FullQuadrupedRobotModel fullRobotModel;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final QuadrupedControllerToolbox controllerToolbox;
+   private final YoBoolean forceFeedbackControlEnabled;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
@@ -36,12 +33,14 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
     */
    private final BitSet initialized;
 
-   public QuadrupedJointInitializationController(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment, QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
    {
-      this.controllerToolbox = controllerToolbox;
-      this.fullRobotModel = controllerToolbox.getFullRobotModel();
-      this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
+      this.fullRobotModel = environment.getFullRobotModel();
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.initialized = new BitSet(fullRobotModel.getOneDoFJoints().length);
+
+      forceFeedbackControlEnabled = new YoBoolean("useForceFeedbackControl", registry);
+      forceFeedbackControlEnabled.set(controlMode == QuadrupedControlMode.FORCE);
 
       parentRegistry.addChild(registry);
    }
@@ -55,7 +54,10 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          OneDoFJoint joint = joints[i];
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(controllerToolbox.getJointControlParameters().getJointInitializationJointMode());
+            if (forceFeedbackControlEnabled.getBooleanValue())
+               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
    }
@@ -71,16 +73,8 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          // Only set a desired if the actuator has just come online.
          if (!initialized.get(i) && joint.isOnline())
          {
-            JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-            jointDesiredOutput.setControlMode(controllerToolbox.getJointControlParameters().getJointInitializationJointMode());
-            PDGainsReadOnly pdGainsReadOnly = controllerToolbox.getJointControlParameters().getJointInitializationJointGains();
-
-            jointDesiredOutput.setStiffness(pdGainsReadOnly.getKp());
-            jointDesiredOutput.setDamping(pdGainsReadOnly.getKd());
-            jointDesiredOutput.setMaxPositionError(pdGainsReadOnly.getMaximumFeedback());
-            jointDesiredOutput.setMaxVelocityError(pdGainsReadOnly.getMaximumFeedbackRate());
-            jointDesiredOutput.setDesiredTorque(0.0);
-            jointDesiredOutput.setDesiredPosition(joint.getQ());
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
 
             initialized.set(i);
          }

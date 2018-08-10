@@ -5,8 +5,11 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.HeightMapFootSnapper;
@@ -20,7 +23,7 @@ import us.ihmc.tools.MemoryTools;
 public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
-   protected QuadrupedTestYoVariables variables;
+   protected QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -50,7 +53,6 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 
       setup(groundProfile);
 
-
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.requestXGait();
@@ -64,12 +66,11 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    private void setup(BumpyGroundProfile groundProfile) throws IOException
    {
       quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
-
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedTestYoVariables(conductor.getScs());
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
    }
 
@@ -96,7 +97,6 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.2);
       setup(groundProfile);
-
       stepTeleopManager.setStepSnapper(new HeightMapFootSnapper(groundProfile));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
