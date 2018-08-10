@@ -16,6 +16,12 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    {
       return new GenericQuadrupedTestFactory();
    }
+
+   @Override
+   public double getPacingWidth()
+   {
+      return 0.2;
+   }
    
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 630000)
@@ -133,55 +139,55 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    @Test(timeout = 630000)
    public void testPacingForwardFast()
    {
-      super.testFlatGroundWalking(0.0, 0.8);
+      super.testFlatGroundPacing(0.8);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 720000)
    public void testPacingForwardSlow()
    {
-      super.testFlatGroundWalking(0.0, 0.1);
+      super.testFlatGroundPacing(0.1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 460000)
    public void testPacingBackwardsFast()
    {
-      super.testFlatGroundWalking(0.0, -0.8);
+      super.testFlatGroundPacing(-0.8);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 670000)
    public void testPacingBackwardsSlow()
    {
-      super.testFlatGroundWalking(0.0, -0.1);
+      super.testFlatGroundPacing(-0.1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1100000)
    public void testPacingInAForwardLeftCircle()
    {
-      super.testWalkingInASemiCircle(0.0, 0.6, 0.3);
+      super.testPacingInASemiCircle(0.6, 0.3);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 246.9)
    @Test(timeout = 1200000)
    public void testPacingInAForwardRightCircle()
    {
-      super.testWalkingInASemiCircle(0.0, 0.6, - 0.3);
+      super.testPacingInASemiCircle(0.6, - 0.3);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1200000)
    public void testPacingInABackwardLeftCircle()
    {
-      super.testWalkingInASemiCircle(0.0, -0.6, - 0.3);
+      super.testPacingInASemiCircle(-0.6, - 0.3);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1500000)
    public void testPacingInABackwardRightCircle()
    {
-      super.testWalkingInASemiCircle(0.0, -0.6, 0.3);
+      super.testPacingInASemiCircle(-0.6, 0.3);
    }
 }
