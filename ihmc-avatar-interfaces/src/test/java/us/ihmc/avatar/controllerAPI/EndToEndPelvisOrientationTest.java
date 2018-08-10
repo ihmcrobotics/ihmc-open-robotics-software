@@ -123,7 +123,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-5;
+      double epsilon = 1.0e-4;
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
