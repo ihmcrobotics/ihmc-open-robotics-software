@@ -453,7 +453,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.2);
 
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setUseNetworking(true);
