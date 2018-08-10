@@ -28,13 +28,15 @@ public class SimpleWalkerICPPlannerTest
    SimpleWalkerICPPlanner icpPlanner = new SimpleWalkerICPPlanner(CoPs, stepTime, omega );
    ArrayList<Double> ICPs = icpPlanner.getICPKnotPoints();
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIfICPListIsSameSize()
    {
       Assert.assertEquals("CoP knots not equal length ICP knots", CoPs.size(),ICPs.size());
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public  void testIfICPsAreInFrontICPExceptLast()
    {
       for(int i=0; i<CoPs.size();i++)
@@ -50,7 +52,9 @@ public class SimpleWalkerICPPlannerTest
          }
       }
    }
-   @Test
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIfICPsAreBetweenAllCoPs()
    {
       for(int i =0; i<ICPs.size();i++)
@@ -58,7 +62,9 @@ public class SimpleWalkerICPPlannerTest
          Assert.assertTrue("ICPs have to lie between initial and final CoP", CoPs.get(0)<ICPs.get(i) && ICPs.get(i)<=CoPs.get(CoPs.size()-1));
       }
    }
-   @Test
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIfICPReferenceLiesBetweenICPPoints()
    {
 
