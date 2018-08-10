@@ -187,7 +187,7 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
       stepTeleopManager.getXGaitSettings().setStanceLength(0.7);
-      stepTeleopManager.setDesiredBodyHeight(0.55);
+//      stepTeleopManager.setDesiredBodyHeight(0.55);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
