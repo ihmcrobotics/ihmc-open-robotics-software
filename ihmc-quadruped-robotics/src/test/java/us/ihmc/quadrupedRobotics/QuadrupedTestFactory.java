@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -19,7 +20,7 @@ public interface QuadrupedTestFactory
 
    public QuadrupedTeleopManager getStepTeleopManager();
 
-   public void setControlMode(QuadrupedControlMode controlMode);
+   public void setControlMode(WholeBodyControllerCoreMode controlMode);
 
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType);
    

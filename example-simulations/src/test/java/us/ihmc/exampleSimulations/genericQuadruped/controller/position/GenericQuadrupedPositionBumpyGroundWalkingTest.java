@@ -6,15 +6,15 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlTurning360Test;
+import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionBumpyGroundWalkingTest;
+import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionTurning720Test;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
-public class GenericQuadrupedPositionCrawlTurning360Test extends QuadrupedPositionCrawlTurning360Test
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+public class GenericQuadrupedPositionBumpyGroundWalkingTest extends QuadrupedPositionBumpyGroundWalkingTest
 {
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
@@ -23,18 +23,10 @@ public class GenericQuadrupedPositionCrawlTurning360Test extends QuadrupedPositi
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 800000)
-   public void rotate360InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
+   @ContinuousIntegrationTest(estimatedDuration = 370.6)
+   @Test(timeout = 1900000)
+   public void testWalkingOverBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      super.rotate360InPlaceRight();
-   }
-   
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 800000)
-   public void rotate360InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
-   {
-      super.rotate360InPlaceLeft();
+      super.testWalkingOverBumpyTerrain();
    }
 }
