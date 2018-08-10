@@ -130,6 +130,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
+   private final DoubleProvider unloadFraction = new DoubleParameter("unloadFraction", registry, 0.5);
+
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -256,7 +258,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
                                                                                                      managerFactory, walkingControllerParameters,
                                                                                                      failureDetectionControlModule, minimumTransferTime,
-                                                                                                     registry);
+                                                                                                     unloadFraction, registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
@@ -279,7 +281,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoTransferState(transferToSide);
          TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(stateEnum, walkingControllerParameters, walkingMessageHandler,
                                                                                          controllerToolbox, managerFactory, failureDetectionControlModule,
-                                                                                         registry);
+                                                                                         null, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }

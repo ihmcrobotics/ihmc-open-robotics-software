@@ -50,7 +50,7 @@ public class MotionQPInputCalculatorTest
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 
-      MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
+      QPInput motionQPInput = new QPInput(numberOfDoFs);
       SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
       spatialAccelerationCommand.set(rootBody, endEffector);
       spatialAccelerationCommand.setWeight(random.nextDouble());
