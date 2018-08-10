@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -99,7 +98,7 @@ public class InverseKinematicsQPSolver
       for (int i = 0; i < numberOfDoFs; i++)
       {
          solverInput_H.add(i, i, 1.0 / factor);
-         solverInput_f.add(i, 0, -solverOutput.get(i, 0) / factor);
+         solverInput_f.add(i, 0, -desiredJointVelocities.get(i, 0) / factor);
       }
    }
 
