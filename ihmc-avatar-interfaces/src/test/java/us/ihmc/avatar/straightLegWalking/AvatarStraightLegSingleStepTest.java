@@ -151,15 +151,20 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
    {
       setupTest();
 
+      Point3D step1 = new Point3D(0.0, -stepWidth, 0.0);
+      Point3D step2 = new Point3D(0.0, stanceWidth - stepWidth, 0.0);
+
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -stepWidth, 0.0), new FrameQuaternion()));
-      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, stanceWidth - stepWidth, 0.0), new FrameQuaternion()));
+      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, step1, new FrameQuaternion()));
+      footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, step2, new FrameQuaternion()));
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
 
-      Point3D center = new Point3D(0.0, 0.5 * stanceWidth - stepWidth, 1.05);
+      Point3D center = new Point3D();
+      center.interpolate(step1, step2, 0.5);
+      center.addZ(1.0);
       Vector3D plusMinusVector = new Vector3D(0.1, stanceWidth / 2.0, 0.1);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);

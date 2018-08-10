@@ -351,8 +351,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
    public void testSteppingDown(double stepDownHeight, double stepLength, int stepsBeforeDrop) throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-
       double dropHeight = -stepDownHeight;
 
       int numberOfDrops = 4;
