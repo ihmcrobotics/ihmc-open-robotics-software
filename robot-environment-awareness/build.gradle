@@ -28,7 +28,7 @@ mainDependencies {
    compile group: "com.vividsolutions", name: "jts", version: "1.13"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
    compile group: "us.ihmc", name: "euclid", version: "0.8.2"
-   compile group: "us.ihmc", name: "joctomap", version: "1.6.7"
+   compile group: "us.ihmc", name: "joctomap", version: "1.6.8"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.1"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.4'
    
