@@ -30,4 +30,4 @@ Fill in the class to look like the following:
 <pre><code data-url-index="0" data-snippet="complete" id="ValkyrieDemo"></code></pre>
 
 
-<script id="snippetscript" src="https://cdn.rawgit.com/ihmcrobotics/ihmcrobotics.github.io/a6a5d7c6/snippetautomation/codesnippets.js" sources=Array.of("https://rawgit.com/ihmcroboticsdocs/sampleproject/master/src/us/ihmc/testeuclid/ValkyrieDemo.java")></script>
+<script id="snippetscript" src="https://cdn.rawgit.com/ihmcrobotics/ihmcrobotics.github.io/source/websitedocs/website/static/snippetautomation/codesnippets.js" sources=Array.of("https://rawgit.com/ihmcroboticsdocs/sampleproject/master/src/us/ihmc/testeuclid/ValkyrieDemo.java")></script>
