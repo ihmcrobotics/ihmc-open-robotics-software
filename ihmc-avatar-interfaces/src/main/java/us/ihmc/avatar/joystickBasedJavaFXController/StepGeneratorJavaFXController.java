@@ -67,6 +67,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
@@ -105,20 +106,13 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<Double> trajectoryDuration;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
-   private final double footLength, inPlaceStepWidth, maxStepLength, maxStepWidth, maxAngleTurnInwards, maxAngleTurnOutwards;
+   private final double inPlaceStepWidth, maxStepLength, maxStepWidth, maxAngleTurnInwards, maxAngleTurnOutwards;
 
    private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
    private final DoubleProvider stepTime;
-
-   private static final double wiggleInWrongDirectionThreshold = 0.04;
-   private static final double closestDistanceToCliff = 0.05;
-   private static final double cliffHeightToAvoid = 0.05;
-   private static final double wiggleInsideDelta = 0.03;
-   private static final double maxPlanarRegionAngle = Math.toRadians(25.0); // 0 degrees being a vertical normal
-   private static final double minPlanarRegionArea = 0.1;
 
    public enum SecondaryControlOption
    {
@@ -134,7 +128,7 @@ public class StepGeneratorJavaFXController
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    private final AtomicReference<PlanarRegionsList> latestPlanarRegions = new AtomicReference<>(null);
-   private final SnapAndWiggleSingleStep snapAndWiggleSingleStep = new SnapAndWiggleSingleStep();
+   private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
 
@@ -156,14 +150,11 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      footLength = steppingParameters.getFootLength();
       inPlaceStepWidth = steppingParameters.getInPlaceWidth();
       maxStepLength = steppingParameters.getMaxStepLength();
       maxStepWidth = steppingParameters.getMaxStepWidth();
       maxAngleTurnInwards = steppingParameters.getMaxAngleTurnInwards();
       maxAngleTurnOutwards = steppingParameters.getMaxAngleTurnOutwards();
-
-      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = wiggleInsideDelta;
 
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
@@ -181,6 +172,10 @@ public class StepGeneratorJavaFXController
       transferDuration = messager.createInput(WalkingTransferDuration, walkingControllerParameters.getDefaultTransferTime());
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
       stepTime = () -> swingDuration.get() + transferDuration.get();
+
+      SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+      parameters.setFootLength(steppingParameters.getFootLength());
+      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
 
       animationTimer = new AnimationTimer()
       {
@@ -232,47 +227,23 @@ public class StepGeneratorJavaFXController
 
    private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
    {
-      FramePose3D result = null;
-
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
-      result = adjustedBasedOnStanceFoot;
 
       PlanarRegionsList planarRegionsList = latestPlanarRegions.get();
 
       if (planarRegionsList != null)
       {
-         planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getConvexHull().getArea() < minPlanarRegionArea);
-         planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getNormal().getZ() < Math.cos(maxPlanarRegionAngle));
-
-         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
-         if (isOnBoundaryOfPlanarRegions(planarRegionsList, footPolygonToWiggle, wiggledPose))
-         {
-            /*
-             * If foot is on the boundary of planar regions, don't snap/wiggle but
-             * set it to the nearest plane's height
-             */
-            FramePoint2DReadOnly footPosition = footstepPose.getPosition();
-            PlanarRegion closestRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition);
-            result.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
-            return result;
-         }
-
          snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+         footPolygonToWiggle.set(footPolygons.get(footSide));
          try
          {
-            footPolygonToWiggle.set(footPolygons.get(footSide));
-            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle);
-            if (!wiggledPose.containsNaN())
-            {
-               result = checkAndHandleTopOfCliff(adjustedBasedOnStanceFoot, wiggledPose, footSide);
-               result = checkAndHandleBottomOfCliff(planarRegionsList, result);
-            }
+            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocityProperty.get() > 0.0);
          }
-         catch (SnappingFailedException e)
+         catch(SnappingFailedException e)
          {
             /*
              * It's fine if the snap & wiggle fails, can be because there no
@@ -280,94 +251,12 @@ public class StepGeneratorJavaFXController
              * footstep based on the pose of the current stance foot.
              */
          }
-      }
-
-      return result;
-   }
-
-   private final PoseReferenceFrame planarRegionFrame = new PoseReferenceFrame("PlanarRegionFrame", ReferenceFrame.getWorldFrame());
-   private final FrameConvexPolygon2D planarRegionPolygon = new FrameConvexPolygon2D();
-   private final ConvexPolygon2D planarRegionsBoundingPolygon = new ConvexPolygon2D();
-
-   private boolean isOnBoundaryOfPlanarRegions(PlanarRegionsList planarRegionsList, ConvexPolygon2D footPolygon, FramePose3D solePose)
-   {
-      planarRegionsBoundingPolygon.clear();
-      for(PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
-      {
-         RigidBodyTransform transform = new RigidBodyTransform();
-         region.getTransformToWorld(transform);
-         planarRegionFrame.setPoseAndUpdate(transform);
-
-         planarRegionPolygon.set(region.getConvexHull());
-         planarRegionPolygon.setReferenceFrame(planarRegionFrame);
-         planarRegionPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-
-         planarRegionsBoundingPolygon.addVertices(planarRegionPolygon);
-      }
-      planarRegionsBoundingPolygon.update();
-
-      PoseReferenceFrame soleFrame = new PoseReferenceFrame("SoleFrame", solePose);
-      FrameConvexPolygon2D footPolygonInWorld = new FrameConvexPolygon2D(soleFrame, footPolygon);
-      footPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-      for (int i = 0; i < footPolygonInWorld.getNumberOfVertices(); i++)
-      {
-         if (!planarRegionsBoundingPolygon.isPointInside(footPolygonInWorld.getVertex(i)))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   // method to help step generator step down from cinder blocks
-   private FramePose3D checkAndHandleTopOfCliff(FramePose3D inputPose, FramePose3D outputPose, RobotSide footSide) throws SnappingFailedException
-   {
-      double yaw = inputPose.getYaw();
-      double forwardVelocity = forwardVelocityProperty.get();
-      Vector2D desiredHeading = new Vector2D(Math.cos(yaw) * forwardVelocity, Math.sin(yaw) * forwardVelocity);
-      desiredHeading.normalize();
-
-      Vector2D achievedHeading = new Vector2D(outputPose.getX() - inputPose.getX(), outputPose.getY() - inputPose.getY());
-      double projectionScale = achievedHeading.dot(desiredHeading);
-
-      if(projectionScale < - wiggleInWrongDirectionThreshold)
-      {
-         FramePose3D shiftedPose = new FramePose3D(inputPose);
-         desiredHeading.scale(footLength + snapAndWiggleSingleStep.getWiggleParameters().deltaInside);
-         shiftedPose.prependTranslation(desiredHeading.getX(), desiredHeading.getY(), 0.0);
-         snapAndWiggleSingleStep.snapAndWiggle(shiftedPose, footPolygons.get(footSide));
-         return shiftedPose;
+         return wiggledPose;
       }
       else
       {
-         return outputPose;
+         return null;
       }
-   }
-
-   private FramePose3D checkAndHandleBottomOfCliff(PlanarRegionsList planarRegionsList, FramePose3D footPose)
-   {
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      footPose.get(soleTransform);
-
-      ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
-      lineSegmentsInSoleFrame.add(new LineSegment2D(0.5 * footLength, 0.0, 0.5 * footLength + closestDistanceToCliff, 0.0));
-      lineSegmentsInSoleFrame.add(new LineSegment2D(-0.5 * footLength, 0.0, -0.5 * footLength - closestDistanceToCliff, 0.0));
-
-      Point3D highestPointInSoleFrame = new Point3D();
-      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
-      Point3D closestPointOnCliff = new Point3D();
-      double highestPointZ = PlanarRegionBaseOfCliffAvoider.findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, closestPointOnCliff);
-
-      if(highestPointZ > cliffHeightToAvoid)
-      {
-         double shiftSign = Math.signum(- closestPointOnCliff.getX());
-         double shiftAmount = shiftSign * (closestDistanceToCliff - (Math.abs(closestPointOnCliff.getX()) - 0.5 * footLength));
-
-         double footstepYaw = footPose.getYaw();
-         footPose.prependTranslation(shiftAmount * Math.cos(footstepYaw), shiftAmount * Math.sin(footstepYaw), 0.0);
-      }
-
-      return footPose;
    }
 
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
