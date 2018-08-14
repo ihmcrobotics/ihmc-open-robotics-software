@@ -16,6 +16,7 @@ import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXControll
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.RightStickXAxis;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,16 +51,20 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -109,6 +114,8 @@ public class StepGeneratorJavaFXController
    private final DoubleProvider stepTime;
 
    private static final double wiggleInWrongDirectionThreshold = 0.04;
+   private static final double closestDistanceToCliff = 0.05;
+   private static final double cliffHeightToAvoid = 0.05;
 
    public enum SecondaryControlOption
    {
@@ -153,7 +160,7 @@ public class StepGeneratorJavaFXController
       maxAngleTurnInwards = steppingParameters.getMaxAngleTurnInwards();
       maxAngleTurnOutwards = steppingParameters.getMaxAngleTurnOutwards();
       
-      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = 0.01;
+      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = 0.05;
 
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
@@ -255,6 +262,7 @@ public class StepGeneratorJavaFXController
             if (!wiggledPose.containsNaN())
             {
                result = checkAndHandleTopOfCliff(adjustedBasedOnStanceFoot, wiggledPose, footSide);
+               result = checkAndHandleBottomOfCliff(planarRegionsList, wiggledPose, footPolygons.get(footSide));
             }
          }
          catch (SnappingFailedException e)
@@ -327,6 +335,32 @@ public class StepGeneratorJavaFXController
       {
          return outputPose;
       }
+   }
+
+   private FramePose3D checkAndHandleBottomOfCliff(PlanarRegionsList planarRegionsList, FramePose3D footPose, ConvexPolygon2DReadOnly footPolygon)
+   {
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      footPose.get(soleTransform);
+
+      ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
+      lineSegmentsInSoleFrame.add(new LineSegment2D(0.5 * footLength, 0.0, 0.5 * footLength + closestDistanceToCliff, 0.0));
+      lineSegmentsInSoleFrame.add(new LineSegment2D(-0.5 * footLength, 0.0, -0.5 * footLength - closestDistanceToCliff, 0.0));
+
+      Point3D highestPointInSoleFrame = new Point3D();
+      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
+      Point3D closestPointOnCliff = new Point3D();
+      double highestPointZ = PlanarRegionBaseOfCliffAvoider.findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, closestPointOnCliff);
+
+      if(highestPointZ > cliffHeightToAvoid)
+      {
+         double shiftSign = Math.signum(- closestPointOnCliff.getX());
+         double shiftAmount = shiftSign * (closestDistanceToCliff - (Math.abs(closestPointOnCliff.getX()) - 0.5 * footLength));
+
+         double footstepYaw = footPose.getYaw();
+         footPose.prependTranslation(shiftAmount * Math.cos(footstepYaw), shiftAmount * Math.sin(footstepYaw), 0.0);
+      }
+
+      return footPose;
    }
 
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
