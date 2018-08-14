@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -13,6 +15,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOptimizationPushRecoveryTestSetup
 {
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
       //setupTest(getScript());
@@ -21,6 +25,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
@@ -37,6 +43,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createSlowForwardWalkingFootstepMessage());
@@ -55,6 +63,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
@@ -73,6 +83,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -125,6 +137,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(success);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationRandomPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
@@ -146,6 +160,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+
+
    public void testPushICPOptimizationLongForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
@@ -163,6 +181,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationLongBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
