@@ -3,6 +3,8 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
@@ -75,6 +77,8 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2000000)
    public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();

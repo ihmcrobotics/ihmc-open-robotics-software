@@ -6,6 +6,8 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -94,6 +96,8 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

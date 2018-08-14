@@ -94,7 +94,6 @@ public class ValueDataCheckerParametersTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   
    public void testMinimumValue()
    {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
