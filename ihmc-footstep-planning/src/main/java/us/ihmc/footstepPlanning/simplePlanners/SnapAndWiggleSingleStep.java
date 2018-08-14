@@ -6,8 +6,12 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
@@ -15,6 +19,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
@@ -22,29 +27,60 @@ public class SnapAndWiggleSingleStep
 {
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private PlanarRegionsList planarRegionsList;
+   private final SnapAndWiggleSingleStepParameters parameters;
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
+   public SnapAndWiggleSingleStep(SnapAndWiggleSingleStepParameters parameters)
+   {
+      this.parameters = parameters;
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+   }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
    }
 
-   public ConvexPolygon2D snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon) throws SnappingFailedException
+   public ConvexPolygon2D snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, boolean walkingForward) throws SnappingFailedException
    {
-
       if (planarRegionsList == null)
       {
          return null;
       }
 
+      planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getConvexHull().getArea() < parameters.getMinPlanarRegionArea());
+      planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getNormal().getZ() < Math.cos(parameters.getMaxPlanarRegionAngle()));
+
+      FramePose3D solePoseBeforeSnapping = new FramePose3D(solePose);
       PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
       FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D(soleFrameBeforeSnapping, footStepPolygon);
       footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
+      if(isOnBoundaryOfPlanarRegions(planarRegionsList, footPolygon))
+      {
+         /*
+          * If foot is on the boundary of planar regions, don't snap/wiggle but
+          * set it to the nearest plane's height
+          */
+         FixedFramePoint3DBasics footPosition = solePose.getPosition();
+         PlanarRegion closestRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
+         solePose.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
+         return new ConvexPolygon2D(footStepPolygon);
+      }
+
+      ConvexPolygon2D foothold = doSnapAndWiggle(solePose, footStepPolygon, footPolygon);
+      checkAndHandleTopOfCliff(solePoseBeforeSnapping, solePose, walkingForward, footStepPolygon, footPolygon);
+      checkAndHandleBottomOfCliff(solePose);
+
+      return foothold;
+   }
+
+   private ConvexPolygon2D doSnapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
+         throws SnappingFailedException
+   {
       PlanarRegion regionToMoveTo = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList,
-                                                                                                        regionToMoveTo);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, regionToMoveTo);
       if (snapTransform == null)
       {
          throw new SnappingFailedException();
@@ -74,25 +110,117 @@ public class SnapAndWiggleSingleStep
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      // fix the foothold
-      if (wiggleParameters.deltaInside != 0.0)
+      // check for partial foothold
+      ConvexPolygon2D foothold = new ConvexPolygon2D();
+      if (wiggleParameters.deltaInside < 0.0)
       {
          PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
          footPolygonInRegion.set(footStepPolygon);
          footPolygonInRegion.applyTransform(soleToRegion, false);
-         ConvexPolygon2D foothold = new ConvexPolygon2D();
          convexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion, foothold);
          soleToRegion.invert();
          foothold.applyTransform(soleToRegion, false);
-         return foothold;
       }
-      return null;
+      else
+      {
+         foothold.set(footPolygon);
+      }
+      return foothold;
    }
 
-   public WiggleParameters getWiggleParameters()
+   private boolean isOnBoundaryOfPlanarRegions(PlanarRegionsList planarRegionsList, FrameConvexPolygon2D footPolygonInWorld)
    {
-      return wiggleParameters;
+      PoseReferenceFrame planarRegionFrame = new PoseReferenceFrame("PlanarRegionFrame", ReferenceFrame.getWorldFrame());
+      FrameConvexPolygon2D planarRegionPolygon = new FrameConvexPolygon2D();
+      ConvexPolygon2D planarRegionsBoundingPolygon = new ConvexPolygon2D();
+
+      planarRegionsBoundingPolygon.clear();
+      for(PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
+      {
+         RigidBodyTransform transform = new RigidBodyTransform();
+         region.getTransformToWorld(transform);
+         planarRegionFrame.setPoseAndUpdate(transform);
+
+         planarRegionPolygon.set(region.getConvexHull());
+         planarRegionPolygon.setReferenceFrame(planarRegionFrame);
+         planarRegionPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+         planarRegionsBoundingPolygon.addVertices(planarRegionPolygon);
+      }
+      planarRegionsBoundingPolygon.update();
+
+      for (int i = 0; i < footPolygonInWorld.getNumberOfVertices(); i++)
+      {
+         if (!planarRegionsBoundingPolygon.isPointInside(footPolygonInWorld.getVertex(i)))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   // method to avoid getting stuck at the top of a ledge
+   private void checkAndHandleTopOfCliff(FramePose3D inputPose, FramePose3D outputPose, boolean walkingForward, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
+   {
+      if(Double.isNaN(parameters.getFootLength()) || parameters.getWiggleInWrongDirectionThreshold() <= 0.0)
+      {
+         return;
+      }
+
+      double yaw = inputPose.getYaw();
+      double desiredForwardHeading = walkingForward ? 1.0 : -1.0;
+      Vector2D desiredHeading = new Vector2D(Math.cos(yaw) * desiredForwardHeading, Math.sin(yaw) * desiredForwardHeading);
+      Vector2D achievedHeading = new Vector2D(outputPose.getX() - inputPose.getX(), outputPose.getY() - inputPose.getY());
+      double projectionScale = achievedHeading.dot(desiredHeading);
+
+      if(projectionScale < - parameters.getWiggleInWrongDirectionThreshold())
+      {
+         FramePose3D shiftedPose = new FramePose3D(inputPose);
+         desiredHeading.scale(parameters.getFootLength() + wiggleParameters.deltaInside);
+         shiftedPose.prependTranslation(desiredHeading.getX(), desiredHeading.getY(), 0.0);
+         outputPose.set(shiftedPose);
+         try
+         {
+            doSnapAndWiggle(outputPose, footStepPolygon, footPolygon);
+         }
+         catch(SnappingFailedException e)
+         {
+         }
+      }
+   }
+
+   private void checkAndHandleBottomOfCliff(FramePose3D footPose)
+   {
+      if (Double.isNaN(parameters.getFootLength()) || parameters.getCliffHeightToAvoid() <= 0.0 || parameters.getClosestDistanceToCliff() <= 0.0)
+      {
+         return;
+      }
+
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      footPose.get(soleTransform);
+
+      ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
+      lineSegmentsInSoleFrame
+            .add(new LineSegment2D(0.5 * parameters.getFootLength(), 0.0, 0.5 * parameters.getFootLength() + parameters.getClosestDistanceToCliff(), 0.0));
+      lineSegmentsInSoleFrame
+            .add(new LineSegment2D(-0.5 * parameters.getFootLength(), 0.0, -0.5 * parameters.getFootLength() - parameters.getClosestDistanceToCliff(), 0.0));
+
+      Point3D highestPointInSoleFrame = new Point3D();
+      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
+      Point3D closestPointOnCliff = new Point3D();
+      double highestPointZ = PlanarRegionBaseOfCliffAvoider
+            .findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame,
+                                     closestPointOnCliff);
+
+      if (highestPointZ > parameters.getCliffHeightToAvoid())
+      {
+         double shiftSign = Math.signum(-closestPointOnCliff.getX());
+         double shiftAmount = shiftSign * (parameters.getClosestDistanceToCliff() - (Math.abs(closestPointOnCliff.getX()) - 0.5 * parameters.getFootLength()));
+
+         double footstepYaw = footPose.getYaw();
+         footPose.prependTranslation(shiftAmount * Math.cos(footstepYaw), shiftAmount * Math.sin(footstepYaw), 0.0);
+      }
    }
 
    public static class SnappingFailedException extends Exception
@@ -101,23 +229,7 @@ public class SnapAndWiggleSingleStep
 
       private SnappingFailedException()
       {
-         super("Foot Snapping_Failed");
+         super("Foot Snapping Failed");
       }
-   }
-
-   public static void main(String[] args)
-   {
-      PoseReferenceFrame bot1 = new PoseReferenceFrame("bot1", ReferenceFrame.getWorldFrame());
-      bot1.setPositionWithoutChecksAndUpdate(0, 2, 0);
-
-      PoseReferenceFrame bot2 = new PoseReferenceFrame("bot2", ReferenceFrame.getWorldFrame());
-      bot2.setPositionWithoutChecksAndUpdate(0, -3, 0);
-
-
-      bot1.update();
-      bot2.update();
-      RigidBodyTransform transform = bot1.getTransformToDesiredFrame(bot2);
-
-      System.out.println(transform);
    }
 }
