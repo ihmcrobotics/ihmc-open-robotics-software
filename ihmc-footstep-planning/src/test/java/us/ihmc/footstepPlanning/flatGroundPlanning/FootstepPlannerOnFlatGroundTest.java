@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +27,8 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       testJustStraightLine(true);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustStraightLine(boolean assertPlannerReturnedResult)
    {
       double xGoal = 5.0;
