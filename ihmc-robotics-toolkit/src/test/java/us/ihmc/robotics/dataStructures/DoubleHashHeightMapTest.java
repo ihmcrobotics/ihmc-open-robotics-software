@@ -164,6 +164,8 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(1.3, points.get(0).getZ(), eps);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOverridingOriginOld(HeightMapWithPoints simpleMap)
    {
       double x;

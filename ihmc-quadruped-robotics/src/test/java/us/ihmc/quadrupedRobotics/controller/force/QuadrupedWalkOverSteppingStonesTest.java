@@ -3,8 +3,10 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -53,6 +55,8 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuouIntegrationTest(estimatedDuration = 103.5)
+   @Test(timeout = 520000)
    public void testWalkOverSteppingStones() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       SteppingStonesEnvironment environment = new SteppingStonesEnvironment();
