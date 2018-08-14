@@ -488,7 +488,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
-         return getTransferDuration(0);
+         return isStanding.getValue() ? 0.0: getTransferDuration(0);
       else
          return getSwingDuration(0);
    }
