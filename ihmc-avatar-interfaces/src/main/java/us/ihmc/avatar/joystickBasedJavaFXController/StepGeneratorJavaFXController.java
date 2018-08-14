@@ -49,10 +49,14 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -64,7 +68,9 @@ import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
@@ -94,13 +100,15 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<Double> trajectoryDuration;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
-   private final double inPlaceStepWidth, maxStepLength, maxStepWidth, maxAngleTurnInwards, maxAngleTurnOutwards;
+   private final double footLength, inPlaceStepWidth, maxStepLength, maxStepWidth, maxAngleTurnInwards, maxAngleTurnOutwards;
 
    private final AtomicBoolean isLeftFootInSupport = new AtomicBoolean(false);
    private final AtomicBoolean isRightFootInSupport = new AtomicBoolean(false);
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
    private final DoubleProvider stepTime;
+
+   private static final double wiggleInWrongDirectionThreshold = 0.04;
 
    public enum SecondaryControlOption
    {
@@ -118,6 +126,7 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<PlanarRegionsList> latestPlanarRegions = new AtomicReference<>(null);
    private final SnapAndWiggleSingleStep snapAndWiggleSingleStep = new SnapAndWiggleSingleStep();
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+   private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
 
    public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
@@ -137,11 +146,14 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      footLength = steppingParameters.getFootLength();
       inPlaceStepWidth = steppingParameters.getInPlaceWidth();
       maxStepLength = steppingParameters.getMaxStepLength();
       maxStepWidth = steppingParameters.getMaxStepWidth();
       maxAngleTurnInwards = steppingParameters.getMaxAngleTurnInwards();
       maxAngleTurnOutwards = steppingParameters.getMaxAngleTurnOutwards();
+      
+      snapAndWiggleSingleStep.getWiggleParameters().deltaInside = 0.01;
 
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
@@ -214,7 +226,7 @@ public class StepGeneratorJavaFXController
 
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
-      adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ() - 0.02);
+      adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
       result = adjustedBasedOnStanceFoot;
 
@@ -222,13 +234,28 @@ public class StepGeneratorJavaFXController
 
       if (planarRegionsList != null)
       {
-         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
+         if (isOnBoundaryOfPlanarRegions(planarRegionsList, footPolygonToWiggle, wiggledPose))
+         {
+            /*
+             * If foot is on the boundary of planar regions, don't snap/wiggle but
+             * set it to the nearest plane's height
+             */
+            FramePoint2DReadOnly footPosition = footstepPose.getPosition();
+            PlanarRegion closestRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition);
+            result.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
+            return result;
+         }
+
+         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
          try
          {
-            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygons.get(footSide));
+            footPolygonToWiggle.set(footPolygons.get(footSide));
+            snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle);
             if (!wiggledPose.containsNaN())
-               result = wiggledPose;
+            {
+               result = checkAndHandleTopOfCliff(adjustedBasedOnStanceFoot, wiggledPose, footSide);
+            }
          }
          catch (SnappingFailedException e)
          {
@@ -241,6 +268,65 @@ public class StepGeneratorJavaFXController
       }
 
       return result;
+   }
+
+   private final PoseReferenceFrame planarRegionFrame = new PoseReferenceFrame("PlanarRegionFrame", ReferenceFrame.getWorldFrame());
+   private final FrameConvexPolygon2D planarRegionPolygon = new FrameConvexPolygon2D();
+   private final ConvexPolygon2D planarRegionsBoundingPolygon = new ConvexPolygon2D();
+
+   private boolean isOnBoundaryOfPlanarRegions(PlanarRegionsList planarRegionsList, ConvexPolygon2D footPolygon, FramePose3D solePose)
+   {
+      planarRegionsBoundingPolygon.clear();
+      for(PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
+      {
+         RigidBodyTransform transform = new RigidBodyTransform();
+         region.getTransformToWorld(transform);
+         planarRegionFrame.setPoseAndUpdate(transform);
+
+         planarRegionPolygon.set(region.getConvexHull());
+         planarRegionPolygon.setReferenceFrame(planarRegionFrame);
+         planarRegionPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+         planarRegionsBoundingPolygon.addVertices(planarRegionPolygon);
+      }
+      planarRegionsBoundingPolygon.update();
+
+      PoseReferenceFrame soleFrame = new PoseReferenceFrame("SoleFrame", solePose);
+      FrameConvexPolygon2D footPolygonInWorld = new FrameConvexPolygon2D(soleFrame, footPolygon);
+      footPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      for (int i = 0; i < footPolygonInWorld.getNumberOfVertices(); i++)
+      {
+         if (!planarRegionsBoundingPolygon.isPointInside(footPolygonInWorld.getVertex(i)))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   // method to help step generator step down from cinder blocks
+   private FramePose3D checkAndHandleTopOfCliff(FramePose3D inputPose, FramePose3D outputPose, RobotSide footSide) throws SnappingFailedException
+   {
+      double yaw = inputPose.getYaw();
+      double forwardVelocity = forwardVelocityProperty.get();
+      Vector2D desiredHeading = new Vector2D(Math.cos(yaw) * forwardVelocity, Math.sin(yaw) * forwardVelocity);
+      desiredHeading.normalize();
+
+      Vector2D achievedHeading = new Vector2D(outputPose.getX() - inputPose.getX(), outputPose.getY() - inputPose.getY());
+      double projectionScale = achievedHeading.dot(desiredHeading);
+
+      if(projectionScale < - wiggleInWrongDirectionThreshold)
+      {
+         FramePose3D shiftedPose = new FramePose3D(inputPose);
+         desiredHeading.scale(footLength);
+         shiftedPose.prependTranslation(desiredHeading.getX(), desiredHeading.getY(), 0.0);
+         snapAndWiggleSingleStep.snapAndWiggle(shiftedPose, footPolygons.get(footSide));
+         return shiftedPose;
+      }
+      else
+      {
+         return outputPose;
+      }
    }
 
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)

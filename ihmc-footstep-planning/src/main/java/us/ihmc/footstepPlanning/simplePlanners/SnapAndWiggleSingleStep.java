@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
@@ -13,6 +15,8 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+
+import java.util.ArrayList;
 
 public class SnapAndWiggleSingleStep
 {
@@ -40,13 +44,13 @@ public class SnapAndWiggleSingleStep
 
       PlanarRegion regionToMoveTo = new PlanarRegion();
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList,
-            regionToMoveTo);
+                                                                                                        regionToMoveTo);
       if (snapTransform == null)
       {
          throw new SnappingFailedException();
       }
-      solePose.setZ(0.0);
 
+      solePose.setZ(0.0);
       solePose.applyTransform(snapTransform);
 
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
@@ -59,14 +63,7 @@ public class SnapAndWiggleSingleStep
       ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
       footPolygonInRegion.applyTransform(soleToRegion, false);
 
-      // TODO: make the delta inside value part of the optimization.
-      wiggleParameters.deltaInside = 0.0;
       RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
-      if (wiggleTransform == null)
-      {
-         wiggleParameters.deltaInside = -0.055;
-         wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
-      }
 
       if (wiggleTransform == null)
          solePose.setToNaN();
@@ -93,6 +90,11 @@ public class SnapAndWiggleSingleStep
       return null;
    }
 
+   public WiggleParameters getWiggleParameters()
+   {
+      return wiggleParameters;
+   }
+
    public static class SnappingFailedException extends Exception
    {
       private static final long serialVersionUID = 6962526781987562540L;
@@ -102,20 +104,20 @@ public class SnapAndWiggleSingleStep
          super("Foot Snapping_Failed");
       }
    }
-   
+
    public static void main(String[] args)
    {
       PoseReferenceFrame bot1 = new PoseReferenceFrame("bot1", ReferenceFrame.getWorldFrame());
       bot1.setPositionWithoutChecksAndUpdate(0, 2, 0);
-      
+
       PoseReferenceFrame bot2 = new PoseReferenceFrame("bot2", ReferenceFrame.getWorldFrame());
       bot2.setPositionWithoutChecksAndUpdate(0, -3, 0);
-      
-      
+
+
       bot1.update();
       bot2.update();
       RigidBodyTransform transform = bot1.getTransformToDesiredFrame(bot2);
-      
+
       System.out.println(transform);
    }
 }
