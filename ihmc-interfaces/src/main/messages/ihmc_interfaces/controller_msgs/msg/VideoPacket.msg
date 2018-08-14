@@ -12,7 +12,7 @@ uint32 sequence_id
 
 byte video_source 255
 int64 timestamp
-byte[<=131072] data
+byte[<=262144] data
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
 IntrinsicParametersMessage intrinsic_parameters
