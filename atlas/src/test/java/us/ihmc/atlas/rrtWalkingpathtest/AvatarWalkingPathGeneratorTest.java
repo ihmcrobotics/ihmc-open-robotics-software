@@ -11,11 +11,13 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -168,6 +170,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 37.0)
+   @Test(timeout = 190000)
    public void testOne() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       // ******************************** //
