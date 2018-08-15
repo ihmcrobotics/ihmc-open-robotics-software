@@ -620,4 +620,9 @@ public class KinematicsToolboxController extends ToolboxController
    {
       return inverseKinematicsSolution;
    }
+
+   public FeedbackControllerDataReadOnly getFeedbackControllerDataHolder()
+   {
+      return feedbackControllerDataHolder;
+   }
 }

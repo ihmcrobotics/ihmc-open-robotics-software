@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.7"
+      classpath "us.ihmc:ihmc-build:0.14.0"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -72,7 +72,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "robotiq-hand-drivers", version: "source"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.4"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.5"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.1"

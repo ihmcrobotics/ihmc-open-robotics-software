@@ -48,4 +48,12 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
    {
       super.testSingleWaypointThenManualChange();
    }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 42.4)
+   @Test(timeout = 210000)
+   public void testStopAllTrajectory() throws Exception
+   {
+      super.testStopAllTrajectory();
+   }
 }

@@ -221,7 +221,7 @@ public class LogCompressorUI extends JFrame
       progressMonitor.setEchoToConsole(true);
       final File logDirectory = sourceFile.getParentFile();
       final LogPropertiesReader logProperties = new LogPropertiesReader(new File(logDirectory, YoVariableLoggerListener.propertyFile));
-      new Thread()
+      new Thread("IHMC-LogCompressor")
       {
          @Override
          public void run()
@@ -291,7 +291,7 @@ public class LogCompressorUI extends JFrame
       progressMonitor.setEchoToConsole(true);
       final File logDirectory = sourceFile.getParentFile();
       final LogPropertiesReader logProperties = new LogPropertiesReader(new File(logDirectory, YoVariableLoggerListener.propertyFile));
-      new Thread()
+      new Thread("IHMC-LogCompressor")
       {
          @Override
          public void run()

@@ -25,7 +25,7 @@ module controller_msgs
         sequence<controller_msgs::msg::dds::FootstepDataMessage> path_plan;
         sequence<boolean> footstep_unknown;
         double sub_optimality;
-        @defaultValue(value=inf)
+        @defaultValue(value=1000000.0)
         double path_cost;
       };
     };

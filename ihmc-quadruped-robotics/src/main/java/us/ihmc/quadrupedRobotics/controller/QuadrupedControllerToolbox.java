@@ -11,6 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
+import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -20,19 +21,30 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.awt.*;
 import java.util.List;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class QuadrupedControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
+
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
+   private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
+   private final QuadrantDependentList<YoFramePoint3D> upcomingGroundPlanePositions;
+
+
    private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -54,6 +66,7 @@ public class QuadrupedControllerToolbox
    private final FrameVector3D comVelocityEstimate = new FrameVector3D();
 
    private final YoFrameVector3D yoCoMVelocityEstimate;
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
 
    public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -80,7 +93,16 @@ public class QuadrupedControllerToolbox
       soleForceEstimator = new QuadrupedSoleForceEstimator(fullRobotModel, referenceFrames, registry);
 
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, 1.0, registry);
-      groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
+//      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
+      upcomingGroundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlaneEstimator = new YoGroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
+      groundPlanePositions = new QuadrantDependentList<>();
+      upcomingGroundPlanePositions = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
+         upcomingGroundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "UpcomingGroundPlanePosition", worldFrame, registry));
+      }
 
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
@@ -88,6 +110,7 @@ public class QuadrupedControllerToolbox
       fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator, registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
+      centerOfMassDataHolder = runtimeEnvironment.getCenterOfMassDataHolder();
 
       double coefficientOfFriction = 1.0; // TODO: magic number...
       QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
@@ -110,18 +133,23 @@ public class QuadrupedControllerToolbox
    {
       referenceFrames.updateFrames();
       soleForceEstimator.compute();
-      comJacobian.compute();
-
       updateSupportPolygon();
 
-      comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
+      if(centerOfMassDataHolder == null)
+      {
+         comJacobian.compute();
+         comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
+      }
+      else
+      {
+         centerOfMassDataHolder.getCenterOfMassVelocity(comVelocityEstimate);
+      }
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
-
       dcmPositionEstimator.compute(comVelocityEstimate);
    }
 
-   public void updateSupportPolygon()
+   private void updateSupportPolygon()
    {
       supportPolygon.clear();
 
@@ -165,6 +193,21 @@ public class QuadrupedControllerToolbox
    public GroundPlaneEstimator getGroundPlaneEstimator()
    {
       return groundPlaneEstimator;
+   }
+
+   public GroundPlaneEstimator getUpcomingGroundPlaneEstimator()
+   {
+      return upcomingGroundPlaneEstimator;
+   }
+
+   public QuadrantDependentList<YoFramePoint3D> getGroundPlanePositions()
+   {
+      return groundPlanePositions;
+   }
+
+   public QuadrantDependentList<YoFramePoint3D> getUpcomingGroundPlanePositions()
+   {
+      return upcomingGroundPlanePositions;
    }
 
    public QuadrupedFallDetector getFallDetector()

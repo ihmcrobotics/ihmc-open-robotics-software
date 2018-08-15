@@ -124,7 +124,7 @@ public class AtlasAllocationTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 600000)
+   @Test(timeout = 900000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;

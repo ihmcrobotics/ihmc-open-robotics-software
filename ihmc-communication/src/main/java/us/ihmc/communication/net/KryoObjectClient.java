@@ -134,7 +134,6 @@ public class KryoObjectClient extends KryoObjectCommunicator
    {
       Thread connectionThread = new Thread(new Runnable()
       {
-
          @Override
          public void run()
          {
@@ -151,7 +150,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
                }
             }
          }
-      });
+      }, "Kryo-OpenConnectionThread");
       connectionThread.start();
    }
 

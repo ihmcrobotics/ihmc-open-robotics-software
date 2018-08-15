@@ -130,7 +130,8 @@ public class InverseDynamicsOptimizationControlModule
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
       ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
-      qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, registry);
+      double dt = toolbox.getControlDT();
+      qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, dt, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
       qpSolver.setJointTorqueWeight(optimizationSettings.getJointTorqueWeight());

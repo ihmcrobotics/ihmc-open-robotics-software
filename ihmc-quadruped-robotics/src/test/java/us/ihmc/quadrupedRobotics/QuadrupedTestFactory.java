@@ -42,4 +42,6 @@ public interface QuadrupedTestFactory
    String getRobotName();
 
    FullRobotModel getFullRobotModel();
+
+   void close();
 }

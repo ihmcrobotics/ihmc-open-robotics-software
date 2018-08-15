@@ -356,7 +356,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
             return;
 
          diagnosticDataReporterRunning = dataReportersToExecute.poll();
-         Thread thread = new Thread(diagnosticDataReporterRunning);
+         Thread thread = new Thread(diagnosticDataReporterRunning, "IHMC-AutomatedDiagnosticReporter");
          thread.setPriority(Thread.MIN_PRIORITY);
          thread.start();
       }

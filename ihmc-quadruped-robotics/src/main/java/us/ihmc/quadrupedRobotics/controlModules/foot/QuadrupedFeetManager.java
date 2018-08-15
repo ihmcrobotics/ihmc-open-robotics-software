@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -102,6 +103,22 @@ public class QuadrupedFeetManager
    public void adjustStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly adjustedStep)
    {
       footControlModules.get(robotQuadrant).adjustStep(adjustedStep);
+   }
+
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link QuadrupedSwingState#minSwingTimeForDisturbanceRecovery}.
+    * @param speedUpFactor multiplier on the current time
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(RobotQuadrant robotQuadrant, double speedUpTime)
+   {
+      return footControlModules.get(robotQuadrant).requestSwingSpeedUp(speedUpTime);
+   }
+
+   public double computeClampedSwingSpeedUpTime(RobotQuadrant robotQuadrant, double speedUpTime)
+   {
+      return footControlModules.get(robotQuadrant).computeClampedSwingSpeedUpTime(speedUpTime);
    }
 
    public void reset()

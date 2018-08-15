@@ -44,8 +44,8 @@ public class AtlasHeadTrajectoryBehaviorTest extends DRCHeadTrajectoryBehaviorTe
    }
 
    @Override
-   //@ContinuousIntegrationTest(estimatedDuration = 37.6)
-   //@Test(timeout = 950000)
+   @ContinuousIntegrationTest(estimatedDuration = 37.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 950000)
    public void testHeadRoll() throws SimulationExceededMaximumTimeException
    {
       super.testHeadRoll();

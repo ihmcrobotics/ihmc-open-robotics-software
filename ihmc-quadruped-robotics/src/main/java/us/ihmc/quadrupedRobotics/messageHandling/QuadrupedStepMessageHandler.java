@@ -63,9 +63,6 @@ public class QuadrupedStepMessageHandler
       return receivedStepSequence.size() > 0;
    }
 
-   /**
-    * Consumes incoming footsteps and adjusts their position by the given vector
-    */
    public void process()
    {
       TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);

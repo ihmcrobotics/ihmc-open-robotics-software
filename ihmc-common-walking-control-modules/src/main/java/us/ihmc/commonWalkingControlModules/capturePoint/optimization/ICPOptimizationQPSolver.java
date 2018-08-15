@@ -15,9 +15,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
@@ -76,6 +80,8 @@ public class ICPOptimizationQPSolver
    /** QP Objective to minimize the difference between the dynamics */
    private final ICPQPInput dynamicsTaskInput;
 
+   private final List<ICPQPInput> inputList = new ArrayList<>();
+
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
    /** Constraint on the CMP location to the bounds. */
@@ -103,8 +109,10 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F footstepRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CoP feedback action. */
    private final DenseMatrix64F copFeedbackWeight = new DenseMatrix64F(2, 2);
-   /** Weight minimizing the CoP feedback rate. */
+   /** Weight minimizing the feedback rate. */
    private final DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
+   /** Weight minimizing the CoP and CMP feedback rate. */
+   private final DenseMatrix64F copCMPFeedbackRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CMP feedback action. */
    private final DenseMatrix64F cmpFeedbackWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
@@ -123,9 +131,12 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */
    private final DenseMatrix64F cmpDeltaSolution;
+   private final DenseMatrix64F dynamicsError;
 
    /** Previous solution for the feedback action, used in the feedback rate objective. */
    private final DenseMatrix64F previousFeedbackDeltaSolution;
+   private final DenseMatrix64F previousCMPFeedbackDeltaSolution;
+   private final DenseMatrix64F previousCoPFeedbackDeltaSolution;
    private final DenseMatrix64F previousFootstepLocation = new DenseMatrix64F(2, 1);
 
    /** Cost to go for the entire quadratic program. */
@@ -136,6 +147,7 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F copFeedbackCostToGo;
    /** Cost to go for the cmp feedback minimization objective. */
    private final DenseMatrix64F cmpFeedbackCostToGo;
+   private final DenseMatrix64F dynamicsCostToGo;
 
    /** Maximum number of vertices in the reachability polygon that the quadratic program will ever consider. Used for clearing and storing data. */
    private static final int maximumNumberOfReachabilityVertices = 4;
@@ -207,6 +219,12 @@ public class ICPOptimizationQPSolver
       dynamicsTaskInput = new ICPQPInput(6);
       feedbackRateTaskInput = new ICPQPInput(4);
 
+      inputList.add(copFeedbackTaskInput);
+      inputList.add(cmpFeedbackTaskInput);
+      inputList.add(footstepTaskInput);
+      inputList.add(dynamicsTaskInput);
+      inputList.add(feedbackRateTaskInput);
+
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
@@ -219,8 +237,11 @@ public class ICPOptimizationQPSolver
       footstepLocationSolution = new DenseMatrix64F(2, 1);
       copDeltaSolution = new DenseMatrix64F(2, 1);
       cmpDeltaSolution = new DenseMatrix64F(2, 1);
+      dynamicsError = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
       tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
       tmpFootstepCost = new DenseMatrix64F(2, 1);
@@ -229,6 +250,7 @@ public class ICPOptimizationQPSolver
       footstepCostToGo = new DenseMatrix64F(1, 1);
       copFeedbackCostToGo = new DenseMatrix64F(1, 1);
       cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
+      dynamicsCostToGo = new DenseMatrix64F(1, 1);
 
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -362,15 +384,16 @@ public class ICPOptimizationQPSolver
       solverInput_Aineq.zero();
       solverInput_bineq.zero();
 
-      cmpFeedbackTaskInput.reset();
-      footstepTaskInput.reset();
-      copFeedbackTaskInput.reset();
-      dynamicsTaskInput.reset();
+      for (int i = 0; i < inputList.size(); i++)
+      {
+         inputList.get(i).reset();
+      }
 
       solution.zero();
       footstepLocationSolution.zero();
       copDeltaSolution.zero();
       cmpDeltaSolution.zero();
+      dynamicsError.zero();
 
       currentInequalityConstraintIndex = 0;
    }
@@ -672,12 +695,16 @@ public class ICPOptimizationQPSolver
     * Enables the use of cop feedback rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
     * amount of CoP feedback to stabilize the ICP dynamics.
     *
-    * @param rateWeight weight placed on changes in the CMP feedback solution.
+    * @param copCMPFeedbackRateWeight weight placed on changes in the CoP and CMP feedback solution.
+    * @param feedbackRateWeight weight placed on changes in the total (CoP + CMP) feedback solution.
     */
-   public void setFeedbackRateWeight(double rateWeight)
+   public void setFeedbackRateWeight(double copCMPFeedbackRateWeight, double feedbackRateWeight)
    {
-      CommonOps.setIdentity(feedbackRateWeight);
-      CommonOps.scale(rateWeight, feedbackRateWeight);
+      CommonOps.setIdentity(this.feedbackRateWeight);
+      CommonOps.setIdentity(this.copCMPFeedbackRateWeight);
+
+      CommonOps.scale(feedbackRateWeight, this.feedbackRateWeight);
+      CommonOps.scale(copCMPFeedbackRateWeight, this.copCMPFeedbackRateWeight);
 
       hasFeedbackRateTerm = true;
    }
@@ -708,7 +735,7 @@ public class ICPOptimizationQPSolver
     *
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
     * @param desiredCMPOffset current desired distance from the CoP to the CMP.
-    * @returns whether a new solution was found if this is false the last valid solution will be used.
+    * @return whether a new solution was found if this is false the last valid solution will be used.
     */
    public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP, FrameVector2D desiredCMPOffset)
    {
@@ -770,6 +797,8 @@ public class ICPOptimizationQPSolver
          extractCoPFeedbackDeltaSolution(copDeltaSolution);
          extractCMPFeedbackDeltaSolution(cmpDeltaSolution);
 
+         inputCalculator.computeDynamicConstraintError(solution, dynamicsError);
+
          if (autoSetPreviousSolution)
             setPreviousFeedbackDeltaSolution(copDeltaSolution, cmpDeltaSolution);
 
@@ -783,7 +812,7 @@ public class ICPOptimizationQPSolver
 
    /**
     * Adds the minimization of step adjustment task to the quadratic program.<br>
-    * Also adds the rate of the footstep adjustment,  if enabled.
+    * Also adds the rate of the footstep adjustment, if enabled.
     */
    private void addStepAdjustmentTask()
    {
@@ -821,6 +850,8 @@ public class ICPOptimizationQPSolver
     */
    private void addFeedbackRateTask()
    {
+      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCoPFeedbackDeltaSolution);
+      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
       inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
       inputCalculator.submitFeedbackRateTask(feedbackRateTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -1015,6 +1046,8 @@ public class ICPOptimizationQPSolver
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
    {
+      previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
+      previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
       CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
@@ -1043,6 +1076,7 @@ public class ICPOptimizationQPSolver
    {
       tmpFootstepCost.zero();
       tmpFeedbackCost.zero();
+      tmpCost.zero();
 
       tmpFootstepCost.reshape(indexHandler.getNumberOfFootstepVariables(), 1);
       tmpFeedbackCost.reshape(2, 1);
@@ -1050,6 +1084,7 @@ public class ICPOptimizationQPSolver
       footstepCostToGo.zero();
       copFeedbackCostToGo.zero();
       cmpFeedbackCostToGo.zero();
+      dynamicsCostToGo.zero();
 
       // feedback cost:
       CommonOps.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
@@ -1058,6 +1093,14 @@ public class ICPOptimizationQPSolver
 
       CommonOps.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
       CommonOps.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
+
+      // dynamics cost:
+      CommonOps.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
+      CommonOps.multTransA(solution, tmpCost, dynamicsCostToGo);
+      CommonOps.scale(0.5, dynamicsCostToGo);
+
+      CommonOps.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
+      CommonOps.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
 
       if (indexHandler.useStepAdjustment())
       { // footstep cost:
@@ -1152,6 +1195,22 @@ public class ICPOptimizationQPSolver
    public double getCMPFeedbackCostToGo()
    {
       return cmpFeedbackCostToGo.get(0);
+   }
+
+   /**
+    * Gets the total cost to go of the optimization problem.
+    * @return cost to go
+    */
+   public double getDynamicsCostToGo()
+   {
+      return dynamicsCostToGo.get(0);
+   }
+
+   public void getDynamicsError(FixedFrameVector2DBasics errorToPack)
+   {
+      errorToPack.checkReferenceFrameMatch(worldFrame);
+      errorToPack.setX(dynamicsError.get(0));
+      errorToPack.setY(dynamicsError.get(1));
    }
 
    /**
