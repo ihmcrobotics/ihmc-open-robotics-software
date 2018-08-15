@@ -107,6 +107,6 @@ public class RosPointCloudFilterRepublisher implements Runnable
    public static void main(String[] arg) throws URISyntaxException
    {
       RosPointCloudFilterRepublisher republisher = new RosPointCloudFilterRepublisher();
-      new Thread(republisher).start();
+      new Thread(republisher, "IHMC-RosPointCloudFilterRepublisher").start();
    }
 }

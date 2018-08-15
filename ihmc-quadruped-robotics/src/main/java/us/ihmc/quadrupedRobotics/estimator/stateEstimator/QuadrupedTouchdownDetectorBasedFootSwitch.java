@@ -14,14 +14,13 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootswitch
 {
-   private static final int defaultGlitchWindow = 20;
+   private static final int defaultGlitchWindow = 3;
 
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
    private final GlitchFilteredYoBoolean touchdownDetected;
    private final YoBoolean trustTouchdownDetectors;
-   private boolean touchdownDetectorsUpdated = false;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
@@ -52,19 +51,14 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public boolean hasFootHitGround()
    {
-      if(!touchdownDetectorsUpdated)
+      boolean touchdown = true;
+      for (int i = 0; i < touchdownDetectors.size(); i++)
       {
-         boolean touchdown = true;
-         for (int i = 0; i < touchdownDetectors.size(); i++)
-         {
-            TouchdownDetector touchdownDetector = touchdownDetectors.get(i);
-            touchdownDetector.update();
-            touchdown &= touchdownDetector.hasTouchedDown();
-         }
-         touchdownDetected.update(touchdown);
-
-         touchdownDetectorsUpdated = true;
+         TouchdownDetector touchdownDetector = touchdownDetectors.get(i);
+         touchdownDetector.update();
+         touchdown &= touchdownDetector.hasTouchedDown();
       }
+      touchdownDetected.update(touchdown);
 
       if(trustTouchdownDetectors.getBooleanValue())
          return touchdownDetected.getBooleanValue();
@@ -113,8 +107,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public void reset()
    {
-      touchdownDetectorsUpdated = false;
-
       for (int i = 0; i < touchdownDetectors.size(); i++)
       {
          touchdownDetectors.get(i).reset();

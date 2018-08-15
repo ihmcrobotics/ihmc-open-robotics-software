@@ -20,15 +20,20 @@ public class ParameterLoaderHelper
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
-      loadParameters(caller, parameterFile, overwriteFile, registry);
+      loadParameters(caller, parameterFile, overwriteFile, registry, true);
    }
 
    public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry)
    {
-      loadParameters(caller, parameterFile, null, registry);
+      loadParameters(caller, parameterFile, null, registry, true);
    }
 
-   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoVariableRegistry registry)
+   public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry, boolean printWarnings)
+   {
+      loadParameters(caller, parameterFile, null, registry, printWarnings);
+   }
+
+   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoVariableRegistry registry, boolean printWarnings)
    {
       if (parameterFile == null)
       {
@@ -46,7 +51,7 @@ public class ParameterLoaderHelper
             {
                reader.overwrite(overwriteFile);
             }
-            loadAndCheckStatistics(registry, reader);
+            loadAndCheckStatistics(registry, reader, printWarnings);
          }
          catch (IOException e)
          {
@@ -61,13 +66,13 @@ public class ParameterLoaderHelper
     * turning on the debug flag {@link ParameterLoaderHelper#debugLoading} to see
     * what parameters were not specified in the XML file.
     */
-   private static void loadAndCheckStatistics(YoVariableRegistry registry, AbstractParameterReader reader)
+   private static void loadAndCheckStatistics(YoVariableRegistry registry, AbstractParameterReader reader, boolean printWarnings)
    {
       HashSet<String> defaultParameters = new HashSet<>();
       HashSet<String> unmatchedParameters = new HashSet<>();
       reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
 
-      if (!unmatchedParameters.isEmpty() && !debugLoading)
+      if (printWarnings && !unmatchedParameters.isEmpty() && !debugLoading)
       {
          String message = "I think something is off in your parameter file.";
          String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" +

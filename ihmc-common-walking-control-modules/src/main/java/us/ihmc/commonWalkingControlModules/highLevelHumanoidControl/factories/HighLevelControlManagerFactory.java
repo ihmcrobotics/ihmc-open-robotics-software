@@ -32,10 +32,12 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,12 +48,14 @@ public class HighLevelControlManagerFactory
    public static final String jointspaceGainRegistryName = "JointspaceGains";
    public static final String rigidBodyGainRegistryName = "RigidBodyGains";
    public static final String footGainRegistryName = "FootGains";
+   public static final String comHeightGainRegistryName = "ComHeightGains";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableRegistry momentumRegistry = new YoVariableRegistry(weightRegistryName);
    private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry(jointspaceGainRegistryName);
    private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry(rigidBodyGainRegistryName);
    private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
+   private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -86,6 +90,10 @@ public class HighLevelControlManagerFactory
    private PIDSE3GainsReadOnly holdFootGains;
    private PIDSE3GainsReadOnly toeOffFootGains;
 
+   private PIDGainsReadOnly walkingControllerComHeightGains;
+   private DoubleProvider walkingControllerMaxComHeightVelocity;
+   private PIDGainsReadOnly userModeComHeightGains;
+
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -94,6 +102,7 @@ public class HighLevelControlManagerFactory
       parentRegistry.addChild(jointGainRegistry);
       parentRegistry.addChild(bodyGainRegistry);
       parentRegistry.addChild(footGainRegistry);
+      parentRegistry.addChild(comHeightGainRegistry);
    }
 
    public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -126,6 +135,10 @@ public class HighLevelControlManagerFactory
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
       toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
+
+      walkingControllerComHeightGains = new ParameterizedPIDGains("WalkingControllerComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
+      walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, 0.25);
+      userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -165,9 +178,10 @@ public class HighLevelControlManagerFactory
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      Vector3DReadOnly pelvisLinearWeight = taskspaceAngularWeightMap.get(pelvisName);
+      Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
+      centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
       return centerOfMassHeightManager;
    }
 

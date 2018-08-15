@@ -10,10 +10,12 @@ import org.junit.Assert;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,11 +24,12 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
@@ -90,7 +93,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -143,7 +146,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -191,6 +194,36 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
          Assert.assertEquals(desiredHeight, pelvisPosition.getZ(), 0.01);
       }
+   }
+
+   /**
+    * This test is to reproduce a bug found on Valkyrie where sending a stop all trajectory would cause the
+    * robot to increase its height.
+    */
+   public void testStopAllTrajectory() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      CommonHumanoidReferenceFrames referenceFrames = drcSimulationTestHelper.getReferenceFrames();
+
+      referenceFrames.updateFrames();
+      double initialPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
+
+      StopAllTrajectoryMessage stopMessage = new StopAllTrajectoryMessage();
+      for (int i = 0; i < 10; i++)
+      {
+         drcSimulationTestHelper.publishToController(stopMessage);
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      }
+
+      referenceFrames.updateFrames();
+      double finalPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
+      Assert.assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-3);
    }
 
    @Before

@@ -18,6 +18,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -34,6 +35,7 @@ public class QuadrupedStepAdjustmentController
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
+   private final YoBoolean stepHasBeenAdjusted = new YoBoolean("stepHasBeenAdjusted", registry);
 
    private final DoubleParameter dcmStepAdjustmentGain = new DoubleParameter("dcmStepAdjustmentGain", registry, 1.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
@@ -103,8 +105,9 @@ public class QuadrupedStepAdjustmentController
       dcmPositionSetpoint.setIncludingFrame(desiredDCMPosition);
       dcmPositionSetpoint.changeFrame(worldFrame);
 
-
       dcmError.sub(dcmPositionSetpoint, dcmPositionEstimate);
+
+      boolean stepHasBeenAdjusted = false;
 
       // adjust nominal step goal positions in foot state machine
       for (int i = 0; i < activeSteps.size(); i++)
@@ -128,6 +131,8 @@ public class QuadrupedStepAdjustmentController
             instantaneousStepAdjustment.set(dcmError);
             instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
             instantaneousStepAdjustment.setZ(0);
+
+            stepHasBeenAdjusted = true;
          }
          else
          {
@@ -143,11 +148,18 @@ public class QuadrupedStepAdjustmentController
          adjustedStep.setGoalPosition(tempPoint);
       }
 
+      this.stepHasBeenAdjusted.set(stepHasBeenAdjusted);
+
       return adjustedActiveSteps;
    }
 
    public FrameVector3DReadOnly getStepAdjustment(RobotQuadrant robotQuadrant)
    {
       return limitedInstantaneousStepAdjustments.get(robotQuadrant);
+   }
+
+   public boolean stepHasBeenAdjusted()
+   {
+      return stepHasBeenAdjusted.getBooleanValue();
    }
 }

@@ -98,7 +98,7 @@ public class JamodTCPMaster
       {
          this.autoreconnect = autoreconnect;
          if(autoreconnect)
-            new Thread(new ConnectionListener()).start();
+            new Thread(new ConnectionListener(), "RobotiqConnectionListener").start();
       }
    }
    

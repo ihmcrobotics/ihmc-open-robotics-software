@@ -85,6 +85,13 @@ public class NetworkParameters
                parameters.put(key, System.getenv("ROS_MASTER_URI"));
             }
          }
+         else if (key == NetworkParameterKeys.RTPSDomainID)
+         {
+            if (System.getenv().containsKey("ROS_DOMAIN_ID"))
+            {
+               parameters.put(key, System.getenv("ROS_DOMAIN_ID"));
+            }
+         }
          else if (System.getenv().containsKey(envVarString))
          {
             parameters.put(key, System.getenv(envVarString));

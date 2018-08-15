@@ -19,7 +19,7 @@ public abstract class RosCameraReceiver
          // Start request for transform
          ROSHeadTransformFrame cameraFrame = new ROSHeadTransformFrame(cameraDataReceiver.getHeadFrame(), rosMainNode, cameraParameters);
          cameraDataReceiver.setCameraFrame(cameraFrame);
-         new Thread(cameraFrame).start();
+         new Thread(cameraFrame, "IHMC-RosCameraReceiver").start();
 
       }
       else if(cameraParameters.useStaticTransformFromHeadFrameToSensor())

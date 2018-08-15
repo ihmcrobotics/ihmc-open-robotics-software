@@ -285,7 +285,7 @@ public class LogVisualizer
 
    public void run()
    {
-      new Thread(scs).start();
+      new Thread(scs, "IHMC-SCSLogVisualizer").start();
    }
 
    public void addLogPlaybackListener(YoVariableLogPlaybackListener listener)

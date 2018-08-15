@@ -101,7 +101,7 @@ public class MotionQPInputCalculator
 
    public void initialize()
    {
-      centroidalMomentumHandler.compute();
+      centroidalMomentumHandler.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 

@@ -51,7 +51,7 @@ public abstract class ProcessSpawner
          {
             shutdown();
          }
-      }));
+      }, "IHMC-ProcessSpawnerShutdown"));
    }
 
    private void redirectProcessOutput(String commandString, Process p, boolean shouldGobbleOutput, boolean shouldGobbleError)

@@ -309,6 +309,11 @@ public class QuadrupedTeleopManager
       return xGaitSettings;
    }
 
+   public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
+   {
+      bodyPathMultiplexer.setShiftPlanBasedOnStepAdjustment(shiftPlanBasedOnStepAdjustment);
+   }
+
    public void handleBodyPathPlanMessage(QuadrupedBodyPathPlanMessage bodyPathPlanMessage)
    {
       bodyPathMultiplexer.initialize();

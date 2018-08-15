@@ -3,6 +3,7 @@ package us.ihmc.robotics.testing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DenseMatrix64F;
 
 import Jama.Matrix;
@@ -61,7 +62,7 @@ public class JUnitTools
       {
          for (int j = 0; j < expected.getNumCols(); j++)
          {
-            assertEquals(message, actual.get(i, j), expected.get(i, j), delta);
+            assertEquals(message + " index (" + i + ", " + j + ")", expected.get(i, j), actual.get(i, j), delta);
          }
       }
    }
@@ -76,5 +77,12 @@ public class JUnitTools
       {
          assertEquals("Array disagree at index " + i + " :", expectedDoubleArray[i], actualDoubleArray[i], epsilon);
       }
+   }
+
+   public static void assertTDoubleArrayListEquals(TDoubleArrayList expected, TDoubleArrayList actual, double epsilon)
+   {
+      assertEquals("Size is not equal. Expected " + expected.size() + ", received " + actual.size() + ".", expected.size(), actual.size());
+      for (int i = 0; i < expected.size(); i++)
+         assertEquals("Value " + i + " is not equal. Expected " + expected.get(i) + ", received " + actual.get(i) + ".", expected.get(i), actual.get(i), epsilon);
    }
 }

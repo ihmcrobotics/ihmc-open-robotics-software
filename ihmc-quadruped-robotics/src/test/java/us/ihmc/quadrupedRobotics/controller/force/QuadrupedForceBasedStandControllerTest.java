@@ -31,16 +31,23 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
+   private QuadrupedTestFactory quadrupedTestFactory;
 
    @Before
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      quadrupedTestFactory.setUseNetworking(true);
    }
 
    @After
    public void tearDown()
    {
+      quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
       variables = null;
@@ -52,41 +59,21 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
 
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_LEFT_HIP_ROLL.getUnderBarName());
    }
 
@@ -151,11 +138,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    public void testStandingAndResistingHumanPowerKickToFace() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -176,11 +158,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
@@ -223,10 +200,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public void testStandingUpAndAdjustingCoM(double translationShift, double translationDelta, double orientationShift, double orientationDelta)
          throws IOException
    {
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();

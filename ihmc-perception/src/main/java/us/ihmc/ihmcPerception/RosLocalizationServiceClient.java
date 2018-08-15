@@ -34,7 +34,7 @@ public class RosLocalizationServiceClient implements PacketConsumer<Localization
    {
       try
       {
-         Thread setupThread = new Thread()
+         Thread setupThread = new Thread("IHMC-RosLocalizationServiceSend")
          {
             public void run()
             {
@@ -82,7 +82,7 @@ public class RosLocalizationServiceClient implements PacketConsumer<Localization
    {
       try
       {
-         Thread setupThread = new Thread()
+         Thread setupThread = new Thread("IHMC-RosLocalizationServiceReset")
          {
             public void run()
             {

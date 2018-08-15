@@ -130,6 +130,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
+      footstepDataList.setAreFootstepsAdjustable(true);
       drcSimulationTestHelper.publishToController(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
