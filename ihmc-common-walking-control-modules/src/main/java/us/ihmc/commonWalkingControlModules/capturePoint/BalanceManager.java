@@ -18,7 +18,9 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -50,6 +52,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -139,6 +143,15 @@ public class BalanceManager
    private final boolean useICPOptimizationControl;
    private final YoICPControlGains icpControlGains;
 
+   private final ReferenceFrame midFootZUpFrame;
+   private final FramePoint2D tempPoint2D = new FramePoint2D();
+   private final FrameVector2D tempVector2D = new FrameVector2D();
+   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
+   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
+   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
+
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoVariableRegistry parentRegistry)
@@ -164,6 +177,7 @@ public class BalanceManager
       yoTime = controllerToolbox.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
@@ -480,6 +494,12 @@ public class BalanceManager
       desiredCMP.set(yoDesiredCMP);
       linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
       yoDesiredCMP.set(desiredCMP);
+
+      tempPoint2D.setIncludingFrame(perfectCoP2d);
+      tempPoint2D.changeFrame(midFootZUpFrame);
+      tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+      centerOfPressureCommand.setDesiredCoP(tempPoint2D);
+      centerOfPressureCommand.setWeight(tempVector2D);
    }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
@@ -539,9 +559,15 @@ public class BalanceManager
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
-   public MomentumRateCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(linearMomentumRateOfChangeControlModule.getMomentumRateCommand());
+      if (useCoPObjective.getValue())
+      {
+         inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
+      }
+      return inverseDynamicsCommandList;
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
