@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
@@ -31,7 +31,7 @@ public class ExplorationHelper
 
    private final FramePoint2D desiredCenterOfPressure = new FramePoint2D();
    private final YoDouble copCommandWeight;
-   private final Vector2D commandWeight = new Vector2D();
+   private final FrameVector2D commandWeight = new FrameVector2D();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private final YoDouble startTime;
@@ -63,6 +63,8 @@ public class ExplorationHelper
          copCommandWeight = null;
       soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
+
+      commandWeight.setToZero(soleFrame);
 
       YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicObjectsListRegistry != null)

@@ -51,7 +51,7 @@ public class InverseDynamicsCommandDataCopier
       for (int i = 0; i < centerOfPressureCommands.size(); i++)
       {
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
-         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBodyName()));
+         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBody().getName()));
       }
 
       for (int i = 0; i < spatialAccelerationCommands.size(); i++)

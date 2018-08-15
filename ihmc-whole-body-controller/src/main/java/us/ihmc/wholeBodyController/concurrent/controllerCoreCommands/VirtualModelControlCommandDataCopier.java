@@ -1,13 +1,19 @@
 package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import java.util.Map;
+
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-
-import java.util.Map;
 
 public class VirtualModelControlCommandDataCopier
 {
@@ -45,7 +51,7 @@ public class VirtualModelControlCommandDataCopier
       for (int i = 0; i < centerOfPressureCommands.size(); i++)
       {
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
-         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBodyName()));
+         command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBody().getName()));
       }
 
       for (int i = 0; i < spatialAccelerationCommands.size(); i++)

@@ -13,15 +13,17 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SelectionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -160,10 +162,87 @@ public class WrenchMatrixCalculator
       useForceRateHighWeight.set(command.isUseHighCoPDamping());
    }
 
+   private final RecyclingArrayList<CenterOfPressureCommand> centerOfPressureCommands = new RecyclingArrayList<>(CenterOfPressureCommand.class);
+
    public void submitCenterOfPressureCommand(CenterOfPressureCommand command)
    {
-      PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getContactingRigidBody());
-      helper.setCenterOfPressureCommand(command);
+      centerOfPressureCommands.add().set(command);
+   }
+
+   private final DenseMatrix64F bodyWrenchJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F fullWrenchJacobian = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F fzRow = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F singleCopRow = new DenseMatrix64F(0, 0);
+   private final FrameVector2D weight = new FrameVector2D();
+
+   public boolean getCenterOfPressureInput(QPInput inputToPack)
+   {
+      int commands = centerOfPressureCommands.size();
+      if (commands <= 0)
+      {
+         return false;
+      }
+
+      fullWrenchJacobian.reshape(Wrench.SIZE, rhoSize);
+      fzRow.reshape(1, rhoSize);
+      singleCopRow.reshape(1, rhoSize);
+
+      CenterOfPressureCommand command = centerOfPressureCommands.get(commands - 1);
+      centerOfPressureCommands.remove(commands - 1);
+
+      RigidBody rigidBody = command.getContactingRigidBody();
+      FramePoint2DReadOnly desiredCoP = command.getDesiredCoP();
+
+      // Compute the wrench jacobian for the command plane frame:
+      // wrench = J * rho
+      ReferenceFrame planeFrame = desiredCoP.getReferenceFrame();
+      fullWrenchJacobian.zero();
+      int rhoStartIndex = 0;
+
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBodies.get(i));
+
+         // If the body is null assume the command is for the full robot.
+         if (rigidBody == null || (rigidBodies.get(i) == rigidBody && helper.canHandleCoPCommand()))
+         {
+            helper.computeWrenchJacobianInFrame(planeFrame, bodyWrenchJacobian);
+            CommonOps.insert(bodyWrenchJacobian, fullWrenchJacobian, 0, rhoStartIndex);
+         }
+
+         rhoStartIndex += helper.getRhoSize();
+      }
+
+      inputToPack.reshape(2);
+      inputToPack.setConstraintType(command.getConstraintType());
+
+      int fzIndex = 5;
+      CommonOps.extractRow(fullWrenchJacobian, fzIndex, fzRow);
+
+      // [x_cop * J_fz + J_ty] * rho == 0
+      int tauYIndex = 1;
+      CommonOps.extractRow(fullWrenchJacobian, tauYIndex, singleCopRow);
+      CommonOps.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
+      CommonOps.insert(singleCopRow, inputToPack.getTaskJacobian(), 0, 0);
+      inputToPack.getTaskObjective().set(0, 0.0);
+
+      // [y_cop * J_fz - J_tx] * rho == 0
+      int tauXIndex = 0;
+      CommonOps.extractRow(fullWrenchJacobian, tauXIndex, singleCopRow);
+      CommonOps.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
+      CommonOps.insert(singleCopRow, inputToPack.getTaskJacobian(), 1, 0);
+      inputToPack.getTaskObjective().set(1, 0.0);
+
+      inputToPack.getTaskWeightMatrix().zero();
+      if (command.getConstraintType() == ConstraintType.OBJECTIVE)
+      {
+         weight.setIncludingFrame(command.getWeight());
+         weight.changeFrame(planeFrame);
+         inputToPack.getTaskWeightMatrix().set(0, 0, command.getWeight().getX());
+         inputToPack.getTaskWeightMatrix().set(1, 1, command.getWeight().getY());
+      }
+
+      return true;
    }
 
    private final RecyclingArrayList<ContactWrenchCommand> contactWrenchCommands = new RecyclingArrayList<>(ContactWrenchCommand.class);
@@ -181,7 +260,7 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
    private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-   public boolean getAdditionalRhoInput(QPInput inputToPack)
+   public boolean getContactWrenchInput(QPInput inputToPack)
    {
       int commands = contactWrenchCommands.size();
       if (commands <= 0)

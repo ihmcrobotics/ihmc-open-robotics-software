@@ -69,7 +69,7 @@ public class ExplorationParameters
    private static final double defaultRecoverTime = 0.05;
    private static final double defaultTimeToGoToCorner = 0.3;
    private static final double defaultTimeToStayInCorner = 0.2;
-   private static final double defaultCopCommandWeight = 200.0;
+   private static final double defaultCopCommandWeight = 0.001;
    private static final double defaultTimeBeforeExploring = 1.5;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)
