@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -26,9 +30,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
-import java.util.Map;
 
 public class VirtualModelControlOptimizationControlModule
 {
@@ -69,6 +70,8 @@ public class VirtualModelControlOptimizationControlModule
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final ReferenceFrame centerOfMassFrame;
 
+   private final DenseMatrix64F zeroObjective = new DenseMatrix64F(0, 0);
+
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
@@ -95,6 +98,9 @@ public class VirtualModelControlOptimizationControlModule
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
       maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
+
+      zeroObjective.reshape(wrenchMatrixCalculator.getCopTaskSize(), 1);
+      zeroObjective.zero();
 
       parentRegistry.addChild(registry);
    }
@@ -254,14 +260,12 @@ public class VirtualModelControlOptimizationControlModule
       DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
+      DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
+      DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
+      qpSolver.addRhoTask(copRegularizationJacobian, zeroObjective, copRegularizationWeight);
 
-      DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
-      DenseMatrix64F copRateWeight = wrenchMatrixCalculator.getCopRateWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, previousCoP, copRateWeight);
-
-      DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
-      DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+      DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
+      DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
+      qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
    }
 }
