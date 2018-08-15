@@ -187,7 +187,7 @@ public class CenterOfMassTrajectoryHandler
    private void clearPoints()
    {
       double currentTime = yoTime.getDoubleValue();
-      while (comTrajectoryPoints.size() > 1 && comTrajectoryPoints.get(0).getTime() < currentTime)
+      while (comTrajectoryPoints.size() > 1 && comTrajectoryPoints.get(1).getTime() < currentTime)
       {
          comTrajectoryPoints.remove(0);
       }

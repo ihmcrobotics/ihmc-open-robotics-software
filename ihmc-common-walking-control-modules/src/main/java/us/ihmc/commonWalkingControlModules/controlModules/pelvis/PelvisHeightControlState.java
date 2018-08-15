@@ -274,8 +274,16 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       taskspaceControlState.doAction(Double.NaN);
    }
 
+   private final FramePoint3D oldControlFramePosition = new FramePoint3D();
+   private final FramePoint3D newControlFramePosition = new FramePoint3D();
+   private final FrameVector3D changeInControlFrame = new FrameVector3D();
+
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose3D initialPose)
    {
+      initialPose.changeFrame(pelvis.getBodyFixedFrame());
+      oldControlFramePosition.setToZero(taskspaceControlState.getControlFrame());
+      oldControlFramePosition.changeFrame(pelvis.getBodyFixedFrame());
+
       if (command.getEuclideanTrajectory().useCustomControlFrame())
       {
          tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
@@ -286,13 +294,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
          taskspaceControlState.setDefaultControlFrame();
       }
 
-      // Convert the initial point to be consistent with the control frame
-      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
-      tempPose.setToZero(pelvisFrame);
-      tempPose.changeFrame(controlFrame);
-      tempPoint.set(tempPose.getPosition());
+      newControlFramePosition.setToZero(taskspaceControlState.getControlFrame());
+      newControlFramePosition.changeFrame(pelvis.getBodyFixedFrame());
+      changeInControlFrame.setToZero(pelvis.getBodyFixedFrame());
+      changeInControlFrame.sub(newControlFramePosition, oldControlFramePosition);
 
-      initialPose.prependTranslation(tempPoint);
+      initialPose.prependTranslation(changeInControlFrame);
 
       return taskspaceControlState.handleEuclideanTrajectoryCommand(command.getEuclideanTrajectory(), initialPose);
    }
