@@ -19,7 +19,7 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        sequence<geometry_msgs::msg::dds::Point, 1> vertices;
+        sequence<geometry_msgs::msg::dds::Point, 50> vertices;
       };
     };
   };

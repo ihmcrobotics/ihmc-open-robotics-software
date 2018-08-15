@@ -44,7 +44,7 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -81,7 +81,7 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
 
-      if(data.getBodyPathPoints().size() <= 1)
+      if(data.getBodyPathPoints().size() <= 50)
       cdr.write_type_e(data.getBodyPathPoints());else
           throw new RuntimeException("body_path_points field exceeds the maximum length");
 
