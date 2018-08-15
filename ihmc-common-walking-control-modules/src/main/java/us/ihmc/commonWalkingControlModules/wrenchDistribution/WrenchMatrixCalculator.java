@@ -96,25 +96,25 @@ public class WrenchMatrixCalculator
       this.dtSquaredInv = 1.0 / (dt * dt);
 
       nContactableBodies = toolbox.getNumberOfContactableBodies();
-      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();        
-      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
-      rhoSize = toolbox.getRhoSize();                                                  
-      copTaskSize = 2 * nContactableBodies; 
-      
+      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();
+      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint();
+      rhoSize = toolbox.getRhoSize();
+      copTaskSize = 2 * nContactableBodies;
+
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
-      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);            
-      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);                      
-                                                                               
-      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
+      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);
+      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
+
+      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
       previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
       activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);              
-      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);   
-      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);      
-      
+      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
@@ -240,6 +240,10 @@ public class WrenchMatrixCalculator
          weight.changeFrame(planeFrame);
          inputToPack.getTaskWeightMatrix().set(0, 0, command.getWeight().getX());
          inputToPack.getTaskWeightMatrix().set(1, 1, command.getWeight().getY());
+      }
+      else if (command.getConstraintType() != ConstraintType.EQUALITY)
+      {
+         throw new RuntimeException("Inequalities are not supported by this command.");
       }
 
       return true;
