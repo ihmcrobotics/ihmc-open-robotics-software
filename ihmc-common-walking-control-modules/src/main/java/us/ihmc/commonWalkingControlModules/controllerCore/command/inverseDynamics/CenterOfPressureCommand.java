@@ -1,31 +1,30 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>, VirtualModelControlCommand<CenterOfPressureCommand>
 {
-   private RigidBody contactingRigidBody;
-   private String contactingRigidBodyName;
-   private final Vector2D weightInSoleFrame = new Vector2D();
-   private final Point2D desiredCoPInSoleFrame = new Point2D();
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
-   public CenterOfPressureCommand()
-   {
-   }
+   private RigidBody contactingRigidBody;
+
+   private final FrameVector2D weight = new FrameVector2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
    @Override
    public void set(CenterOfPressureCommand other)
    {
-      this.weightInSoleFrame.set(other.weightInSoleFrame);
-      this.desiredCoPInSoleFrame.set(other.desiredCoPInSoleFrame);
-
-      this.contactingRigidBody = other.getContactingRigidBody();
-      this.contactingRigidBodyName = other.contactingRigidBodyName;
+      this.constraintType = other.constraintType;
+      this.contactingRigidBody = other.contactingRigidBody;
+      this.weight.setIncludingFrame(other.weight);
+      this.desiredCoP.setIncludingFrame(other.desiredCoP);
    }
 
    @Override
@@ -34,35 +33,39 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       return ControllerCoreCommandType.CENTER_OF_PRESSURE;
    }
 
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
+
    public void setContactingRigidBody(RigidBody contactingRigidBody)
    {
       this.contactingRigidBody = contactingRigidBody;
-      this.contactingRigidBodyName = contactingRigidBody.getName();
    }
 
-   public void setWeight(Vector2D weightInSoleFrame)
+   public void setWeight(FrameVector2DReadOnly weightInSoleFrame)
    {
-      this.weightInSoleFrame.set(weightInSoleFrame);
+      this.weight.setIncludingFrame(weightInSoleFrame);
    }
 
-   public void setDesiredCoP(Point2DReadOnly desiredCoPInSoleFrame)
+   public void setDesiredCoP(FramePoint2DReadOnly desiredCoPInSoleFrame)
    {
-      this.desiredCoPInSoleFrame.set(desiredCoPInSoleFrame);
+      this.desiredCoP.setIncludingFrame(desiredCoPInSoleFrame);
    }
 
-   public Point2D getDesiredCoPInSoleFrame()
+   public FramePoint2DReadOnly getDesiredCoP()
    {
-      return desiredCoPInSoleFrame;
+      return desiredCoP;
    }
 
-   public Vector2D getWeightInSoleFrame()
+   public FrameVector2DReadOnly getWeight()
    {
-      return weightInSoleFrame;
-   }
-
-   public String getContactingRigidBodyName()
-   {
-      return contactingRigidBodyName;
+      return weight;
    }
 
    public RigidBody getContactingRigidBody()
