@@ -55,7 +55,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuouIntegrationTest(estimatedDuration = 103.5)
+   @ContinuousIntegrationTest(estimatedDuration = 103.5)
    @Test(timeout = 520000)
    public void testWalkOverSteppingStones() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
