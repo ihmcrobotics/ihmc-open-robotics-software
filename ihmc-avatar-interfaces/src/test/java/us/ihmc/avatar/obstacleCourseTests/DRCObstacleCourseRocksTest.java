@@ -6,10 +6,12 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -52,6 +54,8 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 93.3)
+   @Test(timeout = 470000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -11,10 +11,14 @@ import org.junit.Before;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import org.junit.Ignore;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -64,6 +68,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @Test(timeout = 230000)
    public void testUnknownStepDownTwoFeetOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -141,6 +147,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 70.4)
+   @Test(timeout = 350000)
    public void testUnknownStepDownOneFootOnEachStepLong(double stepLength, double stairLength, double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -211,6 +219,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 74.2)
+   @Test(timeout = 370000)
    public void testUnknownStepDownOneFootOnEachStep(double stepLength, double stairLength, double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -282,7 +292,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 68.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Test(timeout = 340000)
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight, double stepLength, double stairLength) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -353,6 +364,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 110.0)
+   @Test(timeout = 230000)
    public void testRandomHeightField(double maxStepHeight, double minStepHeight, double maxStepIncrease) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -470,8 +483,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    }
 
 
-
-
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 107.1)
+   @Test(timeout = 540000)
    public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

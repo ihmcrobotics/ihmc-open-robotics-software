@@ -5,10 +5,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -50,6 +52,8 @@ import us.ihmc.commons.thread.ThreadTools;
       }
 
 
+      @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 22.2)
+      @Test(timeout = 110000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
          BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
