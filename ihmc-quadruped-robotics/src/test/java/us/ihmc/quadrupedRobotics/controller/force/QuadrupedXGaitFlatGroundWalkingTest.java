@@ -61,8 +61,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 630000)
    public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

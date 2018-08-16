@@ -77,8 +77,6 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       testWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, xGaitSettings);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 2000000)
    public void testWalkingOverCinderBlockField(QuadrupedXGaitSettingsReadOnly xGaitSettings) throws IOException
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
