@@ -21,6 +21,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,15 +46,15 @@ public class PrecomputedICPPlanner
    private final YoBoolean isBlending = new YoBoolean("isBlending", registry);
    private final YoDouble blendingStartTime = new YoDouble("blendingStartTime", registry);
    private final YoDouble blendingDuration = new YoDouble("blendingDuration", registry);
-   private final FramePoint2D precomputedDesiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector2D precomputedDesiredCapturePointVelocity2d = new FrameVector2D();
-   private final FrameVector2D precomputedCenterOfPressure2d = new FrameVector2D();
 
    private final YoDouble omega0 = new YoDouble(name + "Omega0", registry);
 
+   private final FramePoint3D desiredCoPPosition = new FramePoint3D();
+   private final FramePoint3D desiredCMPPosition = new FramePoint3D();
+   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
    private final FramePoint3D desiredICPPosition = new FramePoint3D();
    private final FrameVector3D desiredICPVelocity = new FrameVector3D();
-   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
+
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
@@ -61,12 +65,29 @@ public class PrecomputedICPPlanner
    private double mass;
    private double gravity;
 
-   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
+   private final DoubleParameter filterBreakFrequency = new DoubleParameter("PrecomputedICPVelocityFilterBreakFrequency", registry, 5.0);
+   private final DoubleProvider alphaProvider;
+   private final AlphaFilteredTuple2D filteredPrecomputedIcpVelocity;
+
+   private final FramePoint2D tempICPPosition = new FramePoint2D();
+   private final FramePoint2D tempCoPPosition = new FramePoint2D();
+
+   public PrecomputedICPPlanner(double dt, CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       blendingDuration.set(0.5);
+
+      alphaProvider = new DoubleProvider()
+      {
+         @Override
+         public double getValue()
+         {
+            return AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+         }
+      };
+      filteredPrecomputedIcpVelocity = new AlphaFilteredTuple2D(alphaProvider);
 
       parentRegistry.addChild(registry);
 
@@ -102,35 +123,35 @@ public class PrecomputedICPPlanner
       double omega0 = this.omega0.getDoubleValue();
       centerOfMassTrajectoryHandler.packDesiredICPAtTime(time, omega0, desiredICPPosition, desiredICPVelocity, desiredCoMPosition);
 
-      computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, yoDesiredCMPPosition);
+      computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, desiredCMPPosition);
 
-      precomputedDesiredCapturePoint2d.set(desiredICPPosition);
-      precomputedDesiredCapturePointVelocity2d.set(desiredICPVelocity);
-
-      yoDesiredICPPosition.set(desiredICPPosition);
-      yoDesiredICPVelocity.set(desiredICPVelocity);
-      yoDesiredCoMPosition.set(desiredCoMPosition);
-
-      yoDesiredCoPPosition.set(yoDesiredCMPPosition);
+      desiredCoPPosition.set(desiredCMPPosition);
       // Can compute CoP if we have a momentum rate of change otherwise set it to match the CMP.
       if (momentumTrajectoryHandler != null && momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(time, desiredAngularMomentum, desiredAngularMomentumRate))
       {
          double fZ = WrenchDistributorTools.computeFz(mass, gravity, comZAcceleration);
-         yoDesiredCoPPosition.addX(-desiredAngularMomentumRate.getY() / fZ);
-         yoDesiredCoPPosition.addY(desiredAngularMomentumRate.getX() / fZ);
+         desiredCoPPosition.addX(-desiredAngularMomentumRate.getY() / fZ);
+         desiredCoPPosition.addY(desiredAngularMomentumRate.getX() / fZ);
       }
-      precomputedCenterOfPressure2d.set(yoDesiredCoPPosition);
+
+      yoDesiredICPPosition.set(desiredICPPosition);
+      yoDesiredICPVelocity.set(desiredICPVelocity);
+      yoDesiredCoMPosition.set(desiredCoMPosition);
+      yoDesiredCoPPosition.set(desiredCoPPosition);
+      yoDesiredCMPPosition.set(desiredCMPPosition);
+
+      filteredPrecomputedIcpVelocity.set(desiredICPVelocity);
    }
 
    public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
-                       FixedFramePoint2DBasics desiredCoP2DToPack)
+                       FramePoint2D desiredCoP2DToPack)
    {
       if (isWithinInterval(time))
       {
          compute(time);
-         desiredCapturePoint2dToPack.setIncludingFrame(yoDesiredICPPosition);
-         desiredCapturePointVelocity2dToPack.setIncludingFrame(yoDesiredICPVelocity);
-         // TODO desired CoP
+         desiredCapturePoint2dToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredICPPosition);
+         desiredCapturePointVelocity2dToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), filteredPrecomputedIcpVelocity);
+         desiredCoP2DToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredCoPPosition);
       }
       else
       {
@@ -142,6 +163,10 @@ public class PrecomputedICPPlanner
    public void computeAndBlend(double time, FixedFramePoint2DBasics desiredCapturePoint2dToPack, FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
                                FixedFramePoint2DBasics desiredCenterOfPressure2dToPack)
    {
+      desiredCapturePoint2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      desiredCapturePointVelocity2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      desiredCenterOfPressure2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
       if (isWithinInterval(time))
       {
          compute(time);
@@ -155,9 +180,12 @@ public class PrecomputedICPPlanner
          isBlending.set(alpha < 1.0);
          alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
-         desiredCapturePoint2dToPack.interpolate(desiredCapturePoint2dToPack, precomputedDesiredCapturePoint2d, alpha);
-         desiredCapturePointVelocity2dToPack.interpolate(desiredCapturePointVelocity2dToPack, precomputedDesiredCapturePointVelocity2d, alpha);
-         desiredCenterOfPressure2dToPack.interpolate(desiredCenterOfPressure2dToPack, precomputedCenterOfPressure2d, alpha);
+         tempICPPosition.set(desiredICPPosition);
+         tempCoPPosition.set(desiredCoPPosition);
+
+         desiredCapturePoint2dToPack.interpolate(desiredCapturePoint2dToPack, tempICPPosition, alpha);
+         desiredCapturePointVelocity2dToPack.interpolate(desiredCapturePointVelocity2dToPack, filteredPrecomputedIcpVelocity, alpha);
+         desiredCenterOfPressure2dToPack.interpolate(desiredCenterOfPressure2dToPack, tempCoPPosition, alpha);
       }
       else
       {
@@ -200,48 +228,6 @@ public class PrecomputedICPPlanner
    public void setGravity(double gravity)
    {
       this.gravity = gravity;
-   }
-
-   /**
-    * Gets the current ICP position.
-    * <p>
-    * The ICP planner has to be updated every control tick using the method
-    * {@link #compute(double)}.
-    * </p>
-    *
-    * @param desiredCapturePointPositionToPack the current ICP position. Modified.
-    */
-   public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
-   {
-      desiredCapturePointPositionToPack.setIncludingFrame(yoDesiredICPPosition);
-   }
-
-   /**
-    * Gets the current ICP velocity.
-    * <p>
-    * The ICP planner has to be updated every control tick using the method
-    * {@link #compute(double)}.
-    * </p>
-    *
-    * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
-    */
-   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
-   {
-      desiredCapturePointVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
-   }
-
-   /**
-    * Gets the current CMP position.
-    * <p>
-    * The ICP planner has to be updated every control tick using the method
-    * {@link #compute(double)}.
-    * </p>
-    *
-    * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
-    */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
-   {
-      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(yoDesiredCMPPosition);
    }
 
    private void hideViz()
