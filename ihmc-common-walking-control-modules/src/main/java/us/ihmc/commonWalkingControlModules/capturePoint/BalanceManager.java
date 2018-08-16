@@ -214,7 +214,8 @@ public class BalanceManager
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
-         precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
+         double dt = controllerToolbox.getControlDT();
+         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
