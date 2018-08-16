@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.AbstractICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -10,11 +7,14 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -32,16 +32,16 @@ import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = false;
    private static final boolean debug = false;
+   private static final int maxNumberOfFootstepsToConsider = 4;
 
    private static final double ZERO_TIME = 0.0;
 
@@ -71,6 +71,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
+
+   private final YoInteger numberOfUpcomingFootsteps;
+   private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider, FootstepData.class);
 
    private static final double ICP_CORNER_POINT_SIZE = 0.002;
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
@@ -106,6 +109,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       this.gravityZ = gravityZ;
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
+      numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
       this.robotMass = robotMass;
 
@@ -127,9 +131,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          icpPhaseExitCornerPoints.add(exitCornerPoint);
       }
 
-      referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
-                                                                  contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
-                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, debug, registry);
+      referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
+                                                                  numberFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
+                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, debug,
+                                                                  numberOfUpcomingFootsteps, upcomingFootstepsData, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, debug, registry);
@@ -233,6 +238,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          transferDurationAlphas.get(i).setToNaN();
          swingDurationShiftFractions.get(i).setToNaN();
       }
+
+      numberOfUpcomingFootsteps.set(0);
+      upcomingFootstepsData.clear();
    }
 
    public void clearPlanWithoutClearingPlannedFootsteps()
@@ -248,8 +256,25 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep == null)
+      {
+         PrintTools.warn("Received null footstep, ignoring");
          return;
-      referenceCoPGenerator.addFootstepToPlan(footstep, timing);
+      }
+      else if(timing == null)
+      {
+         PrintTools.warn("Received null step timing, ignoring");
+         return;
+      }
+      else if (footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+      {
+         PrintTools.warn("Received bad footstep: " + footstep + ", ignoring");
+         return;
+      }
+      else
+      {
+         upcomingFootstepsData.add().set(footstep, timing);
+         numberOfUpcomingFootsteps.increment();
+      }
 
       int footstepIndex = referenceCoPGenerator.getNumberOfFootstepsRegistered() - 1;
       
