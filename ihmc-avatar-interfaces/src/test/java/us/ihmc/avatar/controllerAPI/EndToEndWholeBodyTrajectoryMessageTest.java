@@ -14,12 +14,14 @@ import controller_msgs.msg.dds.MessageCollectionNotification;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollectionMessenger;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,6 +49,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 36.1)
+   @Test(timeout = 180000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -180,6 +184,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 36.4)
+   @Test(timeout = 180000)
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -302,6 +308,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 63.1)
+   @Test(timeout = 320000)
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -427,6 +435,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 16.8)
+   @Test(timeout = 84000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
