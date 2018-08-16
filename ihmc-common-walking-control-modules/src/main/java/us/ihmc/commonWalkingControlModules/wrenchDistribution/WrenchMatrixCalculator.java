@@ -187,8 +187,6 @@ public class WrenchMatrixCalculator
       }
 
       CenterOfPressureCommand command = centerOfPressureCommands.get(commands - 1);
-      centerOfPressureCommands.remove(commands - 1);
-
       RigidBody rigidBody = command.getContactingRigidBody();
       FramePoint2DReadOnly desiredCoP = command.getDesiredCoP();
 
@@ -245,6 +243,7 @@ public class WrenchMatrixCalculator
          throw new RuntimeException("Inequalities are not supported by this command.");
       }
 
+      centerOfPressureCommands.remove(commands - 1);
       return true;
    }
 
@@ -272,7 +271,6 @@ public class WrenchMatrixCalculator
       }
 
       ContactWrenchCommand command = contactWrenchCommands.get(commands - 1);
-      contactWrenchCommands.remove(commands - 1);
       int taskSize = command.getSelectionMatrix().getNumberOfSelectedAxes();
       inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.reshape(taskSize);
@@ -285,6 +283,7 @@ public class WrenchMatrixCalculator
       fullJacobian.zero();
       CommonOps.insert(rigidBodyRhoTaskJacobian, fullJacobian, 0, rhoOffset);
 
+      contactWrenchCommands.remove(commands - 1);
       return true;
    }
 
