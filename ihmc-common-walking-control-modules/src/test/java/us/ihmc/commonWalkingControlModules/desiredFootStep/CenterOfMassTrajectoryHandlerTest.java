@@ -35,7 +35,7 @@ public class CenterOfMassTrajectoryHandlerTest
       command.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
-      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
+      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       handler.handleComTrajectory(command);
 
       FramePoint3D desiredICPPosition = new FramePoint3D();
@@ -88,7 +88,7 @@ public class CenterOfMassTrajectoryHandlerTest
       command.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
-      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
+      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       yoTime.set(offset);
       handler.handleComTrajectory(command);
 
@@ -136,7 +136,7 @@ public class CenterOfMassTrajectoryHandlerTest
       double omega0 = 1.0;
       double epsilon = 1.0e-10;
 
-      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
+      CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime, registry);
 
       // assume method x(t) = -1/2 * t^3 + 3/2 * t^2 for x and y and 0.0 for z
       CenterOfMassTrajectoryCommand command1 = new CenterOfMassTrajectoryCommand();

@@ -1,36 +1,49 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CenterOfMassTrajectoryHandler
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final YoDouble yoTime;
    private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> comTrajectoryPoints = new RecyclingArrayList<>(10, SimpleEuclideanTrajectoryPoint.class);
 
-   private final YoPolynomial polynomial = new YoPolynomial("CubicPolynomial", 4, new YoVariableRegistry("Temp"));
+   private final YoPolynomial polynomial = new YoPolynomial("CubicPolynomial", 4, registry);
 
-   private final Point3D comPosition = new Point3D();
-   private final Vector3D comVelocity = new Vector3D();
-   private final Vector3D comAcceleration = new Vector3D();
+   private final YoFramePoint3D comPosition = new YoFramePoint3D("CoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comVelocity = new YoFrameVector3D("CoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D comAcceleration = new YoFrameVector3D("CoMAcceleration", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoInteger numberOfPoints = new YoInteger("NumberOfPoints", registry);
 
    private final Point3D icpPosition = new Point3D();
    private final Vector3D icpVelocity = new Vector3D();
 
-   public CenterOfMassTrajectoryHandler(YoDouble yoTime)
+   private long lastMessageID = -1L;
+
+   public CenterOfMassTrajectoryHandler(YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;
       comTrajectoryPoints.clear();
+
+      parentRegistry.addChild(registry);
    }
 
    /**
@@ -60,6 +73,11 @@ public class CenterOfMassTrajectoryHandler
             PrintTools.warn("Can not queue trajectory with initial time 0.0");
             return;
          }
+         if (command.getEuclideanTrajectory().getPreviousCommandId() != lastMessageID)
+         {
+            PrintTools.warn("Invalid message ID.");
+            return;
+         }
          double lastTime = comTrajectoryPoints.getLast().getTime();
          command.getEuclideanTrajectory().addTimeOffset(lastTime);
          break;
@@ -67,10 +85,14 @@ public class CenterOfMassTrajectoryHandler
          throw new RuntimeException("Unhadled execution mode.");
       }
 
+      lastMessageID = command.getEuclideanTrajectory().getCommandId();
+
       for (int idx = 0; idx < command.getEuclideanTrajectory().getNumberOfTrajectoryPoints(); idx++)
       {
          comTrajectoryPoints.add().set(command.getEuclideanTrajectory().getTrajectoryPoint(idx));
       }
+
+      numberOfPoints.set(comTrajectoryPoints.size());
    }
 
    /**
@@ -169,6 +191,8 @@ public class CenterOfMassTrajectoryHandler
     */
    public boolean isWithinInterval(double controllerTime)
    {
+      clearPoints();
+
       if (comTrajectoryPoints.size() < 2)
       {
          return false;
@@ -184,16 +208,24 @@ public class CenterOfMassTrajectoryHandler
       return true;
    }
 
-   private void clearPoints()
+   public void clearPoints()
    {
       double currentTime = yoTime.getDoubleValue();
+      if (comTrajectoryPoints.size() != 0 && comTrajectoryPoints.getLast().getTime() < currentTime)
+      {
+         comTrajectoryPoints.clear();
+         numberOfPoints.set(0);
+         return;
+      }
+
       while (comTrajectoryPoints.size() > 1 && comTrajectoryPoints.get(1).getTime() < currentTime)
       {
          comTrajectoryPoints.remove(0);
       }
+      numberOfPoints.set(comTrajectoryPoints.size());
    }
 
-   private void packDesiredsAtTime(double time, Point3D comPosition, Vector3D comVelocity, Vector3D comAcceleration)
+   private void packDesiredsAtTime(double time, Point3DBasics comPosition, Vector3DBasics comVelocity, Vector3DBasics comAcceleration)
    {
       int endIndex = 0;
       while (comTrajectoryPoints.get(endIndex).getTime() < time)
