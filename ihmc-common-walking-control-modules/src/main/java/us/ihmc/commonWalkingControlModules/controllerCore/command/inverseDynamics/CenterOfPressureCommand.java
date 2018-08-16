@@ -19,7 +19,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * <p>
  * The center of pressure in this command has an associated frame. Note, that the controller core will use this
  * definition of the CoP for this command: the CoP is the location in the x-y plane of the provided frame at which the
- * x and y torques of the wrench exerted by this body are zero.
+ * x and y torques of the wrench exerted by the relevant body (or full robot) are zero.
  * </p>
  */
 public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>, VirtualModelControlCommand<CenterOfPressureCommand>
@@ -44,7 +44,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
 
    /**
     * The desired CoP. This object also provides the frame for the command: the wrench exerted by the
-    * contacting body in this frame will have zero z and y torque if expressed at the CoP location.
+    * contacting body in this frame will have zero x and y torque if expressed at the CoP location.
     */
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
