@@ -6,12 +6,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Random;
 
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();
