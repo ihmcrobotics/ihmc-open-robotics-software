@@ -286,7 +286,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       if (command.getEuclideanTrajectory().useCustomControlFrame())
       {
-         tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
+         command.getEuclideanTrajectory().getControlFramePose(controlFrame);
          taskspaceControlState.setControlFramePose(controlFrame);
       }
       else
