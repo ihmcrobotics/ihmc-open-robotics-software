@@ -146,7 +146,7 @@ public class WalkingMessageHandler
       footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
 
-      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
+      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
 
