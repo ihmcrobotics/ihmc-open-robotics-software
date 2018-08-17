@@ -158,6 +158,9 @@ public class PrecomputedICPPlanner
          hideViz();
       }
       currentlyBlendingICPTrajectories.set(false);
+
+      centerOfMassTrajectoryHandler.clearPointsInPast();
+      momentumTrajectoryHandler.clearPointsInPast();
    }
 
    public void computeAndBlend(double time, FixedFramePoint2DBasics desiredCapturePoint2dToPack, FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
@@ -193,6 +196,9 @@ public class PrecomputedICPPlanner
          currentlyBlendingICPTrajectories.set(false);
          hideViz();
       }
+
+      centerOfMassTrajectoryHandler.clearPointsInPast();
+      momentumTrajectoryHandler.clearPointsInPast();
    }
 
    public boolean isWithinInterval(double time)

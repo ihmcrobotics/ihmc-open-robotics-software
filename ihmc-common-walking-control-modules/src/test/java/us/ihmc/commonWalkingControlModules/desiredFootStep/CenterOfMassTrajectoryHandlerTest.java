@@ -143,14 +143,16 @@ public class CenterOfMassTrajectoryHandlerTest
       command1.getEuclideanTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       command1.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command1.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command1.getEuclideanTrajectory().setCommandId(0L);
       handler.handleComTrajectory(command1);
 
       // assume method x(t) = -1/2 * (t - 3.0)^3 + 3/2 * (t - 3.0)^2 for x and y and 0.0 for z
       CenterOfMassTrajectoryCommand command2 = new CenterOfMassTrajectoryCommand();
-      command2.getEuclideanTrajectory().setExecutionMode(ExecutionMode.QUEUE);
       command2.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(3.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command1.getEuclideanTrajectory().setPreviousCommandId(0L);
+      command2.getEuclideanTrajectory().setExecutionMode(ExecutionMode.QUEUE);
 
       yoTime.set(-20.9);
       handler.handleComTrajectory(command2);
