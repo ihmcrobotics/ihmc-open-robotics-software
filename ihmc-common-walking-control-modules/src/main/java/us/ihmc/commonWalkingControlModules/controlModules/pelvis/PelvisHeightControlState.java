@@ -201,14 +201,16 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       double offsetDesiredHeight = desiredHeight + offset.getValue();
       double adjustedDesiredHeight = avoidSingularities(offsetDesiredHeight);
 
-      trajectoryPoint.setToZero();
-      trajectoryPoint.setZ(adjustedDesiredHeight);
-
       command.clear();
+      trajectoryPoint.setToZero();
+
+      taskspaceControlState.getDesiredPose(tempPose);
+      trajectoryPoint.setZ(tempPose.getZ());
+      command.addTrajectoryPoint(0.0, trajectoryPoint, zeroVelocity);
+      trajectoryPoint.setZ(adjustedDesiredHeight);
       command.addTrajectoryPoint(time, trajectoryPoint, zeroVelocity);
 
       taskspaceControlState.setDefaultControlFrame();
-      taskspaceControlState.getDesiredPose(tempPose);
       taskspaceControlState.handleEuclideanTrajectoryCommand(command, tempPose);
    }
 
