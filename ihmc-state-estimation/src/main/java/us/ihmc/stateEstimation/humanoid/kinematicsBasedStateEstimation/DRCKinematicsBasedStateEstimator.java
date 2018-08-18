@@ -8,8 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -294,9 +293,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
+   public void initializeEstimator(RigidBodyTransform initialRootJointTranform)
    {
-      pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
+      pelvisLinearStateUpdater.initializeRootJointPosition(initialRootJointTranform.getTranslationVector());
       // Do nothing for the orientation since the IMU is trusted
    }
 
