@@ -123,8 +123,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public DRCKinematicsBasedStateEstimator createStateEstimator(YoVariableRegistry stateEstimatorRegistry,
-                                                                YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
+   public DRCKinematicsBasedStateEstimator createStateEstimator(YoVariableRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
