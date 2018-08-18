@@ -54,6 +54,7 @@ public class PrecomputedICPPlanner
    private final FramePoint3D desiredCoMPosition = new FramePoint3D();
    private final FramePoint3D desiredICPPosition = new FramePoint3D();
    private final FrameVector3D desiredICPVelocity = new FrameVector3D();
+   private final FrameVector3D filteredDesiredICPVelocity = new FrameVector3D();
 
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
@@ -123,7 +124,10 @@ public class PrecomputedICPPlanner
       double omega0 = this.omega0.getDoubleValue();
       centerOfMassTrajectoryHandler.packDesiredICPAtTime(time, omega0, desiredICPPosition, desiredICPVelocity, desiredCoMPosition);
 
-      computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, desiredCMPPosition);
+      filteredPrecomputedIcpVelocity.set(desiredICPVelocity);
+      filteredDesiredICPVelocity.set(filteredPrecomputedIcpVelocity);
+
+      computeDesiredCentroidalMomentumPivot(desiredICPPosition, filteredDesiredICPVelocity, omega0, desiredCMPPosition);
 
       desiredCoPPosition.set(desiredCMPPosition);
       // Can compute CoP if we have a momentum rate of change otherwise set it to match the CMP.
@@ -139,8 +143,6 @@ public class PrecomputedICPPlanner
       yoDesiredCoMPosition.set(desiredCoMPosition);
       yoDesiredCoPPosition.set(desiredCoPPosition);
       yoDesiredCMPPosition.set(desiredCMPPosition);
-
-      filteredPrecomputedIcpVelocity.set(desiredICPVelocity);
    }
 
    public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
