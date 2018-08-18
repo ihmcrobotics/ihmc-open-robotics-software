@@ -7,7 +7,7 @@ import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSimulationController implements RobotController
@@ -22,19 +22,19 @@ public class QuadrupedSimulationController implements RobotController
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
    private RobotController headController; //not implemented yet
-   private DRCKinematicsBasedStateEstimator stateEstimator; //not implemented yet
+   private StateEstimatorController stateEstimator; //not implemented yet
    private final DRCPoseCommunicator poseCommunicator;
    private boolean firstTick = true;
 
    private final RobotVisualizer robotVisualizer;
 
-   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
                                         DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, poseCommunicator, headController, null);
    }
 
-   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
                                         DRCPoseCommunicator poseCommunicator, RobotController headController, RobotVisualizer robotVisualizer)
    {
       this.sdfRobot = simulationRobot;
@@ -60,7 +60,7 @@ public class QuadrupedSimulationController implements RobotController
    @Override
    public void initialize()
    {
-      
+
    }
 
    @Override
