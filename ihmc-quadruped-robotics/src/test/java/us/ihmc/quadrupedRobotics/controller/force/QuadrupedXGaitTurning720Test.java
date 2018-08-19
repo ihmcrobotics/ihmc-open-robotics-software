@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -59,6 +61,8 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 370.6)
+   @Test(timeout = 1900000)
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -86,7 +90,9 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
          conductor.simulate();
       }
    }
-   
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 370.6)
+   @Test(timeout = 1900000)
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
