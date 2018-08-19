@@ -95,13 +95,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      testSingleWaypintInternal();
+      runSingleWaypintTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 30.1)
-   @Test(timeout = 150000)
-   private void testSingleWaypintInternal() throws SimulationExceededMaximumTimeException
+
+   private void runSingleWaypintTest() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(564574L);
 
@@ -177,7 +176,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testSingleWaypointAndAbort() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      testSingleWaypintInternal();
+      runSingleWaypintTest();
 
       StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
       drcSimulationTestHelper.publishToController(stopAll);
