@@ -61,6 +61,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
    public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -86,6 +88,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
    public void testFlatGroundPacing(double walkingSpeed)
    {
       stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());
@@ -113,6 +117,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1100000)
    public void testWalkingInASemiCircle(double endPhaseShift, double forwardVelocity, double angularVelocity)
    {
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
@@ -143,6 +149,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1100000)
    public void testPacingInASemiCircle(double forwardVelocity, double angularVelocity)
    {
       stepTeleopManager.getXGaitSettings().setStanceWidth(getPacingWidth());

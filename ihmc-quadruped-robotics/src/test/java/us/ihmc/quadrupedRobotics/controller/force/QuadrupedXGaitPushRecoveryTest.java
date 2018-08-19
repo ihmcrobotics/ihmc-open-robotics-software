@@ -74,6 +74,8 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
    public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -102,6 +104,8 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
    public void testScriptedWalkingWithPush(double endPhaseShift, double walkingSpeed, double stepDuration)
    {
 

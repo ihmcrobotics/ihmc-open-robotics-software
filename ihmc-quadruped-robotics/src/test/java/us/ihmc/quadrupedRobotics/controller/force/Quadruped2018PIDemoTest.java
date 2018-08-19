@@ -2,8 +2,10 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -76,7 +78,9 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
    {
       createTest();
@@ -124,6 +128,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
       createTest();
@@ -181,6 +187,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testMultiGait()
    {
       createTest();
@@ -286,6 +294,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingUpStaircase() throws IOException
    {
       double stepHeight = 0.13;
@@ -339,6 +349,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingDownStaircase() throws IOException
    {
       double stepHeight = 0.13;
@@ -404,6 +416,8 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       conductor.simulate();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testWalkingOverCinderBlocks() throws IOException
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -445,8 +459,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
-   } 
+   }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 5000000)
    public void testTrottingOverAggressiveBumpyTerrain() throws IOException
    {
       double xAmp1 = 0.03, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;

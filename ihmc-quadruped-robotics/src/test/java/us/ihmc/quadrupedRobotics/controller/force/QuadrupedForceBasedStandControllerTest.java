@@ -66,20 +66,27 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_LEFT_HIP_ROLL.getUnderBarName());
    }
+
 
    private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
    {
@@ -160,6 +167,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
+   @Test(timeout = 550000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
@@ -201,6 +210,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 390000)
    public void testStandingUpAndAdjustingCoM(double translationShift, double translationDelta, double orientationShift, double orientationDelta)
          throws IOException
    {
@@ -216,15 +227,15 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
-      testMovingCoM(initialBodyHeight + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialBodyHeight, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialBodyHeight - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialBodyHeight + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
-      testMovingCoM(initialBodyHeight, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight, orientationShift, -orientationShift, orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight - translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight + translationShift, -orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
+      runMovingCoM(initialBodyHeight, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
    }
 
-   private void testMovingCoM(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
-                              double orientationDelta)
+   private void runMovingCoM(double bodyHeight, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta,
+                             double orientationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
       stepTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll, 0.1);
