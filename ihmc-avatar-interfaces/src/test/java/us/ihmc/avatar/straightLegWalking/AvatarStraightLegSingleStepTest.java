@@ -41,6 +41,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
    private Double stepLength = null;
    private Double stepWidth = null;
    private Double stanceWidth = null;
+   private Double stepDownHeight = null;
+   private Double stepHeight = null;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -50,6 +52,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       stepLength = null;
       stepWidth = null;
       stanceWidth = null;
+      stepDownHeight = null;
+      stepHeight = null;
    }
 
    @After
@@ -73,6 +77,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       stepLength = null;
       stepWidth = null;
       stanceWidth = null;
+      stepDownHeight = null;
+      stepHeight = null;
    }
 
    public void setStepLength(double stepLength)
@@ -88,6 +94,16 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
    public void setStanceWidth(double stanceWidth)
    {
       this.stanceWidth = stanceWidth;
+   }
+
+   public void setStepDownHeight(double stepDownHeight)
+   {
+      this.stepDownHeight = stepDownHeight;
+   }
+
+   public void setStepHeight(double stepHeight)
+   {
+      this.stepHeight = stepHeight;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
@@ -214,12 +230,12 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 100000)
-   public void testSteppingDown(double stepDownHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
+   public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      testSteppingDown(stepDownHeight, stepDownHeight, stepLength, stanceWidth);
+      runSteppingDown(stepDownHeight, stepDownHeight, stepLength, stanceWidth);
    }
 
-   public void testSteppingDown(double stepDownHeight, double stepHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
+   public void runSteppingDown(double stepDownHeight, double stepHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -256,7 +272,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 100000)
-   public void testSteppingDownWithClosing(double stepDownHeight, double stepLength, double stanceWidth) throws SimulationExceededMaximumTimeException
+   public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
