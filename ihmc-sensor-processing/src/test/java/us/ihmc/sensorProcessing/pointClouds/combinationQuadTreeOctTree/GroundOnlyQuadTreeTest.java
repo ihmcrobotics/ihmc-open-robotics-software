@@ -1,9 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +53,12 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 30000)
+   public void testUnhandledPoints()
+   {
+      super.testUnhandledPoints();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test (timeout = 30000)
