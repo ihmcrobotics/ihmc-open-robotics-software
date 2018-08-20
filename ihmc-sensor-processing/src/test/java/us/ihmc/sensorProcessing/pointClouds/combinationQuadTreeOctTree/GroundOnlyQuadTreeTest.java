@@ -223,11 +223,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-/*   @Test(timeout=300000)
-   public void testUnhandledPoints()
-   {
-      super.testUnhandledPoints();
-   }*/
+
 
    @Override
    public HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)
