@@ -335,17 +335,12 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testSimpleStepOnBox()
-   {
-      testSimpleStepOnBox(true);
-   }
-
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testSimpleStepOnBox(boolean assertPlannerReturnedResult)
+   public void testSimpleStepOnBox()
    {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
+
       // create planar regions
       double stepHeight = 0.2;
       double boxSize = 1.0;
