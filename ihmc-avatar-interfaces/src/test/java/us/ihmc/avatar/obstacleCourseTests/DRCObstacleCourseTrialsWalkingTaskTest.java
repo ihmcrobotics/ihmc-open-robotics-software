@@ -8,9 +8,11 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -62,6 +64,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 64.7)
+   @Test(timeout = 320000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -102,6 +106,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.6)
+   @Test(timeout = 500000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -166,6 +172,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
    // We don't need step on/off two layer CinderBlocks anymore
    //Note: this test will fail because of bounding box that needs to be "tuned"
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.6)
+   @Test(timeout = 500000)
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

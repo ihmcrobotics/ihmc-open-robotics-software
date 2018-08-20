@@ -22,6 +22,8 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
    private static final double stepWidth = 0.3;
    private final Random random = new Random(727434726273L);
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustStraightLine()
    {
       testJustStraightLine(true);

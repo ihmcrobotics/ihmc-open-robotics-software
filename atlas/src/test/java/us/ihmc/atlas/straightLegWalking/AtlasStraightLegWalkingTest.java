@@ -20,7 +20,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
@@ -28,7 +28,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 400000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
@@ -36,7 +36,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
    @Test(timeout = 200000000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
@@ -44,49 +44,44 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
    @Test(timeout = 520000)
    public void testWalkingOverStairs() throws Exception
    {
       super.testWalkingOverStairs();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 200000)
-   public void testDropOffsWhileWalking() throws Exception
+   public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.08;
-      super.testDropOffsWhileWalking(stepDownHeight);
+      super.testDropOffsWhileWalking();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
    @Test(timeout = 680000)
-   public void testSteppingDown() throws Exception
+   public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.2;
-      super.testSteppingDown(stepDownHeight, 0.30, 1);
+      super.testSteppingDown();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 200000)
    public void testSteppingDownEveryTime() throws Exception
    {
-      double stepLength = 0.35;
-      double stepDownHeight = 0.15;
-      super.testSteppingDown(stepDownHeight, stepLength, 0);
+      super.testSteppingDownEveryTime();
    }
 
-   /*
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.EXCLUDE})
    @Test(timeout = 200000)
    public void testRandomHeightField() throws Exception
    {
-      double maxStepIncrease = 0.07;
-      double maxStepHeight = 0.04;
-      double minStepHeight = -0.12;
-      super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
+      super.testRandomHeightField();
    }
-   */
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -86,11 +86,16 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public abstract DRCRobotModel getRobotModel();
+   public abstract boolean doPelvisWarmup();
+
    @ContinuousIntegrationTest(estimatedDuration = 348.7)
    @Test(timeout = 1700000)
-   public void testFlatGroundWalking(DRCRobotModel robotModel, boolean doPelvisWarmup)
+   public void testFlatGroundWalking()
          throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      DRCRobotModel robotModel = getRobotModel();
+      boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();

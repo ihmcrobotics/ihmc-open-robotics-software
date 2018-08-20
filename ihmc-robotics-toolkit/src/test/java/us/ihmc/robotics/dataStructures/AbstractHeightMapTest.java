@@ -130,7 +130,9 @@ public abstract class AbstractHeightMapTest
       super.testUnhandledPoints();
    }
    */
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    protected void testUnhandledPoints()
    {
       HeightMapWithPoints simpleMap = getHeightMap(-63.5*RESOLUTION,-63.5*RESOLUTION,64.5*RESOLUTION,64.5*RESOLUTION,RESOLUTION);
@@ -163,6 +165,8 @@ public abstract class AbstractHeightMapTest
    
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOverridingOrigin(HeightMapWithPoints simpleMap)
    {
       double x;

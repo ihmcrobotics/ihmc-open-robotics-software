@@ -29,7 +29,10 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       double stepLength = 1.5;
       double stepWidth = 0.25;
 
-      super.testForwardStep(stepLength, stepWidth);
+      setStepLength(stepLength);
+      setStepWidth(stepWidth);
+
+      super.testForwardStep();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
@@ -39,20 +42,17 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       double stepLength = 1.0;
       double stepWidth = 0.25;
 
-      super.testForwardStepWithPause(stepLength, stepWidth);
+      setStepLength(stepLength);
+      setStepWidth(stepWidth);
+
+      super.testForwardStepWithPause();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 99990000)
    public void testForwardSteps() throws SimulationExceededMaximumTimeException
    {
-      double startingLength = 0.4;
-      double nominalStepLength = 0.75;
-      double stepWidth = 0.2;
-      int stepsToLength = 3;
-      int totalSteps = 20;
-
-      super.testForwardSteps(startingLength, nominalStepLength, stepsToLength, stepWidth, totalSteps);
+      super.testForwardSteps();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
@@ -62,18 +62,24 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       double stepWidth = 0.6;
       double stanceWidth = 0.25;
 
-      super.testWideStep(stepWidth, stanceWidth);
+      setStepWidth(stepWidth);
+      setStanceWidth(stanceWidth);
+
+      super.testWideStep();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 100000)
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.2;
       double stepHeight = 0.4;
       double stepLength = 0.4;
       double stanceWidth = 0.25;
-      super.testSteppingDown(/*stepDownHeight,*/ stepHeight, stepLength, stanceWidth);
+      setStepDownHeight(stepHeight);
+      setStepHeight(stepHeight);
+      setStepLength(stepLength);
+      setStanceWidth(stanceWidth);
+      super.testSteppingDown();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
@@ -83,7 +89,10 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       double stepDownHeight = 0.3;
       double stepLength = 0.4;
       double stanceWidth = 0.25;
-      super.testSteppingDownWithClosing(stepDownHeight, stepLength, stanceWidth);
+      setStepDownHeight(stepDownHeight);
+      setStepLength(stepLength);
+      setStanceWidth(stanceWidth);
+      super.testSteppingDownWithClosing();
    }
 
    @Override

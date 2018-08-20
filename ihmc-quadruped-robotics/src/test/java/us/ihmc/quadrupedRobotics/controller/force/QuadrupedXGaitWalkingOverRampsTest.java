@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import junit.framework.AssertionFailedError;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -42,7 +44,9 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2200000)
    public void testWalkingOverShallowRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.075, 0.75, 1.2);
@@ -50,6 +54,8 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkOverRamps(groundProfile, comHeightForRoughTerrain);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2000000)
    public void testWalkingOverAggressiveRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
@@ -96,12 +102,16 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       
       conductor.concludeTesting();
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
+   @Test(timeout = 1200000)
    public void testWalkingDownSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       walkSlope(0.2, initialPosition);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   @Test(timeout = 980000)
    public void testWalkingUpSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       walkSlope(-0.1, initialPosition);
