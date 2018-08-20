@@ -125,11 +125,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
 
-      FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
-      pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
-      drcSimulationTestHelper.publishToController(message);
-
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
@@ -142,8 +137,11 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       YoBoolean leftDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("leftFootSwingDoToeTouchdownIfPossible");
       YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("rightFootSwingDoToeTouchdownIfPossible");
+      YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationConstructionSet.getVariable("doToeOffIfPossibleInSingleSupport");
       leftDoToeTouchdownIfPossible.set(true);
       rightDoToeTouchdownIfPossible.set(true);
+//      doToeOffIfPossibleInSingleSupport.set(true);
+
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
