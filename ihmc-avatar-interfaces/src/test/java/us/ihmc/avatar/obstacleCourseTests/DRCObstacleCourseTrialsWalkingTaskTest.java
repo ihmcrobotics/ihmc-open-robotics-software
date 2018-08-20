@@ -63,7 +63,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 64.7)
    @Test(timeout = 320000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
@@ -79,10 +78,12 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
+
       FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
       drcSimulationTestHelper.publishToController(message);
+
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
@@ -99,6 +100,59 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       assertTrue(success);
 
       Point3D center = new Point3D(13.10268850797296, 14.090724695197087, 1.146368436759061);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   // We don't need step on/off two layer CinderBlocks anymore
+   //Note: this test will fail because of bounding box that needs to be "tuned"
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.6)
+   @Test(timeout = 500000)
+   public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml";
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
+
+      FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
+      drcSimulationTestHelper.publishToController(message);
+
+      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+      drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      setupCameraForWalkingOverCinderBlocks();
+
+      ThreadTools.sleep(0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+      YoBoolean leftDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("leftFootSwingDoToeTouchdownIfPossible");
+      YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("rightFootSwingDoToeTouchdownIfPossible");
+      leftDoToeTouchdownIfPossible.set(true);
+      rightDoToeTouchdownIfPossible.set(true);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D();
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
@@ -144,7 +198,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      if (MOVE_ROBOT_FOR_VIZ) moveRobotOutOfWayForViz();
+      if (MOVE_ROBOT_FOR_VIZ)
+         moveRobotOutOfWayForViz();
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -165,54 +220,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
          public void processData()
          {
             q_y.sub(4.0);
-         }};
+         }
+      };
 
       scs.applyDataProcessingFunction(dataProcessingFunction);
-   }
-
-   // We don't need step on/off two layer CinderBlocks anymore
-   //Note: this test will fail because of bounding box that needs to be "tuned"
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.6)
-   @Test(timeout = 500000)
-   public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml";
-
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      setupCameraForWalkingOverCinderBlocks();
-
-      ThreadTools.sleep(0);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
-
-      YoBoolean doToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
-      doToeTouchdownIfPossible.set(true);
-
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
-
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-
-      Point3D center = new Point3D();
-      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOverCinderBlocks()

@@ -7,6 +7,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsWalkingTaskTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -30,7 +31,8 @@ public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseT
    }
 
    @Override
-   //@Test see super comment.
+   @ContinuousIntegrationTest(estimatedDuration = 100.6)
+   @Test(timeout = 500000)
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testStepOnAndOffCinderBlocks();
