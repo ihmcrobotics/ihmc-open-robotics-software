@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -84,7 +86,9 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -1.0));
       conductor.simulate();
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 33.0)
+   @Test(timeout = 200000)
    public void testWalkingBackwardsSlow() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);

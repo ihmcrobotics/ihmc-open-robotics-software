@@ -10,9 +10,11 @@ import org.junit.After;
 import org.junit.Before;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -48,6 +50,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    private OneDoFJoint[] neckJoints;
    private int numberOfJoints;
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 29.0)
+   @Test(timeout = 140000)
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       setupTest();

@@ -19,12 +19,18 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
+   @Override
+   public boolean doPelvisWarmup()
+   {
+      return true;
+   }
+
 	@ContinuousIntegrationTest(estimatedDuration = 504.7)
 	@Test(timeout = 2500000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-      super.testFlatGroundWalking(robotModel, true);
+      super.testFlatGroundWalking();
    }
 
    @Override

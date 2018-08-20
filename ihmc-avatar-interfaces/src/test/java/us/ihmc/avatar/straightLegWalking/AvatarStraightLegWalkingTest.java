@@ -12,6 +12,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -213,6 +214,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 400000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -246,8 +249,11 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
+   @Test(timeout = 200000)
+   public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
+      double stepDownHeight = 0.08;
       double stepLength = 0.35;
       double dropHeight = -stepDownHeight;
 
@@ -334,7 +340,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
 
-
       numberOfSteps = message.getFootstepDataList().size();
       Point3D last1 = message.getFootstepDataList().get(numberOfSteps - 1).getLocation();
       Point3D last2 = message.getFootstepDataList().get(numberOfSteps - 2).getLocation();
@@ -349,7 +354,25 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testSteppingDown(double stepDownHeight, double stepLength, int stepsBeforeDrop) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
+   @Test(timeout = 680000)
+   public void testSteppingDown() throws SimulationExceededMaximumTimeException
+   {
+      double stepDownHeight = 0.2;
+      runSteppingDown(stepDownHeight, 0.30, 1);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  167.7)
+   @Test(timeout = 200000)
+   public void testSteppingDownEveryTime() throws Exception
+   {
+      double stepLength = 0.35;
+      double stepDownHeight = 0.15;
+      runSteppingDown(stepDownHeight, stepLength, 0);
+   }
+
+
+   private void runSteppingDown(double stepDownHeight, double stepLength, int stepsBeforeDrop) throws SimulationExceededMaximumTimeException
    {
       double dropHeight = -stepDownHeight;
 
@@ -434,7 +457,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.getFootstepDataList().size() * 2.0);
 
-
       numberOfSteps = message.getFootstepDataList().size();
       Point3D last1 = message.getFootstepDataList().get(numberOfSteps - 1).getLocation();
       Point3D last2 = message.getFootstepDataList().get(numberOfSteps - 2).getLocation();
@@ -449,7 +471,17 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testRandomHeightField(double maxStepHeight, double minStepHeight, double maxStepIncrease) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration =  167.7)
+   @Test(timeout = 200000)
+   public void testRandomHeightField() throws Exception
+   {
+      double maxStepIncrease = 0.07;
+      double maxStepHeight = 0.04;
+      double minStepHeight = -0.12;
+      runRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
+   }
+
+   private void runRandomHeightField(double maxStepHeight, double minStepHeight, double maxStepIncrease) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(10);
