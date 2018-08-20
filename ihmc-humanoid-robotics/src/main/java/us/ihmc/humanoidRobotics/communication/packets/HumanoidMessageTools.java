@@ -149,6 +149,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -320,6 +321,15 @@ public class HumanoidMessageTools
          message.getDelayTimes().add(desiredJointPositions[i]);
 
       return message;
+   }
+
+   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, double time, double desiredConfiguration,
+                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
+   {
+      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
+      messageToAppend.getDelayTimes().add(0.0);
+      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
+      jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
 
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)
@@ -1433,7 +1443,7 @@ public class HumanoidMessageTools
       }
       return message;
    }
-   
+
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double[] trajectoryTimes, double[] desiredJointPositions)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
