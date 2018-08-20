@@ -59,6 +59,12 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public abstract double getTranslationShift();
+   public abstract double getTranslationDelta();
+   public abstract double getOrientationShift();
+   public abstract double getOrientationDelta();
+
+
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 320000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
@@ -212,9 +218,13 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 390000)
-   public void testStandingUpAndAdjustingCoM(double translationShift, double translationDelta, double orientationShift, double orientationDelta)
+   public void testStandingUpAndAdjustingCoM()
          throws IOException
    {
+      double translationShift = getTranslationShift();
+      double translationDelta = getTranslationDelta();
+      double orientationShift = getOrientationShift();
+      double orientationDelta = getOrientationDelta();
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
