@@ -30,27 +30,4 @@ public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseT
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.6)
-   @Test(timeout = 500000)
-   public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
-   {
-      super.testStepOnAndOffCinderBlocks();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 64.7)
-   @Test(timeout = 320000)
-   public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
-   {
-      super.testStepOnCinderBlocks();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.6)
-   @Test(timeout = 500000)
-   public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
-   {
-      super.testStepOnCinderBlocksSlowlyWithDisturbance();
-   }
 }
