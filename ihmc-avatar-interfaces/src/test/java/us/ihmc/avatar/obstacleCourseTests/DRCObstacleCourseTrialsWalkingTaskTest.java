@@ -140,7 +140,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationConstructionSet.getVariable("doToeOffIfPossibleInSingleSupport");
       leftDoToeTouchdownIfPossible.set(true);
       rightDoToeTouchdownIfPossible.set(true);
-//      doToeOffIfPossibleInSingleSupport.set(true);
+      doToeOffIfPossibleInSingleSupport.set(true);
 
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
