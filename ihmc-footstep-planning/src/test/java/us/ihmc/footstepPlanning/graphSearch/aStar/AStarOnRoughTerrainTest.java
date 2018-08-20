@@ -26,65 +26,12 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    private FootstepNodeVisualization visualization = null;
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testWalkingAroundBox()
+   public boolean assertPlannerReturnedResult()
    {
-      super.testWalkingAroundBox();
+      return true;
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testWalkingAroundHole()
-   {
-      super.testWalkingAroundHole();
-   }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.5)
-   @Test(timeout = 30000)
-   public void testWithWall()
-   {
-      super.testWithWall(true);
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testOnStaircase()
-   {
-      super.testOnStaircase();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testSimpleGaps()
-   {
-      super.testSimpleGaps();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testStepUpsAndDownsScoringDifficult()
-   {
-      super.testStepUpsAndDownsScoringDifficult(false);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testSteppingStones()
-   {
-      super.testSteppingStones(!visualizePlanner);
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
-   public void testOverCinderBlockField()
-   {
-      super.testOverCinderBlockField(!visualizePlanner);
-   }
 
    @Before
    public void createPlanner()
