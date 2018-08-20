@@ -165,9 +165,8 @@ public abstract class AbstractHeightMapTest
    
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testOverridingOrigin(HeightMapWithPoints simpleMap)
+
+   protected void testOverridingOrigin(HeightMapWithPoints simpleMap)
    {
       double x;
       double y;
