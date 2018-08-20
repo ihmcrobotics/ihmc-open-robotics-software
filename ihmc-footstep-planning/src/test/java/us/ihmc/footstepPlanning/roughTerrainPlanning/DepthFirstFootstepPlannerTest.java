@@ -161,6 +161,22 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testSteppingStones();
    }
 
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testPartialGaps()
+   {
+      super.testPartialGaps();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 51000)
+   public void testSpiralStaircase()
+   {
+      super.testSpiralStaircase();
+   }
+
    @Before
    public void setupPlanner()
    {
