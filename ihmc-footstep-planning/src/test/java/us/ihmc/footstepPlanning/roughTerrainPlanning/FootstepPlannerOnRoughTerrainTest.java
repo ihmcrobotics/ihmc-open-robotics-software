@@ -367,8 +367,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
-   public void testSimpleStepOnBoxTwo(boolean assertPlannerReturnedResult)
+   public void testSimpleStepOnBoxTwo()
    {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       // create planar regions
       double stepHeight = 0.2;
       double boxSize = 1.0;
@@ -410,11 +411,8 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    @Test(timeout = 30000)
    public void testRandomEnvironment()
    {
-      testRandomEnvironment(true);
-   }
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
 
-   public void testRandomEnvironment(boolean assertPlannerReturnedResult)
-   {
       // define start and goal conditions
       FramePose3D initialStanceFootPose = new FramePose3D(worldFrame);
       RobotSide initialStanceSide = RobotSide.LEFT;
@@ -470,13 +468,12 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
    public void testPartialGaps()
    {
-      testPartialGaps(true);
-   }
-
-   public void testPartialGaps(boolean assertPlannerReturnedResult)
-   {
+      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double absAngle = Math.toRadians(15.0);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -534,6 +531,8 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
    public void testSpiralStaircase()
    {
       ConvexPolygon2D circlePolygon = new ConvexPolygon2D();

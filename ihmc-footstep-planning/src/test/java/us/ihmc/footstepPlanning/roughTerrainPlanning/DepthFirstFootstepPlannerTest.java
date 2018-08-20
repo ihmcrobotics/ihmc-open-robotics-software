@@ -70,7 +70,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBoxTwo(true);
+      super.testSimpleStepOnBoxTwo();
    }
 
    @Override
@@ -81,7 +81,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testRandomEnvironment(true);
+      super.testRandomEnvironment();
    }
 
    @Override
