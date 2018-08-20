@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -95,10 +94,10 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             sideDependentHandJointHandlers.get(robotSide).put(valkyrieHandJointName, handJointHandler);
          }
          ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName> handJointFingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName>(ValkyrieHandJointName.class,
-                                                                                                                                                                  robotSide,
-                                                                                                                                                                  handControllerTime,
-                                                                                                                                                                  sideDependentHandJointHandlers.get(robotSide),
-                                                                                                                                                                  registry);
+                                                                                                                                                                    robotSide,
+                                                                                                                                                                    handControllerTime,
+                                                                                                                                                                    sideDependentHandJointHandlers.get(robotSide),
+                                                                                                                                                                    registry);
          handJointFingerSetControllers.put(robotSide, handJointFingerSetController);
       }
 
@@ -115,10 +114,10 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             sideDependentFingerMotorHandlers.get(robotSide).put(valkyrieFingerMotorName, fingerMotorHandler);
          }
          ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class,
-                                                                                                                                                             robotSide,
-                                                                                                                                                             handControllerTime,
-                                                                                                                                                             sideDependentFingerMotorHandlers.get(robotSide),
-                                                                                                                                                             registry);
+                                                                                                                                                               robotSide,
+                                                                                                                                                               handControllerTime,
+                                                                                                                                                               sideDependentFingerMotorHandlers.get(robotSide),
+                                                                                                                                                               registry);
          fingerSetControllers.put(robotSide, fingerSetController);
       }
 
@@ -365,6 +364,10 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                                                                       sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
                   setEstimatedStopedValueOnHandJointFingerSetController(robotSide, fingerMotorName);
                }
+               else if (indexOfTrajectory == -2)
+               {
+                  ;
+               }
                else
                {
                   Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory()
@@ -390,6 +393,9 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
 
    private int hasTrajectory(us.ihmc.idl.IDLSequence.Byte namesInMessage, ValkyrieFingerMotorName fingerMotorName)
    {
+      if (fingerMotorName == ValkyrieFingerMotorName.ThumbMotorPitch2)
+         return -2;
+
       for (int i = 0; i < namesInMessage.size(); i++)
          if (fingerMotorName == ValkyrieFingerMotorName.fromByte(namesInMessage.get(i)))
             return i;
@@ -430,7 +436,8 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       for (int i = 1; i <= numberOfHandJoints; i++)
       {
          ValkyrieHandJointName handJointName = fingerMotorName.getCorrespondingJointName(i);
-         handJointFingerSetControllers.get(robotSide).appendStopPoint(handJointName, sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
+         handJointFingerSetControllers.get(robotSide).appendStopPoint(handJointName,
+                                                                      sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
       }
    }
 }
