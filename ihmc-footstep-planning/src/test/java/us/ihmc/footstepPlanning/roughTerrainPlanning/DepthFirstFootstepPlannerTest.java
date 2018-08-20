@@ -60,7 +60,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testSimpleStepOnBox(true);
+      super.testSimpleStepOnBox();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
