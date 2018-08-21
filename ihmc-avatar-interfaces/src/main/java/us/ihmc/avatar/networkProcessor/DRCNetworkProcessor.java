@@ -61,9 +61,7 @@ public class DRCNetworkProcessor
       if (!params.isWholeBodyTrajectoryToolboxEnabled())
          return;
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-
-      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isWholeBodyTrajectoryToolboxVisualizerEnabled());
+      new WholeBodyTrajectoryToolboxModule(robotModel, params.isWholeBodyTrajectoryToolboxVisualizerEnabled());
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
