@@ -1,22 +1,54 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
 import gnu.trove.list.TByteList;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public enum ConfigurationSpaceName
 {
-   X, Y, Z, ROLL, PITCH, YAW;
+   X, Y, Z, ROLL, PITCH, YAW, SE3;
+
+   private static final boolean generateSE3ByQuaternion = true;
 
    public static final ConfigurationSpaceName[] values = values();
 
-   public double getDefaultExplorationLowerLimit()
-   {
-      return -getDefaultExplorationAmplitude();
-   }
-
    public double getDefaultExplorationUpperLimit()
    {
-      return getDefaultExplorationAmplitude();
+      switch (this)
+      {
+      case X:
+      case Y:
+      case Z:
+         return 0.1;
+      case ROLL:
+      case PITCH:
+      case YAW:
+         return 0.3 * Math.PI;
+      case SE3:
+         return 1.0;
+      default:
+         throw new RuntimeException("Unexpected value: " + this);
+      }
+   }
+
+   public double getDefaultExplorationLowerLimit()
+   {
+      switch (this)
+      {
+      case X:
+      case Y:
+      case Z:
+         return -0.1;
+      case ROLL:
+      case PITCH:
+      case YAW:
+         return -0.3 * Math.PI;
+      case SE3:
+         return 0.0;
+      default:
+         throw new RuntimeException("Unexpected value: " + this);
+      }
    }
 
    public double getDefaultExplorationAmplitude()
@@ -26,39 +58,80 @@ public enum ConfigurationSpaceName
       case X:
       case Y:
       case Z:
-         return 1.0;
+         return 0.15;
       case ROLL:
       case PITCH:
       case YAW:
-         return 0.25 * Math.PI;
+         return 0.3 * Math.PI;
+      case SE3:
+         return 1.0;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
    }
 
-   public RigidBodyTransform getLocalRigidBodyTransform(double configuration)
+   /**
+    * All configuration value for SE3 should be 0~1.
+    */
+   public RigidBodyTransform getLocalRigidBodyTransform(double... configuration)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
 
       switch (this)
       {
       case X:
-         ret.appendTranslation(configuration, 0, 0);
+         ret.appendTranslation(configuration[0], 0, 0);
          break;
       case Y:
-         ret.appendTranslation(0, configuration, 0);
+         ret.appendTranslation(0, configuration[0], 0);
          break;
       case Z:
-         ret.appendTranslation(0, 0, configuration);
+         ret.appendTranslation(0, 0, configuration[0]);
          break;
       case ROLL:
-         ret.appendRollRotation(configuration);
+         ret.appendRollRotation(configuration[0]);
          break;
       case PITCH:
-         ret.appendPitchRotation(configuration);
+         ret.appendPitchRotation(configuration[0]);
          break;
       case YAW:
-         ret.appendYawRotation(configuration);
+         ret.appendYawRotation(configuration[0]);
+         break;
+      case SE3:
+         // uniform quat         
+         if (generateSE3ByQuaternion)
+         {
+            Quaternion quat = new Quaternion();
+
+            double s = configuration[0];
+            double s1 = Math.sqrt(1 - s);
+            double s2 = Math.sqrt(s);
+
+            double theta1 = Math.PI * 2 * configuration[1];
+            double theta2 = Math.PI * 2 * configuration[2];
+
+            quat.set(Math.sin(theta1) * s1, Math.cos(theta1) * s1, Math.sin(theta2) * s2, Math.cos(theta2) * s2);
+            quat.norm();
+
+            RotationMatrix rotationMatrix = new RotationMatrix(quat);
+            ret.setRotation(rotationMatrix);
+         }
+         // uniform roll pitch yaw
+         else
+         {
+            double theta1 = Math.PI * 2 * configuration[0];
+            double theta2 = Math.acos(1 - 2 * configuration[1]) + Math.PI * 0.5;
+            if (configuration[1] < 0.5)
+               if (theta2 < Math.PI)
+                  theta2 = theta2 + Math.PI;
+               else
+                  theta2 = theta2 - Math.PI;
+            double theta3 = Math.PI * 2 * configuration[2] - Math.PI;
+
+            ret.appendRollRotation(theta1);
+            ret.appendPitchRotation(theta2);
+            ret.appendYawRotation(theta3);
+         }
          break;
       }
 
@@ -86,7 +159,7 @@ public enum ConfigurationSpaceName
          byteArray[i] = enumArray[i].toByte();
       return byteArray;
    }
-   
+
    public static ConfigurationSpaceName[] fromBytes(TByteList enumListAsBytes)
    {
       if (enumListAsBytes == null)
@@ -96,7 +169,7 @@ public enum ConfigurationSpaceName
          enumArray[i] = fromByte(enumListAsBytes.get(i));
       return enumArray;
    }
-   
+
    public static ConfigurationSpaceName[] fromBytes(byte[] enumArrayAsBytes)
    {
       if (enumArrayAsBytes == null)
