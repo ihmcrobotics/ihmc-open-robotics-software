@@ -16,7 +16,7 @@ public class SliderboardDemo
          return;
       }
 
-      for (int slider = 1; slider <= 8; slider++)
+      for (int slider = 1; slider <= 16; slider++)
       {
          int sliderIndex = slider;
 
@@ -32,7 +32,7 @@ public class SliderboardDemo
          sliderboard.setSliderValue(0.0, sliderIndex);
       }
 
-      for (int button = 1; button <= 16; button++)
+      for (int button = 1; button <= 20; button++)
       {
          int buttonIndex = button;
 
@@ -49,13 +49,13 @@ public class SliderboardDemo
       Random random = new Random();
       for (int i = 0; i < 20; i++)
       {
-         int sliderIndex = random.nextInt(8) + 1;
+         int sliderIndex = random.nextInt(16) + 1;
          sliderboard.setSliderValue(random.nextDouble(), sliderIndex);
          ThreadTools.sleep(100);
       }
       for (int i = 0; i < 20; i++)
       {
-         int buttonIndex = random.nextInt(16) + 1;
+         int buttonIndex = random.nextInt(20) + 1;
          sliderboard.setButtonValue(random.nextBoolean(), buttonIndex);
          ThreadTools.sleep(100);
       }

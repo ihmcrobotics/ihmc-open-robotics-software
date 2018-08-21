@@ -8,6 +8,8 @@ package us.ihmc.robotics.sliderboard;
  */
 public interface MidiControlMap
 {
+   public static int INVALID = -1;
+
    /**
     * Gets the MIDI control channel (between 0 and 127) associated with the given slider index for a
     * sliderboard.

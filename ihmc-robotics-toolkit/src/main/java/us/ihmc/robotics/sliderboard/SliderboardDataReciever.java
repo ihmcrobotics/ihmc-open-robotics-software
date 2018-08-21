@@ -43,11 +43,11 @@ public class SliderboardDataReciever implements Receiver
       }
 
       int midiChannel = shortMessage.getData1();
-      if (channelMapper.getSliderIndex(midiChannel) != -1)
+      if (channelMapper.getSliderIndex(midiChannel) != MidiControlMap.INVALID)
       {
          handleSliderInput(channelMapper.getSliderIndex(midiChannel), shortMessage.getData2());
       }
-      else if (channelMapper.getButtonIndex(midiChannel) != -1)
+      else if (channelMapper.getButtonIndex(midiChannel) != MidiControlMap.INVALID)
       {
          handleButtonInput(channelMapper.getButtonIndex(midiChannel), shortMessage.getData2());
       }
@@ -84,7 +84,7 @@ public class SliderboardDataReciever implements Receiver
 
    public boolean addListener(SliderboardListener sliderListener, int sliderIndex)
    {
-      if (channelMapper.getSliderChannel(sliderIndex) == -1)
+      if (channelMapper.getSliderChannel(sliderIndex) == MidiControlMap.INVALID)
       {
          return false;
       }
@@ -99,7 +99,7 @@ public class SliderboardDataReciever implements Receiver
 
    public boolean addListener(ButtonListener buttonListener, int buttonIndex)
    {
-      if (channelMapper.getButtonChannel(buttonIndex) == -1)
+      if (channelMapper.getButtonChannel(buttonIndex) == MidiControlMap.INVALID)
       {
          return false;
       }
