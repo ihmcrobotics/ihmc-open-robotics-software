@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,7 +23,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
 
@@ -37,7 +41,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -55,7 +61,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -73,7 +81,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
@@ -125,7 +135,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(success);
    }
 
-   public void testPushICPOptimizationRandomPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -146,7 +158,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -163,7 +177,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOp
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);

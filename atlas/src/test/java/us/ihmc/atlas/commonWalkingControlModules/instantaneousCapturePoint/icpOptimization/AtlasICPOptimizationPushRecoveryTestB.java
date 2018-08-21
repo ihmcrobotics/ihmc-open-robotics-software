@@ -70,28 +70,32 @@ public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimization
    @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationDiagonalOutwardPushInSwing(0.2);
+      percentWeight = 0.2;
+      super.testPushICPOptimizationDiagonalOutwardPushInSwing();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing(0.13);
+      percentWeight = 0.13;
+      super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationLongBackwardPushInSwing(0.15);
+      percentWeight = 0.15;
+      super.testPushICPOptimizationLongBackwardPushInSwing();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationLongForwardPushInSwing(0.07);
+      percentWeight = 0.07;
+      super.testPushICPOptimizationLongForwardPushInSwing();
    }
 
    @Override
@@ -106,21 +110,24 @@ public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimization
    @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInSlowSwing(0.11);
+      percentWeight = 0.11;
+      super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInSwing(0.25);
+      percentWeight = 0.25;
+      super.testPushICPOptimizationOutwardPushInSwing();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationRandomPushInSwing(0.18);
+      percentWeight = 0.18;
+      super.testPushICPOptimizationRandomPushInSwing();
    }
 
    public static void main(String[] args)

@@ -48,11 +48,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    protected SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
+   protected Double percentWeight;
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      percentWeight = null;
    }
 
    @After
@@ -75,7 +79,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       pushRobotController = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+
+      percentWeight = null;
    }
+
 
    protected abstract DRCRobotModel getRobotModel();
 
