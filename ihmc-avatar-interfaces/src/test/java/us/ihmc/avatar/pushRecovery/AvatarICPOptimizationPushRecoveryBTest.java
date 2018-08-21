@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
-public abstract class AvatarICPOptimizationPushRecoveryTestB extends AvatarICPOptimizationPushRecoveryTestSetup
+public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
