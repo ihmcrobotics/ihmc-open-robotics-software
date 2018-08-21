@@ -26,6 +26,24 @@ public interface MidiControlMap
     */
    int getSliderIndex(int sliderChannel);
 
+   /**
+    * Gets the MIDI control channel (between 0 and 127) associated with the given button index for a
+    * sliderboard.
+    *
+    * @param buttonIndex the index of a button on the sliderboard.
+    * @return the MIDI control channel associated with the button index.
+    */
+   int getButtonChannel(int buttonIndex);
+
+   /**
+    * Gets the button index of the provided MIDI control channel. This is the inverse function of
+    * {@link #getButtonChannel(int)}.
+    *
+    * @param buttonChannel the MIDI channel associated with a button on the slider board.
+    * @return the index of the button corresponding to the provided MIDI channel.
+    */
+   int getButtonIndex(int buttonChannel);
+
    static boolean isInRange(int index, int min, int max)
    {
       return index >= min && index <= max;
