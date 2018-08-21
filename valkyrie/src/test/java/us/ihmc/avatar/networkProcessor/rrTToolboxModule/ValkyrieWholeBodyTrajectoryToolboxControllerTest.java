@@ -15,7 +15,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.AvatarWholeBodyTrajectoryToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.AvatarWholeBodyTrajectoryToolboxControllerTest;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
