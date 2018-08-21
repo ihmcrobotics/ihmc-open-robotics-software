@@ -60,6 +60,12 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    }
 
    @Override
+   public double getNominalHeight()
+   {
+      return 0.9;
+   }
+
+   @Override
    protected double getSizeScale()
    {
       return 1.0;
