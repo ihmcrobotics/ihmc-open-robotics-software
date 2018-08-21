@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules;
+package us.ihmc.avatar;
 
 import org.junit.After;
 import org.junit.Before;
