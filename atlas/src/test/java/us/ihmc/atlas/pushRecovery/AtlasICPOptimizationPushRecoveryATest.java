@@ -7,7 +7,7 @@ import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryTestB;
+import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryATest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import java.lang.Exception;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
-public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimizationPushRecoveryTestB
+public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryATest
 {
    @Override
    protected DRCRobotModel getRobotModel()
@@ -53,7 +53,6 @@ public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimization
                   };
                }
             };
-
          }
       };
 
@@ -66,76 +65,74 @@ public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimization
       return 1.0;
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
+   public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
       percentWeight = 0.2;
-      super.testPushICPOptimizationDiagonalOutwardPushInSwing();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
-   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.13;
-      super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
-   public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.15;
-      super.testPushICPOptimizationLongBackwardPushInSwing();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
-   public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.07;
-      super.testPushICPOptimizationLongForwardPushInSwing();
+      super.testPushICPOptimizationBackwardPushInSwing();
    }
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationNoPush() throws Exception
+   public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
-      super.testPushICPOptimizationNoPush();
+      percentWeight = 0.2;
+      super.testPushICPOptimizationForwardPushInSlowSwing();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationForwardPushInSwing() throws Exception
+   {
+      percentWeight = 0.29;
+      super.testPushICPOptimizationForwardPushInSwing();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationInwardPushInSwing() throws Exception
+   {
+      percentWeight = 0.17;
+      super.testPushICPOptimizationInwardPushInSwing();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
+   {
+      percentWeight = 0.05;
+      super.testPushICPOptimizationLongInwardPushInSwing();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 150000)
+   public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
+   {
+      percentWeight = 0.12;
+      super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
+   public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
-      percentWeight = 0.11;
-      super.testPushICPOptimizationOutwardPushInSlowSwing();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
-   public void testPushICPOptimizationOutwardPushInSwing() throws Exception
-   {
-      percentWeight = 0.25;
-      super.testPushICPOptimizationOutwardPushInSwing();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
-   public void testPushICPOptimizationRandomPushInSwing() throws Exception
-   {
-      percentWeight = 0.18;
-      super.testPushICPOptimizationRandomPushInSwing();
+      percentWeight = 0.12;
+      super.testPushICPOptimizationOutwardPushOnEachStep();
    }
 
    public static void main(String[] args)
    {
-      AtlasICPOptimizationPushRecoveryTestB test = new AtlasICPOptimizationPushRecoveryTestB();
+      AtlasICPOptimizationPushRecoveryATest test = new AtlasICPOptimizationPushRecoveryATest();
       try
       {
-         test.testPushICPOptimizationNoPush();
+         test.testPushICPOptimizationOutwardPushOnEachStep();
       }
       catch (Exception e)
       {
