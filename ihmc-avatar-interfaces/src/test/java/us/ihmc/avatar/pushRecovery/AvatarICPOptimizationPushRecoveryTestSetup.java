@@ -5,11 +5,14 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.opencv.core.Point3;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,6 +34,11 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.awt.*;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
+
 public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -50,6 +58,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    protected Double percentWeight;
+
+   public abstract double getNominalHeight();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -128,6 +138,29 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
       setupCamera(scs);
       ThreadTools.sleep(1000);
+   }
+
+   protected void validateTest(FootstepDataListMessage footsteps) throws SimulationExceededMaximumTimeException
+   {
+      validateTest(footsteps, true);
+   }
+
+   protected void validateTest(FootstepDataListMessage footsteps, boolean simulate) throws SimulationExceededMaximumTimeException
+   {
+      if (simulate)
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      List<FootstepDataMessage> footstepList = footsteps.getFootstepDataList();
+      int size = footstepList.size();
+      Point3D lastStep = footstepList.get(size - 1).getLocation();
+      Point3D secondToLastStep = footstepList.get(size - 2).getLocation();
+
+      Point3D goalPoint = new Point3D();
+      goalPoint.interpolate(lastStep, secondToLastStep, 0.5);
+      goalPoint.addZ(getNominalHeight());
+
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(goalPoint, new Vector3D(0.2, 0.2, 0.4));
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    private void setupCamera(SimulationConstructionSet scs)
