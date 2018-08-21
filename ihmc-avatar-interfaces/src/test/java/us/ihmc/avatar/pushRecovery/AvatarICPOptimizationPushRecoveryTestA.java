@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules;
+package us.ihmc.avatar.pushRecovery;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,13 +7,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -32,7 +31,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -57,7 +56,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -76,7 +75,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -95,7 +94,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
       setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -114,7 +113,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -133,7 +132,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOp
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
-   public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
