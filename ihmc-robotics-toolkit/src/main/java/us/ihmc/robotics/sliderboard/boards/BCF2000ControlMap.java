@@ -25,4 +25,26 @@ public class BCF2000ControlMap implements MidiControlMap
 
       return sliderChannel - 80;
    }
+
+   @Override
+   public int getButtonChannel(int buttonIndex)
+   {
+      if (!MidiControlMap.isInRange(buttonIndex, 1, 16))
+      {
+         return -1;
+      }
+
+      return buttonIndex + 64;
+   }
+
+   @Override
+   public int getButtonIndex(int buttonChannel)
+   {
+      if (!MidiControlMap.isInRange(buttonChannel, 65, 80))
+      {
+         return -1;
+      }
+
+      return buttonChannel - 64;
+   }
 }
