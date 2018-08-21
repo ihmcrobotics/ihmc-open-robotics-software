@@ -173,6 +173,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       message.getFootstepDataList().add().set(message5);
       message.getFootstepDataList().add().set(message6);
 
+      message.setAreFootstepsAdjustable(true);
+
       return message;
    }
 
@@ -210,6 +212,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       message.getFootstepDataList().add().set(message4);
       message.getFootstepDataList().add().set(message5);
       message.getFootstepDataList().add().set(message6);
+
+      message.setAreFootstepsAdjustable(true);
+
 
       return message;
    }
@@ -255,6 +260,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       message.getFootstepDataList().add().set(message4);
       message.getFootstepDataList().add().set(message5);
       message.getFootstepDataList().add().set(message6);
+
+      message.setAreFootstepsAdjustable(true);
 
       return message;
    }
