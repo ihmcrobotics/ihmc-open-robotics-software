@@ -1,5 +1,6 @@
 package us.ihmc.avatar.pushRecovery;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -14,7 +15,8 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
    @Test(timeout = 150000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -26,14 +28,17 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      validateTest(footsteps);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
+
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -50,15 +55,15 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
 
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      validateTest(footsteps);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footstepDataListMessage = createForwardWalkingFootstepMessage();
+      setupAndRunTest(footstepDataListMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -70,14 +75,16 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      validateTest(footstepDataListMessage);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -89,14 +96,16 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      validateTest(footsteps);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
-      setupAndRunTest(createSlowForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createSlowForwardWalkingFootstepMessage();
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -108,14 +117,16 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      validateTest(footsteps);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -127,14 +138,16 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      validateTest(footsteps);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
-      setupAndRunTest(createForwardWalkingFootstepMessage());
+      FootstepDataListMessage footsteps = createForwardWalkingFootstepMessage();
+      setupAndRunTest(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -179,5 +192,7 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       assertTrue(success);
+
+      validateTest(footsteps, false);
    }
 }
