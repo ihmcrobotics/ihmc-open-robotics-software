@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
+package us.ihmc.manipulation.planning.exploringSpatial;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
