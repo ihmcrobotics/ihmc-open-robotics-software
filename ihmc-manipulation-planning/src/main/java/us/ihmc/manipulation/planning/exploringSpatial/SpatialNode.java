@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.exploringSpatial;
+package us.ihmc.manipulation.planning.exploringSpatial;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
