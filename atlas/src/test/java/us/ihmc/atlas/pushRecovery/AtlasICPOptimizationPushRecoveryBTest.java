@@ -72,6 +72,18 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       return 0.9;
    }
 
+   @Override
+   public double getSlowSwingDuration()
+   {
+      return 1.2;
+   }
+
+   @Override
+   public double getSlowTransferDuration()
+   {
+      return 0.8;
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception

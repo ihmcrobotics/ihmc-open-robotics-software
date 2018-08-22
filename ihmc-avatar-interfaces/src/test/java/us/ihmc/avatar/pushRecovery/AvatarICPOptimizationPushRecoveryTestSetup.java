@@ -47,8 +47,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   protected static double simulationTime = 10.0;
-
    protected PushRobotController pushRobotController;
 
    protected double swingTime, transferTime;
@@ -60,6 +58,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    protected Double percentWeight;
 
    public abstract double getNominalHeight();
+
+   public abstract double getSlowTransferDuration();
+
+   public abstract double getSlowSwingDuration();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -136,7 +138,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      setupCamera(scs);
+      setupCamera();
       ThreadTools.sleep(1000);
    }
 
@@ -167,7 +169,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   private void setupCamera(SimulationConstructionSet scs)
+   private void setupCamera()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
       Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
@@ -240,8 +242,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
       FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
 
-      swingTime = 1.2;
-      transferTime = 0.8;
+      swingTime = getSlowSwingDuration();
+      transferTime = getSlowTransferDuration();
+
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       message.getFootstepDataList().add().set(message1);
       message.getFootstepDataList().add().set(message2);
