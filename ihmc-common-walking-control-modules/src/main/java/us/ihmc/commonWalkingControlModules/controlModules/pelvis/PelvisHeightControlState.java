@@ -205,6 +205,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       trajectoryPoint.setToZero();
 
       taskspaceControlState.getDesiredPose(tempPose);
+      tempPose.changeFrame(ReferenceFrame.getWorldFrame());
       trajectoryPoint.setZ(tempPose.getZ());
       command.addTrajectoryPoint(0.0, trajectoryPoint, zeroVelocity);
       trajectoryPoint.setZ(adjustedDesiredHeight);
