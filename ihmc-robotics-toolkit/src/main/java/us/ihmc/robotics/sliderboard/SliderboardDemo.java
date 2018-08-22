@@ -1,12 +1,14 @@
 package us.ihmc.robotics.sliderboard;
 
-import java.util.Random;
-
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class SliderboardDemo
 {
+   private static final int buttons = 16;
+   private static final int sliders = 16;
+
    public static void main(String[] args)
    {
       Sliderboard sliderboard = new Sliderboard();
@@ -16,7 +18,7 @@ public class SliderboardDemo
          return;
       }
 
-      for (int slider = 1; slider <= 16; slider++)
+      for (int slider = 1; slider <= sliders; slider++)
       {
          int sliderIndex = slider;
 
@@ -32,7 +34,7 @@ public class SliderboardDemo
          sliderboard.setSliderValue(0.0, sliderIndex);
       }
 
-      for (int button = 1; button <= 20; button++)
+      for (int button = 1; button <= buttons; button++)
       {
          int buttonIndex = button;
 
@@ -46,20 +48,43 @@ public class SliderboardDemo
          }, button);
       }
 
-      Random random = new Random();
-      for (int i = 0; i < 20; i++)
+      goToZero(sliderboard);
+
+      double time = 0.0;
+      double dt = 0.05;
+      double totalTime = 5.0;
+      int button = 1;
+
+      while (time < totalTime)
       {
-         int sliderIndex = random.nextInt(16) + 1;
-         sliderboard.setSliderValue(random.nextDouble(), sliderIndex);
-         ThreadTools.sleep(100);
-      }
-      for (int i = 0; i < 20; i++)
-      {
-         int buttonIndex = random.nextInt(20) + 1;
-         sliderboard.setButtonValue(random.nextBoolean(), buttonIndex);
-         ThreadTools.sleep(100);
+         for (int slider = 1 ; slider <= sliders; slider++)
+         {
+            double phase = Math.PI * slider / sliders + Math.PI;
+            sliderboard.setSliderValue(Math.max(Math.sin(time * 2.0 * Math.PI / totalTime + phase), 0.0), slider);
+         }
+
+         sliderboard.setButtonValue(false, (button - 1) == 0 ? buttons : button - 1);
+         sliderboard.setButtonValue(true, button);
+         button = button == buttons ? 1 : button + 1;
+
+         ThreadTools.sleep((int) Conversions.secondsToMilliseconds(dt));
+         time += dt;
       }
 
+      goToZero(sliderboard);
       sliderboard.close();
+   }
+
+   private static void goToZero(Sliderboard sliderboard)
+   {
+      for (int button = 1 ; button <= buttons; button++)
+      {
+         sliderboard.setButtonValue(false, button);
+      }
+      for (int slider = 1 ; slider <= sliders; slider++)
+      {
+         sliderboard.setSliderValue(0.0, slider);
+      }
+      ThreadTools.sleep(100);
    }
 }
