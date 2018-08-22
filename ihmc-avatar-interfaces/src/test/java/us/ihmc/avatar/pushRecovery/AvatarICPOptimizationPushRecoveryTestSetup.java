@@ -147,11 +147,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    protected void validateTest(FootstepDataListMessage footsteps, boolean simulate) throws SimulationExceededMaximumTimeException
    {
-      if (simulate)
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-
       List<FootstepDataMessage> footstepList = footsteps.getFootstepDataList();
       int size = footstepList.size();
+
+      if (simulate)
+      {
+         double duration = size * (footsteps.getDefaultSwingDuration() + footsteps.getDefaultTransferDuration());
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+      }
+
       Point3D lastStep = footstepList.get(size - 1).getLocation();
       Point3D secondToLastStep = footstepList.get(size - 2).getLocation();
 
