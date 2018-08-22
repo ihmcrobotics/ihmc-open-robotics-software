@@ -484,7 +484,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          messageLinearWeight.setToZero();
          if (weightMatrix.getWeightFrame() != null)
          {
-            messageAngularWeightFrame.set(weightMatrix.getWeightFrame().getNameBasedHashCode());
+            messageAngularWeightFrame.set(weightMatrix.getWeightFrame().hashCode());
          }
          else
          {
@@ -590,7 +590,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          messageLinearWeight.set(linearWeightMatrix.getXAxisWeight(), linearWeightMatrix.getYAxisWeight(), linearWeightMatrix.getZAxisWeight());
          if (angularWeightMatrix.getWeightFrame() != null)
          {
-            messageAngularWeightFrame.set(angularWeightMatrix.getWeightFrame().getNameBasedHashCode());
+            messageAngularWeightFrame.set(angularWeightMatrix.getWeightFrame().hashCode());
          }
          else
          {
@@ -598,7 +598,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          }
          if (linearWeightMatrix.getWeightFrame() != null)
          {
-            messageLinearWeightFrame.set(linearWeightMatrix.getWeightFrame().getNameBasedHashCode());
+            messageLinearWeightFrame.set(linearWeightMatrix.getWeightFrame().hashCode());
          }
          else
          {
@@ -681,7 +681,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          messageAngularWeightFrame.set(CommonReferenceFrameIds.NONE.getHashId());
          if (weightMatrix.getWeightFrame() != null)
          {
-            messageLinearWeightFrame.set(weightMatrix.getWeightFrame().getNameBasedHashCode());
+            messageLinearWeightFrame.set(weightMatrix.getWeightFrame().hashCode());
          }
          else
          {

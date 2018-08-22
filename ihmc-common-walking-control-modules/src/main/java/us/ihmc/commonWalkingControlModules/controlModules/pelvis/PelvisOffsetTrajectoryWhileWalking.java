@@ -92,7 +92,7 @@ public class PelvisOffsetTrajectoryWhileWalking
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, parentFrame);
+            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
          }
       };
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");

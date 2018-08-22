@@ -30,7 +30,7 @@ mainDependencies {
    compile group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.3.0'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.5.1'
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
 }
 

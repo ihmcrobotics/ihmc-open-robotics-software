@@ -75,8 +75,8 @@ public class YoReferencePose extends ReferenceFrame
 
    public void interpolate(YoReferencePose start, YoReferencePose goal, double alpha)
    {
-      start.getTransformToDesiredFrame(interpolationStartingPosition, parentFrame);
-      goal.getTransformToDesiredFrame(interpolationGoalPosition, parentFrame);
+      start.getTransformToDesiredFrame(interpolationStartingPosition, getParent());
+      goal.getTransformToDesiredFrame(interpolationGoalPosition, getParent());
 
       transformInterpolationCalculator.computeInterpolation(interpolationStartingPosition, interpolationGoalPosition, output, alpha);
       setAndUpdate(output);

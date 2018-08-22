@@ -147,7 +147,7 @@ public class RigidBodyControlManagerTest
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
       message.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -301,7 +301,7 @@ public class RigidBodyControlManagerTest
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
          message.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -413,7 +413,7 @@ public class RigidBodyControlManagerTest
       Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
       message.getControlFramePose().setPosition(controlFramePosition);
       message.getControlFramePose().setOrientation(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
