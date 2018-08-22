@@ -207,7 +207,6 @@ public abstract class TransferState extends WalkingState
          stepTiming.setTimings(Double.NaN, Double.NaN, Double.NaN);
       }
 
-      adjustTouchdownDuration();
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
       if (supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
@@ -231,31 +230,6 @@ public abstract class TransferState extends WalkingState
       FixedFramePoint3DBasics transferFootPosition = footstep.getFootstepPose().getPosition();
       double transferTime = walkingMessageHandler.getNextTransferTime();
       comHeightManager.transfer(transferFootPosition, transferTime, swingSide, extraToeOffHeight);
-   }
-
-   /**
-    * If we're using absolute timings and the swing was too long, we should reduce the touchdown
-    * duration
-    */
-   private void adjustTouchdownDuration()
-   {
-      if (!walkingMessageHandler.isNextFootstepUsingAbsoluteTiming())
-         return;
-
-      double originalSwingTime = stepTiming.getSwingTime();
-      double currentTime = controllerToolbox.getYoTime().getDoubleValue();
-      double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
-      double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
-      double percentageToShrinkTouchdown = MathTools.clamp(adjustedTransferTime / stepTiming.getTransferTime(), 0.0, 1.0);
-      double touchdownDuration = stepTiming.getTouchdownDuration();
-
-      if (Double.isFinite(touchdownDuration))
-      {
-         touchdownDuration = Math.max(0.0, touchdownDuration * percentageToShrinkTouchdown);
-      }
-
-      stepTiming.setTimings(originalSwingTime, touchdownDuration, adjustedTransferTime);
-      walkingMessageHandler.adjustTimings(0, stepTiming.getSwingTime(), touchdownDuration, stepTiming.getTransferTime());
    }
 
    protected void updateICPPlan()
