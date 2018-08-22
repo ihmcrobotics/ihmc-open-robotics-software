@@ -285,7 +285,8 @@ public class DynamicReachabilityCalculator
       }
 
       updateLegLengthLimits();
-      setupVisualizers(yoGraphicsListRegistry);
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }

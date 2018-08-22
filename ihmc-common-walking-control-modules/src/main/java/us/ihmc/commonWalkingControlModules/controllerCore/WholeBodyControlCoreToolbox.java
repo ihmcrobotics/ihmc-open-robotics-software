@@ -364,6 +364,8 @@ public class WholeBodyControlCoreToolbox
 
    public WrenchVisualizer getWrenchVisualizer()
    {
+      if (yoGraphicsListRegistry == null)
+         return null;
       if (wrenchVisualizer == null)
          wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
       return wrenchVisualizer;
