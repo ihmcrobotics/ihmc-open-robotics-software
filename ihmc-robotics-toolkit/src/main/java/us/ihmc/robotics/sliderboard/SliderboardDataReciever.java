@@ -51,6 +51,10 @@ public class SliderboardDataReciever implements Receiver
       {
          handleButtonInput(channelMapper.getButtonIndex(midiChannel), shortMessage.getData2());
       }
+      else if (channelMapper.getDelayVariationChannel() == midiChannel)
+      {
+         PrintTools.info("Got a 'Delay/Variation Send' message.");
+      }
       else
       {
          PrintTools.info("Unknown controller: " + midiChannel + " - " + shortMessage.getData2());
