@@ -54,6 +54,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -132,8 +133,8 @@ public class BalanceManager
    private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
-   private final YoDouble maxICPErrorBeforeSingleSupportX = new YoDouble("maxICPErrorBeforeSingleSupportX", registry);
-   private final YoDouble maxICPErrorBeforeSingleSupportY = new YoDouble("maxICPErrorBeforeSingleSupportY", registry);
+   private final DoubleProvider maxICPErrorBeforeSingleSupportX;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportY;
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -254,8 +255,8 @@ public class BalanceManager
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
-      maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
-      maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
+      maxICPErrorBeforeSingleSupportX = new DoubleParameter("maxICPErrorBeforeSingleSupportX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
+      maxICPErrorBeforeSingleSupportY = new DoubleParameter("maxICPErrorBeforeSingleSupportY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
       double pelvisTranslationICPSupportPolygonSafeMargin = walkingControllerParameters.getPelvisTranslationICPSupportPolygonSafeMargin();
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, pelvisTranslationICPSupportPolygonSafeMargin, bipedSupportPolygons, registry);
@@ -672,8 +673,8 @@ public class BalanceManager
       getICPError(icpError2d);
       ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
       icpError2d.changeFrame(leadingAnkleZUpFrame);
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getDoubleValue())
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue()));
+      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
+            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
    }
 
    public double getNormalizedEllipticICPError()
