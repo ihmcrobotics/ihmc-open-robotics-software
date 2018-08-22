@@ -53,7 +53,7 @@ public class SliderboardDataReciever implements Receiver
       }
       else
       {
-         PrintTools.info("Unknown controller: " + midiChannel);
+         PrintTools.info("Unknown controller: " + midiChannel + " - " + shortMessage.getData2());
          return;
       }
    }
