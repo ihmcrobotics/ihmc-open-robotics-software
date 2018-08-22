@@ -46,6 +46,13 @@ public interface MidiControlMap
     */
    int getButtonIndex(int buttonChannel);
 
+   /**
+    * Gets the channel associated with the "Delay/Variation Send" status.
+    *
+    * @return the index of the "Delay/Variation Send" controller.
+    */
+   int getDelayVariationChannel();
+
    static boolean isInRange(int index, int min, int max)
    {
       return index >= min && index <= max;

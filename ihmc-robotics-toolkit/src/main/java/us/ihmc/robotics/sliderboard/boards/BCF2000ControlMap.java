@@ -91,4 +91,10 @@ public class BCF2000ControlMap implements MidiControlMap
 
       return INVALID;
    }
+
+   @Override
+   public int getDelayVariationChannel()
+   {
+      return 94;
+   }
 }
