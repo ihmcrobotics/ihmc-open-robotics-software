@@ -15,12 +15,9 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -101,7 +98,7 @@ public class WholeBodyInverseKinematicsSolver
 
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
 
-      SpatialForceVector centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
+      Momentum centroidalMomentumSolution = inverseKinematicsSolution.getCentroidalMomentumSolution();
       yoAchievedMomentumLinear.set(centroidalMomentumSolution.getLinearPart());
       yoAchievedMomentumAngular.set(centroidalMomentumSolution.getAngularPart());
 
@@ -170,8 +167,8 @@ public class WholeBodyInverseKinematicsSolver
    private void recordMomentumRate(MomentumCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentum();
-      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumAngular, momentumRate, 0);
-      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumLinear, momentumRate, 3);
+      yoDesiredMomentumAngular.set(0, momentumRate);
+      yoDesiredMomentumLinear.set(3, momentumRate);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()

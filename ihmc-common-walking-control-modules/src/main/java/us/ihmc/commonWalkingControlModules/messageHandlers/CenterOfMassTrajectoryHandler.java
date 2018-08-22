@@ -115,7 +115,7 @@ public class CenterOfMassTrajectoryHandler extends EuclideanTrajectoryHandler
       return true;
    }
 
-   public void setPositionOffset(FrameVector3D offset)
+   public void setPositionOffset(FrameVector3DReadOnly offset)
    {
       this.offset.setIncludingFrame(offset);
    }
