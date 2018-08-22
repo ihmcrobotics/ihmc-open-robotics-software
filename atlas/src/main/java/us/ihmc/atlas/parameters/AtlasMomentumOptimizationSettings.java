@@ -31,9 +31,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double jointAccelerationWeight = 0.005;
    private final double jointJerkWeight = 1.6E-6;
    private final double jointTorqueWeight = 0.005;
-   private final Vector2D copWeight = new Vector2D(100.0, 200.0);
-   private final Vector2D copRateDefaultWeight = new Vector2D(0.32, 0.32);
-   private final Vector2D copRateHighWeight = new Vector2D(40.0, 160.0);
+   private final Vector2D copWeight = new Vector2D(0.001, 0.002);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.0000032, 0.0000032);
+   private final Vector2D copRateHighWeight = new Vector2D(0.0004, 0.0016);
 
    private final double rhoWeight;
    private final double rhoMin;
