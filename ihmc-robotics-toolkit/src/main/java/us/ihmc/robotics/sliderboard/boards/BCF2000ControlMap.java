@@ -9,7 +9,8 @@ import us.ihmc.robotics.sliderboard.MidiControlMap;
  *  - The sliders 1-8 map to the physical sliders on the board.</br>
  *  - The sliders 9-16 map to the knobs on the board.</br>
  *  - The buttons 1-16 map to the buttons below the knobs on the board.</br>
- *  - The buttons 17-20 map the buttons in the bottom right of the board.
+ *  - The buttons 17-20 map the buttons in the bottom right of the board.</br>
+ *  - The buttons 21-28 map the knobs as they can be used as buttons as well.
  * </p>
  *
  * @author Georg Wiedebach
@@ -61,6 +62,11 @@ public class BCF2000ControlMap implements MidiControlMap
       {
          return buttonIndex + 72;
       }
+      // knobs
+      if (MidiControlMap.isInRange(buttonIndex, 21, 28))
+      {
+         return buttonIndex + 12;
+      }
 
       return INVALID;
    }
@@ -76,6 +82,11 @@ public class BCF2000ControlMap implements MidiControlMap
       if (MidiControlMap.isInRange(buttonChannel, 89, 92))
       {
          return buttonChannel - 72;
+      }
+      // knobs
+      if (MidiControlMap.isInRange(buttonChannel, 33, 40))
+      {
+         return buttonChannel - 12;
       }
 
       return INVALID;
