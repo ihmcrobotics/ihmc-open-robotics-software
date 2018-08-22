@@ -98,7 +98,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            pelvisFrame.getTransformToDesiredFrame(transformToParent, parentFrame);
+            pelvisFrame.getTransformToDesiredFrame(transformToParent, getParent());
             transformToParent.setRotation(desiredPelvisOrientation);
          }
       };
@@ -110,7 +110,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, parentFrame);
+            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
          }
       };
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");

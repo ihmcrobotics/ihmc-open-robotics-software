@@ -1294,7 +1294,7 @@ public class DynamicReachabilityCalculator
 
       public void setXAxis(FrameVector3D xAxis)
       {
-         xAxis.changeFrame(parentFrame);
+         xAxis.changeFrame(getParent());
          this.xAxis.set(xAxis);
          this.xAxis.normalize();
          update();

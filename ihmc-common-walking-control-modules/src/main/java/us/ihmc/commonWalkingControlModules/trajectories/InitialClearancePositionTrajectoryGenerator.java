@@ -106,7 +106,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setIdentity();
-            rotationPlane.changeFrame(parentFrame);
+            rotationPlane.changeFrame(getParent());
             transformToParent.setRotation(rotationPlane);
          }
       };

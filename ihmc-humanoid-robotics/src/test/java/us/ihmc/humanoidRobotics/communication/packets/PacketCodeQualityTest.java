@@ -73,8 +73,8 @@ public class PacketCodeQualityTest
    {
       FrameInformation frameInformation = new FrameInformation();
       assertEquals(NameBasedHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), frameInformation.getTrajectoryReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), FrameInformation.WORLD_FRAME);
+      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
    }
 
    @SuppressWarnings("rawtypes")

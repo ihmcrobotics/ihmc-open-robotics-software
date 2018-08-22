@@ -21,7 +21,7 @@ public class OrientationFrame extends ReferenceFrame
 
    public void setOrientationAndUpdate(FrameQuaternion orientation)
    {
-      this.parentFrame.checkReferenceFrameMatch(orientation.getReferenceFrame());
+      this.getParent().checkReferenceFrameMatch(orientation.getReferenceFrame());
       this.frameOrientation.set(orientation);
       this.update();
    }

@@ -36,16 +36,16 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       originOne.setToZero(frameOne);
-      originOne.changeFrame(parentFrame);
+      originOne.changeFrame(getParent());
 
       originTwo.setToZero(frameTwo);
-      originTwo.changeFrame(parentFrame);
+      originTwo.changeFrame(getParent());
 
       // Place this frame between the two frames.
       translation.interpolate(originOne, originTwo, 0.5);
       transformToParent.setTranslation(translation);
 
-      vectorBetweenFrames.setToZero(parentFrame);
+      vectorBetweenFrames.setToZero(getParent());
       vectorBetweenFrames.sub(originTwo, originOne);
 
       xAxis.set(-vectorBetweenFrames.getY(), vectorBetweenFrames.getX());
@@ -74,7 +74,7 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       linearVelocityTwo.changeFrame(this);
       linearVelocity.setToZero(this);
       linearVelocity.interpolate(linearVelocityOne, linearVelocityTwo, 0.5);
-      twistRelativeToParentToPack.setToZero(this, parentFrame, this);
+      twistRelativeToParentToPack.setToZero(this, getParent(), this);
       twistRelativeToParentToPack.setLinearPart(linearVelocity);
 
       linearVelocityOne.sub(linearVelocity);
