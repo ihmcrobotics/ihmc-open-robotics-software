@@ -501,8 +501,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void doAction()
    {
-      controllerToolbox.update();
-
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
