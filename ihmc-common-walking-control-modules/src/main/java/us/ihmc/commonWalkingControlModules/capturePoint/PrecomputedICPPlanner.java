@@ -70,29 +70,32 @@ public class PrecomputedICPPlanner
 
       parentRegistry.addChild(registry);
 
-      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("Desired ICP Precomputed", yoDesiredICPPosition, 0.005, Yellow(),
-                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsList.add(desiredICPPositionGraphic);
-      artifactList.add(desiredICPPositionGraphic.createArtifact());
-
-      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("Desired CoM Precomputed", yoDesiredCoMPosition, 0.003, Black(),
-                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsList.add(desiredCenterOfMassPositionViz);
-      artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
-
-      YoGraphicPosition desiredCoPPositionViz = new YoGraphicPosition("Perfect CoP Precomputed", yoDesiredCoPPosition, 0.005, BlueViolet(),
-                                                                      GraphicType.DIAMOND);
-      YoGraphicPosition desiredCMPPositionViz = new YoGraphicPosition("Perfect CMP Precomputed", yoDesiredCMPPosition, 0.005, BlueViolet());
-
-      artifactList.add(desiredCoPPositionViz.createArtifact());
-      yoGraphicsList.add(desiredCMPPositionViz);
-      artifactList.add(desiredCMPPositionViz.createArtifact());
-
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+         ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+         
+         YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("Desired ICP Precomputed", yoDesiredICPPosition, 0.005, Yellow(),
+                                                                             GraphicType.BALL_WITH_ROTATED_CROSS);
+         yoGraphicsList.add(desiredICPPositionGraphic);
+         artifactList.add(desiredICPPositionGraphic.createArtifact());
+         
+         YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("Desired CoM Precomputed", yoDesiredCoMPosition, 0.003, Black(),
+                                                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
+         yoGraphicsList.add(desiredCenterOfMassPositionViz);
+         artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
+         
+         YoGraphicPosition desiredCoPPositionViz = new YoGraphicPosition("Perfect CoP Precomputed", yoDesiredCoPPosition, 0.005, BlueViolet(),
+                                                                         GraphicType.DIAMOND);
+         YoGraphicPosition desiredCMPPositionViz = new YoGraphicPosition("Perfect CMP Precomputed", yoDesiredCMPPosition, 0.005, BlueViolet());
+         
+         artifactList.add(desiredCoPPositionViz.createArtifact());
+         yoGraphicsList.add(desiredCMPPositionViz);
+         artifactList.add(desiredCMPPositionViz.createArtifact());
+         
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
+      }
 
       hideViz();
    }

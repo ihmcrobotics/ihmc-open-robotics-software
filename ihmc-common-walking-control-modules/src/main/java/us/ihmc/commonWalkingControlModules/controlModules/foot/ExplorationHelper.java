@@ -104,7 +104,8 @@ public class ExplorationHelper
 
    private void reset()
    {
-      yoDesiredCop.setToNaN();
+      if (yoDesiredCop != null)
+         yoDesiredCop.setToNaN();
       commandWeight.set(0.0, 0.0);
       centerOfPressureCommand.setWeight(commandWeight);
       lastCornerCropped = 0;
