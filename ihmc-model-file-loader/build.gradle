@@ -33,7 +33,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.3"
 }
 
 testDependencies {
