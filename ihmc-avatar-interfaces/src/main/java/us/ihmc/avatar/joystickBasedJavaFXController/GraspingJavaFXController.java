@@ -1,0 +1,129 @@
+package us.ihmc.avatar.joystickBasedJavaFXController;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import javafx.animation.AnimationTimer;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.WholeBodyTrajectoryToolboxOutputConverter;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.Ros2Node;
+
+/**
+ * What to do this.
+ * Handler grasping object.
+ * Communicate with WholeBodyTrajectoryToolbox.
+ * Control fingers.
+ * Visualize object and preview of motion.
+ */
+
+public class GraspingJavaFXController
+{
+   private final FullHumanoidRobotModel fullRobotModel;
+
+   private final WholeBodyTrajectoryToolboxOutputConverter outputConverter;
+
+   private final SideDependentList<AtomicReference<Boolean>> sendFingerMessages = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredThumbRolls = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredThumbPitchs = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredThumbPitch2s = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredIndexes = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredMiddles = new SideDependentList<>();
+   private final SideDependentList<AtomicReference<Double>> desiredPinkys = new SideDependentList<>();
+
+   private final AnimationTimer animationTimer;
+
+   private final Group rootNode = new Group();
+
+   private final static double timeDurationForFinger = 2.0;
+
+   private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
+   private final IHMCROS2Publisher<ValkyrieHandFingerTrajectoryMessage> handFingerTrajectoryMessagePublisher;
+
+   public GraspingJavaFXController(String robotName, JavaFXMessager messager, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                   JavaFXRobotVisualizer javaFXRobotVisualizer)
+   {
+      fullRobotModel = javaFXRobotVisualizer.getFullRobotModel();
+      outputConverter = new WholeBodyTrajectoryToolboxOutputConverter(fullRobotModelFactory);
+
+      sendFingerMessages.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightSendMessage, false));
+      sendFingerMessages.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftSendMessage, false));
+
+      desiredThumbRolls.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightThumbRoll, 0.0));
+      desiredThumbPitchs.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightThumb, 0.0));
+      desiredThumbPitch2s.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightThumb2, 0.0));
+      desiredIndexes.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightIndex, 0.0));
+      desiredMiddles.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightMiddle, 0.0));
+      desiredPinkys.put(RobotSide.RIGHT, messager.createInput(GraspingJavaFXTopics.RightPinky, 0.0));
+
+      desiredThumbRolls.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftThumbRoll, 0.0));
+      desiredThumbPitchs.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftThumb, 0.0));
+      desiredThumbPitch2s.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftThumb2, 0.0));
+      desiredIndexes.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftIndex, 0.0));
+      desiredMiddles.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftMiddle, 0.0));
+      desiredPinkys.put(RobotSide.LEFT, messager.createInput(GraspingJavaFXTopics.LeftPinky, 0.0));
+
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+
+      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
+      handFingerTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, ValkyrieHandFingerTrajectoryMessage.class, subscriberTopicNameGenerator);
+
+      animationTimer = new AnimationTimer()
+      {
+         @Override
+         public void handle(long arg0)
+         {
+            sendDesiredFingerConfigurationMessage();
+         }
+      };
+   }
+
+   private void sendDesiredFingerConfigurationMessage()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (sendFingerMessages.get(robotSide).get())
+         {
+            sendFingerMessages.get(robotSide).set(false);
+
+            ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
+            message.setRobotSide(robotSide.toByte());
+
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 0, timeDurationForFinger, desiredThumbRolls.get(robotSide).get(), message);
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 1, timeDurationForFinger, desiredThumbPitchs.get(robotSide).get(), message);
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 2, timeDurationForFinger, desiredThumbPitch2s.get(robotSide).get(), message);
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 3, timeDurationForFinger, desiredIndexes.get(robotSide).get(), message);
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 4, timeDurationForFinger, desiredMiddles.get(robotSide).get(), message);
+            HumanoidMessageTools.appendDesiredFingerConfiguration((byte) 5, timeDurationForFinger, desiredPinkys.get(robotSide).get(), message);
+
+            handFingerTrajectoryMessagePublisher.publish(message);
+         }
+      }
+   }
+
+   public void start()
+   {
+      animationTimer.start();
+   }
+
+   public void stop()
+   {
+      animationTimer.stop();
+   }
+
+   public Node getRootNode()
+   {
+      return rootNode;
+   }
+}
