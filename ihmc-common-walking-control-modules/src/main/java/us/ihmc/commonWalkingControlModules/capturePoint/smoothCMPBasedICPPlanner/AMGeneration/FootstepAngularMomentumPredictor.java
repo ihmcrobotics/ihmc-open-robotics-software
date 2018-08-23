@@ -538,14 +538,14 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       else
       {
          upcomingCoPsInFootsteps.get(footstepIndex).getSupportFootLocation(tempFramePoint1);
-         segmentSwingFootPositionTrajectory.setQuinticWithZeroTerminalAcceleration(0.0, phaseDuration, tempFramePoint1, zeroVector, tempFramePoint1, zeroVector);
+         segmentSwingFootPositionTrajectory.setConstant(0.0, phaseDuration, tempFramePoint1);
       }
    }
 
    private void setSupportFootTrajectoryForPhase(int footstepIndex, WalkingTrajectoryType phase, double phaseDuration)
    {
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSupportFootLocation(tempFramePoint1);
-      segmentSupportFootPositionTrajectory.setQuinticWithZeroTerminalAcceleration(0.0, phaseDuration, tempFramePoint1, zeroVector, tempFramePoint1, zeroVector);
+      segmentSupportFootPositionTrajectory.setConstant(0.0, phaseDuration, tempFramePoint1);
    }
 
    private final FrameTrajectory3D relativeSwingFootTrajectory = new FrameTrajectory3D(2 * maxNumberOfTrajectoryCoefficients, worldFrame);
