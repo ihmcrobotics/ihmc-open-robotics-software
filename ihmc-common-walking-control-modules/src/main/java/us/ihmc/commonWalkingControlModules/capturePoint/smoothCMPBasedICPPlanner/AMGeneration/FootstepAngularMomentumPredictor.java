@@ -13,8 +13,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
@@ -23,7 +21,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -39,6 +36,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroVector = new FrameVector3D();
+   private static final FramePoint3D zeroPosition = new FramePoint3D();
    private static final int maxNumberOfTrajectoryCoefficients = 7;
    private static final int numberOfSwingSegments = 3;
    private static final int numberOfTransferSegments = 2;
@@ -49,7 +47,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final int maxNumberOfFootstepsToConsider = 4;
    private final TrajectoryMathTools trajectoryMathTools;
 
-   private final YoBoolean computePredictedAngularMomentum;
+   private final YoBoolean computeSwingAngularMomentum;
+   private final YoBoolean computeTransferAngularMomentum;
    private final YoInteger numberOfFootstepsToConsider;
    private CoPPointName entryCoPName;
 
@@ -122,7 +121,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       this.DEBUG = debug;
       String fullPrefix = namePrefix + "AngularMomentum";
       this.trajectoryMathTools = new TrajectoryMathTools(2 * maxNumberOfTrajectoryCoefficients);
-      this.computePredictedAngularMomentum = new YoBoolean(fullPrefix + "ComputePredictedAngularMomentum", registry);
+      this.computeSwingAngularMomentum = new YoBoolean(fullPrefix + "ComputeSwingAngularMomentum", registry);
+      this.computeTransferAngularMomentum = new YoBoolean(fullPrefix + "ComputeTransferAngularMomentum", registry);
       this.numberOfFootstepsToConsider = new YoInteger(fullPrefix + "MaxFootsteps", registry);
       this.gravityZ = new YoDouble("AngularMomentumGravityZ", parentRegistry);
       omega0.addVariableChangedListener(new VariableChangedListener()
@@ -262,7 +262,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
    {
       AngularMomentumEstimationParameters angularMomentumParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
-      this.computePredictedAngularMomentum.set(smoothCMPPlannerParameters.planWithAngularMomentum());
+      this.computeSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
+      this.computeTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
       this.numberOfFootstepsToConsider.set(smoothCMPPlannerParameters.getNumberOfFootstepsToConsider());
       this.entryCoPName = smoothCMPPlannerParameters.getEntryCoPName();
       this.swingLegMass.set(totalMass * angularMomentumParameters.getPercentageSwingLegMass());
@@ -321,7 +322,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void update(double currentTime)
    {
-      if (activeTrajectory != null && computePredictedAngularMomentum.getBooleanValue())
+      if (activeTrajectory != null && computePredictedAngularMomentum())
          activeTrajectory.update(currentTime - initialTime, desiredAngularMomentum, desiredTorque, desiredRotatum);
       else
       {
@@ -408,7 +409,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                swingSwingFootTrajectories.get(footstepIndex).set(segmentSwingFootPositionTrajectory);
                swingSupportFootTrajectories.get(footstepIndex).set(segmentSupportFootPositionTrajectory);
             }
-            calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory);
+            calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory, initialWalkingPhase);
             swingAngularMomentumTrajectories.get(footstepIndex).set(estimatedAngularMomentumTrajectory);
             phaseTime += copPointsInFoot.get(j).getTime();
          }
@@ -443,7 +444,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                   swingSupportFootTrajectories.get(stepIndex).set(segmentSupportFootPositionTrajectory);
                }
             }
-            calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory);
+            calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory, currentWalkingPhase);
             if(currentWalkingPhase == WalkingTrajectoryType.TRANSFER)
             {
                transferAngularMomentumTrajectories.get(stepIndex).set(estimatedAngularMomentumTrajectory);
@@ -481,7 +482,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
                transferSwingFootTrajectories.get(numberOfSteps).set(segmentSwingFootPositionTrajectory);
                transferSupportFootTrajectories.get(numberOfSteps).set(segmentSupportFootPositionTrajectory);
          }
-         calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory);
+         calculateAngularMomentumTrajectory(estimatedAngularMomentumTrajectory, currentWalkingPhase);
          transferAngularMomentumTrajectories.get(numberOfSteps).set(estimatedAngularMomentumTrajectory);
          phaseTime += copPointsInFoot.get(j).getTime();
       }
@@ -556,14 +557,33 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final FrameTrajectory3D relativeStanceFootVelocity = new FrameTrajectory3D(2 * maxNumberOfTrajectoryCoefficients, worldFrame);
    private final FrameTrajectory3D stanceFootMomentumTrajectory = new FrameTrajectory3D(2 * maxNumberOfTrajectoryCoefficients, worldFrame);
 
-   private void calculateAngularMomentumTrajectory(FrameTrajectory3D estimatedAngularMomentumTrajectoryToPack)
+   private void calculateAngularMomentumTrajectory(FrameTrajectory3D estimatedAngularMomentumTrajectoryToPack, WalkingTrajectoryType phase)
    {
-      computeFootMomentum(swingFootMomentumTrajectory, relativeSwingFootTrajectory, relativeSwingFootVelocity, segmentSwingFootPositionTrajectory,
-                          segmentSwingFootVelocityTrajectory, segmentCoMPositionTrajectory, segmentCoMVelocityTrajectory, swingLegMass.getDoubleValue(), trajectoryMathTools);
-      computeFootMomentum(stanceFootMomentumTrajectory, relativeStanceFootTrajectory, relativeStanceFootVelocity, segmentSupportFootPositionTrajectory,
-                          segmentSupportFootVelocityTrajectory, segmentCoMPositionTrajectory, segmentCoMVelocityTrajectory, supportLegMass.getDoubleValue(), trajectoryMathTools);
+      if(calculateAngularMomentumForPhase(phase))
+      {
+         computeFootMomentum(swingFootMomentumTrajectory, relativeSwingFootTrajectory, relativeSwingFootVelocity, segmentSwingFootPositionTrajectory,
+                             segmentSwingFootVelocityTrajectory, segmentCoMPositionTrajectory, segmentCoMVelocityTrajectory, swingLegMass.getDoubleValue(), trajectoryMathTools);
+         computeFootMomentum(stanceFootMomentumTrajectory, relativeStanceFootTrajectory, relativeStanceFootVelocity, segmentSupportFootPositionTrajectory,
+                             segmentSupportFootVelocityTrajectory, segmentCoMPositionTrajectory, segmentCoMVelocityTrajectory, supportLegMass.getDoubleValue(), trajectoryMathTools);
 
-      TrajectoryMathTools.add(estimatedAngularMomentumTrajectoryToPack, stanceFootMomentumTrajectory, swingFootMomentumTrajectory);
+         TrajectoryMathTools.add(estimatedAngularMomentumTrajectoryToPack, stanceFootMomentumTrajectory, swingFootMomentumTrajectory);
+      }
+      else
+      {
+         estimatedAngularMomentumTrajectoryToPack.setConstant(segmentCoMPositionTrajectory.getInitialTime(), segmentCoMPositionTrajectory.getFinalTime(), zeroPosition);
+      }
+   }
+
+   private boolean calculateAngularMomentumForPhase(WalkingTrajectoryType phase)
+   {
+      if(phase == WalkingTrajectoryType.SWING)
+      {
+         return computeSwingAngularMomentum.getBooleanValue();
+      }
+      else
+      {
+         return computeTransferAngularMomentum.getBooleanValue();
+      }
    }
 
    private static void computeFootMomentum(FrameTrajectory3D momentumTrajectoryToPack, FrameTrajectory3D relativePositionTrajectoryToPack,
@@ -579,7 +599,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    public void getPredictedCenterOfMassPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
-      if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
+      if (DEBUG && computePredictedAngularMomentum())
       {
          activeCoMTrajectory.update(time - initialTime);
          activeCoMTrajectory.getFramePosition(tempFramePoint1);
@@ -594,7 +614,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    public void getPredictedCenterOfMassPosition(double time)
    {
-      if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
+      if (DEBUG && computePredictedAngularMomentum())
       {
          activeCoMTrajectory.update(time - initialTime);
          activeCoMTrajectory.getFramePosition(tempFramePoint1);
@@ -608,7 +628,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    public void getPredictedFootPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
-      if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
+      if (DEBUG && computePredictedAngularMomentum())
       {
          activeSwingFootTrajectory.update(time - initialTime);
          activeSwingFootTrajectory.getFramePosition(tempFramePoint1);
@@ -631,7 +651,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    public void getPredictedFeetPosition(double time)
    {
-      if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
+      if (DEBUG && computePredictedAngularMomentum())
       {
          activeSwingFootTrajectory.update(time - initialTime);
          activeSwingFootTrajectory.getFramePosition(tempFramePoint1);
@@ -654,7 +674,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public List<? extends AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
    {
-      if (computePredictedAngularMomentum.getBooleanValue())
+      if (computeTransferAngularMomentum.getBooleanValue())
          return transferAngularMomentumTrajectories; //null
       else
          return null;
@@ -663,10 +683,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public List<? extends AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
    {
-      if (computePredictedAngularMomentum.getBooleanValue())
+      if (computeSwingAngularMomentum.getBooleanValue())
          return swingAngularMomentumTrajectories; //null
       else
          return null;
+   }
+
+   private boolean computePredictedAngularMomentum()
+   {
+      return computeSwingAngularMomentum.getBooleanValue() || computeTransferAngularMomentum.getBooleanValue();
    }
 
    private class TrajectoryDebug extends YoSegmentedFrameTrajectory3D
