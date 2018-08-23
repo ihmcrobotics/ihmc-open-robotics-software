@@ -172,9 +172,11 @@ public class ControllerNetworkSubscriber
             if (!collector.isCollecting())
             {
                publisher.publish(collector.startCollecting(messageCollection));
-               break;
+               return;
             }
          }
+
+         PrintTools.warn("No collector available to process the MessageCollection with ID: " + messageCollection.getSequenceId());
       });
    }
 
