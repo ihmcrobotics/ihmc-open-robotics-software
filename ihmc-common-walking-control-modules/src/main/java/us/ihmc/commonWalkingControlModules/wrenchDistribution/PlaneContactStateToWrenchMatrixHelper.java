@@ -312,6 +312,13 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    public void computeCopObjectiveJacobian(DenseMatrix64F jacobianToPack, FramePoint2DReadOnly desiredCoP)
    {
+      if (desiredCoP.containsNaN())
+      {
+         jacobianToPack.reshape(2, rhoSize);
+         jacobianToPack.zero();
+         return;
+      }
+
       desiredCoP.checkReferenceFrameMatch(planeFrame);
 
       int fzIndex = 5;
