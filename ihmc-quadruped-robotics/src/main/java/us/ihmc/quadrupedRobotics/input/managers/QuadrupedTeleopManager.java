@@ -1,24 +1,18 @@
 package us.ihmc.quadrupedRobotics.input.managers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
@@ -31,13 +25,18 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PlanarGroundPo
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
-import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedTeleopManager
 {
@@ -63,7 +62,7 @@ public class QuadrupedTeleopManager
    private final AtomicDouble desiredOrientationRoll = new AtomicDouble();
    private final AtomicDouble desiredOrientationTime = new AtomicDouble();
 
-   private final AtomicReference<QuadrupedControllerStateChangeMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicLong timestampNanos = new AtomicLong();
 
@@ -117,7 +116,7 @@ public class QuadrupedTeleopManager
       stepStream.setStepSnapper(new PlanarGroundPointFootSnapper(robotName, referenceFrames, ros2Node));
 
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedControllerStateChangeMessage.class, controllerPubGenerator, s -> controllerStateChangeMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator, s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator, s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> timestampNanos.set(s.takeNextData().timestamp_));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedRequestedControllerStateMessage.class, controllerPubGenerator, s -> paused.set(true));
@@ -205,8 +204,8 @@ public class QuadrupedTeleopManager
 
    private boolean isInBalancingState()
    {
-      QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
-      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.WALKING.toByte());
+      HighLevelStateChangeStatusMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndHighLevelControllerName() == HighLevelControllerName.WALKING.toByte());
    }
 
    public boolean isInStepState()

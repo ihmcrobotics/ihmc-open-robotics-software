@@ -55,7 +55,7 @@ public class QuadrupedControllerAPIDefinition
 
       List<Class<? extends Settable<?>>> quadrupedStatusMessages = new ArrayList<>();
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
+      quadrupedStatusMessages.add(HighLevelStateChangeStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
       quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
