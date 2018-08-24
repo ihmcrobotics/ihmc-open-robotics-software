@@ -67,7 +67,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final AtomicReference<QuadrupedControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
-   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties)
+   public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, HighLevelControllerName initialControllerState)
    {
       this.controllerToolbox = new QuadrupedControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
@@ -107,7 +107,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          }
       });
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment);
+      if(initialControllerState == null)
+      {
+         initialControllerState = runtimeEnvironment.getHighLevelControllerParameters().getDefaultInitialControllerState();
+      }
+
+      this.stateMachine = buildStateMachine(runtimeEnvironment, initialControllerState);
    }
 
    public State getState(HighLevelControllerName state)
@@ -203,7 +208,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       return motionStatusHolder;
    }
 
-   private StateMachine<HighLevelControllerName, HighLevelControllerState> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment)
+   private StateMachine<HighLevelControllerName, HighLevelControllerState> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, HighLevelControllerName initialControllerState)
    {
       OneDoFJointBasics[] controlledJoints = runtimeEnvironment.getFullRobotModel().getControllableOneDoFJoints();
       HighLevelControllerParameters highLevelControllerParameters = runtimeEnvironment.getHighLevelControllerParameters();
@@ -272,7 +277,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          }
       });
 
-      return factory.build(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
+      return factory.build(initialControllerState);
    }
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)

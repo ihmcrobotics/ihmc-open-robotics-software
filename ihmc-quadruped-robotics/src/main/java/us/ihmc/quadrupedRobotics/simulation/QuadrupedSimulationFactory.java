@@ -364,7 +364,7 @@ public class QuadrupedSimulationFactory
          throw new RuntimeException("Position Control Mode currently not supported");
       }
 
-      controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get());
+      controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get());
    }
 
    private void createPoseCommunicator()
