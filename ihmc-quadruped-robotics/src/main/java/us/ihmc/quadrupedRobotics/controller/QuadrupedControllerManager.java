@@ -10,7 +10,13 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelay
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
-import us.ihmc.quadrupedRobotics.controller.states.*;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedJointInitializationController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedStandPrepController;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -244,8 +250,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       State steppingState;
       if (controlMode == QuadrupedControlMode.FORCE)
       {
-         steppingState = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager, statusMessageOutputManager,
-                                                         controlManagerFactory, registry);
+         steppingState = new QuadrupedWalkingControllerState(runtimeEnvironment, controllerToolbox, commandInputManager, statusMessageOutputManager,
+                                                             controlManagerFactory, registry);
       }
       else
       {
@@ -322,7 +328,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    public void resetSteppingState()
    {
-      QuadrupedSteppingState steppingState = (QuadrupedSteppingState) stateMachine.getState(QuadrupedControllerEnum.STEPPING);
+      QuadrupedWalkingControllerState steppingState = (QuadrupedWalkingControllerState) stateMachine.getState(QuadrupedControllerEnum.STEPPING);
       steppingState.onEntry();
    }
 

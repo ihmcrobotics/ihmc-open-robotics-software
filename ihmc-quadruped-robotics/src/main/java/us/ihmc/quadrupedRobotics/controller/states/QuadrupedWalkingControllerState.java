@@ -11,12 +11,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -37,7 +39,6 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventState;
@@ -46,6 +47,7 @@ import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -54,7 +56,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class QuadrupedSteppingState implements State, QuadrupedStepTransitionCallback
+public class QuadrupedWalkingControllerState extends HighLevelControllerState implements QuadrupedStepTransitionCallback
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -105,10 +107,11 @@ public class QuadrupedSteppingState implements State, QuadrupedStepTransitionCal
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
    private final WholeBodyControllerCore controllerCore;
 
-   public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
-                                 CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                 QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+   public QuadrupedWalkingControllerState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
+                                          CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+                                          QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
+      super(HighLevelControllerName.WALKING, runtimeEnvironment.getHighLevelControllerParameters(), controllerToolbox.getFullRobotModel().getControllableOneDoFJoints());
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
       this.commandInputManager = commandInputManager;
@@ -431,5 +434,11 @@ public class QuadrupedSteppingState implements State, QuadrupedStepTransitionCal
    public void onExit()
    {
 
+   }
+
+   @Override
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
+   {
+      return controllerCore.getOutputForLowLevelController();
    }
 }
