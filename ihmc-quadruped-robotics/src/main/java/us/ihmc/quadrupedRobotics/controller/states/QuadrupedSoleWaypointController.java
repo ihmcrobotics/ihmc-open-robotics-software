@@ -3,17 +3,16 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class QuadrupedSoleWaypointController implements QuadrupedController, QuadrupedWaypointCallback
+public class QuadrupedSoleWaypointController implements EventState, QuadrupedWaypointCallback
 {
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
