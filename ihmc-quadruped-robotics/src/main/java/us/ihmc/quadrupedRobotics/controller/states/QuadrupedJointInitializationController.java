@@ -15,8 +15,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.util.BitSet;
-
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */

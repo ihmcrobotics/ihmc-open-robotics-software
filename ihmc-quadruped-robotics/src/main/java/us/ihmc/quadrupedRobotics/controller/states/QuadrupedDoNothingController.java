@@ -15,8 +15,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to stand prep
  */

@@ -364,7 +364,7 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   public void createControllerManager() throws IOException
+   public void createControllerManager()
    {
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
@@ -372,29 +372,13 @@ public class QuadrupedSimulationFactory
                                                                                        yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
                                                                                        contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
                                                                                        footSwitches, gravity.get(), highLevelControllerParameters.get());
-      switch (controlMode.get())
+
+      if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
-      case FORCE:
-         if (initialForceControlState.hasValue())
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get(),
-                                                               initialForceControlState.get());
-         else
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get());
-         break;
-      case POSITION:
-         if (initialForceControlState.hasValue())
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
-                                                               controlMode.get());
-         else
-            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
-                                                               initialForceControlState.get(), controlMode.get());
-         break;
-      default:
-         controllerManager = null;
-         break;
+         throw new RuntimeException("Position Control Mode currently not supported");
       }
+
+      controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get());
    }
 
    private void createPoseCommunicator()
