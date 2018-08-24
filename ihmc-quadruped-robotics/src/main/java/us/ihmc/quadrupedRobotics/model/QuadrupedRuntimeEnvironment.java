@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.model;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,6 +29,7 @@ public class QuadrupedRuntimeEnvironment
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
+   private final HighLevelControllerParameters highLevelControllerParameters;
 
    private final double gravityZ;
 
@@ -41,7 +43,8 @@ public class QuadrupedRuntimeEnvironment
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
+                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity,
+                                      HighLevelControllerParameters highLevelControllerParameters)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -57,6 +60,7 @@ public class QuadrupedRuntimeEnvironment
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
+      this.highLevelControllerParameters = highLevelControllerParameters;
    }
 
    public double getControlDT()
@@ -127,5 +131,10 @@ public class QuadrupedRuntimeEnvironment
    public CenterOfMassDataHolderReadOnly getCenterOfMassDataHolder()
    {
       return centerOfMassDataHolder;
+   }
+
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
    }
 }
