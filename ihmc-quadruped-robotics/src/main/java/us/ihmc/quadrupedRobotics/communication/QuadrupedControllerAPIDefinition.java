@@ -19,10 +19,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 
@@ -41,6 +38,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
       quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
+      quadrupedCommands.add(HighLevelControllerStateCommand.class);
 //      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
 //      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
 //      quadrupedCommands.add(GoHomeCommand.class); // todo

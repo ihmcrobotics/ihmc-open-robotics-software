@@ -109,7 +109,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
    public QuadrupedWalkingControllerState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerToolbox controllerToolbox,
                                           CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                          QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+                                          QuadrupedControlManagerFactory controlManagerFactory)
    {
       super(HighLevelControllerName.WALKING, runtimeEnvironment.getHighLevelControllerParameters(), controllerToolbox.getFullRobotModel().getControllableOneDoFJoints());
       this.runtimeEnvironment = runtimeEnvironment;
@@ -151,8 +151,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       {
          footstepStatusMessages.set(robotQuadrant, new QuadrupedFootstepStatusMessage());
       }
-
-      parentRegistry.addChild(registry);
    }
 
    private StateMachine<QuadrupedSteppingStateEnum, EventState> buildStateMachine()
