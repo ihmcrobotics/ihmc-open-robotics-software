@@ -158,7 +158,7 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketClass(QuadrupedRequestedSteppingStateMessage.class);
 
       registerPacketClass(QuadrupedSteppingStateChangeMessage.class);
-      registerPacketClass(QuadrupedControllerStateChangeMessage.class);
+      registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       registerPacketField(String.class);
       registerPacketField(boolean.class);

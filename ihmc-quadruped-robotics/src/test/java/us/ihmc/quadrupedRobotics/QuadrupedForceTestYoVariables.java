@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
@@ -14,7 +14,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
    private final YoEnum<QuadrupedControllerRequestedEvent> userTrigger;
    private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
-   private final YoEnum<QuadrupedControllerEnum> controllerState;
+   private final YoEnum<HighLevelControllerName> controllerState;
    private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
 
    private final YoDouble stanceHeight;
@@ -51,7 +51,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       
       userTrigger = (YoEnum<QuadrupedControllerRequestedEvent>) scs.getVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
-      controllerState = (YoEnum<QuadrupedControllerEnum>) scs.getVariable("controllerCurrentState");
+      controllerState = (YoEnum<HighLevelControllerName>) scs.getVariable("controllerCurrentState");
       steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
 
       stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
@@ -88,7 +88,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return stepTrigger;
    }
 
-   public YoEnum<QuadrupedControllerEnum> getControllerState()
+   public YoEnum<HighLevelControllerName> getControllerState()
    {
       return controllerState;
    }
