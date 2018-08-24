@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
-   private final YoEnum<QuadrupedControllerRequestedEvent> userTrigger;
+   private final YoEnum<HighLevelControllerName> userTrigger;
    private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
    private final YoEnum<HighLevelControllerName> controllerState;
    private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
@@ -49,7 +49,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (YoEnum<QuadrupedControllerRequestedEvent>) scs.getVariable("requestedControllerState");
+      userTrigger = (YoEnum<HighLevelControllerName>) scs.getVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
       controllerState = (YoEnum<HighLevelControllerName>) scs.getVariable("controllerCurrentState");
       steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
@@ -78,7 +78,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
    }
 
-   public YoEnum<QuadrupedControllerRequestedEvent> getUserTrigger()
+   public YoEnum<HighLevelControllerName> getUserTrigger()
    {
       return userTrigger;
    }

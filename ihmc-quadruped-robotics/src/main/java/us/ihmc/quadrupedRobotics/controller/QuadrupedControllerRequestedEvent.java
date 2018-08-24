@@ -4,6 +4,7 @@ public enum QuadrupedControllerRequestedEvent
 {
    REQUEST_DO_NOTHING,
    REQUEST_STAND_PREP,
+   REQUEST_STAND_TRANSITION,
    REQUEST_FREEZE,
    REQUEST_STEPPING,
    REQUEST_FALL;
