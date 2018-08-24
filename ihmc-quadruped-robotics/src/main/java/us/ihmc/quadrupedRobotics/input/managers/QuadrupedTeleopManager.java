@@ -206,7 +206,7 @@ public class QuadrupedTeleopManager
    private boolean isInBalancingState()
    {
       QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
-      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte());
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.WALKING.toByte());
    }
 
    public boolean isInStepState()

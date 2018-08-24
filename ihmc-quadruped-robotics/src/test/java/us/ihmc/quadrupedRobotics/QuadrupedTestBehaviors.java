@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType;
 import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import junit.framework.AssertionFailedError;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
@@ -14,8 +13,6 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-
-import java.util.List;
 
 public class QuadrupedTestBehaviors
 {
@@ -29,7 +26,7 @@ public class QuadrupedTestBehaviors
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
       variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.FREEZE));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.FREEZE_STATE));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
       conductor.simulate();
 
@@ -72,7 +69,7 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.STEPPING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), QuadrupedControllerEnum.WALKING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
