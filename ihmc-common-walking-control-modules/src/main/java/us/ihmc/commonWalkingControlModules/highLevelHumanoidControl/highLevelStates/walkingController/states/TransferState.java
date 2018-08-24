@@ -198,15 +198,6 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onEntry()
    {
-      if (walkingMessageHandler.hasUpcomingFootsteps())
-      {
-         walkingMessageHandler.peekTiming(0, stepTiming);
-      }
-      else
-      {
-         stepTiming.setTimings(Double.NaN, Double.NaN, Double.NaN);
-      }
-
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
       if (supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
@@ -219,6 +210,15 @@ public abstract class TransferState extends WalkingState
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
          isInTouchdown.set(false);
          updateICPPlan();
+      }
+
+      if (walkingMessageHandler.hasUpcomingFootsteps())
+      {
+         walkingMessageHandler.peekTiming(0, stepTiming);
+      }
+      else
+      {
+         stepTiming.setTimings(Double.NaN, Double.NaN, Double.NaN);
       }
 
       double extraToeOffHeight = 0.0;
