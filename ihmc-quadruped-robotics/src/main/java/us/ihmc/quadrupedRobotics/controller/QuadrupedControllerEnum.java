@@ -2,13 +2,11 @@ package us.ihmc.quadrupedRobotics.controller;
 
 public enum QuadrupedControllerEnum
 {
-   JOINT_INITIALIZATION,
    DO_NOTHING,
    STAND_PREP,
    STAND_READY,
    FREEZE,
-   STEPPING,
-   FALL;
+   STEPPING;
 
    public static QuadrupedControllerEnum[] values = values();
 

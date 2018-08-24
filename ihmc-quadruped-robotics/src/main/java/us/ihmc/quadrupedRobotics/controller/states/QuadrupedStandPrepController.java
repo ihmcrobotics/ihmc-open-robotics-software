@@ -18,9 +18,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
  */
