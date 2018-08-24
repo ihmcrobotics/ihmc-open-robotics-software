@@ -1,43 +1,26 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingControllerState;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSteppingState;
+import us.ihmc.quadrupedRobotics.controller.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
-import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
-import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.extra.EventTrigger;
-import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -45,9 +28,11 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal
@@ -66,8 +51,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final StateMachine<QuadrupedControllerEnum, QuadrupedController> stateMachine;
-   private EventTrigger trigger;
+   private final StateMachine<QuadrupedControllerEnum, State> stateMachine;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedControlManagerFactory controlManagerFactory;
@@ -149,37 +133,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                             crawlControllerParameters, controlMode);
    }
 
-   /**
-    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the
-    * JIT compiler and avoids expensive interpreted code paths
-    */
-   public void warmup(int iterations)
-   {
-      YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
-      for (QuadrupedControllerEnum state : QuadrupedControllerEnum.values)
-      {
-         QuadrupedController stateImpl = stateMachine.getState(state);
-
-         stateImpl.onEntry();
-         for (int i = 0; i < iterations; i++)
-         {
-            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
-            stateImpl.doAction(Double.NaN);
-         }
-         stateImpl.onExit();
-
-         for (int i = 0; i < iterations; i++)
-         {
-            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
-            stateImpl.onEntry();
-            stateImpl.onExit();
-         }
-      }
-      robotTimestamp.set(robotTimeBeforeWarmUp);
-   }
-
-   public QuadrupedController getState(QuadrupedControllerEnum state)
+   public State getState(QuadrupedControllerEnum state)
    {
       return stateMachine.getState(state);
    }
@@ -202,7 +156,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       if (reqEvent != null)
       {
          lastEvent.set(reqEvent);
-         trigger.fireEvent(reqEvent);
+         requestedControllerState.set(reqEvent);
       }
 
       // update controller state machine
@@ -243,7 +197,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       // update fall detector
       if (controllerToolbox.getFallDetector().detect())
       {
-         trigger.fireEvent(QuadrupedControllerRequestedEvent.REQUEST_FALL);
+         requestedControllerState.set(QuadrupedControllerRequestedEvent.REQUEST_FALL);
          walkingControllerFailureStatusMessage.falling_direction_.set(runtimeEnvironment.getFullRobotModel().getRootJoint().getJointTwist().getLinearPart());
          statusMessageOutputManager.reportStatusMessage(walkingControllerFailureStatusMessage);
       }
@@ -272,7 +226,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       return motionStatusHolder;
    }
 
-   private StateMachine<QuadrupedControllerEnum, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+   private StateMachine<QuadrupedControllerEnum, State> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
                                                                                         FullQuadrupedRobotModelFactory modelFactory,
                                                                                         QuadrupedPhysicalProperties physicalProperties,
                                                                                         QuadrupedControllerEnum initialState,
@@ -281,70 +235,63 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                         QuadrupedControlMode controlMode)
    {
       // Initialize controllers.
-      final QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment, controlMode, registry);
-      final QuadrupedController doNothingController = new QuadrupedDoNothingController(controlManagerFactory.getOrCreateFeetManager(), runtimeEnvironment,
+      QuadrupedJointInitializationController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment, controlMode, registry);
+      QuadrupedDoNothingController doNothingController = new QuadrupedDoNothingController(controlManagerFactory.getOrCreateFeetManager(), runtimeEnvironment,
                                                                                        controlMode, registry);
-      final QuadrupedController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, initialPositionParameters, controlMode, registry);
-      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, controlMode, registry);
+      QuadrupedStandPrepController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, initialPositionParameters, controlMode, registry);
+      QuadrupedFreezeController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
-      final QuadrupedController steppingController;
+      State steppingState;
       if (controlMode == QuadrupedControlMode.FORCE)
       {
-         steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager, statusMessageOutputManager,
+         steppingState = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager, statusMessageOutputManager,
                                                          controlManagerFactory, registry);
       }
       else
       {
-         steppingController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
+         steppingState = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
       }
 
-      EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
+      StateMachineFactory<QuadrupedControllerEnum, State> factory = new StateMachineFactory<>(QuadrupedControllerEnum.class);
       factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
-      factory.buildYoEventTrigger("userTrigger", QuadrupedControllerRequestedEvent.class);
-      trigger = factory.buildEventTrigger();
 
       factory.addState(QuadrupedControllerEnum.JOINT_INITIALIZATION, jointInitializationController);
       factory.addState(QuadrupedControllerEnum.DO_NOTHING, doNothingController);
       factory.addState(QuadrupedControllerEnum.STAND_PREP, standPrepController);
       factory.addState(QuadrupedControllerEnum.STAND_READY, freezeController);
       factory.addState(QuadrupedControllerEnum.FREEZE, freezeController);
-      factory.addState(QuadrupedControllerEnum.STEPPING, steppingController);
+      factory.addState(QuadrupedControllerEnum.STEPPING, steppingState);
       factory.addState(QuadrupedControllerEnum.FALL, freezeController);
 
       // Add automatic transitions that lead into the stand state.
-      factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.JOINT_INITIALIZATION, QuadrupedControllerEnum.DO_NOTHING);
-      factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.STAND_READY);
-      factory.addTransition(ControllerEvent.FAIL, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FREEZE);
+      factory.addDoneTransition(QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.STAND_READY);
 
       // Manually triggered events to transition to main controllers.
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STEPPING, QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.STEPPING);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STEPPING, QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.STEPPING);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STEPPING, QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.STEPPING);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.STAND_PREP);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.STAND_PREP);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FREEZE, QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.FREEZE);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FREEZE, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FREEZE);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FREEZE, QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.FREEZE);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FREEZE, QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.FREEZE);
-
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.DO_NOTHING);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING, QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.DO_NOTHING);
+      factory.addTransition(QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.STEPPING, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STEPPING);
+      factory.addTransition(QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.STEPPING, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STEPPING);
+      factory.addTransition(QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.STEPPING, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STEPPING);
+      factory.addTransition(QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.STAND_PREP, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      factory.addTransition(QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.STAND_PREP, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      factory.addTransition(QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.FREEZE, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      factory.addTransition(QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FREEZE, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      factory.addTransition(QuadrupedControllerEnum.STAND_PREP, QuadrupedControllerEnum.FREEZE, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
+      factory.addTransition(QuadrupedControllerEnum.STAND_READY, QuadrupedControllerEnum.FREEZE, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FREEZE);
 
       // Trigger do nothing
       for (QuadrupedControllerEnum state : QuadrupedControllerEnum.values)
       {
-         factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING, state, QuadrupedControllerEnum.DO_NOTHING);
+         factory.addTransition(state, QuadrupedControllerEnum.DO_NOTHING, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING);
       }
 
       // Fall triggered events
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FALL, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FALL);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_FALL, QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.FALL);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedControllerEnum.FALL, QuadrupedControllerEnum.STAND_PREP);
-      factory.addTransition(ControllerEvent.DONE, QuadrupedControllerEnum.FALL, QuadrupedControllerEnum.FREEZE);
+      factory.addTransition(QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.FALL, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FALL);
+      factory.addTransition(QuadrupedControllerEnum.FREEZE, QuadrupedControllerEnum.FALL, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_FALL);
+      factory.addTransition(QuadrupedControllerEnum.FALL, QuadrupedControllerEnum.STAND_PREP, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      factory.addDoneTransition(QuadrupedControllerEnum.FALL, QuadrupedControllerEnum.FREEZE);
 
       // Transitions from controllers back to stand prep.
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.STAND_PREP);
-      factory.addTransition(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.STAND_PREP);
+      factory.addTransition(QuadrupedControllerEnum.DO_NOTHING, QuadrupedControllerEnum.STAND_PREP, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      factory.addTransition(QuadrupedControllerEnum.STEPPING, QuadrupedControllerEnum.STAND_PREP, time -> requestedControllerState.getEnumValue() == QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
 
       factory.addStateChangedListener(new StateChangedListener<QuadrupedControllerEnum>()
       {
