@@ -11,13 +11,10 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlG
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -340,6 +337,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void clearPlan()
    {
@@ -351,30 +349,35 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       nextTransferDuration.setToNaN();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setTransferDuration(double duration)
    {
       transferDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setSwingDuration(double duration)
    {
       swingDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setNextTransferDuration(double duration)
    {
       nextTransferDuration.set(duration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
@@ -409,6 +412,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void initializeForStanding(double initialTime)
    {
@@ -441,8 +445,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       speedUpTime.set(0.0);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
+   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
@@ -470,6 +475,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.notifyResetActiveSet();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
    {
@@ -539,30 +545,47 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       return upcomingFootsteps.size() > 0;
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean useStepAdjustment()
    {
       return useStepAdjustment.getBooleanValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
       desiredCMPToPack.set(feedbackCMP);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void getFootstepSolution(Footstep footstepSolutionToPack)
    {
       footstepSolutionToPack.setPose(footstepSolution);
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean wasFootstepAdjusted()
    {
       return solutionHandler.wasFootstepAdjusted();
    }
 
+   private final FrameVector3D scaledAdjustment = new FrameVector3D();
+
+   /** {@inheritDoc} */
+   @Override
+   public FrameVector3DReadOnly getICPShiftFromStepAdjustment()
+   {
+      scaledAdjustment.setIncludingFrame(solutionHandler.getFootstepAdjustment(), 0.0);
+      scaledAdjustment.scale(footstepMultiplier.getDoubleValue());
+
+      return scaledAdjustment;
+   }
+
+   /** {@inheritDoc} */
    @Override
    public boolean useAngularMomentum()
    {
@@ -571,6 +594,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
 
+   /** {@inheritDoc} */
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
@@ -579,6 +603,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
@@ -647,6 +672,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaledCMPFeedbackWeight.set(cmpFeedbackWeight.getValue());
    }
 
+   /** {@inheritDoc} */
    @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
@@ -939,6 +965,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
@@ -946,6 +973,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          planarRegionConstraintProvider.setPlanarRegions(planarRegions);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
