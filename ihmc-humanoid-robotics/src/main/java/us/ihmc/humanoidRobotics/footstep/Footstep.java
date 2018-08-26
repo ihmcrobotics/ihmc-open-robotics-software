@@ -524,7 +524,7 @@ public class Footstep implements Settable<Footstep>
       orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
    }
 
-   public void setFromAnklePose(FramePose3D anklePose, RigidBodyTransform transformFromAnkleToSole)
+   public void setFromAnklePose(FramePose3DReadOnly anklePose, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(anklePose.getOrientation());
       tempTransform.setTranslation(anklePose.getPosition());
@@ -532,7 +532,7 @@ public class Footstep implements Settable<Footstep>
       footstepPose.setIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector3D offset)
+   public void addOffset(FrameVector3DReadOnly offset)
    {
       footstepPose.prependTranslation(offset);
 
