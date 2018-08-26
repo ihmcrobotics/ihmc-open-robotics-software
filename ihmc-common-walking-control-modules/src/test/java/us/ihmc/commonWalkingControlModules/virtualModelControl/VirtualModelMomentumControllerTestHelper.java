@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.virtualModelControl;
+package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,8 +9,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
