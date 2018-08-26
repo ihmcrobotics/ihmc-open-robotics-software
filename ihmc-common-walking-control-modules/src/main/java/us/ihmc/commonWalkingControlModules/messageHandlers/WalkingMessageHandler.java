@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -910,7 +911,7 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void addOffsetVector(FrameVector3D offset)
+   public void addOffsetVector(FrameVector3DReadOnly offset)
    {
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {
