@@ -11,10 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -524,7 +521,7 @@ public class Footstep implements Settable<Footstep>
       orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
    }
 
-   public void setFromAnklePose(FramePose3D anklePose, RigidBodyTransform transformFromAnkleToSole)
+   public void setFromAnklePose(FramePose3DReadOnly anklePose, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(anklePose.getOrientation());
       tempTransform.setTranslation(anklePose.getPosition());
@@ -532,7 +529,7 @@ public class Footstep implements Settable<Footstep>
       footstepPose.setIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector3D offset)
+   public void addOffset(FrameVector3DReadOnly offset)
    {
       footstepPose.prependTranslation(offset);
 
