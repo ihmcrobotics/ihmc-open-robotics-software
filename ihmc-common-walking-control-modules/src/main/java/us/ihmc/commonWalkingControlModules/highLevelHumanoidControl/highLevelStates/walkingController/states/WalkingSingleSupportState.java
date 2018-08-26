@@ -37,6 +37,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
+   private final FramePoint3D adjustedFootstepPositionInWorld = new FramePoint3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePoint3D nextExitCMP = new FramePoint3D();
 
@@ -128,6 +129,9 @@ public class WalkingSingleSupportState extends SingleSupportState
             updateFootstepParameters();
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+
+            // the footstep was adjusted, so shift the CoM plan, if there is one.
+            walkingMessageHandler.addOffsetVector(balanceManager.getEffectiveICPAdjustment());
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
@@ -304,8 +308,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
 
-      actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
-      touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
+      // this footstep has potentially been updated, so get the footstep position.
+      nextFootstep.getPosition(adjustedFootstepPositionInWorld);
+      actualFootPoseInWorld.checkReferenceFrameMatch(adjustedFootstepPositionInWorld);
+      touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), adjustedFootstepPositionInWorld);
       touchdownErrorVector.setZ(0.0);
       walkingMessageHandler.addOffsetVector(touchdownErrorVector);
 
@@ -347,7 +353,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
