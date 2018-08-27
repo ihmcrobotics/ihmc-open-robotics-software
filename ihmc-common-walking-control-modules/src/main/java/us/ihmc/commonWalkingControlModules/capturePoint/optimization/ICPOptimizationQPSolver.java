@@ -389,6 +389,9 @@ public class ICPOptimizationQPSolver
 
    public void addReachabilityPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
+      if (polygon == null)
+         return;
+
       polygon.checkReferenceFrameMatch(worldFrame);
       polygon.checkIfUpToDate();
       reachabilityConstraint.addPolygon(polygon);
