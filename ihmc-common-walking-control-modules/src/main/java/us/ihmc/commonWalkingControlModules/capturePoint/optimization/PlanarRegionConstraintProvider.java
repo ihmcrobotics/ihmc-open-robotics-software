@@ -221,7 +221,10 @@ public class PlanarRegionConstraintProvider
                planarRegionNeedsUpdating = checkCurrentPlanarRegion();
 
             if (planarRegionNeedsUpdating)
+            {
                activePlanarRegion = findPlanarRegionWithLargestIntersectionArea();
+               solver.notifyResetActiveSet();
+            }
          }
 
          if (activePlanarRegion != null)
