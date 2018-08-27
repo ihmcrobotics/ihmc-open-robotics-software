@@ -40,12 +40,12 @@ public class ICPOptimizationCoPConstraintHandler
          for (RobotSide robotSide : RobotSide.values)
          {
             FrameConvexPolygon2D supportPolygon;
-            // TODO: are icpControlPolygons != null and hasICPControlPoygons redundant?
             if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPoygons)
                supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
             else
                supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
 
+            // this is a really simplistic way of checking if the support polygon has changed.
             if (supportPolygon.getNumberOfVertices() != numberOfVertices)
             {
                solver.notifyResetActiveSet();
@@ -64,12 +64,12 @@ public class ICPOptimizationCoPConstraintHandler
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
          FrameConvexPolygon2D supportPolygon;
-         // TODO: are icpControlPolygons != null and hasICPControlPoygons redundant?
          if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPoygons)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
 
+         // this is a really simplistic way of checking if the support polygon has changed.
          if (supportPolygon.getNumberOfVertices() != numberOfVertices)
          {
             solver.notifyResetActiveSet();
