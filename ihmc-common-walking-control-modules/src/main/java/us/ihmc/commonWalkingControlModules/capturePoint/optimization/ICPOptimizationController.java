@@ -415,7 +415,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      if (copConstraintHandler.hasSupportPolygonChanged())
+         solver.notifyResetActiveSet();
+
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
       if (planarRegionConstraintProvider != null)
          planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
@@ -444,7 +448,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       footstepSolution.setToNaN();
       unclippedFootstepSolution.setToNaN();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      if (copConstraintHandler.hasSupportPolygonChanged())
+         solver.notifyResetActiveSet();
+
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
       if (planarRegionConstraintProvider != null)
          planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
@@ -463,7 +471,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       initializeOnContactChange(initialTime);
 
-      copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
+
+      if (copConstraintHandler.hasSupportPolygonChanged())
+         solver.notifyResetActiveSet();
+
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
@@ -636,11 +649,20 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       if (isInDoubleSupport.getBooleanValue())
       {
-         copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+
+         if (copConstraintHandler.hasSupportPolygonChanged())
+            solver.notifyResetActiveSet();
       }
       else
       {
-         copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
+
+         if (copConstraintHandler.hasSupportPolygonChanged())
+            solver.notifyResetActiveSet();
+
          if (planarRegionConstraintProvider != null)
             planarRegionConstraintProvider
                   .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
