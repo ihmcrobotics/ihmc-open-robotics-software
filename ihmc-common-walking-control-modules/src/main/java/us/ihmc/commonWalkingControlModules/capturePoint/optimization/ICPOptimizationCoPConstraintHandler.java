@@ -17,6 +17,8 @@ public class ICPOptimizationCoPConstraintHandler
    private final BooleanProvider useICPControlPolygons;
    private final YoBoolean keepCoPInsideSupportPolygon;
 
+   private int numberOfVertices = 0;
+
    public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                               BooleanProvider useICPControlPolygons, boolean hasICPControlPoygons, YoVariableRegistry parentRegistry)
    {
@@ -43,6 +45,13 @@ public class ICPOptimizationCoPConstraintHandler
                supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
             else
                supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
+
+            if (supportPolygon.getNumberOfVertices() != numberOfVertices)
+            {
+               solver.notifyResetActiveSet();
+               numberOfVertices = supportPolygon.getNumberOfVertices();
+            }
+
             solver.addSupportPolygon(supportPolygon);
          }
       }
@@ -60,6 +69,13 @@ public class ICPOptimizationCoPConstraintHandler
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
+
+         if (supportPolygon.getNumberOfVertices() != numberOfVertices)
+         {
+            solver.notifyResetActiveSet();
+            numberOfVertices = supportPolygon.getNumberOfVertices();
+         }
+
          solver.addSupportPolygon(supportPolygon);
       }
    }
