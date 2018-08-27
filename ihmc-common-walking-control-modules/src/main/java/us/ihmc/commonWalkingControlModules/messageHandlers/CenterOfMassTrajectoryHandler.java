@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
@@ -114,7 +115,7 @@ public class CenterOfMassTrajectoryHandler extends EuclideanTrajectoryHandler
       return true;
    }
 
-   public void setPositionOffset(FrameVector3D offset)
+   public void setPositionOffset(FrameVector3DReadOnly offset)
    {
       this.offset.setIncludingFrame(offset);
    }
