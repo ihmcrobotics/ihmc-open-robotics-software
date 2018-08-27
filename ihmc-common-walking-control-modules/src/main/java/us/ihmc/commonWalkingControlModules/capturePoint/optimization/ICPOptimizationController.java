@@ -43,8 +43,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean DEBUG = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean DEBUG = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
@@ -136,7 +136,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
-   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
+   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
+   private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
+   private final YoDouble phaseInMultiplier = new YoDouble(yoNamePrefix + "PhaseInMultiplier", registry);
 
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
@@ -582,7 +584,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public FrameVector3DReadOnly getICPShiftFromStepAdjustment()
    {
-      scaledAdjustment.setIncludingFrame(solutionHandler.getFootstepAdjustment(), 0.0);
+      scaledAdjustment.setIncludingFrame(solutionHandler.getTotalFootstepAdjustment(), 0.0);
       scaledAdjustment.scale(footstepMultiplier.getDoubleValue());
 
       return scaledAdjustment;
@@ -784,7 +786,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             projectedTempPoint3d.set(upcomingFootstepLocation.getPosition());
 
          footstepLocationSubmitted.set(projectedTempPoint3d);
-         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getValue(),
+         solver.setFootstepAdjustmentConditions(footstepMultiplier.getDoubleValue(), footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getValue(),
                                                 projectedTempPoint3d);
       }
 
@@ -834,7 +836,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          }
 
          if (isInDoubleSupport.getBooleanValue())
-            solutionHandler.zeroAdjustment();
+            solutionHandler.resetAdjustment();
 
          solutionHandler.updateVisualizers(desiredICP, footstepMultiplier.getDoubleValue());
 
@@ -844,6 +846,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
+      }
+      else
+      {
+         numberOfIterations.set(solver.getNumberOfIterations());
+
+         if (localUseStepAdjustment && includeFootsteps)
+            solutionHandler.zeroAdjustment();
       }
 
       isICPStuck.update(computeIsStuck());
