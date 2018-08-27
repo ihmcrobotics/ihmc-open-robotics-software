@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -232,8 +233,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry,
                                                          icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
-      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry, icpOptimizationParameters.getMinICPErrorForStepAdjustment());
-      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry, icpOptimizationParameters.getFractionThroughSwingForAdjustment());
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry,
+                                                         icpOptimizationParameters.getMinICPErrorForStepAdjustment());
+      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry,
+                                                              icpOptimizationParameters.getFractionThroughSwingForAdjustment());
 
       footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
                                                            icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
@@ -244,7 +247,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
       copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
 
-      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry, icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
+      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry,
+                                                     icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
       feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
@@ -424,11 +428,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (planarRegionConstraintProvider != null)
       {
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
       }
 
       solver.notifyResetActiveSet();
-
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
 
@@ -462,7 +465,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
 
       if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
 
       solver.notifyResetActiveSet();
    }
@@ -492,8 +495,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (planarRegionConstraintProvider != null)
       {
          planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-         planarRegionConstraintProvider
-               .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         ConvexPolygon2D planarRegion = planarRegionConstraintProvider
+               .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+         solver.setPlanarRegionConstraint(planarRegion);
       }
 
       solver.notifyResetActiveSet();
@@ -667,12 +672,21 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.resetCoPLocationConstraint();
          solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
 
-         if (copConstraintHandler.hasSupportPolygonChanged())
-            solver.notifyResetActiveSet();
+         boolean resetActiveSet = copConstraintHandler.hasSupportPolygonChanged();
 
          if (planarRegionConstraintProvider != null)
-            planarRegionConstraintProvider
-                  .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         {
+            ConvexPolygon2D planarRegionConstraint = planarRegionConstraintProvider
+                  .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+            solver.resetPlanarRegionConstraint();
+            solver.setPlanarRegionConstraint(planarRegionConstraint);
+
+            resetActiveSet = resetActiveSet || planarRegionConstraintProvider.hasConstraintChanged();
+         }
+
+         if (resetActiveSet)
+            solver.notifyResetActiveSet();
       }
 
       solver.resetFootstepConditions();
