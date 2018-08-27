@@ -57,6 +57,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BooleanProvider allowStepAdjustment;
+   private final YoBoolean includeFootsteps = new YoBoolean(yoNamePrefix + "IncludeFootsteps", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
@@ -590,6 +591,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeTimeRemainingInState();
 
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
+      if (includeFootsteps != this.includeFootsteps.getBooleanValue())
+      {
+         solver.notifyResetActiveSet();
+         this.includeFootsteps.set(includeFootsteps);
+      }
 
       scaleStepRateWeightWithTime();
       scaleFeedbackWeightWithGain();

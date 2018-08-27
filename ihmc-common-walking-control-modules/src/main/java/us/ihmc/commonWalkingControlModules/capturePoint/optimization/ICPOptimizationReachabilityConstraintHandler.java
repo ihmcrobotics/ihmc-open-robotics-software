@@ -101,6 +101,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       adjustmentLineSegment.setToNaN();
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
+      solver.notifyResetActiveSet();
    }
 
    public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
@@ -112,6 +113,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.update();
       solver.addReachabilityPolygon(contractedReachabilityPolygon);
       solver.resetPlanarRegionConstraint();
+      solver.notifyResetActiveSet();
    }
 
    private YoFrameConvexPolygon2D getReachabilityPolygon(RobotSide supportSide)
