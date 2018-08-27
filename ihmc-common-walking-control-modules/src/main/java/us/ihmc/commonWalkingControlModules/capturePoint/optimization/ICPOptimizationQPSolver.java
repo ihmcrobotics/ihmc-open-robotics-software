@@ -258,11 +258,17 @@ public class ICPOptimizationQPSolver
       solver.setUseWarmStart(useWarmStart);
    }
 
+   /**
+    * Let the QP solver know that the active set has been changed, so it must be reset.
+    */
    public void notifyResetActiveSet()
    {
       this.resetActiveSet = true;
    }
 
+   /**
+    * Check whether or not the active set must be reset.
+    */
    private boolean pollResetActiveSet()
    {
       boolean ret = resetActiveSet;
@@ -331,11 +337,21 @@ public class ICPOptimizationQPSolver
       cmpLocationConstraint.reset();
    }
 
+   /**
+    * Sets the minimum distance that the CoP must lie within the support polygon (m). This is the distance that the CoP
+    * will be to the edge, from the inside. Note that this is not a Euclidean distance, but is the maximum distance in X,
+    * and then the maximum distance in Y, rather than their distance sum.
+    */
    public void setCopSafeDistanceToEdge(double copSafeDistanceToEdge)
    {
       this.copSafeDistanceToEdge = copSafeDistanceToEdge;
    }
 
+   /**
+    * Sets the maximum distance that the CMP can lie from the support polygon (m). This is the maximum distance from the CMP
+    * when it is outside the support polygon to the support polygon edge. Note that this is not a Euclidean distance, but is
+    * the maximum distance in X, and then the maximum distance in Y, rather than their distance sum.
+    */
    public void setMaxCMPDistanceFromEdge(double maxCMPDistance)
    {
       this.cmpSafeDistanceFromEdge = maxCMPDistance;
