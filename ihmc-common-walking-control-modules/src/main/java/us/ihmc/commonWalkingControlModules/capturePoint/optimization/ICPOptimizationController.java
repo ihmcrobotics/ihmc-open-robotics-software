@@ -591,6 +591,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeTimeRemainingInState();
 
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
+      // if we are switching between including footsteps and not, the decision variables are changing, so the active set needs resetting
       if (includeFootsteps != this.includeFootsteps.getBooleanValue())
       {
          solver.notifyResetActiveSet();
