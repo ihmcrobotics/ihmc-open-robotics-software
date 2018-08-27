@@ -130,12 +130,12 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-            // the footstep was adjusted, so shift the CoM plan, if there is one.
-            walkingMessageHandler.addOffsetVector(balanceManager.getEffectiveICPAdjustment());
-
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
          }
+
+         // if the footstep was adjusted, shift the CoM plan, if there is one.
+         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
       else if (balanceManager.isPushRecoveryEnabled())
       {
@@ -309,11 +309,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.changeFrame(worldFrame);
 
       // this footstep has potentially been updated, so get the footstep position.
-      nextFootstep.getPosition(adjustedFootstepPositionInWorld);
-      actualFootPoseInWorld.checkReferenceFrameMatch(adjustedFootstepPositionInWorld);
-      touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), adjustedFootstepPositionInWorld);
+//      nextFootstep.getPosition(adjustedFootstepPositionInWorld);
+//      actualFootPoseInWorld.checkReferenceFrameMatch(adjustedFootstepPositionInWorld);
+      touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
       touchdownErrorVector.setZ(0.0);
-      walkingMessageHandler.addOffsetVector(touchdownErrorVector);
+      walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
