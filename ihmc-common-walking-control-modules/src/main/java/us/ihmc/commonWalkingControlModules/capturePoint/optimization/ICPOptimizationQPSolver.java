@@ -404,6 +404,9 @@ public class ICPOptimizationQPSolver
 
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
    {
+      if (convexPolygon == null)
+         return;
+
       hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon);
    }
 
