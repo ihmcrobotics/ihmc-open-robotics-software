@@ -502,10 +502,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
          return false;
 
-      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()))
+      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
          return false;
 
-      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
+      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()) && !includeFootsteps.getBooleanValue())
          return false;
 
       return upcomingFootsteps.size() > 0;
