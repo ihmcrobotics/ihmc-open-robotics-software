@@ -308,9 +308,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
 
-      // this footstep has potentially been updated, so get the footstep position.
-//      nextFootstep.getPosition(adjustedFootstepPositionInWorld);
-//      actualFootPoseInWorld.checkReferenceFrameMatch(adjustedFootstepPositionInWorld);
+      actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
       touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
       touchdownErrorVector.setZ(0.0);
       walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
