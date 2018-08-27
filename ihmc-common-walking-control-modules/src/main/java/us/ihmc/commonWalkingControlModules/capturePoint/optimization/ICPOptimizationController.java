@@ -772,10 +772,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
          helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getValue(), lateralFootstepWeight.getValue(), soleFrame);
 
-         double recursionTime =
-               Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue();
-         double recursionMultiplier = Math.exp(-omega0 * recursionTime);
-         this.footstepMultiplier.set(recursionMultiplier);
+         this.footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
 
          predictedEndOfStateICP.sub(desiredICP, yoPerfectCMP);
          predictedEndOfStateICP.scaleAdd(Math.exp(omega0 * timeRemainingInState.getDoubleValue()), yoPerfectCMP);
@@ -792,6 +789,20 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (useFootstepRate.getValue())
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
+   }
+
+   private double computeFootstepAdjustmentMultiplier(double omega0)
+   {
+      double recursionTime =
+            Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue();
+      recursionMultiplier.set(Math.exp(-omega0 * recursionTime));
+
+      double phaseThroughState = timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue();
+      double phaseForIdentity = 0.2;
+      double fractionOfPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
+      phaseInMultiplier.set(10.0 * (1.0 - fractionOfPhaseIn) + fractionOfPhaseIn);
+
+      return phaseInMultiplier.getDoubleValue() * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()
