@@ -140,6 +140,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
    private final YoDouble phaseInMultiplier = new YoDouble(yoNamePrefix + "PhaseInMultiplier", registry);
 
+   private final DoubleProvider phaseInFraction;
+   private final DoubleProvider phaseInScalar;
+
+
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
@@ -283,6 +287,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isICPStuck = new GlitchFilteredYoBoolean(yoNamePrefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
 
       minimumTimeRemaining = new DoubleParameter(yoNamePrefix + "MinimumTimeRemaining", registry, icpOptimizationParameters.getMinimumTimeRemaining());
+
+
+      phaseInFraction = new DoubleParameter(yoNamePrefix + "PhaseInFraction", registry, icpOptimizationParameters.getStepAdjustmentPhaseInFraction());
+      phaseInScalar = new DoubleParameter(yoNamePrefix + "PhaseInScalar", registry, icpOptimizationParameters.getPhaseInScalar());
+
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -795,9 +804,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       recursionMultiplier.set(Math.exp(-omega0 * recursionTime));
 
       double phaseThroughState = timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue();
-      double phaseForIdentity = 0.2;
-      double fractionOfPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
-      phaseInMultiplier.set(10.0 * (1.0 - fractionOfPhaseIn) + fractionOfPhaseIn);
+      double phaseForIdentity = Math.min(phaseInFraction.getValue(), 1.0);
+      if (phaseForIdentity > 0.0)
+      {
+         double fractionThroughPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
+         phaseInMultiplier.set(phaseInScalar.getValue() * (1.0 - fractionThroughPhaseIn) + fractionThroughPhaseIn);
+      }
+      else
+      {
+         phaseInMultiplier.set(1.0);
+      }
 
       return phaseInMultiplier.getDoubleValue() * recursionMultiplier.getDoubleValue();
    }
