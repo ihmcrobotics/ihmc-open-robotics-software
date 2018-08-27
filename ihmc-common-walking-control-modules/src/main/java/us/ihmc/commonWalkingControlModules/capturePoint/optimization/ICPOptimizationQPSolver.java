@@ -349,6 +349,9 @@ public class ICPOptimizationQPSolver
     */
    public void addSupportPolygon(FrameConvexPolygon2D polygon)
    {
+      if (polygon == null)
+         return;
+
       polygon.changeFrame(worldFrame);
       copLocationConstraint.addPolygon(polygon);
       cmpLocationConstraint.addPolygon(polygon);
