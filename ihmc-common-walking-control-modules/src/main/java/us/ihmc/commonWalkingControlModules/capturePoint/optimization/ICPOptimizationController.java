@@ -808,7 +808,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (phaseForIdentity > 0.0)
       {
          double fractionThroughPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
-         phaseInMultiplier.set(phaseInScalar.getValue() * (1.0 - fractionThroughPhaseIn) + fractionThroughPhaseIn);
+         phaseInMultiplier.set(Math.max(phaseInScalar.getValue() * (1.0 - fractionThroughPhaseIn) + fractionThroughPhaseIn, 1.0));
       }
       else
       {
