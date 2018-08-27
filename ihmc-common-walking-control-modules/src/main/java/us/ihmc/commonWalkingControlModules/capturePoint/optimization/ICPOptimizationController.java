@@ -416,13 +416,19 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
-      if (copConstraintHandler.hasSupportPolygonChanged())
-         solver.notifyResetActiveSet();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
 
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
+      {
          planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+      }
+
+      solver.notifyResetActiveSet();
+
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
 
@@ -449,13 +455,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       unclippedFootstepSolution.setToNaN();
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
-      if (copConstraintHandler.hasSupportPolygonChanged())
-         solver.notifyResetActiveSet();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
 
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
          planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+
+      solver.notifyResetActiveSet();
    }
 
    @Override
@@ -472,12 +481,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       initializeOnContactChange(initialTime);
 
       solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
       solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
-
-      if (copConstraintHandler.hasSupportPolygonChanged())
-         solver.notifyResetActiveSet();
-
-      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide));
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
 
@@ -487,6 +495,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          planarRegionConstraintProvider
                .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
       }
+
+      solver.notifyResetActiveSet();
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -673,7 +683,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (localUseStepAdjustment && !isInDoubleSupport.getBooleanValue())
       {
          submitFootstepTaskConditionsToSolver(omega0, includeFootsteps);
-         reachabilityConstraintHandler.updateReachabilityConstraint(solver);
+
+         solver.resetReachabilityConstraint();
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.updateReachabilityConstraint());
       }
       else
       {
