@@ -189,6 +189,18 @@ float64 yaw_weight
 # Field default value -1.0
 float64 cost_per_step
 
+# When using a cost based planning approach, this value defines how the forward (or backward) displacement
+# of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+# weight is averaged with the value returned by {@link #getLateralWeight()}
+# Field default value -1.0
+float64 forward_weight
+
+# When using a cost based planning approach, this value defines how the lateral displacement
+# of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+# weight is averaged with the value returned by {@link #getForwardWeight()}
+# Field default value -1.0
+float64 lateral_weight
+
 # Some node checkers will check if the body of the robot will move through a higher planar region
 # (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
 # ground triggering this this parameter defines a ground clearance under which obstacles are allowed.

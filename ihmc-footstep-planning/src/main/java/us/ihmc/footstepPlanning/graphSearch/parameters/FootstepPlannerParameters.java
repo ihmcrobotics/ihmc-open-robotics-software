@@ -267,7 +267,7 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getCliffHeightToAvoid()
+   default double getCliffHeightToAvoid()
    {
       return Double.MAX_VALUE;
    }
@@ -283,7 +283,7 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getMinimumDistanceFromCliffBottoms()
+   default double getMinimumDistanceFromCliffBottoms()
    {
       return 0.0;
    }
@@ -295,7 +295,7 @@ public interface FootstepPlannerParameters
     * the "best" effort plan, where the plan is at least {@link #getMinimumStepsForBestEffortPlan()} steps long
     * "best" is determined by the planner.
     */
-   public default boolean getReturnBestEffortPlan()
+   default boolean getReturnBestEffortPlan()
    {
       return false;
    }
@@ -304,7 +304,7 @@ public interface FootstepPlannerParameters
     * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
     * contains at least this many footsteps.
     */
-   public default int getMinimumStepsForBestEffortPlan()
+   default int getMinimumStepsForBestEffortPlan()
    {
       return 3;
    }
@@ -313,9 +313,39 @@ public interface FootstepPlannerParameters
     * When using a cost based planning approach this value defined how the yaw of a footstep will be
     * weighted in comparison to its position.
     */
-   public default double getYawWeight()
+   default double getYawWeight()
    {
       return 0.1;
+   }
+
+   /**
+    * <p>
+    * This value defined how the forward (or backward) displacement of a footstep will be weighted in
+    * comparison to its position.
+    * </p>
+    * <p>
+    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
+    *    {@link #getLateralWeight()}
+    * </p>
+    */
+   default double getForwardWeight()
+   {
+      return 1.0;
+   }
+
+   /**
+    * <p>
+    * This value defined how the lateral displacement of a footstep will be weighted in comparison to
+    * its position.
+    * </p>
+    * <p>
+    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
+    *    {@link #getForwardWeight()}
+    * </p>
+    */
+   default double getLateralWeight()
+   {
+      return 1.0;
    }
 
    /**
