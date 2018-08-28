@@ -45,6 +45,12 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    private static final boolean DO_ASSERTS = true;
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 30000)
+   public void testUnhandledPoints()
+   {
+      super.testUnhandledPoints();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test (timeout = 30000)
@@ -223,11 +229,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-/*   @Test(timeout=300000)
-   public void testUnhandledPoints()
-   {
-      super.testUnhandledPoints();
-   }*/
+
 
    @Override
    public HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)

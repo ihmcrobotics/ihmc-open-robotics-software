@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -16,6 +17,7 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -84,9 +86,21 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testFlatGroundWalking(DRCRobotModel robotModel, boolean doPelvisWarmup)
-         throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public abstract DRCRobotModel getRobotModel();
+
+   public abstract boolean doPelvisWarmup();
+
+   @ContinuousIntegrationTest(estimatedDuration = 348.7)
+   @Test(timeout = 1700000)
+   public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
+      runFlatGroundWalking();
+   }
+
+   public void runFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();

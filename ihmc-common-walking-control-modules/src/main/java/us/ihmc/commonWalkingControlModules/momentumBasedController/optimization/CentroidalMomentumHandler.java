@@ -40,6 +40,8 @@ public class CentroidalMomentumHandler
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
    private final double robotMass;
 
+   private boolean isUpToDate = false;
+
    public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
    {
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
@@ -66,8 +68,30 @@ public class CentroidalMomentumHandler
    {
    }
 
+   /**
+    * Invalidates the internal data such that it will be updated when accessing any information such as the momentum or the centroidal momentum matrix.
+    * @deprecated Use {@link #reset()} instead
+    */
    public void compute()
    {
+      reset();
+   }
+
+   /**
+    * Invalidates the internal data such that it will be updated when accessing any information such as the momentum or the centroidal momentum matrix.
+    */
+   public void reset()
+   {
+      isUpToDate = false;
+   }
+
+   private void updateIfNeeded()
+   {
+      if (isUpToDate)
+         return;
+
+      isUpToDate = true;
+
       ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
 
       centroidalMomentumRateTermCalculator.compute();
@@ -76,6 +100,7 @@ public class CentroidalMomentumHandler
 
    public void getAngularMomentum(FrameVector3D angularMomentumToPack)
    {
+      updateIfNeeded();
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
       CommonOps.mult(centroidalMomentumMatrix, v, momentum);
       angularMomentumToPack.setIncludingFrame(centerOfMassFrame, 0, momentum);
@@ -83,6 +108,7 @@ public class CentroidalMomentumHandler
 
    public void getLinearMomentum(FrameVector3D linearMomentumToPack)
    {
+      updateIfNeeded();
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
       CommonOps.mult(centroidalMomentumMatrix, v, momentum);
       linearMomentumToPack.setIncludingFrame(centerOfMassFrame, 3, momentum);
@@ -96,6 +122,7 @@ public class CentroidalMomentumHandler
 
    public DenseMatrix64F getCentroidalMomentumMatrixPart(InverseDynamicsJoint[] joints)
    {
+      updateIfNeeded();
       int partDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(joints);
       centroidalMomentumMatrixPart.reshape(Momentum.SIZE, partDegreesOfFreedom);
       centroidalMomentumMatrixPart.zero();
@@ -112,6 +139,7 @@ public class CentroidalMomentumHandler
 
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
+      updateIfNeeded();
       return adotV;
    }
 
@@ -125,11 +153,13 @@ public class CentroidalMomentumHandler
 
    public SpatialForceVector getCentroidalMomentumRate()
    {
+      updateIfNeeded();
       return centroidalMomentumRate;
    }
 
    public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateCommand momentumRateCommand)
    {
+      updateIfNeeded();
       momentumRateCommand.getSelectionMatrix(centerOfMassFrame, selectionMatrix);
       DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
 

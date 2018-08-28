@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -28,35 +28,9 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    private FootstepNodeVisualization visualization = null;
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testJustStraightLine()
+   public boolean assertPlannerReturnedResult()
    {
-      super.testJustStraightLine(true);
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testATightTurn()
-   {
-      super.testATightTurn(true);
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testStraightLineWithInitialTurn()
-   {
-      super.testStraightLineWithInitialTurn(true);
-   }
-
-   @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 2.8)
-   @Test(timeout = 30000)
-   public void testJustTurnInPlace()
-   {
-      super.testJustTurnInPlace(true);
+      return true;
    }
 
    @Before
