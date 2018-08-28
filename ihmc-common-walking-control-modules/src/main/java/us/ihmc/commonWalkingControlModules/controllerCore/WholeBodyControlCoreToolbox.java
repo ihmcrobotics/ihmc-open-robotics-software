@@ -64,6 +64,11 @@ public class WholeBodyControlCoreToolbox
    private YoFrameVector3D yoDesiredMomentumRateAngular;
    private YoFrameVector3D yoAchievedMomentumRateAngular;
 
+   private YoFrameVector3D yoDesiredMomentumLinear;
+   private YoFrameVector3D yoDesiredMomentumAngular;
+   private YoFrameVector3D yoAchievedMomentumLinear;
+   private YoFrameVector3D yoAchievedMomentumAngular;
+
    private YoFrameVector3D yoResidualRootJointForce;
    private YoFrameVector3D yoResidualRootJointTorque;
 
@@ -395,6 +400,34 @@ public class WholeBodyControlCoreToolbox
       if (yoAchievedMomentumRateAngular == null)
          yoAchievedMomentumRateAngular = new YoFrameVector3D("achievedMomentumRateAngular", worldFrame, registry);
       return yoAchievedMomentumRateAngular;
+   }
+
+   public YoFrameVector3D getYoDesiredMomentumLinear()
+   {
+      if (yoDesiredMomentumLinear == null)
+         yoDesiredMomentumLinear = new YoFrameVector3D("desiredMomentumLinear", worldFrame, registry);
+      return yoDesiredMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoDesiredMomentumAngular()
+   {
+      if (yoDesiredMomentumAngular == null)
+         yoDesiredMomentumAngular = new YoFrameVector3D("desiredMomentumAngular", worldFrame, registry);
+      return yoDesiredMomentumAngular;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumLinear()
+   {
+      if (yoAchievedMomentumLinear == null)
+         yoAchievedMomentumLinear = new YoFrameVector3D("achievedMomentumLinear", worldFrame, registry);
+      return yoAchievedMomentumLinear;
+   }
+
+   public YoFrameVector3D getYoAchievedMomentumAngular()
+   {
+      if (yoAchievedMomentumAngular == null)
+         yoAchievedMomentumAngular = new YoFrameVector3D("achievedMomentumAngular", worldFrame, registry);
+      return yoAchievedMomentumAngular;
    }
 
    public YoFrameVector3D getYoResidualRootJointForce()
