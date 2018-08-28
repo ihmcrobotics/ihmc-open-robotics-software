@@ -7,11 +7,9 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -94,24 +92,34 @@ public class ICPOptimizationReachabilityConstraintHandler
       }
    }
 
-   public void initializeReachabilityConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
+   /**
+    * Initializes the reachability constraint for the double support state.
+    * This is the constraint that determines where the robot can step to kinematically.
+    * It is a simple convex rectangle determined by the stepping parameters.
+    */
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForDoubleSupport()
    {
       contractedReachabilityPolygon.clear();
       motionLimitLine.setToNaN();
       adjustmentLineSegment.setToNaN();
-      solver.resetReachabilityConstraint();
-      solver.resetPlanarRegionConstraint();
+
+      return null;
    }
 
-   public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
+   /**
+    * Initializes the reachability constraint for the single support state.
+    * This is the constraint that determines where the robot can step to kinematically.
+    * It is a simple convex rectangle determined by the stepping parameters.\
+    *
+    * @param  supportSide the current support side of the robot
+    */
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForSingleSupport(RobotSide supportSide)
    {
-      solver.resetReachabilityConstraint();
-
       YoFrameConvexPolygon2D reachabilityPolygon = getReachabilityPolygon(supportSide);
       contractedReachabilityPolygon.setMatchingFrame(reachabilityPolygon, false);
       contractedReachabilityPolygon.update();
-      solver.addReachabilityPolygon(contractedReachabilityPolygon);
-      solver.resetPlanarRegionConstraint();
+
+      return contractedReachabilityPolygon;
    }
 
    private YoFrameConvexPolygon2D getReachabilityPolygon(RobotSide supportSide)
@@ -165,10 +173,13 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLimitLine.set(lineIntersector2d.getIntersectionPointOne(), lineIntersector2d.getIntersectionPointTwo());
    }
 
-   public void updateReachabilityConstraint(ICPOptimizationQPSolver solver)
+   /**
+    * Get the polygon that describes the reachable region for the step position.
+    */
+   public FrameConvexPolygon2DReadOnly updateReachabilityConstraint()
    {
-      solver.resetReachabilityConstraint();
       contractedReachabilityPolygon.update();
-      solver.addReachabilityPolygon(contractedReachabilityPolygon);
+
+      return contractedReachabilityPolygon;
    }
 }
