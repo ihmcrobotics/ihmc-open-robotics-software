@@ -803,6 +803,12 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
    }
 
+   public FrameVector3DReadOnly getEffectiveICPAdjustment()
+   {
+      return linearMomentumRateOfChangeControlModule.getICPOptimizationController().getICPShiftFromStepAdjustment();
+   }
+
+
    public void getCapturePoint(FramePoint2D capturePointToPack)
    {
       controllerToolbox.getCapturePoint(capturePointToPack);
