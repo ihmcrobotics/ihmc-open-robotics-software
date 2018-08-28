@@ -32,6 +32,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble maximumZPenetrationOnValleyRegions = new YoDouble("maximumZPenetrationOnValleyRegions", registry);
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
+   private final YoDouble forwardWeight = new YoDouble("forwardWeight", registry);
+   private final YoDouble lateralWeight  = new YoDouble("lateralWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
@@ -69,6 +71,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumSurfaceInclineRadians.set(defaults.getMinimumSurfaceInclineRadians());
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
       yawWeight.set(defaults.getYawWeight());
+      forwardWeight.set(defaults.getForwardWeight());
+      lateralWeight.set(defaults.getLateralWeight());
       costPerStep.set(defaults.getCostPerStep());
       bodyGroundClearance.set(defaults.getBodyGroundClearance());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
@@ -210,6 +214,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
+   public double getForwardWeight()
+   {
+      return forwardWeight.getDoubleValue();
+   }
+
+   @Override
+   public double getLateralWeight()
+   {
+      return lateralWeight.getDoubleValue();
+   }
+
+   @Override
    public double getCostPerStep()
    {
       return costPerStep.getDoubleValue();
@@ -293,6 +309,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinimumStepForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
       if (parametersPacket.getYawWeight() != -1.0)
          setYawWeight(parametersPacket.getYawWeight());
+      if (parametersPacket.getForwardWeight() != -1.0)
+         setForwardWeight(parametersPacket.getForwardWeight());
+      if (parametersPacket.getLateralWeight() != -1.0)
+         setLateralWeight(parametersPacket.getLateralWeight());
       if (parametersPacket.getCostPerStep() != -1.0)
          setCostPerStep(parametersPacket.getCostPerStep());
       if (parametersPacket.getBodyGroundClearance() != -1.0)
@@ -421,6 +441,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setYawWeight(double yawWeight)
    {
       this.yawWeight.set(yawWeight);
+   }
+
+   public void setForwardWeight(double forwardWeight)
+   {
+      this.forwardWeight.set(forwardWeight);
+   }
+
+   public void setLateralWeight(double lateralWeight)
+   {
+      this.lateralWeight.set(lateralWeight);
    }
 
    public void setCostPerStep(double costPerStep)

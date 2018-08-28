@@ -98,6 +98,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -198,6 +202,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -255,6 +265,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getYawWeight());
 
       cdr.write_type_6(data.getCostPerStep());
+
+      cdr.write_type_6(data.getForwardWeight());
+
+      cdr.write_type_6(data.getLateralWeight());
 
       cdr.write_type_6(data.getBodyGroundClearance());
 
@@ -318,6 +332,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setCostPerStep(cdr.read_type_6());
       	
+      data.setForwardWeight(cdr.read_type_6());
+      	
+      data.setLateralWeight(cdr.read_type_6());
+      	
       data.setBodyGroundClearance(cdr.read_type_6());
       	
       data.setMinXClearanceFromStance(cdr.read_type_6());
@@ -356,6 +374,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_4("minimum_steps_for_best_effort_plan", data.getMinimumStepsForBestEffortPlan());
       ser.write_type_6("yaw_weight", data.getYawWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
+      ser.write_type_6("forward_weight", data.getForwardWeight());
+      ser.write_type_6("lateral_weight", data.getLateralWeight());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
@@ -390,6 +410,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMinimumStepsForBestEffortPlan(ser.read_type_4("minimum_steps_for_best_effort_plan"));
       data.setYawWeight(ser.read_type_6("yaw_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
+      data.setForwardWeight(ser.read_type_6("forward_weight"));
+      data.setLateralWeight(ser.read_type_6("lateral_weight"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
