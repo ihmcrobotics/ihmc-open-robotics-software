@@ -5,12 +5,14 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
@@ -18,7 +20,21 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      {
+         @Override
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
+            {
+               @Override
+               public boolean useOptimizationBasedICPController()
+               {
+                  return false;
+               }
+            };
+         }
+      };
    }
 
    @Override
