@@ -26,6 +26,15 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Specifies how long the controller must have been in the swing date (as a function of the swing duration) before it will allow step adjustment.
+    * By default, this is set to 0.0, meaning the controller can immediately adjust the desired step at the start of swing.
+    */
+   public double getFractionThroughSwingForAdjustment()
+   {
+      return 0.0;
+   }
+
+   /**
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
