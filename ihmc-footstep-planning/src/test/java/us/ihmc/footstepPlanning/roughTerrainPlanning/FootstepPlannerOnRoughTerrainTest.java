@@ -15,11 +15,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -28,9 +28,9 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePathTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParametersTopic;
+import static us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments.*;
 
 public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 {

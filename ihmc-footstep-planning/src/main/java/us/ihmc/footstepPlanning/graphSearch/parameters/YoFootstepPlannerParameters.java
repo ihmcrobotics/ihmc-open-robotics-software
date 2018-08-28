@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch;
+package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
