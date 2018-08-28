@@ -60,8 +60,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
    private final QuadrupedStepCommandConsumer commandConsumer;
