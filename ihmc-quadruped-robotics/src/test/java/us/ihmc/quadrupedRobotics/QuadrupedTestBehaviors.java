@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedTestBehaviors
 {
@@ -27,12 +28,12 @@ public class QuadrupedTestBehaviors
    {
       variables.getUserTrigger().set(HighLevelControllerName.FREEZE_STATE);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.FREEZE_STATE));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.25));
       conductor.simulate();
 
-      variables.getUserTrigger().set(HighLevelControllerName.STAND_READY);
+      variables.getUserTrigger().set(HighLevelControllerName.STAND_PREP_STATE);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.STAND_READY));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
       conductor.simulate();
    }
 
