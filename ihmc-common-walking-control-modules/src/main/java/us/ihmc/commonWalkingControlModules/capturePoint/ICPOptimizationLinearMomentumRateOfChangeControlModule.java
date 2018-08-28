@@ -80,7 +80,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    @Override
    public void initializeForTransfer()
    {
-      icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide, omega0);
+      icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
    }
 
    @Override

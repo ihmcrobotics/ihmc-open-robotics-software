@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,11 +43,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoi
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.*;
 
 public class WalkingMessageHandler
 {
@@ -99,7 +96,8 @@ public class WalkingMessageHandler
    private final PlanarRegionsListHandler planarRegionsListHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
-   private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
+   private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
                                 double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -158,7 +156,7 @@ public class WalkingMessageHandler
       offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {
-         planOffsetInWorld.setToZero(ReferenceFrame.getWorldFrame());
+         planOffsetInWorld.setToZero();
       }
 
       if (command.getNumberOfFootsteps() > 0)
@@ -910,12 +908,13 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void addOffsetVector(FrameVector3D offset)
+   public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {
          return;
       }
+
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
@@ -924,9 +923,26 @@ public class WalkingMessageHandler
       }
 
       this.planOffsetInWorld.add(offset);
-      comTrajectoryHandler.setPositionOffset(this.planOffsetInWorld);
+      setPlanOffsetInternal(planOffsetInWorld);
+
+      planOffsetFromAdjustment.setToZero();
+   }
+
+   private final FrameVector3D totalOffset = new FrameVector3D();
+
+   public void setPlanOffsetFromAdjustment(FrameVector3DReadOnly planOffsetFromAdjustment)
+   {
+      this.planOffsetFromAdjustment.set(planOffsetFromAdjustment);
+      totalOffset.add(planOffsetInWorld, planOffsetFromAdjustment);
+      setPlanOffsetInternal(totalOffset);
+   }
+
+   private void setPlanOffsetInternal(FrameVector3DReadOnly planOffset)
+   {
+      comTrajectoryHandler.setPositionOffset(planOffset);
 
       updateVisualization();
-      statusOutputManager.reportStatusMessage(HumanoidMessageTools.createPlanOffsetStatus(planOffsetInWorld));
+      statusOutputManager.reportStatusMessage(HumanoidMessageTools.createPlanOffsetStatus(planOffset));
+
    }
 }
