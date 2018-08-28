@@ -96,7 +96,7 @@ public class WalkingMessageHandler
    private final PlanarRegionsListHandler planarRegionsListHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
-   private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("comPlanOffsetInWorld", worldFrame, registry);
+   private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
@@ -924,6 +924,8 @@ public class WalkingMessageHandler
 
       this.planOffsetInWorld.add(offset);
       setPlanOffsetInternal(planOffsetInWorld);
+
+      planOffsetFromAdjustment.setToZero();
    }
 
    private final FrameVector3D totalOffset = new FrameVector3D();
