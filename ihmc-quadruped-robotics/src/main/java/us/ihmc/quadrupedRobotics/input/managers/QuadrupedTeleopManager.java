@@ -50,7 +50,7 @@ public class QuadrupedTeleopManager
    private final YoBoolean xGaitRequested = new YoBoolean("xGaitRequested", registry);
    private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("teleopDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredVelocityRateLimit = new YoDouble("teleopDesiredVelocityRateLimit", registry);
-   private final YoEnum<QuadrupedControllerRequestedEvent> controllerRequestedEvent = new YoEnum<>("teleopControllerRequestedEvent", registry, QuadrupedControllerRequestedEvent.class, true);
+   private final YoEnum<HighLevelControllerName> controllerRequestedEvent = new YoEnum<>("teleopControllerRequestedEvent", registry, HighLevelControllerName.class, true);
    private final RateLimitedYoFrameVector limitedDesiredVelocity;
 
    private final YoBoolean standingRequested = new YoBoolean("standingRequested", registry);
@@ -69,7 +69,7 @@ public class QuadrupedTeleopManager
    private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedBodyPathMultiplexer bodyPathMultiplexer;
-   private final IHMCROS2Publisher<QuadrupedRequestedControllerStateMessage> controllerStatePublisher;
+   private final IHMCROS2Publisher<HighLevelStateMessage> controllerStatePublisher;
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
    private IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
    private IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
@@ -101,12 +101,12 @@ public class QuadrupedTeleopManager
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            QuadrupedControllerRequestedEvent requestedEvent = controllerRequestedEvent.getEnumValue();
-            if (requestedEvent != null)
+            HighLevelControllerName requestedState = controllerRequestedEvent.getEnumValue();
+            if (requestedState != null)
             {
                controllerRequestedEvent.set(null);
-               QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-               controllerMessage.setQuadrupedControllerRequestedEvent(requestedEvent.toByte());
+               HighLevelStateMessage controllerMessage = new HighLevelStateMessage();
+               controllerMessage.setHighLevelControllerName(requestedState.toByte());
                controllerStatePublisher.publish(controllerMessage);
             }
          }
@@ -123,7 +123,7 @@ public class QuadrupedTeleopManager
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedControllerStateMessage.class, controllerSubGenerator);
+      controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
@@ -185,8 +185,8 @@ public class QuadrupedTeleopManager
 
    public void requestSteppingState()
    {
-      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerRequestedEvent(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      HighLevelStateMessage controllerMessage = new HighLevelStateMessage();
+      controllerMessage.setHighLevelControllerName(HighLevelStateMessage.STAND_TRANSITION_STATE);
       controllerStatePublisher.publish(controllerMessage);
    }
 
