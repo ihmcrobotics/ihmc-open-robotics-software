@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 
 public class PerStepCost implements FootstepCost
