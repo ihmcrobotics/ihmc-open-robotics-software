@@ -368,11 +368,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
                                                               SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                               YoVariableRegistry registry)
    {
-      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
+
+      AlwaysValidNodeChecker alwaysValidNodeChecker = new AlwaysValidNodeChecker();
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker();
+
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(alwaysValidNodeChecker, bodyCollisionNodeChecker));
 
       return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
    }
@@ -386,16 +390,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker();
-      List<FootstepNodeChecker> nodeCheckers = new ArrayList<>();
-      nodeCheckers.add(snapBasedNodeChecker);
-      nodeCheckers.add(bodyCollisionNodeChecker);
-
-      FootstepNodeCheckerOfCheckers nodeChecker = new FootstepNodeCheckerOfCheckers(nodeCheckers);
-
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
-      FootstepNodeChecker checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
+
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -405,7 +404,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, checkerOfCheckers, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, viz,
                                                               registry);
       return planner;
    }
