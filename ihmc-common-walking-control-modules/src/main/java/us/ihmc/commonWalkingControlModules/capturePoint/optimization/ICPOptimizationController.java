@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,6 +58,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BooleanProvider allowStepAdjustment;
+   private final YoBoolean includeFootsteps = new YoBoolean(yoNamePrefix + "IncludeFootsteps", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
@@ -231,8 +233,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry,
                                                          icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
-      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry, icpOptimizationParameters.getMinICPErrorForStepAdjustment());
-      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry, icpOptimizationParameters.getFractionThroughSwingForAdjustment());
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry,
+                                                         icpOptimizationParameters.getMinICPErrorForStepAdjustment());
+      fractionThroughSwingForAdjustment = new DoubleParameter(yoNamePrefix + "FractionThroughSwingForAdjustment", registry,
+                                                              icpOptimizationParameters.getFractionThroughSwingForAdjustment());
 
       footstepAdjustmentSafetyFactor = new DoubleParameter(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry,
                                                            icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
@@ -243,7 +247,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
       copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
 
-      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry, icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
+      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight", registry,
+                                                     icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
       feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
@@ -414,10 +419,19 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+      {
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
+      }
+
+      solver.notifyResetActiveSet();
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
 
@@ -443,10 +457,17 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       footstepSolution.setToNaN();
       unclippedFootstepSolution.setToNaN();
 
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+
       if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
+
+      solver.notifyResetActiveSet();
    }
 
    @Override
@@ -462,17 +483,25 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       initializeOnContactChange(initialTime);
 
-      copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
+      solver.resetCoPLocationConstraint();
+      solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
+
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
+      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide));
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
 
       if (planarRegionConstraintProvider != null)
       {
          planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-         planarRegionConstraintProvider
-               .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         ConvexPolygon2D planarRegion = planarRegionConstraintProvider
+               .updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+         solver.setPlanarRegionConstraint(planarRegion);
       }
+
+      solver.notifyResetActiveSet();
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -501,10 +530,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
          return false;
 
-      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()))
+      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
          return false;
 
-      if (timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue() < fractionThroughSwingForAdjustment.getValue())
+      if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()) && !includeFootsteps.getBooleanValue())
          return false;
 
       return upcomingFootsteps.size() > 0;
@@ -590,6 +619,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeTimeRemainingInState();
 
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
+      // if we are switching between including footsteps and not, the decision variables are changing, so the active set needs resetting
+      if (includeFootsteps != this.includeFootsteps.getBooleanValue())
+      {
+         solver.notifyResetActiveSet();
+         this.includeFootsteps.set(includeFootsteps);
+      }
 
       scaleStepRateWeightWithTime();
       scaleFeedbackWeightWithGain();
@@ -626,14 +661,32 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       if (isInDoubleSupport.getBooleanValue())
       {
-         copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+
+         if (copConstraintHandler.hasSupportPolygonChanged())
+            solver.notifyResetActiveSet();
       }
       else
       {
-         copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         solver.resetCoPLocationConstraint();
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
+
+         boolean resetActiveSet = copConstraintHandler.hasSupportPolygonChanged();
+
          if (planarRegionConstraintProvider != null)
-            planarRegionConstraintProvider
-                  .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         {
+            ConvexPolygon2D planarRegionConstraint = planarRegionConstraintProvider
+                  .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0);
+
+            solver.resetPlanarRegionConstraint();
+            solver.setPlanarRegionConstraint(planarRegionConstraint);
+
+            resetActiveSet = resetActiveSet || planarRegionConstraintProvider.hasConstraintChanged();
+         }
+
+         if (resetActiveSet)
+            solver.notifyResetActiveSet();
       }
 
       solver.resetFootstepConditions();
@@ -641,7 +694,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (localUseStepAdjustment && !isInDoubleSupport.getBooleanValue())
       {
          submitFootstepTaskConditionsToSolver(omega0, includeFootsteps);
-         reachabilityConstraintHandler.updateReachabilityConstraint(solver);
+
+         solver.resetReachabilityConstraint();
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.updateReachabilityConstraint());
       }
       else
       {
