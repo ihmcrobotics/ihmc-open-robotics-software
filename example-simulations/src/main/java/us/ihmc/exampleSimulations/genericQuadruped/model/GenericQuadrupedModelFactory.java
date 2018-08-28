@@ -106,4 +106,11 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
          throw new RuntimeException("No parameter file exists for control mode: " + controlMode);
       }
    }
+
+   @Override
+   public InputStream getParameterInputStream(QuadrupedControlMode controlMode)
+   {
+      return getClass().getResourceAsStream(getParameterResourceName(controlMode));
+   }
+
 }

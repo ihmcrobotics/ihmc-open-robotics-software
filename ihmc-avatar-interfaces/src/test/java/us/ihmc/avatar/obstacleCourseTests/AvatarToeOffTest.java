@@ -7,10 +7,12 @@ import org.junit.Before;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,9 +37,13 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private double swingTime = 0.6;
    private double transferTime = 0.25;
 
+   public abstract double getStepLength();
+   public abstract int getNumberOfSteps();
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -59,12 +65,16 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testShortSteps(double stepLength, int numberOfSteps) throws SimulationExceededMaximumTimeException
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 36.8)
+   @Test(timeout = 180000)
+   public void testShortSteps() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
 
-      walkForward(stepLength, numberOfSteps);
+      walkForward(getStepLength(), getNumberOfSteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 

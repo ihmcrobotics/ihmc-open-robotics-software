@@ -83,7 +83,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       CommonOps.multTransA(linearJacobianInverse, jointTorques, footLinearForce);
       
       footForce.setToZero(footJacobian.getJacobianFrame());
-      footForce.set(footLinearForce.get(0), footLinearForce.get(1), footLinearForce.get(2));
+      footForce.set(footLinearForce);
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ() * -1.0);
       isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getDoubleValue());
