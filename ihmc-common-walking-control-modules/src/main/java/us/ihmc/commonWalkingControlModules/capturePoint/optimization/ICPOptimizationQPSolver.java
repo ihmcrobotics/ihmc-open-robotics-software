@@ -32,10 +32,11 @@ public class ICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   // FIXME this cannot be true until we setup resetting the active set based on state changes
-   private static final boolean useWarmStart = false;
-   private static final int maxNumberOfIterations = 10;
+   private static final boolean useWarmStart = true;
+   private static final int maxNumberOfIterations = 100;
    private static final double convergenceThreshold = 1.0e-20;
+
+   private boolean resetActiveSet;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
@@ -252,9 +253,27 @@ public class ICPOptimizationQPSolver
       cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
       dynamicsCostToGo = new DenseMatrix64F(1, 1);
 
-      solver.setConvergenceThreshold(convergenceThreshold);
+//      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
       solver.setUseWarmStart(useWarmStart);
+   }
+
+   /**
+    * Let the QP solver know that the active set has been changed, so it must be reset.
+    */
+   public void notifyResetActiveSet()
+   {
+      this.resetActiveSet = true;
+   }
+
+   /**
+    * Check whether or not the active set must be reset.
+    */
+   private boolean pollResetActiveSet()
+   {
+      boolean ret = resetActiveSet;
+      resetActiveSet = false;
+      return ret;
    }
 
    /**
@@ -318,11 +337,21 @@ public class ICPOptimizationQPSolver
       cmpLocationConstraint.reset();
    }
 
+   /**
+    * Sets the minimum distance that the CoP must lie within the support polygon (m). This is the distance that the CoP
+    * will be to the edge, from the inside. Note that this is not a Euclidean distance, but is the maximum distance in X,
+    * and then the maximum distance in Y, rather than their distance sum.
+    */
    public void setCopSafeDistanceToEdge(double copSafeDistanceToEdge)
    {
       this.copSafeDistanceToEdge = copSafeDistanceToEdge;
    }
 
+   /**
+    * Sets the maximum distance that the CMP can lie from the support polygon (m). This is the maximum distance from the CMP
+    * when it is outside the support polygon to the support polygon edge. Note that this is not a Euclidean distance, but is
+    * the maximum distance in X, and then the maximum distance in Y, rather than their distance sum.
+    */
    public void setMaxCMPDistanceFromEdge(double maxCMPDistance)
    {
       this.cmpSafeDistanceFromEdge = maxCMPDistance;
@@ -336,6 +365,9 @@ public class ICPOptimizationQPSolver
     */
    public void addSupportPolygon(FrameConvexPolygon2D polygon)
    {
+      if (polygon == null)
+         return;
+
       polygon.changeFrame(worldFrame);
       copLocationConstraint.addPolygon(polygon);
       cmpLocationConstraint.addPolygon(polygon);
@@ -357,6 +389,9 @@ public class ICPOptimizationQPSolver
 
    public void addReachabilityPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
+      if (polygon == null)
+         return;
+
       polygon.checkReferenceFrameMatch(worldFrame);
       polygon.checkIfUpToDate();
       reachabilityConstraint.addPolygon(polygon);
@@ -369,6 +404,9 @@ public class ICPOptimizationQPSolver
 
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
    {
+      if (convexPolygon == null)
+         return;
+
       hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon);
    }
 
@@ -718,7 +756,7 @@ public class ICPOptimizationQPSolver
     * All the tasks must be set every tick before calling this method.
     *
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
-    * @returns whether a new solution was found if this is false the last valid solution will be used.
+    * @return whether a new solution was found if this is false the last valid solution will be used.
     */
    public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP)
    {
@@ -974,7 +1012,7 @@ public class ICPOptimizationQPSolver
     * Internal call to solves the quadratic program. Adds all the objectives and constraints to the problem and then solves it.
     *
     * @param solutionToPack solution of the QP.
-    * @returns whether a solution was found.
+    * @return whether a solution was found.
     */
    private boolean solve(DenseMatrix64F solutionToPack)
    {
@@ -987,6 +1025,10 @@ public class ICPOptimizationQPSolver
       }
 
       solver.clear();
+
+      if (useWarmStart && pollResetActiveSet())
+         solver.resetActiveConstraints();
+
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
