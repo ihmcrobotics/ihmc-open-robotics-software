@@ -46,7 +46,7 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
 
-   public static final Topic<us.ihmc.footstepPlanning.FootstepPlan> PlanTopic = Root.child(FootstepPlan).topic(Data);
+   public static final Topic<us.ihmc.footstepPlanning.FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(FootstepPlan).topic(FootstepPlannerParameters);
