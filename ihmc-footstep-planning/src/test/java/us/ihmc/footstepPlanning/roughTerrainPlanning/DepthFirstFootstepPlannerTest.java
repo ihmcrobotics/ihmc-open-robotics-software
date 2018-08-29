@@ -68,7 +68,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    {
       if (visualize())
       {
-         ui = new StandaloneFootstepPlannerUI(primaryStage);
+         ui = new FootstepPlannerUI(primaryStage);
          ui.show();
       }
    }

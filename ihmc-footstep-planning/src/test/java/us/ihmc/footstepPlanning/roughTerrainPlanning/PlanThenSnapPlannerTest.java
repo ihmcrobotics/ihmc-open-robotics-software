@@ -53,7 +53,7 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    {
       if (visualize())
       {
-         ui = new StandaloneFootstepPlannerUI(primaryStage);
+         ui = new FootstepPlannerUI(primaryStage);
          ui.show();
       }
    }
