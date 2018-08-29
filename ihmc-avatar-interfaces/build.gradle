@@ -68,6 +68,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
+   compile group: "us.ihmc", name: "ihmc-javafx-visualizers", version: "source"
 }
 
 testDependencies {

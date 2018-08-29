@@ -1,4 +1,4 @@
-package us.ihmc.avatar.joystickBasedJavaFXController;
+package us.ihmc.javaFXVisualizers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
