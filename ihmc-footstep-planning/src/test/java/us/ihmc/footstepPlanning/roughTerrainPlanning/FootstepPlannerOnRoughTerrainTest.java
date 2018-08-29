@@ -52,8 +52,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
    public abstract boolean assertPlannerReturnedResult();
 
-
-
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testOnStaircase()
@@ -600,7 +598,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       return new DefaultFootstepPlanningParameters();
    }
 
-
    private void runTestAndAssert(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, PlanarRegionsList planarRegions)
    {
       FootstepPlan footstepPlan = PlannerTools
@@ -611,9 +608,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
       if (ui != null && visualize())
       {
-         JavaFXMessager messager = ui.getMessager();
+         submitInfoToUI(initialStanceFootPose, goalPose, planarRegions, footstepPlan);
 
-         messager.registerTopicListener(ComputePathTopic, request -> iterateOnPlan(initialStanceFootPose, initialStanceSide, goalPose, planarRegions));
+         ThreadTools.sleep(10);
+
+         ui.getMessager().registerTopicListener(ComputePathTopic, request -> iterateOnPlan(initialStanceFootPose, initialStanceSide, goalPose, planarRegions));
 
          ThreadTools.sleepForever();
       }
@@ -624,19 +623,22 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       FootstepPlan footstepPlan = PlannerTools
             .runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegions, assertPlannerReturnedResult());
 
-      if (ui != null && visualize())
-      {
-         JavaFXMessager messager = ui.getMessager();
+      submitInfoToUI(initialStanceFootPose, goalPose, planarRegions, footstepPlan);
+   }
 
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, planarRegions);
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalPose.getOrientation().getYaw());
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, new Point3D(initialStanceFootPose.getPosition()));
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
+   private void submitInfoToUI(FramePose3D initialStanceFootPose, FramePose3D goalPose, PlanarRegionsList planarRegions, FootstepPlan footstepPlan)
+   {
+      JavaFXMessager messager = ui.getMessager();
 
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, planarRegions);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalPose.getOrientation().getYaw());
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, new Point3D(initialStanceFootPose.getPosition()));
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
 
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanTopic, footstepPlan);
-      }
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
+
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, footstepPlan);
+
    }
 }

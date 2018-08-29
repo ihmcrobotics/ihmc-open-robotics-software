@@ -138,7 +138,7 @@ public class FootstepPathCalculator
                PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps());
          }
 
-         messager.submitMessage(PlanTopic, planner.getPlan());
+         messager.submitMessage(FootstepPlanTopic, planner.getPlan());
 
       }
       catch (Exception e)
