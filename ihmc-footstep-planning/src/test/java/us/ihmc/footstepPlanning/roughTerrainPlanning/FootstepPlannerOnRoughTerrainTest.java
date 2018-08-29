@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
@@ -33,9 +34,11 @@ import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsLi
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ComputePathTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlannerParametersTopic;
 
 public abstract class FootstepPlannerOnRoughTerrainTest extends Application implements PlanningTest
 {
@@ -49,6 +52,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
    }
 
    protected static FootstepPlannerUI ui;
+   protected AtomicReference<FootstepPlannerParameters> parametersReference;
 
    public abstract boolean assertPlannerReturnedResult();
 
@@ -593,9 +597,17 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       return planarRegionsList;
    }
 
-   protected FootstepPlannerParameters getPlannerParameters()
+   protected FootstepPlannerParameters getDefaultPlannerParameters()
    {
       return new DefaultFootstepPlanningParameters();
+   }
+
+   protected FootstepPlannerParameters getPlannerParameters()
+   {
+      if (parametersReference == null)
+         return getDefaultPlannerParameters();
+
+      return parametersReference.get();
    }
 
    private void runTestAndAssert(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, PlanarRegionsList planarRegions)
@@ -608,11 +620,14 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
       if (ui != null && visualize())
       {
+         Messager messager = ui.getMessager();
+         parametersReference = messager.createInput(PlannerParametersTopic, getDefaultPlannerParameters());
+
          submitInfoToUI(initialStanceFootPose, goalPose, planarRegions, footstepPlan);
 
          ThreadTools.sleep(10);
 
-         ui.getMessager().registerTopicListener(ComputePathTopic, request -> iterateOnPlan(initialStanceFootPose, initialStanceSide, goalPose, planarRegions));
+         messager.registerTopicListener(ComputePathTopic, request -> iterateOnPlan(initialStanceFootPose, initialStanceSide, goalPose, planarRegions));
 
          ThreadTools.sleepForever();
       }
@@ -639,6 +654,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, footstepPlan);
-
    }
+
 }
