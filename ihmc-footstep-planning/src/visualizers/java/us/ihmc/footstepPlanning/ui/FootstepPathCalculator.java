@@ -9,8 +9,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
+import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +43,7 @@ public class FootstepPathCalculator
    private final AtomicReference<Point3D> goalPositionReference;
    private final AtomicReference<Double> startOrientationReference;
    private final AtomicReference<Double> goalOrientationReference;
+   private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<FootstepPlannerParameters> parameters;
 
@@ -49,6 +59,7 @@ public class FootstepPathCalculator
       startOrientationReference = messager.createInput(StartOrientationTopic, 0.0);
       goalOrientationReference = messager.createInput(GoalOrientationTopic, 0.0);
       parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
+      footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
 
       messager.registerTopicListener(ComputePathTopic, request -> computePathOnThread());
    }
@@ -103,11 +114,7 @@ public class FootstepPathCalculator
 
       try
       {
-         SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-         FootstepPlannerParameters parameters = this.parameters.get();
-         ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
-         FootstepPlanner planner = AStarFootstepPlanner
-               .createRoughTerrainPlanner(parameters, null, footPolygons, expansion, new YoVariableRegistry("visualizerRegistry"));
+         FootstepPlanner planner = createPlanner();
 
          planner.setPlanarRegions(planarRegionsList);
          planner.setTimeout(5.0);
@@ -142,4 +149,45 @@ public class FootstepPathCalculator
 
    }
 
+   private FootstepPlanner createPlanner()
+   {
+      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = PlannerTools.createDefaultFootPolygons();
+      YoVariableRegistry registry = new YoVariableRegistry("visualizerRegistry");
+
+      switch (footstepPlannerTypeReference.get())
+      {
+      case PLANAR_REGION_BIPEDAL:
+         return createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, registry);
+      case PLAN_THEN_SNAP:
+         return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame);
+      case A_STAR:
+         return createAStarPlanner(contactPointsInSoleFrame, registry);
+      case SIMPLE_BODY_PATH:
+         return new BodyPathBasedFootstepPlanner(parameters.get(), contactPointsInSoleFrame, registry);
+      case VIS_GRAPH_WITH_A_STAR:
+         return new VisibilityGraphWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, null, registry);
+      default:
+         throw new RuntimeException("Planner type " + footstepPlannerTypeReference.get() + " is not valid!");
+      }
+   }
+
+   private FootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   {
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters.get());
+      return AStarFootstepPlanner.createRoughTerrainPlanner(parameters.get(), null, footPolygons, expansion, registry);
+   }
+
+   private FootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
+   {
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters.get(), null);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, parameters.get());
+      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
+
+      DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(parameters.get(), snapper, nodeChecker, stepCostCalculator, registry);
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
+      footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      footstepPlanner.setExitAfterInitialSolution(false);
+
+      return footstepPlanner;
+   }
 }
