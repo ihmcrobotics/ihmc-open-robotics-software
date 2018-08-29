@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -34,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -43,7 +43,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoi
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class WalkingMessageHandler
 {
@@ -64,6 +69,7 @@ public class WalkingMessageHandler
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
+   private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
 
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
@@ -942,7 +948,8 @@ public class WalkingMessageHandler
       comTrajectoryHandler.setPositionOffset(planOffset);
 
       updateVisualization();
-      statusOutputManager.reportStatusMessage(HumanoidMessageTools.createPlanOffsetStatus(planOffset));
+      planOffsetStatus.getOffsetVector().set(planOffset);
+      statusOutputManager.reportStatusMessage(planOffsetStatus);
 
    }
 }
