@@ -1,14 +1,5 @@
 package us.ihmc.footstepPlanning.ui;
 
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalPositionEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.GoalPositionTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ShowPlanarRegionsTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartPositionEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.StartPositionTopic;
-
-import java.io.IOException;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,6 +12,8 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
+
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public class FootstepPlannerUI
 {
@@ -112,7 +105,12 @@ public class FootstepPlannerUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   public void show() throws IOException
+   public JavaFXMessager getMessager()
+   {
+      return messager;
+   }
+
+   public void show()
    {
       primaryStage.show();
    }
