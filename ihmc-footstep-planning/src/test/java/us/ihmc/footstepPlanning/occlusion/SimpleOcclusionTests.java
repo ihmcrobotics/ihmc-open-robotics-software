@@ -1,17 +1,10 @@
 package us.ihmc.footstepPlanning.occlusion;
 
-import java.awt.Color;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -25,16 +18,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -56,11 +42,13 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleOcclusionTests
 {
@@ -165,7 +153,7 @@ public class SimpleOcclusionTests
       if (visualize)
       {
          YoFrameConvexPolygon2D defaultPolygon = new YoFrameConvexPolygon2D("DefaultFootPolygon", worldFrame, 4, registry);
-         defaultPolygon.set(PlanningTestTools.createDefaultFootPolygon());
+         defaultPolygon.set(PlannerTools.createDefaultFootPolygon());
 
          solePosesForVisualization = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
          for (int i = 0; i < stepsPerSideToVisualize; i++)
@@ -593,7 +581,7 @@ public class SimpleOcclusionTests
 
    private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
-      SideDependentList<ConvexPolygon2D> footPloygons = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
       return new VisibilityGraphWithAStarPlanner(parameters, footPloygons, graphicsListRegistry, registry);
    }
 

@@ -11,6 +11,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.PlannerTools;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
@@ -38,7 +39,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    {
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
       planner = AStarFootstepPlanner.createFlatGroundPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));

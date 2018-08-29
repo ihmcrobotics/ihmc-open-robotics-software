@@ -9,13 +9,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
@@ -34,7 +34,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Point3D> footPositionReference;
    private final AtomicReference<Double> footOrientationReference;
 
-   private static final ConvexPolygon2D defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
+   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(defaultFootPolygon, defaultFootPolygon);
    private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
    private final FootstepNodeChecker checker = new PlanarRegionBaseOfCliffAvoider(new DefaultFootstepPlanningParameters(), snapper, footPolygons);
