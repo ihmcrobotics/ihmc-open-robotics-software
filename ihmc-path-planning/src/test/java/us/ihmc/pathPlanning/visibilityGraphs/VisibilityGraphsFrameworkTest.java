@@ -744,14 +744,20 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
-      ui.show();
+      if (VISUALIZE)
+      {
+         ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
+         ui.show();
+      }
    }
 
    @Override
    public void stop() throws Exception
    {
-      ui.stop();
+      if (VISUALIZE)
+      {
+         ui.stop();
+      }
    }
 
    private static interface DatasetTestRunner
