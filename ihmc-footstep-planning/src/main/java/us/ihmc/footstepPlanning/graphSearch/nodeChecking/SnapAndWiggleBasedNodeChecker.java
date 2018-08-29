@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -28,7 +29,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private BipedalFootstepPlannerListener listener;
    private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
-   private YoFootstepPlannerParameters parameters;
+   private FootstepPlannerParameters parameters;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
    private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
 
@@ -36,7 +37,6 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private final YoDouble totalArea = new YoDouble("totalArea", registry);
    private final YoDouble stepReach = new YoDouble("stepReach", registry);
 
-   private final RigidBodyTransform transform = new RigidBodyTransform();
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TransformReferenceFrame parentSoleFrame = new TransformReferenceFrame("parentSole", ReferenceFrame.getWorldFrame());
    private final ZUpFrame parentSoleZupFrame = new ZUpFrame(worldFrame, parentSoleFrame, "parentSoleZupFrame");
@@ -45,8 +45,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
    public SnapAndWiggleBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons,
                                         BipedalFootstepPlannerListener listener,
-                                        YoFootstepPlannerParameters parameters,
-                                        YoGraphicsListRegistry graphicsListRegistry)
+                                        FootstepPlannerParameters parameters)
    {
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
       this.parameters = parameters;
