@@ -127,7 +127,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = new Quaternion();
       double trajectoryTime = 1.0;
 
-      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredPose.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
@@ -191,6 +191,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
+         initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          // First need to pick up the foot:
          assertTrue(pickupFoot(robotSide, foot));
@@ -226,6 +227,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
+         initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          // First need to pick up the foot:
          assertTrue(pickupFoot(robotSide, foot));
