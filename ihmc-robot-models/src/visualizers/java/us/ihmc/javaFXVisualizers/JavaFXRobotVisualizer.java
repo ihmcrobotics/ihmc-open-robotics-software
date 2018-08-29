@@ -1,6 +1,7 @@
 package us.ihmc.javaFXVisualizers;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
@@ -14,7 +15,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -38,7 +40,8 @@ public class JavaFXRobotVisualizer
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
+      
+      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
 
       new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
@@ -70,6 +73,27 @@ public class JavaFXRobotVisualizer
       };
    }
 
+   public static int calculateJointNameHash(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   {
+      CRC32 crc = new CRC32();
+      for (OneDoFJoint joint : joints)
+      {
+         crc.update(joint.getName().getBytes());
+      }
+   
+      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
+      {
+         crc.update(forceSensorDefinition.getSensorName().getBytes());
+      }
+   
+      for (IMUDefinition imuDefinition : imuDefinitions)
+      {
+         crc.update(imuDefinition.getName().getBytes());
+      }
+   
+      return (int) crc.getValue();
+   }
+   
    private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
