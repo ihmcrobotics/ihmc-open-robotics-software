@@ -21,6 +21,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -44,11 +45,14 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean requestIntegratorReset = false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox);
+      this.controllerToolbox = controllerToolbox;
 
       // create walking controller
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
@@ -188,6 +192,7 @@ public class WalkingControllerState extends HighLevelControllerState
    public void onExit()
    {
       walkingController.resetJointIntegrators();
+      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);
    }
 
    @Override
