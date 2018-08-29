@@ -1,9 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
+import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -14,17 +16,63 @@ import us.ihmc.footstepPlanning.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
+
+   private static boolean visualize = true;
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (visualize)
+      {
+         // Did not find a better solution for starting JavaFX and still be able to move on.
+         new Thread(() -> launch()).start();
+
+         while (ui == null)
+            ThreadTools.sleep(200);
+      }
+   }
+
+   @After
+   public void tearDown()
+   {
+      if (visualize())
+      {
+         stop();
+      }
+      ui = null;
+   }
+
+   @Override
+   public void start(Stage primaryStage) throws Exception
+   {
+      if (visualize())
+      {
+         ui = new StandaloneFootstepPlannerUI(primaryStage);
+         ui.show();
+      }
+   }
+
+   @Override
+   public void stop()
+   {
+      if (visualize())
+      {
+         ui.stop();
+      }
+   }
 
    @Override
    public boolean assertPlannerReturnedResult()
@@ -56,8 +104,8 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getParameters());
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(getParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getPlannerParameters());
+      planner = AStarFootstepPlanner.createRoughTerrainPlanner(getPlannerParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After

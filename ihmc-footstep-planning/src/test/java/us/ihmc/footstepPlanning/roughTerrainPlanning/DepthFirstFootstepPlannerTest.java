@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javafx.stage.Stage;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,6 +21,8 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,8 +34,53 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
 
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
+
+   private static boolean visualize = true;
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (visualize)
+      {
+         // Did not find a better solution for starting JavaFX and still be able to move on.
+         new Thread(() -> launch()).start();
+
+         while (ui == null)
+            ThreadTools.sleep(200);
+      }
+   }
+
+   @After
+   public void tearDown()
+   {
+      if (visualize())
+      {
+         stop();
+      }
+      ui = null;
+   }
+
+   @Override
+   public void start(Stage primaryStage) throws Exception
+   {
+      if (visualize())
+      {
+         ui = new StandaloneFootstepPlannerUI(primaryStage);
+         ui.show();
+      }
+   }
+
+   @Override
+   public void stop()
+   {
+      if (visualize())
+      {
+         ui.stop();
+      }
+   }
 
    @Override
    public boolean assertPlannerReturnedResult()

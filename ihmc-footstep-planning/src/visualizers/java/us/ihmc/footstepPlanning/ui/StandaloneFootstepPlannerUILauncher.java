@@ -4,14 +4,14 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-public class FootstepPlannerUIStandaloneLauncher extends Application
+public class StandaloneFootstepPlannerUILauncher extends Application
 {
-   private FootstepPlannerUI ui;
+   private StandaloneFootstepPlannerUI ui;
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new FootstepPlannerUI(primaryStage);
+      ui = new StandaloneFootstepPlannerUI(primaryStage);
       ui.show();
    }
 
