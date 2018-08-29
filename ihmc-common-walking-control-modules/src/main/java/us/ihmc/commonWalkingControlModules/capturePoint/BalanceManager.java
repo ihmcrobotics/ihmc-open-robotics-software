@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -570,6 +571,11 @@ public class BalanceManager
          inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
       }
       return inverseDynamicsCommandList;
+   }
+
+   public MomentumRateCommand getMomentumRateCommand()
+   {
+      return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
