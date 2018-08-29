@@ -139,7 +139,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT, stateEstimatorParameters, registry);
-      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, stateEstimatorParameters, registry);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, robotMotionStatusFromController, stateEstimatorParameters, registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
