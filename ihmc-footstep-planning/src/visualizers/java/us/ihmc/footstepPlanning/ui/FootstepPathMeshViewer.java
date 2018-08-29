@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannerTools;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPathMeshViewer extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
-   private static final ConvexPolygon2D defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
+   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
