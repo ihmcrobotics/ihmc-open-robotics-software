@@ -580,7 +580,7 @@ public class ConvexPolygonScalerTest
       assertFalse(success);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 30000)
    public void testTroublingCollapseExteriorRectangleToLine()
    {
