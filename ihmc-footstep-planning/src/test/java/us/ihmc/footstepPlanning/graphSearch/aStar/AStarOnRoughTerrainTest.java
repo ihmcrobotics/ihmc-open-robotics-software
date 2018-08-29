@@ -60,7 +60,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    {
       if (visualize())
       {
-         ui = new StandaloneFootstepPlannerUI(primaryStage);
+         ui = new FootstepPlannerUI(primaryStage);
          ui.show();
       }
    }
