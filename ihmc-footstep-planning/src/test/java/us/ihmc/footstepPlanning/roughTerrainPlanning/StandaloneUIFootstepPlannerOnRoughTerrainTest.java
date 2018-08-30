@@ -16,10 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.PlannerTools;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -598,17 +595,21 @@ public abstract class StandaloneUIFootstepPlannerOnRoughTerrainTest extends Appl
       submitInfoToUI(initialStanceFootPose, goalPose, planarRegions);
 
       AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
+      AtomicReference<Boolean> receivedResult = new AtomicReference<>(false);
       messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
+      messager.registerTopicListener(PlanningResultTopic, request -> receivedResult.set(true));
       AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
+      AtomicReference<FootstepPlanningResult> footstepPlanningResult = messager.createInput(PlanningResultTopic);
 
       messager.submitMessage(ComputePathTopic, true);
 
-      while (!receivedPlan.get())
+      while (!receivedPlan.get() && !receivedResult.get())
       {
       }
 
       ThreadTools.sleep(10);
 
+      assertTrue("Planning result is invalid, result was " + footstepPlanningResult.get(), footstepPlanningResult.get().validForExecution());
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose, footstepPlanReference.get()));
 
       if (keepUIUp)

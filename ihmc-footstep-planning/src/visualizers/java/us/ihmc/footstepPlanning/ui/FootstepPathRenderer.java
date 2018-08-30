@@ -26,6 +26,7 @@ public class FootstepPathRenderer
       footstepPlanReference = messager.createInput(FootstepPlanTopic);
 
       messager.registerTopicListener(FootstepPlanTopic, request -> processFootstepPath());
+      messager.registerTopicListener(FootstepPlanTopic, request -> processFootstepPath());
 
       footstepPathMeshViewer = new FootstepPathMeshViewer();
       root.getChildren().add(footstepPathMeshViewer.getRoot());
