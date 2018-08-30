@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.frameworkTests;
 
+import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
@@ -10,53 +12,54 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.frameworkTests.FootstepPlannerFrameworkTest;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUILauncher;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarFrameworkTest extends FootstepPlannerFrameworkTest
 {
-   private static boolean visualize = false;
-
-   @Before
-   public void setup()
-   {
-      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-
-      // Did not find a better solution for starting JavaFX and still be able to move on.
-      new Thread(() -> launch()).start();
-
-      while (ui == null)
-         ThreadTools.sleep(200);
-   }
-
-   @After
-   public void tearDown()
-   {
-      stop();
-      ui = null;
-   }
-
    @Override
    public FootstepPlannerType getPlannerType()
    {
       return FootstepPlannerType.A_STAR;
    }
 
-   @Override
-   public void start(Stage primaryStage) throws Exception
-   {
-      ui = new StandaloneFootstepPlannerUI(primaryStage);
 
-      if (visualize)
-      {
-         ui.show();
-      }
+   @Before
+   public void setup()
+   {
+      VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+
+      StandaloneFootstepPlannerUILauncher launcher = new StandaloneFootstepPlannerUILauncher(VISUALIZE);
+      PlatformImpl.startup(() -> {
+         Platform.runLater(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               try
+               {
+                  launcher.start(new Stage());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
+      });
+
+      while (launcher.getUI() == null)
+         ThreadTools.sleep(100);
+
+      ui = launcher.getUI();
    }
 
-   @Override
-   public void stop()
+   @After
+   public void tearDown() throws Exception
    {
       ui.stop();
+      ui = null;
    }
-
 
 }

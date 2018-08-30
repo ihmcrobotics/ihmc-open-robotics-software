@@ -49,7 +49,6 @@ public class FootstepPathRenderer
 
    private void processFootstepPath()
    {
-      PrintTools.info("FootstepPlan has been processed in the renderer.");
       footstepPathMeshViewer.processFootstepPath(footstepPlanReference.getAndSet(null));
    }
 
