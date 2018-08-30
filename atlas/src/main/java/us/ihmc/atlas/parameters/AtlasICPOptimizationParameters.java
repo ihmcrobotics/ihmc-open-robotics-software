@@ -173,13 +173,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getBackwardReachabilityLimit()
-   {
-      return runningOnRealRobot ? -0.3 : -0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean getLimitReachabilityFromAdjustment()
    {
       return false;
