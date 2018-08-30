@@ -158,4 +158,36 @@ public class PlannerTools
       else
          return false;
    }
+
+   public static boolean isGoalNextToLastStep(Point3D goalPosition, FootstepPlan footstepPlan)
+   {
+      return isGoalNextToLastStep(goalPosition, footstepPlan, 0.5);
+   }
+
+   public static boolean isGoalNextToLastStep(Point3D desiredPosition, FootstepPlan footstepPlan, double epsilon)
+   {
+      int steps = footstepPlan.getNumberOfSteps();
+      if (steps < 1)
+         throw new RuntimeException("Did not get enough footsteps to check if goal is within feet.");
+
+      SimpleFootstep footstep = footstepPlan.getFootstep(steps - 1);
+      FramePose3D stepPose = new FramePose3D();
+      footstep.getSoleFramePose(stepPose);
+      RobotSide stepSide = footstep.getRobotSide();
+
+      double midFeetOffset = stepSide.negateIfLeftSide(0.125);
+      Vector3D goalOffset = new Vector3D(0.0, midFeetOffset, 0.0);
+      RigidBodyTransform soleToWorld = new RigidBodyTransform();
+      stepPose.get(soleToWorld);
+      soleToWorld.transform(goalOffset);
+
+      FramePose3D achievedGoal = new FramePose3D(stepPose);
+      Point3D goalPosition = new Point3D(achievedGoal.getPosition());
+      goalPosition.add(goalOffset);
+
+      if (goalPosition.epsilonEquals(desiredPosition, epsilon))
+         return true;
+      else
+         return false;
+   }
 }
