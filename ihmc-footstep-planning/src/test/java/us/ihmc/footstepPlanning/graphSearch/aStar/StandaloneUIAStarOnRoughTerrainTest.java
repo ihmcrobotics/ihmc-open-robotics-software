@@ -69,20 +69,5 @@ public class StandaloneUIAStarOnRoughTerrainTest extends StandaloneUIFootstepPla
       ui.stop();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 51000)
-   public void testPartialGaps()
-   {
-      super.testPartialGaps();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   @Test(timeout = 51000)
-   public void testSpiralStaircase()
-   {
-      super.testSpiralStaircase();
-   }
 
 }
