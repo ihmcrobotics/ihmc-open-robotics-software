@@ -52,3 +52,10 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.1"
 }
+
+visualizersDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+}
