@@ -285,6 +285,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlan();
 
       this.initialTime.set(initialTime);
+      timeInCurrentStateRemaining.setToNaN();
       isInitialTransfer.set(isStanding.getBooleanValue());
       isStanding.set(true);
       isDoubleSupport.set(true);
@@ -299,6 +300,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void initializeForTransfer(double initialTime)
    {
       this.initialTime.set(initialTime);
+      timeInCurrentStateRemaining.set(getTransferDuration(0));
+
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
       isStanding.set(false);
@@ -322,6 +325,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void initializeForSingleSupport(double initialTime)
    {
       this.initialTime.set(initialTime);
+      timeInCurrentStateRemaining.set(getSwingDuration(0));
       isStanding.set(false);
       isDoubleSupport.set(false);
 
