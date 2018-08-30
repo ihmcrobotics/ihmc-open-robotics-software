@@ -38,6 +38,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final YoFrameLineSegment2D adjustmentLineSegment;
 
    private final DoubleProvider lengthLimit;
+   private final DoubleProvider lengthBackLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
 
@@ -45,6 +46,7 @@ public class ICPOptimizationReachabilityConstraintHandler
                                                        boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
+      lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
       innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
       outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
 
@@ -128,7 +130,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
       double forwardLimit = lengthLimit.getValue();
-      double backwardLimit = -lengthLimit.getValue();
+      double backwardLimit = -lengthBackLimit.getValue();
       double innerLimit = supportSide.negateIfLeftSide(this.innerLimit.getValue());
       double outerLimit = supportSide.negateIfLeftSide(this.outerLimit.getValue());
 
