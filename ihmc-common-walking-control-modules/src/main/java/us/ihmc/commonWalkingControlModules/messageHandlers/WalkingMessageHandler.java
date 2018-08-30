@@ -932,6 +932,8 @@ public class WalkingMessageHandler
       setPlanOffsetInternal(planOffsetInWorld);
 
       planOffsetFromAdjustment.setToZero();
+
+      updateVisualization();
    }
 
    private final FrameVector3D totalOffset = new FrameVector3D();
@@ -946,8 +948,6 @@ public class WalkingMessageHandler
    private void setPlanOffsetInternal(FrameVector3DReadOnly planOffset)
    {
       comTrajectoryHandler.setPositionOffset(planOffset);
-
-      updateVisualization();
       planOffsetStatus.getOffsetVector().set(planOffset);
       statusOutputManager.reportStatusMessage(planOffsetStatus);
 
