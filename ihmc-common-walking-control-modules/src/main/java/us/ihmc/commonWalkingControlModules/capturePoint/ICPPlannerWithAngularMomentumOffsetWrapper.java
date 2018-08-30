@@ -86,6 +86,42 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
+
+   /** {@inheritDoc} */
+   @Override
+   public void initializeForStanding(double initialTime)
+   {
+      super.initializeForStanding(initialTime);
+      initializeOnStateChange();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void initializeForTransfer(double initialTime)
+   {
+      super.initializeForTransfer(initialTime);
+      initializeOnStateChange();
+   }
+
+
+   /** {@inheritDoc} */
+   @Override
+   public void initializeForSingleSupport(double initialTime)
+   {
+      super.initializeForSingleSupport(initialTime);
+      initializeOnStateChange();
+   }
+
+   private void initializeOnStateChange()
+   {
+//      super.getDesiredCapturePointVelocity(modifiedICPVelocity);
+//      super.getDesiredCentroidalMomentumPivotPosition(modifiedCMPPosition);
+//      super.getDesiredCentroidalMomentumPivotVelocity(modifiedCMPVelocity);
+      modifiedTimeInCurrentState.set(super.getTimeInCurrentState());
+      modifiedTimeInCurrentStateRemaining.set(super.getTimeInCurrentStateRemaining());
+   }
+
+
    private final FramePoint3D desiredCMPPosition = new FramePoint3D();
    private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
 
