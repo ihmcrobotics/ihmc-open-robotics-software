@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.aStar;
+package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javafx.stage.Stage;
 import org.junit.After;
@@ -13,6 +13,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.PlannerTools;
+import us.ihmc.footstepPlanning.graphSearch.aStar.FootstepNodeVisualization;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
