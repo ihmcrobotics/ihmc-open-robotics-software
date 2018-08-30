@@ -207,14 +207,6 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * @return The backward limit that the swing foot can reach w.r.t. the stance foot.
-    */
-   public double getBackwardReachabilityLimit()
-   {
-      return -0.3;
-   }
-
-   /**
     * Specifies whether or not to use the ICP control polygon for the CMP, rather than the actual support polygon.
     */
    public boolean getUseICPControlPolygons()
