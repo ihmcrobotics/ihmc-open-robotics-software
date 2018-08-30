@@ -28,6 +28,10 @@ public class DoubleSpinner extends NumericSpinner<Double>
       {
          return Double.parseDouble(numberString.substring(0, numberString.length() - 1));
       }
+      else if (numberString.endsWith("e-") || numberString.endsWith("E-"))
+      {
+         return Double.parseDouble(numberString.substring(0, numberString.length() - 2));
+      }
       return Double.parseDouble(numberString);
    }
 

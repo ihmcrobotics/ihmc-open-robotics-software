@@ -4,19 +4,24 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
-public class MotionQPInput
+public class QPInput
 {
-   public final DenseMatrix64F taskJacobian;
-   public final DenseMatrix64F taskObjective;
-   public final DenseMatrix64F taskWeightMatrix;
-   private double taskWeightScalar;
+   private static final int initialTaskSize = 6;
+
+   private final int numberOfVariables;
+
+   public final DenseMatrix64F taskJacobian = new DenseMatrix64F(0, 0);
+   public final DenseMatrix64F taskObjective = new DenseMatrix64F(0, 0);
+   public final DenseMatrix64F taskWeightMatrix = new DenseMatrix64F(0, 0);
+
    private boolean useWeightScalar = false;
-   private final int numberOfDoFs;
+   private double taskWeightScalar;
+
    private ConstraintType constraintType = ConstraintType.OBJECTIVE;
 
    /**
     * <p>
-    * Motion objective input into the QP solver. Must be in the form
+    * Input into the QP solver. Must be in the form
     * </p>
     * <p>
     * A * x - b
@@ -30,17 +35,15 @@ public class MotionQPInput
     * where the overall desire is minimize the objective.
     * </p>
     */
-   public MotionQPInput(int numberOfDoFs)
+   public QPInput(int numberOfVariables)
    {
-      this.numberOfDoFs = numberOfDoFs;
-      taskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      taskObjective = new DenseMatrix64F(numberOfDoFs, 1);
-      taskWeightMatrix = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
+      this.numberOfVariables = numberOfVariables;
+      reshape(initialTaskSize);
    }
 
    public void reshape(int taskSize)
    {
-      taskJacobian.reshape(taskSize, numberOfDoFs);
+      taskJacobian.reshape(taskSize, numberOfVariables);
       taskObjective.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
    }
@@ -50,14 +53,29 @@ public class MotionQPInput
       this.taskJacobian.set(taskJacobian);
    }
 
+   public DenseMatrix64F getTaskJacobian()
+   {
+      return taskJacobian;
+   }
+
    public void setTaskObjective(DenseMatrix64F taskObjective)
    {
       this.taskObjective.set(taskObjective);
    }
 
+   public DenseMatrix64F getTaskObjective()
+   {
+      return taskObjective;
+   }
+
    public void setTaskWeightMatrix(DenseMatrix64F taskWeightMatrix)
    {
       this.taskWeightMatrix.set(taskWeightMatrix);
+   }
+
+   public DenseMatrix64F getTaskWeightMatrix()
+   {
+      return taskWeightMatrix;
    }
 
    public void setUseWeightScalar(boolean useWeightScalar)
@@ -71,6 +89,11 @@ public class MotionQPInput
    }
 
    public double getWeightScalar()
+   {
+      return taskWeightScalar;
+   }
+
+   public double getTaskWeightScalar()
    {
       return taskWeightScalar;
    }
