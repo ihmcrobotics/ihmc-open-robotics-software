@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javafx.application.Application;
-import org.junit.After;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,10 +18,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
+import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -38,24 +39,17 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ComputePathTopic;
-import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.PlannerParametersTopic;
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-public abstract class FootstepPlannerOnRoughTerrainTest extends Application implements PlanningTest
+public abstract class StandaloneUIFootstepPlannerOnRoughTerrainTest extends Application
 {
    private static final Random random = new Random(42747621889239430L);
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @After
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
+   protected static StandaloneFootstepPlannerUI ui;
+   protected boolean keepUIUp = false;
 
-   protected static FootstepPlannerUI ui;
-   protected AtomicReference<FootstepPlannerParameters> parametersReference;
-
-   public abstract boolean assertPlannerReturnedResult();
+   public abstract FootstepPlannerType getPlannerType();
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 50000)
@@ -90,10 +84,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       generator.addRectangle(1.0, 1.5);
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
+      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters();
       // define start and goal conditions
       FramePose3D initialStanceFootPose = new FramePose3D(worldFrame);
       RobotSide initialStanceSide = RobotSide.LEFT;
-      initialStanceFootPose.setY(initialStanceSide.negateIfRightSide(getPlannerParameters().getIdealFootstepWidth() / 2.0));
+      initialStanceFootPose.setY(initialStanceSide.negateIfRightSide(plannerParameters.getIdealFootstepWidth() / 2.0));
       initialStanceFootPose.setX(-2.0);
 
       FramePose3D goalPose = new FramePose3D(worldFrame);
@@ -155,7 +150,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
    @Test(timeout = 30000)
    public void testStepUpsAndDownsScoringDifficult()
    {
-      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double cinderBlockSize = 0.4;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -206,7 +200,6 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
    private void runCompareAfterPitchedStep(boolean pitchCinderBack)
    {
-      boolean assertPlannerReturnedResult = assertPlannerReturnedResult();
       double cinderBlockSize = 0.4;
       double fieldHeight = 0.4;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -598,52 +591,31 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
       return planarRegionsList;
    }
 
-   protected FootstepPlannerParameters getDefaultPlannerParameters()
-   {
-      return new DefaultFootstepPlanningParameters();
-   }
-
-   protected FootstepPlannerParameters getPlannerParameters()
-   {
-      if (parametersReference == null)
-         return getDefaultPlannerParameters();
-
-      return parametersReference.get();
-   }
-
    private void runTestAndAssert(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, PlanarRegionsList planarRegions)
    {
-      FootstepPlan footstepPlan = PlannerTools
-            .runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegions, assertPlannerReturnedResult());
+      Messager messager = ui.getMessager();
 
-      if (assertPlannerReturnedResult())
-         assertTrue(PlannerTools.isGoalNextToLastStep(goalPose, footstepPlan));
+      submitInfoToUI(initialStanceFootPose, goalPose, planarRegions);
 
-      if (ui != null && visualize())
+      AtomicReference<Boolean> receivedPlan = new AtomicReference<>(false);
+      messager.registerTopicListener(FootstepPlanTopic, request -> receivedPlan.set(true));
+      AtomicReference<FootstepPlan> footstepPlanReference = messager.createInput(FootstepPlanTopic);
+
+      messager.submitMessage(ComputePathTopic, true);
+
+      while (!receivedPlan.get())
       {
-         Messager messager = ui.getMessager();
-         parametersReference = messager.createInput(PlannerParametersTopic, getDefaultPlannerParameters());
-
-         submitInfoToUI(initialStanceFootPose, goalPose, planarRegions, footstepPlan);
-
-         ThreadTools.sleep(10);
-
-         messager.registerTopicListener(ComputePathTopic, request -> iterateOnPlan(initialStanceFootPose, initialStanceSide, goalPose, planarRegions));
-
-         ThreadTools.sleepForever();
       }
+
+      ThreadTools.sleep(10);
+
+      assertTrue(PlannerTools.isGoalNextToLastStep(goalPose, footstepPlanReference.get()));
+
+      if (keepUIUp)
+         ThreadTools.sleepForever();
    }
 
-   private void iterateOnPlan(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, PlanarRegionsList planarRegions)
-   {
-      PrintTools.info("Iterating");
-      FootstepPlan footstepPlan = PlannerTools
-            .runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegions, assertPlannerReturnedResult());
-
-      submitInfoToUI(initialStanceFootPose, goalPose, planarRegions, footstepPlan);
-   }
-
-   private void submitInfoToUI(FramePose3D initialStanceFootPose, FramePose3D goalPose, PlanarRegionsList planarRegions, FootstepPlan footstepPlan)
+   private void submitInfoToUI(FramePose3D initialStanceFootPose, FramePose3D goalPose, PlanarRegionsList planarRegions)
    {
       JavaFXMessager messager = ui.getMessager();
 
@@ -655,7 +627,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest extends Application impl
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, initialStanceFootPose.getOrientation().getYaw());
 
-      messager.submitMessage(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(PlannerTypeTopic, getPlannerType());
    }
 
 }
