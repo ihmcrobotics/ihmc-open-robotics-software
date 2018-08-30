@@ -28,7 +28,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionViewer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
@@ -59,7 +59,7 @@ public class PlanarRegionViewer
             if (localReference != null)
             {
                if (VERBOSE)
-                  PrintTools.info(this, "Rendering new planar regions.");
+                  PrintTools.info("Rendering new planar regions.");
                graphicsRendered = localReference;
                root.getChildren().clear();
             }
