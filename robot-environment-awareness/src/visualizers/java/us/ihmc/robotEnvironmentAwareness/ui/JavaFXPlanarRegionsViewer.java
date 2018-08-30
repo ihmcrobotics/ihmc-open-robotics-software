@@ -1,4 +1,4 @@
-package us.ihmc.robotics.visualization;
+package us.ihmc.robotEnvironmentAwareness.ui;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.animation.AnimationTimer;
