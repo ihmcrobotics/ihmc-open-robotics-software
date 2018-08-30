@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.roughTerrainPlanning;
+package us.ihmc.footstepPlanning.frameworkTests;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
