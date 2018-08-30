@@ -140,6 +140,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
    private final YoDouble phaseInMultiplier = new YoDouble(yoNamePrefix + "PhaseInMultiplier", registry);
 
+   private final DoubleProvider phaseInFraction;
+   private final DoubleProvider phaseInScalar;
+
+
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
@@ -283,6 +287,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isICPStuck = new GlitchFilteredYoBoolean(yoNamePrefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
 
       minimumTimeRemaining = new DoubleParameter(yoNamePrefix + "MinimumTimeRemaining", registry, icpOptimizationParameters.getMinimumTimeRemaining());
+
+
+      phaseInFraction = new DoubleParameter(yoNamePrefix + "PhaseInFraction", registry, icpOptimizationParameters.getStepAdjustmentPhaseInFraction());
+      phaseInScalar = new DoubleParameter(yoNamePrefix + "PhaseInScalar", registry, icpOptimizationParameters.getPhaseInScalar());
+
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -769,10 +778,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
          helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getValue(), lateralFootstepWeight.getValue(), soleFrame);
 
-         double recursionTime =
-               Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue();
-         double recursionMultiplier = Math.exp(-omega0 * recursionTime);
-         this.footstepMultiplier.set(recursionMultiplier);
+         this.footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
 
          predictedEndOfStateICP.sub(desiredICP, yoPerfectCMP);
          predictedEndOfStateICP.scaleAdd(Math.exp(omega0 * timeRemainingInState.getDoubleValue()), yoPerfectCMP);
@@ -789,6 +795,27 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (useFootstepRate.getValue())
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
+   }
+
+   private double computeFootstepAdjustmentMultiplier(double omega0)
+   {
+      double recursionTime =
+            Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue();
+      recursionMultiplier.set(Math.exp(-omega0 * recursionTime));
+
+      double phaseThroughState = timeInCurrentState.getDoubleValue() / swingDuration.getDoubleValue();
+      double phaseForIdentity = Math.min(phaseInFraction.getValue(), 1.0);
+      if (phaseForIdentity > 0.0)
+      {
+         double fractionThroughPhaseIn = Math.min(phaseThroughState / phaseForIdentity, 1.0);
+         phaseInMultiplier.set(Math.max(phaseInScalar.getValue() * (1.0 - fractionThroughPhaseIn) + fractionThroughPhaseIn, 1.0));
+      }
+      else
+      {
+         phaseInMultiplier.set(1.0);
+      }
+
+      return phaseInMultiplier.getDoubleValue() * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()
