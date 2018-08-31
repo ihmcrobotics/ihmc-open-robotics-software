@@ -71,7 +71,7 @@ public class VisibilityGraphsOcclusionTest
    private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
-   private static final double defaultMaxAllowedSolveTime = 1.25;
+   private static final double defaultMaxAllowedSolveTime = 1.5;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final double maximumFlyingDistance = 0.05;
@@ -600,10 +600,10 @@ public class VisibilityGraphsOcclusionTest
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(50.0, 5.0);
 
-      startPoseToPack.set(-20.005, -2.001, 0.0);
+      startPoseToPack.set(-18.005, -2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(20.005, 2.001, 0.0);
+      goalPoseToPack.set(18.005, 2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();
