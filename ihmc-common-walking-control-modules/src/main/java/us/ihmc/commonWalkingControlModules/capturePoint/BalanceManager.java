@@ -414,11 +414,10 @@ public class BalanceManager
    private final FramePoint3D copEstimate = new FramePoint3D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
-      controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
-      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      computeICPPlan(supportLeg);
 
       if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
          icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
@@ -504,6 +503,17 @@ public class BalanceManager
       centerOfPressureCommand.setDesiredCoP(tempPoint2D);
       centerOfPressureCommand.setWeight(tempVector2D);
    }
+
+   public void computeICPPlan(RobotSide supportLeg)
+   {
+      controllerToolbox.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCoP(copEstimate);
+      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+
+      if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
+         icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
+   }
+
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
