@@ -243,6 +243,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    @Override
    public void updateCurrentPlan()
    {
+      timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
+
       if (isDoubleSupport.getBooleanValue())
       {
          if (isHoldingPosition.getBooleanValue())
@@ -292,6 +294,24 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          velocityReductionFactor.set(MathTools.clamp(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
          desiredICPVelocity.scale(velocityReductionFactor.getDoubleValue());
       }
+   }
+
+   public void initializeForStanding(double initialTime)
+   {
+      timeInCurrentState.set(0.0);
+      timeInCurrentStateRemaining.setToNaN();
+   }
+
+   public void initializeForTransfer(double initialTime)
+   {
+      timeInCurrentState.set(0.0);
+      timeInCurrentStateRemaining.set(getCurrentStateDuration());
+   }
+
+   public void initializeForSingleSupport(double initialTime)
+   {
+      timeInCurrentState.set(0.0);
+      timeInCurrentStateRemaining.set(getCurrentStateDuration());
    }
 
    /** {@inheritDoc} */

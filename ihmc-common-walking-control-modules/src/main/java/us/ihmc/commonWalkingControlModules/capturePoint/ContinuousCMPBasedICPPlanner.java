@@ -315,6 +315,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       updateTransferPlan(false);
+
+      super.initializeForStanding(initialTime);
    }
 
    /** {@inheritDoc} */
@@ -332,6 +334,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
 
       updateTransferPlan(false);
+
+      super.initializeForTransfer(initialTime);
    }
 
 
@@ -376,6 +380,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       singleSupportInitialCoM.set(desiredCoMPosition);
       updateSingleSupportPlan(false);
+
+      super.initializeForSingleSupport(initialTime);
    }
 
 

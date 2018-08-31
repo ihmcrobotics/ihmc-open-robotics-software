@@ -8,6 +8,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -84,6 +86,36 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
          angularMomentumRateForwardGain.set(angularMomentumModifierParameters.getAngularMomentumRateForwardGain());
          angularMomentumRateLateralGain.set(angularMomentumModifierParameters.getAngularMomentumRateLateralGain());
       }
+   }
+
+   @Override
+   public void initializeForStanding(double initialTime)
+   {
+      super.initializeForStanding(initialTime);
+
+      initializeInternal();
+   }
+
+   @Override
+   public void initializeForTransfer(double initialTime)
+   {
+      super.initializeForTransfer(initialTime);
+
+      initializeInternal();
+   }
+
+   @Override
+   public void initializeForSingleSupport(double initialTime)
+   {
+      super.initializeForSingleSupport(initialTime);
+
+      initializeInternal();
+   }
+
+   private void initializeInternal()
+   {
+      modifiedTimeInCurrentState.set(super.getTimeInCurrentState());
+      modifiedTimeInCurrentStateRemaining.set(super.getTimeInCurrentStateRemaining());
    }
 
    private final FramePoint3D desiredCMPPosition = new FramePoint3D();
