@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -105,7 +106,10 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
-      GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters();
+      GenericQuadrupedJointNameMapAndContactDefinition jointMap = new GenericQuadrupedJointNameMapAndContactDefinition(
+            new GenericQuadrupedPhysicalProperties());
+      GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
+            jointMap);
 
       fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());

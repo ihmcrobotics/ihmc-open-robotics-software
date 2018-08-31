@@ -69,7 +69,7 @@ public class QuadrupedTestBehaviors
       teleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
-      conductor.addTimeLimit(variables.getYoTime(), 2.0);
+      conductor.addTimeLimit(variables.getYoTime(), 4.5);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.WALKING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
