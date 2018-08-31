@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.PlannerTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.testTools.PlannerTestEnvironments;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;

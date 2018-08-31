@@ -4,7 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.PlannerTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
