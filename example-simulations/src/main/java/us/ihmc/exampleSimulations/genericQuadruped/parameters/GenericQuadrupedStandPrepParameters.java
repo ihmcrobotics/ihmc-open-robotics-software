@@ -11,18 +11,18 @@ public class GenericQuadrupedStandPrepParameters implements WholeBodySetpointPar
 
    static
    {
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_HIP_ROLL.getName(), 0.6);
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_HIP_PITCH.getName(), 0.8);
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_KNEE_PITCH.getName(), -1.4);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_HIP_ROLL.getName(), 0.6);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_HIP_PITCH.getName(), 0.8);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_KNEE_PITCH.getName(), -1.4);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_HIP_ROLL.getName(), 0.6);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_HIP_PITCH.getName(), 0.8);
-      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_KNEE_PITCH.getName(), -1.4);
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_HIP_ROLL.getName(), 0.6);
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_HIP_PITCH.getName(), 0.8);
-      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_KNEE_PITCH.getName(), -1.4);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_HIP_ROLL.getName(), -0.1);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_HIP_PITCH.getName(), 0.363);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_LEFT_KNEE_PITCH.getName(), -1.275);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_HIP_ROLL.getName(), 0.1);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_HIP_PITCH.getName(), 0.363);
+      setSetpoint(GenericQuadrupedOrderedJointMap.FRONT_RIGHT_KNEE_PITCH.getName(), -1.275);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_HIP_ROLL.getName(), -0.1);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_HIP_PITCH.getName(), -0.363);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_LEFT_KNEE_PITCH.getName(), 1.275);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_HIP_ROLL.getName(), 0.1);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_HIP_PITCH.getName(), -0.363);
+      setSetpoint(GenericQuadrupedOrderedJointMap.HIND_RIGHT_KNEE_PITCH.getName(), 1.275);
    }
 
    private static void setSetpoint(String jointName, double value)
