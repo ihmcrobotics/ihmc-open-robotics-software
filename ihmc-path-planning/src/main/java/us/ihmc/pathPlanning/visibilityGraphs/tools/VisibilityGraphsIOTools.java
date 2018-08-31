@@ -112,7 +112,7 @@ public class VisibilityGraphsIOTools
       return new Point3D(x, y, z);
    }
 
-   private static <T> T parseField(BufferedReader file, String fieldOpen, String fieldClose, Parser<T> parser)
+   protected static <T> T parseField(BufferedReader file, String fieldOpen, String fieldClose, Parser<T> parser)
    {
       T ret = null;
 
@@ -171,7 +171,7 @@ public class VisibilityGraphsIOTools
       }
    }
 
-   private static interface Parser<T>
+   protected static interface Parser<T>
    {
       T parse(String string);
    }
@@ -263,12 +263,12 @@ public class VisibilityGraphsIOTools
       private final String datasetName;
       private final String datasetResourceName;
 
-      private final int expectedPathSize;
-      private final Point3D start;
-      private final Point3D goal;
+      private int expectedPathSize;
+      private Point3D start;
+      private Point3D goal;
       private final PlanarRegionsList planarRegionsList;
 
-      private VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
+      protected VisibilityGraphsUnitTestDataset(Class<?> clazz, String datasetResourceName)
       {
          this.datasetName = getDatasetName(datasetResourceName);
          this.datasetResourceName = datasetResourceName;
@@ -291,9 +291,7 @@ public class VisibilityGraphsIOTools
             e.printStackTrace();
          }
 
-         expectedPathSize = parsePathSize(bufferedReader);
-         start = parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
-         goal = parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+         loadFields(bufferedReader);
 
          try
          {
@@ -313,6 +311,14 @@ public class VisibilityGraphsIOTools
          if (planarRegionsList == null)
             throw new RuntimeException("Could not load the planar regions. Data folder: " + expectedPlanarRegionsResourceName);
       }
+
+      protected void loadFields(BufferedReader bufferedReader)
+      {
+         expectedPathSize = parsePathSize(bufferedReader);
+         start = parseField(bufferedReader, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
+         goal = parseField(bufferedReader, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+      }
+
 
       private static String getDatasetName(String datasetResourceName)
       {
