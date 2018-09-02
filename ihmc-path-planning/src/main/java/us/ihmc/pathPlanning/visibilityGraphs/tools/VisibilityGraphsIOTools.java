@@ -36,11 +36,11 @@ public class VisibilityGraphsIOTools
    private static final String PATH_SIZE_FIELD_OPEN = "<PathSize,";
    private static final String PATH_SIZE_FIELD_END = ",PathSize>";
 
-   private static final String START_FIELD_OPEN = "<Start,";
-   private static final String START_FIELD_CLOSE = ",Start>";
+   protected static final String START_FIELD_OPEN = "<Start,";
+   protected static final String START_FIELD_CLOSE = ",Start>";
 
-   private static final String GOAL_FIELD_OPEN = "<Goal,";
-   private static final String GOAL_FIELD_END = ",Goal>";
+   protected static final String GOAL_FIELD_OPEN = "<Goal,";
+   protected static final String GOAL_FIELD_END = ",Goal>";
 
    public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly start,
                                        Point3DReadOnly goal)
@@ -64,7 +64,7 @@ public class VisibilityGraphsIOTools
       return true;
    }
 
-   private static boolean exportParameters(File containingFolder, Point3DReadOnly start, Point3DReadOnly goal)
+   protected static boolean exportParameters(File containingFolder, Point3DReadOnly start, Point3DReadOnly goal)
    {
       if (containingFolder == null || !containingFolder.exists())
       {
@@ -96,7 +96,7 @@ public class VisibilityGraphsIOTools
       return PlanarRegionFileTools.getDate() + "_" + VIZ_GRAPHS_DATA_FOLDER_SUFFIX;
    }
 
-   private static String getPoint3DString(Point3DReadOnly point3D)
+   protected static String getPoint3DString(Point3DReadOnly point3D)
    {
       return EuclidCoreIOTools.getStringOf("", "", ",", point3D.getX(), point3D.getY(), point3D.getZ());
    }
@@ -139,7 +139,7 @@ public class VisibilityGraphsIOTools
       return ret;
    }
 
-   private static void writeField(File file, String fieldOpen, String fieldClose, Writer writer)
+   protected static void writeField(File file, String fieldOpen, String fieldClose, Writer writer)
    {
       BufferedWriter bw = null;
 
@@ -176,7 +176,7 @@ public class VisibilityGraphsIOTools
       T parse(String string);
    }
 
-   private static interface Writer
+   protected static interface Writer
    {
       String getStringToWrite();
    }
