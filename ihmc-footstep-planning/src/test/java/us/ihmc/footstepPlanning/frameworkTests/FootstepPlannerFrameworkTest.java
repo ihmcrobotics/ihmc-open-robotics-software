@@ -4,13 +4,11 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -76,4 +74,5 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
       }
       return !condition ? "\n" + message : "";
    }
+
 }

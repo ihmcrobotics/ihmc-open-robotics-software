@@ -20,25 +20,19 @@ import java.util.Random;
 
 public abstract class DataSetFrameworkTest
 {
-   // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
-   protected static final long TIMEOUT = 100000; // Long.MAX_VALUE; //
-
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = true;
 
-
    public abstract FootstepPlannerType getPlannerType();
 
-
-   @Test(timeout = TIMEOUT)
+   @Test(timeout = 500000)
    @ContinuousIntegrationTest(estimatedDuration = 13.0)
    public void testDatasetsWithoutOcclusion()
    {
       runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
    }
-
 
    private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner)
    {
@@ -86,11 +80,11 @@ public abstract class DataSetFrameworkTest
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
 
-            currentDatasetIndex++;
-            if (currentDatasetIndex < allDatasets.size())
-               dataset = allDatasets.get(currentDatasetIndex);
-            else
-               dataset = null;
+         currentDatasetIndex++;
+         if (currentDatasetIndex < allDatasets.size())
+            dataset = allDatasets.get(currentDatasetIndex);
+         else
+            dataset = null;
 
          ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
       }
@@ -99,22 +93,63 @@ public abstract class DataSetFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private String runAssertionsWithoutOcclusion(FootstepPlannerUnitTestDataset dataset)
+   protected String runAssertionsWithoutOcclusion(FootstepPlannerUnitTestDataset dataset)
    {
       submitDataSet(dataset);
 
       return findPlanAndAssertGoodResult(dataset);
    }
 
+   protected void runAssertionsOnDataset(DatasetTestRunner datasetTestRunner, String datasetName)
+   {
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
+
+      if (DEBUG)
+      {
+         PrintTools.info("Unit test files found: " + allDatasets.size());
+      }
+
+      String errorMessages = "";
+
+      if (allDatasets.isEmpty())
+         Assert.fail("Did not find any datasets to test.");
+
+      // Randomizing the regionIds so the viz is better
+      Random random = new Random(324);
+      allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
+                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
+
+      FootstepPlannerUnitTestDataset dataset = null;
+      for (FootstepPlannerUnitTestDataset datasetToQuery : allDatasets)
+      {
+         if (datasetToQuery.getDatasetName().equals(datasetName))
+         {
+            dataset = datasetToQuery;
+            break;
+         }
+      }
+
+      if (dataset == null)
+         throw new RuntimeException("Dataset " + datasetName + " does not exist!");
+
+      if (DEBUG)
+      {
+         PrintTools.info("Processing file: " + dataset.getDatasetName());
+      }
+
+      String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+      errorMessages += errorMessagesForCurrentFile;
+
+      ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
+
+      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
+   }
+
    public abstract void submitDataSet(FootstepPlannerUnitTestDataset dataset);
 
    public abstract String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset);
 
-
-
-
-
-   private static interface DatasetTestRunner
+   protected static interface DatasetTestRunner
    {
       String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
