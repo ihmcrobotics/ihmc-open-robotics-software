@@ -267,4 +267,15 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
 
    }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return -1;
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {}
+
 }

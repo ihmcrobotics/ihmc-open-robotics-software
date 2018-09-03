@@ -46,6 +46,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final FootstepPlannerParameters parameters;
    private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
    private final YoDouble timeout = new YoDouble("Timeout", registry);
+   private final YoDouble planningDuration = new YoDouble("planningDuration", registry);
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
 
    private final FootstepGraph footstepGraph;
@@ -104,6 +105,16 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       this.timeout.set(timeoutInSeconds);
    }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return planningDuration.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {}
 
    public void setExitAfterInitialSolution(boolean exitAfterInitialSolution)
    {
@@ -262,14 +273,18 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
 
          long timeInNano = System.nanoTime();
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+            planningDuration.set(-1.0);
             break;
       }
 
       if (bestGoalNode == null)
       {
          notifyListenerSolutionWasNotFound();
+         planningDuration.set(-1.0);
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
+
+      planningDuration.set(Conversions.nanosecondsToSeconds(System.nanoTime() - planningStartTime.getLongValue()));
 
       if (stack.isEmpty())
          return FootstepPlanningResult.OPTIMAL_SOLUTION;

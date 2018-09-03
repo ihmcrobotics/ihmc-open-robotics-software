@@ -2,20 +2,13 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanThenSnapPlanner implements FootstepPlanner
 {
-   private final WiggleParameters wiggleParameters = new WiggleParameters();
-
    private final FootstepPlanner internalPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private PlanarRegionsList planarRegionsList;
@@ -92,6 +85,17 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    public void setTimeout(double timeout)
    {
 
+   }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return -1;
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {
    }
 
 }

@@ -47,6 +47,7 @@ public class FootstepPathCalculator
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<Double> plannerTimeoutReference;
+   private final AtomicReference<Double> plannerHorizonLengthReference;
 
    private final AtomicReference<FootstepPlannerParameters> parameters;
 
@@ -64,6 +65,7 @@ public class FootstepPathCalculator
       parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic, 5.0);
+      plannerHorizonLengthReference = messager.createInput(PlannerHorizonLengthTopic, 1.0);
 
       messager.registerTopicListener(ComputePathTopic, request -> computePathOnThread());
    }
@@ -76,6 +78,7 @@ public class FootstepPathCalculator
       startOrientationReference.set(null);
       goalOrientationReference.set(null);
       plannerTimeoutReference.set(null);
+      plannerHorizonLengthReference.set(null);
    }
 
    public void start()
@@ -123,6 +126,7 @@ public class FootstepPathCalculator
 
          planner.setPlanarRegions(planarRegionsList);
          planner.setTimeout(plannerTimeoutReference.get());
+         planner.setPlanningHorizonLength(plannerHorizonLengthReference.get());
 
          AxisAngle startRotation = new AxisAngle(startOrientationReference.get(), 0.0, 0.0);
          AxisAngle goalRotation = new AxisAngle(goalOrientationReference.get(), 0.0, 0.0);
@@ -140,7 +144,7 @@ public class FootstepPathCalculator
          {
             PrintTools.info(this, "Planner result: " + planningResult);
             if (planningResult.validForExecution())
-               PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps());
+               PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps() + " steps, taking " + planner.getPlanningDuration() + " s.");
          }
 
          messager.submitMessage(PlanningResultTopic, planningResult);

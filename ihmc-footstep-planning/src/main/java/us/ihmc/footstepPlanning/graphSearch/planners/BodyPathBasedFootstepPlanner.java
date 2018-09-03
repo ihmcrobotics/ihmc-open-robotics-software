@@ -34,6 +34,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 {
@@ -48,6 +49,8 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    private final List<Point2D> waypoints = new ArrayList<>();
    private final YoPolynomial xPoly;
    private final YoPolynomial yPoly;
+
+   private final YoDouble planningHorizonLength;
 
    private static final double weight = 1.0;
 
@@ -68,6 +71,9 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       heuristics.setWeight(weight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
+
+      planningHorizonLength = new YoDouble("planningHorizonLength", registry);
+      planningHorizonLength.set(1.0);
    }
 
    @Override
@@ -109,6 +115,18 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    }
 
    @Override
+   public double getPlanningDuration()
+   {
+      return footstepPlanner.getPlanningDuration();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizonLength)
+   {
+      this.planningHorizonLength.set(planningHorizonLength);
+   }
+
+   @Override
    public FootstepPlanningResult plan()
    {
       waypoints.clear();
@@ -128,7 +146,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(parameters.getHorizonPlanningDistance() / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
 
       FramePose3D footstepPlannerGoal = new FramePose3D();
