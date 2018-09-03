@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
@@ -41,7 +42,7 @@ public abstract class DataSetFrameworkTest
 
    private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner)
    {
-      List<FootstepPlannerIOTools.FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
+      List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
 
       if (DEBUG)
       {
@@ -60,7 +61,7 @@ public abstract class DataSetFrameworkTest
       allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
-      FootstepPlannerIOTools.FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
+      FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
       {
@@ -98,16 +99,16 @@ public abstract class DataSetFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private String runAssertionsWithoutOcclusion(VisibilityGraphsUnitTestDataset dataset)
+   private String runAssertionsWithoutOcclusion(FootstepPlannerUnitTestDataset dataset)
    {
       submitDataSet(dataset);
 
       return findPlanAndAssertGoodResult(dataset);
    }
 
-   public abstract void submitDataSet(VisibilityGraphsUnitTestDataset dataset);
+   public abstract void submitDataSet(FootstepPlannerUnitTestDataset dataset);
 
-   public abstract String findPlanAndAssertGoodResult(VisibilityGraphsUnitTestDataset dataset);
+   public abstract String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset);
 
 
 
@@ -115,6 +116,6 @@ public abstract class DataSetFrameworkTest
 
    private static interface DatasetTestRunner
    {
-      String testDataset(VisibilityGraphsUnitTestDataset dataset);
+      String testDataset(FootstepPlannerUnitTestDataset dataset);
    }
 }

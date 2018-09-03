@@ -21,9 +21,13 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
    private static final String TYPE_FIELD_OPEN = "<Type,";
    private static final String TYPE_FIELD_CLOSE = ",Type>";
 
+   private static final String TIMEOUT_FIELD_OPEN = "<Timeout,";
+   private static final String TIMEOUT_FIELD_CLOSE = ",Timeout>";
+
    public static class FootstepPlannerUnitTestDataset extends VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset
    {
-      private FootstepPlannerType[] plannerTypes;
+      private List<FootstepPlannerType> plannerTypes;
+      private Double[] timeouts;
 
       private FootstepPlannerUnitTestDataset(Class<?> clazz, String datasetResourceName)
       {
@@ -33,9 +37,17 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
             throw new RuntimeException("Could not load the planner types. Data folder: " + datasetResourceName);
       }
 
-      public FootstepPlannerType[] getTypes()
+      public List<FootstepPlannerType> getTypes()
       {
          return plannerTypes;
+      }
+
+      public double getTimeout(FootstepPlannerType plannerType)
+      {
+         if (plannerTypes.contains(plannerType))
+            return timeouts[plannerTypes.indexOf(plannerType)];
+
+         return Double.NaN;
       }
 
       @Override
@@ -44,6 +56,7 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
          super.loadFields(bufferedReader);
 
          plannerTypes = parseField(bufferedReader, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, FootstepPlannerIOTools::parsePlannerTypes);
+         timeouts = parseField(bufferedReader, TIMEOUT_FIELD_OPEN, TIMEOUT_FIELD_CLOSE, FootstepPlannerIOTools::parsePlannerTimeouts);
       }
    }
 
@@ -87,7 +100,8 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME);
       writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(start));
       writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goal));
-      writeField(parametersFile, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, () -> getFootstepPlannerTypeString(type));
+      writeField(parametersFile, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, () -> type.name());
+//      writeField(parametersFile, TYPE_FIELD_OPEN, TYPE_FIELD_CLOSE, () -> getFootstepPlannerTypeString(type));
 
       return true;
    }
@@ -114,7 +128,7 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
    }
 
 
-   private static FootstepPlannerType[] parsePlannerTypes(String stringPlannerTypes)
+   private static List<FootstepPlannerType> parsePlannerTypes(String stringPlannerTypes)
    {
       List<FootstepPlannerType> footstepPlannerTypes = new ArrayList<>();
 
@@ -128,10 +142,7 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
             containsData = false;
       }
 
-      FootstepPlannerType[] typeArray = new FootstepPlannerType[footstepPlannerTypes.size()];
-      footstepPlannerTypes.toArray(typeArray);
-
-      return typeArray;
+      return footstepPlannerTypes;
    }
 
    private static String parsePlannerType(List<FootstepPlannerType> footstepPlannerTypes, String stringPlannerTypes)
@@ -150,8 +161,40 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       return null;
    }
 
-   private static String getFootstepPlannerTypeString(FootstepPlannerType type)
+   private static Double[] parsePlannerTimeouts(String stringTimeouts)
    {
-      return type.name();
+      List<Double> footstepPlannerTimeouts = new ArrayList<>();
+
+      boolean containsData = true;
+
+      while (containsData)
+      {
+         stringTimeouts = parsePlannerTimeout(footstepPlannerTimeouts, stringTimeouts);
+
+         if (stringTimeouts == null)
+            containsData = false;
+      }
+
+      Double[] typeArray = new Double[footstepPlannerTimeouts.size()];
+      footstepPlannerTimeouts.toArray(typeArray);
+
+      return typeArray;
    }
+
+   private static String parsePlannerTimeout(List<Double> footstepPlannerTimeouts, String stringTimeouts)
+   {
+      if (stringTimeouts.contains(","))
+      {
+         footstepPlannerTimeouts.add(Double.parseDouble(stringTimeouts.substring(0, stringTimeouts.indexOf(","))));
+         stringTimeouts = stringTimeouts.substring(stringTimeouts.indexOf(",") + 1);
+
+         while (stringTimeouts.startsWith(" "))
+            stringTimeouts = stringTimeouts.replaceFirst(" ", "");
+
+         return stringTimeouts;
+      }
+
+      return null;
+   }
+
 }
