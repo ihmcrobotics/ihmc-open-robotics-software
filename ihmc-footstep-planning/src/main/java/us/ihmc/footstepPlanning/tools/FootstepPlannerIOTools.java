@@ -33,6 +33,11 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
             throw new RuntimeException("Could not load the planner types. Data folder: " + datasetResourceName);
       }
 
+      public FootstepPlannerType[] getTypes()
+      {
+         return plannerTypes;
+      }
+
       @Override
       protected void loadFields(BufferedReader bufferedReader)
       {
@@ -135,6 +140,9 @@ public class FootstepPlannerIOTools extends VisibilityGraphsIOTools
       {
          footstepPlannerTypes.add(FootstepPlannerType.fromString(stringPlannerTypes.substring(0, stringPlannerTypes.indexOf(","))));
          stringPlannerTypes = stringPlannerTypes.substring(stringPlannerTypes.indexOf(",") + 1);
+
+         while (stringPlannerTypes.startsWith(" "))
+            stringPlannerTypes = stringPlannerTypes.replaceFirst(" ", "");
 
          return stringPlannerTypes;
       }
