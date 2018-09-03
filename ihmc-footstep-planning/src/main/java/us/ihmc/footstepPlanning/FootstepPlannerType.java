@@ -23,7 +23,7 @@ public enum FootstepPlannerType
             return value;
       }
 
-      return null;
+      throw new IllegalArgumentException("Unable to find a corresponding FootstepPlannerType to string : " + name);
    }
 
 }

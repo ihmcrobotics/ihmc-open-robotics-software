@@ -11,7 +11,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.ArrayTools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -58,7 +60,7 @@ public abstract class DataSetFrameworkTest
       allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
                  .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
-      VisibilityGraphsUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
+      FootstepPlannerIOTools.FootstepPlannerUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
       {
@@ -67,6 +69,16 @@ public abstract class DataSetFrameworkTest
          {
             PrintTools.info("Processing file: " + dataset.getDatasetName());
          }
+
+         boolean hasType = false;
+         for (FootstepPlannerType type : dataset.getTypes())
+         {
+            if (getPlannerType() == type)
+               hasType = true;
+         }
+
+         if (!hasType)
+            continue;
 
          String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
