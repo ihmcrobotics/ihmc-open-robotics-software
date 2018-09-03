@@ -56,7 +56,7 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
 
       int ticksToWait = 100;
       int tick = 0;
-      if (receivedResult.get() && footstepPlanningResult.get().validForExecution());
+      if (receivedResult.get() && footstepPlanningResult.get().validForExecution())
       { // we know there's a valid plan, so wait until we've received it
          while (!receivedPlan.get())
          {
