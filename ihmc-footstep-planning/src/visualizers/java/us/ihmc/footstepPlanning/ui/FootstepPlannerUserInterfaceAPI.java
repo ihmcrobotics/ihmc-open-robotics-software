@@ -32,6 +32,7 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Double> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
+   private static final TypedTopicTheme<Double> PlannerTimeout = apiFactory.createTypedTopicTheme("PlannerTimeout");
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
@@ -52,6 +53,7 @@ public class FootstepPlannerUserInterfaceAPI
 
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(FootstepPlan).topic(FootstepPlannerParameters);
+   public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlan).topic(FootstepPlannerType);
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlan).topic(FootstepPlannerResult);
 
