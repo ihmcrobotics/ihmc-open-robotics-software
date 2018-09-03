@@ -54,13 +54,16 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
       }
       String datasetName = dataset.getDatasetName();
 
+      for (int i = 0; i < 10; i++) // run a few times to receive everything
+         ThreadTools.sleep(10);
 
       String errorMessage = "";
       errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + footstepPlanningResult.get(),
                                  footstepPlanningResult.get().validForExecution());
 
       if (footstepPlanningResult.get().validForExecution())
-         errorMessage += assertTrue(datasetName, datasetName + "did not reach goal.", PlannerTools.isGoalNextToLastStep(dataset.getGoal(), footstepPlanReference.get()));
+         errorMessage += assertTrue(datasetName, datasetName + "did not reach goal.",
+                                    PlannerTools.isGoalNextToLastStep(dataset.getGoal(), footstepPlanReference.get()));
 
       return errorMessage;
    }
