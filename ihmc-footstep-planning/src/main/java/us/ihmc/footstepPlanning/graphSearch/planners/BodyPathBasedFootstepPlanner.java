@@ -50,7 +50,6 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
    private final YoPolynomial yPoly;
 
    private static final double weight = 1.0;
-   private static final double horizon = 1.0;
 
    public BodyPathBasedFootstepPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
    {
@@ -129,7 +128,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(horizon / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(parameters.getHorizonPlanningDistance() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
 
       FramePose3D footstepPlannerGoal = new FramePose3D();
