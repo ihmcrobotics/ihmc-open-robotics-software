@@ -1,4 +1,4 @@
 <Start, 0.400, 0.500, 0.001,Start>
 <Goal, 8.500,-3.500, 0.010,Goal>
-<Type,PLAN_THEN_SNAP, A_STAR, SIMPLE_BODY_PATH, VIS_GRAPH_WITH_A_STAR,Type>
-<Timeout,5.0, 5.0, 5.0, 5.0,Timeout>
+<Type,A_STAR, SIMPLE_BODY_PATH, VIS_GRAPH_WITH_A_STAR,Type>
+<Timeout,5.0, 5.0, 5.0,Timeout>
