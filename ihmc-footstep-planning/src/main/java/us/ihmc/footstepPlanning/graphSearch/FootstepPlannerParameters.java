@@ -357,4 +357,9 @@ public interface FootstepPlannerParameters
    {
       return 0.0;
    }
+
+   public default double getHorizonPlanningDistance()
+   {
+      return 1.0;
+   }
 }
