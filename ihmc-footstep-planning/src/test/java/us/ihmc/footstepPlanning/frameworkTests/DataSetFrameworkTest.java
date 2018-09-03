@@ -34,7 +34,7 @@ public abstract class DataSetFrameworkTest
       runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
-   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner)
+   protected void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner)
    {
       List<FootstepPlannerUnitTestDataset> allDatasets = FootstepPlannerIOTools.loadAllFootstepPlannerDatasets(VisibilityGraphsDataExporter.class);
 

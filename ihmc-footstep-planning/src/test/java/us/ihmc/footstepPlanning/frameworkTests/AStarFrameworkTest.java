@@ -5,7 +5,9 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -21,6 +23,13 @@ public class AStarFrameworkTest extends FootstepPlannerFrameworkTest
    public FootstepPlannerType getPlannerType()
    {
       return FootstepPlannerType.A_STAR;
+   }
+
+   @Test(timeout = 500000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0)
+   public void testDatasetsWithoutOcclusion()
+   {
+      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
 
@@ -68,7 +77,7 @@ public class AStarFrameworkTest extends FootstepPlannerFrameworkTest
       AStarFrameworkTest test = new AStarFrameworkTest();
       String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_200805_RampsAndCorridors");
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171218_205040_SimpleMaze");
       test.tearDown();
 
    }
