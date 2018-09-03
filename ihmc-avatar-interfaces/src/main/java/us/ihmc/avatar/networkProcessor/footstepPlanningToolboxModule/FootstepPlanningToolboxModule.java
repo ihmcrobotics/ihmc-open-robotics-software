@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
@@ -27,12 +28,12 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer)
-         throws IOException
+                                        boolean startYoVariableServer) throws IOException
    {
       super(drcRobotModel.getSimpleRobotName(), fullHumanoidRobotModel, modelProvider, startYoVariableServer);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, registry,
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel.getContactPointParameters(),
+                                                                                drcRobotModel.getFootstepPlannerParameters(), statusOutputManager, registry,
                                                                                 yoGraphicsListRegistry,
                                                                                 Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
       footstepPlanningToolboxController.setTextToSpeechPublisher(textToSpeechPublisher);
@@ -44,6 +45,8 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> footstepPlanningToolboxController.processPlannerParameters(s.takeNextData()));
       textToSpeechPublisher = ROS2Tools.createPublisher(realtimeRos2Node, TextToSpeechPacket.class, ROS2Tools::generateDefaultTopicName);
    }
 
