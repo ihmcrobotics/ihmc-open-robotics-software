@@ -46,6 +46,8 @@ public class FootstepPathCalculator
    private final AtomicReference<Double> goalOrientationReference;
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
+   private final AtomicReference<Double> plannerTimeoutReference;
+
    private final AtomicReference<FootstepPlannerParameters> parameters;
 
    private final Messager messager;
@@ -61,6 +63,7 @@ public class FootstepPathCalculator
       goalOrientationReference = messager.createInput(GoalOrientationTopic, 0.0);
       parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
+      plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic, 5.0);
 
       messager.registerTopicListener(ComputePathTopic, request -> computePathOnThread());
    }
@@ -72,6 +75,7 @@ public class FootstepPathCalculator
       goalPositionReference.set(null);
       startOrientationReference.set(null);
       goalOrientationReference.set(null);
+      plannerTimeoutReference.set(null);
    }
 
    public void start()
@@ -118,7 +122,7 @@ public class FootstepPathCalculator
          FootstepPlanner planner = createPlanner();
 
          planner.setPlanarRegions(planarRegionsList);
-         planner.setTimeout(5.0);
+         planner.setTimeout(plannerTimeoutReference.get());
 
          AxisAngle startRotation = new AxisAngle(startOrientationReference.get(), 0.0, 0.0);
          AxisAngle goalRotation = new AxisAngle(goalOrientationReference.get(), 0.0, 0.0);
