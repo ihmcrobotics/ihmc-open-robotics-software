@@ -44,6 +44,7 @@ public abstract class DataSetFrameworkTest
       }
 
       int numberOfFailingDatasets = 0;
+      int numberOfTotalDatasets = 0;
       String errorMessages = "";
 
       int currentDatasetIndex = 0;
@@ -78,6 +79,7 @@ public abstract class DataSetFrameworkTest
             if (!errorMessagesForCurrentFile.isEmpty())
                numberOfFailingDatasets++;
             errorMessages += errorMessagesForCurrentFile;
+            numberOfTotalDatasets++;
          }
 
          currentDatasetIndex++;
@@ -89,7 +91,7 @@ public abstract class DataSetFrameworkTest
          ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + allDatasets.size() + ". Errors:" + errorMessages,
+      Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + numberOfTotalDatasets + ". Errors:" + errorMessages,
                         errorMessages.isEmpty());
    }
 

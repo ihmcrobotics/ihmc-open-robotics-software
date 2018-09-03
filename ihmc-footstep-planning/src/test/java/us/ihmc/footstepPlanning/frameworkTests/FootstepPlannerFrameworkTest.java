@@ -31,6 +31,7 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
    }
 
    @Override
@@ -72,7 +73,7 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
                                  footstepPlanningResult.get().validForExecution());
 
       if (footstepPlanningResult.get().validForExecution())
-         errorMessage += assertTrue(datasetName, datasetName + "did not reach goal.",
+         errorMessage += assertTrue(datasetName, datasetName + " did not reach goal.",
                                     PlannerTools.isGoalNextToLastStep(dataset.getGoal(), footstepPlanReference.get()));
 
       return errorMessage;
