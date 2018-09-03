@@ -4,6 +4,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
@@ -20,7 +22,7 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
    protected StandaloneFootstepPlannerUI ui;
 
    @Override
-   public void submitDataSet(VisibilityGraphsUnitTestDataset dataset)
+   public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
       JavaFXMessager messager = ui.getMessager();
 
@@ -29,10 +31,12 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, dataset.getGoal());
 
       messager.submitMessage(PlannerTypeTopic, getPlannerType());
+
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, dataset.getTimeout(getPlannerType()));
    }
 
    @Override
-   public String findPlanAndAssertGoodResult(VisibilityGraphsUnitTestDataset dataset)
+   public String findPlanAndAssertGoodResult(FootstepPlannerUnitTestDataset dataset)
    {
       JavaFXMessager messager = ui.getMessager();
 
