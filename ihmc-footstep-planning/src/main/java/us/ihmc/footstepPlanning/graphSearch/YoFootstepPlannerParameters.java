@@ -37,7 +37,6 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
    private final YoDouble minYClearanceFromStance = new YoDouble("minYClearanceFromStance", registry);
-   private final YoDouble horizonPlanningDistance = new YoDouble("horizonPlanningDistance", registry);
 
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
@@ -75,7 +74,6 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
       minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
-      horizonPlanningDistance.set(defaults.getHorizonPlanningDistance());
    }
 
    @Override
@@ -246,9 +244,4 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       return minYClearanceFromStance.getDoubleValue();
    }
 
-   @Override
-   public double getHorizonPlanningDistance()
-   {
-      return horizonPlanningDistance.getDoubleValue();
-   }
 }

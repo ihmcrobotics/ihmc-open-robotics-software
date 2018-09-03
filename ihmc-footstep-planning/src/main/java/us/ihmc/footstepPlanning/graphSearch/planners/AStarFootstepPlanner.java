@@ -51,7 +51,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
-   private PlanarRegionsList planarRegionsList;
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
@@ -135,7 +134,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
    }
@@ -189,6 +187,17 @@ public class AStarFootstepPlanner implements FootstepPlanner
       }
 
       return plan;
+   }
+
+   @Override
+   public double getPlanningDuration()
+   {
+      return planningTime.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizon)
+   {
    }
 
    private void initialize()

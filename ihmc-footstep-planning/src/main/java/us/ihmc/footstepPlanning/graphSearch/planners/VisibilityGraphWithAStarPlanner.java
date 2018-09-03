@@ -55,7 +55,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
    private static final boolean DEBUG = true;
    private static final double defaultHeuristicWeight = 15.0;
-   private static final double planningHorizon = 1.0;
    private static final double defaultTimeout = 5.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -63,6 +62,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
    private final YoDouble timeSpentBeforeFootstepPlanner = new  YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new  YoDouble("timeSpentInFootstepPlanner", registry);
+   private final YoDouble planningHorizonLength = new YoDouble("planningHorizonLength", registry);
    private final YoEnum<FootstepPlanningResult> yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
    private final NavigableRegionsManager navigableRegionsManager;
 
@@ -93,6 +93,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
+
+      planningHorizonLength.set(1.0);
 
       heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
@@ -152,6 +154,18 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    }
 
    @Override
+   public double getPlanningDuration()
+   {
+      return timeSpentBeforeFootstepPlanner.getDoubleValue() + timeSpentInFootstepPlanner.getDoubleValue();
+   }
+
+   @Override
+   public void setPlanningHorizonLength(double planningHorizon)
+   {
+      planningHorizonLength.set(planningHorizon);
+   }
+
+   @Override
    public FootstepPlanningResult plan()
    {
       long startTime = System.currentTimeMillis();
@@ -198,7 +212,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
                {
                   Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
                   goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
-                  goalDirection.scale(planningHorizon / goalDirection.length());
+                  goalDirection.scale(planningHorizonLength.getDoubleValue() / goalDirection.length());
                   waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));
                }
                else
@@ -237,7 +251,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
       heuristics.setGoalAlpha(alpha);
 
@@ -316,7 +330,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
       bodyPath.getPointAlongPath(alpha, goalPose2d);
       return goalPose2d;
    }
