@@ -56,10 +56,20 @@ public class AStarFrameworkTest extends FootstepPlannerFrameworkTest
    }
 
    @After
-   public void tearDown() throws Exception
+   public void tearDown()
    {
       ui.stop();
       ui = null;
    }
 
+
+   public static void main(String[] args)
+   {
+      AStarFrameworkTest test = new AStarFrameworkTest();
+      String prefix = "unitTestData/testable/";
+      test.setup();
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), prefix + "20171215_200805_RampsAndCorridors");
+      test.tearDown();
+
+   }
 }
