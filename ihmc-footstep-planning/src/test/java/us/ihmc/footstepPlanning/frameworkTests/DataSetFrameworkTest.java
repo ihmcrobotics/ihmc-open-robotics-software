@@ -72,13 +72,13 @@ public abstract class DataSetFrameworkTest
                hasType = true;
          }
 
-         if (!hasType)
-            continue;
-
-         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
-         if (!errorMessagesForCurrentFile.isEmpty())
-            numberOfFailingDatasets++;
-         errorMessages += errorMessagesForCurrentFile;
+         if (hasType)
+         {
+            String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
+            if (!errorMessagesForCurrentFile.isEmpty())
+               numberOfFailingDatasets++;
+            errorMessages += errorMessagesForCurrentFile;
+         }
 
          currentDatasetIndex++;
          if (currentDatasetIndex < allDatasets.size())

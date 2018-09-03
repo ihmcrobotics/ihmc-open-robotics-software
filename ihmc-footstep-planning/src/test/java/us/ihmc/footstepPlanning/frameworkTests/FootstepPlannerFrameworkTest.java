@@ -54,8 +54,18 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
       }
       String datasetName = dataset.getDatasetName();
 
-      for (int i = 0; i < 10; i++) // run a few times to receive everything
-         ThreadTools.sleep(10);
+      int ticksToWait = 100;
+      int tick = 0;
+      if (receivedResult.get() && footstepPlanningResult.get().validForExecution());
+      { // we know there's a valid plan, so wait until we've received it
+         while (!receivedPlan.get())
+         {
+            if (tick > ticksToWait)
+               return "Supposedly found a solution, but never received a plan out.";
+            ThreadTools.sleep(10);
+            tick++;
+         }
+      }
 
       String errorMessage = "";
       errorMessage += assertTrue(datasetName, "Planning result for " + datasetName + " is invalid, result was " + footstepPlanningResult.get(),
