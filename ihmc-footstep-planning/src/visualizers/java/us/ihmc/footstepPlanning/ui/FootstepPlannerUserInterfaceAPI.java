@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -10,6 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory;
 import us.ihmc.javaFXToolkit.messager.MessagerAPIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlannerUserInterfaceAPI
 {
@@ -30,7 +32,8 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
-   private static final TypedTopicTheme<Double> Orientation = apiFactory.createTypedTopicTheme("Orientation");
+   private static final TypedTopicTheme<RobotSide> Side = apiFactory.createTypedTopicTheme("Side");
+   private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Double> PlannerTimeout = apiFactory.createTypedTopicTheme("PlannerTimeout");
    private static final TypedTopicTheme<Double> PlannerHorizonLength = apiFactory.createTypedTopicTheme("PlannerHorizonLength");
@@ -65,17 +68,18 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<Boolean> StartOrientationEditModeEnabledTopic = Root.child(Start).child(EditMode).child(OrientationTheme).topic(Enable);
    public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(OrientationTheme).topic(Enable);
 
+   public static final Topic<RobotSide> InitialSupportSideTopic = Root.child(Start).topic(Side);
    public static final Topic<Point3D> StartPositionTopic = Root.child(Start).topic(Position);
    public static final Topic<Point3D> GoalPositionTopic = Root.child(Goal).topic(Position);
 
-   public static final Topic<Double> StartOrientationTopic = Root.child(Start).topic(Orientation);
-   public static final Topic<Double> GoalOrientationTopic = Root.child(Goal).topic(Orientation);
+   public static final Topic<Quaternion> StartOrientationTopic = Root.child(Start).topic(Orientation);
+   public static final Topic<Quaternion> GoalOrientationTopic = Root.child(Goal).topic(Orientation);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
 
    public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
    public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
-   public static final Topic<Double> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
+   public static final Topic<Quaternion> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
    public static final Topic<Double> CliffHeight = Root.child(NodeChecking).topic(NodeCheckerCliffHeight);
    public static final Topic<Double> MinDistanceToCliff = Root.child(NodeChecking).topic(NodeCheckerCliffMinDistance);
    public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);

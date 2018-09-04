@@ -8,8 +8,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.AxisAngleTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -101,8 +104,9 @@ public class StartGoalOrientationEditor extends AnimationTimer
             Vector3D difference = new Vector3D();
             difference.sub(interception, startPosition);
             double startYaw = Math.atan2(difference.getY(), difference.getX());
+            Quaternion orientation = new Quaternion(startYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, startYaw);
+            messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, orientation);
          }
 
          if(orientationValidated.getAndSet(false))
@@ -121,8 +125,9 @@ public class StartGoalOrientationEditor extends AnimationTimer
             Vector3D difference = new Vector3D();
             difference.sub(interception, goalPosition);
             double goalYaw = Math.atan2(difference.getY(), difference.getX());
+            Quaternion orientation = new Quaternion(goalYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalYaw);
+            messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, orientation);
          }
 
          if(orientationValidated.getAndSet(false))

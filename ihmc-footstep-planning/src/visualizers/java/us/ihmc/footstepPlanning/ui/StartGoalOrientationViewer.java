@@ -8,6 +8,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.Messager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
@@ -31,8 +32,8 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
-   private final AtomicReference<Double> startRotationReference;
-   private final AtomicReference<Double> goalRotationReference;
+   private final AtomicReference<Quaternion> startQuaternionReference;
+   private final AtomicReference<Quaternion> goalQuaternionReference;
 
    public StartGoalOrientationViewer(Messager messager)
    {
@@ -48,8 +49,8 @@ public class StartGoalOrientationViewer extends AnimationTimer
       startPositionReference = messager.createInput(StartPositionTopic, new Point3D());
       goalPositionReference = messager.createInput(GoalPositionTopic, new Point3D());
 
-      startRotationReference = messager.createInput(StartOrientationTopic, 0.0);
-      goalRotationReference = messager.createInput(GoalOrientationTopic, 0.0);
+      startQuaternionReference = messager.createInput(StartOrientationTopic, new Quaternion());
+      goalQuaternionReference = messager.createInput(GoalOrientationTopic, new Quaternion());
    }
 
    @Override
@@ -63,7 +64,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
       Point3D startPosition = startPositionReference.get();
       if (startPosition != null)
       {
-         setArrowPose(startArrow, startPosition, startRotationReference.get());
+         setArrowPose(startArrow, startPosition, startQuaternionReference.get().getYaw());
       }
 
       if (goalRotationEditModeEnabled.get())
@@ -74,7 +75,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
       Point3D goalPosition = goalPositionReference.get();
       if (goalPosition != null)
       {
-         setArrowPose(goalArrow, goalPosition, goalRotationReference.get());
+         setArrowPose(goalArrow, goalPosition, goalQuaternionReference.get().getYaw());
       }
    }
 

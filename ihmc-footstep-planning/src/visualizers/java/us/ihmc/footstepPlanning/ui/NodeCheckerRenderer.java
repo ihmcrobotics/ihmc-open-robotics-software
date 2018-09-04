@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -32,7 +33,8 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Boolean> nodeCheckerEnabled;
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
    private final AtomicReference<Point3D> footPositionReference;
-   private final AtomicReference<Double> footOrientationReference;
+   private final AtomicReference<Quaternion> footOrientationReference;
+   private final AtomicReference<RobotSide> initialSupportSideReference;
 
    private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(defaultFootPolygon, defaultFootPolygon);
@@ -49,7 +51,8 @@ public class NodeCheckerRenderer extends AnimationTimer
       nodeCheckerEnabled = messager.createInput(EnableNodeChecking, false);
       planarRegionsReference = messager.createInput(PlanarRegionDataTopic);
       footPositionReference = messager.createInput(NodeCheckingPosition);
-      footOrientationReference = messager.createInput(NodeCheckingOrientation, 0.0);
+      footOrientationReference = messager.createInput(NodeCheckingOrientation, new Quaternion());
+      initialSupportSideReference = messager.createInput(InitialSupportSideTopic, RobotSide.LEFT);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
@@ -66,13 +69,13 @@ public class NodeCheckerRenderer extends AnimationTimer
          return;
 
       Point3D footPosition = footPositionReference.get();
-      double footOrientation = footOrientationReference.get();
+      double footOrientation = footOrientationReference.get().getYaw();
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
 
       if(footPosition == null || planarRegionsList == null)
          return;
 
-      FootstepNode node = new FootstepNode(footPosition.getX(), footPosition.getY(), footOrientation, RobotSide.LEFT);
+      FootstepNode node = new FootstepNode(footPosition.getX(), footPosition.getY(), footOrientation, initialSupportSideReference.get());
       snapper.setPlanarRegions(planarRegionsList);
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       checker.setPlanarRegions(planarRegionsList);
