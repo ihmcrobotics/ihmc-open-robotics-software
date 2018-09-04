@@ -1,9 +1,11 @@
-package us.ihmc.footstepPlanning.frameworkTests;
+package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.frameworkTests.DataSetFrameworkTest;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnitTestDataset;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
@@ -22,7 +24,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
 
    private void setup()
    {
-      tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupFootstepPlanningToolboxModule());
    }
 
    private void tryToStartModule(ModuleStarter runnable)
@@ -43,7 +45,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
       void startModule() throws IOException;
    }
 
-   private void setupFootstepPlanningToolboxModule(DRCNetworkModuleParameters params) throws IOException
+   private void setupFootstepPlanningToolboxModule() throws IOException
    {
       new FootstepPlanningToolboxModule(null, null, null, true);
    }
@@ -53,6 +55,11 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)
    {
       JavaFXMessager messager = ui.getMessager();
+
+      FootstepPlanningRequestPacket planningRequestPacket = new FootstepPlanningRequestPacket();
+      planningRequestPacket.getStanceFootPositionInWorld().set(dataset.getStart());
+      planningRequestPacket.getGoalPositionInWorld().set(dataset.getGoal());
+      planningRequestPacket.setRequestedFootstepPlannerType(getPlannerType().toByte());
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, dataset.getStart());
