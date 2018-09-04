@@ -22,36 +22,41 @@ import static junit.framework.TestCase.assertTrue;
 
 public class FootstepPlannerUIRosNodeTest
 {
-   private FootstepPlannerUIRosNode uiNode;
+   private static final String robotName = "testBot";
+
    private RealtimeRos2Node localNode;
+   private FootstepPlannerUIRosNode uiNode;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
 
    @Before
    public void setup()
    {
-      uiNode = new FootstepPlannerUIRosNode("");
       localNode = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
-      localNode.spin();
+      uiNode = new FootstepPlannerUIRosNode(robotName);
    }
 
    @After
    public void tearDown() throws Exception
    {
-      localNode.stopSpinning();
+      localNode.destroy();
       uiNode.destroy();
+
       uiNode = null;
+      localNode = null;
+
       planningRequestReference.set(null);
    }
 
    @Test
-   public void testRequestFootstepPlan()
+   public void testRequestFootstepPlan() throws Exception
    {
-      ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class, ROS2Tools.getTopicNameGenerator("", ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
+      ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      localNode.spin();
 
       JavaFXMessager messager = uiNode.getUI().getMessager();
-
 
       double timeout = 15.0;
       Point3D startPosition = new Point3D(0.5, 0.5, 0.0);
@@ -62,31 +67,33 @@ public class FootstepPlannerUIRosNodeTest
       // TODO robot side
       // TODO planning ID
 
-
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, startPosition);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic, planningType);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, timeout);
       // TODO set planar regions
       // TODO set orientations
-      // TODO set robot side
+      // TODO set robot sideyeah
       // TODO set planning ID
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
 
-      /*
-      for (int i = 0; i < 10; i++)
+      int ticks = 0;
+      while (planningRequestReference.get() == null)
       {
+         ticks++;
+         if (ticks > 100)
+            assertTrue("Timed out waiting for packet.", false);
+
          ThreadTools.sleep(10);
       }
-      */
 
       FootstepPlanningRequestPacket packet = planningRequestReference.getAndSet(null);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Start goal positions aren't equal.", startPosition, packet.getStanceFootPositionInWorld(), 1e-5);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("End goal positions aren't equal.", goalPosition, packet.getGoalPositionInWorld(), 1e-5);
       assertEquals("Timeouts aren't equal.", timeout, packet.getTimeout(), 1e-5);
-      assertTrue("Planner types aren't equal.", planningType.equals(FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType())));
+      assertEquals("Planner types aren't equal.", planningType, FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType()));
       // TODO test planar regions
       // TODO test orientations
       // TODO test robot side
@@ -99,10 +106,12 @@ public class FootstepPlannerUIRosNodeTest
    }
 
    @Test
-   public void testReceivedGoal()
+   public void testReceivedGoal() throws Exception
    {
-      IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools.createPublisher(localNode, FootstepPlanningRequestPacket.class, ROS2Tools
-         .getTopicNameGenerator("", ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+      IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
+            .createPublisher(localNode, FootstepPlanningRequestPacket.class,
+                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      localNode.spin();
 
       JavaFXMessager messager = uiNode.getUI().getMessager();
 
@@ -121,7 +130,6 @@ public class FootstepPlannerUIRosNodeTest
       // TODO orientations
       // TODO robot side
       // TODO planning ID
-
 
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
       packet.getStanceFootPositionInWorld().set(startPosition);
@@ -153,7 +161,6 @@ public class FootstepPlannerUIRosNodeTest
       // TODO test orientations
       // TODO test robot side
       // TODO test planning ID
-
 
    }
 }
