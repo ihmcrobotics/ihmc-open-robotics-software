@@ -63,14 +63,14 @@ public class PlanarRegionBipedalFrameworkTest extends FootstepPlannerFrameworkTe
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
-      ui.stop();
+      launcher.stop();
       ui = null;
+      launcher = null;
    }
 
-
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       VISUALIZE = true;
       PlanarRegionBipedalFrameworkTest test = new PlanarRegionBipedalFrameworkTest();

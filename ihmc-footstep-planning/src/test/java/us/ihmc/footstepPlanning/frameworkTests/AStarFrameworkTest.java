@@ -65,14 +65,15 @@ public class AStarFrameworkTest extends FootstepPlannerFrameworkTest
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
-      ui.stop();
+      launcher.stop();
       ui = null;
+      launcher = null;
    }
 
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       AStarFrameworkTest test = new AStarFrameworkTest();
       String prefix = "unitTestData/testable/";

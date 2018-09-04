@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.frameworkTests;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.net.telnet.EchoOptionHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,14 +64,15 @@ public class VisGraphAStarFrameworkTest extends FootstepPlannerFrameworkTest
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
-      ui.stop();
+      launcher.stop();
+      launcher = null;
       ui = null;
    }
 
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       VisGraphAStarFrameworkTest test = new VisGraphAStarFrameworkTest();
       String prefix = "unitTestData/testable/";

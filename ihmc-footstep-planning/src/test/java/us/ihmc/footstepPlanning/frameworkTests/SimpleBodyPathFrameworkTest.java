@@ -63,14 +63,15 @@ public class SimpleBodyPathFrameworkTest extends FootstepPlannerFrameworkTest
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
-      ui.stop();
+      launcher.stop();
+      launcher = null;
       ui = null;
    }
 
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       SimpleBodyPathFrameworkTest test = new SimpleBodyPathFrameworkTest();
       String prefix = "unitTestData/testable/";
