@@ -33,7 +33,7 @@ public class FootstepPlannerUILauncher extends Application
       super.stop();
       ui.stop();
 
-      Platform.exit();
+//      Platform.exit();
    }
 
    public FootstepPlannerUI getUI()
