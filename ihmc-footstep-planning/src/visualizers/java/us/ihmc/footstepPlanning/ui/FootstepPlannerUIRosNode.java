@@ -49,6 +49,7 @@ public class FootstepPlannerUIRosNode
       this.robotName = robotName;
 
       launcher = new FootstepPlannerUILauncher();
+
       PlatformImpl.startup(() -> {
          Platform.runLater(new Runnable()
          {
@@ -66,6 +67,7 @@ public class FootstepPlannerUIRosNode
             }
          });
       });
+      PlatformImpl.setImplicitExit(false);
 
       while (launcher.getUI() == null)
          ThreadTools.sleep(100);
@@ -76,7 +78,7 @@ public class FootstepPlannerUIRosNode
 
       plannerParametersReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartPositionTopic);
-      plannerStartOrientationReference= messager.createInput(FootstepPlannerUserInterfaceAPI.StartOrientationTopic);
+      plannerStartOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartOrientationTopic);
       plannerGoalPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalPositionTopic);
       plannerGoalOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic);
@@ -87,12 +89,10 @@ public class FootstepPlannerUIRosNode
       ros2Node.spin();
    }
 
-
-
    public void destroy() throws Exception
    {
       launcher.stop();
-      ros2Node.stopSpinning();
+      ros2Node.destroy();
    }
 
    private void registerPubSubs(RealtimeRos2Node ros2Node)
@@ -114,9 +114,9 @@ public class FootstepPlannerUIRosNode
    private void registerPublishers(RealtimeRos2Node ros2Node)
    {
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, ROS2Tools
-            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
-            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+            .getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
       messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.ComputePathTopic, request -> requestNewPlan());
    }
@@ -202,12 +202,17 @@ public class FootstepPlannerUIRosNode
    {
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
       packet.getStanceFootPositionInWorld().set(plannerStartPositionReference.get());
-      packet.getStanceFootOrientationInWorld().setYawPitchRoll(plannerStartOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
+      if (plannerStartOrientationReference.get() != null)
+         packet.getStanceFootOrientationInWorld().setYawPitchRoll(plannerStartOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
       packet.getGoalPositionInWorld().set(plannerGoalPositionReference.get());
-      packet.getGoalOrientationInWorld().setYawPitchRoll(plannerGoalOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
+      if (plannerGoalOrientationReference.get() != null)
+         packet.getGoalOrientationInWorld().setYawPitchRoll(plannerGoalOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
       // TODO add robot side
-      packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
-      packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get())); // TODO use a local copy
+      if (plannerTypeReference.get() != null)
+         packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
+      if (plannerPlanarRegionReference.get() != null)
+         packet.getPlanarRegionsListMessage()
+               .set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get())); // TODO use a local copy
 
       footstepPlanningRequestPublisher.publish(packet);
    }
