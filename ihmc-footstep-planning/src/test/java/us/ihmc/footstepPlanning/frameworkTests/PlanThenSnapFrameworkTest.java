@@ -63,14 +63,15 @@ public class PlanThenSnapFrameworkTest extends FootstepPlannerFrameworkTest
    }
 
    @After
-   public void tearDown()
+   public void tearDown() throws Exception
    {
       ui.stop();
-      ui = null;
+      launcher.stop();
+      launcher = null;
    }
 
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       PlanThenSnapFrameworkTest test = new PlanThenSnapFrameworkTest();
       String prefix = "unitTestData/testable/";
