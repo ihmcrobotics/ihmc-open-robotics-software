@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -408,8 +409,11 @@ public class PelvisLinearStateUpdater
          for (int i = 0; i < feet.size(); i++)
          {
             RigidBody foot = feet.get(i);
-            areFeetTrusted.get(foot).set(haveFeetHitGroundFiltered.get(foot).getBooleanValue());
+            areFeetTrusted.get(foot).set(false);
          }
+         // Only trust lowest foot in contact
+         areFeetTrusted.get(getLowestFootInContact()).set(true);
+         numberOfEndEffectorsTrusted = 1;
       }
 
       // Else if there is a foot with a force past the threshold trust the force and not the CoP
@@ -460,6 +464,29 @@ public class PelvisLinearStateUpdater
       }
 
       return numberOfEndEffectorsTrusted;
+   }
+
+   FramePoint3D tmpFramePoint = new FramePoint3D();
+   private RigidBody getLowestFootInContact()
+   {
+      RigidBody lowestFootInContact = null;
+      double lowestFootZ = Double.MAX_VALUE;
+      for(int i = 0; i < feet.size(); i++)
+      {
+         RigidBody foot = feet.get(i);
+         tmpFramePoint.setToZero(foot.getBodyFixedFrame());
+         tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         double footZ = tmpFramePoint.getZ();
+         if(haveFeetHitGroundFiltered.get(foot).getBooleanValue())
+         {
+            if (footZ < lowestFootZ)
+            {
+               lowestFootZ = footZ;
+               lowestFootInContact = foot;
+            }
+         }
+      }
+      return lowestFootInContact;
    }
 
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
