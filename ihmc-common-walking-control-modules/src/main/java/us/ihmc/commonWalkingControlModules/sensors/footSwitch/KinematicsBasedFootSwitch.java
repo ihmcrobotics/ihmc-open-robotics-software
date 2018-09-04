@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -22,7 +24,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final YoVariableRegistry registry;
    private final YoBoolean hitGround, fixedOnGround;
    private final DoubleProvider switchZThreshold;
-   private final YoDouble soleZ, ankleZ;
+   private final YoDouble soleZ;
    private final double totalRobotWeight;
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
@@ -40,7 +42,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
       soleZ = new YoDouble(footName + "soleZ", registry);
-      ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
 
       yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
@@ -72,7 +73,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
       soleZ = new YoDouble(footName + "soleZ", registry);
-      ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
 
       yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
@@ -82,25 +82,38 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    FramePoint3D tmpFramePoint = new FramePoint3D();
 
-   private Point3DReadOnly getPointInWorld(ReferenceFrame frame)
+   Point3D tempHighestPoint = new Point3D();
+   private Point3DReadOnly getPointInWorld(ContactablePlaneBody body, ReferenceFrame frame)
    {
-      tmpFramePoint.setToZero(frame);
-      tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      return tmpFramePoint;
+      tempHighestPoint.setToZero();
+      tempHighestPoint.setZ(Double.NEGATIVE_INFINITY);
+      for (int i = 0; i < body.getContactPoints2d().size(); i++)
+      {
+         tempContactPoint.setToZero(frame);
+         tempContactPoint.setX(body.getContactPoints2d().get(i).getX());
+         tempContactPoint.setY(body.getContactPoints2d().get(i).getY());
+         tempContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         if (tempContactPoint.getZ() > tempHighestPoint.getZ())
+         {
+            tempHighestPoint.set(tempContactPoint);
+         }
+      }
+      return tempHighestPoint;
    }
 
    /**
     * is the foot in question within the switchZThreshold of the lowest foot
     */
+   FramePoint3D tempContactPoint = new FramePoint3D();
    @Override
    public boolean hasFootHitGround()
    {
-      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
+      double thisFootZ = getPointInWorld(foot, foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
 
       hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
       soleZ.set(thisFootZ);
-      ankleZ.set(getPointInWorld(foot.getFrameAfterParentJoint()).getZ());
       return hitGround.getBooleanValue();
    }
 
@@ -109,7 +122,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       double lowestZ = Double.MAX_VALUE;
       for(int i = 0; i < otherFeet.length; i++)
       {
-         double z = getPointInWorld(otherFeet[i].getSoleFrame()).getZ();
+         double z = getPointInWorld(otherFeet[i], otherFeet[i].getSoleFrame()).getZ();
          if(z < lowestZ)
          {
             lowestZ = z;
@@ -159,7 +172,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    public boolean getForceMagnitudePastThreshhold()
    {
       //a more liberal version of hasFootHitGround
-      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
+      double thisFootZ = getPointInWorld(foot, foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
       return fixedOnGround.getBooleanValue();
