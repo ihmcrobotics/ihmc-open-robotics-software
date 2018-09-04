@@ -7,7 +7,10 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,6 +33,8 @@ public class ICPOptimizationReachabilityConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final int numberOfVertices = 5;
+
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
 
@@ -38,6 +43,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final YoFrameLineSegment2D adjustmentLineSegment;
 
    private final DoubleProvider lengthLimit;
+   private final DoubleProvider lengthBackLimit;
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
 
@@ -45,28 +51,24 @@ public class ICPOptimizationReachabilityConstraintHandler
                                                        boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
-      innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
-      outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
+      lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
+      innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMinStepWidth());
+      outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame soleFrame = bipedSupportPolygons.getSoleZUpFrames().get(robotSide);
 
+         YoInteger yoNumberOfVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
+         yoNumberOfVertices.set(numberOfVertices);
+
          List<YoFramePoint2D> reachabilityVertices = new ArrayList<>();
-         YoFramePoint2D frontInsidePoint = new YoFramePoint2D(yoNamePrefix + robotSide.getSideNameFirstLetter() + "FrontInsidePoint", soleFrame, registry);
-         YoFramePoint2D frontOutsidePoint = new YoFramePoint2D(yoNamePrefix + robotSide.getSideNameFirstLetter() + "FrontOutsidePoint", soleFrame, registry);
-         YoFramePoint2D backInsidePoint = new YoFramePoint2D(yoNamePrefix + robotSide.getSideNameFirstLetter() + "BackInsidePoint", soleFrame, registry);
-         YoFramePoint2D backOutsidePoint = new YoFramePoint2D(yoNamePrefix + robotSide.getSideNameFirstLetter() + "BackOutsidePoint", soleFrame, registry);
-
-         YoInteger numberOfVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
-         numberOfVertices.set(4);
-
-         reachabilityVertices.add(frontInsidePoint);
-         reachabilityVertices.add(frontOutsidePoint);
-         reachabilityVertices.add(backInsidePoint);
-         reachabilityVertices.add(backOutsidePoint);
-
-         YoFrameConvexPolygon2D reachabilityPolygon = new YoFrameConvexPolygon2D(reachabilityVertices, numberOfVertices, soleFrame);
+         for (int i = 0; i < yoNumberOfVertices.getValue(); i++)
+         {
+            YoFramePoint2D vertex = new YoFramePoint2D(yoNamePrefix + robotSide.getSideNameFirstLetter() + "ReachabilityVertex" + i, soleFrame, registry);
+            reachabilityVertices.add(vertex);
+         }
+         YoFrameConvexPolygon2D reachabilityPolygon = new YoFrameConvexPolygon2D(reachabilityVertices, yoNumberOfVertices, soleFrame);
 
          this.reachabilityVertices.put(robotSide, reachabilityVertices);
          this.reachabilityPolygons.put(robotSide, reachabilityPolygon);
@@ -127,15 +129,20 @@ public class ICPOptimizationReachabilityConstraintHandler
       List<YoFramePoint2D> vertices = reachabilityVertices.get(supportSide);
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
 
-      double forwardLimit = lengthLimit.getValue();
-      double backwardLimit = -lengthLimit.getValue();
-      double innerLimit = supportSide.negateIfLeftSide(this.innerLimit.getValue());
-      double outerLimit = supportSide.negateIfLeftSide(this.outerLimit.getValue());
+      // create an ellipsoid around the center of the forward and backward reachable limits
+      double xRadius = 0.5 * (lengthLimit.getValue() + lengthBackLimit.getValue());
+      double yRadius = outerLimit.getValue() - innerLimit.getValue();
+      double centerX = lengthLimit.getValue() - xRadius;
+      double centerY = innerLimit.getValue();
 
-      vertices.get(0).set(forwardLimit, innerLimit);
-      vertices.get(1).set(forwardLimit, outerLimit);
-      vertices.get(2).set(backwardLimit, innerLimit);
-      vertices.get(3).set(backwardLimit, outerLimit);
+      // compute the vertices on the edge of the ellipsoid
+      for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
+      {
+         double angle = Math.PI * vertexIdx / (vertices.size() - 1);
+         double x = centerX + xRadius * Math.cos(angle);
+         double y = centerY + yRadius * Math.sin(angle);
+         vertices.get(vertexIdx).set(x, supportSide.negateIfLeftSide(y));
+      }
 
       polygon.notifyVerticesChanged();
       polygon.update();
