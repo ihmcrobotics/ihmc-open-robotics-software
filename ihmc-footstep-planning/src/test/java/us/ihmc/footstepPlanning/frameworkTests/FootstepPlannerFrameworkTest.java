@@ -8,6 +8,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerIOTools.FootstepPlannerUnit
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.StandaloneFootstepPlannerUILauncher;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,6 +19,7 @@ public abstract class FootstepPlannerFrameworkTest extends DataSetFrameworkTest
 {
 
    protected StandaloneFootstepPlannerUI ui;
+   protected StandaloneFootstepPlannerUILauncher launcher;
 
    @Override
    public void submitDataSet(FootstepPlannerUnitTestDataset dataset)

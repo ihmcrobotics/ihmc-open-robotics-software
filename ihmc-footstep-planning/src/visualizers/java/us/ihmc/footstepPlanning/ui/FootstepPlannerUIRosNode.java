@@ -1,6 +1,10 @@
 package us.ihmc.footstepPlanning.ui;
 
+import com.sun.javafx.application.PlatformImpl;
 import controller_msgs.msg.dds.*;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -10,7 +14,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,8 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPlannerUIRosNode
 {
    // TODO make a local thing of planar regions
+
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
 
+   private final FootstepPlannerUILauncher launcher;
    private final FootstepPlannerUI ui;
    private final JavaFXMessager messager;
 
@@ -43,8 +48,30 @@ public class FootstepPlannerUIRosNode
    {
       this.robotName = robotName;
 
-      FootstepPlannerUILauncher launcher = new FootstepPlannerUILauncher();
+      launcher = new FootstepPlannerUILauncher();
+      PlatformImpl.startup(() -> {
+         Platform.runLater(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               try
+               {
+                  launcher.start(new Stage());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
+      });
+
+      while (launcher.getUI() == null)
+         ThreadTools.sleep(100);
+
       ui = launcher.getUI();
+
       messager = ui.getMessager();
 
       plannerParametersReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerParametersTopic, null);
@@ -56,12 +83,15 @@ public class FootstepPlannerUIRosNode
       plannerTypeReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic);
 
       registerPubSubs(ros2Node);
+
       ros2Node.spin();
    }
 
-   public void destroy()
+
+
+   public void destroy() throws Exception
    {
-      ui.stop();
+      launcher.stop();
       ros2Node.stopSpinning();
    }
 
@@ -207,4 +237,8 @@ public class FootstepPlannerUIRosNode
       return footstepPlan;
    }
 
+   public FootstepPlannerUI getUI()
+   {
+      return ui;
+   }
 }
