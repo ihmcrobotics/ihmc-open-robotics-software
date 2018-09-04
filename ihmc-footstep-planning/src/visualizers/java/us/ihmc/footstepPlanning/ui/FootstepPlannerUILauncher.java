@@ -4,17 +4,17 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-public class StandaloneFootstepPlannerUILauncher extends Application
+public class FootstepPlannerUILauncher extends Application
 {
    private final boolean visualize;
-   private StandaloneFootstepPlannerUI ui;
+   private FootstepPlannerUI ui;
 
-   public StandaloneFootstepPlannerUILauncher()
+   public FootstepPlannerUILauncher()
    {
       this(true);
    }
 
-   public StandaloneFootstepPlannerUILauncher(boolean visualize)
+   public FootstepPlannerUILauncher(boolean visualize)
    {
       this.visualize = visualize;
    }
@@ -22,7 +22,7 @@ public class StandaloneFootstepPlannerUILauncher extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new StandaloneFootstepPlannerUI(primaryStage);
+      ui = new FootstepPlannerUI(primaryStage);
       if (visualize)
          ui.show();
    }
@@ -36,7 +36,7 @@ public class StandaloneFootstepPlannerUILauncher extends Application
       Platform.exit();
    }
 
-   public StandaloneFootstepPlannerUI getUI()
+   public FootstepPlannerUI getUI()
    {
       return ui;
    }
