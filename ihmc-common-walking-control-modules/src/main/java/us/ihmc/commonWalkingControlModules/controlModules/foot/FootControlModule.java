@@ -500,7 +500,7 @@ public class FootControlModule
 
    public void unload(double percentInUnloading)
    {
-      minZForce.set(0.0);
+      minZForce.set((1.0 - percentInUnloading) * minWeightFractionPerFoot.getValue() * robotWeightFz);
       maxZForce.set((1.0 - percentInUnloading) * maxWeightFractionPerFoot.getValue() * robotWeightFz);
 
       updateWrenchCommands();
