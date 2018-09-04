@@ -14,6 +14,7 @@ import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 
 public class StartGoalTabController
 {
@@ -49,8 +50,8 @@ public class StartGoalTabController
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
 
-   private final SimpleObjectProperty<Double> startRotationProperty = new SimpleObjectProperty<>(this, "startRotationProperty", 0.0);
-   private final SimpleObjectProperty<Double> goalRotationProperty = new SimpleObjectProperty<>(this, "goalRotationProperty", 0.0);
+   private final YawProperty startRotationProperty = new YawProperty(this, "startRotationProperty", 0.0);
+   private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -109,10 +110,10 @@ public class StartGoalTabController
 
       messager.bindBidirectional(GoalPositionTopic, goalPositionProperty, false);
 
-      startRotationProperty.bindBidirectional(startYawSpinner.getValueFactory().valueProperty());
+      startRotationProperty.bindBidirectionalYaw(startYawSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(StartOrientationTopic, startRotationProperty, false);
 
-      goalRotationProperty.bindBidirectional(goalYawSpinner.getValueFactory().valueProperty());
+      goalRotationProperty.bindBidirectionalYaw(goalYawSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalOrientationTopic, goalRotationProperty, false);
 
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());

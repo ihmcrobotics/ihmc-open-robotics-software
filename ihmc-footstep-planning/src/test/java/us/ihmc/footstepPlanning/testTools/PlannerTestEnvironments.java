@@ -751,9 +751,9 @@ public class PlannerTestEnvironments
          return new Point3D(startPose.getPosition());
       }
 
-      public double getStartOrientation()
+      public Quaternion getStartOrientation()
       {
-         return startPose.getYaw();
+         return new Quaternion(startPose.getOrientation());
       }
 
       public Point3D getGoalPosition()
@@ -761,9 +761,9 @@ public class PlannerTestEnvironments
          return new Point3D(goalPose.getPosition());
       }
 
-      public double getGoalOrientation()
+      public Quaternion getGoalOrientation()
       {
-         return goalPose.getYaw();
+         return new Quaternion(goalPose.getOrientation());
       }
 
       public FramePose3D getGoalPose()

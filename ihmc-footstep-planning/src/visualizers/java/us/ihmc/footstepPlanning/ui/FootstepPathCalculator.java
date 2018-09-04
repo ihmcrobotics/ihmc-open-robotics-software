@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -41,9 +42,10 @@ public class FootstepPathCalculator
 
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
    private final AtomicReference<Point3D> startPositionReference;
+   private final AtomicReference<Quaternion> startOrientationReference;
+   private final AtomicReference<RobotSide> initialStanceSideReference;
    private final AtomicReference<Point3D> goalPositionReference;
-   private final AtomicReference<Double> startOrientationReference;
-   private final AtomicReference<Double> goalOrientationReference;
+   private final AtomicReference<Quaternion> goalOrientationReference;
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -59,9 +61,10 @@ public class FootstepPathCalculator
 
       planarRegionsReference = messager.createInput(PlanarRegionDataTopic);
       startPositionReference = messager.createInput(StartPositionTopic);
+      startOrientationReference = messager.createInput(StartOrientationTopic, new Quaternion());
+      initialStanceSideReference = messager.createInput(InitialSupportSideTopic, RobotSide.LEFT);
       goalPositionReference = messager.createInput(GoalPositionTopic);
-      startOrientationReference = messager.createInput(StartOrientationTopic, 0.0);
-      goalOrientationReference = messager.createInput(GoalOrientationTopic, 0.0);
+      goalOrientationReference = messager.createInput(GoalOrientationTopic, new Quaternion());
       parameters = messager.createInput(PlannerParametersTopic, new DefaultFootstepPlanningParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerTypeTopic, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(PlannerTimeoutTopic, 5.0);
@@ -74,8 +77,9 @@ public class FootstepPathCalculator
    {
       planarRegionsReference.set(null);
       startPositionReference.set(null);
-      goalPositionReference.set(null);
       startOrientationReference.set(null);
+      initialStanceSideReference.set(null);
+      goalPositionReference.set(null);
       goalOrientationReference.set(null);
       plannerTimeoutReference.set(null);
       plannerHorizonLengthReference.set(null);
@@ -128,14 +132,11 @@ public class FootstepPathCalculator
          planner.setTimeout(plannerTimeoutReference.get());
          planner.setPlanningHorizonLength(plannerHorizonLengthReference.get());
 
-         AxisAngle startRotation = new AxisAngle(startOrientationReference.get(), 0.0, 0.0);
-         AxisAngle goalRotation = new AxisAngle(goalOrientationReference.get(), 0.0, 0.0);
-
-         planner.setInitialStanceFoot(new FramePose3D(ReferenceFrame.getWorldFrame(), start, startRotation), RobotSide.LEFT);
+         planner.setInitialStanceFoot(new FramePose3D(ReferenceFrame.getWorldFrame(), start, startOrientationReference.get()), initialStanceSideReference.get());
 
          FootstepPlannerGoal plannerGoal = new FootstepPlannerGoal();
          plannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-         plannerGoal.setGoalPoseBetweenFeet(new FramePose3D(ReferenceFrame.getWorldFrame(), goal, goalRotation));
+         plannerGoal.setGoalPoseBetweenFeet(new FramePose3D(ReferenceFrame.getWorldFrame(), goal, goalOrientationReference.get()));
          planner.setGoal(plannerGoal);
 
          FootstepPlanningResult planningResult = planner.plan();

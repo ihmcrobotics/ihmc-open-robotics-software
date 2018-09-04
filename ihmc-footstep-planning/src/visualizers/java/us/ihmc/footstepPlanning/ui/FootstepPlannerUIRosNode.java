@@ -10,6 +10,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -35,9 +36,9 @@ public class FootstepPlannerUIRosNode
 
    private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
-   private final AtomicReference<Double> plannerStartOrientationReference;
+   private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
-   private final AtomicReference<Double> plannerGoalOrientationReference;
+   private final AtomicReference<Quaternion> plannerGoalOrientationReference;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
 
@@ -78,9 +79,9 @@ public class FootstepPlannerUIRosNode
 
       plannerParametersReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerParametersTopic, null);
       plannerStartPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartPositionTopic);
-      plannerStartOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartOrientationTopic);
+      plannerStartOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, new Quaternion());
       plannerGoalPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalPositionTopic);
-      plannerGoalOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic);
+      plannerGoalOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, new Quaternion());
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic);
       plannerTypeReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic);
 
@@ -202,11 +203,9 @@ public class FootstepPlannerUIRosNode
    {
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
       packet.getStanceFootPositionInWorld().set(plannerStartPositionReference.get());
-      if (plannerStartOrientationReference.get() != null)
-         packet.getStanceFootOrientationInWorld().setYawPitchRoll(plannerStartOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
+      packet.getStanceFootOrientationInWorld().set(plannerStartOrientationReference.get());
       packet.getGoalPositionInWorld().set(plannerGoalPositionReference.get());
-      if (plannerGoalOrientationReference.get() != null)
-         packet.getGoalOrientationInWorld().setYawPitchRoll(plannerGoalOrientationReference.get(), 0.0, 0.0); // TODO add pitch roll
+      packet.getGoalOrientationInWorld().set(plannerGoalOrientationReference.get());
       // TODO add robot side
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());

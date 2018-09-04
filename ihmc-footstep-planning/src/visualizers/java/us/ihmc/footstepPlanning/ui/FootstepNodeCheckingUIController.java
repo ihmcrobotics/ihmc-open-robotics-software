@@ -8,6 +8,7 @@ import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 
 public class FootstepNodeCheckingUIController
 {
@@ -27,7 +28,7 @@ public class FootstepNodeCheckingUIController
 
    private JavaFXMessager messager;
    private final Point3DProperty nodeCheckerFootPosition = new Point3DProperty(this, "nodeCheckerFootPosition", new Point3D());
-   private final SimpleObjectProperty<Double> nodeCheckerFootYawProperty = new SimpleObjectProperty<>(this, "nodeCheckerFootYaw", 0.0);
+   private final YawProperty nodeCheckerFootYawProperty = new YawProperty(this, "nodeCheckerFootYaw", 0.0);
 
    private void setupControls()
    {
@@ -46,7 +47,7 @@ public class FootstepNodeCheckingUIController
       nodeCheckerFootPosition.bindBidirectionalY(nodeCheckerFootYSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(FootstepPlannerUserInterfaceAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
 
-      nodeCheckerFootYawProperty.bindBidirectional(nodeCheckerFootYaw.getValueFactory().valueProperty());
+      nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(FootstepPlannerUserInterfaceAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
    }
 
