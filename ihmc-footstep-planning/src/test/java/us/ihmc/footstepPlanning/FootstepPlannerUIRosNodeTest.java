@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +29,7 @@ public class FootstepPlannerUIRosNodeTest
    private FootstepPlannerUIRosNode uiNode;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
 
    @Before
    public void setup()
@@ -49,7 +51,7 @@ public class FootstepPlannerUIRosNodeTest
    }
 
    @Test
-   public void testRequestFootstepPlan() throws Exception
+   public void testSendingFootstepPlanningRequestPacket()
    {
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
                                            ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
@@ -100,9 +102,41 @@ public class FootstepPlannerUIRosNodeTest
       // TODO test planning ID
    }
 
+   @Test
+   public void testSendingFootstepPlannerParametersPacket()
+   {
+      ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT),
+                                           s -> processFootstepPlannerParametersPacket(s.takeNextData()));
+      localNode.spin();
+
+      JavaFXMessager messager = uiNode.getUI().getMessager();
+
+
+
+      int ticks = 0;
+      while (footstepPlannerParametersReference.get() == null)
+      {
+         ticks++;
+         if (ticks > 100)
+            assertTrue("Timed out waiting for packet.", false);
+
+         ThreadTools.sleep(10);
+      }
+
+      FootstepPlannerParametersPacket packet = footstepPlannerParametersReference.getAndSet(null);
+
+      assertTrue("test is not done", false);
+   }
+
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
    {
       planningRequestReference.set(packet);
+   }
+
+   private void processFootstepPlannerParametersPacket(FootstepPlannerParametersPacket packet)
+   {
+      footstepPlannerParametersReference.set(packet);
    }
 
    @Test
