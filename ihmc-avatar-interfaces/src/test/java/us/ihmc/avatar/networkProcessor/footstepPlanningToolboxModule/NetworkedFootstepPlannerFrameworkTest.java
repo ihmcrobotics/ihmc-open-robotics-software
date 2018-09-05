@@ -49,7 +49,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
       ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_test");
 
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, ROS2Tools
-            .getTopicNameGenerator("", ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+            .getTopicNameGenerator("", ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
       ros2Node.spin();
    }
@@ -62,6 +62,7 @@ public abstract class NetworkedFootstepPlannerFrameworkTest extends DataSetFrame
 
       ros2Node = null;
       footstepPlanningRequestPublisher = null;
+      uiNode = null;
    }
 
    private void tryToStartModule(ModuleStarter runnable)
