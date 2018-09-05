@@ -11,6 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -35,7 +36,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -79,7 +79,8 @@ public class FootstepPlannerUIRosNodeTest
       planningRequestReference.set(null);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 6.0)
+   @Test(timeout = 30000)
    public void testSendingFootstepPlanningRequestPacketFromUI()
    {
       Random random = new Random(1738L);
@@ -93,6 +94,7 @@ public class FootstepPlannerUIRosNodeTest
       for (int iter = 0; iter < iters; iter++)
       {
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
          Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
          Quaternion startOrientation = EuclidCoreRandomTools.nextQuaternion(random);
          Point3D goalPosition = EuclidCoreRandomTools.nextPoint3D(random);
@@ -102,8 +104,6 @@ public class FootstepPlannerUIRosNodeTest
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
-
-         // TODO horizon length
 
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalOrientation);
@@ -115,8 +115,7 @@ public class FootstepPlannerUIRosNodeTest
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, robotSide);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
-
-         // TODO set horizon length
+         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
 
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.ComputePathTopic, true);
 
@@ -144,10 +143,9 @@ public class FootstepPlannerUIRosNodeTest
 
          assertEquals("Sequence Ids aren't equal.", sequenceId, packet.getSequenceId(), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, packet.getPlannerRequestId(), epsilon);
+         assertEquals("Planner horizon lengths aren't equal.", horizonLength, packet.getHorizonLength(), epsilon);
 
          checkPlanarRegionListsAreEqual(planarRegionsList, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsListMessage()));
-
-         // TODO test horizon length
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
@@ -164,7 +162,8 @@ public class FootstepPlannerUIRosNodeTest
       footstepPlannerParametersReference.set(packet);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 6.0)
+   @Test(timeout = 30000)
    public void testSendingFootstepPlannerRequestPacketToUI()
    {
       Random random = new Random(1738L);
@@ -190,9 +189,13 @@ public class FootstepPlannerUIRosNodeTest
 
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic);
 
+      AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic);
+
+
       for (int iter = 0; iter < iters; iter++)
       {
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
          Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
@@ -203,7 +206,6 @@ public class FootstepPlannerUIRosNodeTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
 
-         // TODO add horizon length
 
          FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
          packet.getStanceFootPositionInWorld().set(startPosition);
@@ -215,9 +217,9 @@ public class FootstepPlannerUIRosNodeTest
          packet.getStanceFootOrientationInWorld().set(startOrientation);
          packet.setPlannerRequestId(plannerRequestId);
          packet.setSequenceId(sequenceId);
+         packet.setHorizonLength(horizonLength);
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
-         // TODO set horizon length
 
          footstepPlanningRequestPublisher.publish(packet);
 
@@ -239,9 +241,9 @@ public class FootstepPlannerUIRosNodeTest
          EuclidCoreTestTools.assertQuaternionEquals("Goal orientations aren't equal.", goalOrientation, goalOrientationReference.getAndSet(null), epsilon);
          assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
+         assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
          checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
 
-         // TODO test horizon length
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);
@@ -264,6 +266,7 @@ public class FootstepPlannerUIRosNodeTest
       {
          FootstepPlannerParameters randomParameters = createRandomParameters(random);
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
          Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
          Quaternion startOrientation = EuclidCoreRandomTools.nextQuaternion(random);
          Point3D goalPosition = EuclidCoreRandomTools.nextPoint3D(random);
@@ -274,7 +277,6 @@ public class FootstepPlannerUIRosNodeTest
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         // TODO horizon length
 
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalOrientation);
@@ -286,8 +288,8 @@ public class FootstepPlannerUIRosNodeTest
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, robotSide);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
+         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
 
-         // TODO horizon length
 
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerParametersTopic, randomParameters);
 
@@ -351,7 +353,7 @@ public class FootstepPlannerUIRosNodeTest
          footstepOutputStatusPublisher.publish(outputPacket);
 
          int ticks = 0;
-         while (planarRegionsListReference.get() == null)
+         while (planarRegionsListReference.get() == null && footstepPlanReference.get() == null)
          {
             ticks++;
             assertTrue("Timed out waiting on messages.", ticks < 100);
