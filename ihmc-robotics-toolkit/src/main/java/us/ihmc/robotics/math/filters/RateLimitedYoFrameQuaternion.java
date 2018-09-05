@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -95,10 +94,10 @@ public class RateLimitedYoFrameQuaternion extends YoFrameQuaternion
       update(rawQuaternion);
    }
 
-   public void update(FrameQuaternion frameOrientationUnfiltered)
+   public void update(FrameQuaternionReadOnly frameOrientationUnfiltered)
    {
       checkReferenceFrameMatch(frameOrientationUnfiltered);
-      update(frameOrientationUnfiltered);
+      update((QuaternionReadOnly) frameOrientationUnfiltered);
    }
 
    private final Quaternion difference = new Quaternion();
