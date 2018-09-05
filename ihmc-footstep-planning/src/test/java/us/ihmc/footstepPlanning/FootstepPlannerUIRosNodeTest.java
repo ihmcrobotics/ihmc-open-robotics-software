@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
 import controller_msgs.msg.dds.*;
-import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,25 +19,23 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUIRosNode;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.simulationconstructionset.Robot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -49,7 +45,7 @@ import static org.junit.Assert.assertFalse;
 
 public class FootstepPlannerUIRosNodeTest
 {
-   private static final int iters = 100;
+   private static final int iters = 1;
    private static final double epsilon = 1e-5;
 
    private static final boolean VISUALIZE = false;
@@ -71,6 +67,9 @@ public class FootstepPlannerUIRosNodeTest
    @After
    public void tearDown() throws Exception
    {
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
+
       localNode.destroy();
       uiNode.destroy();
 
@@ -149,6 +148,9 @@ public class FootstepPlannerUIRosNodeTest
          checkPlanarRegionListsAreEqual(planarRegionsList, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsListMessage()));
 
          // TODO test horizon length
+
+         for (int i = 0; i < 100; i++)
+            ThreadTools.sleep(10);
       }
    }
 
@@ -240,6 +242,9 @@ public class FootstepPlannerUIRosNodeTest
          checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
 
          // TODO test horizon length
+
+         for (int i = 0; i < 100; i++)
+            ThreadTools.sleep(10);
       }
 
    }
@@ -300,6 +305,9 @@ public class FootstepPlannerUIRosNodeTest
          FootstepPlannerParametersPacket packet = footstepPlannerParametersReference.getAndSet(null);
 
          checkFootstepPlannerParameters(randomParameters, packet);
+
+         for (int i = 0; i < 100; i++)
+            ThreadTools.sleep(10);
       }
    }
 
@@ -320,38 +328,45 @@ public class FootstepPlannerUIRosNodeTest
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanningResultTopic);
 
-      Pose2D goalPose = new Pose2D();
-      goalPose.setPosition(EuclidCoreRandomTools.nextPoint2D(random));
-      goalPose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random));
-      PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-      FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
-      int sequenceId = RandomNumbers.nextInt(random, 0, 100);
-      int planId = RandomNumbers.nextInt(random, 0, 100);
-      FootstepPlanningResult result = FootstepPlanningResult.generateRandomResult(random);
-
-      FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
-      outputPacket.getLowLevelPlannerGoal().set(goalPose);
-      outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      outputPacket.getFootstepDataList().set(footstepDataListMessage);
-      outputPacket.setPlanId(planId);
-      outputPacket.setSequenceId(sequenceId);
-      outputPacket.setFootstepPlanningResult(result.toByte());
-
-      footstepOutputStatusPublisher.publish(outputPacket);
-
-      int ticks = 0;
-      while (planarRegionsListReference.get() == null)
+      for (int iter = 0; iter < iters; iter++)
       {
-         ticks++;
-         assertTrue("Timed out waiting on messages.", ticks < 100);
-         ThreadTools.sleep(100);
-      }
 
-      checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
-      checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
-      assertEquals("Planner Ids aren't equal.", planId, plannerRequestIdReference.getAndSet(null), epsilon);
-      assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
-      assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
+         Pose2D goalPose = new Pose2D();
+         goalPose.setPosition(EuclidCoreRandomTools.nextPoint2D(random));
+         goalPose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+         FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
+         int sequenceId = RandomNumbers.nextInt(random, 0, 100);
+         int planId = RandomNumbers.nextInt(random, 0, 100);
+         FootstepPlanningResult result = FootstepPlanningResult.generateRandomResult(random);
+
+         FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
+         outputPacket.getLowLevelPlannerGoal().set(goalPose);
+         outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+         outputPacket.getFootstepDataList().set(footstepDataListMessage);
+         outputPacket.setPlanId(planId);
+         outputPacket.setSequenceId(sequenceId);
+         outputPacket.setFootstepPlanningResult(result.toByte());
+
+         footstepOutputStatusPublisher.publish(outputPacket);
+
+         int ticks = 0;
+         while (planarRegionsListReference.get() == null)
+         {
+            ticks++;
+            assertTrue("Timed out waiting on messages.", ticks < 100);
+            ThreadTools.sleep(100);
+         }
+
+         checkPlanarRegionListsAreEqual(planarRegionsList, planarRegionsListReference.getAndSet(null));
+         checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
+         assertEquals("Planner Ids aren't equal.", planId, plannerRequestIdReference.getAndSet(null), epsilon);
+         assertEquals("Sequence Ids aren't equal.", sequenceId, sequenceIdReference.getAndSet(null), epsilon);
+         assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
+
+         for (int i = 0; i < 100; i++)
+            ThreadTools.sleep(10);
+      }
    }
 
    private static PlanarRegionsList createRandomPlanarRegionList(Random random)
@@ -378,8 +393,6 @@ public class FootstepPlannerUIRosNodeTest
 
       return planarRegion;
    }
-
-
 
    private static FootstepDataListMessage nextFootstepDataListMessage(Random random)
    {
@@ -430,6 +443,7 @@ public class FootstepPlannerUIRosNodeTest
       FootstepPlannerParameters parameters = new FootstepPlannerParameters()
       {
          private final double idealWidth = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getIdealFootstepWidth()
          {
@@ -437,6 +451,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double idealLength = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getIdealFootstepLength()
          {
@@ -444,6 +459,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double wiggleInsideDelta = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getWiggleInsideDelta()
          {
@@ -451,6 +467,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxReach = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getMaximumStepReach()
          {
@@ -458,6 +475,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxYaw = RandomNumbers.nextDouble(random, 0.01, Math.PI);
+
          @Override
          public double getMaximumStepYaw()
          {
@@ -465,6 +483,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minStepWidth = RandomNumbers.nextDouble(random, 0.0, 1.0);
+
          @Override
          public double getMinimumStepWidth()
          {
@@ -472,6 +491,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minStepLength = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getMinimumStepLength()
          {
@@ -479,13 +499,15 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minStepYaw = RandomNumbers.nextDouble(random, 0.0, Math.PI);
+
          @Override
          public double getMinimumStepYaw()
          {
             return minStepYaw;
          }
 
-         private final double maxStepXForwardAndDown = RandomNumbers.nextDouble(random, 0.0,0.5);
+         private final double maxStepXForwardAndDown = RandomNumbers.nextDouble(random, 0.0, 0.5);
+
          @Override
          public double getMaximumStepXWhenForwardAndDown()
          {
@@ -493,6 +515,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxStepZForwardAndDown = RandomNumbers.nextDouble(random, 0.0, 5.0);
+
          @Override
          public double getMaximumStepZWhenForwardAndDown()
          {
@@ -500,6 +523,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxStepZ = RandomNumbers.nextDouble(random, 0.01, 1.5);
+
          @Override
          public double getMaximumStepZ()
          {
@@ -507,6 +531,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minFootholdPercent = RandomNumbers.nextDouble(random, 0.0, 1.0);
+
          @Override
          public double getMinimumFootholdPercent()
          {
@@ -514,6 +539,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minSurfaceIncline = RandomNumbers.nextDouble(random, 0.0, 2.0);
+
          @Override
          public double getMinimumSurfaceInclineRadians()
          {
@@ -521,6 +547,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final boolean wiggleInto = RandomNumbers.nextBoolean(random, 0.5);
+
          @Override
          public boolean getWiggleIntoConvexHullOfPlanarRegions()
          {
@@ -528,6 +555,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final boolean rejectIfNoWiggle = RandomNumbers.nextBoolean(random, 0.5);
+
          @Override
          public boolean getRejectIfCannotFullyWiggleInside()
          {
@@ -535,6 +563,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxXYWiggle = RandomNumbers.nextDouble(random, 0.1, 1.5);
+
          @Override
          public double getMaximumXYWiggleDistance()
          {
@@ -542,6 +571,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxYawWiggle = RandomNumbers.nextDouble(random, 0.1, Math.PI);
+
          @Override
          public double getMaximumYawWiggle()
          {
@@ -549,6 +579,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxZPenetration = RandomNumbers.nextDouble(random, 0.05, 0.4);
+
          @Override
          public double getMaximumZPenetrationOnValleyRegions()
          {
@@ -556,14 +587,15 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double maxStepWidth = RandomNumbers.nextDouble(random, 0.1, 0.5);
+
          @Override
          public double getMaximumStepWidth()
          {
             return maxStepWidth;
          }
 
-
          private final double cliffHeightToAvoid = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getCliffHeightToAvoid()
          {
@@ -571,6 +603,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minDistanceFromCliff = RandomNumbers.nextDouble(random, 0.05, 1.0);
+
          @Override
          public double getMinimumDistanceFromCliffBottoms()
          {
@@ -578,6 +611,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final boolean returnBestEffort = RandomNumbers.nextBoolean(random, 0.5);
+
          @Override
          public boolean getReturnBestEffortPlan()
          {
@@ -585,6 +619,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final int minSteps = RandomNumbers.nextInt(random, 1, 10);
+
          @Override
          public int getMinimumStepsForBestEffortPlan()
          {
@@ -592,6 +627,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double yawWeight = RandomNumbers.nextDouble(random, 0.0, 10.0);
+
          @Override
          public double getYawWeight()
          {
@@ -599,6 +635,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double costPerStep = RandomNumbers.nextDouble(random, 0.0, 10.0);
+
          @Override
          public double getCostPerStep()
          {
@@ -606,6 +643,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double bodyGroundClearance = RandomNumbers.nextDouble(random, 0.1, 0.5);
+
          @Override
          public double getBodyGroundClearance()
          {
@@ -613,6 +651,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minXClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getMinXClearanceFromStance()
          {
@@ -620,6 +659,7 @@ public class FootstepPlannerUIRosNodeTest
          }
 
          private final double minYClearance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+
          @Override
          public double getMinYClearanceFromStance()
          {
@@ -629,6 +669,7 @@ public class FootstepPlannerUIRosNodeTest
 
       return parameters;
    }
+
    private static void checkPlanarRegionListsAreEqual(PlanarRegionsList listA, PlanarRegionsList listB)
    {
       assertEquals("Planar region lists are different sizes.", listA.getNumberOfPlanarRegions(), listB.getNumberOfPlanarRegions());
@@ -653,14 +694,20 @@ public class FootstepPlannerUIRosNodeTest
 
    private static void checkPlanarRegionsEqual(int regionId, PlanarRegion planarRegionA, PlanarRegion planarRegionB)
    {
-      RigidBodyTransform transformA = new RigidBodyTransform();
-      RigidBodyTransform transformB = new RigidBodyTransform();
+      Point3D centerA = new Point3D();
+      Point3D centerB = new Point3D();
 
-      planarRegionA.getTransformToWorld(transformA);
-      planarRegionB.getTransformToWorld(transformB);
+      planarRegionA.getPointInRegion(centerA);
+      planarRegionB.getPointInRegion(centerB);
 
-      //      EuclidCoreTestTools.assertRigidBodyTransformEquals("Transform " + regionId + " are not equal.", transformA, transformB, 1);
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals("Transform " + regionId + " are not equal.", transformA, transformB, 1);
+      Vector3D normalA = new Vector3D();
+      Vector3D normalB = new Vector3D();
+
+      planarRegionA.getNormal(normalA);
+      planarRegionB.getNormal(normalB);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Center of regions " + regionId + " are not equal.", centerA, centerB, epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals("Normal of regions " + regionId + " are not equal.", normalA, normalB, epsilon);
 
       assertEquals("Number of convex polygons of " + regionId + " not equal. ", planarRegionA.getNumberOfConvexPolygons(),
                    planarRegionB.getNumberOfConvexPolygons());
@@ -726,11 +773,12 @@ public class FootstepPlannerUIRosNodeTest
                    epsilon);
       assertEquals("Max step width isn't equal.", parameters.getMaximumStepWidth(), packet.getMaximumStepWidth(), epsilon);
       assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
-      assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms (), packet.getMinimumDistanceFromCliffBottoms(), epsilon);
+      assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
+                   packet.getMinimumDistanceFromCliffBottoms(), epsilon);
       assertTrue("Return best effort isn't equal.", parameters.getReturnBestEffortPlan() == packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
-      assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getCostPerStep(), epsilon);
+      assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
       assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
       assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
