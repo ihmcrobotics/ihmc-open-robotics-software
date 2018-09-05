@@ -26,7 +26,7 @@ public class FootstepPlannerUserInterfaceAPI
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
    private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
 
-   private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
+   private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
@@ -37,14 +37,13 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Double> PlannerTimeout = apiFactory.createTypedTopicTheme("PlannerTimeout");
    private static final TypedTopicTheme<Double> PlannerHorizonLength = apiFactory.createTypedTopicTheme("PlannerHorizonLength");
+   private static final TypedTopicTheme<Integer> PlannerRequestId = apiFactory.createTypedTopicTheme("PlannerRequestId");
+   private static final TypedTopicTheme<Integer> SequenceId = apiFactory.createTypedTopicTheme("SequenceId");
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
 
-   private static final TypedTopicTheme<Double> NodeCheckerCliffHeight = apiFactory.createTypedTopicTheme("NodeCheckerCliffHeight");
-   private static final TypedTopicTheme<Double> NodeCheckerCliffMinDistance = apiFactory.createTypedTopicTheme("NodeCheckerCliffMinDistance");
-   private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
-   private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
+
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
@@ -61,6 +60,8 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlan).topic(PlannerHorizonLength);
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlan).topic(FootstepPlannerType);
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlan).topic(FootstepPlannerResult);
+   public static final Topic<Integer> PlannerRequestIdTopic = Root.child(FootstepPlan).topic(PlannerRequestId);
+   public static final Topic<Integer> SequenceIdTopic = Root.child(FootstepPlan).topic(SequenceId);
 
    public static final Topic<Boolean> StartPositionEditModeEnabledTopic = Root.child(Start).child(EditMode).child(PositionTheme).topic(Enable);
    public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(PositionTheme).topic(Enable);
@@ -80,8 +81,10 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
    public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
    public static final Topic<Quaternion> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
-   public static final Topic<Double> CliffHeight = Root.child(NodeChecking).topic(NodeCheckerCliffHeight);
-   public static final Topic<Double> MinDistanceToCliff = Root.child(NodeChecking).topic(NodeCheckerCliffMinDistance);
+
+   private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
+   private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
+
    public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);
    public static final Topic<Pose3D> FootstepPoseTopic = Root.child(NodeChecking).topic(FootstepPose);
 

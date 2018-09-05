@@ -41,15 +41,24 @@ public class FootstepPlannerUIRosNode
    private final AtomicReference<Quaternion> plannerGoalOrientationReference;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
+   private final AtomicReference<Double> plannerTimeoutReference;
+   private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
+   private final AtomicReference<Integer> plannerSequenceIdReference;
+   private final AtomicReference<Integer> plannerRequestIdReference;
 
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
    public FootstepPlannerUIRosNode(String robotName)
    {
+      this(robotName, false);
+   }
+
+   public FootstepPlannerUIRosNode(String robotName, boolean visualize)
+   {
       this.robotName = robotName;
 
-      launcher = new FootstepPlannerUILauncher();
+      launcher = new FootstepPlannerUILauncher(visualize);
 
       PlatformImpl.startup(() -> {
          Platform.runLater(new Runnable()
@@ -83,7 +92,11 @@ public class FootstepPlannerUIRosNode
       plannerGoalPositionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalPositionTopic);
       plannerGoalOrientationReference = messager.createInput(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, new Quaternion());
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic);
-      plannerTypeReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic);
+      plannerTypeReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic, FootstepPlannerType.A_STAR);
+      plannerTimeoutReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, 5.0);
+      plannerInitialSupportSideReference = messager.createInput(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, RobotSide.LEFT);
+      plannerSequenceIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.SequenceIdTopic);
+      plannerRequestIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic);
 
       registerPubSubs(ros2Node);
 
@@ -104,9 +117,9 @@ public class FootstepPlannerUIRosNode
 
    private void registerSubscribers(RealtimeRos2Node ros2Node)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, getInputSubscriberTopicNameGenerator(),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class, getOutputSubscriberTopicNameGenerator(),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // TODO visualize node status
 
@@ -127,8 +140,13 @@ public class FootstepPlannerUIRosNode
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsListMessage();
 
       Point3D goalPosition = packet.getGoalPositionInWorld();
+      Quaternion goalOrientation = packet.getGoalOrientationInWorld();
       Point3D startPosition = packet.getStanceFootPositionInWorld();
+      Quaternion startOrientation = packet.getStanceFootOrientationInWorld();
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
+      RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
+      int plannerRequestId = packet.getPlannerRequestId();
+      int sequenceId = (int) packet.getSequenceId();
 
       double timeout = packet.getTimeout();
 
@@ -137,9 +155,17 @@ public class FootstepPlannerUIRosNode
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartPositionTopic, startPosition);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPosition);
 
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.GoalOrientationTopic, goalOrientation);
+
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTypeTopic, plannerType);
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerTimeoutTopic, timeout);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, initialSupportSide);
+
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
+
       // TODO add horizon length
    }
 
@@ -151,6 +177,7 @@ public class FootstepPlannerUIRosNode
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic,
                              PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, convertToFootstepPlan(footstepDataListMessage));
+      // Goal pose
       // TODO visualize body path
    }
 
@@ -206,9 +233,16 @@ public class FootstepPlannerUIRosNode
       packet.getStanceFootOrientationInWorld().set(plannerStartOrientationReference.get());
       packet.getGoalPositionInWorld().set(plannerGoalPositionReference.get());
       packet.getGoalOrientationInWorld().set(plannerGoalOrientationReference.get());
-      // TODO add robot side
+      if (plannerInitialSupportSideReference.get() != null)
+         packet.setInitialStanceRobotSide(plannerInitialSupportSideReference.get().toByte());
+      if (plannerTimeoutReference.get() != null)
+         packet.setTimeout(plannerTimeoutReference.get());
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
+      if (plannerSequenceIdReference.get() != null)
+         packet.setSequenceId(plannerSequenceIdReference.get());
+      if (plannerRequestIdReference.get() != null)
+         packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage()
                .set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get())); // TODO use a local copy
@@ -216,14 +250,24 @@ public class FootstepPlannerUIRosNode
       footstepPlanningRequestPublisher.publish(packet);
    }
 
-   private ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   private ROS2Tools.MessageTopicNameGenerator getInputSubscriberTopicNameGenerator()
    {
-      return getSubscriberTopicNameGenerator(robotName);
+      return getInputSubscriberTopicNameGenerator(robotName);
    }
 
-   private static ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   private static ROS2Tools.MessageTopicNameGenerator getInputSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+   }
+
+   private ROS2Tools.MessageTopicNameGenerator getOutputSubscriberTopicNameGenerator()
+   {
+      return getOutputSubscriberTopicNameGenerator(robotName);
+   }
+
+   private static ROS2Tools.MessageTopicNameGenerator getOutputSubscriberTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
 
    private static FootstepPlan convertToFootstepPlan(FootstepDataListMessage footstepDataListMessage)
