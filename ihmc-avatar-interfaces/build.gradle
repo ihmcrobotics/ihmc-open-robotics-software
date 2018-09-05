@@ -61,7 +61,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"

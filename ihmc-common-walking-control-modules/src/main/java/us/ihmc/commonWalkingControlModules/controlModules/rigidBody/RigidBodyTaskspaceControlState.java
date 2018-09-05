@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -41,8 +41,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -109,7 +109,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FramePoint3D controlPoint = new FramePoint3D();
    private final YoFramePoint3D yoControlPoint;
    private final FrameQuaternion controlOrientation = new FrameQuaternion();
-   private final YoFrameYawPitchRoll yoControlOrientation;
+   private final YoFrameQuaternion yoControlOrientation;
    private final FramePoint3D desiredPoint = new FramePoint3D();
    private final YoFramePoint3D yoDesiredPoint;
 
@@ -154,7 +154,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       currentLinearWeight = new YoFrameVector3D(prefix + "CurrentLinearWeight", null, registry);
 
       yoControlPoint = new YoFramePoint3D(prefix + "ControlPoint", worldFrame, registry);
-      yoControlOrientation = new YoFrameYawPitchRoll(prefix + "ControlOrientation", worldFrame, registry);
+      yoControlOrientation = new YoFrameQuaternion(prefix + "ControlOrientation", worldFrame, registry);
       yoDesiredPoint = new YoFramePoint3D(prefix + "DesiredPoint", worldFrame, registry);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);

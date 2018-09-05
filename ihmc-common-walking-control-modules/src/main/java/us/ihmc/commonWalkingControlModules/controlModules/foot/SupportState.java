@@ -173,7 +173,7 @@ public class SupportState extends AbstractFootControlState
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicsListRegistry != null)
       {
-         frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
+         frameViz = new YoGraphicReferenceFrame(controlFrame, registry, false, 0.2);
          graphicsListRegistry.registerYoGraphic(prefix + getClass().getSimpleName(), frameViz);
       }
       else

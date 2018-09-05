@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
+   compile group: "us.ihmc", name: "euclid", version: "0.9.1"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
@@ -43,7 +43,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
 }
 
