@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -173,10 +174,17 @@ public class FootstepPlannerUIRosNode
    {
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
+      int plannerRequestId = packet.getPlanId();
+      int sequenceId = (int) packet.getSequenceId();
+      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic,
                              PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.FootstepPlanTopic, convertToFootstepPlan(footstepDataListMessage));
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanningResultTopic, result);
+
       // Goal pose
       // TODO visualize body path
    }
