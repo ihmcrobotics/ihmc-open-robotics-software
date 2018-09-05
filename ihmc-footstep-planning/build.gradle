@@ -28,7 +28,7 @@ mainDependencies {
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
    compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
 }

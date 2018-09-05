@@ -30,7 +30,7 @@ mainDependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.1"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
