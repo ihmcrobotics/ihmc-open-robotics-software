@@ -46,6 +46,7 @@ public class FootstepPlannerUIRosNode
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
    private final AtomicReference<Integer> plannerSequenceIdReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
+   private final AtomicReference<Double> plannerHorizonLengthReference;
 
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -98,6 +99,7 @@ public class FootstepPlannerUIRosNode
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerUserInterfaceAPI.InitialSupportSideTopic, RobotSide.LEFT);
       plannerSequenceIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.SequenceIdTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic);
+      plannerHorizonLengthReference = messager.createInput(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic);
 
       registerPubSubs(ros2Node);
 
@@ -150,6 +152,7 @@ public class FootstepPlannerUIRosNode
       int sequenceId = (int) packet.getSequenceId();
 
       double timeout = packet.getTimeout();
+      double horizonLength = packet.getHorizonLength();
 
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic,
                              PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
@@ -167,7 +170,7 @@ public class FootstepPlannerUIRosNode
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerRequestIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerUserInterfaceAPI.SequenceIdTopic, sequenceId);
 
-      // TODO add horizon length
+      messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlannerHorizonLengthTopic, horizonLength);
    }
 
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
@@ -254,6 +257,8 @@ public class FootstepPlannerUIRosNode
          packet.setSequenceId(plannerSequenceIdReference.get());
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
+      if (plannerHorizonLengthReference.get() != null)
+         packet.setHorizonLength(plannerHorizonLengthReference.get());
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage()
                .set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get())); // TODO use a local copy
