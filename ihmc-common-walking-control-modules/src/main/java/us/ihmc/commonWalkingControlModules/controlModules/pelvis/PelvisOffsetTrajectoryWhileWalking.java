@@ -2,21 +2,21 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class PelvisOffsetTrajectoryWhileWalking
 {
@@ -54,7 +54,7 @@ public class PelvisOffsetTrajectoryWhileWalking
    private final YoDouble interpolatedLegAngle = new YoDouble("pelvisPitchInterpolatedLegAngle", registry);
 
    private final YoFrameYawPitchRoll desiredWalkingPelvisOffsetOrientation = new YoFrameYawPitchRoll("desiredWalkingPelvisOffset", worldFrame, registry);
-   private final RateLimitedYoFrameOrientation limitedDesiredWalkingPelvisOffsetOrientation;
+   private final RateLimitedYoFrameQuaternion limitedDesiredWalkingPelvisOffsetOrientation;
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
@@ -107,8 +107,8 @@ public class PelvisOffsetTrajectoryWhileWalking
 
       YoDouble maxPelvisOrientationRate = new YoDouble("pelvisMaxOrientationRate", registry);
       maxPelvisOrientationRate.set(maxOrientationRate);
-      limitedDesiredWalkingPelvisOffsetOrientation = new RateLimitedYoFrameOrientation("desiredWalkingPelvisOffset", "Limited", registry,
-            maxPelvisOrientationRate, controlDT, desiredWalkingPelvisOffsetOrientation);
+      limitedDesiredWalkingPelvisOffsetOrientation = new RateLimitedYoFrameQuaternion("desiredWalkingPelvisOffset", "Limited", registry,
+            maxPelvisOrientationRate, controlDT, desiredWalkingPelvisOffsetOrientation.getReferenceFrame());
 
       parentRegistry.addChild(registry);
    }
@@ -208,12 +208,12 @@ public class PelvisOffsetTrajectoryWhileWalking
          updatePelvisYaw();
       }
 
-      limitedDesiredWalkingPelvisOffsetOrientation.update();
+      limitedDesiredWalkingPelvisOffsetOrientation.update(desiredWalkingPelvisOffsetOrientation.getFrameOrientation());
    }
 
    public void addAngularOffset(FrameQuaternion orientationToPack)
    {
-      orientationToPack.preMultiply(limitedDesiredWalkingPelvisOffsetOrientation.getFrameOrientation());
+      orientationToPack.preMultiply(limitedDesiredWalkingPelvisOffsetOrientation);
    }
 
    private void updateFrames()
