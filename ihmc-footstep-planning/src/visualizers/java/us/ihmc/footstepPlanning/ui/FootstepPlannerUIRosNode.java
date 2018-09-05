@@ -208,12 +208,15 @@ public class FootstepPlannerUIRosNode
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
+      packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleIntoConvexHullOfPlanarRegions(parameters.getWiggleIntoConvexHullOfPlanarRegions());
       packet.setRejectIfCannotFullyWiggleInside(parameters.getRejectIfCannotFullyWiggleInside());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
       packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
       packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
+      packet.setMinimumDistanceFromCliffBottoms(parameters.getMinimumDistanceFromCliffBottoms());
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
