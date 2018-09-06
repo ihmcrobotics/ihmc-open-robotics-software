@@ -94,6 +94,12 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
    }
 
+   @Override
+   public boolean computeIntegralTermInFeedbackControllers()
+   {
+      return false; // Saves about 130 YoVariables.
+   }
+
    private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, DRCRobotJointMap jointMap, ArmJointName jointName, double weight)
    {
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), jointMap.getLeftAndRightJointNames(jointName)));
