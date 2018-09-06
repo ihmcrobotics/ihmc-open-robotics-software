@@ -33,6 +33,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfVertices = 5;
+   private static final double SUFFICIENTLY_LARGE = 5.0;
 
    private final List<Footstep> upcomingFootsteps;
 
@@ -73,10 +74,10 @@ public class ICPOptimizationReachabilityConstraintHandler
       innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
 
-      forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry, 0.1);
-      backwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry, 0.1);
-      innerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "InnerAdjustmentLimit", registry, 0.1);
-      outerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "OuterAdjustmentLimit", registry, 0.1);
+      forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
+      backwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
+      innerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "InnerAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
+      outerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "OuterAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -98,7 +99,7 @@ public class ICPOptimizationReachabilityConstraintHandler
          this.reachabilityVertices.put(robotSide, reachabilityVertices);
          this.reachabilityPolygons.put(robotSide, reachabilityPolygon);
 
-         ReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
+         PoseReferenceFrame adjustmentFrame = new PoseReferenceFrame(prefix + "AdjustmentFrame", worldFrame);
 
          YoInteger yoNumberOfAdjustmentVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfAdjustmentVertices", registry);
          yoNumberOfAdjustmentVertices.set(4);
@@ -112,6 +113,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
          YoFrameConvexPolygon2D adjustmentPolygon = new YoFrameConvexPolygon2D(adjustmentVertices, yoNumberOfAdjustmentVertices, adjustmentFrame);
 
+         this.stepFrames.put(robotSide, adjustmentFrame);
          this.adjustmentVertices.put(robotSide, adjustmentVertices);
          this.adjustmentPolygons.put(robotSide, adjustmentPolygon);
 
@@ -166,7 +168,14 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
       contractedReachabilityPolygon.checkReferenceFrameMatch(adjustmentPolygon);
 
-      polygonTools.computeIntersectionOfPolygons(reachabilityPolygon, adjustmentPolygon, contractedReachabilityPolygon);
+      if (polygonTools.computeIntersectionOfPolygons(reachabilityPolygon, adjustmentPolygon, contractedReachabilityPolygon))
+         return contractedReachabilityPolygon;
+
+      // there is no intersection, make the reachability only a single point.
+      upcomingFootsteps.get(0).getPose(footstepPose);
+      contractedReachabilityPolygon.clear();
+      contractedReachabilityPolygon.addVertex(footstepPose.getPosition());
+      contractedReachabilityPolygon.update();
 
       return contractedReachabilityPolygon;
    }
