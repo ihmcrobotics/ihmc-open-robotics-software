@@ -311,7 +311,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPoygons,
                                                                      registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons,
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters,
                                                                                        walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
                                                                                        VISUALIZE, upcomingFootsteps, registry, yoGraphicsListRegistry);
       if (walkingControllerParameters != null)
