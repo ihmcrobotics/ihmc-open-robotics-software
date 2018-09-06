@@ -263,4 +263,11 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    {
       return taskspaceLinearWeights;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useWarmStartInSolver()
+   {
+      return true;
+   }
 }
