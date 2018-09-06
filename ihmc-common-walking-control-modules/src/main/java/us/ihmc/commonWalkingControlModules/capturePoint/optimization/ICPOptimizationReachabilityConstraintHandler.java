@@ -58,13 +58,14 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final DoubleProvider forwardAdjustmentLimit;
    private final DoubleProvider backwardAdjustmentLimit;
-   private final DoubleProvider innerAdjustmentLimit;
-   private final DoubleProvider outerAdjustmentLimit;
+   private final DoubleProvider inwardAdjustmentLimit;
+   private final DoubleProvider outwardAdjustmentLimit;
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
-   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, SteppingParameters steppingParameters, String yoNamePrefix,
-                                                       boolean visualize, List<Footstep> upcomingFootsteps, YoVariableRegistry registry,
+   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
+                                                       SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
+                                                       List<Footstep> upcomingFootsteps, YoVariableRegistry registry,
                                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.upcomingFootsteps = upcomingFootsteps;
@@ -74,10 +75,14 @@ public class ICPOptimizationReachabilityConstraintHandler
       innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       outerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
 
-      forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
-      backwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
-      innerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "InnerAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
-      outerAdjustmentLimit = new DoubleParameter(yoNamePrefix + "OuterAdjustmentLimit", registry, SUFFICIENTLY_LARGE);
+      forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
+                                                   Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward()));
+      backwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "BackwardAdjustmentLimit", registry,
+                                                    Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentBackward()));
+      inwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "InwardAdjustmentLimit", registry,
+                                                  Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentInward()));
+      outwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "OutwardAdjustmentLimit", registry,
+                                                   Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentOutward()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -222,10 +227,10 @@ public class ICPOptimizationReachabilityConstraintHandler
       List<YoFramePoint2D> vertices = adjustmentVertices.get(swingSide);
       YoFrameConvexPolygon2D polygon = adjustmentPolygons.get(swingSide);
 
-      vertices.get(0).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outerAdjustmentLimit.getValue()));
-      vertices.get(1).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(innerAdjustmentLimit.getValue()));
-      vertices.get(2).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outerAdjustmentLimit.getValue()));
-      vertices.get(3).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(innerAdjustmentLimit.getValue()));
+      vertices.get(0).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
+      vertices.get(1).set(forwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
+      vertices.get(2).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfRightSide(outwardAdjustmentLimit.getValue()));
+      vertices.get(3).set(-backwardAdjustmentLimit.getValue(), swingSide.negateIfLeftSide(inwardAdjustmentLimit.getValue()));
 
       polygon.notifyVerticesChanged();
       polygon.update();
