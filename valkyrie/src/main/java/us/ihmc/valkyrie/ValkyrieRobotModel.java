@@ -142,7 +142,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
-      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT, jointMap);
+      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO, jointMap);
       calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
       InputStream sdf = null;
 
@@ -174,11 +174,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         if (forceSensorNames.equals("leftAnkleRoll") && target != RobotTarget.GAZEBO)
+         if (forceSensorNames.equals("leftAnkleRoll"))
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         else if (forceSensorNames.equals("rightAnkleRoll") && target != RobotTarget.GAZEBO)
+         else if (forceSensorNames.equals("rightAnkleRoll"))
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
          }
