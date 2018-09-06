@@ -17,6 +17,11 @@ public class ICPOptimizationCoPConstraintHandler
    private final BooleanProvider useICPControlPolygons;
    private final YoBoolean keepCoPInsideSupportPolygon;
 
+   private int numberOfVertices = 0;
+   private boolean hasSupportPolygonChanged;
+
+   private final FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D();
+
    public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                               BooleanProvider useICPControlPolygons, boolean hasICPControlPoygons, YoVariableRegistry parentRegistry)
    {
@@ -29,12 +34,25 @@ public class ICPOptimizationCoPConstraintHandler
       keepCoPInsideSupportPolygon.set(true);
    }
 
-   public void updateCoPConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
+   /**
+    * <p>
+    * Updates the CoP and CMP constraint polygons for the optimization controller. This polygon is used
+    * to constrain both the location of the CoP and the CMP. It is either the vertical projection of the
+    * support feet, or the projection through the CoM (to account for
+    * multi and out of plane contact).
+    * </p>
+    *
+    * <p>
+    *    NOTE: You MUST call {@link ICPOptimizationQPSolver#resetCoPLocationConstraint()} before calling
+    *    this method!
+    * </p>
+    */
+   public FrameConvexPolygon2D updateCoPConstraintForDoubleSupport()
    {
-      solver.resetCoPLocationConstraint();
-
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
+         combinedPolygon.clear();
+
          for (RobotSide robotSide : RobotSide.values)
          {
             FrameConvexPolygon2D supportPolygon;
@@ -43,15 +61,44 @@ public class ICPOptimizationCoPConstraintHandler
                supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
             else
                supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
-            solver.addSupportPolygon(supportPolygon);
+
+            if (supportPolygon.getNumberOfVertices() != numberOfVertices)
+            {
+               hasSupportPolygonChanged = true;
+               numberOfVertices = supportPolygon.getNumberOfVertices();
+            }
+            else
+            {
+               hasSupportPolygonChanged = false;
+            }
+
+            combinedPolygon.addVertices(supportPolygon);
          }
+
+         combinedPolygon.update();
+
+         return combinedPolygon;
       }
+
+      return null;
    }
 
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
+   /**
+    * <p>
+    * Updates the CoP and CMP constraint polygons for the optimization controller. This polygon is used
+    * to constrain both the location of the CoP and the CMP. It is either the vertical projection of the
+    * support foot indicated by {@param supportSide}, or the projection through the CoM (to account for
+    * multi and out of plane contact).
+    * </p>
+    *
+    * <p>
+    *    NOTE: You MUST call {@link ICPOptimizationQPSolver#resetCoPLocationConstraint()} before calling
+    *    this method!
+    * </p>
+    * @param supportSide support foot side. Not Modified.
+    */
+   public FrameConvexPolygon2D updateCoPConstraintForSingleSupport(RobotSide supportSide)
    {
-      solver.resetCoPLocationConstraint();
-
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
          FrameConvexPolygon2D supportPolygon;
@@ -60,8 +107,30 @@ public class ICPOptimizationCoPConstraintHandler
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
-         solver.addSupportPolygon(supportPolygon);
+
+         if (supportPolygon.getNumberOfVertices() != numberOfVertices)
+         {
+            hasSupportPolygonChanged = true;
+            numberOfVertices = supportPolygon.getNumberOfVertices();
+         }
+         else
+         {
+            hasSupportPolygonChanged = false;
+         }
+
+         return supportPolygon;
       }
+
+      return null;
+   }
+
+   /**
+    * Returns whether or not the support polygon has changed. This currently uses a very simplistic way of
+    * determining a change, only monitoring the number of vertices in the support polygon constraint.
+    */
+   public boolean hasSupportPolygonChanged()
+   {
+      return hasSupportPolygonChanged;
    }
 
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)

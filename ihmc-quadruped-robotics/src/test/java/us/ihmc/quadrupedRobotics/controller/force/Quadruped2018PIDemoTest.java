@@ -81,8 +81,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 5000000)
-   public void testFlatGroundWalking(double endPhaseShift, double walkingSpeed)
+   public void testTrottingFast()
    {
+      double endPhaseShift = 180.0;
+      double walkingSpeed = 2.0;
       createTest();
 
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.25);
@@ -130,8 +132,10 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 5000000)
-   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
+   public void testTrottingWithPush()
    {
+      double endPhaseShift = 180.0;
+      double walkingSpeed = 1.0;
       createTest();
 
       stepTeleopManager.getXGaitSettings().setStanceLength(0.7);

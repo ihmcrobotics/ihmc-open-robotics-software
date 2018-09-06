@@ -500,6 +500,15 @@ public class SelectionMatrix3D
    }
 
    /**
+    * Computes the number of selections. Will be a number between 0 and 3.
+    * @return the number of selected axes.
+    */
+   public int getNumberOfSelectedAxes()
+   {
+      return (isXSelected() ? 1 : 0) + (isYSelected() ? 1 : 0) + (isZSelected() ? 1 : 0);
+   }
+
+   /**
     * The reference frame to which the axis selection is referring to.
     * <p>
     * This selection frame can be {@code null}.

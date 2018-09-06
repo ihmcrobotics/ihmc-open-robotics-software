@@ -133,7 +133,7 @@ public class QuadrupedTeleopManager
       parentRegistry.addChild(registry);
    }
 
-   public void pulishTimedStepListToController(QuadrupedTimedStepListMessage message)
+   public void publishTimedStepListToController(QuadrupedTimedStepListMessage message)
    {
       timedStepListPublisher.publish(message);
    }

@@ -26,20 +26,22 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
       super.testSwingTrajectoryInWorld();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 33.7)
    @Test(timeout = 170000)
    public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
    {
       setPushAndAdjust(false);
-      testTouchdownSpeed();
+      super.testSwingTrajectoryTouchdownSpeed();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 33.7)
    @Test(timeout = 170000)
    public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
    {
       setPushAndAdjust(true);
-      testTouchdownSpeed();
+      super.testSwingTrajectoryTouchdownWithAdjustment();
    }
 
    @Override
