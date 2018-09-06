@@ -77,7 +77,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
 
       conductor.simulate();
-      
+
       conductor.concludeTesting();
    }
 
