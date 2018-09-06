@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,7 +37,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    {
       super.testCloseAndStopAndOpen();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
@@ -46,7 +45,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    {
       super.testBasicGrip();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
@@ -54,7 +53,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    {
       super.testCloseAndOpenFingers();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
@@ -64,7 +63,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    }
 
    @Override
-   public Packet<?> createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
+   public ValkyrieHandFingerTrajectoryMessage createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
    {
       ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
 
