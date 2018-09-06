@@ -39,14 +39,14 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(RootJointDesiredConfigurationData other)
+   public void completeWith(RootJointDesiredConfigurationDataReadOnly other)
    {
       if (!hasDesiredConfiguration())
-         desiredConfiguration.set(other.desiredConfiguration);
+         desiredConfiguration.set(other.getDesiredConfiguration());
       if (!hasDesiredVelocity())
-         desiredVelocity.set(other.desiredVelocity);
+         desiredVelocity.set(other.getDesiredVelocity());
       if (!hasDesiredAcceleration())
-         desiredAcceleration.set(other.desiredAcceleration);
+         desiredAcceleration.set(other.getDesiredAcceleration());
    }
 
    public void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint)
