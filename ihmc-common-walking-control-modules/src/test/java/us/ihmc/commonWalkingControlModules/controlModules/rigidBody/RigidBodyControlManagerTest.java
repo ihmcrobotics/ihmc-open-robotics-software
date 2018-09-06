@@ -527,7 +527,7 @@ public class RigidBodyControlManagerTest
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, trajectoryFrames, controlFrame,
-                                                                    baseFrame, contactableBody, null, yoTime, null, testRegistry);
+                                                                    baseFrame, true, true, contactableBody, null, yoTime, null, testRegistry);
       new DefaultParameterReader().readParametersInRegistry(testRegistry);
       return manager;
    }

@@ -44,7 +44,7 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState("Orientation", pelvis, elevator, elevator, trajectoryFrames, pelvisFixedFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState("Orientation", pelvis, elevator, elevator, trajectoryFrames, pelvisFixedFrame, baseFrame, true, true, yoTime, null, graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains, null);
 
       orientationFeedbackControlCommand.set(elevator, pelvis);

@@ -88,7 +88,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       linearMomentumZPDController.setDerivativeGain(gains.getDerivativeGains()[2]);
       yoControlFrame =  new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, true, false, yoTime, null, graphicsListRegistry, registry);
       taskspaceControlState.setGains(null, gains);
 
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
