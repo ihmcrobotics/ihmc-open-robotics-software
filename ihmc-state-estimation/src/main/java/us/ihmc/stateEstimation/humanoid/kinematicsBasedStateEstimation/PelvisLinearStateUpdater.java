@@ -71,8 +71,6 @@ public class PelvisLinearStateUpdater
    private final YoFramePoint3D yoRootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector3D yoRootJointVelocity = new YoFrameVector3D("estimatedRootJointVelocity", worldFrame, registry);
 
-   private final YoDouble yoInitialComHeight = new YoDouble("initialComHeight", registry);
-   private final YoFramePoint3D yoInitialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMassPosition", worldFrame, registry);
    private final YoFramePoint3D yoInitialFootPosition = new YoFramePoint3D("initialFootPosition", worldFrame, registry);
 
    private final YoFramePoint3D yoCenterOfMassPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
@@ -81,7 +79,7 @@ public class PelvisLinearStateUpdater
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
 
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
-   
+
    private final YoFrameVector3D totalGroundReactionForce = new YoFrameVector3D("totalGroundForce", worldFrame, registry);
    private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoFrameVector3D comAcceleration = new YoFrameVector3D("comAcceleration", worldFrame, registry);
@@ -130,6 +128,7 @@ public class PelvisLinearStateUpdater
    private final FloatingInverseDynamicsJoint rootJoint;
 
    private boolean initializeToActual = false;
+   private final FramePoint3D initialRootJointPosition = new FramePoint3D(worldFrame);
 
    // Temporary variables
    private final FramePoint3D rootJointPosition = new FramePoint3D(worldFrame);
@@ -137,15 +136,13 @@ public class PelvisLinearStateUpdater
    private final FramePoint3D centerOfMassPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
-   private final FrameVector3D tempFrameVector = new FrameVector3D();
-   private final FramePoint3D tempCenterOfMassPosition = new FramePoint3D();
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
 
    private final double gravitationalAcceleration;
-   
+
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches, 
+         IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
          Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -156,7 +153,7 @@ public class PelvisLinearStateUpdater
       this.feet.addAll(footSwitches.keySet());
 
       this.estimatorCenterOfMassDataHolderToUpdate = estimatorCenterOfMassDataHolderToUpdate;
-      
+
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
 
@@ -167,7 +164,7 @@ public class PelvisLinearStateUpdater
       this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator);
 
       this.gravitationalAcceleration = gravitationalAcceleration;
-      
+
       robotMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
       setupBunchOfVariables();
 
@@ -183,7 +180,7 @@ public class PelvisLinearStateUpdater
 
       kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, feetContactablePlaneBodies, footSwitches,
             centerOfPressureDataHolderFromController, estimatorDT, stateEstimatorParameters, yoGraphicsListRegistry, registry);
-      
+
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, cancelGravityFromAccelerationMeasurement, estimatorDT,
             gravitationalAcceleration, stateEstimatorParameters, yoGraphicsListRegistry, registry);
 
@@ -251,12 +248,6 @@ public class PelvisLinearStateUpdater
    {
       reinitialize.set(false);
 
-      centerOfMassCalculator.compute();
-      centerOfMassCalculator.getCenterOfMass(tempCenterOfMassPosition);
-
-      tempCenterOfMassPosition.changeFrame(worldFrame);
-      yoInitialCenterOfMassPosition.set(tempCenterOfMassPosition);
-
       if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
       {
          RigidBody foot = feet.get(0);
@@ -264,20 +255,26 @@ public class PelvisLinearStateUpdater
          footPositionInWorld.changeFrame(worldFrame);
          yoInitialFootPosition.set(footPositionInWorld);
 
-         double footToCoMZ = tempCenterOfMassPosition.getZ() - footPositionInWorld.getZ();
-         yoInitialComHeight.set(footToCoMZ);
-
-         tempCenterOfMassPosition.setZ(tempCenterOfMassPosition.getZ() - footToCoMZ);
+         rootJointPosition.set(rootJoint.getTranslationForReading());
+         rootJointPosition.setZ(-footPositionInWorld.getZ());
+         yoRootJointPosition.set(rootJointPosition);
       }
-      tempFrameVector.setIncludingFrame(tempCenterOfMassPosition);
+      else
+      {
+         rootJointPosition.set(initialRootJointPosition);
+      }
 
-      rootJointPosition.set(centerOfMassPosition);
-      rootJointPosition.sub(tempFrameVector);
-      yoRootJointPosition.set(rootJointPosition);
       rootJointVelocity.setToZero(worldFrame);
+      yoRootJointPosition.set(rootJointPosition);
       yoRootJointVelocity.setToZero();
 
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
+   }
+
+   public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
+   {
+      initializeToActual = true;
+      initialRootJointPosition.setIncludingFrame(worldFrame, rootJointPosition);
    }
 
    public void updateForFrozenState()
@@ -558,7 +555,7 @@ public class PelvisLinearStateUpdater
 
          //TODO: Lots of duplicated computation with reading the force sensors and changing frames. Just do it once and share...
          computeTotalGroundReactionForce();
-         
+
          double totalMass = robotMass.getDoubleValue();
          if (totalMass < 0.01) totalMass = 0.01;
 
@@ -578,13 +575,13 @@ public class PelvisLinearStateUpdater
          comVelocityPelvisAndKinPart.scale(1.0 - alpha);
 
 
-         yoCenterOfMassVelocity.add(comVelocityGRFPart, comVelocityPelvisAndKinPart);         
+         yoCenterOfMassVelocity.add(comVelocityGRFPart, comVelocityPelvisAndKinPart);
       }
       else
       {
          yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
       }
-      
+
       if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
    }
 
@@ -625,20 +622,6 @@ public class PelvisLinearStateUpdater
          else
             listOfUnTrustedFeet.add(foot);
       }
-   }
-
-   public void initializeCoMPositionToActual(Tuple3DReadOnly initialCoMPosition)
-   {
-      initializeToActual = true;
-      centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
-      yoCenterOfMassPosition.set(initialCoMPosition);
-   }
-
-   public void initializeCoMPositionToActual(FramePoint3D initialCoMPosition)
-   {
-      initializeToActual = true;
-      centerOfMassPosition.set(initialCoMPosition);
-      yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
    public void getEstimatedPelvisPosition(FramePoint3D pelvisPositionToPack)

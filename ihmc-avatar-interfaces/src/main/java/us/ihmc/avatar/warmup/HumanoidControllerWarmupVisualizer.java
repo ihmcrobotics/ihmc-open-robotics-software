@@ -40,7 +40,14 @@ public class HumanoidControllerWarmupVisualizer
          scs.tickAndUpdate();
       });
 
-      controllerWarumup.runWarmup();
+      try
+      {
+         controllerWarumup.runWarmup();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       scs.setIndex(1);
       scs.setInPoint();

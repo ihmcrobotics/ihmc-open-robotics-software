@@ -45,6 +45,10 @@ public class FootstepTiming
       this.swingTime = swingTime;
       this.transferTime = transferTime;
       this.touchdownDuration = 0.0;
+      if (transferTime < 0.0 || swingTime < 0.0)
+      {
+         throw new RuntimeException("Swing and transfer duration can not be negative.");
+      }
    }
    
    /**
@@ -55,6 +59,10 @@ public class FootstepTiming
       this.swingTime = swingTime;
       this.transferTime = transferTime;
       this.touchdownDuration = touchdownTime;
+      if (transferTime < 0.0 || swingTime < 0.0)
+      {
+         throw new RuntimeException("Swing and transfer duration can not be negative.");
+      }
    }
 
    /**

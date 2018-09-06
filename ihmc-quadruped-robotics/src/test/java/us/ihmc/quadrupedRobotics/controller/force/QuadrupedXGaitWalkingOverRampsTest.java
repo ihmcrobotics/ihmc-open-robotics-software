@@ -47,19 +47,19 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2200000)
-   public void testWalkingOverShallowRamps(double comHeightForRoughTerrain) throws IOException
+   public void testWalkingOverShallowRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.075, 0.75, 1.2);
       
-      walkOverRamps(groundProfile, comHeightForRoughTerrain);
+      walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
-   public void testWalkingOverAggressiveRamps(double comHeightForRoughTerrain) throws IOException
+   public void testWalkingOverAggressiveRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
-      walkOverRamps(groundProfile, comHeightForRoughTerrain);
+      walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
    private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
@@ -105,16 +105,16 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 1200000)
-   public void testWalkingDownSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
+   public void testWalkingDownSlope() throws IOException
    {
-      walkSlope(0.2, initialPosition);
+      walkSlope(0.2, getWalkingDownSlopePosition());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 980000)
-   public void testWalkingUpSlope(QuadrupedInitialPositionParameters initialPosition) throws IOException
+   public void testWalkingUpSlope() throws IOException
    {
-      walkSlope(-0.1, initialPosition);
+      walkSlope(-0.1, getWalkingUpSlopePosition());
    }
 
    private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
@@ -156,4 +156,10 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    }
 
    public abstract double getDesiredWalkingVelocity();
+
+   public abstract double getComHeightForRoughTerrain();
+
+   public abstract QuadrupedInitialPositionParameters getWalkingDownSlopePosition();
+
+   public abstract QuadrupedInitialPositionParameters getWalkingUpSlopePosition();
 }

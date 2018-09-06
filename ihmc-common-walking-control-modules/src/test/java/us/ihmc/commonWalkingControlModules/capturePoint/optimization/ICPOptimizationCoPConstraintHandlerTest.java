@@ -58,7 +58,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setMinimumFeedbackWeight(0.0001);
       solver.setMinimumFootstepWeight(0.0001);
 
-      constraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
 
@@ -116,7 +118,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
-      constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
 
@@ -157,7 +161,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
 
       // test right support
-      constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT, solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
@@ -215,7 +221,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setMinimumFeedbackWeight(0.0001);
       solver.setMinimumFootstepWeight(0.0001);
 
-      constraintHandler.updateCoPConstraintForDoubleSupport(solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
 
@@ -267,7 +275,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setMinimumFootstepWeight(0.0001);
 
       // test left support
-      constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
 
@@ -302,7 +312,9 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
 
       // test right support
-      constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT, solver);
+      solver.resetCoPLocationConstraint();
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).getCentroid());

@@ -2,6 +2,8 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,8 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep implements Settable<Footstep>
 {
-   public static final int maxNumberOfSwingWaypoints = 100;
+   public static final int maxNumberOfSwingWaypoints = 10;
 
    // --- TODO: GW nuke this:
    public static enum FootstepType
@@ -521,7 +521,7 @@ public class Footstep implements Settable<Footstep>
       orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
    }
 
-   public void setFromAnklePose(FramePose3D anklePose, RigidBodyTransform transformFromAnkleToSole)
+   public void setFromAnklePose(FramePose3DReadOnly anklePose, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(anklePose.getOrientation());
       tempTransform.setTranslation(anklePose.getPosition());
@@ -529,7 +529,7 @@ public class Footstep implements Settable<Footstep>
       footstepPose.setIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector3D offset)
+   public void addOffset(FrameVector3DReadOnly offset)
    {
       footstepPose.prependTranslation(offset);
 

@@ -37,9 +37,13 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private double swingTime = 0.6;
    private double transferTime = 0.25;
 
+   public abstract double getStepLength();
+   public abstract int getNumberOfSteps();
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -61,14 +65,16 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+
+
    @ContinuousIntegrationTest(estimatedDuration = 36.8)
    @Test(timeout = 180000)
-   public void testShortSteps(double stepLength, int numberOfSteps) throws SimulationExceededMaximumTimeException
+   public void testShortSteps() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
 
-      walkForward(stepLength, numberOfSteps);
+      walkForward(getStepLength(), getNumberOfSteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 

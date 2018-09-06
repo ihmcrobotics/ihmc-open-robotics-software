@@ -670,6 +670,15 @@ public class SelectionMatrix6D
       return isLinearXSelected() || isLinearYSelected() || isLinearZSelected();
    }
 
+   /**
+    * Computes the number of selections. Will be a number between 0 and 6.
+    * @return the number of selected axes.
+    */
+   public int getNumberOfSelectedAxes()
+   {
+      return linearPart.getNumberOfSelectedAxes() + angularPart.getNumberOfSelectedAxes();
+   }
+
    @Override
    public String toString()
    {
