@@ -4,11 +4,13 @@ import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
@@ -18,6 +20,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
+import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.SteppingStonesEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -71,6 +74,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
+      conductor.setKeepSCSUp(false);
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
@@ -89,23 +93,30 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 
       List<QuadrupedTimedStepMessage> steps = getSteps(environment.getBaseBlockFrame());
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
-      packetCommunicator.send(message);
+      stepTeleopManager.pulishTimedStepListToController(message);
 
-      boolean isStanding = true;
-      while (isStanding)
-      {
-         conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-         conductor.simulate();
-         isStanding = steppingState.get() == QuadrupedSteppingStateEnum.STAND;
-      }
 
-      boolean isStepping = true;
-      while (isStepping)
-      {
-         conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-         conductor.simulate();
-         isStepping = steppingState.get() == QuadrupedSteppingStateEnum.STEP;
-      }
+
+
+      int number = message.getQuadrupedStepList().size();
+      QuadrupedTimedStepMessage lastMessage0 = message.getQuadrupedStepList().get(number - 1);
+      QuadrupedTimedStepMessage lastMessage1 = message.getQuadrupedStepList().get(number - 2);
+      QuadrupedTimedStepMessage lastMessage2 = message.getQuadrupedStepList().get(number - 3);
+      QuadrupedTimedStepMessage lastMessage3 = message.getQuadrupedStepList().get(number - 4);
+
+
+      Point3D finalPoint = new Point3D();
+      finalPoint.scaleAdd(0.25, lastMessage0.getQuadrupedStepMessage().getGoalPosition(), finalPoint);
+      finalPoint.scaleAdd(0.25, lastMessage1.getQuadrupedStepMessage().getGoalPosition(), finalPoint);
+      finalPoint.scaleAdd(0.25, lastMessage2.getQuadrupedStepMessage().getGoalPosition(), finalPoint);
+      finalPoint.scaleAdd(0.25, lastMessage3.getQuadrupedStepMessage().getGoalPosition(), finalPoint);
+
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), finalPoint.getX(), 0.1));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), finalPoint.getY(), 0.1));
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, lastMessage0.getTimeInterval().getEndTime() + 2.0));
+      conductor.simulate();
+
 
       conductor.concludeTesting();
    }
