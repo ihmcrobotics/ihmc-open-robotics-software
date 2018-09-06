@@ -2,117 +2,129 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
- * <p>FilteredVelocityYoFrameVector </p>
+ * <p>
+ * FilteredVelocityYoFrameVector
+ * </p>
  *
- * <p>Differentiates and Filters a YoFrameVector to get its derivative. </p>
+ * <p>
+ * Differentiates and Filters a YoFrameVector to get its derivative.
+ * </p>
  *
- * <p>IHMC </p>
+ * <p>
+ * IHMC
+ * </p>
  *
  * @author IHMC Biped Team
  * @version 1.0
  */
 public class FilteredVelocityYoFrameVector extends YoFrameVector3D
 {
-   private final FilteredVelocityYoVariable xDot, yDot, zDot;
+   private final double dt;
+   private final DoubleProvider alphaProvider;
 
-   public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-         YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
+   private final YoBoolean hasBeenCalled;
+   private final FrameTuple3DReadOnly currentPosition;
+   private final YoFrameVector3D lastPosition;
+
+   /**
+    * @deprecated Use
+    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoVariableRegistry, FrameTuple3DReadOnly)}
+    *             instead.
+    */
+   @Deprecated
+   public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
+                                                                                   YoVariableRegistry registry,
+                                                                                   FrameTuple3DReadOnly frameTuple3DToDifferentiate)
    {
-      FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha,
-            yoFrameVectorToDifferentiate.getYoX(), dt, registry);
-      FilteredVelocityYoVariable yDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", alpha,
-            yoFrameVectorToDifferentiate.getYoY(), dt, registry);
-      FilteredVelocityYoVariable zDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", alpha,
-            yoFrameVectorToDifferentiate.getYoZ(), dt, registry);
-
-      FilteredVelocityYoFrameVector ret = new FilteredVelocityYoFrameVector(xDot, yDot, zDot, alpha, dt, registry,
-            yoFrameVectorToDifferentiate.getReferenceFrame());
-
-      return ret;
+      return new FilteredVelocityYoFrameVector(namePrefix, nameSuffix, alpha, dt, registry, frameTuple3DToDifferentiate);
    }
 
-   public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-         YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
+   /**
+    * @deprecated Use
+    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoVariableRegistry, ReferenceFrame)}
+    *             instead.
+    */
+   @Deprecated
+   public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
+                                                                                   YoVariableRegistry registry, ReferenceFrame referenceFrame)
    {
-      FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha,
-            yoFramePointToDifferentiate.getYoX(), dt, registry);
-      FilteredVelocityYoVariable yDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", alpha,
-            yoFramePointToDifferentiate.getYoY(), dt, registry);
-      FilteredVelocityYoVariable zDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", alpha,
-            yoFramePointToDifferentiate.getYoZ(), dt, registry);
-
-      FilteredVelocityYoFrameVector ret = new FilteredVelocityYoFrameVector(xDot, yDot, zDot, alpha, dt, registry,
-            yoFramePointToDifferentiate.getReferenceFrame());
-
-      return ret;
+      return new FilteredVelocityYoFrameVector(namePrefix, nameSuffix, alpha, dt, registry, referenceFrame);
    }
 
-   public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt,
-         YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+                                        FrameTuple3DReadOnly frameTuple3DToDifferentiate)
    {
-      FilteredVelocityYoVariable xDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, dt, registry);
-      FilteredVelocityYoVariable yDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", alpha, dt, registry);
-      FilteredVelocityYoVariable zDot = new FilteredVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", alpha, dt, registry);
+      super(namePrefix, nameSuffix, frameTuple3DToDifferentiate.getReferenceFrame(), registry);
+      this.alphaProvider = alpha;
+      this.dt = dt;
 
-      FilteredVelocityYoFrameVector ret = new FilteredVelocityYoFrameVector(xDot, yDot, zDot, alpha, dt, registry, referenceFrame);
-
-      return ret;
+      hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      currentPosition = frameTuple3DToDifferentiate;
+      lastPosition = new YoFrameVector3D(namePrefix + "_lastPosition", nameSuffix, getReferenceFrame(), registry);
+      reset();
    }
 
-   private FilteredVelocityYoFrameVector(FilteredVelocityYoVariable xDot, FilteredVelocityYoVariable yDot, FilteredVelocityYoVariable zDot,
-         YoDouble alpha, double dt, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+                                        ReferenceFrame referenceFrame)
    {
-      super(xDot, yDot, zDot, referenceFrame);
+      super(namePrefix, nameSuffix, referenceFrame, registry);
 
-      this.xDot = xDot;
-      this.yDot = yDot;
-      this.zDot = zDot;
+      this.alphaProvider = alpha;
+      this.dt = dt;
+
+      hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      currentPosition = null;
+      lastPosition = new YoFrameVector3D(namePrefix + "_lastPosition", nameSuffix, getReferenceFrame(), registry);
+      reset();
    }
 
-   private FilteredVelocityYoFrameVector(FilteredVelocityYoVariable xDot, FilteredVelocityYoVariable yDot, FilteredVelocityYoVariable zDot,
-         YoDouble alpha, double dt, YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
+   public void reset()
    {
-      super(xDot, yDot, zDot, yoFramePointToDifferentiate.getReferenceFrame());
-
-      this.xDot = xDot;
-      this.yDot = yDot;
-      this.zDot = zDot;
+      hasBeenCalled.set(false);
    }
 
    public void update()
    {
-      xDot.update();
-      yDot.update();
-      zDot.update();
-   }
+      if (currentPosition == null)
+      {
+         throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
+               + "position variable to call update(), otherwise use update(FrameTuple3DReadOnly)");
+      }
 
-   public void update(Tuple3DReadOnly tuple)
-   {
-      xDot.update(tuple.getX());
-      yDot.update(tuple.getY());
-      zDot.update(tuple.getZ());
+      update(currentPosition);
    }
 
    public void update(FrameTuple3DReadOnly frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
-      xDot.update(frameTuple.getX());
-      yDot.update(frameTuple.getY());
-      zDot.update(frameTuple.getZ());
+      update((Tuple3DReadOnly) frameTuple);
    }
 
-   public void reset()
+   private final Vector3D currentRawDerivative = new Vector3D();
+
+   public void update(Tuple3DReadOnly currentPosition)
    {
-      xDot.reset();
-      yDot.reset();
-      zDot.reset();
+      if (!hasBeenCalled.getBooleanValue())
+      {
+         hasBeenCalled.set(true);
+         lastPosition.set(currentPosition);
+         setToZero();
+      }
+
+      currentRawDerivative.sub(currentPosition, lastPosition);
+      currentRawDerivative.scale(1.0 / dt);
+
+      double alpha = alphaProvider.getValue();
+      interpolate(currentRawDerivative, this, alpha);
+
+      lastPosition.set(currentPosition);
    }
 }
