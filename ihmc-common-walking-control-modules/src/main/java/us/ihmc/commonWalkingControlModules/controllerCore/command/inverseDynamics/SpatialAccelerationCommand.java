@@ -762,6 +762,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
+    * Gets the internal reference to the selection matrix to use with this command.
+    * 
+    * @return the selection matrix.
+    */
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
+   /**
     * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
     * this command.
     * 
