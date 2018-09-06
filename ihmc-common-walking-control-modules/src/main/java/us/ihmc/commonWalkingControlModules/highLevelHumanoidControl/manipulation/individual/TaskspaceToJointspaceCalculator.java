@@ -213,9 +213,9 @@ public class TaskspaceToJointspaceCalculator
       yoBaseParentJointFrameOrientation = new YoFrameQuaternion(namePrefix + "BaseParentJointFrame", worldFrame, registry);
 
       alphaBaseParentJointPose = new YoDouble(namePrefix + "AlphaBaseParentJointPose", registry);
-      yoBaseParentJointFramePositionFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "BaseParentJointFrameFiltered", "",
+      yoBaseParentJointFramePositionFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "BaseParentJointFramePositionFiltered", "",
             registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
-      yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix + "BaseParentJointFrameFiltered", "",
+      yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix + "BaseParentJointFrameOrientationFiltered", "",
             yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
 
       enableFeedbackControl = new YoBoolean(namePrefix + "EnableFeedBackControl", registry);
