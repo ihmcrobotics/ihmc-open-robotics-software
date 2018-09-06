@@ -313,7 +313,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                                                                      registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons,
                                                                                        walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
-                                                                                       VISUALIZE, registry, yoGraphicsListRegistry);
+                                                                                       VISUALIZE, upcomingFootsteps, registry, yoGraphicsListRegistry);
       if (walkingControllerParameters != null)
          planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
                                                                              bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry,
