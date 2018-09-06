@@ -11,7 +11,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,14 +25,14 @@ import us.ihmc.tools.MemoryTools;
 public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final boolean DEBUG = false;
-   
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    protected HumanoidFloatingRootJointRobot controllerFullRobotModel;
 
-   public abstract Packet<?> createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration);
+   public abstract Object createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration);
 
    public void testClose() throws SimulationExceededMaximumTimeException
    {
@@ -51,13 +50,13 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       RobotSide robotSide = RobotSide.RIGHT;
       drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
       double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
-      
+
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
       double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
 
       assertTrue(fingerJointQAtFinal > fingerJointQAtInitial);
    }
-   
+
    public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -72,12 +71,12 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.RIGHT;
-      
+
       drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
       double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
       double fingerJointQAtStop = getTotalFingerJointQ(robotSide);
       assertTrue(fingerJointQAtStop > fingerJointQAtInitial);
@@ -91,7 +90,6 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
       double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
       assertTrue(fingerJointQAtFinal < fingerJointQAtStop);
-      
 
       assertTrue(success);
    }
@@ -112,7 +110,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       RobotSide robotSide = RobotSide.RIGHT;
       drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.BASIC_GRIP));
       double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
-      
+
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
       double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
 
@@ -172,7 +170,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private double getTotalFingerJointQ(RobotSide robotSide)
    {
       double ret = 0.0;
