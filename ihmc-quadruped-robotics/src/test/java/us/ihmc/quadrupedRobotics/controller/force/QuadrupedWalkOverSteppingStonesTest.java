@@ -72,7 +72,6 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
 
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       conductor.setKeepSCSUp(false);
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
