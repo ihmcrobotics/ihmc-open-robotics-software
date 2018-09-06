@@ -273,6 +273,15 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       }
    }
 
+   public void insertDesiredTorquesIntoOneDoFJoints(OneDoFJoint[] oneDoFJoints)
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         joint.setTau(lowLevelJointDataMap.get(joint.getNameBasedHashCode()).getDesiredTorque());
+      }
+   }
+
    public JointDesiredControlMode getJointControlMode(OneDoFJoint joint)
    {
       JointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());

@@ -7,9 +7,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -34,8 +33,8 @@ public class WholeBodyControllerCore
    private final WholeBodyVirtualModelControlSolver virtualModelControlSolver;
 
    private final ControllerCoreOutput controllerCoreOutput;
-   private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
-   private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
+   private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData;
+   private final LowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private OneDoFJoint[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
@@ -71,10 +70,10 @@ public class WholeBodyControllerCore
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
       if (rootJoint != null)
-         yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
+         rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
       else
-         yoRootJointDesiredConfigurationData = null;
-      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
+         rootJointDesiredConfigurationData = null;
+      yoLowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
 
@@ -186,8 +185,8 @@ public class WholeBodyControllerCore
       }
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
-      if (yoRootJointDesiredConfigurationData != null)
-         yoRootJointDesiredConfigurationData.clear();
+      if (rootJointDesiredConfigurationData != null)
+         rootJointDesiredConfigurationData.clear();
 
       controllerCoreCommand.clear();
       controllerCoreSubmitTimer.stopMeasurement();
@@ -225,8 +224,8 @@ public class WholeBodyControllerCore
 
       clearOnEDoFJointOutputs();
 
-      if (yoRootJointDesiredConfigurationData != null)
-         controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);
+      if (rootJointDesiredConfigurationData != null)
+         controllerCoreOutput.setRootJointDesiredConfigurationData(rootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(yoLowLevelOneDoFJointDesiredDataHolder);
       controllerCoreComputeTimer.stopMeasurement();
    }
@@ -242,8 +241,8 @@ public class WholeBodyControllerCore
       LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseDynamicsOutput);
-      if (yoRootJointDesiredConfigurationData != null)
-         yoRootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
+      if (rootJointDesiredConfigurationData != null)
+         rootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
       controllerCoreOutput.setAndMatchFrameLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
    }
 
@@ -257,8 +256,8 @@ public class WholeBodyControllerCore
       LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
-      if (yoRootJointDesiredConfigurationData != null)
-         yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
+      if (rootJointDesiredConfigurationData != null)
+         rootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
    }
 
    private void doVirtualModelControl()
@@ -271,8 +270,8 @@ public class WholeBodyControllerCore
       LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
-      if (yoRootJointDesiredConfigurationData != null)
-         yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
+      if (rootJointDesiredConfigurationData != null)
+         rootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
       controllerCoreOutput.setAndMatchFrameLinearMomentumRate(virtualModelControlSolver.getAchievedMomentumRateLinear());
    }
 
@@ -334,7 +333,7 @@ public class WholeBodyControllerCore
 
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
-      return yoRootJointDesiredConfigurationData;
+      return rootJointDesiredConfigurationData;
    }
 
    public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
