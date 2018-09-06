@@ -180,13 +180,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
     * mass, if it does not exist it is created.
     *
+    * @param useIntegrator whether to create the gains necessary to compute the integral term. 
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
-   public YoPID3DGains getCenterOfMassGains()
+   public YoPID3DGains getCenterOfMassGains(boolean useIntegrator)
    {
       if (centerOfMassPositionGains == null)
       {
-         centerOfMassPositionGains = new DefaultYoPID3DGains(centerOfMassName, GainCoupling.NONE, true, registry);
+         centerOfMassPositionGains = new DefaultYoPID3DGains(centerOfMassName, GainCoupling.NONE, useIntegrator, registry);
       }
       return centerOfMassPositionGains;
    }
@@ -516,16 +517,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * the given end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
+    * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given
     *         end-effector.
     */
-   public YoPID3DGains getOrientationGains(RigidBody endEffector)
+   public YoPID3DGains getOrientationGains(RigidBody endEffector, boolean useIntegrator)
    {
       YoPID3DGains gains = endEffectorOrientationGains.get(endEffector);
 
       if (gains == null)
       {
-         gains = new DefaultYoPID3DGains(endEffector.getName() + "Orientation", GainCoupling.NONE, true, registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Orientation", GainCoupling.NONE, useIntegrator, registry);
          endEffectorOrientationGains.put(endEffector, gains);
       }
       return gains;
@@ -536,15 +538,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * given end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
+    * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPID3DGains getPositionGains(RigidBody endEffector)
+   public YoPID3DGains getPositionGains(RigidBody endEffector, boolean useIntegrator)
    {
       YoPID3DGains gains = endEffectorPositionGains.get(endEffector);
 
       if (gains == null)
       {
-         gains = new DefaultYoPID3DGains(endEffector.getName() + "Position", GainCoupling.NONE, true, registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Position", GainCoupling.NONE, useIntegrator, registry);
          endEffectorPositionGains.put(endEffector, gains);
       }
       return gains;
@@ -555,12 +558,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
+    * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
-   public YoPIDSE3Gains getSE3PIDGains(RigidBody endEffector)
+   public YoPIDSE3Gains getSE3PIDGains(RigidBody endEffector, boolean useIntegrator)
    {
-      YoPID3DGains positionGains = getPositionGains(endEffector);
-      YoPID3DGains orientationGains = getOrientationGains(endEffector);
+      YoPID3DGains positionGains = getPositionGains(endEffector, useIntegrator);
+      YoPID3DGains orientationGains = getOrientationGains(endEffector, useIntegrator);
       return new DefaultYoPIDSE3Gains(positionGains, orientationGains);
    }
 
