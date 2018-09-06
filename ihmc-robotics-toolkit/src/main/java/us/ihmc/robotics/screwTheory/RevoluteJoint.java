@@ -1,5 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,8 +10,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class RevoluteJoint extends OneDoFJoint
 {
+   private static final double EPSILON = 1.0e-7;
    private final FrameVector3D jointAxis;
-   private final AxisAngle axisAngle = new AxisAngle();
+   private final JointTransformCalculator jointTransformCalculator;
 
    public RevoluteJoint(String name, RigidBody predecessor, Vector3DReadOnly jointAxis)
    {
@@ -22,13 +24,33 @@ public class RevoluteJoint extends OneDoFJoint
       super(name, predecessor, transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
       this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
+
+      if (jointAxis.geometricallyEquals(Axis.X, EPSILON))
+      {
+         jointTransformCalculator = transform -> transform.setRotationRollAndZeroTranslation(getQ());
+      }
+      else if (jointAxis.geometricallyEquals(Axis.Y, EPSILON))
+      {
+         jointTransformCalculator = transform -> transform.setRotationPitchAndZeroTranslation(getQ());
+      }
+      else if (jointAxis.geometricallyEquals(Axis.Z, EPSILON))
+      {
+         jointTransformCalculator = transform -> transform.setRotationYawAndZeroTranslation(getQ());
+      }
+      else
+      {
+         AxisAngle axisAngle = new AxisAngle();
+         jointTransformCalculator = transform -> {
+            axisAngle.set(jointAxis, getQ());
+            transform.setRotationAndZeroTranslation(axisAngle);
+         };
+      }
    }
 
    @Override
    protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      axisAngle.set(jointAxis, getQ());
-      jointTransform.setRotationAndZeroTranslation(axisAngle);
+      jointTransformCalculator.updateJointTransform(jointTransform);
    }
 
    @Override
@@ -80,5 +102,10 @@ public class RevoluteJoint extends OneDoFJoint
    public boolean isPassiveJoint()
    {
       return false;
+   }
+
+   private static interface JointTransformCalculator
+   {
+      void updateJointTransform(RigidBodyTransform jointTransformToUpdate);
    }
 }
