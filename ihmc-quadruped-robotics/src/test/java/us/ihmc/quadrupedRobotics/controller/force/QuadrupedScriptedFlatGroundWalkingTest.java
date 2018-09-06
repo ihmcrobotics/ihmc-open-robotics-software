@@ -66,7 +66,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       List<QuadrupedTimedStepMessage> steps = getSteps();
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
-      stepTeleopManager.pulishTimedStepListToController(message);
+      stepTeleopManager.publishTimedStepListToController(message);
 
       // check robot is still upright and walked forward
       Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
