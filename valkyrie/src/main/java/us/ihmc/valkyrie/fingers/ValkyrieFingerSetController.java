@@ -74,7 +74,6 @@ public class ValkyrieFingerSetController implements RobotController
          String jointName = jointEnum.getJointName(robotSide);
 
          YoDouble desiredAngle = new YoDouble("q_d_" + jointName, registry);
-         //desiredAngle.setToNaN();
          desiredAngle.set(fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide, jointEnum.getCorrespondingJointName(1)));
          desiredAngles.put(jointEnum, desiredAngle);
 
