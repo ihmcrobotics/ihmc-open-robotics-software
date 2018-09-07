@@ -8,7 +8,8 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.14.0"
+      classpath "us.ihmc:ihmc-build:0.15.1"
+      classpath "us.ihmc:ihmc-ci-plugin:0.18.0"
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.10.0"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.8.3"
       classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
@@ -16,6 +17,7 @@ buildscript {
 }
 
 apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "us.ihmc.ihmc-ci-plugin"
 apply plugin: "com.bmuschko.docker-remote-api"
 
 ihmc {
@@ -43,6 +45,7 @@ mainDependencies {
 }
 
 testDependencies {
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
    compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.10.0'
 }
 
