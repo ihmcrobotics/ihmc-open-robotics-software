@@ -25,10 +25,10 @@ public class ICPInequalityInputTest
          int numberOfConstraints = RandomNumbers.nextInt(random, 1, 200);
          ICPInequalityInput input = new ICPInequalityInput(numberOfConstraints, size);
 
-         Assert.assertEquals(numberOfConstraints, input.linearOperator.numRows);
-         Assert.assertEquals(size, input.linearOperator.numCols);
-         Assert.assertEquals(numberOfConstraints, input.objective.numRows);
-         Assert.assertEquals(1, input.objective.numCols);
+         Assert.assertEquals(numberOfConstraints, input.Aineq.numRows);
+         Assert.assertEquals(size, input.Aineq.numCols);
+         Assert.assertEquals(numberOfConstraints, input.bineq.numRows);
+         Assert.assertEquals(1, input.bineq.numCols);
       }
    }
 
@@ -45,20 +45,20 @@ public class ICPInequalityInputTest
 
          ICPInequalityInput input = new ICPInequalityInput(numberOfConstraints, size);
 
-         Assert.assertEquals(numberOfConstraints, input.linearOperator.numRows);
-         Assert.assertEquals(size, input.linearOperator.numCols);
-         Assert.assertEquals(numberOfConstraints, input.objective.numRows);
-         Assert.assertEquals(1, input.objective.numCols);
+         Assert.assertEquals(numberOfConstraints, input.Aineq.numRows);
+         Assert.assertEquals(size, input.Aineq.numCols);
+         Assert.assertEquals(numberOfConstraints, input.bineq.numRows);
+         Assert.assertEquals(1, input.bineq.numCols);
 
          int newSize = RandomNumbers.nextInt(random, 1, 200);
          int newNumberOfConstraints = RandomNumbers.nextInt(random, 1, 200);
 
          input.reshape(newNumberOfConstraints, newSize);
 
-         Assert.assertEquals(newNumberOfConstraints, input.linearOperator.numRows);
-         Assert.assertEquals(newSize, input.linearOperator.numCols);
-         Assert.assertEquals(newNumberOfConstraints, input.objective.numRows);
-         Assert.assertEquals(1, input.objective.numCols);
+         Assert.assertEquals(newNumberOfConstraints, input.Aineq.numRows);
+         Assert.assertEquals(newSize, input.Aineq.numCols);
+         Assert.assertEquals(newNumberOfConstraints, input.bineq.numRows);
+         Assert.assertEquals(1, input.bineq.numCols);
       }
    }
 
@@ -76,16 +76,16 @@ public class ICPInequalityInputTest
 
          ICPInequalityInput input = new ICPInequalityInput(numberOfConstraints, size);
 
-         CommonOps.fill(input.linearOperator, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
-         CommonOps.fill(input.objective, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps.fill(input.Aineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps.fill(input.bineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
 
-         Assert.assertNotEquals(CommonOps.elementSum(input.linearOperator), 0.0, 1e-7);
-         Assert.assertNotEquals(CommonOps.elementSum(input.objective), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps.elementSum(input.Aineq), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps.elementSum(input.bineq), 0.0, 1e-7);
 
          input.reset();
 
-         Assert.assertEquals(CommonOps.elementSum(input.linearOperator), 0.0, 1e-7);
-         Assert.assertEquals(CommonOps.elementSum(input.objective), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps.elementSum(input.Aineq), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps.elementSum(input.bineq), 0.0, 1e-7);
       }
    }
 

@@ -3,27 +3,29 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 import org.ejml.data.DenseMatrix64F;
 
 /**
- * Formulated as linearOperator x <= objective
+ * Formulated as Aineq x <= bineq
  */
 public class ICPInequalityInput
 {
-   public DenseMatrix64F linearOperator;
-   public DenseMatrix64F objective;
+   /** matrix multiplier of the constrained variable. */
+   public final DenseMatrix64F Aineq;
+   /** desired bounds for the constrained variable. */
+   public final DenseMatrix64F bineq;
 
    public ICPInequalityInput(int numberOfConstraints, int size)
    {
-      linearOperator = new DenseMatrix64F(numberOfConstraints, size);
-      objective = new DenseMatrix64F(numberOfConstraints, 1);
+      Aineq = new DenseMatrix64F(numberOfConstraints, size);
+      bineq = new DenseMatrix64F(numberOfConstraints, 1);
 
    }
 
    /**
-    * Resets the inequality terms in the objective. Should be called before calling {@link #reshape(int, int)}.
+    * Resets the inequality terms in the bineq. Should be called before calling {@link #reshape(int, int)}.
     */
    public void reset()
    {
-      linearOperator.zero();
-      objective.zero();
+      Aineq.zero();
+      bineq.zero();
    }
 
    /**
@@ -35,7 +37,7 @@ public class ICPInequalityInput
     */
    public void reshape(int numberOfConstraints, int numberOfVariables)
    {
-      linearOperator.reshape(numberOfConstraints, numberOfVariables);
-      objective.reshape(numberOfConstraints, 1);
+      Aineq.reshape(numberOfConstraints, numberOfVariables);
+      bineq.reshape(numberOfConstraints, 1);
    }
 }
