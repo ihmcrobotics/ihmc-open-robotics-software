@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,8 +31,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    private final List<T> controlledFingerJoints;
 
    private final EnumMap<T, YoDouble> delayTimes;
-   private final EnumMap<T, ArrayList<Double>> wayPointPositions;
-   private final EnumMap<T, ArrayList<Double>> wayPointTimes;
+   private final EnumMap<T, TDoubleArrayList> wayPointPositions;
+   private final EnumMap<T, TDoubleArrayList> wayPointTimes;
 
    private final StateMachine<TrajectoryGeneratorMode, State> stateMachine;
    private final YoEnum<TrajectoryGeneratorMode> requestedState;
@@ -76,8 +77,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
          delayTimes.put(key, new YoDouble(robotSide + key.name() + "_delayTime", parentRegistry));
          delayTimes.get(key).set(0.0);
-         wayPointPositions.put(key, new ArrayList<Double>());
-         wayPointTimes.put(key, new ArrayList<Double>());
+         wayPointPositions.put(key, new TDoubleArrayList());
+         wayPointTimes.put(key, new TDoubleArrayList());
       }
 
       requestedState = new YoEnum<>(name + "requestedState", registry, TrajectoryGeneratorMode.class, true);
@@ -104,8 +105,8 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          trajectoryGenerators.get(key).clear();
          double delayTime = this.delayTimes.get(key).getDoubleValue();
          trajectoryGenerators.get(key).appendWaypoint(delayTime, desiredQs.get(key).getValue(), 0.0);
-         ArrayList<Double> wayPointPositions = this.wayPointPositions.get(key);
-         ArrayList<Double> wayPointTimes = this.wayPointTimes.get(key);
+         TDoubleArrayList wayPointPositions = this.wayPointPositions.get(key);
+         TDoubleArrayList wayPointTimes = this.wayPointTimes.get(key);
          for (int j = 0; j < wayPointPositions.size(); j++)
          {
             trajectoryGenerators.get(key).appendWaypoint(delayTime + wayPointTimes.get(j), wayPointPositions.get(j), 0.0);
