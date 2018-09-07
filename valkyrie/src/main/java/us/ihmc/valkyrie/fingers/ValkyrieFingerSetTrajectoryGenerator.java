@@ -30,7 +30,6 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
    private final List<T> controlledFingerJoints;
 
-   private final EnumMap<T, YoDouble> delayTimes;
    private final EnumMap<T, TDoubleArrayList> wayPointPositions;
    private final EnumMap<T, TDoubleArrayList> wayPointTimes;
 
@@ -43,7 +42,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    }
 
    public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
-                                              YoVariableRegistry parentRegistry)
+                                               YoVariableRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.name = robotSide.getLowerCaseName() + enumType.getSimpleName();
@@ -55,7 +54,6 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       this.trajectoryGenerators = new EnumMap<>(enumType);
       this.controlledFingerJoints = new ArrayList<T>();
 
-      this.delayTimes = new EnumMap<>(enumType);
       this.wayPointPositions = new EnumMap<>(enumType);
       this.wayPointTimes = new EnumMap<>(enumType);
 
@@ -75,8 +73,6 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
          controlledFingerJoints.add(key);
 
-         delayTimes.put(key, new YoDouble(robotSide + key.name() + "_delayTime", parentRegistry));
-         delayTimes.get(key).set(0.0);
          wayPointPositions.put(key, new TDoubleArrayList());
          wayPointTimes.put(key, new TDoubleArrayList());
       }
@@ -103,17 +99,15 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       {
          T key = controlledFingerJoints.get(i);
          trajectoryGenerators.get(key).clear();
-         double delayTime = this.delayTimes.get(key).getDoubleValue();
-         trajectoryGenerators.get(key).appendWaypoint(delayTime, desiredQs.get(key).getValue(), 0.0);
          TDoubleArrayList wayPointPositions = this.wayPointPositions.get(key);
          TDoubleArrayList wayPointTimes = this.wayPointTimes.get(key);
          for (int j = 0; j < wayPointPositions.size(); j++)
          {
-            trajectoryGenerators.get(key).appendWaypoint(delayTime + wayPointTimes.get(j), wayPointPositions.get(j), 0.0);
+            trajectoryGenerators.get(key).appendWaypoint(wayPointTimes.get(j), wayPointPositions.get(j), 0.0);
          }
       }
    }
-   
+
    /**
     *  setting up joint trajectory is in order of methods,
     *  <p>clearTrajectories()
@@ -161,7 +155,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
             desiredQs.get(key).setValue(desiredQ);
             desiredQds.get(key).setValue(desiredQd);
-            
+
          }
       }
 
@@ -171,7 +165,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          for (int i = 0; i < controlledFingerJoints.size(); i++)
          {
             T key = controlledFingerJoints.get(i);
-            if(!trajectoryGenerators.get(key).isDone())
+            if (!trajectoryGenerators.get(key).isDone())
                return false;
          }
          return true;
@@ -224,15 +218,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       for (int i = 0; i < controlledFingerJoints.size(); i++)
       {
          T key = controlledFingerJoints.get(i);
-         delayTimes.get(key).set(0.0);
          wayPointPositions.get(key).clear();
          wayPointTimes.get(key).clear();
       }
-   }
-
-   public void setDelay(T controlSpace, double delayTime)
-   {
-      delayTimes.get(controlSpace).set(delayTime);
    }
 
    public void appendWayPoint(T controlSpace, double time, double goal)
@@ -251,7 +239,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    {
       return desiredQs.get(controlSpace).getValue();
    }
-   
+
    public double getDesiredVelocity(T controlSpace)
    {
       return desiredQds.get(controlSpace).getValue();
