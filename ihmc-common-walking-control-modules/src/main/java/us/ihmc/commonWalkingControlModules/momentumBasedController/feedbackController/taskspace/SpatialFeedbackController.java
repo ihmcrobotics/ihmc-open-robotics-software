@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -125,7 +126,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                     YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      computeIntegralTerm = toolbox.getOptimizationSettings().computeIntegralTermInFeedbackControllers();
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      if (optimizationSettings != null)
+         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      else
+         computeIntegralTerm = true;
 
       if (toolbox.getRootJoint() != null)
       {
