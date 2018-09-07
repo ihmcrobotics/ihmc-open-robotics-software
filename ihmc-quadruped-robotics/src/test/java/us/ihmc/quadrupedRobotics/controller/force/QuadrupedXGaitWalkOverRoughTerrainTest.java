@@ -75,8 +75,8 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    @Test(timeout = 2000000)
    public void testWalkingOverConsecutiveRamps() throws IOException
    {
-      ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 4, -0.1);
-      double walkTime = 15.0;
+      ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 20, -0.1);
+      double walkTime = 5.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 3.0;
 
