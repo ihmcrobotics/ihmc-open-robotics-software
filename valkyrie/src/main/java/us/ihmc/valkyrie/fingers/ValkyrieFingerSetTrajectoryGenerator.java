@@ -145,9 +145,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
             double desiredQ = multipleWaypointsTrajectoryGenerator.getValue();
             double desiredQd = multipleWaypointsTrajectoryGenerator.getVelocity();
 
-            if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > stateMachine.getTimeInCurrentState())
+            if (multipleWaypointsTrajectoryGenerator.getLastWaypointTime() > timeInState)
             {
-               multipleWaypointsTrajectoryGenerator.compute(stateMachine.getTimeInCurrentState());
+               multipleWaypointsTrajectoryGenerator.compute(timeInState);
                desiredQ = multipleWaypointsTrajectoryGenerator.getValue();
                desiredQd = multipleWaypointsTrajectoryGenerator.getVelocity();
             }
@@ -168,7 +168,13 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       @Override
       public boolean isDone(double timeInState)
       {
-         return false;
+         for (int i = 0; i < controlledFingerJoints.size(); i++)
+         {
+            T key = controlledFingerJoints.get(i);
+            if(!trajectoryGenerators.get(key).isDone())
+               return false;
+         }
+         return true;
       }
 
       @Override
@@ -181,7 +187,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    @Override
    public void initialize()
    {
-
+      stateMachine.resetToInitialState();
    }
 
    @Override
