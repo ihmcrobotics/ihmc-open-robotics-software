@@ -168,7 +168,7 @@ public class CenterOfPressureResolverTest
 
       if (Double.isNaN(expectedCenterOfPressureFramePoint.getX()) && Double.isNaN(expectedCenterOfPressureFramePoint.getY())
             && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
-         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()) && Double.isNaN(centerOfPressure.getZ()));
+         assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()));
       else
          assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure,
                expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));
