@@ -338,10 +338,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(compositeSolution, tempMatrix, expectedCost);
       CommonOps.scale(0.5, expectedCost);
 
-
       JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
-
-
 
       // run the actual test on the cost with non-zero previous solution.
 
@@ -366,11 +363,9 @@ public class ICPQPInputCalculatorTest
       CommonOps.subtract(solution, previousSolution, delta);
       CommonOps.subtract(compositeSolution, compositePreviousSolution, compositeDelta);
 
-
       CommonOps.mult(rateWeight, compositeDelta, tempMatrix);
       CommonOps.multTransA(compositeDelta, tempMatrix, expectedCost);
       CommonOps.scale(0.5, expectedCost);
-
 
       JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
    }
@@ -1464,10 +1459,12 @@ public class ICPQPInputCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSubmitFeedbackTask()
+   public void testSubmitCoPeedbackTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+
+      indexHandler.computeProblemSize();
 
       ICPQPInput feedbackTask = new ICPQPInput(2);
       ICPQPInput feedbackRateTask = new ICPQPInput(2);
@@ -1484,7 +1481,7 @@ public class ICPQPInputCalculatorTest
 
       DenseMatrix64F previousFeedbackSolution = new DenseMatrix64F(2, 1);
       previousFeedbackSolution.set(0, 0, 0.03);
-      previousFeedbackSolution.set(0, 0, 0.05);
+      previousFeedbackSolution.set(1, 0, 0.05);
 
       inputCalculator.computeCoPFeedbackRateTask(feedbackRateTask, feedbackRateWeight, previousFeedbackSolution);
 
@@ -1510,6 +1507,73 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
       JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
       JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+
+
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSubmitFeedbackRateTask()
+   {
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+
+      indexHandler.setHasCMPFeedbackTask(true);
+      indexHandler.computeProblemSize();
+
+      ICPQPInput feedbackRateTask = new ICPQPInput(4);
+
+      DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
+      DenseMatrix64F feedbackCMPCoPRateWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackRateWeight);
+      CommonOps.scale(1.3, feedbackRateWeight);
+      MatrixTools.setDiagonal(feedbackCMPCoPRateWeight, 4.7);
+
+      DenseMatrix64F previousCoPFeedbackSolution = new DenseMatrix64F(2, 1);
+      DenseMatrix64F previousCMPFeedbackSolution = new DenseMatrix64F(2, 1);
+      DenseMatrix64F previousFeedbackSolution = new DenseMatrix64F(2, 1);
+      previousCoPFeedbackSolution.set(0, 0, 0.06);
+      previousCoPFeedbackSolution.set(1, 0, 0.13);
+      previousCMPFeedbackSolution.set(0, 0, 0.03);
+      previousCMPFeedbackSolution.set(1, 0, 0.07);
+
+      CommonOps.add(previousCoPFeedbackSolution, previousCMPFeedbackSolution, previousFeedbackSolution);
+
+      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTask, feedbackCMPCoPRateWeight, previousCoPFeedbackSolution);
+      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTask, feedbackCMPCoPRateWeight, previousCMPFeedbackSolution);
+      inputCalculator.computeFeedbackRateTask(feedbackRateTask, feedbackRateWeight, previousFeedbackSolution);
+
+      DenseMatrix64F quadratic = new DenseMatrix64F(4, 4);
+      DenseMatrix64F linear = new DenseMatrix64F(4, 1);
+      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+
+      DenseMatrix64F quadraticExpected = new DenseMatrix64F(4, 4);
+      DenseMatrix64F linearExpected = new DenseMatrix64F(4, 1);
+      DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
+
+      inputCalculator.submitFeedbackRateTask(feedbackRateTask, quadratic, linear, scalar);
+
+      quadraticExpected.set(feedbackRateTask.quadraticTerm);
+      linearExpected.set(feedbackRateTask.linearTerm);
+      scalarExpected.set(feedbackRateTask.residualCost);
+
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, epsilon);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
+
+      quadraticExpected = new DenseMatrix64F(4, 4);
+
+      quadraticExpected.set(0, 0, feedbackCMPCoPRateWeight.get(0, 0) + feedbackRateWeight.get(0, 0));
+      quadraticExpected.set(1, 1, feedbackCMPCoPRateWeight.get(1, 1) + feedbackRateWeight.get(1, 1));
+      quadraticExpected.set(2, 2, feedbackCMPCoPRateWeight.get(0, 0) + feedbackRateWeight.get(0, 0));
+      quadraticExpected.set(3, 3, feedbackCMPCoPRateWeight.get(1, 1) + feedbackRateWeight.get(1, 1));
+      quadraticExpected.set(0, 2, feedbackRateWeight.get(0, 0));
+      quadraticExpected.set(1, 3, feedbackRateWeight.get(1, 1));
+      quadraticExpected.set(2, 0, feedbackRateWeight.get(0, 0));
+      quadraticExpected.set(3, 1, feedbackRateWeight.get(1, 1));
+
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1572,7 +1636,7 @@ public class ICPQPInputCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSubmitAngularMomentumRateTask()
+   public void testSubmitCMPFeedbackTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
@@ -1693,7 +1757,7 @@ public class ICPQPInputCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSubmitFeedbackAndAngularMomentumTask()
+   public void testSubmitCoPAndCMPOFeedbackTasks()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
