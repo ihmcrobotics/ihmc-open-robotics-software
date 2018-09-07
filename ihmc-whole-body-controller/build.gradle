@@ -23,8 +23,8 @@ testSuites {
 
 mainDependencies {
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: 'commons-net', name: 'commons-net', version: '3.3'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
@@ -37,7 +37,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"

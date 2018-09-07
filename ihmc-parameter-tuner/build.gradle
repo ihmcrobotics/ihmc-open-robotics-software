@@ -25,7 +25,7 @@ mainDependencies {
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
