@@ -309,6 +309,8 @@ public class RigidBodyControlManager
 
    public void holdCurrentDesiredInJointspace()
    {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
       if (getActiveControlMode() == jointspaceControlState.getControlMode())
       {
          jointspaceControlState.holdCurrentDesired();
@@ -328,6 +330,8 @@ public class RigidBodyControlManager
 
    public void holdCurrentDesiredInTaskspace()
    {
+      // It is only safe to hold the current desired if the body was controlled in the control mode. Otherwise the
+      // desired values might be out of date or they might have never been set. In that case hold the current.
       if (getActiveControlMode() == taskspaceControlState.getControlMode())
       {
          taskspaceControlState.holdCurrentDesired();
