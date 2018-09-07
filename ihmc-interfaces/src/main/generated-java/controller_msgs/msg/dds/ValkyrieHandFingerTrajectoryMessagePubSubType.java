@@ -44,7 +44,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -83,7 +83,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_9(data.getRobotSide());
 
-      if(data.getFingerMotorNames().size() <= 100)
+      if(data.getFingerMotorNames().size() <= 5)
       cdr.write_type_e(data.getFingerMotorNames());else
           throw new RuntimeException("finger_motor_names field exceeds the maximum length");
 

@@ -16,7 +16,7 @@ uint32 sequence_id
 byte robot_side 255
 
 # Specifies the list of finger motor names that we want to control.
-byte[] finger_motor_names
+byte[<=5] finger_motor_names
 
 # The indexing for the joints refers the list of finger motor names.
 JointspaceTrajectoryMessage jointspace_trajectory
