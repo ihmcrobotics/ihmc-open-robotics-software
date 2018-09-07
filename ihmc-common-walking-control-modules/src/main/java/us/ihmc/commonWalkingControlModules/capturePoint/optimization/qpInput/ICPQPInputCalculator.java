@@ -90,6 +90,33 @@ public class ICPQPInputCalculator
       computeQuadraticTask(indexHandler.getCoPFeedbackIndex(), icpQPInputToPack, rateWeight, objective);
    }
 
+   /**
+    * Computes the CMP feedback rate task. This tries to minimize the distance of the current solution
+    * from the previous solution. Has the form<br>
+    *    (&kappa; - &kappa;<sub>prev</sub>)<sup>T</sup> Q (&kappa; - &kappa;<sub>prev</sub>)<br>
+    * where &kappa; is the CMP feedback and &kappa;<sub>prev</sub> is the previous solution.
+    *
+    * @param icpQPInputToPack QP input to store the CoP feedback rate task. Modified.
+    * @param rateWeight weight attached to rate the CoP feedback.
+    * @param objective the previous solution value, &delta;<sub>prev</sub>
+    */
+   public void computeCMPFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
+   {
+      if (indexHandler.hasCMPFeedbackTask())
+         computeQuadraticTask(indexHandler.getCMPFeedbackIndex(), icpQPInputToPack, rateWeight, objective);
+   }
+
+   /**
+    * Computes the total feedback rate task. This tries to minimize the distance of the current solution
+    * from the previous solution. Has the form<br>
+    *    (&delta; + &kappa; - &delta;<sub>prev</sub> - &kappa;<sub>prev</sub>)<sup>T</sup> Q (&delta; + &kappa; - &delta;<sub>prev</sub> - &kappa;<sub>prev</sub>)<br>
+    * where &delta; is the CoP feedback, &kappa; is the CMP feedback, &delta;<sub>prev</sub> is the previous solution for the CoP feedback,
+    * and &kappa;<sub>prev</sub> is the previous solution for the CMP feedback.
+    *
+    * @param icpQPInputToPack QP input to store the CoP feedback rate task. Modified.
+    * @param rateWeight weight attached to rate the CoP feedback.
+    * @param objective the previous solution value, &delta;<sub>prev</sub>
+    */
    public void computeFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
    {
       int copIndex = indexHandler.getCoPFeedbackIndex();
@@ -97,16 +124,10 @@ public class ICPQPInputCalculator
       computeQuadraticTask(copIndex, icpQPInputToPack, rateWeight, objective);
       if (indexHandler.hasCMPFeedbackTask())
       {
-         computeQuadraticTask(cmpIndex, icpQPInputToPack, rateWeight, objective);
-         MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, copIndex, cmpIndex, rateWeight, 0, 0, 2, 2, 0.5);
-         MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, cmpIndex, copIndex, rateWeight, 0, 0, 2, 2, 0.5);
+         computeQuadraticTask(cmpIndex, icpQPInputToPack, rateWeight, objective, false);
+         MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, copIndex, cmpIndex, rateWeight, 0, 0, 2, 2, 1);
+         MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, cmpIndex, copIndex, rateWeight, 0, 0, 2, 2, 1);
       }
-   }
-
-   public void computeCMPFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
-   {
-      if (indexHandler.hasCMPFeedbackTask())
-         computeQuadraticTask(indexHandler.getCMPFeedbackIndex(), icpQPInputToPack, rateWeight, objective);
    }
 
    /**
@@ -420,14 +441,22 @@ public class ICPQPInputCalculator
 
    void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
    {
+      computeQuadraticTask(startIndex, icpQPInputToPack, weight, objective, true);
+   }
+
+   void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective, boolean includeResidual)
+   {
       MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
 
       CommonOps.mult(weight, objective, tmpObjective);
 
       MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, startIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
 
-      CommonOps.multTransA(0.5, objective, tmpObjective, tmpScalar);
-      CommonOps.addEquals(icpQPInputToPack.residualCost, tmpScalar);
+      if (includeResidual)
+      {
+         CommonOps.multTransA(0.5, objective, tmpObjective, tmpScalar);
+         CommonOps.addEquals(icpQPInputToPack.residualCost, tmpScalar);
+      }
    }
 
 }
