@@ -56,10 +56,6 @@ module controller_msgs
          * The indexing for the joints refers the list of finger motor names.
          */
         controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
-        /**
-         * The list of times for trajectory execution delay.
-         */
-        sequence<double> delay_times;
       };
     };
   };

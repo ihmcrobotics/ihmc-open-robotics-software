@@ -303,8 +303,7 @@ public class HumanoidMessageTools
    }
 
    public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
-                                                                                               double trajectoryTime, double[] desiredJointPositions,
-                                                                                               double[] executionDelayTimes)
+                                                                                               double trajectoryTime, double[] desiredJointPositions)
    {
       ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
 
@@ -317,9 +316,6 @@ public class HumanoidMessageTools
 
       message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
 
-      for (int i = 0; i < dimension; i++)
-         message.getDelayTimes().add(desiredJointPositions[i]);
-
       return message;
    }
 
@@ -327,7 +323,6 @@ public class HumanoidMessageTools
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
       messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
-      messageToAppend.getDelayTimes().add(0.0);
       Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
       jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
