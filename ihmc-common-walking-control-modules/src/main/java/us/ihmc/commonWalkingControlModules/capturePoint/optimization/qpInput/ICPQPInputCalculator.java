@@ -367,6 +367,25 @@ public class ICPQPInputCalculator
       MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
+
+   /**
+    * Submits the CMP feedback action task to the total quadratic program cost terms.
+    *
+    * @param icpQPInput QP Input that stores the data.
+    * @param solverInput_H_ToPack full problem quadratic cost term.
+    * @param solverInput_h_ToPack full problem linear cost term.
+    * @param solverInputResidualCostToPack full problem residual cost term.
+    */
+   public void submitCMPFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+                                     DenseMatrix64F solverInputResidualCostToPack)
+   {
+      int angularMomentumIndex = indexHandler.getCMPFeedbackIndex();
+      MatrixTools.addMatrixBlock(solverInput_H_ToPack, angularMomentumIndex, angularMomentumIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h_ToPack, angularMomentumIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
+   }
+
+
    /**
     * Submits the CoP feedback action task to the total quadratic program cost terms.
     *
@@ -399,23 +418,6 @@ public class ICPQPInputCalculator
       int size = icpQPInput.linearTerm.getNumRows();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, 0, 0, size, size, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, 0, 0, icpQPInput.linearTerm, 0, 0, size, 1, 1.0);
-      MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
-   }
-
-   /**
-    * Submits the angular momentum minimization task to the total quadratic program cost terms.
-    *
-    * @param icpQPInput QP Input that stores the data.
-    * @param solverInput_H_ToPack full problem quadratic cost term.
-    * @param solverInput_h_ToPack full problem linear cost term.
-    * @param solverInputResidualCostToPack full problem residual cost term.
-    */
-   public void submitCMPFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-                                     DenseMatrix64F solverInputResidualCostToPack)
-   {
-      int angularMomentumIndex = indexHandler.getCMPFeedbackIndex();
-      MatrixTools.addMatrixBlock(solverInput_H_ToPack, angularMomentumIndex, angularMomentumIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h_ToPack, angularMomentumIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
