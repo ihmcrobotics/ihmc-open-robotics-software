@@ -5,12 +5,14 @@ import org.junit.Test;
 import us.ihmc.avatar.behaviorTests.DRCWalkToLocationBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
@@ -113,5 +115,13 @@ public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehavio
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testWalkPauseAndResumeOnLastStepBehavior();
+   }
+   
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 67.6, categoriesOverride = {IntegrationCategory.EXCLUDE})
+   @Test(timeout = 340000)
+   public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkStopAndWalkToDifferentLocation();
    }
 }
