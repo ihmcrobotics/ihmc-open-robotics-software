@@ -27,7 +27,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    private final EnumMap<T, SettableDoubleProvider> desiredQds;
    private final EnumMap<T, MultipleWaypointsTrajectoryGenerator> trajectoryGenerators;
 
-   private final List<T> listOfKeySet;
+   private final List<T> controlledFingerJoints;
 
    private final EnumMap<T, YoDouble> delayTimes;
    private final EnumMap<T, ArrayList<Double>> wayPointPositions;
@@ -52,7 +52,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       this.desiredQs = new EnumMap<>(enumType);
       this.desiredQds = new EnumMap<>(enumType);
       this.trajectoryGenerators = new EnumMap<>(enumType);
-      this.listOfKeySet = new ArrayList<T>();
+      this.controlledFingerJoints = new ArrayList<T>();
 
       this.delayTimes = new EnumMap<>(enumType);
       this.wayPointPositions = new EnumMap<>(enumType);
@@ -72,7 +72,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
          trajectoryGenerator.initialize();
          trajectoryGenerators.put(key, trajectoryGenerator);
 
-         listOfKeySet.add(key);
+         controlledFingerJoints.add(key);
 
          delayTimes.put(key, new YoDouble(robotSide + key.name() + "_delayTime", parentRegistry));
          delayTimes.get(key).set(0.0);
@@ -98,9 +98,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
    private void setTrajectories()
    {
-      for (int i = 0; i < listOfKeySet.size(); i++)
+      for (int i = 0; i < controlledFingerJoints.size(); i++)
       {
-         T key = listOfKeySet.get(i);
+         T key = controlledFingerJoints.get(i);
          trajectoryGenerators.get(key).clear();
          double delayTime = this.delayTimes.get(key).getDoubleValue();
          trajectoryGenerators.get(key).appendWaypoint(delayTime, desiredQs.get(key).getValue(), 0.0);
@@ -127,9 +127,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       public void onEntry()
       {
          setTrajectories();
-         for (int i = 0; i < listOfKeySet.size(); i++)
+         for (int i = 0; i < controlledFingerJoints.size(); i++)
          {
-            T key = listOfKeySet.get(i);
+            T key = controlledFingerJoints.get(i);
             trajectoryGenerators.get(key).initialize();
          }
       }
@@ -137,9 +137,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       @Override
       public void doAction(double timeInState)
       {
-         for (int i = 0; i < listOfKeySet.size(); i++)
+         for (int i = 0; i < controlledFingerJoints.size(); i++)
          {
-            T key = listOfKeySet.get(i);
+            T key = controlledFingerJoints.get(i);
             MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectoryGenerator = trajectoryGenerators.get(key);
             double desiredQ = multipleWaypointsTrajectoryGenerator.getValue();
             double desiredQd = multipleWaypointsTrajectoryGenerator.getVelocity();
@@ -214,9 +214,9 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
    public void clearTrajectories()
    {
-      for (int i = 0; i < listOfKeySet.size(); i++)
+      for (int i = 0; i < controlledFingerJoints.size(); i++)
       {
-         T key = listOfKeySet.get(i);
+         T key = controlledFingerJoints.get(i);
          delayTimes.get(key).set(0.0);
          wayPointPositions.get(key).clear();
          wayPointTimes.get(key).clear();
