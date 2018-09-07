@@ -3,11 +3,13 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
+import org.ejml.ops.RandomMatrices;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -15,10 +17,103 @@ import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
 
+import java.util.Random;
+
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputCalculatorTest
 {
    private final double epsilon = 1e-7;
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testComputeQuadraticTask()
+   {
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < 10; iter++)
+      {
+         int size = RandomNumbers.nextInt(random, 1, 1000);
+         int subSize = RandomNumbers.nextInt(random, 1, size);
+         int startIndex = RandomNumbers.nextInt(random, 1, (size - subSize));
+
+         ICPQPInput inputToTest = new ICPQPInput(size);
+         ICPQPInput inputExpected = new ICPQPInput(size);
+
+         DenseMatrix64F weight = RandomMatrices.createRandom(subSize, subSize, random);
+         DenseMatrix64F objective = RandomMatrices.createRandom(subSize, 1, random);
+
+         ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+         ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+         inputCalculator.tmpObjective.reshape(subSize, 1);
+
+         for (int row = 0; row < subSize; row++)
+         {
+            for (int col = 0; col < subSize; col++)
+            {
+               inputExpected.quadraticTerm.set(startIndex + row, startIndex + col, weight.get(row, col));
+            }
+         }
+
+         DenseMatrix64F tempMatrix = new DenseMatrix64F(subSize, 1);
+         DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+         CommonOps.mult(weight, objective, tempMatrix);
+
+         for (int row = 0; row < subSize; row++)
+         {
+            inputExpected.linearTerm.set(startIndex + row, 0,objective.get(row, 0));
+         }
+
+         inputCalculator.computeQuadraticTask(startIndex, inputToTest, weight, objective);
+
+         CommonOps.multTransA(objective, tempMatrix, scalar);
+         CommonOps.scale(0.5, scalar);
+         inputExpected.residualCost.set(scalar);
+
+         Assert.assertTrue(inputExpected.equals(inputExpected, epsilon));
+      }
+
+      int size = RandomNumbers.nextInt(random, 1, 1000);
+      int subSize = RandomNumbers.nextInt(random, 1, size);
+      int startIndex = RandomNumbers.nextInt(random, 1, (size - subSize));
+
+      ICPQPInput inputToTest = new ICPQPInput(size);
+      ICPQPInput inputExpected = new ICPQPInput(size);
+
+      DenseMatrix64F weight = RandomMatrices.createRandom(subSize, subSize, random);
+      DenseMatrix64F objective = RandomMatrices.createRandom(subSize, 1, random);
+
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+      inputCalculator.tmpObjective.reshape(subSize, 1);
+
+      for (int iter = 0; iter < 10; iter++)
+      {
+
+         for (int row = 0; row < subSize; row++)
+         {
+            for (int col = 0; col < subSize; col++)
+            {
+               inputExpected.quadraticTerm.add(startIndex + row, startIndex + col, weight.get(row, col));
+            }
+         }
+
+         DenseMatrix64F tempMatrix = new DenseMatrix64F(subSize, 1);
+         DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+         CommonOps.mult(weight, objective, tempMatrix);
+
+         for (int row = 0; row < subSize; row++)
+         {
+            inputExpected.linearTerm.add(startIndex + row, 0, objective.get(row, 0));
+         }
+
+         inputCalculator.computeQuadraticTask(startIndex, inputToTest, weight, objective);
+
+         CommonOps.multTransA(objective, tempMatrix, scalar);
+         CommonOps.scale(0.5, scalar);
+         inputExpected.residualCost.add(0, 0, scalar.get(0, 0));
+
+         Assert.assertTrue(inputExpected.equals(inputExpected, epsilon));
+      }
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
