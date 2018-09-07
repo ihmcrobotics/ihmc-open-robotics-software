@@ -19,6 +19,8 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+import static junit.framework.TestCase.assertTrue;
+
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
@@ -73,8 +75,8 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
    @Test(timeout = 2000000)
    public void testWalkingOverConsecutiveRamps() throws IOException
    {
-      ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 4, -0.1);
-      double walkTime = 15.0;
+      ZigZagSlopeEnvironment environment = new ZigZagSlopeEnvironment(0.15, 0.5, 20, -0.1);
+      double walkTime = 5.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 3.0;
 
@@ -138,8 +140,16 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), minimumXPositionAfterWalking));
       conductor.simulate();
 
-      stepTeleopManager.requestStopWalking();
-      conductor.addTimeLimit(variables.getYoTime(), 1.5);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
+
+
+      stepTeleopManager.requestStanding();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.simulate();
+
+      assertTrue(stepTeleopManager.isInStandState());
    }
 }

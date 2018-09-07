@@ -18,7 +18,13 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    private QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
 
-
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2000000)
+   public void testWalkingUpStaircase() throws IOException
+   {
+      xGaitSettings = new GenericQuadrupedXGaitSettings();
+      super.testWalkingUpStaircase();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
@@ -44,7 +50,7 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
       super.testWalkingOverConsecutiveRamps();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 2000000)
    public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
    {
