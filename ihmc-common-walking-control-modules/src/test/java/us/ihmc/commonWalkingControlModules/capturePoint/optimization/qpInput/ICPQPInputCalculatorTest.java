@@ -2,28 +2,23 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.jcodec.common.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.robotics.testing.JUnitToolsTest;
 
+import javax.print.attribute.standard.JobOriginatingUserName;
 import java.util.Random;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputCalculatorTest
 {
-   private final double epsilon = 1e-7;
+   private static final double epsilon = 1e-7;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test
@@ -69,7 +64,7 @@ public class ICPQPInputCalculatorTest
          CommonOps.scale(0.5, scalar);
          inputExpected.residualCost.set(scalar);
 
-         Assert.assertTrue(inputExpected.equals(inputExpected, epsilon));
+         assertInputEquals(inputExpected, inputExpected, epsilon);
       }
 
       int size = RandomNumbers.nextInt(random, 1, 1000);
@@ -112,7 +107,7 @@ public class ICPQPInputCalculatorTest
          CommonOps.scale(0.5, scalar);
          inputExpected.residualCost.add(0, 0, scalar.get(0, 0));
 
-         Assert.assertTrue(inputExpected.equals(inputExpected, epsilon));
+         assertInputEquals(inputExpected, inputExpected, epsilon);
       }
    }
 
@@ -132,12 +127,12 @@ public class ICPQPInputCalculatorTest
 
       ICPQPInputCalculator.computeCoPFeedbackTask(icpQPInputToTest, feedbackWeight);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testFeedbackRateTask()
+   public void testCoPFeedbackRateTask()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
@@ -151,7 +146,7 @@ public class ICPQPInputCalculatorTest
 
       DenseMatrix64F previousSolution = new DenseMatrix64F(2, 1);
       previousSolution.set(0, 0, 0.5);
-      previousSolution.set(0, 0, 0.1);
+      previousSolution.set(1, 0, 0.1);
 
       icpQPInputExpected.quadraticTerm.set(rateWeight);
 
@@ -165,31 +160,229 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeCoPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
+
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < 100; iter++)
+      {
+         icpQPInputToTest.reset();
+         previousSolution.set(RandomMatrices.createRandom(2, 1, random));
+
+         inputCalculator.computeCoPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
+
+         CommonOps.mult(rateWeight, previousSolution, Qx_p);
+
+         icpQPInputExpected.linearTerm.set(Qx_p);
+
+         CommonOps.multTransA(previousSolution, Qx_p, icpQPInputExpected.residualCost);
+         CommonOps.scale(0.5, icpQPInputExpected.residualCost);
+
+         assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAngularMomentumRateTask()
+   public void testCMPFeedbackRateTask()
    {
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+      indexHandler.computeProblemSize();
+
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
+      ICPQPInput icpQPInputEmpty = new ICPQPInput(2);
       ICPQPInput icpQPInputExpected = new ICPQPInput(2);
 
+      // test without cmp, which should be really easy
+      DenseMatrix64F rateWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(rateWeight);
+      CommonOps.scale(2.0, rateWeight);
+
+      DenseMatrix64F previousSolution = new DenseMatrix64F(2, 1);
+      previousSolution.set(0, 0, 0.5);
+      previousSolution.set(1, 0, 0.1);
+
+      icpQPInputExpected.quadraticTerm.set(rateWeight);
+
+      DenseMatrix64F Qx_p = new DenseMatrix64F(2, 1);
+      CommonOps.mult(rateWeight, previousSolution, Qx_p);
+
+      icpQPInputExpected.linearTerm.set(Qx_p);
+
+      CommonOps.multTransA(previousSolution, Qx_p, icpQPInputExpected.residualCost);
+      CommonOps.scale(0.5, icpQPInputExpected.residualCost);
+
+      inputCalculator.computeCMPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
+
+      assertInputEquals(icpQPInputEmpty, icpQPInputToTest, epsilon);
+
+      indexHandler.setHasCMPFeedbackTask(true);
+      indexHandler.computeProblemSize();
+
+      inputCalculator.computeCMPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
+
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
+
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < 100; iter++)
+      {
+         icpQPInputToTest.reset();
+         previousSolution.set(RandomMatrices.createRandom(2, 1, random));
+
+         inputCalculator.computeCoPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
+
+         CommonOps.mult(rateWeight, previousSolution, Qx_p);
+
+         icpQPInputExpected.linearTerm.set(Qx_p);
+
+         CommonOps.multTransA(previousSolution, Qx_p, icpQPInputExpected.residualCost);
+         CommonOps.scale(0.5, icpQPInputExpected.residualCost);
+
+         assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFeedbackRateTask()
+   {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      DenseMatrix64F minimizationWeight = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(minimizationWeight);
-      CommonOps.scale(2.0, minimizationWeight);
+      ICPQPInput icpQPInputToTestWithoutCMP = new ICPQPInput(2);
+      ICPQPInput icpQPInputToTestWithCMP = new ICPQPInput(4);
+      ICPQPInput icpQPInputWithoutCMP = new ICPQPInput(2);
+      ICPQPInput icpQPInputWithCMP = new ICPQPInput(4);
 
-      CommonOps.setIdentity(icpQPInputExpected.quadraticTerm);
-      CommonOps.scale(2.0, icpQPInputExpected.quadraticTerm);
+      // test without cmp, which should be really easy
+      DenseMatrix64F rateWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(rateWeight);
+      CommonOps.scale(2.0, rateWeight);
 
-      inputCalculator.computeCMPFeedbackTask(icpQPInputToTest, minimizationWeight);
+      DenseMatrix64F previousCoPSolution = new DenseMatrix64F(2, 1);
+      previousCoPSolution.set(0, 0, 0.5);
+      previousCoPSolution.set(1, 0, 0.1);
+      DenseMatrix64F previousCMPSolution = new DenseMatrix64F(2, 1);
+      previousCMPSolution.set(0, 0, 0.3);
+      previousCMPSolution.set(1, 0, 0.7);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      DenseMatrix64F previousSolution = new DenseMatrix64F(2, 1);
+      CommonOps.add(previousCMPSolution, previousCoPSolution, previousSolution);
 
-      // TODO add the objective
+      icpQPInputWithoutCMP.quadraticTerm.set(rateWeight);
+      MatrixTools.setDiagonal(icpQPInputWithCMP.quadraticTerm, 2.0);
+
+      DenseMatrix64F Qx_p = new DenseMatrix64F(2, 1);
+      CommonOps.mult(rateWeight, previousCoPSolution, Qx_p);
+
+      icpQPInputWithoutCMP.linearTerm.set(Qx_p);
+
+      CommonOps.mult(rateWeight, previousSolution, Qx_p);
+
+      icpQPInputWithCMP.linearTerm.set(0, 0, Qx_p.get(0, 0));
+      icpQPInputWithCMP.linearTerm.set(1, 0, Qx_p.get(1, 0));
+      icpQPInputWithCMP.linearTerm.set(2, 0, Qx_p.get(0, 0));
+      icpQPInputWithCMP.linearTerm.set(3, 0, Qx_p.get(1, 0));
+
+      CommonOps.mult(rateWeight, previousCoPSolution, Qx_p);
+
+      CommonOps.multAddTransA(previousCoPSolution, Qx_p, icpQPInputWithoutCMP.residualCost);
+      CommonOps.scale(0.5, icpQPInputWithoutCMP.residualCost);
+
+      icpQPInputWithCMP.quadraticTerm.set(0, 2, 2.0);
+      icpQPInputWithCMP.quadraticTerm.set(1, 3, 2.0);
+      icpQPInputWithCMP.quadraticTerm.set(2, 0, 2.0);
+      icpQPInputWithCMP.quadraticTerm.set(3, 1, 2.0);
+
+      inputCalculator.computeFeedbackRateTask(icpQPInputToTestWithoutCMP, rateWeight, previousCoPSolution);
+
+      assertInputEquals(icpQPInputWithoutCMP, icpQPInputToTestWithoutCMP, epsilon);
+
+      CommonOps.mult(rateWeight, previousSolution, Qx_p);
+      CommonOps.multAddTransA(previousSolution, Qx_p, icpQPInputWithCMP.residualCost);
+      CommonOps.scale(0.5, icpQPInputWithCMP.residualCost);
+
+      indexHandler.setHasCMPFeedbackTask(true);
+      indexHandler.computeProblemSize();
+
+      inputCalculator.computeFeedbackRateTask(icpQPInputToTestWithCMP, rateWeight, previousSolution);
+
+      assertInputEquals(icpQPInputWithCMP, icpQPInputToTestWithCMP, epsilon);
+
+      // run the actual test on the cost with zero previous solution.
+
+      icpQPInputToTestWithCMP.reset();
+      previousSolution.zero();
+      inputCalculator.computeFeedbackRateTask(icpQPInputToTestWithCMP, rateWeight, previousSolution);
+
+      DenseMatrix64F zeroLinear = new DenseMatrix64F(4, 1);
+      JUnitTools.assertMatrixEquals(icpQPInputToTestWithCMP.linearTerm, zeroLinear, epsilon);
+      zeroLinear.reshape(1, 1);
+      JUnitTools.assertMatrixEquals(icpQPInputToTestWithCMP.residualCost, zeroLinear, epsilon);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F solution = RandomMatrices.createRandom(4, 1, random);
+      DenseMatrix64F compositeSolution = new DenseMatrix64F(2, 1);
+      compositeSolution.set(0, 0, solution.get(0, 0) + solution.get(2, 0));
+      compositeSolution.set(1, 0, solution.get(1, 0) + solution.get(3, 0));
+
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(2, 1);
+      DenseMatrix64F expectedCost = new DenseMatrix64F(1, 1);
+
+      CommonOps.mult(rateWeight, compositeSolution, tempMatrix);
+      CommonOps.multTransA(compositeSolution, tempMatrix, expectedCost);
+      CommonOps.scale(0.5, expectedCost);
+
+
+      JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+
+
+
+      // run the actual test on the cost with non-zero previous solution.
+
+      icpQPInputToTestWithCMP.reset();
+      previousSolution.set(RandomMatrices.createRandom(4, 1, random));
+      DenseMatrix64F compositePreviousSolution = new DenseMatrix64F(2, 1);
+      compositePreviousSolution.set(0, 0, previousSolution.get(0, 0) + previousSolution.get(2, 0));
+      compositePreviousSolution.set(1, 0, previousSolution.get(1, 0) + previousSolution.get(3, 0));
+
+      inputCalculator.computeFeedbackRateTask(icpQPInputToTestWithCMP, rateWeight, compositePreviousSolution);
+
+      solution = RandomMatrices.createRandom(4, 1, random);
+      compositeSolution = new DenseMatrix64F(2, 1);
+      compositeSolution.set(0, 0, solution.get(0, 0) + solution.get(2, 0));
+      compositeSolution.set(1, 0, solution.get(1, 0) + solution.get(3, 0));
+
+      tempMatrix = new DenseMatrix64F(2, 1);
+      expectedCost = new DenseMatrix64F(1, 1);
+
+      DenseMatrix64F delta = new DenseMatrix64F(4, 1);
+      DenseMatrix64F compositeDelta = new DenseMatrix64F(2, 1);
+      CommonOps.subtract(solution, previousSolution, delta);
+      CommonOps.subtract(compositeSolution, compositePreviousSolution, compositeDelta);
+
+
+      CommonOps.mult(rateWeight, compositeDelta, tempMatrix);
+      CommonOps.multTransA(compositeDelta, tempMatrix, expectedCost);
+      CommonOps.scale(0.5, expectedCost);
+
+
+      JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+   }
+
+   private static DenseMatrix64F computeCost(ICPQPInput icpqpInput, DenseMatrix64F solution)
+   {
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(solution.numRows, 1);
+      DenseMatrix64F cost = new DenseMatrix64F(1, 1);
+
+      CommonOps.mult(icpqpInput.quadraticTerm, solution, tempMatrix);
+      CommonOps.multTransA(solution, tempMatrix, cost);
+      CommonOps.scale(0.5, cost);
+
+      CommonOps.multAddTransA(-1.0, icpqpInput.linearTerm, solution, cost);
+      CommonOps.addEquals(cost, icpqpInput.residualCost);
+
+      return cost;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -222,7 +415,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeFootstepTask(0, icpQPInputToTest, footstepWeight, footstepObjective);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
 
       DenseMatrix64F footstepObjective1 = new DenseMatrix64F(2, 1);
       DenseMatrix64F footstepObjective2 = new DenseMatrix64F(2, 1);
@@ -271,7 +464,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(footstepObjective, Qx_p, icpQPInputExpected.residualCost);
       CommonOps.scale(0.5, icpQPInputExpected.residualCost);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -304,7 +497,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeFootstepRateTask(0, icpQPInputToTest, footstepWeight, footstepObjective);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
 
       // test multiple footsteps
       DenseMatrix64F footstepObjective1 = new DenseMatrix64F(2, 1);
@@ -354,7 +547,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(footstepObjective, Qx_p, icpQPInputExpected.residualCost);
       CommonOps.scale(0.5, icpQPInputExpected.residualCost);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
+      assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1309,9 +1502,9 @@ public class ICPQPInputCalculatorTest
       CommonOps.addEquals(linearExpected, feedbackRateTask.linearTerm);
       CommonOps.addEquals(scalarExpected, feedbackRateTask.residualCost);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1367,9 +1560,9 @@ public class ICPQPInputCalculatorTest
       linearExpected.set(dynamicsTask.linearTerm);
       scalarExpected.set(dynamicsTask.residualCost);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1404,9 +1597,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.setMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       CommonOps.addEquals(scalarExpected, angularMomentumTask.residualCost);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1488,9 +1681,9 @@ public class ICPQPInputCalculatorTest
       scalarExpected.set(footstepTask.residualCost);
       CommonOps.addEquals(scalarExpected, footstepRateTask.residualCost);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1538,9 +1731,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, angularMomentumTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1609,9 +1802,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, feedbackTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1680,9 +1873,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRateTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRateTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1783,9 +1976,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRateTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRateTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1900,9 +2093,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, angularMomentumTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
+      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+      JUnitTools.assertMatrixEquals(linearExpected, linear, epsilon);
+      JUnitTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1943,5 +2136,12 @@ public class ICPQPInputCalculatorTest
          JUnitTools.assertMatrixEquals(errorExpected, errorToTest, epsilon);
       }
 
+   }
+
+   private static void assertInputEquals(ICPQPInput inputA, ICPQPInput inputB, double tol)
+   {
+      JUnitTools.assertMatrixEquals("Quadratic terms aren't equal.", inputA.quadraticTerm, inputB.quadraticTerm, tol);
+      JUnitTools.assertMatrixEquals("Linear terms aren't equal.", inputA.linearTerm, inputB.linearTerm, tol);
+      JUnitTools.assertMatrixEquals("Residual terms aren't equal.", inputA.residualCost, inputB.residualCost, tol);
    }
 }
