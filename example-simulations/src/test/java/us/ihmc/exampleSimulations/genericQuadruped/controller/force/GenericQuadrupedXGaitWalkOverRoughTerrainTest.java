@@ -50,7 +50,7 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
       super.testWalkingOverConsecutiveRamps();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 2000000)
    public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
    {
