@@ -25,7 +25,8 @@ public class MovingZUpFrameTest
 {
    private static final double EPSILON = 1.0e-7;
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 1000)
    public void testYawShortcut() throws Exception
    {
       Random random = new Random(5646);
@@ -78,7 +79,8 @@ public class MovingZUpFrameTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 1000)
    public void testYawRateShortcut()
    {
       Random random = new Random(234523);
