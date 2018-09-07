@@ -48,8 +48,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       return current_alignment - initial_alignment;
    }
@@ -75,10 +73,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getDelayTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -94,10 +88,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
           throw new RuntimeException("finger_motor_names field exceeds the maximum length");
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
-      if(data.getDelayTimes().size() <= 100)
-      cdr.write_type_e(data.getDelayTimes());else
-          throw new RuntimeException("delay_times field exceeds the maximum length");
-
    }
 
    public static void read(controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -108,7 +98,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
       	
       cdr.read_type_e(data.getFingerMotorNames());	
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectory(), cdr);	
-      cdr.read_type_e(data.getDelayTimes());	
 
    }
 
@@ -120,7 +109,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
       ser.write_type_e("finger_motor_names", data.getFingerMotorNames());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
-      ser.write_type_e("delay_times", data.getDelayTimes());
    }
 
    @Override
@@ -131,7 +119,6 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
       ser.read_type_e("finger_motor_names", data.getFingerMotorNames());
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
-      ser.read_type_e("delay_times", data.getDelayTimes());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage src, controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage dest)
