@@ -99,6 +99,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       {
          T key = controlledFingerJoints.get(i);
          trajectoryGenerators.get(key).clear();
+         trajectoryGenerators.get(key).appendWaypoint(0.0, desiredQs.get(key).getValue(), 0.0);
          TDoubleArrayList wayPointPositions = this.wayPointPositions.get(key);
          TDoubleArrayList wayPointTimes = this.wayPointTimes.get(key);
          for (int j = 0; j < wayPointPositions.size(); j++)
