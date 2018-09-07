@@ -191,7 +191,7 @@ public class ICPQPInputCalculatorTest
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
       ICPQPInput icpQPInputEmpty = new ICPQPInput(2);
-      ICPQPInput icpQPInputExpected = new ICPQPInput(2);
+      ICPQPInput icpQPInputExpected = new ICPQPInput(4);
 
       // test without cmp, which should be really easy
       DenseMatrix64F rateWeight = new DenseMatrix64F(2, 2);
@@ -202,12 +202,14 @@ public class ICPQPInputCalculatorTest
       previousSolution.set(0, 0, 0.5);
       previousSolution.set(1, 0, 0.1);
 
-      icpQPInputExpected.quadraticTerm.set(rateWeight);
+      icpQPInputExpected.quadraticTerm.set(2, 2, rateWeight.get(0, 0));
+      icpQPInputExpected.quadraticTerm.set(3, 3, rateWeight.get(1, 1));
 
       DenseMatrix64F Qx_p = new DenseMatrix64F(2, 1);
       CommonOps.mult(rateWeight, previousSolution, Qx_p);
 
-      icpQPInputExpected.linearTerm.set(Qx_p);
+      icpQPInputExpected.linearTerm.set(2, 0, Qx_p.get(0, 0));
+      icpQPInputExpected.linearTerm.set(3, 0, Qx_p.get(1, 0));
 
       CommonOps.multTransA(previousSolution, Qx_p, icpQPInputExpected.residualCost);
       CommonOps.scale(0.5, icpQPInputExpected.residualCost);
@@ -219,6 +221,8 @@ public class ICPQPInputCalculatorTest
       indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.computeProblemSize();
 
+      icpQPInputToTest = new ICPQPInput(4);
+
       inputCalculator.computeCMPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
 
       assertInputEquals(icpQPInputExpected, icpQPInputToTest, epsilon);
@@ -229,11 +233,12 @@ public class ICPQPInputCalculatorTest
          icpQPInputToTest.reset();
          previousSolution.set(RandomMatrices.createRandom(2, 1, random));
 
-         inputCalculator.computeCoPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
+         inputCalculator.computeCMPFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
 
          CommonOps.mult(rateWeight, previousSolution, Qx_p);
 
-         icpQPInputExpected.linearTerm.set(Qx_p);
+         icpQPInputExpected.linearTerm.set(2, 0, Qx_p.get(0, 0));
+         icpQPInputExpected.linearTerm.set(3, 0, Qx_p.get(1, 0));
 
          CommonOps.multTransA(previousSolution, Qx_p, icpQPInputExpected.residualCost);
          CommonOps.scale(0.5, icpQPInputExpected.residualCost);
