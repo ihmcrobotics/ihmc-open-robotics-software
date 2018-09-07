@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
+import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -339,6 +340,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.scale(0.5, expectedCost);
 
       JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+      Assert.assertEquals(expectedCost.get(0, 0), icpQPInputToTestWithCMP.computeCost(solution), epsilon);
 
       // run the actual test on the cost with non-zero previous solution.
 
@@ -368,22 +370,9 @@ public class ICPQPInputCalculatorTest
       CommonOps.scale(0.5, expectedCost);
 
       JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+      Assert.assertEquals(expectedCost.get(0, 0), icpQPInputToTestWithCMP.computeCost(solution), epsilon);
    }
 
-   private static DenseMatrix64F computeCost(ICPQPInput icpqpInput, DenseMatrix64F solution)
-   {
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(solution.numRows, 1);
-      DenseMatrix64F cost = new DenseMatrix64F(1, 1);
-
-      CommonOps.mult(icpqpInput.quadraticTerm, solution, tempMatrix);
-      CommonOps.multTransA(solution, tempMatrix, cost);
-      CommonOps.scale(0.5, cost);
-
-      CommonOps.multAddTransA(-1.0, icpqpInput.linearTerm, solution, cost);
-      CommonOps.addEquals(cost, icpqpInput.residualCost);
-
-      return cost;
-   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -2212,5 +2201,21 @@ public class ICPQPInputCalculatorTest
       JUnitTools.assertMatrixEquals("Quadratic terms aren't equal.", inputA.quadraticTerm, inputB.quadraticTerm, tol);
       JUnitTools.assertMatrixEquals("Linear terms aren't equal.", inputA.linearTerm, inputB.linearTerm, tol);
       JUnitTools.assertMatrixEquals("Residual terms aren't equal.", inputA.residualCost, inputB.residualCost, tol);
+   }
+
+
+   private static DenseMatrix64F computeCost(ICPQPInput icpqpInput, DenseMatrix64F solution)
+   {
+      DenseMatrix64F tempMatrix = new DenseMatrix64F(solution.numRows, 1);
+      DenseMatrix64F cost = new DenseMatrix64F(1, 1);
+
+      CommonOps.mult(icpqpInput.quadraticTerm, solution, tempMatrix);
+      CommonOps.multTransA(solution, tempMatrix, cost);
+      CommonOps.scale(0.5, cost);
+
+      CommonOps.multAddTransA(-1.0, icpqpInput.linearTerm, solution, cost);
+      CommonOps.addEquals(cost, icpqpInput.residualCost);
+
+      return cost;
    }
 }
