@@ -12,7 +12,6 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -60,7 +59,6 @@ public class ValkyrieFingerSetController implements RobotController
       registry = new YoVariableRegistry(sidePrefix + name);
 
       mapJointsAndVariables(gains);
-
       fingerSetTrajectoryGenerator = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class, robotSide, yoTime,
                                                                                                        desiredAngles, registry);
 
@@ -183,8 +181,8 @@ public class ValkyrieFingerSetController implements RobotController
       case STOP:
          for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
             fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName,
-                                                         fingerStateEstimator.getFingerJointTransmissionScale(robotSide,
-                                                                                                              fingerMotorName.getCorrespondingJointName(1)));
+                                                         fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide,
+                                                                                                               fingerMotorName.getCorrespondingJointName(1)));
          break;
 
       default:
@@ -205,8 +203,8 @@ public class ValkyrieFingerSetController implements RobotController
          if (indexOfTrajectory == -1)
          {
             fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName,
-                                                         fingerStateEstimator.getFingerJointTransmissionScale(robotSide,
-                                                                                                              fingerMotorName.getCorrespondingJointName(1)));
+                                                         fingerStateEstimator.getMotorBasedFingerJointPosition(robotSide,
+                                                                                                               fingerMotorName.getCorrespondingJointName(1)));
          }
          else
          {
