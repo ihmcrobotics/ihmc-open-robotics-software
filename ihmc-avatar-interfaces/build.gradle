@@ -22,35 +22,37 @@ testSuites {
 }
 
 mainDependencies {
+   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
+   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "160414"
+   compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
+   compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
+   compile group: "org.ejml", name: "core", version: "0.30"
+   compile group: "org.ejml", name: "dense64", version: "0.30"
+   compile group: "org.boofcv", name: "geo", version: "0.24.1"
+   compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
+   compile group: "org.ros.rosjava_messages", name: "geometry_msgs", version: "1.11.7"
+   compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
+   compile group: "com.github.quickhull3d", name: "quickhull3d", version: "1.0.0"
+   compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
+   compile group: "org.ros.rosjava_messages", name: "dynamic_reconfigure", version: "1.5.38"
+   compile group: "org.ros.rosjava_messages", name: "trajectory_msgs", version: "1.11.7"
+   compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
+   compile group: "org.reflections", name: "reflections", version: "0.9.10"
+
+   compile group: "us.ihmc", name: "IHMCRealtime", version: "1.1.8"
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
-   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
-   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
-   compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
-   compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
-   compile group: 'org.ejml', name: 'core', version: '0.30'
-   compile group: 'org.ejml', name: 'dense64', version: '0.30'
-   compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
-   compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
-   compile group: 'org.ros.rosjava_messages', name: 'geometry_msgs', version: '1.11.7'
-   compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
-   compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
-   compile group: 'org.ros.rosjava_messages', name: 'sensor_msgs', version: '1.11.7'
-   compile group: 'org.ros.rosjava_messages', name: 'dynamic_reconfigure', version: '1.5.38'
-   compile group: 'org.ros.rosjava_messages', name: 'trajectory_msgs', version: '1.11.7'
-   compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
-   compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
-   compile group: 'us.ihmc', name: 'robot-environment-awareness', version: "source"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.2"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
+   compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
@@ -61,7 +63,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
@@ -71,8 +72,9 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
+
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: "source"

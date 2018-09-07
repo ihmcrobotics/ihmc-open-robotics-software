@@ -8,7 +8,7 @@ buildscript {
    }
 }
 plugins {
-   id 'application'
+   id "application"
 }
 apply plugin: "us.ihmc.ihmc-build"
 
@@ -25,29 +25,31 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
-   compile group: 'net.wimpi', name: 'jamod', version: '1.2'
-   compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
+   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
+   compile group: "net.wimpi", name: "jamod", version: "1.2"
+   compile group: "commons-collections", name: "commons-collections", version: "3.2.1"
+
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
+
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
-applicationName = 'RobotiqControlThread'
-mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
+applicationName = "RobotiqControlThread"
+mainClassName = "us.ihmc.robotiq.control.RobotiqControlThread"
 
 applicationDistribution.from(file("IHMCNetworkParameters.ini")) {
    into "bin"

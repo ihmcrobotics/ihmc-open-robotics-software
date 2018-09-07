@@ -22,21 +22,23 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+   compile group: "org.apache.commons", name: "commons-lang3", version: "3.7"
    compile group: "commons-io", name: "commons-io", version: "2.6"
-   compile group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '4.3.0'
-   compile group: 'org.apache.lucene', name: 'lucene-core', version: '4.3.0'
-   compile group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.3.0'
-   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
-   compile group: 'com.google.guava', name: 'guava', version: '18.0'
+   compile group: "org.apache.lucene", name: "lucene-analyzers-common", version: "4.3.0"
+   compile group: "org.apache.lucene", name: "lucene-core", version: "4.3.0"
+   compile group: "org.apache.lucene", name: "lucene-queryparser", version: "4.3.0"
+   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "160414"
+   compile group: "com.google.guava", name: "guava", version: "18.0"
+
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
+
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

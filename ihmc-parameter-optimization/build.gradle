@@ -22,13 +22,14 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.20.0"
+
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.14"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

@@ -9,7 +9,7 @@ buildscript {
 }
 plugins {
    id "org.hidetake.ssh" version "2.9.0"
-   id 'application'
+   id "application"
 }
 apply plugin: "us.ihmc.ihmc-build"
 
@@ -26,22 +26,23 @@ testSuites {
 }
 
 mainDependencies {
+   compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
+   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
+   compile group: "net.sourceforge.jmatio", name: "jmatio", version: "1.0"
+
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.3.2'
-   compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
-   compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
-   compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.3'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.20.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "IHMCVideoCodecs", version: "2.1.3"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.4"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.3"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
 
@@ -49,7 +50,7 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 }
 
-mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer"
+mainClassName = hasProperty("mainClass") ? mainClass : "us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer"
 
 if (ihmc.isBuildRoot())
 {
@@ -64,11 +65,11 @@ if (ihmc.isBuildRoot())
       guiCaptureViewer {
          baseName = "IHMCGUICaptureViewer"
          contents {
-            into('lib') {
+            into("lib") {
                from project.configurations.runtime + jar.outputs.files
             }
 
-            into('bin') {
+            into("bin") {
                from viewerStartScripts
                include "IHMCGUICaptureViewer*"
             }
@@ -81,7 +82,7 @@ if (ihmc.isBuildRoot())
       def deployViewerPasswordValue = project.hasProperty("deployViewerPassword") ? project.deployViewerPassword : "invalid"
       def deployViewerHostValue = project.hasProperty("deployViewerHost") ? project.deployViewerHost : "invalid"
 
-      remotes.create('deployViewerTarget') {
+      remotes.create("deployViewerTarget") {
          host = deployViewerHostValue
          user = deployViewerUserValue
          password = deployViewerPasswordValue
