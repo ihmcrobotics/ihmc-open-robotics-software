@@ -94,29 +94,6 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       assertTrue(success);
    }
 
-   public void testBasicGrip() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-
-      controllerFullRobotModel = drcSimulationTestHelper.getRobot();
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      assertTrue(success);
-
-      RobotSide robotSide = RobotSide.RIGHT;
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.BASIC_GRIP));
-      double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-      double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
-
-      assertTrue(fingerJointQAtFinal > fingerJointQAtInitial);
-   }
-
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
