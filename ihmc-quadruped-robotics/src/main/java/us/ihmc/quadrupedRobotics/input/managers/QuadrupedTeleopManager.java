@@ -191,7 +191,7 @@ public class QuadrupedTeleopManager
       controllerStatePublisher.publish(controllerMessage);
    }
 
-   public void requestStopWalking()
+   private void requestStopWalking()
    {
       QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
       steppingMessage.setQuadrupedSteppingRequestedEvent(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
@@ -209,11 +209,18 @@ public class QuadrupedTeleopManager
       return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndQuadrupedControllerEnum() == QuadrupedControllerEnum.STEPPING.toByte());
    }
 
-   private boolean isInStepState()
+   public boolean isInStepState()
    {
       QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
       return isInBalancingState() && (steppingStateChangeMessage != null
             && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STEP.toByte());
+   }
+
+   public boolean isInStandState()
+   {
+      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+      return isInBalancingState() && (steppingStateChangeMessage != null
+            && steppingStateChangeMessage.getEndQuadrupedSteppingStateEnum() == QuadrupedSteppingStateEnum.STAND.toByte());
    }
 
    public boolean isWalking()

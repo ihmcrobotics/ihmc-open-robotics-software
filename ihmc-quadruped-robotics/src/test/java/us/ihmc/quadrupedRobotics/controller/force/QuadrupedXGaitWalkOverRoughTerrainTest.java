@@ -19,6 +19,8 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+import static junit.framework.TestCase.assertTrue;
+
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
@@ -138,8 +140,16 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), minimumXPositionAfterWalking));
       conductor.simulate();
 
-      stepTeleopManager.requestStopWalking();
-      conductor.addTimeLimit(variables.getYoTime(), 1.5);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.simulate();
+
+
+      stepTeleopManager.requestStanding();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.simulate();
+
+      assertTrue(stepTeleopManager.isInStandState());
    }
 }

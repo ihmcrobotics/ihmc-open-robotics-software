@@ -18,7 +18,13 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    private QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
 
-
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
+   @Test(timeout = 2000000)
+   public void testWalkingUpStaircase() throws IOException
+   {
+      xGaitSettings = new GenericQuadrupedXGaitSettings();
+      super.testWalkingUpStaircase();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 2000000)
