@@ -41,14 +41,6 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9)
    @Test(timeout = 230000)
-   public void testBasicGrip() throws SimulationExceededMaximumTimeException
-   {
-      super.testBasicGrip();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9)
-   @Test(timeout = 230000)
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
    {
       super.testCloseAndOpenFingers();
