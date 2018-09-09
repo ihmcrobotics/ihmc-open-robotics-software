@@ -12,11 +12,15 @@ public class ICPInequalityInput
    /** desired bounds for the constrained variable. */
    public final DenseMatrix64F bineq;
 
-   public ICPInequalityInput(int numberOfConstraints, int size)
-   {
-      Aineq = new DenseMatrix64F(numberOfConstraints, size);
-      bineq = new DenseMatrix64F(numberOfConstraints, 1);
+   private int numberOfConstraints;
+   private int numberOfVariables;
 
+   public ICPInequalityInput(int numberOfConstraints, int numberOfVariables)
+   {
+      this.numberOfConstraints = numberOfConstraints;
+      this.numberOfVariables = numberOfVariables;
+      Aineq = new DenseMatrix64F(numberOfConstraints, numberOfVariables);
+      bineq = new DenseMatrix64F(numberOfConstraints, 1);
    }
 
    /**
@@ -39,5 +43,24 @@ public class ICPInequalityInput
    {
       Aineq.reshape(numberOfConstraints, numberOfVariables);
       bineq.reshape(numberOfConstraints, 1);
+
+      this.numberOfConstraints = numberOfConstraints;
+      this.numberOfVariables = numberOfVariables;
+   }
+
+   /**
+    * Returns the number of constraints that this inequality input represents.
+    */
+   public int getNumberOfConstraints()
+   {
+      return numberOfConstraints;
+   }
+
+   /**
+    * Returns the number of variables that are required for this inequality constraint.
+    */
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables;
    }
 }

@@ -59,6 +59,9 @@ public class ICPInequalityInputTest
          Assert.assertEquals(newSize, input.Aineq.numCols);
          Assert.assertEquals(newNumberOfConstraints, input.bineq.numRows);
          Assert.assertEquals(1, input.bineq.numCols);
+
+         Assert.assertEquals(newNumberOfConstraints, input.getNumberOfConstraints());
+         Assert.assertEquals(newSize, input.getNumberOfVariables());
       }
    }
 
