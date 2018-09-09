@@ -57,28 +57,48 @@ public class ICPQPConstraintCalculator
    public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double maxXMagnitude, double maxYMagnitude)
    {
       inputToPack.reset();
-      inputToPack.reshape(4, indexHandler.getNumberOfFreeVariables());
 
-      // set CoP upper bound in the multiplier
-      inputToPack.Aineq.set(0, indexHandler.getCoPFeedbackIndex(), 1.0);
-      inputToPack.Aineq.set(1, indexHandler.getCoPFeedbackIndex() + 1, 1.0);
-      // set CoP lower bound in the multiplier
-      inputToPack.Aineq.set(2, indexHandler.getCoPFeedbackIndex(), -1.0);
-      inputToPack.Aineq.set(3, indexHandler.getCoPFeedbackIndex() + 1, -1.0);
-      if (indexHandler.hasCMPFeedbackTask())
-      {
-         // add in the CMP effects on the upper bound
-         inputToPack.Aineq.set(0, indexHandler.getCMPFeedbackIndex(), 1.0);
-         inputToPack.Aineq.set(1, indexHandler.getCMPFeedbackIndex() + 1, 1.0);
-         // add in the CMP effects on the lower bound
-         inputToPack.Aineq.set(2, indexHandler.getCMPFeedbackIndex(), -1.0);
-         inputToPack.Aineq.set(3, indexHandler.getCMPFeedbackIndex() + 1, -1.0);
+      int size = 0;
+      boolean hasX = Double.isFinite(maxXMagnitude);
+      boolean hasY = Double.isFinite(maxYMagnitude);
+      if (hasX)
+         size += 2;
+      if (hasY)
+         size += 2;
+
+      inputToPack.reshape(size, indexHandler.getNumberOfFreeVariables());
+
+      int offset = 0;
+      if (hasX)
+      { // set X CoP upper and lower bound in the multiplier
+         inputToPack.Aineq.set(0, indexHandler.getCoPFeedbackIndex(), 1.0);
+         inputToPack.Aineq.set(1, indexHandler.getCoPFeedbackIndex(), -1.0);
+
+         if (indexHandler.hasCMPFeedbackTask())
+         { // add in the CMP effects
+            inputToPack.Aineq.set(0, indexHandler.getCMPFeedbackIndex(), 1.0);
+            inputToPack.Aineq.set(1, indexHandler.getCMPFeedbackIndex(), -1.0);
+         }
+
+         inputToPack.bineq.set(0, maxXMagnitude);
+         inputToPack.bineq.set(1, maxXMagnitude);
+
+         offset += 2;
       }
 
-      inputToPack.bineq.set(0, maxXMagnitude);
-      inputToPack.bineq.set(1, maxYMagnitude);
-      inputToPack.bineq.set(2, maxXMagnitude);
-      inputToPack.bineq.set(3, maxYMagnitude);
+      if (hasY)
+      { // set X CoP upper and lower bound in the multiplier
+         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex() + 1, 1.0);
+         inputToPack.Aineq.set(offset + 1, indexHandler.getCoPFeedbackIndex() + 1, -1.0);
+
+         if (indexHandler.hasCMPFeedbackTask())
+         { // add in the CMP effects
+            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex() + 1, 1.0);
+            inputToPack.Aineq.set(offset + 1, indexHandler.getCMPFeedbackIndex() + 1, -1.0);
+         }
+         inputToPack.bineq.set(offset, maxYMagnitude);
+         inputToPack.bineq.set(offset + 1, maxYMagnitude);
+      }
    }
 
    /**
