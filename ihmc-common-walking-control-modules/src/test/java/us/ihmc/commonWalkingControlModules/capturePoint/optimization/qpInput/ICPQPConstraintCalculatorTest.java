@@ -77,7 +77,9 @@ public class ICPQPConstraintCalculatorTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
+         indexHandler.setHasCMPFeedbackTask(false);
          indexHandler.computeProblemSize();
+
          double maxXValue = Double.POSITIVE_INFINITY;
          double maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
@@ -119,6 +121,61 @@ public class ICPQPConstraintCalculatorTest
          inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
 
          assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+
+
+
+         indexHandler.setHasCMPFeedbackTask(true);
+         indexHandler.computeProblemSize();
+
+         maxXValue = Double.POSITIVE_INFINITY;
+         maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         expectedConstraint = new ICPInequalityInput(2, 4);
+
+         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(0, 3, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+         expectedConstraint.Aineq.set(1, 3, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+
+         maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(0, 2, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+         expectedConstraint.Aineq.set(1, 2, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+         expectedConstraint.reshape(0, 4);
+
+         maxXValue = Double.POSITIVE_INFINITY;
+         maxYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
       }
    }
 
@@ -126,7 +183,6 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraint()
    {
-      assert(false);
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
@@ -135,12 +191,20 @@ public class ICPQPConstraintCalculatorTest
       for (int iter = 0; iter < iters; iter++)
       {
          indexHandler.computeProblemSize();
-         double maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         double maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         double maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         double previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
          ICPInequalityInput expectedConstraint = new ICPInequalityInput(4, 2);
 
-         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         double maxXValue = previousXValue + controlDT * maxXRate;
+         double maxYValue = previousYValue + controlDT * maxYRate;
 
          testInequalityConstraint(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
       }
@@ -150,23 +214,31 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraintWithCMP()
    {
-      assert(false);
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
+      indexHandler.setHasCMPFeedbackTask(true);
 
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
          indexHandler.computeProblemSize();
-         double maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         double maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
 
-         ICPInequalityInput expectedConstraint = new ICPInequalityInput(4, 2);
+         double maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
-         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+         double previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
-         testInequalityConstraint(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
+         ICPInequalityInput expectedConstraint = new ICPInequalityInput(4, 4);
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         double maxXValue = previousXValue + controlDT * maxXRate;
+         double maxYValue = previousYValue + controlDT * maxYRate;
+
+         testInequalityConstraintWithCMP(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
       }
    }
 
@@ -174,8 +246,6 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxRateConstraintWithInfiniteLimits()
    {
-      assert(false);
-
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
@@ -183,17 +253,284 @@ public class ICPQPConstraintCalculatorTest
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
       {
+         indexHandler.setHasCMPFeedbackTask(false);
          indexHandler.computeProblemSize();
-         double maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         double maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
-         ICPInequalityInput expectedConstraint = new ICPInequalityInput(4, 2);
+         double controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
 
-         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+         double maxXRate = Double.POSITIVE_INFINITY;
+         double maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
-         testInequalityConstraint(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
+         double previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         double maxYValue = previousYValue + controlDT * maxYRate;
+
+         ICPInequalityInput expectedConstraint = new ICPInequalityInput(2, 2);
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = Double.POSITIVE_INFINITY;
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         maxYValue = previousYValue + controlDT * maxYRate;
+
+         expectedConstraint.reset();
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = Double.POSITIVE_INFINITY;
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         double maxXValue = previousXValue + controlDT * maxXRate;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = Double.POSITIVE_INFINITY;
+
+         maxXValue = previousXValue + controlDT * maxXRate;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+         expectedConstraint.reset();
+         expectedConstraint.reshape(0, 2);
+
+
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = Double.POSITIVE_INFINITY;
+         maxYRate = Double.POSITIVE_INFINITY;
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = Double.POSITIVE_INFINITY;
+         previousYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+
+
+
+         indexHandler.setHasCMPFeedbackTask(true);
+         indexHandler.computeProblemSize();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = Double.POSITIVE_INFINITY;
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         maxYValue = previousYValue + controlDT * maxYRate;
+
+         expectedConstraint = new ICPInequalityInput(2, 4);
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(0, 3, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+         expectedConstraint.Aineq.set(1, 3, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = Double.POSITIVE_INFINITY;
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         maxYValue = previousYValue + controlDT * maxYRate;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(0, 3, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+         expectedConstraint.Aineq.set(1, 3, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = Double.POSITIVE_INFINITY;
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         maxXValue = previousXValue + controlDT * maxXRate;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(0, 2, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+         expectedConstraint.Aineq.set(1, 2, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+
+         expectedConstraint.reset();
+
+         controlDT = RandomNumbers.nextDouble(random, 1e-6, 1e-2);
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = Double.POSITIVE_INFINITY;
+
+         maxXValue = previousXValue + controlDT * maxXRate;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(0, 2, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+         expectedConstraint.Aineq.set(1, 2, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+         expectedConstraint.reshape(0, 4);
+
+         maxXRate = Double.POSITIVE_INFINITY;
+         maxYRate = Double.POSITIVE_INFINITY;
+
+         previousXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         previousYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+
+         expectedConstraint.reset();
+
+         maxXRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYRate = RandomNumbers.nextDouble(random, 0.01, 10.0);
+
+         previousXValue = Double.POSITIVE_INFINITY;
+         previousYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackRateConstraint(inequalityConstraint, maxXRate, maxYRate, previousXValue, previousYValue, controlDT);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
       }
    }
+
 
    private static void testInequalityConstraint(ICPInequalityInput expectedConstraint, ICPInequalityInput inequalityConstraint, Random random, double maxXValue,
                                          double maxYValue, int iter)
