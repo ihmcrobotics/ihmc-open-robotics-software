@@ -70,8 +70,6 @@ public class ICPQPConstraintCalculatorTest
    @Test(timeout = 30000)
    public void testFeedbackMaxValueConstraintWithInfiniteLimits()
    {
-      assert(false);
-
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPConstraintCalculator inputCalculator = new ICPQPConstraintCalculator(indexHandler);
       ICPInequalityInput inequalityConstraint = new ICPInequalityInput(10, 10);
@@ -80,14 +78,47 @@ public class ICPQPConstraintCalculatorTest
       for (int iter = 0; iter < iters; iter++)
       {
          indexHandler.computeProblemSize();
-         double maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double maxXValue = Double.POSITIVE_INFINITY;
          double maxYValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
 
-         ICPInequalityInput expectedConstraint = new ICPInequalityInput(4, 2);
+         ICPInequalityInput expectedConstraint = new ICPInequalityInput(2, 2);
 
          inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
 
-         testInequalityConstraint(expectedConstraint, inequalityConstraint, random, maxXValue, maxYValue, iter);
+         expectedConstraint.Aineq.set(0, 1, 1);
+         expectedConstraint.Aineq.set(1, 1, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxYValue);
+         expectedConstraint.bineq.set(1, 0, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+
+         maxXValue = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         maxYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+
+         expectedConstraint.Aineq.set(0, 0, 1);
+         expectedConstraint.Aineq.set(1, 0, -1);
+
+         expectedConstraint.bineq.set(0, 0, maxXValue);
+         expectedConstraint.bineq.set(1, 0, maxXValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
+
+
+         expectedConstraint.reset();
+         expectedConstraint.reshape(0, 2);
+
+         maxXValue = Double.POSITIVE_INFINITY;
+         maxYValue = Double.POSITIVE_INFINITY;
+
+         inputCalculator.calculateMaxFeedbackMagnitudeConstraint(inequalityConstraint, maxXValue, maxYValue);
+
+         assertConstraintsEqual("", expectedConstraint, inequalityConstraint);
       }
    }
 
@@ -370,14 +401,14 @@ public class ICPQPConstraintCalculatorTest
       double randomYValue = RandomNumbers.nextDouble(random, -maxYValue + distanceToBoundEdge, maxYValue - distanceToBoundEdge);
       double randomYValue1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * randomYValue;
       double randomYValue2 = randomYValue - randomYValue1;
-      double xValueNearBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * maxXValue - 0.5 * distanceToBoundEdge;
-      double xValueNearBound2 = maxXValue - xValueNearBound1;
-      double yValueNearBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * maxYValue - 0.5 * distanceToBoundEdge;
-      double yValueNearBound2 = maxYValue - yValueNearBound1;
+      double xValueNearBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxXValue - distanceToBoundEdge);
+      double xValueNearBound2 = maxXValue - distanceToBoundEdge - xValueNearBound1;
+      double yValueNearBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxYValue - distanceToBoundEdge);
+      double yValueNearBound2 = maxYValue - distanceToBoundEdge - yValueNearBound1;
       double xValueAtBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * maxXValue;
       double xValueAtBound2 = maxXValue - xValueAtBound1;
       double yValueAtBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * maxYValue;
-      double yValueAtBound2 = maxXValue - yValueAtBound1;
+      double yValueAtBound2 = maxYValue - yValueAtBound1;
       double xValueJustPastBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxXValue + distanceToBoundEdge);
       double xValueJustPastBound2 = maxXValue + distanceToBoundEdge - xValueJustPastBound1;
       double yValueJustPastBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxYValue + distanceToBoundEdge);
@@ -385,7 +416,7 @@ public class ICPQPConstraintCalculatorTest
       double xValueWellPastBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxXValue + 3.0);
       double xValueWellPastBound2 = maxXValue + 3.0 - xValueWellPastBound1;
       double yValueWellPastBound1 = RandomNumbers.nextDouble(random, 0.0, 1.0) * (maxYValue + 3.0);
-      double yValueWellPastBound2 = maxXValue + 3.0 - yValueWellPastBound1;
+      double yValueWellPastBound2 = maxYValue + 3.0 - yValueWellPastBound1;
 
       // test inside
       DenseMatrix64F value = new DenseMatrix64F(4, 1);
