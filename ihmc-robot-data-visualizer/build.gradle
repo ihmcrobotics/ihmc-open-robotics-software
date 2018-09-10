@@ -30,7 +30,7 @@ mainDependencies {
    compile group: "com.martiansoftware", name: "jsap", version: "2.1"
    compile group: "net.sourceforge.jmatio", name: "jmatio", version: "1.0"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "IHMCVideoCodecs", version: "2.1.3"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"

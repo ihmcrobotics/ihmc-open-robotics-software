@@ -54,7 +54,7 @@ mainDependencies {
    compile "org.ros.rosjava_messages:geometry_msgs:1.11.9"
    compile "org.boofcv:recognition:0.24.1"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.2"

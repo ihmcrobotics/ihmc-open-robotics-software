@@ -29,7 +29,7 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"
