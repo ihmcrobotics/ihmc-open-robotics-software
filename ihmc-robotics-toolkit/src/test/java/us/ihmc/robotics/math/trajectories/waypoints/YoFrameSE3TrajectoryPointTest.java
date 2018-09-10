@@ -336,7 +336,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getPosition(), epsilon));
       Quaternion trajectoryPointQuaternion = new Quaternion(testedYoFrameSE3TrajectoryPoint.getOrientation());
       assertEquals(expectedOrientation.getReferenceFrame(), testedYoFrameSE3TrajectoryPoint.getOrientation().getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionEquals(expectedOrientation, trajectoryPointQuaternion, epsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedOrientation, trajectoryPointQuaternion, epsilon);
       assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon));
 
@@ -362,7 +362,7 @@ public class YoFrameSE3TrajectoryPointTest
       testedYoFrameSE3TrajectoryPoint.getAngularVelocity(actualAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
 
@@ -377,7 +377,7 @@ public class YoFrameSE3TrajectoryPointTest
       testedYoFrameSE3TrajectoryPoint.getAngularVelocity(actualFrameAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualFrameOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
 
@@ -392,7 +392,7 @@ public class YoFrameSE3TrajectoryPointTest
       testedYoFrameSE3TrajectoryPoint.getAngularVelocityIncludingFrame(actualFrameAngularVelocity);
 
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(actualFrameOrientation, epsilon));
+      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
