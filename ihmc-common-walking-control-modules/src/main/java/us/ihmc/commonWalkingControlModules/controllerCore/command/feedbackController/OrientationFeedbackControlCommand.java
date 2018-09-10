@@ -19,6 +19,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 /**
  * A {@code OrientationFeedbackControlCommand} can be used to request the
@@ -309,6 +310,23 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void setWeightForSolver(double weight)
    {
       spatialAccelerationCommand.setWeight(weight);
+   }
+
+   /**
+    * Sets the angular weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrix(WeightMatrix3D angularWeightMatrix)
+   {
+      spatialAccelerationCommand.setAngularPartOfWeightMatrix(angularWeightMatrix);
+      spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
    /**
