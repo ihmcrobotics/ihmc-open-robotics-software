@@ -334,6 +334,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       spatialAccelerationCommand.setLinearPartOfWeightMatrix(weightMatrix);
+      spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
    /**
