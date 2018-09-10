@@ -395,12 +395,10 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint.reset();
    }
 
-   public void resetPlanarRegionConstraint()
-   {
-      planarRegionConstraint.reset();
-      hasPlanarRegionConstraint = false;
-   }
-
+   /**
+    * Adds the polygon that is used to describe where the robot is allowed to step based on its kinematics. This constraint requires that the footstep lies in
+    * the convex hull of this polygon.
+    */
    public void addReachabilityPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
       if (polygon == null)
@@ -411,23 +409,46 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint.addPolygon(polygon);
    }
 
+   /**
+    * Sets the maximum allowable feedback magnitude in X and Y. This defines an inequality constraint on the sum of the feedback terms in the QP.
+    */
    public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
    {
       this.maxFeedbackXMagnitude = maximumFeedbackMagnitude.getX();
       this.maxFeedbackYMagnitude = maximumFeedbackMagnitude.getY();
    }
 
+   /**
+    * Sets the maximum allowable feedback rate in X and Y. This defines an inequality constraint on the sum of the feedback terms in the QP.
+    */
    public void setMaximumFeedbackRate(double maximumFeedbackRate, double controlDT)
    {
       this.maximumFeedbackRate = maximumFeedbackRate;
       this.controlDT = controlDT;
    }
 
+   /**
+    * Resets the planar region constraint on the upcoming footstep location. This constraint requires that the footstep lies in the convex hull of this polygon.
+    */
+   public void resetPlanarRegionConstraint()
+   {
+      planarRegionConstraint.reset();
+      hasPlanarRegionConstraint = false;
+   }
+
+   /**
+    * Adds the polygon that is used to describe where the robot is allowed to step based on terrain information. This constraint requires that the footstep lies
+    * in the convex hull of this polygon.
+    */
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon, double planarRegionDistanceFromEdge)
    {
       hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon, planarRegionDistanceFromEdge);
    }
 
+   /**
+    * Adds the polygon that is used to describe where the robot is allowed to step based on terrain information. This constraint requires that the footstep lies
+    * in the convex hull of this polygon.
+    */
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
    {
       if (convexPolygon == null)
@@ -1345,12 +1366,18 @@ public class ICPOptimizationQPSolver
       return numberOfIterations;
    }
 
-   public ConstraintToConvexRegion getCoPLocationConstraint()
+   /**
+    * Returns the location constraint on the center of pressure, formulated as an inequality constraint. Useful for testing purposes.
+    */
+   ConstraintToConvexRegion getCoPLocationConstraint()
    {
       return copLocationConstraint;
    }
 
-   public ConstraintToConvexRegion getCMPLocationConstraint()
+   /**
+    * Returns the location constraint on the CMP, formulated as an inequality constraint. Useful for testing purposes.
+    */
+   ConstraintToConvexRegion getCMPLocationConstraint()
    {
       return cmpLocationConstraint;
    }
