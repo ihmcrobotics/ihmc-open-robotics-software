@@ -51,15 +51,11 @@ module controller_msgs
         /**
          * Specifies the list of finger motor names that we want to control.
          */
-        sequence<octet> finger_motor_names;
+        sequence<octet, 5> finger_motor_names;
         /**
          * The indexing for the joints refers the list of finger motor names.
          */
         controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
-        /**
-         * The list of times for trajectory execution delay.
-         */
-        sequence<double> delay_times;
       };
     };
   };

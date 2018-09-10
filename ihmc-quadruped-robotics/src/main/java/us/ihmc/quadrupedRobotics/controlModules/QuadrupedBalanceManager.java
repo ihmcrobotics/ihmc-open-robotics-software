@@ -227,8 +227,11 @@ public class QuadrupedBalanceManager
       }
    }
 
-   private void initialize()
+
+   public void initializeForStanding()
    {
+      centerOfMassHeightManager.initialize();
+
       // update model
       centerOfMassHeightManager.update();
       linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
@@ -240,19 +243,16 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
-   }
 
-   public void initializeForStanding()
-   {
-      centerOfMassHeightManager.initialize();
-
-      initialize();
       dcmPlanner.initializeForStanding();
    }
 
    public void initializeForStepping()
    {
-      initialize();
+      // update model
+      centerOfMassHeightManager.update();
+      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), dcmPositionEstimate);
    }
 

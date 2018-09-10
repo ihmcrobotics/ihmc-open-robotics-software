@@ -35,18 +35,12 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
             * The indexing for the joints refers the list of finger motor names.
             */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
-   /**
-            * The list of times for trajectory execution delay.
-            */
-   public us.ihmc.idl.IDLSequence.Double  delay_times_;
 
    public ValkyrieHandFingerTrajectoryMessage()
    {
-      finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");
+      finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (5, "type_9");
 
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
-      delay_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
-
    }
 
    public ValkyrieHandFingerTrajectoryMessage(ValkyrieHandFingerTrajectoryMessage other)
@@ -63,7 +57,6 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
       finger_motor_names_.set(other.finger_motor_names_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
-      delay_times_.set(other.delay_times_);
    }
 
    /**
@@ -115,15 +108,6 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
    }
 
 
-   /**
-            * The list of times for trajectory execution delay.
-            */
-   public us.ihmc.idl.IDLSequence.Double  getDelayTimes()
-   {
-      return delay_times_;
-   }
-
-
    public static Supplier<ValkyrieHandFingerTrajectoryMessagePubSubType> getPubSubType()
    {
       return ValkyrieHandFingerTrajectoryMessagePubSubType::new;
@@ -148,8 +132,6 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.finger_motor_names_, other.finger_motor_names_, epsilon)) return false;
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.delay_times_, other.delay_times_, epsilon)) return false;
-
 
       return true;
    }
@@ -169,7 +151,6 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
       if (!this.finger_motor_names_.equals(otherMyClass.finger_motor_names_)) return false;
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
-      if (!this.delay_times_.equals(otherMyClass.delay_times_)) return false;
 
       return true;
    }
@@ -187,9 +168,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
       builder.append("finger_motor_names=");
       builder.append(this.finger_motor_names_);      builder.append(", ");
       builder.append("jointspace_trajectory=");
-      builder.append(this.jointspace_trajectory_);      builder.append(", ");
-      builder.append("delay_times=");
-      builder.append(this.delay_times_);
+      builder.append(this.jointspace_trajectory_);
       builder.append("}");
       return builder.toString();
    }

@@ -73,7 +73,19 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
    @ContinuousIntegrationTest(estimatedDuration = 33.7)
    @Test(timeout = 170000)
-   public void testTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   public void testSwingTrajectoryTouchdownSpeed() throws SimulationExceededMaximumTimeException
+   {
+      runTestTouchdownSpeed();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 33.7)
+   @Test(timeout = 170000)
+   public void testSwingTrajectoryTouchdownWithAdjustment() throws SimulationExceededMaximumTimeException
+   {
+      runTestTouchdownSpeed();
+   }
+
+   private void runTestTouchdownSpeed() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = setup(DRCObstacleCourseStartingLocation.DEFAULT);
 

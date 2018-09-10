@@ -332,7 +332,7 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    @Override
    public boolean hasMaxPositionError()
    {
-      return maxPositionError.isNaN();
+      return !maxPositionError.isNaN();
    }
 
    @Override
@@ -349,7 +349,7 @@ public class YoJointDesiredOutput extends JointDesiredOutputReadOnly
    @Override
    public boolean hasMaxVelocityError()
    {
-      return maxVelocityError.isNaN();
+      return !maxVelocityError.isNaN();
    }
 
    @Override
