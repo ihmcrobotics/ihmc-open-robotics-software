@@ -2,38 +2,31 @@ package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-
 import org.junit.After;
 import org.junit.Before;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
 public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final boolean DEBUG = false;
-   
+   private static final double epsilon = 0.05;
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    protected HumanoidFloatingRootJointRobot controllerFullRobotModel;
 
-   public abstract Packet<?> createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration);
+   public abstract Object createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration);
 
    public void testClose() throws SimulationExceededMaximumTimeException
    {
@@ -44,20 +37,18 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
       controllerFullRobotModel = drcSimulationTestHelper.getRobot();
 
-      ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.RIGHT;
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
-      double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
-      
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-      double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      assertTrue(fingerJointQAtFinal > fingerJointQAtInitial);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+         assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
    }
-   
+
    public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -67,56 +58,26 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
       controllerFullRobotModel = drcSimulationTestHelper.getRobot();
 
-      ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.RIGHT;
-      
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
-      double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
-      double fingerJointQAtStop = getTotalFingerJointQ(robotSide);
-      assertTrue(fingerJointQAtStop > fingerJointQAtInitial);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
-      double fingerJointQAtOpen = getTotalFingerJointQ(robotSide);
-      assertTrue(Math.abs(fingerJointQAtOpen - fingerJointQAtStop) < 1.0);
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-      double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
-      assertTrue(fingerJointQAtFinal < fingerJointQAtStop);
-      
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
-      assertTrue(success);
-   }
-
-   public void testBasicGrip() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-
-      controllerFullRobotModel = drcSimulationTestHelper.getRobot();
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      assertTrue(success);
-
-      RobotSide robotSide = RobotSide.RIGHT;
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.BASIC_GRIP));
-      double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
-      
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-      double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
-
-      assertTrue(fingerJointQAtFinal > fingerJointQAtInitial);
+      for (RobotSide robotSide : RobotSide.values)
+         assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN, epsilon);
    }
 
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
@@ -128,25 +89,24 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
       controllerFullRobotModel = drcSimulationTestHelper.getRobot();
 
-      ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.RIGHT;
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
-      double fingerJointQAtInitial = getTotalFingerJointQ(robotSide);
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
-      drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
-      double fingerJointQAtOpen = getTotalFingerJointQ(robotSide);
+      for (RobotSide robotSide : RobotSide.values)
+         assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
 
-      assertTrue(fingerJointQAtOpen > fingerJointQAtInitial);
+      for (RobotSide robotSide : RobotSide.values)
+         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-      double fingerJointQAtFinal = getTotalFingerJointQ(robotSide);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
-      assertTrue(fingerJointQAtFinal < fingerJointQAtOpen);
+      for (RobotSide robotSide : RobotSide.values)
+         assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN_FINGERS, epsilon);
    }
 
    @Before
@@ -172,27 +132,6 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   private double getTotalFingerJointQ(RobotSide robotSide)
-   {
-      double ret = 0.0;
 
-      ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      HumanoidJointNameMap jointNameMap = (HumanoidJointNameMap) drcSimulationTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
-      Joint wristJoint = drcSimulationTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
-      wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
-      fingerJoints.remove(0);
-
-      for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
-      {
-         double q = fingerJoint.getQYoVariable().getDoubleValue();
-         ret += q;
-         if (DEBUG)
-         {
-            PrintTools.debug(this, fingerJoint.getName() + " q : " + q);
-         }
-      }
-
-      return ret;
-   }
+   public abstract void assertDesiredFingerJoint(RobotSide robotSide, HandConfiguration handConfiguration, double epsilon);
 }

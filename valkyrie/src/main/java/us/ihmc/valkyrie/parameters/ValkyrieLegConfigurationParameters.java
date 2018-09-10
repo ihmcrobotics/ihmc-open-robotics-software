@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 
 public class ValkyrieLegConfigurationParameters extends LegConfigurationParameters
 {
@@ -12,14 +13,19 @@ public class ValkyrieLegConfigurationParameters extends LegConfigurationParamete
    }
 
    /** {@inheritDoc} */
-   public boolean attemptToStraightenLegs()
+   @Override
+   public LegConfigurationGains getBentLegGains()
    {
-      return false;
+      LegConfigurationGains gains = new LegConfigurationGains();
+      gains.setJointSpaceKp(runningOnRealRobot ? 40.0 : 150.0);
+      gains.setJointSpaceKd(6.0);
+
+      return gains;
    }
 
    /** {@inheritDoc} */
-   public double getBentLegPrivilegedConfigurationGain()
+   public boolean attemptToStraightenLegs()
    {
-      return runningOnRealRobot ? 40.0 : 100.0;
+      return false;
    }
 }

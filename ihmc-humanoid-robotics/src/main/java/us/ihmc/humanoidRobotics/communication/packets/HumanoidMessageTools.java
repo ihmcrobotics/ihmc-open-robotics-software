@@ -89,7 +89,6 @@ import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StateEstimatorModePacket;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.ValveLocationPacket;
 import controller_msgs.msg.dds.VehiclePosePacket;
 import controller_msgs.msg.dds.VideoPacket;
@@ -149,7 +148,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -300,36 +298,6 @@ public class HumanoidMessageTools
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.setRobotSide(robotSide.toByte());
       return message;
-   }
-
-   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
-                                                                                               double trajectoryTime, double[] desiredJointPositions,
-                                                                                               double[] executionDelayTimes)
-   {
-      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
-
-      message.setRobotSide(robotSide.toByte());
-
-      int dimension = valkyrieFingerMotorNames.length;
-
-      for (int i = 0; i < dimension; i++)
-         message.getFingerMotorNames().add(valkyrieFingerMotorNames[i]);
-
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
-
-      for (int i = 0; i < dimension; i++)
-         message.getDelayTimes().add(desiredJointPositions[i]);
-
-      return message;
-   }
-
-   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, double time, double desiredConfiguration,
-                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
-   {
-      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
-      messageToAppend.getDelayTimes().add(0.0);
-      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
-      jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
 
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)

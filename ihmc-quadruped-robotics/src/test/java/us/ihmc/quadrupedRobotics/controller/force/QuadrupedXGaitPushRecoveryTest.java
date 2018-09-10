@@ -74,9 +74,24 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public abstract double getWalkingSpeed();
+   public abstract double getStepDuration();
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 630000)
-   public void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
+   public void testWalkingForwardFastWithPush()
+   {
+      testWalkingWithPush(90.0, getWalkingSpeed());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 630000)
+   public void testScriptedWalkingForwardFastWithPush()
+   {
+      testScriptedWalkingWithPush(90.0, getWalkingSpeed(), getStepDuration());
+   }
+
+   private void testWalkingWithPush(double endPhaseShift, double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -104,9 +119,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.simulate();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 630000)
-   public void testScriptedWalkingWithPush(double endPhaseShift, double walkingSpeed, double stepDuration)
+   private void testScriptedWalkingWithPush(double endPhaseShift, double walkingSpeed, double stepDuration)
    {
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -114,7 +127,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       double stepLength = walkingSpeed * (2 * stepDuration);
       List<QuadrupedTimedStepMessage> steps = getSteps(endPhaseShift, stepLength, 1.0, 0.0, stepDuration, 10);
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
-      stepTeleopManager.pulishTimedStepListToController(message);
+      stepTeleopManager.publishTimedStepListToController(message);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

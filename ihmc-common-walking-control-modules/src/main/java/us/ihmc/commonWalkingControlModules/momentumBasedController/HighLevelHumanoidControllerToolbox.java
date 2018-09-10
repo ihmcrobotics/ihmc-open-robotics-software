@@ -668,6 +668,13 @@ public class HighLevelHumanoidControllerToolbox
    public void initialize()
    {
       update();
+
+      // This removes rate objectives from the inverse dynamics QP solver in case an old solution is around from a fall and the
+      // robot is reinitialized.
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactStates.get(robotSide).notifyContactStateHasChanged();
+      }
    }
 
    private void readWristSensorData()

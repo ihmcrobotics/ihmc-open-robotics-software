@@ -11,6 +11,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
@@ -20,6 +21,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -230,6 +232,13 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          SpineTrajectoryMessage message = new SpineTrajectoryMessage();
          double timeInMessage = timePerWaypoint;
 
+         if (msgIdx == 0)
+         {
+            // To make sure an initial point at the current desired is queued offset the very first trajectory point.
+            timeInMessage += RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
+            totalTime += RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
+         }
+
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
 
@@ -259,7 +268,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          if (msgIdx != 0)
          {
             message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-            message.getJointspaceTrajectory().getQueueingProperties().setPreviousMessageId((long) msgIdx);
+            message.getJointspaceTrajectory().getQueueingProperties().setPreviousMessageId(msgIdx);
          }
 
          messages[msgIdx] = message;

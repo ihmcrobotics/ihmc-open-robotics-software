@@ -48,6 +48,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    private double swingTime = 0.6;
    private double transferTime = 0.25;
 
+   private Double pushMagnitude;
+
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
    private PushRobotController pushRobotController;
@@ -55,6 +57,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      pushMagnitude = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -73,12 +76,19 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          drcSimulationTestHelper = null;
       }
 
+      pushMagnitude = null;
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   public void setPushMagnitude(double pushMagnitude)
+   {
+      this.pushMagnitude = pushMagnitude;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 38.9)
    @Test(timeout = 190000)
-   public void testPushLeftEarlySwing(double pushMagnitude) throws SimulationExceededMaximumTimeException
+   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
@@ -112,7 +122,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    @ContinuousIntegrationTest(estimatedDuration = 61.0)
    @Test(timeout = 300000)
-   public void testPushRightThenLeftMidSwing(double pushMagnitude) throws SimulationExceededMaximumTimeException
+   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 

@@ -28,10 +28,11 @@ public class CentroidalMomentumHandler
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumMatrixPart = new DenseMatrix64F(1, 1);
    private final SpatialForceVector centroidalMomentumRate;
+   private final Momentum centroidalMomentum;
 
    private final InverseDynamicsJoint[] jointsInOrder;
    private final DenseMatrix64F v;
-   private final Map<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
+   private final Map<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<>();
    private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
@@ -58,6 +59,7 @@ public class CentroidalMomentumHandler
       }
 
       centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
+      centroidalMomentum = new Momentum(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
 
       robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
@@ -155,6 +157,18 @@ public class CentroidalMomentumHandler
    {
       updateIfNeeded();
       return centroidalMomentumRate;
+   }
+
+   public void computeCentroidalMomentum(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointVelocities)
+   {
+      DenseMatrix64F centroidalMomentumMatrixPart = getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
+      CommonOps.mult(centroidalMomentumMatrixPart, jointVelocities, momentum);
+      centroidalMomentum.set(centerOfMassFrame, momentum);
+   }
+
+   public Momentum getCentroidalMomentum()
+   {
+      return centroidalMomentum;
    }
 
    public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateCommand momentumRateCommand)

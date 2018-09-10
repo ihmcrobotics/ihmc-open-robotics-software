@@ -89,7 +89,7 @@ public class ValkyrieFingerControlParameters
       {
          EnumMap<ValkyrieHandJointName, Double> closedDesiredDefinition = closedDesiredHandJointDefinitions.get(robotSide);
 
-         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, 1.5);
+         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, robotSide.negateIfLeftSide(1.5));
          closedDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch1, robotSide.negateIfLeftSide(1.5));
          closedDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch2, robotSide.negateIfLeftSide(1.5));
          closedDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch3, robotSide.negateIfLeftSide(1.5));

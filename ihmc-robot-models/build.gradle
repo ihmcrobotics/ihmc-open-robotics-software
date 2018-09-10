@@ -35,3 +35,12 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
 }
+
+visualizersDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("test")
+   compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.5"
+}

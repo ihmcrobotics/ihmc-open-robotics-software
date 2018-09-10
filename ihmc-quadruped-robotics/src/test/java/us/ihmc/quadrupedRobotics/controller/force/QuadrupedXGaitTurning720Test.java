@@ -89,6 +89,8 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }
+
+      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 370.6)
@@ -119,5 +121,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }
+
+      conductor.concludeTesting();
    }
 }

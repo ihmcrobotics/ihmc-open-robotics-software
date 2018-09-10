@@ -26,6 +26,15 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Specifies how long the controller must have been in the swing date (as a function of the swing duration) before it will allow step adjustment.
+    * By default, this is set to 0.0, meaning the controller can immediately adjust the desired step at the start of swing.
+    */
+   public double getFractionThroughSwingForAdjustment()
+   {
+      return 0.0;
+   }
+
+   /**
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
@@ -283,5 +292,40 @@ public abstract class ICPOptimizationParameters
    public boolean switchPlanarRegionConstraintsAutomatically()
    {
       return true;
+   }
+
+   /**
+    * The ICP controller has a phase in period for the step adjustment, that makes the step adjustment have a larger
+    * effect on the feedback controller than it would according to the dynamics at the beginning of the swing state.
+    * This is important to help avoid large adjustments at the beginning of swing.
+    *
+    * This variable is meant as the fraction of the swing state at which the "phase in" period should have ended.
+    */
+   public double getStepAdjustmentPhaseInFraction()
+   {
+      return 0.0;
+   }
+
+   /**
+    * <p>
+    * This term multiplies the footstep multiplier at the beginning of the swing state. It is then linearly ramped
+    * down over the course of the phase-in period, who's length is determined by {@link #getStepAdjustmentPhaseInFraction()}.
+    * </p>
+    *
+    * <p>
+    *    A value of 10 means that the step adjustment is 10 times as effective at the start of swing. This could also be
+    *    thought of as an ICP tracking error requiring only 10% of the same amount of step adjustment.
+    * </p>
+    *
+    * <p>
+    *    A higher value will result in significantly less step adjustment at the beginning of swing. This gives the CMP
+    *    feedback controller more time to correct the tracking errors. However, too large of a value means that a lot of
+    *    the step adjustment action has to be performed at the end of swing, which may result in really high foot speeds,
+    *    which can be difficult to track.
+    * </p>
+    */
+   public double getPhaseInScalar()
+   {
+      return 10.0;
    }
 }

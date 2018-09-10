@@ -48,6 +48,8 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
+   public static final double timeEpsilonForInitialPoint = 0.05;
+
    public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -470,7 +472,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
@@ -575,7 +577,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
@@ -666,7 +668,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          clear();
          trajectoryFrame = command.getTrajectoryFrame();
-         if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+         if (command.getTrajectoryPoint(0).getTime() > timeEpsilonForInitialPoint)
          {
             queueInitialPoint(initialPose);
          }
