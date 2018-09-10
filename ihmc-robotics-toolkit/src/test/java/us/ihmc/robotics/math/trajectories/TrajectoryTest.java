@@ -277,4 +277,35 @@ public class TrajectoryTest
       assert (MathTools.epsilonCompare(2.0 * traj.getCoefficient(2), dervTraj.getCoefficient(1), 1));
       assert (MathTools.epsilonCompare(3.0 * traj.getCoefficient(3), dervTraj.getCoefficient(2), 1));
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testQuinticTrajectory()
+   {
+      Trajectory quinticTrajectory = new Trajectory(-10.0, 10.0, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
+
+      quinticTrajectory.setQuintic(0.0, 1.0,    1.0, 2.0, 3.0,     4.0, 5.0, 6.0);
+
+      quinticTrajectory.compute(0.0);
+      assertEquals(quinticTrajectory.getPosition(), 1.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), 2.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 3.0, 1e-7);
+
+      quinticTrajectory.compute(1.0);
+      assertEquals(quinticTrajectory.getPosition(), 4.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), 5.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(), 6.0, 1e-7);
+
+      quinticTrajectory.setQuintic(-1.0, 1.0,  1.0, -2.0, 3.0,     -4.0, -5.0, 6.0);
+
+      quinticTrajectory.compute(-1.0);
+      assertEquals(quinticTrajectory.getPosition(),  1.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(), -2.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(),  3.0, 1e-7);
+
+      quinticTrajectory.compute(1.0);
+      assertEquals(quinticTrajectory.getPosition(),  -4.0, 1e-7);
+      assertEquals(quinticTrajectory.getVelocity(),  -5.0, 1e-7);
+      assertEquals(quinticTrajectory.getAcceleration(),   6.0, 1e-7);
+   }
 }
