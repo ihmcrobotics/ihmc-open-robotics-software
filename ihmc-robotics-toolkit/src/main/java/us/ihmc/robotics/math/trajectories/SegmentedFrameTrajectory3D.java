@@ -107,9 +107,6 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
 
    public List<FrameTrajectory3D> getSegments()
    {
-      Collection<FrameTrajectory3D> c = new ArrayList<FrameTrajectory3D>();
-      Collections.unmodifiableCollection(null);
-
       return segments;
    }
 
