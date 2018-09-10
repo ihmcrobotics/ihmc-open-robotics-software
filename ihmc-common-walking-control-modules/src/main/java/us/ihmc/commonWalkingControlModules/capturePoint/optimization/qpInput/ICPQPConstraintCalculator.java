@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 
@@ -32,18 +31,6 @@ public class ICPQPConstraintCalculator
    public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, FrameTuple2DReadOnly maxMagnitudes)
    {
       calculateMaxFeedbackMagnitudeConstraint(inputToPack, maxMagnitudes.getX(), maxMagnitudes.getY());
-   }
-
-   /**
-    * Computes the inequality constraint for the total feedback (CoP and CMP, if available). This returns a set of 4
-    * inequality constraints.
-    *
-    * @param inputToPack the object in which to store the inequality constraint.
-    * @param maxMagnitudes the maximum feedback magnitudes in X and Y.
-    */
-   public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, DenseMatrix64F maxMagnitudes)
-   {
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, maxMagnitudes.get(0), maxMagnitudes.get(1));
    }
 
    /**
@@ -99,6 +86,21 @@ public class ICPQPConstraintCalculator
          inputToPack.bineq.set(offset, maxYMagnitude);
          inputToPack.bineq.set(offset + 1, maxYMagnitude);
       }
+   }
+
+   /**
+    * Computes the inequality constraint for the to limit the total feedback rate (CoP and CMP, if available). This returns a set of 4
+    * inequality constraints.
+    *
+    * @param inputToPack the object in which to store the inequality constraint.
+    * @param maxRate the maximum feedback rate in X and Y.
+    * @param previousValue the value of the previous feedback term in X and Y.
+    * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
+    */
+   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, FrameTuple2DReadOnly maxRate, FrameTuple2DReadOnly previousValue,
+                                                  double controlDT)
+   {
+      calculateMaxFeedbackRateConstraint(inputToPack, maxRate.getX(), maxRate.getY(), previousValue.getX(), previousValue.getY(), controlDT);
    }
 
    /**
