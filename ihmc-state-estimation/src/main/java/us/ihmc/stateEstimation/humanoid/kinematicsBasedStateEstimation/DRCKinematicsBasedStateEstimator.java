@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -48,6 +49,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
+   private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = true;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -62,6 +64,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
+
+   private final EstimatedFromTorquesWrenchVisualizer estimatedWrenchVisualizer;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -139,7 +143,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT, stateEstimatorParameters, registry);
-      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, robotMotionStatusFromController, stateEstimatorParameters, registry);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, robotMotionStatusFromController, stateEstimatorParameters,
+                                                      registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
@@ -186,6 +191,23 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          operatingMode.set(StateEstimatorMode.FROZEN);
       else
          operatingMode.set(StateEstimatorMode.NORMAL);
+
+      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
+      {
+         List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+         for (RigidBody rigidBody : feet.keySet())
+         {
+            ContactablePlaneBody contactableBody = feet.get(rigidBody);
+            contactablePlaneBodies.add(contactableBody);
+         }
+         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer
+               .createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches", inverseDynamicsStructure.getRootJoint().getSuccessor(),
+                                                            contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         estimatedWrenchVisualizer = null;
+      }
    }
 
    private void setupYoGraphics(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
@@ -303,6 +325,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
          jointTorqueFromForceSensorVisualizer.update();
+
+      if (ENABLE_ESTIMATED_WRENCH_VISUALIZER)
+         estimatedWrenchVisualizer.update();
    }
 
    @Override
