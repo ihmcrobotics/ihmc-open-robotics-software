@@ -24,8 +24,14 @@ public class ICPOptimizationControllerHelper
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
+   public void transformGainsFromDynamicsFrame(FixedFrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
+                                          double orthogonalGain)
+   {
+      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
+   }
+
    public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
-                                          double orthogonalValue)
+                                               double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -34,12 +40,12 @@ public class ICPOptimizationControllerHelper
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
          icpVelocityDirectionFrame.getTransformToDesiredFrame(tempTransform, worldFrame);
 
-         transformValues(valuesToPack, 1.0 + parallelValue, 1.0 + orthogonalValue, tempTransform);
+         transformValues(valuesToPack, parallelValue, orthogonalValue, tempTransform);
       }
       else
       {
          valuesToPack.setToZero();
-         valuesToPack.set(1.0 + orthogonalValue, 1.0 + orthogonalValue);
+         valuesToPack.set(orthogonalValue, orthogonalValue);
       }
    }
 

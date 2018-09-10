@@ -746,7 +746,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void submitCoPFeedbackTaskConditionsToSolver()
    {
-      helper.transformFromDynamicsFrame(transformedGains, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
+      helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
       helper.transformFromDynamicsFrame(transformedMagnitudeLimits, desiredICPVelocity, feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
@@ -942,8 +942,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (scaleFeedbackWeightWithGain.getValue())
       {
-         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
-         scaledCoPFeedbackWeight.scale(1.0 / tempVector2d.length());
+         helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
+         scaledCoPFeedbackWeight.scale(1.0 / transformedGains.length());
       }
    }
 
