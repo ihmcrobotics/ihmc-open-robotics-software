@@ -31,24 +31,24 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 150000)
    public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
    {
       super.testCloseAndStopAndOpen();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 150000)
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
    {
       super.testCloseAndOpenFingers();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.9)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 150000)
    public void testClose() throws SimulationExceededMaximumTimeException
    {
       super.testClose();
