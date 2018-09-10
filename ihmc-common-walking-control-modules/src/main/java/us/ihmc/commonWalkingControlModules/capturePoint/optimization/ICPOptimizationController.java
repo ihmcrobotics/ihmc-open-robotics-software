@@ -88,7 +88,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
    private final YoFramePoint2D predictedEndOfStateICP = new YoFramePoint2D(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
-   private final YoFrameVector2D feedbackDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
@@ -762,7 +761,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
 
       solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
-      solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), feedbackCMPDelta, controlDT);
+      solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
 
       if (useFeedbackRate.getValue())
          solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);
@@ -891,8 +890,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackCMP.add(feedbackCoP, perfectCMPOffset);
       feedbackCMP.add(feedbackCMPDelta);
       feedbackCMP.add(feedbackCMPIntegral);
-
-      feedbackDelta.add(feedbackCoPDelta, feedbackCMPDelta);
 
       if (limitReachabilityFromAdjustment.getValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();

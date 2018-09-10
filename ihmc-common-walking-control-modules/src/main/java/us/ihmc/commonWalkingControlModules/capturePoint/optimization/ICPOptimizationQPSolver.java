@@ -65,7 +65,6 @@ public class ICPOptimizationQPSolver
    /** Total linear inequality constraint objective vector for the quadratic program. */
    private final DenseMatrix64F solverInput_bineq;
 
-
    /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
    private final ICPQPInput copFeedbackTaskInput;
    /** QP Objective to minimize the amount of step adjustment. Also contains step adjustment. */
@@ -175,6 +174,11 @@ public class ICPOptimizationQPSolver
    /** Minimum allowable weight on the feedback task. */
    private double minimumFeedbackWeight;
 
+   private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
+   private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
+   private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
+   private double controlDT = Double.POSITIVE_INFINITY;
+
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;
@@ -240,7 +244,8 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
       planarRegionConstraint = new ConstraintToConvexRegion(20);
 
-      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
+      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices,
+                                             maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
       solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, 1);
 
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
@@ -262,7 +267,7 @@ public class ICPOptimizationQPSolver
       cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
       dynamicsCostToGo = new DenseMatrix64F(1, 1);
 
-//      solver.setConvergenceThreshold(convergenceThreshold);
+      //      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
       solver.setUseWarmStart(useWarmStart);
    }
@@ -408,12 +413,14 @@ public class ICPOptimizationQPSolver
 
    public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
    {
-      constraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maximumFeedbackMagnitude);
+      this.maxFeedbackXMagnitude = maximumFeedbackMagnitude.getX();
+      this.maxFeedbackYMagnitude = maximumFeedbackMagnitude.getY();
    }
 
-   public void setMaximumFeedbackRate(double maximumFeedbackRate, FrameTuple2DReadOnly previousFeedback, double controlDT)
+   public void setMaximumFeedbackRate(double maximumFeedbackRate, double controlDT)
    {
-      constraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedback, controlDT);
+      this.maximumFeedbackRate = maximumFeedbackRate;
+      this.controlDT = controlDT;
    }
 
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon, double planarRegionDistanceFromEdge)
@@ -497,7 +504,9 @@ public class ICPOptimizationQPSolver
       cmpFeedbackTaskInput.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
-      numberOfInequalityConstraints += feedbackLimitConstraint.getNumberOfConstraints() + feedbackRateLimitConstraint.getNumberOfConstraints();
+      numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
+      numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) ? 2 : 0;
+      numberOfInequalityConstraints += Double.isFinite(maxFeedbackYMagnitude) ? 2 : 0;
 
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
@@ -604,7 +613,8 @@ public class ICPOptimizationQPSolver
     * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2D referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
+                                               FramePoint2D referenceFootstepLocation)
    {
       referenceFootstepLocation.changeFrame(worldFrame);
       setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
@@ -619,14 +629,15 @@ public class ICPOptimizationQPSolver
     * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint3D referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
+                                               FramePoint3D referenceFootstepLocation)
    {
       referenceFootstepLocation.changeFrame(worldFrame);
       setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
    }
 
-   private void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, double referenceXPositionInWorld,
-                                                double referenceYPositionInWorld)
+   private void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor,
+                                                double referenceXPositionInWorld, double referenceYPositionInWorld)
    {
       footstepRecursionMultiplier = recursionMultiplier;
       footstepAdjustmentSafetyFactor = safetyFactor;
@@ -710,9 +721,6 @@ public class ICPOptimizationQPSolver
       this.previousFeedbackDeltaSolution.set(1, 0, previousFeedbackDeltaSolution.getY());
    }
 
-
-
-
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
@@ -774,6 +782,7 @@ public class ICPOptimizationQPSolver
    }
 
    private final FrameVector2D cmpOffsetToThrowAway = new FrameVector2D();
+
    /**
     * Solves a linearly constrained quadratic program that computes the desired CMP feedback action combined with the desired step adjustment to stabilize the
     * ICP dynamics. This problem attempts to minimize the magnitude of CMP feedback while minimizing the amount of step adjustment. This is achieved by noting
@@ -847,7 +856,8 @@ public class ICPOptimizationQPSolver
             addPlanarRegionConstraint();
       }
 
-      submitInequalityConstraints();
+      addMaximumFeedbackMagnitudeConstraint();
+      addMaximumFeedbackRateConstraint();
 
       boolean foundSolution = solve(solution);
 
@@ -935,7 +945,8 @@ public class ICPOptimizationQPSolver
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), copLocationConstraint.Aineq, 0, 0,
+                                 constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -964,8 +975,10 @@ public class ICPOptimizationQPSolver
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCMPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0,
+                                 constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCMPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0,
+                                 constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -984,7 +997,8 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0,
+                                 constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -1003,7 +1017,8 @@ public class ICPOptimizationQPSolver
       planarRegionConstraint.formulateConstraint();
 
       int constraintSize = planarRegionConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), planarRegionConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), planarRegionConstraint.Aineq, 0, 0,
+                                 constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, planarRegionConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -1030,28 +1045,45 @@ public class ICPOptimizationQPSolver
     */
    private void addDynamicConstraintTask()
    {
-      inputCalculator.computeDynamicsTask(dynamicsTaskInput, currentICPError, referenceFootstepLocation, feedbackGain,
-            dynamicsWeight, footstepRecursionMultiplier, footstepAdjustmentSafetyFactor);
+      inputCalculator
+            .computeDynamicsTask(dynamicsTaskInput, currentICPError, referenceFootstepLocation, feedbackGain, dynamicsWeight, footstepRecursionMultiplier,
+                                 footstepAdjustmentSafetyFactor);
       inputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
-    * Submits the inequality constraints to the solver. These currently include the feedback magnitude and feedback rate.
+    * Submits the feedback magnitude inequality constraints to the solver.
     */
-   private void submitInequalityConstraints()
+   private void addMaximumFeedbackMagnitudeConstraint()
    {
+      constraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maxFeedbackXMagnitude, maxFeedbackYMagnitude);
+
       int feedbackMagnitudeConstraintSize = feedbackLimitConstraint.getNumberOfConstraints();
       int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.Aineq, 0, 0, feedbackMagnitudeConstraintSize, numberOfVariables, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.bineq, 0, 0, feedbackMagnitudeConstraintSize, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.Aineq, 0, 0, feedbackMagnitudeConstraintSize,
+                                 numberOfVariables, 1.0);
+      MatrixTools
+            .setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.bineq, 0, 0, feedbackMagnitudeConstraintSize, 1,
+                            1.0);
 
       currentInequalityConstraintIndex += feedbackMagnitudeConstraintSize;
+   }
+
+   /**
+    * Submits the feedback rate inequality constraints to the solver.
+    */
+   private void addMaximumFeedbackRateConstraint()
+   {
+      constraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedbackDeltaSolution, controlDT);
 
       int feedbackRateConstraintSize = feedbackRateLimitConstraint.getNumberOfConstraints();
+      int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.Aineq, 0, 0, feedbackRateConstraintSize, numberOfVariables, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.bineq, 0, 0, feedbackRateConstraintSize, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackRateLimitConstraint.Aineq, 0, 0, feedbackRateConstraintSize,
+                                 numberOfVariables, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackRateLimitConstraint.bineq, 0, 0, feedbackRateConstraintSize, 1,
+                                 1.0);
 
       currentInequalityConstraintIndex += feedbackRateConstraintSize;
    }
@@ -1092,7 +1124,8 @@ public class ICPOptimizationQPSolver
     */
    private void extractFootstepSolutions(DenseMatrix64F footstepLocationSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, indexHandler.getFootstepStartIndex(), 0, indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
+      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, indexHandler.getFootstepStartIndex(), 0,
+                                 indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
    }
 
    /**
