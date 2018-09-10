@@ -411,11 +411,10 @@ public class ICPOptimizationQPSolver
       constraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maximumFeedbackMagnitude);
    }
 
-   public void setMaximumFeedbackRate(FrameVector2DReadOnly maximumFeedbackRate, FramePoint2DReadOnly previousFeedback, double controlDT)
+   public void setMaximumFeedbackRate(double maximumFeedbackRate, FrameTuple2DReadOnly previousFeedback, double controlDT)
    {
       constraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedback, controlDT);
    }
-
 
    public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon, double planarRegionDistanceFromEdge)
    {
