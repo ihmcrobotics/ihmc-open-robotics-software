@@ -29,7 +29,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
-   compile group: "us.ihmc", name: "euclid", version: "0.9.1"
+   compile group: "us.ihmc", name: "euclid", version: "0.9.2"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.23.0"

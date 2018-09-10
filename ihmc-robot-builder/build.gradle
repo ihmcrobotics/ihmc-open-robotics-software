@@ -24,7 +24,7 @@ testSuites {
 mainDependencies {
    compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.4"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.2"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.5"

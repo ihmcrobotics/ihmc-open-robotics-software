@@ -38,7 +38,7 @@ mainDependencies {
    compile "org.boofcv:recognition:0.24.1"
 
    compile group: "us.ihmc", name: "IHMCVideoCodecs", version: "2.1.3"
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.0"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
