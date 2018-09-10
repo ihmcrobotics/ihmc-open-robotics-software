@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 
@@ -116,6 +117,21 @@ public class ICPQPConstraintCalculator
                                                   double controlDT)
    {
       calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.getX(), previousValue.getY(), controlDT);
+   }
+
+   /**
+    * Computes the inequality constraint for the to limit the total feedback rate (CoP and CMP, if available). This returns a set of 4
+    * inequality constraints.
+    *
+    * @param inputToPack the object in which to store the inequality constraint.
+    * @param maxRate the maximum feedback rate in X and Y.
+    * @param previousValue the value of the previous feedback term in X and Y.
+    * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
+    */
+   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue,
+                                                  double controlDT)
+   {
+      calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.get(0), previousValue.get(1), controlDT);
    }
 
    /**
