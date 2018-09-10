@@ -171,7 +171,7 @@ public class ReferenceFrameHashCodeResolver
       if (nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
       {
          ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
-         if (!referenceFrame.equals(existingFrame))
+         if (referenceFrame != existingFrame)
          {
             throw new IllegalArgumentException("ReferenceFrameHashCodeResolver: Tried to put in a reference frame with the same name");
          }
