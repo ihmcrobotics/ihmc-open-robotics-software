@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.junit.Assert;
 import org.junit.Test;
