@@ -22,7 +22,7 @@ public class ICPQPInputCalculatorTest
    private static final double epsilon = 1e-7;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testComputeQuadraticTask()
    {
       Random random = new Random(1738L);
