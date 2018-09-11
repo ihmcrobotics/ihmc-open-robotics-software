@@ -38,7 +38,7 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
    public ValkyrieHandFingerTrajectoryMessage()
    {
-      finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (5, "type_9");
+      finger_motor_names_ = new us.ihmc.idl.IDLSequence.Byte (6, "type_9");
 
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
