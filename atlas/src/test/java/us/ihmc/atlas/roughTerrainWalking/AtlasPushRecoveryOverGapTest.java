@@ -4,10 +4,12 @@ import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverGapTest;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -63,6 +65,19 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
                   return 0.55;
+               }
+
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new AtlasSteppingParameters(getJointMap())
+                  {
+                     @Override
+                     public double getMaxStepLength()
+                     {
+                        return 1.0;
+                     }
+                  };
                }
 
                @Override

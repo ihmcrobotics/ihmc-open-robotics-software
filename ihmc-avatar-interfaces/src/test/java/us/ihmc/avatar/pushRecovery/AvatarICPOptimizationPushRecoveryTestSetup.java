@@ -47,7 +47,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   protected static double simulationTime = 10.0;
+   protected static double simulationTime = 13.0;
 
    protected PushRobotController pushRobotController;
 
