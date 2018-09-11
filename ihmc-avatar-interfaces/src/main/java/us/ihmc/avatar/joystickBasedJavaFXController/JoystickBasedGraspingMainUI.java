@@ -3,6 +3,7 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,13 +12,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 
@@ -37,7 +41,7 @@ public class JoystickBasedGraspingMainUI
    @FXML
    private GraspingPaneController graspingPaneController;
 
-   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory)
+   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -60,7 +64,7 @@ public class JoystickBasedGraspingMainUI
                                            s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
-      graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer);
+      graspingJavaFXController = new GraspingJavaFXController(robotName, messager, ros2Node, fullRobotModelFactory, javaFXRobotVisualizer, handFingerTrajectoryMessagePublisher);
       view3dFactory.addNodeToView(graspingJavaFXController.getRootNode());
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
