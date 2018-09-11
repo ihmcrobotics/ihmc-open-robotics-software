@@ -4,6 +4,9 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToWalkingSingleSupportState;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -40,6 +43,9 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final YoFrameVector3D angularMomentumRateWeight;
    private final YoFrameVector3D linearMomentumRateWeight;
 
+   /** Note: this value is basically for visualization purposes only. DO NOT SET IT YOURSELF. It gets overwritten
+    * by {@link WalkingSingleSupportState#minimizeAngularMomentumRateZDuringSwing} and {@link TransferToWalkingSingleSupportState#minimizeAngularMomentumRateZDuringTransfer}.
+    */
    private final YoBoolean minimizeAngularMomentumRateZ;
 
    private final YoFrameVector3D controlledCoMAcceleration;
@@ -99,7 +105,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight = new YoFrameVector3D(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector3D(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
-      minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
+      minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", "Identifies whether or not the angular momentum rate about the "
+            + "Z axis will be included in the controller objective. Is set externally.", registry);
 
       yoSafeAreaPolygon = new YoFrameConvexPolygon2D("yoSafeAreaPolygon", worldFrame, 10, registry);
       yoProjectionPolygon = new YoFrameConvexPolygon2D("yoProjectionPolygon", worldFrame, 10, registry);
