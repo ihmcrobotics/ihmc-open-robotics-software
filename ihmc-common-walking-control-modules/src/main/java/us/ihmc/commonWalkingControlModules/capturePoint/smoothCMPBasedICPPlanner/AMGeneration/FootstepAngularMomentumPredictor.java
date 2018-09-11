@@ -259,6 +259,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
    {
       AngularMomentumEstimationParameters angularMomentumParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
@@ -303,10 +304,11 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations, List<? extends FramePoint3DReadOnly> comInitialPositions,
-                                     List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
-                                     List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
-                                     List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
+   @Override
+   public void addCopAndComSetpointsToPlan(List<CoPPointsInFoot> copLocations, List<? extends FramePoint3DReadOnly> comInitialPositions,
+                                           List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
+                                           List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
+                                           List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
       for (int i = 0; i < copLocations.size(); i++)
          upcomingCoPsInFootsteps.get(i).setIncludingFrame(copLocations.get(i));
