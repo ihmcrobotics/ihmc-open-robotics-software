@@ -207,13 +207,13 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories()
+   public List<AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
    {
       return transferTrajectories;
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories()
+   public List<AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
    {
       return swingTrajectories;
    }

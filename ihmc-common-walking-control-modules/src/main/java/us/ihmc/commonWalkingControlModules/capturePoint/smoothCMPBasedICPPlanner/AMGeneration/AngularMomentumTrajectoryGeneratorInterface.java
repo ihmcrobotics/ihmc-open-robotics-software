@@ -24,9 +24,9 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void computeReferenceAngularMomentumStartingFromSingleSupport();
 
-   List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories();
+   List<AngularMomentumTrajectory> getTransferAngularMomentumTrajectories();
 
-   List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories();
+   List<AngularMomentumTrajectory> getSwingAngularMomentumTrajectories();
 
    void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ);
 
@@ -34,4 +34,6 @@ public interface AngularMomentumTrajectoryGeneratorInterface
                                     List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
                                     List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
                                     List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps);
+
+
 }
