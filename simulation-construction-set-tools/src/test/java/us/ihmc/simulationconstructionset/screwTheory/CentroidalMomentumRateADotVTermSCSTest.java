@@ -5,10 +5,12 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -41,6 +43,12 @@ public class CentroidalMomentumRateADotVTermSCSTest
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)

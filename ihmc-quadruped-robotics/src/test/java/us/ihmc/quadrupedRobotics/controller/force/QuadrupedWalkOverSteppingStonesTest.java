@@ -7,6 +7,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
@@ -47,6 +48,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       variables = null;
       stepTeleopManager = null;
 
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 

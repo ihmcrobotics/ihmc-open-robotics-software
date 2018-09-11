@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
@@ -32,6 +33,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -78,6 +80,12 @@ public class RigidBodyControlManagerTest
 
    private double q1_home = random.nextDouble();
    private double q2_home = random.nextDouble();
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

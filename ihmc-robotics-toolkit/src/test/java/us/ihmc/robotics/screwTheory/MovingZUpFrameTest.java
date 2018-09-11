@@ -9,11 +9,13 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,6 +26,12 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 public class MovingZUpFrameTest
 {
    private static final double EPSILON = 1.0e-7;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 1000)

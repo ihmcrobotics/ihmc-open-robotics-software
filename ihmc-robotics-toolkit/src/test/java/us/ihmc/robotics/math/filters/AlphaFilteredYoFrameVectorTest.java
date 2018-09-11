@@ -2,10 +2,12 @@ package us.ihmc.robotics.math.filters;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -15,6 +17,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class AlphaFilteredYoFrameVectorTest
 {
    private static final double EPSILON = 1.0e-15;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 1000)

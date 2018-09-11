@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -13,11 +14,17 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class GroundTruthinatorTest
 {
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)

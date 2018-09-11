@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -9,6 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
@@ -18,7 +20,12 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 public class MultipleWaypointsOrientationTrajectoryGeneratorTest
 {
    private final double EPSILON = 1e-3;
-   
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)

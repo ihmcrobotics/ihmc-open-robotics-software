@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
@@ -14,6 +15,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -32,7 +34,13 @@ public class SmoothCoMIntegrationToolboxTest
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
-   
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMatricesCoMPrime3DLinear()

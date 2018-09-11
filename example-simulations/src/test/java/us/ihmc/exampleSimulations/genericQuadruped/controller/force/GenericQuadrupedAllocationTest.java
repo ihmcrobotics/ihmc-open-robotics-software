@@ -22,6 +22,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
@@ -87,6 +88,7 @@ public class GenericQuadrupedAllocationTest
       variables = null;
       stepTeleopManager = null;
 
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 

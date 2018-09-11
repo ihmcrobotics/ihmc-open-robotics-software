@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.SmartCMPProjector.ProjectionMethod;
@@ -34,6 +35,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -58,6 +60,12 @@ public class SmartCMPProjectorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final Random random = new Random(727434726273L);
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

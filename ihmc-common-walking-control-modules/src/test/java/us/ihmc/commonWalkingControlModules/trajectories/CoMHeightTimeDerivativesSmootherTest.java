@@ -9,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
@@ -29,6 +30,7 @@ public class CoMHeightTimeDerivativesSmootherTest
    @After
    public void showMemoryUsageAfterTest()
    {
+      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -14,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -27,6 +29,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class BlendedPoseTrajectoryGeneratorTest
 {
    private final double EPSILON = 1e-3;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    private void assertGeometricEquals(FramePose3D poseA, FramePose3D poseB, double epsilon)
    {
