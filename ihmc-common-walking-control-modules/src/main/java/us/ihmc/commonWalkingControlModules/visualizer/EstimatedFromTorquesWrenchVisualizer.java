@@ -70,7 +70,7 @@ public class EstimatedFromTorquesWrenchVisualizer
                                                double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(name, jacobianHolder, rootBody, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.AliceBlue(),
-           YoAppearance.LightYellow());
+           YoAppearance.YellowGreen());
    }
 
    public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBody rootBody, List<RigidBody> rigidBodies,
@@ -145,7 +145,7 @@ public class EstimatedFromTorquesWrenchVisualizer
 
          DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
          jointChainTorquesVector.reshape(jacobian.getNumberOfColumns(), 1);
-         jacobianInverseMatrix.reshape(6, jacobian.getNumberOfColumns());
+         jacobianInverseMatrix.reshape(jacobian.getNumberOfColumns(), 6);
 
          pseudoInverseSolver.setA(jacobianMatrix);
          pseudoInverseSolver.invert(jacobianInverseMatrix);
