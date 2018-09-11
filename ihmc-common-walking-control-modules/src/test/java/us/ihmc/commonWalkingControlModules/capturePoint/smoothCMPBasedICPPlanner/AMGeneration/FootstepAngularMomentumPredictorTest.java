@@ -272,9 +272,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
 
       List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories = angularMomentumGenerator.getSwingAngularMomentumTrajectories();
@@ -356,9 +356,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
       angularMomentumGenerator.initializeForDoubleSupport(0.0, isStanding.getBooleanValue());
 
@@ -508,9 +508,9 @@ public class FootstepAngularMomentumPredictorTest
       List<? extends FrameVector3DReadOnly> comFinalAccelerationList = comTrajectoryGenerator.getCoMAccelerationDesiredFinalList();
       List<CoPPointsInFoot> copWaypointList = copTrajectoryGenerator.getWaypoints();
 
-      angularMomentumGenerator.addFootstepCoPsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
-                                                     comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
-                                                     copTrajectoryGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumGenerator.addCopAndComSetpointsToPlan(copTrajectoryGenerator.getWaypoints(), comInitialPositionList, comFinalPositionList,
+                                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList,
+                                                           copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
       angularMomentumGenerator.initializeForSingleSupport(0.0);
 
