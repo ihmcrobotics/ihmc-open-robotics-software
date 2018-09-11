@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -25,6 +27,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
+   private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
+
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -40,6 +44,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
+      minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
+                                                                        walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
    }
 
    @Override
@@ -118,9 +124,25 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
+   public void onEntry()
+   {
+      super.onEntry();
+
+      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+   }
+
+   @Override
    public boolean isDone(double timeInState)
    {
       return super.isDone(timeInState) || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+   }
+
+   @Override
+   public void onExit()
+   {
+      super.onExit();
+
+      balanceManager.minimizeAngularMomentumRateZ(false);
    }
 
    /**
