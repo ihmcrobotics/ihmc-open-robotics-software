@@ -55,7 +55,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRateWeight()
    {
-      return 4e-13;
+      return 4e-12;
    }
 
    /** {@inheritDoc} */
