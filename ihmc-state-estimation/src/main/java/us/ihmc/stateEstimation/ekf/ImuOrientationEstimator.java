@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -90,6 +91,17 @@ public class ImuOrientationEstimator
       poseState.getOrientation(orientation);
       yoOrientation.set(orientation);
       return orientation;
+   }
+
+   public void initialize(QuaternionReadOnly initialOrientation)
+   {
+      imuTransform.setRotationAndZeroTranslation(initialOrientation);
+      MovingReferenceFrame imuFrame = imuJoint.getFrameAfterJoint();
+      imuTwist.setToZero(imuFrame, imuFrame.getParent(), imuFrame);
+      poseState.initialize(imuTransform, imuTwist);
+      stateEstimator.resetCovariance(1.0);
+      angularVelocitySensor.reset();
+      linearAccelerationSensor.reset();
    }
 
    private void updateRobot()
