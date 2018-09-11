@@ -6,6 +6,7 @@ import us.ihmc.avatar.behaviorTests.HumanoidHandDesiredConfigurationBehaviorTest
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -25,7 +26,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 230000)
@@ -48,5 +49,11 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testStopCloseHand();
+   }
+
+   @Override
+   protected double getFingerClosedJointAngleSign(RobotSide robotSide)
+   {
+      return robotSide.negateIfLeftSide(1.0);
    }
 }
