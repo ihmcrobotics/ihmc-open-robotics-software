@@ -1,6 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,7 +20,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -39,8 +38,8 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
 {
@@ -174,10 +173,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
-      FramePose3D framePose = new FramePose3D();
-      findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
-      Pose3D pose = new Pose3D(framePose);
-      return pose;
+      return new Pose3D(findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs));
    }
 
    @SuppressWarnings("unchecked")
@@ -186,23 +182,24 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return ((YoEnum<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePoseUsingYawPitchRoll findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
    {
-      return findYoFramePose(nameSpace, namePrefix, "", scs);
+      return findYoFramePose3D(nameSpace, namePrefix, "", scs);
    }
 
-   private static YoFramePoseUsingYawPitchRoll findYoFramePose(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose3D(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
       YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
       YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
       YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
-      YoDouble yaw = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "yaw", nameSuffix));
-      YoDouble pitch = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "pitch", nameSuffix));
-      YoDouble roll = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createName(namePrefix, "roll", nameSuffix));
-      YoFrameYawPitchRoll orientation = new YoFrameYawPitchRoll(yaw, pitch, roll, ReferenceFrame.getWorldFrame());
-      return new YoFramePoseUsingYawPitchRoll(position, orientation);
+      YoDouble qx = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(namePrefix, nameSuffix));
+      YoDouble qy = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(namePrefix, nameSuffix));
+      YoDouble qz = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(namePrefix, nameSuffix));
+      YoDouble qs = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(namePrefix, nameSuffix));
+      YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
+      return new YoFramePose3D(position, orientation);
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
