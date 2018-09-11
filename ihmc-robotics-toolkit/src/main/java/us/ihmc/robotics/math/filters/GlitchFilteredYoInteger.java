@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -7,7 +8,7 @@ public class GlitchFilteredYoInteger extends YoInteger
 {
    private final YoInteger position;
    private final YoInteger previousPosition;
-   private final YoInteger windowSize;
+   private final IntegerProvider windowSize;
    private final YoInteger counter;
 
    public GlitchFilteredYoInteger(String name, int windowSize, YoVariableRegistry registry)
@@ -23,8 +24,25 @@ public class GlitchFilteredYoInteger extends YoInteger
 
       previousPosition = new YoInteger(name + "PrevValue", registry);
       counter = new YoInteger(name + "Count", registry);
-      this.windowSize = new YoInteger(name + "WindowSize", registry);
-      this.windowSize.set(windowSize);
+      YoInteger yoWindowSize = new YoInteger(name + "WindowSize", registry);
+      yoWindowSize.set(windowSize);
+      this.windowSize = yoWindowSize;
+   }
+
+   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoVariableRegistry registry)
+   {
+      this(name, windowSize, null, registry);
+   }
+
+   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoInteger position, YoVariableRegistry registry)
+   {
+      super(name, GlitchFilteredYoInteger.class.getSimpleName(), registry);
+
+      this.position = position;
+
+      previousPosition = new YoInteger(name + "PrevValue", registry);
+      counter = new YoInteger(name + "Count", registry);
+      this.windowSize = windowSize;
    }
 
    @Override
@@ -61,7 +79,7 @@ public class GlitchFilteredYoInteger extends YoInteger
       else
          counter.set(0);
 
-      if (counter.getIntegerValue() >= windowSize.getIntegerValue())
+      if (counter.getIntegerValue() >= windowSize.getValue())
       {
          set(currentValue);
          counter.set(0);
@@ -72,11 +90,18 @@ public class GlitchFilteredYoInteger extends YoInteger
 
    public int getWindowSize()
    {
-      return windowSize.getIntegerValue();
+      return windowSize.getValue();
    }
 
    public void setWindowSize(int windowSize)
    {
-      this.windowSize.set(windowSize);
+      if (this.windowSize instanceof YoInteger)
+      {
+         ((YoInteger) this.windowSize).set(windowSize);
+      }
+      else
+      {
+         throw new RuntimeException("Setting the window size is not supported");
+      }
    }
 }
