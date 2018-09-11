@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -21,6 +20,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -36,8 +36,10 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -82,7 +84,7 @@ public class PelvisLinearStateUpdater
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
 
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
-   
+
    private final YoFrameVector3D totalGroundReactionForce = new YoFrameVector3D("totalGroundForce", worldFrame, registry);
    private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoFrameVector3D comAcceleration = new YoFrameVector3D("comAcceleration", worldFrame, registry);
@@ -144,7 +146,11 @@ public class PelvisLinearStateUpdater
    private final FrameVector3D tempVelocity = new FrameVector3D();
 
    private final double gravitationalAcceleration;
-   
+
+   private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, false);
+   private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
+   private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
+
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches, 
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
@@ -406,14 +412,19 @@ public class PelvisLinearStateUpdater
       // Update only if at least one foot hit the ground
       if (numberOfEndEffectorsTrusted > 0)
       {
-         for (int i = 0; i < feet.size(); i++)
+         if (trustOnlyLowestFoot.getValue())
          {
-            RigidBody foot = feet.get(i);
-            areFeetTrusted.get(foot).set(false);
+            numberOfEndEffectorsTrusted = filterAndTrustLowestFoot();
          }
-         // Only trust lowest foot in contact
-         areFeetTrusted.get(getLowestFootInContact()).set(true);
-         numberOfEndEffectorsTrusted = 1;
+         else
+         {
+            for (int i = 0; i < feet.size(); i++)
+            {
+               RigidBody foot = feet.get(i);
+               boolean isFootOnGround = haveFeetHitGroundFiltered.get(foot).getBooleanValue();
+               areFeetTrusted.get(foot).set(isFootOnGround);
+            }
+         }
       }
 
       // Else if there is a foot with a force past the threshold trust the force and not the CoP
@@ -466,23 +477,47 @@ public class PelvisLinearStateUpdater
       return numberOfEndEffectorsTrusted;
    }
 
-   FramePoint3D tmpFramePoint = new FramePoint3D();
-   private RigidBody getLowestFootInContact()
+   private int filterAndTrustLowestFoot()
    {
-      RigidBody lowestFootInContact = null;
-      double lowestFootZ = Double.MAX_VALUE;
-      for(int i = 0; i < feet.size(); i++)
+      int lastLowestFootIdx = lowestFootInContactIndex.getValue();
+      int lowestFootIdx = findLowestFootInContact();
+
+      if (haveFeetHitGroundFiltered.get(feet.get(lastLowestFootIdx)).getValue())
       {
-         RigidBody foot = feet.get(i);
+         lowestFootInContactIndex.update(lowestFootIdx);
+      }
+      else
+      {
+         lowestFootInContactIndex.set(lowestFootIdx);
+      }
+
+      for (int footIdx = 0; footIdx < feet.size(); footIdx++)
+      {
+         areFeetTrusted.get(feet.get(footIdx)).set(footIdx == lowestFootInContactIndex.getValue());
+      }
+
+      return 1;
+   }
+
+   FramePoint3D tmpFramePoint = new FramePoint3D();
+
+   private int findLowestFootInContact()
+   {
+      int lowestFootInContact = -1;
+      double lowestFootZ = Double.MAX_VALUE;
+      for (int footIdx = 0; footIdx < feet.size(); footIdx++)
+      {
+         RigidBody foot = feet.get(footIdx);
          tmpFramePoint.setToZero(foot.getBodyFixedFrame());
          tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          double footZ = tmpFramePoint.getZ();
-         if(haveFeetHitGroundFiltered.get(foot).getBooleanValue())
+
+         if (haveFeetHitGroundFiltered.get(foot).getBooleanValue())
          {
             if (footZ < lowestFootZ)
             {
                lowestFootZ = footZ;
-               lowestFootInContact = foot;
+               lowestFootInContact = footIdx;
             }
          }
       }
