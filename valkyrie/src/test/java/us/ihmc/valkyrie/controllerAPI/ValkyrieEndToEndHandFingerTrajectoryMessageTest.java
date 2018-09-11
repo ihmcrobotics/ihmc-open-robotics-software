@@ -147,7 +147,10 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       ValkyrieHandJointName firstHandJointName = fingerMotorName.getCorrespondingJointName(0);
       Joint firstHandJoint = controllerFullRobotModel.getJoint(firstHandJointName.getJointName(robotSide));
 
-      firstHandJoint.recursiveGetOneDegreeOfFreedomJoints(handJoints);
+      if (fingerMotorName == ValkyrieFingerMotorName.ThumbMotorRoll)
+         handJoints.add((OneDegreeOfFreedomJoint) firstHandJoint);
+      else
+         firstHandJoint.recursiveGetOneDegreeOfFreedomJoints(handJoints);
 
       return handJoints;
    }
