@@ -674,7 +674,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
+   public List<AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
    {
       if (computeTransferAngularMomentum.getBooleanValue())
          return transferAngularMomentumTrajectories; //null
@@ -683,7 +683,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
+   public List<AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
    {
       if (computeSwingAngularMomentum.getBooleanValue())
          return swingAngularMomentumTrajectories; //null
