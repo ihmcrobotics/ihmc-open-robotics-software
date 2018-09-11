@@ -139,4 +139,12 @@ public abstract class BodyVelocitySensor extends Sensor
    {
       this.measurement.set(measurement);
    }
+
+   public void reset()
+   {
+      if (biasState != null)
+      {
+         biasState.reset();
+      }
+   }
 }
