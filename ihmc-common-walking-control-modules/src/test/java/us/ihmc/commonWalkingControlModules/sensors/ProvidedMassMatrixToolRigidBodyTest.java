@@ -2,7 +2,10 @@ package us.ihmc.commonWalkingControlModules.sensors;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,6 +19,12 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    private final RobotSide robotSide = RobotSide.LEFT;
    private final double gravity = 9.81;
    private final double mass = 2.0;
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
+   }
 
    public void testprovidedMassMatrixToolRigidBody()
    {

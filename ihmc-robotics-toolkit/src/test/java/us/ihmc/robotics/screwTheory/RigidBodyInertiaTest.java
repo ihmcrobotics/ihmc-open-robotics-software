@@ -12,6 +12,7 @@ import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,6 +20,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -78,6 +80,12 @@ public class RigidBodyInertiaTest
       rotatedOnlyFrame.update();
 
       inertia = new RigidBodyInertia(frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
+   }
+
+   @After
+   public void tearDown()
+   {
+      ReferenceFrameTools.clearWorldFrameTree();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
