@@ -4,6 +4,10 @@ import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,26 +21,35 @@ public class FootLeapOfFaithModule
 
    private final YoDouble swingDuration;
 
-   private final YoDouble fractionOfSwing = new YoDouble(yoNamePrefix + "FractionOfSwingToScaleFootWeight", registry);
-   private final YoBoolean scaleFootWeight = new YoBoolean(yoNamePrefix + "ScaleFootWeight", registry);
+   private final DoubleProvider fractionOfSwing;
+   private final BooleanProvider scaleFootWeight;
 
-   private final YoDouble verticalFootWeightScaleFactor = new YoDouble(yoNamePrefix + "VerticalFootWeightScaleFactor", registry);
-   private final YoDouble horizontalFootWeightScaleFactor = new YoDouble(yoNamePrefix + "HorizontalFootWeightScaleFactor", registry);
+   private final DoubleProvider verticalFootWeightScaleFactor;
+   private final DoubleProvider horizontalFootWeightScaleFactor;
 
    private final YoDouble verticalFootWeightScaleFraction = new YoDouble(yoNamePrefix + "VerticalFootWeightScaleFraction", registry);
    private final YoDouble horizontalFootWeightScaleFraction = new YoDouble(yoNamePrefix + "HorizontalFootWeightScaleFraction", registry);
-   private final YoDouble minimumHorizontalWeight = new YoDouble(yoNamePrefix + "MinimumHorizontalFootWeight", registry);
 
    public FootLeapOfFaithModule(YoDouble swingDuration, LeapOfFaithParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.swingDuration = swingDuration;
 
-      scaleFootWeight.set(parameters.scaleFootWeight());
-      fractionOfSwing.set(parameters.getFractionOfSwingToScaleFootWeight());
+      if (parameters == null)
+      {
+         scaleFootWeight = new BooleanParameter(yoNamePrefix + "ScaleFootWeight", registry, false);
+         fractionOfSwing = new DoubleParameter(yoNamePrefix + "FractionOfSwingToScaleFootWeight", registry, 1.0);
 
-      horizontalFootWeightScaleFactor.set(parameters.getHorizontalFootWeightScaleFactor());
-      verticalFootWeightScaleFactor.set(parameters.getVerticalFootWeightScaleFactor());
-      minimumHorizontalWeight.set(parameters.getMinimumHorizontalFootWeight());
+         verticalFootWeightScaleFactor = new DoubleParameter(yoNamePrefix + "VerticalFootWeightScaleFactor", registry, 1.0);
+         horizontalFootWeightScaleFactor = new DoubleParameter(yoNamePrefix + "HorizontalFootWeightScaleFactor", registry, 1.0);
+      }
+      else
+      {
+         scaleFootWeight = new BooleanParameter(yoNamePrefix + "ScaleFootWeight", registry, parameters.scaleFootWeight());
+         fractionOfSwing = new DoubleParameter(yoNamePrefix + "FractionOfSwingToScaleFootWeight", registry, parameters.getFractionOfSwingToScaleFootWeight());
+
+         verticalFootWeightScaleFactor = new DoubleParameter(yoNamePrefix + "VerticalFootWeightScaleFactor", registry, parameters.getVerticalFootWeightScaleFactor());
+         horizontalFootWeightScaleFactor = new DoubleParameter(yoNamePrefix + "HorizontalFootWeightScaleFactor", registry, parameters.getHorizontalFootWeightScaleFactor());
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -46,15 +59,15 @@ public class FootLeapOfFaithModule
       horizontalFootWeightScaleFraction.set(1.0);
       verticalFootWeightScaleFraction.set(1.0);
 
-      double exceededTime = Math.max(currentTime - fractionOfSwing.getDoubleValue() * swingDuration.getDoubleValue(), 0.0);
+      double timeToScaleWith = Math.max(currentTime - fractionOfSwing.getValue() * swingDuration.getDoubleValue(), 0.0);
 
-      if (exceededTime == 0.0)
+      if (timeToScaleWith == 0.0)
          return;
 
-      if (scaleFootWeight.getBooleanValue())
+      if (scaleFootWeight.getValue())
       {
-         double horizontalFootWeightScaleFraction = MathTools.clamp(1.0 - horizontalFootWeightScaleFactor.getDoubleValue() * exceededTime, 0.0, 1.0);
-         double verticalFootWeightScaleFraction = Math.max(1.0, 1.0 + exceededTime * verticalFootWeightScaleFactor.getDoubleValue());
+         double horizontalFootWeightScaleFraction = Math.max(1.0, 1.0 + timeToScaleWith * horizontalFootWeightScaleFactor.getValue());
+         double verticalFootWeightScaleFraction = Math.max(1.0, 1.0 + timeToScaleWith * verticalFootWeightScaleFactor.getValue());
 
          this.horizontalFootWeightScaleFraction.set(horizontalFootWeightScaleFraction);
          this.verticalFootWeightScaleFraction.set(verticalFootWeightScaleFraction);
@@ -65,13 +78,10 @@ public class FootLeapOfFaithModule
    {
       scaledLinearWeight.set(unscaledLinearWeight);
 
-      if (!scaleFootWeight.getBooleanValue())
+      if (!scaleFootWeight.getValue())
          return;
 
       scaledLinearWeight.scale(horizontalFootWeightScaleFraction.getDoubleValue());
-
-      scaledLinearWeight.setX(Math.max(minimumHorizontalWeight.getDoubleValue(), scaledLinearWeight.getX()));
-      scaledLinearWeight.setY(Math.max(minimumHorizontalWeight.getDoubleValue(), scaledLinearWeight.getY()));
 
       double verticalWeight = unscaledLinearWeight.getZ() * verticalFootWeightScaleFraction.getDoubleValue();
       scaledLinearWeight.setZ(verticalWeight);
