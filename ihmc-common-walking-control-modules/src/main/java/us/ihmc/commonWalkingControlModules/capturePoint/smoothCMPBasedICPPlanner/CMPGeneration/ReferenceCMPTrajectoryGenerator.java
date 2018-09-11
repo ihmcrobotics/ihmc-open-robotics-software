@@ -22,7 +22,7 @@ import java.util.List;
 public class ReferenceCMPTrajectoryGenerator
 {
    private static final int maxNumberOfCoefficients = 10;
-   private static final int maxNumberOfSegments = 5;
+   private static final int maxNumberOfSegments = 35;
    
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
