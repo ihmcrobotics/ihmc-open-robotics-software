@@ -84,7 +84,7 @@ public class PelvisLinearStateUpdater
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
 
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
-
+   
    private final YoFrameVector3D totalGroundReactionForce = new YoFrameVector3D("totalGroundForce", worldFrame, registry);
    private final YoDouble robotMass = new YoDouble("robotMass", registry);
    private final YoFrameVector3D comAcceleration = new YoFrameVector3D("comAcceleration", worldFrame, registry);
@@ -484,10 +484,14 @@ public class PelvisLinearStateUpdater
 
       if (haveFeetHitGroundFiltered.get(feet.get(lastLowestFootIdx)).getValue())
       {
+         // If the previously trusted foot is still in contact glitch filter the trusted foot to avoid
+         // jumping between the feet.
          lowestFootInContactIndex.update(lowestFootIdx);
       }
       else
       {
+         // In case the previously trusted foot is not in contact anymore we do not need to glitch filter.
+         // Just use the new lowest foot.
          lowestFootInContactIndex.set(lowestFootIdx);
       }
 
