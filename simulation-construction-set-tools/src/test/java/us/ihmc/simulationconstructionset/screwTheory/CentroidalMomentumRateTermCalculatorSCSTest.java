@@ -11,7 +11,6 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -129,7 +128,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       
-      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame, v, totalMass);
+      CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
@@ -156,8 +155,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          robot.packIdJoints(idJoints);
          ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
-         centroidalMomentumRateTermCalculator.compute();
-         aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getADotVTerm());
+         centroidalMomentumRateTermCalculator.reset();
+         aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getBiasSpatialForceMatrix());
 
          aTermCalculator.set(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix());
          // Compute aDotV numerically

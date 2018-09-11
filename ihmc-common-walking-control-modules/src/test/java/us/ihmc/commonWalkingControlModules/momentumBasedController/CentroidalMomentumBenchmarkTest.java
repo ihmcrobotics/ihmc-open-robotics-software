@@ -89,7 +89,7 @@ public class CentroidalMomentumBenchmarkTest
       CentroidalMomentumRateADotVTerm aDotVAnalyticalCalculator = new CentroidalMomentumRateADotVTerm(elevator, centerOfMassFrame,
             centroidalMomentumMatrixCalculator, totalMass, v);
 
-      CentroidalMomentumRateTermCalculator testTermCalc = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame, v, totalMass);
+      CentroidalMomentumRateTermCalculator testTermCalc = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame);
 
       ScrewTestTools.setRandomVelocities(joints, random);
       ScrewTestTools.setRandomPositions(joints, random);
@@ -117,7 +117,7 @@ public class CentroidalMomentumBenchmarkTest
       long startTime = System.nanoTime();
       for (int i = 0; i < iters; i++)
       {
-         testTermCalc.compute();
+         testTermCalc.reset();
       }
       long duration = (System.nanoTime() - startTime) / (iters);
       double termCalculatorTime = ((double) duration / 1000000000);
