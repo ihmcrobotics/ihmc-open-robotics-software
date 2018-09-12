@@ -523,11 +523,18 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case "hokuyo_link":
             modifyHokuyoInertia(linkHolder);
             break;
+         case "torso":
+            modifyChestMass(linkHolder);
+            break;
          default:
             break;
          }
-
       }
+   }
+
+   private void modifyChestMass(SDFLinkHolder chestSDFLink)
+   {
+      chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
    }
 
    @Override
