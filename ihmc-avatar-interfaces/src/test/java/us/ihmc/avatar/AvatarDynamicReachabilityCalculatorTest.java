@@ -7,7 +7,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+<<<<<<< Updated upstream
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+=======
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+>>>>>>> Stashed changes
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -68,8 +74,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 100000)
    public void testForwardWalkingShort() throws SimulationExceededMaximumTimeException
    {
       setupTest(shortScript);
@@ -79,8 +85,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
       assertTrue(success);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 100000)
    public void testForwardWalkingMedium() throws SimulationExceededMaximumTimeException
    {
       setupTest(mediumScript);
@@ -90,8 +96,8 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
       assertTrue(success);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 100000)
    public void testForwardWalkingLong() throws SimulationExceededMaximumTimeException
    {
       setupTest(longScript);
