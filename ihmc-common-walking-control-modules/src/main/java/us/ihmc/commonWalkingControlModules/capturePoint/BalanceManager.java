@@ -501,8 +501,9 @@ public class BalanceManager
 
       tempPoint2D.setIncludingFrame(perfectCoP2d);
       tempPoint2D.changeFrame(midFootZUpFrame);
+      desiredCoP.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      centerOfPressureCommand.setDesiredCoP(tempPoint2D); // TODO use the desired CoP instead.
+      centerOfPressureCommand.setDesiredCoP(desiredCoP); // TODO use the desired CoP instead.
       centerOfPressureCommand.setWeight(tempVector2D);
    }
 
