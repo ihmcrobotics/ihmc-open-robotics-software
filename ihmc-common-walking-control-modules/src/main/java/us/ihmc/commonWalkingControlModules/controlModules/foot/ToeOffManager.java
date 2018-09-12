@@ -25,6 +25,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +61,11 @@ public class ToeOffManager
    private final BooleanProvider useToeLineContactInTransfer;
    private final YoBoolean computeToeLineContact = new YoBoolean("computeToeLineContact", registry);
    private final YoBoolean computeToePointContact = new YoBoolean("computeToePointContact", registry);
+
    private final BooleanProvider updateLineContactDuringToeOff;
    private final BooleanProvider updatePointContactDuringToeOff;
+   private final BooleanProvider checkECMPForToeOff;
+   private final BooleanProvider checkCoPForToeOff;
 
    private final DoubleProvider ankleLowerLimitToTriggerToeOff;
    private final DoubleProvider kneeUpperLimitToTriggerToeOff;
@@ -104,8 +108,13 @@ public class ToeOffManager
                                                                                                                isRearKneePitchHittingLowerLimit, largeGlitchWindowSize);
 
    private final DoubleProvider minStepLengthForToeOff;
+   private final DoubleProvider minStepForwardForToeOff;
    private final DoubleProvider minStepHeightForToeOff;
    private final DoubleProvider extraCoMMaxHeightWithToes;
+
+   private final YoBoolean isSideStepping = new YoBoolean("isSideStepping", registry);
+   private final YoBoolean isStepLongEnough = new YoBoolean("isStepLongEnough", registry);
+   private final YoBoolean isStepLongEnoughAlongX = new YoBoolean("isStepLongEnoughAlongX", registry);
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint3D> contactStatePoints = new ArrayList<>();
@@ -122,17 +131,16 @@ public class ToeOffManager
    private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
    private final FrameVector2D toLeadingFoot = new FrameVector2D();
 
+   private final YoFramePoint2D leadingFootPosition = new YoFramePoint2D("leadingFootPositionForToeOff", null, registry);
+
    private final HashMap<ToeContact, AbstractToeContact> toeContacts = new HashMap<>();
 
    private Footstep nextFootstep;
-
-   private final ToeOffParameters toeOffParameters;
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final ToeOffCalculator toeOffCalculator;
 
    private final double inPlaceWidth;
-   private final double footLength;
 
    public ToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffCalculator toeOffCalculator,
                         WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
@@ -146,7 +154,7 @@ public class ToeOffManager
                         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
                         YoVariableRegistry parentRegistry)
    {
-      this.toeOffParameters = walkingControllerParameters.getToeOffParameters();
+      ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
 
       doToeOffIfPossibleInDoubleSupport = new BooleanParameter("doToeOffIfPossibleInDoubleSupport", registry, toeOffParameters.doToeOffIfPossible());
       doToeOffIfPossibleInSingleSupport = new BooleanParameter("doToeOffIfPossibleInSingleSupport", registry, toeOffParameters.doToeOffIfPossibleInSingleSupport());
@@ -161,6 +169,8 @@ public class ToeOffManager
       icpPercentOfStanceForDSToeOff = new DoubleParameter("icpPercentOfStanceForDSToeOff", registry, toeOffParameters.getICPPercentOfStanceForDSToeOff());
       icpPercentOfStanceForSSToeOff = new DoubleParameter("icpPercentOfStanceForSSToeOff", registry, toeOffParameters.getICPPercentOfStanceForSSToeOff());
 
+      checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
+      checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
       ecmpProximityForToeOff = new DoubleParameter("ecmpProximityForToeOff", registry, toeOffParameters.getECMPProximityForToeOff());
       copProximityForToeOff = new DoubleParameter("copProximityForToeOff", registry, toeOffParameters.getCoPProximityForToeOff());
 
@@ -170,12 +180,14 @@ public class ToeOffManager
       this.feet = feet;
 
       this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset() + walkingControllerParameters.getSteppingParameters()
+
+      double footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset() + walkingControllerParameters.getSteppingParameters()
                                                                                                                                  .getFootForwardOffset();
 
       extraCoMMaxHeightWithToes =  new DoubleParameter("extraCoMMaxHeightWithToes", registry, extraCoMHeightWithToes);
 
       minStepLengthForToeOff = new DoubleParameter("minStepLengthForToeOff", registry, toeOffParameters.getMinStepLengthForToeOff());
+      minStepForwardForToeOff = new DoubleParameter("minStepForwardForToeOff", registry, footLength);
       minStepHeightForToeOff = new DoubleParameter("minStepHeightForToeOff", registry, toeOffParameters.getMinStepHeightForToeOff());
 
       useToeLineContactInSwing = new BooleanParameter("useToeLineContactInSwing", registry, toeOffParameters.useToeOffLineContactInSwing());
@@ -462,7 +474,7 @@ public class ToeOffManager
 
    private void checkECMPLocation(FramePoint2D desiredECMP)
    {
-      if (toeOffParameters.checkECMPLocationToTriggerToeOff())
+      if (checkECMPForToeOff.getValue())
       {
          desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
          isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) <= ecmpProximityForToeOff.getValue());
@@ -477,7 +489,7 @@ public class ToeOffManager
 
    private void checkCoPLocation(FramePoint2D desiredCoP)
    {
-      if (toeOffParameters.checkCoPLocationToTriggerToeOff())
+      if (checkCoPForToeOff.getValue())
       {
          desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
          isDesiredCoPOKForToeOff.set(onToesSupportPolygon.distance(desiredCoP) <= copProximityForToeOff.getValue());
@@ -584,6 +596,8 @@ public class ToeOffManager
       else
          tempLeadingFootPosition.setY(0.0);
 
+      leadingFootPosition.set(tempLeadingFootPosition.getX(), tempLeadingFootPosition.getY());
+
       tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
       tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
       tempLeadingFootPositionInWorld.changeFrame(worldFrame);
@@ -612,14 +626,13 @@ public class ToeOffManager
             return false;
       }
 
-      boolean isSideStepping =
-            Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
-      if (isSideStepping && !DO_TOE_OFF_FOR_SIDE_STEPS)
+      isSideStepping.set(Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping));
+      if (isSideStepping.getValue() && !DO_TOE_OFF_FOR_SIDE_STEPS)
          return false;
 
-      boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getValue();
-      boolean isStepLongEnoughAlongX = tempLeadingFootPosition.getX() > footLength;
-      return isStepLongEnough && isStepLongEnoughAlongX;
+      isStepLongEnough.set(tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getValue());
+      isStepLongEnoughAlongX.set(tempLeadingFootPosition.getX() > minStepForwardForToeOff.getValue());
+      return isStepLongEnough.getValue() && isStepLongEnoughAlongX.getValue();
    }
 
    /**
