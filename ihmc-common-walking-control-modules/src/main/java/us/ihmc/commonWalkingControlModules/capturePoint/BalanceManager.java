@@ -499,11 +499,9 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
       yoDesiredCMP.set(desiredCMP);
 
-      tempPoint2D.setIncludingFrame(perfectCoP2d);
-      tempPoint2D.changeFrame(midFootZUpFrame);
       desiredCoP.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      centerOfPressureCommand.setDesiredCoP(desiredCoP); // TODO use the desired CoP instead.
+      centerOfPressureCommand.setDesiredCoP(desiredCoP);
       centerOfPressureCommand.setWeight(tempVector2D);
    }
 
