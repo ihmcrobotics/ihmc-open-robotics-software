@@ -20,14 +20,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 500.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 500.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
