@@ -300,7 +300,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
-      return lowerBodyJointVelocityBacklashSlopTime;
+      return 0.0;
    }
 
    @Override
