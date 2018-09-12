@@ -567,7 +567,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMPToPack.set(feedbackCMP);
+      desiredCMPToPack.setIncludingFrame(feedbackCMP);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCoP(FramePoint2D desiredCoPToPack)
+   {
+      desiredCoPToPack.setIncludingFrame(feedbackCoP);
    }
 
    /** {@inheritDoc} */

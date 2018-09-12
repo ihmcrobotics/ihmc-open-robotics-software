@@ -120,6 +120,7 @@ public class BalanceManager
    private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
 
    private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint2D achievedCMP = new FramePoint2D();
 
    private final FrameVector2D icpError2d = new FrameVector2D();
@@ -495,13 +496,13 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
       desiredCMP.set(yoDesiredCMP);
-      linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
+      linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
       yoDesiredCMP.set(desiredCMP);
 
       tempPoint2D.setIncludingFrame(perfectCoP2d);
       tempPoint2D.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      centerOfPressureCommand.setDesiredCoP(tempPoint2D);
+      centerOfPressureCommand.setDesiredCoP(tempPoint2D); // TODO use the desired CoP instead.
       centerOfPressureCommand.setWeight(tempVector2D);
    }
 
