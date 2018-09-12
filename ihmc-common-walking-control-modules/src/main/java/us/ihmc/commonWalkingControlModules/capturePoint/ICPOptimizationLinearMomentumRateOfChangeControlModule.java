@@ -100,6 +100,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
 
       icpOptimizationController.getDesiredCMP(desiredCMP);
+      icpOptimizationController.getDesiredCoP(desiredCoP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
    }

@@ -70,6 +70,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
          if (cmpProjector.getWasCMPProjected())
             icpProportionalController.bleedOffIntegralTerm();
       }
+
+      // we don't have any knowledge of a feedback CoP, so we're going to set this value to the perfect CoP.
+      desiredCoP.set(perfectCoP);
    }
 
    @Override

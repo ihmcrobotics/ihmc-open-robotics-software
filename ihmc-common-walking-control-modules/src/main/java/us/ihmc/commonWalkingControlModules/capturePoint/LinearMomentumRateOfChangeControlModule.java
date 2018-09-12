@@ -64,6 +64,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCMP = new FramePoint2D();
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
+   protected final FramePoint2D desiredCoP = new FramePoint2D();
 
    protected final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
    protected final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
@@ -251,17 +252,26 @@ public abstract class LinearMomentumRateOfChangeControlModule
    }
 
    private boolean desiredCMPcontainedNaN = false;
+   private boolean desiredCoPcontainedNaN = false;
 
+   private final FramePoint2D desiredCoPToThrowAway = new FramePoint2D();
    public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   {
+      compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToThrowAway);
+   }
+
+   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
    {
       computeCMPInternal(desiredCMPPreviousValue);
 
       capturePoint.changeFrame(worldFrame);
       desiredCMP.changeFrame(worldFrame);
+      desiredCoP.changeFrame(worldFrame);
+
       if (desiredCMP.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
-            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
+            PrintTools.error("Desired CMP contains NaN, setting it to the ICP - only showing this error once");
          desiredCMP.set(capturePoint);
          desiredCMPcontainedNaN = true;
       }
@@ -270,8 +280,23 @@ public abstract class LinearMomentumRateOfChangeControlModule
          desiredCMPcontainedNaN = false;
       }
 
+      if (desiredCoP.containsNaN())
+      {
+         if (!desiredCoPcontainedNaN)
+            PrintTools.error("Desired CoP contains NaN, setting it to the desiredCMP - only showing this error once");
+         desiredCoP.set(desiredCMP);
+         desiredCoPcontainedNaN = true;
+      }
+      else
+      {
+         desiredCoPcontainedNaN = false;
+      }
+
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
+
+      desiredCoPToPack.setIncludingFrame(desiredCoP);
+      desiredCoPToPack.changeFrame(worldFrame);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);

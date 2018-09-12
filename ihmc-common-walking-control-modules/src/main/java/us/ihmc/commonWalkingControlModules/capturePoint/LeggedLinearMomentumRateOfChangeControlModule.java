@@ -43,11 +43,19 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
       if (robotSide != null)
          this.transferToSide = robotSide.getOppositeSide();
    }
-   
+
+
    @Override
    public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
       super.compute(desiredCMPPreviousValue, desiredCMPToPack);
+      supportLegPreviousTick.set(supportSide);
+   }
+
+   @Override
+   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   {
+      super.compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToPack);
       supportLegPreviousTick.set(supportSide);
    }
    
