@@ -2,6 +2,8 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -72,6 +74,18 @@ public class RateLimitedYoFramePoint2D extends YoFramePoint2D
       this.dt = dt;
 
       reset();
+   }
+
+   public void setAndUpdate(FramePoint2DReadOnly framePoint2D)
+   {
+      super.set(framePoint2D);
+      hasBeenCalled.set(true);
+   }
+
+   public void setAndUpdate(FramePoint3DReadOnly framePoint3D)
+   {
+      super.set(framePoint3D);
+      hasBeenCalled.set(true);
    }
 
    public void reset()
