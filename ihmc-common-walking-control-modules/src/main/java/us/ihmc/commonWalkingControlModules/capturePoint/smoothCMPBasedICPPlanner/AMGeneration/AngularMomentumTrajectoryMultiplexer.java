@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -33,17 +34,17 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 
    private AngularMomentumTrajectoryGeneratorInterface currentAngularMomentumTrajectoryGenerator;
 
-   public AngularMomentumTrajectoryMultiplexer(String namePrefix, WalkingMessageHandler walkingMessageHandler, YoDouble yoTime, YoDouble omega0, boolean debug, YoVariableRegistry parentRegistry)
+   public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0, boolean debug, YoVariableRegistry parentRegistry)
    {
       predictedAngularMomentum = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, registry);
 
-      if(walkingMessageHandler == null)
+      if(momentumTrajectoryHandler == null)
       {
          commandedAngularMomentum = null;
       }
       else
       {
-         commandedAngularMomentum = new CommandBasedAngularMomentumTrajectoryGenerator(walkingMessageHandler, yoTime, registry);
+         commandedAngularMomentum = new CommandBasedAngularMomentumTrajectoryGenerator(momentumTrajectoryHandler, yoTime, registry);
       }
 
       currentAngularMomentumTrajectoryGenerator = predictedAngularMomentum;
