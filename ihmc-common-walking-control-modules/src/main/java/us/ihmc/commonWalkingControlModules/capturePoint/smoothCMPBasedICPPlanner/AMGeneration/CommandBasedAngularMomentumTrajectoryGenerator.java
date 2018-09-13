@@ -25,12 +25,12 @@ import java.util.List;
 
 public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMomentumTrajectoryGeneratorInterface
 {
-   private static final int waypointsPerWalkingPhase = 30;
+   private static final int waypointsPerWalkingPhase = 12;
    private static final int maxNumberOfStepsToConsider = 4;
    private static final int numberOfTrajectoryCoefficients = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final WalkingMessageHandler walkingMessageHandler;
+   private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final YoDouble time;
    private final YoInteger numberOfStepsToConsider, numberOfRegisteredFootsteps;
    private final YoDouble[] commandedAngularMomentum = new YoDouble[3];
@@ -48,10 +48,10 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final FrameVector3D desiredTorque = new FrameVector3D();
    private final FrameVector3D desiredRotatum = new FrameVector3D();
 
-   public CommandBasedAngularMomentumTrajectoryGenerator(WalkingMessageHandler walkingMessageHandler, YoDouble time, YoVariableRegistry parentRegistry)
+   public CommandBasedAngularMomentumTrajectoryGenerator(MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble time, YoVariableRegistry parentRegistry)
    {
       String namePrefix = "commandedAngMomentum";
-      this.walkingMessageHandler = walkingMessageHandler;
+      this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       this.time = time;
       this.numberOfStepsToConsider = new YoInteger(namePrefix + "NumberOfStepsToConsider", registry);
       this.numberOfRegisteredFootsteps = new YoInteger(namePrefix + "NumberOfRegisteredFootsteps", registry);
@@ -94,10 +94,18 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    {
    }
 
+   private final FrameVector3D prevAM = new FrameVector3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
+
    @Override
    public void update(double currentTime)
    {
+      prevAM.setIncludingFrame(desiredAngularMomentum);
       activeTrajectory.update(currentTime - initialTime, desiredAngularMomentum, desiredTorque, desiredRotatum);
+
+      tempVector.sub(desiredAngularMomentum, prevAM);
+      double diff = tempVector.length();
+      diff += 0.01;
    }
 
    @Override
@@ -128,7 +136,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    private void computeTrajectories(WalkingTrajectoryType startingTrajectoryType)
    {
-      MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
       momentumTrajectoryHandler.clearPointsInPast();
 
       int stepIndex = 0;
@@ -240,7 +247,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    public boolean hasReferenceTrajectory()
    {
-      MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
       return !momentumTrajectoryHandler.isEmpty() && momentumTrajectoryHandler.isWithinInterval(time.getDoubleValue());
    }
 }

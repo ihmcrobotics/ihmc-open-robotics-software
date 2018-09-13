@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
@@ -97,16 +98,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
-                                   WalkingMessageHandler walkingMessageHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
+                                   MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ)
    {
-      this(fullRobotModel.getTotalMass(), bipedSupportPolygons, contactableFeet, maxNumberOfFootstepsToConsider, walkingMessageHandler, yoTime, parentRegistry,
+      this(fullRobotModel.getTotalMass(), bipedSupportPolygons, contactableFeet, maxNumberOfFootstepsToConsider, momentumTrajectoryHandler, yoTime, parentRegistry,
            yoGraphicsListRegistry, gravityZ);
    }
 
    public SmoothCMPBasedICPPlanner(double robotMass, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
-                                   WalkingMessageHandler walkingMessageHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
+                                   MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ)
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
@@ -146,7 +147,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, debug, registry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isDoubleSupport, registry);
-      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, walkingMessageHandler, yoTime, omega0, debug, registry);
+      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, registry);
 
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
