@@ -5,6 +5,7 @@ import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class TriangleToolsTest
@@ -23,11 +24,13 @@ public class TriangleToolsTest
          double interiorAngle = RandomNumbers.nextDouble(random, 0.0 + 1e-2, Math.PI - 1e-2);
 
          double farSideLength = TriangleTools.computeSideLength(sideALength, sideBLength, interiorAngle);
-         assertEquals("Iteration " + iter + " length failed.", interiorAngle, TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength), epsilon);
+         assertEquals("Iteration " + iter + " length failed.", interiorAngle, TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength),
+                      epsilon);
 
          double interiorAngleVelocity = RandomNumbers.nextDouble(random, -10.0, 10.0);
          double farSideVelocity = TriangleTools.computeSideLengthVelocity(sideALength, sideBLength, interiorAngle, interiorAngleVelocity);
-         assertEquals("Iteration " + iter + " velocity failed.", interiorAngleVelocity, TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity), epsilon);
+         assertEquals("Iteration " + iter + " velocity failed.", interiorAngleVelocity,
+                      TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity), epsilon);
 
          double interiorAngleAcceleration = RandomNumbers.nextDouble(random, -100.0, 100.0);
          double farSideAcceleration = TriangleTools
@@ -148,7 +151,9 @@ public class TriangleToolsTest
          double interiorAngle = Math.acos(-lengthDifference / 2.0 / sideALength / sideBLength);
          double interiorAngleVelocity = 2.0 * farSideLength * farSideLengthVelocity / 2.0 / sideALength / sideBLength / Math.sin(interiorAngle);
 
-         double interiorAngleAcceleration = farSideLengthAcceleration * Math.pow(farSideLength, 2.0) / (sideALength * sideBLength) - Math.cos(interiorAngle) * Math.pow(interiorAngleVelocity, 2.0) * farSideLength + farSideLengthVelocity * interiorAngleVelocity * Math.sin(interiorAngle);
+         double interiorAngleAcceleration =
+               farSideLengthAcceleration * Math.pow(farSideLength, 2.0) / (sideALength * sideBLength) - Math.cos(interiorAngle) * Math
+                     .pow(interiorAngleVelocity, 2.0) * farSideLength + farSideLengthVelocity * interiorAngleVelocity * Math.sin(interiorAngle);
          interiorAngleAcceleration /= Math.sin(interiorAngle) * farSideLength;
 
          assertEquals(interiorAngleAcceleration,
@@ -173,9 +178,11 @@ public class TriangleToolsTest
          double dt = 0.00001;
          double angleVelocity = TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideLengthVelocity);
          double angleVelocityPlus = TriangleTools
-               .computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength + farSideLengthVelocity * dt  + 0.5 * farSideLengthAcceleration * dt * dt, farSideLengthVelocity + dt * farSideLengthAcceleration);
+               .computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength + farSideLengthVelocity * dt + 0.5 * farSideLengthAcceleration * dt * dt,
+                                             farSideLengthVelocity + dt * farSideLengthAcceleration);
          double angleVelocityMinus = TriangleTools
-               .computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength - farSideLengthVelocity * dt  + 0.5 * farSideLengthAcceleration * dt * dt, farSideLengthVelocity - dt * farSideLengthAcceleration);
+               .computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength - farSideLengthVelocity * dt + 0.5 * farSideLengthAcceleration * dt * dt,
+                                             farSideLengthVelocity - dt * farSideLengthAcceleration);
 
          double accelerationPlus = (angleVelocityPlus - angleVelocity) / dt;
          double accelerationMinus = (angleVelocity - angleVelocityMinus) / dt;
@@ -346,4 +353,93 @@ public class TriangleToolsTest
       }
    }
 
+   @Test(timeout = 30000)
+   public void testFindFarSideLengthPastPi()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         double sideALength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double sideBLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double interiorAngleToUse = RandomNumbers.nextDouble(random, 0.0 + 1e-3, Math.PI - 1e-3);
+         double interiorAngle = Math.PI + interiorAngleToUse;
+
+         double farSideLengthSquared =
+               Math.pow(sideALength, 2.0) + Math.pow(sideBLength, 2.0) - 2.0 * sideALength * sideBLength * Math.cos(Math.PI - interiorAngleToUse);
+         double farSideLength = Math.sqrt(farSideLengthSquared);
+
+         assertEquals(farSideLength, TriangleTools.computeSideLength(sideALength, sideBLength, interiorAngle), epsilon);
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testFindInteriorAngleVelocityDirectionality()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         double sideALength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double sideBLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double maxLength = sideALength + sideBLength;
+         double minLength = Math.abs(sideALength - sideBLength);
+         double farSideLength;
+         if (minLength * 1.05 > 0.95 * maxLength)
+            farSideLength = 0.5 * (minLength + maxLength);
+         else
+            farSideLength = RandomNumbers.nextDouble(random, 1.05 * minLength, 0.95 * maxLength);
+
+         double farSideLengthVelocityPositive = RandomNumbers.nextDouble(random, 0.01, 100.0);
+         double farSideLengthVelocityNegative = RandomNumbers.nextDouble(random, -100.0, -0.01);
+
+         double positiveInteriorVel = TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideLengthVelocityPositive);
+         double negativeInteriorVel = TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideLengthVelocityNegative);
+         assertTrue("Iteration " + iter + " positive failed. Actuator velocity " + farSideLengthVelocityPositive + " resulted in joint velocity "
+                          + positiveInteriorVel + ", length = " + farSideLength, positiveInteriorVel > epsilon);
+         assertTrue("Iteration " + iter + " negative failed. Actuator velocity " + farSideLengthVelocityNegative + " resulted in joint velocity "
+                          + negativeInteriorVel, negativeInteriorVel < epsilon);
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testFindInteriorAngleAccelerationDirectionality()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         double sideALength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double sideBLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
+         double maxLength = sideALength + sideBLength;
+         double minLength = Math.abs(sideALength - sideBLength);
+         double farSideLength;
+         if (minLength * 1.05 > 0.95 * maxLength)
+            farSideLength = 0.5 * (minLength + maxLength);
+         else
+            farSideLength = RandomNumbers.nextDouble(random, 1.05 * minLength, 0.95 * maxLength);
+
+         double farSideLengthAccelerationPositive = RandomNumbers.nextDouble(random, 0.01, 100.0);
+         double farSideLengthAccelerationNegative = RandomNumbers.nextDouble(random, -100.0, -0.01);
+
+         double positiveInteriorAccel = TriangleTools
+               .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationPositive);
+         double negativeInteriorAccel = TriangleTools
+               .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationNegative);
+         assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
+         assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
+
+         for (int iterB = 0; iterB < 1000; iterB++)
+         {
+            double farSideLengthVelocity = RandomNumbers.nextDouble(random, -10.0, 10.0);
+
+            positiveInteriorAccel = TriangleTools
+                  .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideLengthVelocity, farSideLengthAccelerationPositive);
+            negativeInteriorAccel = TriangleTools
+                  .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideLengthVelocity, farSideLengthAccelerationNegative);
+            assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
+            assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
+         }
+      }
+   }
 }
