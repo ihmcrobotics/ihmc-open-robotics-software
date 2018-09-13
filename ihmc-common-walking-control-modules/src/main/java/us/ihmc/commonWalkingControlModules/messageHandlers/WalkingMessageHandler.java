@@ -535,8 +535,6 @@ public class WalkingMessageHandler
       footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
       statusOutputManager.reportStatusMessage(footstepStatus);
 
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
       executingFootstep.set(false);
    }
 
@@ -556,8 +554,6 @@ public class WalkingMessageHandler
       walkingStatusMessage.setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingAbortRequested()
@@ -565,8 +561,6 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatus.ABORT_REQUESTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
-      //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
-      //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportControllerFailure(FrameVector3D fallingDirection)
