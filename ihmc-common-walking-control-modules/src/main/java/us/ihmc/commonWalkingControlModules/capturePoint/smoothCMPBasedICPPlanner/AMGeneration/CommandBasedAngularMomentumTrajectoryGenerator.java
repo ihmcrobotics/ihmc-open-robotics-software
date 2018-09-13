@@ -94,18 +94,10 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    {
    }
 
-   private final FrameVector3D prevAM = new FrameVector3D();
-   private final FrameVector3D tempVector = new FrameVector3D();
-
    @Override
    public void update(double currentTime)
    {
-      prevAM.setIncludingFrame(desiredAngularMomentum);
       activeTrajectory.update(currentTime - initialTime, desiredAngularMomentum, desiredTorque, desiredRotatum);
-
-      tempVector.sub(desiredAngularMomentum, prevAM);
-      double diff = tempVector.length();
-      diff += 0.01;
    }
 
    @Override
@@ -136,6 +128,12 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    private void computeTrajectories(WalkingTrajectoryType startingTrajectoryType)
    {
+      // don't recompute if you're already in this phase
+      if(isInPhase(startingTrajectoryType))
+      {
+         return;
+      }
+
       momentumTrajectoryHandler.clearPointsInPast();
 
       int stepIndex = 0;
@@ -177,6 +175,23 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       double finalTransferDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, entryCoPName);
       momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + finalTransferDuration, waypointsPerWalkingPhase, waypoints);
       setSubTrajectory(finalTransferDuration, transferTrajectories.get(stepIndex));
+   }
+
+   private boolean isInPhase(WalkingTrajectoryType phase)
+   {
+      if(activeTrajectory == null)
+      {
+         return false;
+      }
+      else if(phase.equals(WalkingTrajectoryType.SWING) && activeTrajectory == swingTrajectories.get(0))
+      {
+         return true;
+      }
+      else if(phase.equals(WalkingTrajectoryType.TRANSFER) && activeTrajectory == transferTrajectories.get(0))
+      {
+         return true;
+      }
+      return false;
    }
 
    /**
