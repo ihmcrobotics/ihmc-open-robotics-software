@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
@@ -59,6 +61,10 @@ public class WalkingMessageHandler
    private static final int maxNumberOfFootsteps = 100;
    private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
    private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
+   private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
+
+   private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
+   private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
 
    private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
@@ -227,13 +233,15 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), command.getExecutionMode());
+         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
+                           command.getExecutionMode());
          setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
          currentNumberOfFootsteps.increment();
       }
 
       if (!checkTimings(upcomingFootstepTimings))
          clearFootsteps();
+      checkForPause();
 
       updateVisualization();
    }
@@ -362,7 +370,7 @@ public class WalkingMessageHandler
     */
    public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
-      if (upcomingFootsteps.isEmpty())
+      if (getStepsBeforePause() == 0)
       {
          throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
       }
@@ -376,6 +384,7 @@ public class WalkingMessageHandler
       currentFootstepIndex.increment();
 
       upcomingFootstepTimings.remove(0);
+      pauseDurationAfterStep.remove(0);
       upcomingFootsteps.remove(0);
    }
 
@@ -434,7 +443,44 @@ public class WalkingMessageHandler
 
    public boolean hasUpcomingFootsteps()
    {
-      return !upcomingFootsteps.isEmpty() && !isWalkingPaused.getBooleanValue();
+      return getStepsBeforePause() > 0 && !isWalkingPaused.getBooleanValue();
+   }
+
+   private void checkForPause()
+   {
+      if (!pauseDurationAfterStep.isEmpty() && Double.isFinite(pauseDurationAfterStep.get(0).getValue()))
+      {
+         double pause = pauseDurationAfterStep.get(0).getValue();
+         timeToContinueWalking.set(yoTime.getValue() + pause);
+         isPausedWithSteps.set(true);
+         pauseDurationAfterStep.get(0).setValue(Double.NaN);
+      }
+   }
+
+   private int getStepsBeforePause()
+   {
+      // Check if we can continue walking if we are paused.
+      if (isPausedWithSteps.getValue() && yoTime.getValue() >= timeToContinueWalking.getValue())
+      {
+         isPausedWithSteps.set(false);
+      }
+
+      if (isPausedWithSteps.getValue())
+      {
+         return 0;
+      }
+
+      int stepIndex = 0;
+      while (stepIndex < upcomingFootsteps.size())
+      {
+         if (Double.isFinite(pauseDurationAfterStep.get(stepIndex).getValue()))
+         {
+            return stepIndex;
+         }
+         stepIndex++;
+      }
+
+      return stepIndex;
    }
 
    public boolean hasRequestedFootstepAdjustment()
@@ -487,6 +533,7 @@ public class WalkingMessageHandler
    {
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
+      pauseDurationAfterStep.clear();
       currentNumberOfFootsteps.set(0);
       currentFootstepIndex.set(0);
       updateVisualization();
@@ -551,6 +598,14 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      // If we have transitioned to standing this will be called. However, we might just be taking a break because of a long
+      // transfer. In that case do not report walking complete. Instead compute when to continue walking.
+      if (!upcomingFootsteps.isEmpty())
+      {
+         checkForPause();
+         return;
+      }
+
       walkingStatusMessage.setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
@@ -666,7 +721,7 @@ public class WalkingMessageHandler
 
    public int getCurrentNumberOfFootsteps()
    {
-      return currentNumberOfFootsteps.getIntegerValue();
+      return getStepsBeforePause();
    }
 
    private void updateVisualization()
@@ -745,9 +800,10 @@ public class WalkingMessageHandler
       }
    }
 
-   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, ExecutionMode executionMode)
+   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
+                                  ExecutionMode executionMode)
    {
-      int stepsInQueue = getCurrentNumberOfFootsteps();
+      int stepsInQueue = upcomingFootsteps.size();
 
       double swingDuration = footstep.getSwingDuration();
       if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
@@ -807,6 +863,19 @@ public class WalkingMessageHandler
          break;
       default:
          throw new RuntimeException("Timing mode not implemented.");
+      }
+
+      // The transfer is long enough that we can go to standing, pause, and then keep walking:
+      double timeToGoToStanding = stepsInQueue == 0 ? 0.0 : finalTransferTime.getValue();
+      double pauseTime = timingToSet.getTransferTime() - timeToGoToStanding - defaultInitialTransferTime.getValue();
+      if (pauseTime > 0.0)
+      {
+         timingToSet.setTransferTime(defaultInitialTransferTime.getValue());
+         pauseDurationToSet.setValue(pauseTime);
+      }
+      else
+      {
+         pauseDurationToSet.setValue(Double.NaN);
       }
    }
 
