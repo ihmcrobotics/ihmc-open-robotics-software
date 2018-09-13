@@ -79,6 +79,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(setUpBollard(0, 4, new Point2D(0.4, 0.0), bollardHeight, bollardRadius));
          combinedTerrainObject3D.addTerrainObject(setUpBollard(0, 4, new Point2D(-0.4, 0.0), bollardHeight, bollardRadius));
 
+         combinedTerrainObject3D.addTerrainObject(setUpStormGrate(1, 5));
+
          //         combinedTerrainObject3D.addTerrainObject(setUpGridWithPotholes(1, 1));
          //         combinedTerrainObject3D.addTerrainObject(setUpGridWithPotholes(2, 1));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 2));
@@ -101,7 +103,6 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       case C:
          break;
       }
-
    }
 
    private TerrainObject3D setUpFlatGrid(int row, int column)
@@ -193,7 +194,33 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       double centerY = (getWorldCoordinate(startRow, startColumn).getY() + getWorldCoordinate(endRow, endColumn).getY()) / 2;
       RotatableRampTerrainObject inclinedSurface = new RotatableRampTerrainObject(centerX, centerY, rampLength, rampWidth, flatGridHeight, -90, curbAppearance);
 
+      // TODO : place grass and stones on this surface.
       combinedTerrainObject.addTerrainObject(inclinedSurface);
+
+      return combinedTerrainObject;
+   }
+
+   private CombinedTerrainObject3D setUpStormGrate(int row, int column)
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("StormGrate");
+
+      AppearanceDefinition crossLineAppearance = YoAppearance.DarkGrey();
+
+      double depthCrossLine = 0.05;
+      double thickCrossLine = 0.02;
+      int numberOfCrossLines = 15;
+
+      double intervalOfCrossLines = gridLength / (numberOfCrossLines + 1);
+
+      for (int i = 0; i < numberOfCrossLines; i++)
+      {
+         RigidBodyTransform location = new RigidBodyTransform();
+         location.appendTranslation(getWorldCoordinate(row, column));
+         location.appendTranslation(gridLength / 2 - intervalOfCrossLines * (i + 1), 0.0, -depthCrossLine / 2);
+         Box3D crossLine = new Box3D(location, thickCrossLine, gridWidth, depthCrossLine);
+
+         combinedTerrainObject.addRotatableBox(crossLine, crossLineAppearance);
+      }
 
       return combinedTerrainObject;
    }
