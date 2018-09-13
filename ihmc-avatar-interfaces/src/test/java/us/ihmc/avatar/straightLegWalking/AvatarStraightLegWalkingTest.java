@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -79,7 +80,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+//      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
@@ -105,7 +106,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       double timeOverrunFactor = 1.1;
 
-      double simulationTime = timeOverrunFactor * numberOfSteps * (transferDuration + swingDuration) + 2.0;
+      double simulationTime = timeOverrunFactor * numberOfSteps * (transferDuration + swingDuration) + 3.0;
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
@@ -781,7 +782,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       Point3D bounds = new Point3D(0.2, 0.2, 0.3);
 
-      BoundingBox3D boundingBox3D = new BoundingBox3D(midpoint, bounds);
+      BoundingBox3D boundingBox3D = BoundingBox3D.createUsingCenterAndPlusMinusVector(midpoint, bounds);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox3D);
    }
 }
