@@ -43,10 +43,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    private ArrayList<SliderBoardControlAddedListener> controlAddedListeners = new ArrayList<SliderBoardControlAddedListener>();
 
-   private Devices preferedDevice = Devices.VIRTUAL;
+   private Devices preferedDevice = Devices.XTOUCH_COMPACT;
    private int preferdDeviceNumber = -1;
 
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;
@@ -199,7 +199,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             catch (Exception e)
             {
                if (DEBUG)
+               {
                   System.err.println("Exception when trying to get MIDI transmitter 1: " + e);
+                 e.printStackTrace();
+               }
             }
 
             final Object self = this;
@@ -521,7 +524,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                rc += 1;
             }
          }
-         else if (description.contains("X-TOUCH COMPACT"))
+         else if (name.contains("X-TOUCH COMPACT") || description.contains("X-TOUCH COMPACT"))
          {
             preferdDeviceNumber = i;
             preferedDevice = Devices.XTOUCH_COMPACT;
