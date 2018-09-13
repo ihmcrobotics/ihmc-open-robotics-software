@@ -6,7 +6,7 @@ import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableRampTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.SimpleTableTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
@@ -30,14 +31,14 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    }
 
    private static final double flatGridHeight = 0.3;
-   private static final double palletLength = 1.25;
-   private static final double palletWidth = 1.0;
+   private static final double gridLength = 1.25;
+   private static final double gridWidth = 1.0;
 
    private static final int gridDimensionX = 3;
    private static final int gridDimensionY = 7;
 
-   private static final double worldLength = gridDimensionX * palletLength;
-   private static final double worldWidth = gridDimensionY * palletWidth;
+   private static final double worldLength = gridDimensionX * gridLength;
+   private static final double worldWidth = gridDimensionY * gridWidth;
 
    private static final double tableHeight = 0.5;
    private static final double tableThickness = 0.05;
@@ -61,13 +62,15 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("CTTSOObstacleCourseEnvironment");
 
-      combinedTerrainObject3D.addTerrainObject(setUpPallets("PalletGround"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       switch (type)
       {
       case A:
          break;
       case B:
+         combinedTerrainObject3D.addTerrainObject(setUpInclinedSurface(0, 0, 0, 3));
+
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 0));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 0));
 
@@ -101,30 +104,15 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private CombinedTerrainObject3D setUpPallets(String name)
-   {
-      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
-
-      AppearanceDefinition palletAppearance = YoAppearance.SandyBrown();
-      double palletThickness = 0.1;
-
-      RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3D(0, 0, -flatGridHeight - palletThickness / 2));
-
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, worldLength, worldWidth, palletThickness), palletAppearance);
-      combinedTerrainObject.addTerrainObject(newBox);
-
-      return combinedTerrainObject;
-   }
-
    private TerrainObject3D setUpFlatGrid(int row, int column)
    {
       AppearanceDefinition gridAppearance = YoAppearance.Grey();
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.appendTranslation(getWorldCoordinate(row, column).getX(), getWorldCoordinate(row, column).getY(), -flatGridHeight / 2);
+      location.appendTranslation(getWorldCoordinate(row, column));
+      location.appendTranslation(0.0, 0.0, -flatGridHeight / 2);
 
-      return new RotatableBoxTerrainObject(new Box3D(location, palletLength, palletWidth, flatGridHeight), gridAppearance);
+      return new RotatableBoxTerrainObject(new Box3D(location, gridLength, gridWidth, flatGridHeight), gridAppearance);
    }
 
    private TerrainObject3D setUpBollard(int row, int column, Point2D positionInGrid, double height, double radius)
@@ -132,7 +120,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition bollardAppearance = YoAppearance.Yellow();
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.appendTranslation(getWorldCoordinate(row, column).getX(), getWorldCoordinate(row, column).getY(), 0.0);
+      location.appendTranslation(getWorldCoordinate(row, column));
       location.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), height / 2);
 
       return new CylinderTerrainObject(location, height, radius, bollardAppearance);
@@ -141,15 +129,15 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    private TerrainObject3D setUpTable(int row, int column, Point2D positionInGrid)
    {
       RigidBodyTransform location = new RigidBodyTransform();
-      location.appendTranslation(getWorldCoordinate(row, column).getX(), getWorldCoordinate(row, column).getY(), 0.0);
+      location.appendTranslation(getWorldCoordinate(row, column));
       location.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), 0.0);
 
       double xStart = location.getTranslationX() - tableLength / 2;
       double yStart = location.getTranslationY() - tableWidth / 2;
       double xEnd = location.getTranslationX() + tableLength / 2;
       double yEnd = location.getTranslationY() + tableWidth / 2;
-      double zStart = tableHeight - tableThickness;
-      double zEnd = tableHeight;
+      double zStart = tableHeight - tableThickness + getWorldCoordinate(row, column).getZ();
+      double zEnd = tableHeight + getWorldCoordinate(row, column).getZ();
 
       return new SimpleTableTerrainObject(xStart, yStart, xEnd, yEnd, zStart, zEnd);
    }
@@ -164,29 +152,48 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition edgeAppearance = YoAppearance.DarkGrey();
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.appendTranslation(getWorldCoordinate(row, column).getX(), getWorldCoordinate(row, column).getY(), 0.0);
+      location.appendTranslation(getWorldCoordinate(row, column));
       location.appendTranslation(0.0, 0.0, curbHeight / 2);
 
-      combinedTerrainObject.addRotatableBox(location, palletLength, palletWidth - curbHeight * 2, curbHeight, curbAppearance);
+      combinedTerrainObject.addRotatableBox(location, gridLength, gridWidth - curbHeight * 2, curbHeight, curbAppearance);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          double filletRadius = curbHeight * fillet;
-         Cylinder3D sideEdgeFillet = new Cylinder3D(location, palletLength, filletRadius);
-         sideEdgeFillet.appendTranslation(0.0, robotSide.negateIfRightSide(palletWidth / 2 - filletRadius), curbHeight / 2 - filletRadius);
+         Cylinder3D sideEdgeFillet = new Cylinder3D(location, gridLength, filletRadius);
+         sideEdgeFillet.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - filletRadius), curbHeight / 2 - filletRadius);
          sideEdgeFillet.appendPitchRotation(Math.PI / 2);
          RigidBodyTransform sideEdgeFilletTransform = new RigidBodyTransform();
          sideEdgeFillet.getPose(sideEdgeFilletTransform);
-         combinedTerrainObject.addTerrainObject(new CylinderTerrainObject(sideEdgeFilletTransform, palletLength, filletRadius, edgeAppearance));
+         combinedTerrainObject.addTerrainObject(new CylinderTerrainObject(sideEdgeFilletTransform, gridLength, filletRadius, edgeAppearance));
 
-         Box3D sideEdge = new Box3D(location, palletLength, curbHeight, curbHeight - filletRadius);
-         sideEdge.appendTranslation(0.0, robotSide.negateIfRightSide(palletWidth / 2 - sideEdge.getWidth() / 2), - filletRadius / 2);
+         Box3D sideEdge = new Box3D(location, gridLength, curbHeight, curbHeight - filletRadius);
+         sideEdge.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdge.getWidth() / 2), -filletRadius / 2);
          combinedTerrainObject.addRotatableBox(sideEdge, edgeAppearance);
-         
-         Box3D sideEdgeTop = new Box3D(location, palletLength, curbHeight - filletRadius, filletRadius);
-         sideEdgeTop.appendTranslation(0.0, robotSide.negateIfRightSide(palletWidth / 2 - sideEdgeTop.getWidth() / 2 - filletRadius), curbHeight / 2 - sideEdgeTop.getHeight() / 2);
+
+         Box3D sideEdgeTop = new Box3D(location, gridLength, curbHeight - filletRadius, filletRadius);
+         sideEdgeTop.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdgeTop.getWidth() / 2 - filletRadius),
+                                       curbHeight / 2 - sideEdgeTop.getHeight() / 2);
          combinedTerrainObject.addRotatableBox(sideEdgeTop, edgeAppearance);
       }
+
+      return combinedTerrainObject;
+   }
+
+   private CombinedTerrainObject3D setUpInclinedSurface(int startRow, int endRow, int startColumn, int endColumn)
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("InclinedSurface");
+
+      AppearanceDefinition curbAppearance = YoAppearance.LightSlateGrey();
+
+      double rampWidth = (endRow - startRow + 1) * gridLength;
+      double rampLength = (endColumn - startColumn + 1) * gridWidth;
+
+      double centerX = (getWorldCoordinate(startRow, startColumn).getX() + getWorldCoordinate(endRow, endColumn).getX()) / 2;
+      double centerY = (getWorldCoordinate(startRow, startColumn).getY() + getWorldCoordinate(endRow, endColumn).getY()) / 2;
+      RotatableRampTerrainObject inclinedSurface = new RotatableRampTerrainObject(centerX, centerY, rampLength, rampWidth, flatGridHeight, -90, curbAppearance);
+
+      combinedTerrainObject.addTerrainObject(inclinedSurface);
 
       return combinedTerrainObject;
    }
@@ -198,9 +205,12 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private Point2D getWorldCoordinate(int row, int column)
+   private Point3D getWorldCoordinate(int row, int column)
    {
-      return new Point2D(worldLength / 2 - (row * palletLength + palletLength / 2), worldWidth / 2 - (column * palletWidth + palletWidth / 2));
+      double worldX = worldLength / 2 - (row * gridLength + gridLength / 2);
+      double worldY = worldWidth / 2 - (column * gridWidth + gridWidth / 2);
+      double worldZOnFlatGround = flatGridHeight;
+      return new Point3D(worldX, worldY, worldZOnFlatGround);
    }
 
    @Override
