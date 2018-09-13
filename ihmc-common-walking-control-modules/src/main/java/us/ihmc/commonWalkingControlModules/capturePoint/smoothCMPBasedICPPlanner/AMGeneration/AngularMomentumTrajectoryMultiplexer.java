@@ -46,6 +46,9 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
          commandedAngularMomentum = new CommandBasedAngularMomentumTrajectoryGenerator(walkingMessageHandler, yoTime, registry);
       }
 
+      currentAngularMomentumTrajectoryGenerator = predictedAngularMomentum;
+      usingReferenceAngularMomentum.set(false);
+
       parentRegistry.addChild(registry);
    }
 
@@ -74,7 +77,6 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    @Override
    public void update(double currentTime)
    {
-      updateCurrentAngularMomentumTrajectoryGenerator();
       currentAngularMomentumTrajectoryGenerator.update(currentTime);
    }
 
@@ -99,12 +101,14 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
+      updateCurrentAngularMomentumTrajectoryGenerator();
       currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(atAStop);
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
+      updateCurrentAngularMomentumTrajectoryGenerator();
       currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
    }
 
@@ -127,8 +131,14 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
                                            List<? extends FrameVector3DReadOnly> comInitialAccelerations,
                                            List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
-      currentAngularMomentumTrajectoryGenerator.addCopAndComSetpointsToPlan(copLocations, comInitialPositions, comFinalPositions, comInitialVelocities,
-                                                                            comFinalVelocities, comInitialAccelerations, comFinalAccelerations, numberOfRegisteredFootsteps);
+      predictedAngularMomentum.addCopAndComSetpointsToPlan(copLocations, comInitialPositions, comFinalPositions, comInitialVelocities, comFinalVelocities,
+                                                           comInitialAccelerations, comFinalAccelerations, numberOfRegisteredFootsteps);
+
+      if (commandedAngularMomentum != null)
+      {
+         commandedAngularMomentum.addCopAndComSetpointsToPlan(copLocations, comInitialPositions, comFinalPositions, comInitialVelocities, comFinalVelocities,
+                                                              comInitialAccelerations, comFinalAccelerations, numberOfRegisteredFootsteps);
+      }
    }
 
    private void updateCurrentAngularMomentumTrajectoryGenerator()
