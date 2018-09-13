@@ -264,7 +264,7 @@ public class OnToesState extends AbstractFootControlState
 
       for (int contactIndex = 0; contactIndex < contactPoints.size(); contactIndex++)
       {
-         contactPointLocations.get(contactIndex).set(contactPoints.get(contactIndex).getPosition());
+         contactPointLocations.get(contactIndex).setAndUpdate(contactPoints.get(contactIndex).getPosition());
       }
 
       if (usePointContact.getBooleanValue())
