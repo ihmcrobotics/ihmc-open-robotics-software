@@ -189,7 +189,8 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
-      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+//      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+      contactStatesMap.put(ConstraintType.TOES, trues);
       contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
