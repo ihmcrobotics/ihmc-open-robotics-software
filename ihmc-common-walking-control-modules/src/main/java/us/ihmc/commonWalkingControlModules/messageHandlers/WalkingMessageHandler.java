@@ -121,9 +121,6 @@ public class WalkingMessageHandler
    {
       this.statusOutputManager = statusOutputManager;
 
-      upcomingFootsteps.clear();
-      upcomingFootstepTimings.clear();
-
       this.yoTime = yoTime;
       footstepDataListReceivedTime.setToNaN();
 
@@ -237,7 +234,6 @@ public class WalkingMessageHandler
 
       if (!checkTimings(upcomingFootstepTimings))
          clearFootsteps();
-      updateTransferTimes(upcomingFootstepTimings);
 
       updateVisualization();
    }
@@ -439,12 +435,6 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void insertNextFootstep(Footstep newNextFootstep)
-   {
-      if (newNextFootstep != null)
-         upcomingFootsteps.add(0, newNextFootstep);
-   }
-
    public boolean hasUpcomingFootsteps()
    {
       return !upcomingFootsteps.isEmpty() && !isWalkingPaused.getBooleanValue();
@@ -458,16 +448,6 @@ public class WalkingMessageHandler
          requestedFootstepAdjustment.clear();
       }
       return hasNewFootstepAdjustment.getBooleanValue();
-   }
-
-   public boolean isNextFootstepUsingAbsoluteTiming()
-   {
-      if (!hasUpcomingFootsteps())
-      {
-         return false;
-      }
-
-      return upcomingFootstepTimings.get(0).hasAbsoluteTime();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
@@ -493,11 +473,6 @@ public class WalkingMessageHandler
    public boolean hasFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
-   }
-
-   public boolean isWalkingPaused()
-   {
-      return isWalkingPaused.getBooleanValue();
    }
 
    public void clearFootTrajectory(RobotSide robotSide)
@@ -841,34 +816,6 @@ public class WalkingMessageHandler
          break;
       default:
          throw new RuntimeException("Timing mode not implemented.");
-      }
-   }
-
-   private void updateTransferTimes(List<FootstepTiming> upcomingFootstepTimings)
-   {
-      if (upcomingFootstepTimings.isEmpty())
-         return;
-
-      FootstepTiming firstTiming = upcomingFootstepTimings.get(0);
-      if (!firstTiming.hasAbsoluteTime())
-         return;
-
-      double lastSwingStart = firstTiming.getSwingStartTime();
-      double lastSwingTime = firstTiming.getSwingTime();
-      double touchdownDuration = firstTiming.getTouchdownDuration();
-      firstTiming.setTimings(lastSwingTime, touchdownDuration, lastSwingStart);
-
-      for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
-      {
-         FootstepTiming timing = upcomingFootstepTimings.get(footstepIdx);
-         double swingStart = timing.getSwingStartTime();
-         double swingTime = timing.getSwingTime();
-         double transferTime = swingStart - (lastSwingStart + lastSwingTime);
-         touchdownDuration = timing.getTouchdownDuration();
-         timing.setTimings(swingTime, touchdownDuration, transferTime);
-
-         lastSwingStart = swingStart;
-         lastSwingTime = swingTime;
       }
    }
 
