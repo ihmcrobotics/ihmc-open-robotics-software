@@ -380,22 +380,19 @@ public class WalkingMessageHandler
    }
 
    /**
-    * This method can be used if the timing of a upcoming footstep needs to be adjusted. It
-    * will throw a {@link RuntimeException} if there is less upcoming footstep timings then
-    * {@code stepIndex}.
+    * This method can be used to adjust the timing of the upcoming footstep. It will throw a {@link RuntimeException} if
+    * there are no footsteps in the queue.
     *
-    * @param stepIndex is the index of the timing that will be adjusted in the list of upcoming steps.
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTimings(int stepIndex, double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
+   public void adjustTiming(double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
    {
-      if (upcomingFootstepTimings.size() <= stepIndex)
+      if (upcomingFootstepTimings.isEmpty())
       {
-         throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size()
-               + " upcoming steps.");
+         throw new RuntimeException("Can not adjust timing of upciming step - have no steps.");
       }
-      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
+      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
