@@ -30,7 +30,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int FIRST_SEGMENT = 0;
 
-   private final static int defaultSize = 50;
+   private final static int defaultSize = 300;
 
    private final boolean debug;
 
