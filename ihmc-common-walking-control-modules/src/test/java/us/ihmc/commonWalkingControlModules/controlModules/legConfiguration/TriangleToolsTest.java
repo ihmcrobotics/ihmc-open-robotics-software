@@ -20,19 +20,19 @@ public class TriangleToolsTest
       {
          double sideALength = RandomNumbers.nextDouble(random, 0.1, 10.0);
          double sideBLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
-         double interiorAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI);
+         double interiorAngle = RandomNumbers.nextDouble(random, 0.0 + 1e-2, Math.PI - 1e-2);
 
          double farSideLength = TriangleTools.computeSideLength(sideALength, sideBLength, interiorAngle);
-         assertEquals(interiorAngle, TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength), epsilon);
+         assertEquals("Iteration " + iter + " length failed.", interiorAngle, TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength), epsilon);
 
-         double interiorAngleVelocity = RandomNumbers.nextDouble(random, -100.0, 100.0);
+         double interiorAngleVelocity = RandomNumbers.nextDouble(random, -10.0, 10.0);
          double farSideVelocity = TriangleTools.computeSideLengthVelocity(sideALength, sideBLength, interiorAngle, interiorAngleVelocity);
-         assertEquals(interiorAngleVelocity, TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity), epsilon);
+         assertEquals("Iteration " + iter + " velocity failed.", interiorAngleVelocity, TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity), epsilon);
 
-         double interiorAngleAcceleration = RandomNumbers.nextDouble(random, -1000.0, 1000.0);
+         double interiorAngleAcceleration = RandomNumbers.nextDouble(random, -100.0, 100.0);
          double farSideAcceleration = TriangleTools
                .computeSideLengthAcceleration(sideALength, sideBLength, interiorAngle, interiorAngleVelocity, interiorAngleAcceleration);
-         assertEquals(interiorAngleAcceleration,
+         assertEquals("Iteration " + iter + " acceleration failed.", interiorAngleAcceleration,
                       TriangleTools.computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideVelocity, farSideAcceleration), epsilon);
       }
    }
