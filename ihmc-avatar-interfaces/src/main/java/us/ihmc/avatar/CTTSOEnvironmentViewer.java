@@ -18,7 +18,7 @@ public class CTTSOEnvironmentViewer
    private final boolean SHOWCOLLISIONTERRAIN = false;
 
    private final double[] CAMFIX = {0, 0, 0};
-   private final double[] CAMPOS = {-20, -10, 10};
+   private final double[] CAMPOS = {10, 12, 9};
 
    Robot robot = new Robot("NotARobot");
    private double gravity = -9.81;
