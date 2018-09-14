@@ -30,12 +30,6 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void clear();
 
-   /**
-    * Add footstep location to planned
-    * @param footstep
-    */
-   void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
-
    int getNumberOfFootstepsRegistered();
 
    void update(double currentTime);
