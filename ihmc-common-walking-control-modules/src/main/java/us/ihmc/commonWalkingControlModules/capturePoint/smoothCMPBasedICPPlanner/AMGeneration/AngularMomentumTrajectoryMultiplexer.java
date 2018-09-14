@@ -1,15 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
+import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -18,13 +15,13 @@ import java.util.List;
 
 /**
  * This class is a wrapper around the predicted and commanded angular momentum trajectory generators.
- * If a reference trajectory is available in {@code commandedAngularMomentum}, it will be used. Otherwise
- * the predicted angular momentum is used.
+ * If the controller receives a {@link MomentumTrajectoryMessage}, it will be used. Otherwise the predicted angular momentum is used.
  */
 public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTrajectoryGeneratorInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private static final int maxNumberOfStepsToConsider = 4;
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean usingReferenceAngularMomentum = new YoBoolean("usingReferenceAngularMomentum", registry);
 
    /** Reference angular momentum trajectory supplied externally */
@@ -34,17 +31,18 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 
    private AngularMomentumTrajectoryGeneratorInterface currentAngularMomentumTrajectoryGenerator;
 
-   public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0, boolean debug, YoVariableRegistry parentRegistry)
+   public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
+                                               boolean debug, YoVariableRegistry parentRegistry)
    {
-      predictedAngularMomentum = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, registry);
+      predictedAngularMomentum = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, maxNumberOfStepsToConsider, registry);
 
-      if(momentumTrajectoryHandler == null)
+      if (momentumTrajectoryHandler == null)
       {
          commandedAngularMomentum = null;
       }
       else
       {
-         commandedAngularMomentum = new CommandBasedAngularMomentumTrajectoryGenerator(momentumTrajectoryHandler, yoTime, registry);
+         commandedAngularMomentum = new CommandBasedAngularMomentumTrajectoryGenerator(momentumTrajectoryHandler, yoTime, maxNumberOfStepsToConsider, registry);
       }
 
       currentAngularMomentumTrajectoryGenerator = predictedAngularMomentum;
@@ -58,7 +56,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    {
       predictedAngularMomentum.clear();
 
-      if(commandedAngularMomentum != null)
+      if (commandedAngularMomentum != null)
       {
          commandedAngularMomentum.clear();
       }
@@ -69,7 +67,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    {
       predictedAngularMomentum.initializeParameters(smoothCMPPlannerParameters, totalMass, gravityZ);
 
-      if(commandedAngularMomentum != null)
+      if (commandedAngularMomentum != null)
       {
          commandedAngularMomentum.initializeParameters(smoothCMPPlannerParameters, totalMass, gravityZ);
       }
@@ -144,7 +142,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 
    private void updateCurrentAngularMomentumTrajectoryGenerator()
    {
-      if(commandedAngularMomentum != null && commandedAngularMomentum.hasReferenceTrajectory())
+      if (commandedAngularMomentum != null && commandedAngularMomentum.hasReferenceTrajectory())
       {
          usingReferenceAngularMomentum.set(true);
          currentAngularMomentumTrajectoryGenerator = commandedAngularMomentum;

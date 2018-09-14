@@ -200,7 +200,8 @@ public class FootstepAngularMomentumPredictorTest
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
-      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, testRegistry);
+      int maxNumberOfStepsToConsider = 4;
+      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, maxNumberOfStepsToConsider, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
       angularMomentumGenerator.initializeParameters(testParameters, robotMass, gravityZ);
    }
