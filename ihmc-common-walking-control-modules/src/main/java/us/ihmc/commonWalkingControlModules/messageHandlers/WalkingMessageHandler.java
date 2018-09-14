@@ -159,21 +159,21 @@ public class WalkingMessageHandler
 
    public void handleFootstepDataListCommand(FootstepDataListCommand command)
    {
-      offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
-      if (!offsettingPlanWithFootstepError.getBooleanValue())
-      {
-         planOffsetInWorld.setToZero();
-      }
-
       if (command.getNumberOfFootsteps() > 0)
       {
          switch (command.getExecutionMode())
          {
          case OVERRIDE:
+            offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            planOffsetInWorld.setToZero();
             clearFootsteps();
             clearFootTrajectory();
             break;
          case QUEUE:
+            if (offsettingPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
+            {
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with exectuion error!");
+            }
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
                if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
