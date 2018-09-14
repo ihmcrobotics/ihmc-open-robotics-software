@@ -38,6 +38,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final YoDouble time;
    private final YoInteger numberOfRegisteredFootsteps;
    private final YoDouble[] commandedAngularMomentum = new YoDouble[3];
+   private final YoDouble[] commandedCoMTorque = new YoDouble[3];
 
    private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> waypoints = new RecyclingArrayList<>(waypointsPerWalkingPhase, SimpleEuclideanTrajectoryPoint::new);
    private final List<AngularMomentumTrajectory> transferTrajectories;
@@ -71,6 +72,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       for (int i = 0; i < Axis.values.length; i++)
       {
          commandedAngularMomentum[i] = new YoDouble("commandedAngularMomentum" + Axis.values[i], registry);
+         commandedCoMTorque[i] = new YoDouble("commandedCoMTorque" + Axis.values[i], registry);
       }
 
       parentRegistry.addChild(registry);
@@ -113,6 +115,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       for (int i = 0; i < Axis.values.length; i++)
       {
          commandedAngularMomentum[i].set(desiredAngularMomentum.getElement(i));
+         commandedCoMTorque[i].set(desiredTorque.getElement(i));
       }
    }
 
