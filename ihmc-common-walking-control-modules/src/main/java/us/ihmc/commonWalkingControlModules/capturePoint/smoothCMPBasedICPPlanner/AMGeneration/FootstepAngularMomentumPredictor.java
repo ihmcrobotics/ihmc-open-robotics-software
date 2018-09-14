@@ -17,6 +17,7 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,6 +47,9 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final int maxNumberOfFootstepsToConsider;
    private final TrajectoryMathTools trajectoryMathTools;
+
+   private final YoBoolean planSwingAngularMomentum;
+   private final YoBoolean planTransferAngularMomentum;
 
    private CoPPointName entryCoPName;
    private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
@@ -139,6 +143,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       this.swingLegMass = new YoDouble(fullPrefix + "SwingFootMass", registry);
       this.supportLegMass = new YoDouble(fullPrefix + "SupportFootMass", registry);
       this.comHeight = new YoDouble(fullPrefix + "CoMHeight", registry);
+      this.planSwingAngularMomentum = new YoBoolean(fullPrefix + "PlanSwingAngularMomentumWithPredictor", registry);
+      this.planTransferAngularMomentum = new YoBoolean(fullPrefix + "PlanTransferAngularMomentumWithPredictor", registry);
 
       this.swingAngularMomentumTrajectories = new ArrayList<>(maxNumberOfFootstepsToConsider);
       this.transferAngularMomentumTrajectories = new ArrayList<>(maxNumberOfFootstepsToConsider + 1);
@@ -262,6 +268,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       this.swingLegMass.set(totalMass * angularMomentumParameters.getPercentageSwingLegMass());
       this.supportLegMass.set(totalMass * angularMomentumParameters.getPercentageSupportLegMass());
       this.gravityZ.set(gravityZ);
+      this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
+      this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
    }
 
    @Override
@@ -686,11 +694,11 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       if(walkingTrajectoryType.equals(WalkingTrajectoryType.SWING))
       {
-         return smoothCMPPlannerParameters.planSwingAngularMomentum();
+         return planSwingAngularMomentum.getBooleanValue();
       }
       else
       {
-         return smoothCMPPlannerParameters.planTransferAngularMomentum();
+         return planTransferAngularMomentum.getBooleanValue();
       }
    }
 }

@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -49,6 +50,9 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private List<CoPPointsInFoot> copLocations;
    private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
 
+   private final YoBoolean planSwingAngularMomentum;
+   private final YoBoolean planTransferAngularMomentum;
+
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredTorque = new FrameVector3D();
    private final FrameVector3D desiredRotatum = new FrameVector3D();
@@ -59,6 +63,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       this.time = time;
       this.numberOfRegisteredFootsteps = new YoInteger(namePrefix + "NumberOfRegisteredFootsteps", registry);
+      this.planSwingAngularMomentum = new YoBoolean(namePrefix + "PlanSwingAngularMomentumWithCommand", registry);
+      this.planTransferAngularMomentum = new YoBoolean(namePrefix + "PlanTransferAngularMomentumWithCommand", registry);
 
       transferTrajectories = new ArrayList<>(maxNumberOfStepsToConsider + 1);
       swingTrajectories = new ArrayList<>(maxNumberOfStepsToConsider);
@@ -82,6 +88,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
    {
       this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
+      this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
+      this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
    }
 
    @Override
@@ -256,11 +264,11 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    {
       if(walkingTrajectoryType.equals(WalkingTrajectoryType.SWING))
       {
-         return smoothCMPPlannerParameters.planSwingAngularMomentum();
+         return planSwingAngularMomentum.getBooleanValue();
       }
       else
       {
-         return smoothCMPPlannerParameters.planTransferAngularMomentum();
+         return planTransferAngularMomentum.getBooleanValue();
       }
    }
 
