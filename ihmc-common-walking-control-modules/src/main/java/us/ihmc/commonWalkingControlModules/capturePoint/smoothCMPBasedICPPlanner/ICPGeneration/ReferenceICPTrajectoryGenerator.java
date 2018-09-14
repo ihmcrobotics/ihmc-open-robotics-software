@@ -123,7 +123,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfCMPSegments", registry);
 
       maxContinuityAdjustmentSegmentDuration = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDuration", registry);
-      maxContinuityAdjustmentSegmentDuration.set(0.1);
+      maxContinuityAdjustmentSegmentDuration.set(0.2);
 
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
