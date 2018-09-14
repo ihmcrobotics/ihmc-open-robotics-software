@@ -51,6 +51,8 @@ public class SmoothCapturePointAdjustmentToolbox
       FrameTrajectory3D cmpPolynomial3DSegment1 = copPolynomials3D.get(0);
       FrameTrajectory3D cmpPolynomial3DSegment2 = copPolynomials3D.get(1);
 
+      editPolynomialDurations(cmpPolynomial3DSegment1, cmpPolynomial3DSegment2);
+
       for (Axis axis : Axis.values)
       {
          Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(axis);
@@ -68,6 +70,15 @@ public class SmoothCapturePointAdjustmentToolbox
          computeAdjustedPolynomialCoefficientVectors1D(numberOfCoefficients);
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
       }
+   }
+
+   private void editPolynomialDurations(FrameTrajectory3D cmpPolynomialSegment1, FrameTrajectory3D cmpPolynomialSegment2)
+   {
+      double segment1Duration = cmpPolynomialSegment1.getFinalTime() - cmpPolynomialSegment1.getInitialTime();
+      double timeToRemoveFromSegment1 = Math.max(0.0, segment1Duration - maxAdjustedSegmentDuration);
+
+      cmpPolynomialSegment1.setFinalTime(cmpPolynomialSegment1.getFinalTime() - timeToRemoveFromSegment1);
+      cmpPolynomialSegment2.setInitialTime(cmpPolynomialSegment2.getInitialTime() - timeToRemoveFromSegment1);
    }
 
    private void adjustCMPPolynomials(Trajectory cmpPolynomialSegment1, Trajectory cmpPolynomialSegment2)

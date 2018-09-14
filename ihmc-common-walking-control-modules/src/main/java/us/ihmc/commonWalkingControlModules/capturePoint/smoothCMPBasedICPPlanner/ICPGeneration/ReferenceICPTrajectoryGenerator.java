@@ -71,6 +71,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoDouble localTimeInCurrentPhase;
    private final YoDouble omega0;
 
+   private final YoDouble maxContinuityAdjustmentSegmentDuration;
+
    private int numberOfFootstepsRegistered;
 
    private final List<FrameTrajectory3D> copTrajectories = new ArrayList<>();
@@ -119,6 +121,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       totalNumberOfCoPSegments = new YoInteger(namePrefix + "TotalNumberOfCoPSegments", registry);
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfCMPSegments", registry);
+
+      maxContinuityAdjustmentSegmentDuration = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDuration", registry);
+      maxContinuityAdjustmentSegmentDuration.set(0.1);
 
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
