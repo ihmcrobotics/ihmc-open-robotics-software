@@ -448,9 +448,9 @@ public class WalkingMessageHandler
 
    private void checkForPause()
    {
-      if (!pauseDurationAfterStep.isEmpty() && Double.isFinite(pauseDurationAfterStep.get(0).getValue()))
+      if (!pauseDurationAfterStep.isEmpty() && Double.isFinite(pauseDurationAfterStep.get(0).doubleValue()))
       {
-         double pause = pauseDurationAfterStep.get(0).getValue();
+         double pause = pauseDurationAfterStep.get(0).doubleValue();
          timeToContinueWalking.set(yoTime.getValue() + pause);
          isPausedWithSteps.set(true);
          pauseDurationAfterStep.get(0).setValue(Double.NaN);
@@ -473,7 +473,7 @@ public class WalkingMessageHandler
       int stepIndex = 0;
       while (stepIndex < upcomingFootsteps.size())
       {
-         if (Double.isFinite(pauseDurationAfterStep.get(stepIndex).getValue()))
+         if (Double.isFinite(pauseDurationAfterStep.get(stepIndex).doubleValue()))
          {
             return stepIndex;
          }
