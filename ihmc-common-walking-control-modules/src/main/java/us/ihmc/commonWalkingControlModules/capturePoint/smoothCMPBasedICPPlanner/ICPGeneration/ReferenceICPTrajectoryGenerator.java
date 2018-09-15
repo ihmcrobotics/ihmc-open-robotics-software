@@ -71,8 +71,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoDouble localTimeInCurrentPhase;
    private final YoDouble omega0;
 
-   private final YoDouble maxContinuityAdjustmentSegmentDuration;
-
    private int numberOfFootstepsRegistered;
 
    private final List<FrameTrajectory3D> copTrajectories = new ArrayList<>();
@@ -121,9 +119,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       totalNumberOfCoPSegments = new YoInteger(namePrefix + "TotalNumberOfCoPSegments", registry);
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfCMPSegments", registry);
-
-      maxContinuityAdjustmentSegmentDuration = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDuration", registry);
-      maxContinuityAdjustmentSegmentDuration.set(0.2);
 
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
@@ -464,7 +459,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       if ((isInitialTransfer.getBooleanValue() || (continuouslyAdjustForICPContinuity.getBooleanValue())) && copTrajectories.size() > 1)
       {
          finalICPConditionForContinuity.set(icpDesiredFinalPositionsFromCoPs.get(1));
-         icpAdjustmentToolbox.setMaxAdjustedSegmentDuration(maxContinuityAdjustmentSegmentDuration.getDoubleValue());
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0.getDoubleValue(), copTrajectories, setInitialICPConditions,
                                                                              finalICPConditionForContinuity);
          icpToolbox.computeDesiredCornerPoints3D(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories, omega0.getDoubleValue());
