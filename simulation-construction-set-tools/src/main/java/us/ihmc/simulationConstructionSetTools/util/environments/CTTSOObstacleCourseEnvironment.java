@@ -1,16 +1,21 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
@@ -23,7 +28,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
-   private static final CourseType type = CourseType.B;
+   private static final CourseType type = CourseType.A;
 
    enum CourseType
    {
@@ -49,14 +54,14 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    private static final double fillet = 0.1;
 
    private static final double bumpHeight = 0.2;
-   private static final double bumplength = 0.5;
-   private static final double bumpWidth = 1.5;
+   private static final double bumpRun = 0.3;
+   private static final double bumpWidth = gridLength;
+   private static final double bumpSideMargin = 0.01;
 
    private static final double bollardHeight = 0.7;
    private static final double bollardRadius = 0.075;
 
-   private static final double potholeDepth = 0.3;
-   private static final double potholeRadius = 0.4;
+   private static final double potholeDepth = 0.15;
 
    public CTTSOObstacleCourseEnvironment()
    {
@@ -67,22 +72,52 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       switch (type)
       {
       case A:
+         combinedTerrainObject3D.addTerrainObject(setUpInclinedSurface(0, 0, 0, 3));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 0));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 0));
+
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 1));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 1));
+         combinedTerrainObject3D.addTerrainObject(createBump(1, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
+         combinedTerrainObject3D.addTerrainObject(createBump(2, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
+
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2));
+         //combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 2));
+
+         //         combinedTerrainObject3D.addTerrainObject(setUpCurb(1, 3));
+         //         combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 3));
+         //         combinedTerrainObject3D.addTerrainObject(createTable(1, 3, new Point2D(0.1, 0.0)));
+
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 4));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 4));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 4));
+         combinedTerrainObject3D.addTerrainObject(createBollard(1, 4, new Point2D(0.0, 0.0), bollardHeight, bollardRadius));
+         combinedTerrainObject3D.addTerrainObject(createBollard(2, 4, new Point2D(0.4, 0.0), bollardHeight, bollardRadius));
+         combinedTerrainObject3D.addTerrainObject(createBollard(2, 4, new Point2D(-0.4, 0.0), bollardHeight, bollardRadius));
+
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 5));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 5));
+         combinedTerrainObject3D.addTerrainObject(setUpStormGrate(2, 5));
+
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 6));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 6));
+         combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 6));
+
          break;
       case B:
          combinedTerrainObject3D.addTerrainObject(setUpInclinedSurface(0, 0, 0, 3));
-
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 0));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 0));
 
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 4));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(0, 5));
-         combinedTerrainObject3D.addTerrainObject(setUpBollard(0, 4, new Point2D(0.4, 0.0), bollardHeight, bollardRadius));
-         combinedTerrainObject3D.addTerrainObject(setUpBollard(0, 4, new Point2D(-0.4, 0.0), bollardHeight, bollardRadius));
+         combinedTerrainObject3D.addTerrainObject(createBollard(0, 4, new Point2D(0.4, 0.0), bollardHeight, bollardRadius));
+         combinedTerrainObject3D.addTerrainObject(createBollard(0, 4, new Point2D(-0.4, 0.0), bollardHeight, bollardRadius));
 
          combinedTerrainObject3D.addTerrainObject(setUpStormGrate(1, 5));
 
-         //         combinedTerrainObject3D.addTerrainObject(setUpGridWithPotholes(1, 1));
-         //         combinedTerrainObject3D.addTerrainObject(setUpGridWithPotholes(2, 1));
+         //combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 1));
+         //combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 1));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 2));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 2));
 
@@ -90,7 +125,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 3));
 
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 6));
-         combinedTerrainObject3D.addTerrainObject(setUpTable(2, 6, new Point2D(-0.0, 0.0)));
+         combinedTerrainObject3D.addTerrainObject(createTable(1, 6, new Point2D(-0.1, 0.0)));
 
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 4));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 4));
@@ -116,7 +151,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       return new RotatableBoxTerrainObject(new Box3D(location, gridLength, gridWidth, flatGridHeight), gridAppearance);
    }
 
-   private TerrainObject3D setUpBollard(int row, int column, Point2D positionInGrid, double height, double radius)
+   private TerrainObject3D createBollard(int row, int column, Point2D positionInGrid, double height, double radius)
    {
       AppearanceDefinition bollardAppearance = YoAppearance.Yellow();
 
@@ -127,7 +162,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       return new CylinderTerrainObject(location, height, radius, bollardAppearance);
    }
 
-   private TerrainObject3D setUpTable(int row, int column, Point2D positionInGrid)
+   private TerrainObject3D createTable(int row, int column, Point2D positionInGrid)
    {
       RigidBodyTransform location = new RigidBodyTransform();
       location.appendTranslation(getWorldCoordinate(row, column));
@@ -141,6 +176,23 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       double zEnd = tableHeight + getWorldCoordinate(row, column).getZ();
 
       return new SimpleTableTerrainObject(xStart, yStart, xEnd, yEnd, zStart, zEnd);
+   }
+
+   private TerrainObject3D createBump(int row, int column, Point2D positionInGrid, double height, double run, double width, double rotateYaw)
+   {
+      AppearanceDefinition bumpAppearance = YoAppearance.Yellow();
+
+      double radius = height / 2 + run * run / 8 / height;
+      double alpha = Math.asin(run / 2 / radius);
+      double depth = radius * Math.cos(alpha);
+
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.appendTranslation(getWorldCoordinate(row, column));
+      location.appendTranslation(positionInGrid.getX(), positionInGrid.getY(), -depth);
+      location.appendYawRotation(rotateYaw);
+      location.appendPitchRotation(Math.PI / 2);
+
+      return new CylinderTerrainObject(location, width - bumpSideMargin, radius, bumpAppearance);
    }
 
    private CombinedTerrainObject3D setUpCurb(int row, int column)
@@ -186,16 +238,27 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("InclinedSurface");
 
       AppearanceDefinition curbAppearance = YoAppearance.LightSlateGrey();
+      AppearanceDefinition wallAppearance = YoAppearance.BurlyWood();
+      YoAppearance.makeTransparent(wallAppearance, 0.7f);
 
-      double rampWidth = (endRow - startRow + 1) * gridLength;
+      double wallThickness = 0.05;
+      double wallHeight = 1.0;
+
+      double rampWidth = (endRow - startRow + 1) * gridLength - wallThickness;
       double rampLength = (endColumn - startColumn + 1) * gridWidth;
 
-      double centerX = (getWorldCoordinate(startRow, startColumn).getX() + getWorldCoordinate(endRow, endColumn).getX()) / 2;
+      double centerX = (getWorldCoordinate(startRow, startColumn).getX() + getWorldCoordinate(endRow, endColumn).getX()) / 2 + wallThickness / 2;
       double centerY = (getWorldCoordinate(startRow, startColumn).getY() + getWorldCoordinate(endRow, endColumn).getY()) / 2;
       RotatableRampTerrainObject inclinedSurface = new RotatableRampTerrainObject(centerX, centerY, rampLength, rampWidth, flatGridHeight, -90, curbAppearance);
 
       // TODO : place grass and stones on this surface.
       combinedTerrainObject.addTerrainObject(inclinedSurface);
+
+      RigidBodyTransform wallLocation = new RigidBodyTransform();
+      wallLocation.appendTranslation(centerX, centerY, 0.0);
+      wallLocation.appendTranslation(-wallThickness / 2 - rampWidth / 2, 0.0, wallHeight / 2);
+
+      combinedTerrainObject.addTerrainObject(new RotatableBoxTerrainObject(wallLocation, wallThickness, rampLength, wallHeight, wallAppearance));
 
       return combinedTerrainObject;
    }
@@ -225,11 +288,161 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
+   private static final int POINTS_PER_POTHOLE = 8;
+   private static final double allowablePenetrationThickness = 0.1;
+
    private CombinedTerrainObject3D setUpPotholeGrid(int row, int column)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("PotholeGrid");
 
+      AppearanceDefinition potholeAppearance = YoAppearance.DarkGrey();
+
+      RigidBodyTransform centroidTransform = new RigidBodyTransform();
+      centroidTransform.appendTranslation(getWorldCoordinate(row, column));
+      double centerToPoints = 0.3;
+      double depthToCentroid = 0.1;
+      RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
+
+      PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+                                                                                                depthToCentroid);
+      List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
+      for (int i = 0; i < potholePlanarRegions.size(); i++)
+      {
+         PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(potholePlanarRegions.get(i), allowablePenetrationThickness,
+                                                                                        potholeAppearance);
+         combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+      }
+
+      ConvexPolygon2D flatRegionPolygon = new ConvexPolygon2D();
+      flatRegionPolygon.addVertex(gridLength / 2, gridWidth / 2);
+      flatRegionPolygon.addVertex(gridLength / 2, -gridWidth / 2);
+      flatRegionPolygon.addVertex(-gridLength / 2, gridWidth / 2);
+      flatRegionPolygon.addVertex(-gridLength / 2, -gridWidth / 2);
+      List<PlanarRegion> flatPlanarRegions = potholePlanarRegionProvider.getAdjustedFlatPlanarRegions(flatRegionPolygon);
+      
+      for (int i = 0; i < flatPlanarRegions.size(); i++)
+      {
+//         PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(flatPlanarRegions.get(i), allowablePenetrationThickness,
+//                                                                                        potholeAppearance);
+//         combinedTerrainObject.addTerrainObject(potholeTerrainObject);
+      }
+
       return combinedTerrainObject;
+   }
+
+   private class RegularPolygon
+   {
+      private final double centerToPoints;
+      private final ConvexPolygon2D polygon;
+
+      private RegularPolygon(double centerToPoints, int numberOfPoints)
+      {
+         this.centerToPoints = centerToPoints;
+
+         polygon = new ConvexPolygon2D();
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            double intervalAngle = 2 * Math.PI / numberOfPoints;
+            RigidBodyTransform vertexTransform = new RigidBodyTransform();
+            vertexTransform.appendYawRotation(intervalAngle * i);
+            vertexTransform.appendTranslation(centerToPoints, 0.0, 0.0);
+            polygon.addVertex(vertexTransform.getTranslationX(), vertexTransform.getTranslationY());
+         }
+         polygon.update();
+      }
+
+      double getCenterToPoints()
+      {
+         return centerToPoints;
+      }
+
+      ConvexPolygon2D getPolygon()
+      {
+         return polygon;
+      }
+   }
+
+   private class PotholePlanarRegionProvider
+   {
+      private final static double defaultRatio = 0.5;
+      private final Point3D centroidLocation;
+      private final double depthToCentroid;
+      private final double ratioToInnerPolygon;
+      private final RegularPolygon potholeRegularPolygon;
+
+      private PotholePlanarRegionProvider(RegularPolygon regularPolygon, Vector3DReadOnly centroidLocation, double depthToCentroid)
+      {
+         this(regularPolygon, centroidLocation, depthToCentroid, defaultRatio);
+      }
+
+      private PotholePlanarRegionProvider(RegularPolygon regularPolygon, Vector3DReadOnly centroidLocation, double depthToCentroid, double ratioToInner)
+      {
+         this.potholeRegularPolygon = regularPolygon;
+         this.centroidLocation = new Point3D(centroidLocation);
+         this.depthToCentroid = depthToCentroid;
+         this.ratioToInnerPolygon = ratioToInner;
+      }
+      
+      List<PlanarRegion> getAdjustedFlatPlanarRegions(ConvexPolygon2D flatRegionPolygon)
+      {
+         
+         return null;
+      }
+
+      List<PlanarRegion> getPlanarRegions()
+      {
+         List<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
+         ConvexPolygon2D polygon = potholeRegularPolygon.getPolygon();
+         int numberOfVertices = polygon.getNumberOfVertices();
+
+         // Bottom Region.
+         RigidBodyTransform bottomTransform = new RigidBodyTransform();
+         bottomTransform.appendTranslation(centroidLocation);
+         bottomTransform.appendTranslation(0.0, 0.0, -depthToCentroid);
+
+         ConvexPolygon2D bottomPolygon = new ConvexPolygon2D();
+         for (int i = 0; i < numberOfVertices; i++)
+         {
+            Point2D vertex = new Point2D(potholeRegularPolygon.getPolygon().getVertex(i));
+            vertex.scale(ratioToInnerPolygon);
+            bottomPolygon.addVertex(vertex);
+         }
+         bottomPolygon.update();
+
+         PlanarRegion bottomPlanarRegion = new PlanarRegion(bottomTransform, bottomPolygon);
+         planarRegions.add(bottomPlanarRegion);
+
+         // Side Regions (trapezoids).
+         for (int i = 0; i < numberOfVertices; i++)
+         {
+            RigidBodyTransform sideTransform = new RigidBodyTransform();
+            sideTransform.appendTranslation(centroidLocation);
+            double intervalAngle = 2 * Math.PI / numberOfVertices;
+            double yawAngle = i * intervalAngle + intervalAngle / 2;
+            double centerToSideLine = potholeRegularPolygon.getCenterToPoints() * Math.cos(intervalAngle / 2);
+            double translationX = centerToSideLine * (1 + ratioToInnerPolygon) / 2;
+            double pitchAngle = -Math.atan(depthToCentroid / (centerToSideLine * (1 - ratioToInnerPolygon)));
+            sideTransform.appendYawRotation(yawAngle);
+            sideTransform.appendTranslation(translationX, 0.0, -depthToCentroid / 2);
+            sideTransform.appendPitchRotation(pitchAngle);
+
+            double trapezoidHeight = depthToCentroid / Math.sin(-pitchAngle);
+            double trapezoidUpperLine = 2 * potholeRegularPolygon.getCenterToPoints() * Math.sin(intervalAngle / 2);
+            double trapezoidLowerLine = trapezoidUpperLine * ratioToInnerPolygon;
+
+            ConvexPolygon2D trapezoidPolygon = new ConvexPolygon2D();
+            trapezoidPolygon.addVertex(trapezoidHeight / 2, trapezoidUpperLine / 2);
+            trapezoidPolygon.addVertex(-trapezoidHeight / 2, trapezoidLowerLine / 2);
+            trapezoidPolygon.addVertex(-trapezoidHeight / 2, -trapezoidLowerLine / 2);
+            trapezoidPolygon.addVertex(trapezoidHeight / 2, -trapezoidUpperLine / 2);
+            trapezoidPolygon.update();
+
+            PlanarRegion sidePlaidenarRegion = new PlanarRegion(sideTransform, trapezoidPolygon);
+            planarRegions.add(sidePlaidenarRegion);
+         }
+
+         return planarRegions;
+      }
    }
 
    private Point3D getWorldCoordinate(int row, int column)
