@@ -14,9 +14,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -66,13 +68,16 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    private static final double bollardHeight = 0.7;
    private static final double bollardRadius = 0.075;
 
-   private static final double potholeDepth = 0.15;
+   private static final double potholeRadius = 0.3;
+   private static final double potholeDepth = 0.05;
+   private static final int POINTS_PER_POTHOLE = 8;
+   private static final double allowablePenetrationThickness = 0.07;
 
    public CTTSOObstacleCourseEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("CTTSOObstacleCourseEnvironment");
 
-      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
+      combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
 
       switch (type)
       {
@@ -86,8 +91,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addTerrainObject(createBump(1, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
          combinedTerrainObject3D.addTerrainObject(createBump(2, 1, new Point2D(), bumpHeight, bumpRun, bumpWidth, 0.0));
 
-         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2, 2, 0.3, 0.05));
-         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 2, 2, 0.3, 0.1));
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 2, 2, potholeRadius, potholeDepth));
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 2, 2, potholeRadius, potholeDepth));
 
          combinedTerrainObject3D.addTerrainObject(setUpCurb(1, 3));
          combinedTerrainObject3D.addTerrainObject(setUpCurb(2, 3));
@@ -121,8 +126,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
          combinedTerrainObject3D.addTerrainObject(setUpStormGrate(1, 5));
 
-         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 1, 2, 0.3, 0.05));
-         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 1, 2, 0.3, 0.1));
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(1, 1, 2, potholeRadius, potholeDepth));
+         combinedTerrainObject3D.addTerrainObject(setUpPotholeGrid(2, 1, 2, potholeRadius, potholeDepth));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(1, 2));
          combinedTerrainObject3D.addTerrainObject(setUpFlatGrid(2, 2));
 
@@ -145,9 +150,35 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
+   public static CombinedTerrainObject3D setUpGround(String name)
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
+
+      int groundDimension = 20;
+      double unitLength = 1.0;
+      double groundThickness = 1.0;
+
+      YoAppearanceTexture texture = new YoAppearanceTexture("Textures/brick.png");
+
+      for (int i = 0; i < groundDimension; i++)
+      {
+         for (int j = 0; j < groundDimension; j++)
+         {
+            RigidBodyTransform location = new RigidBodyTransform();
+            location.appendTranslation(new Vector3D(groundDimension / 2 * unitLength, groundDimension / 2 * unitLength, -groundThickness / 2));
+            location.appendTranslation(new Vector3D(-unitLength * (i + 0.5), -unitLength * (j + 0.5), 0.0));
+
+            RotatableBoxTerrainObject unitBox = new RotatableBoxTerrainObject(new Box3D(location, unitLength, unitLength, groundThickness), texture);
+            combinedTerrainObject.addTerrainObject(unitBox);
+         }
+      }
+
+      return combinedTerrainObject;
+   }
+
    private TerrainObject3D setUpFlatGrid(int row, int column)
    {
-      AppearanceDefinition gridAppearance = YoAppearance.Grey();
+      AppearanceDefinition gridAppearance = new YoAppearanceTexture("Textures/asphalt.png");
 
       RigidBodyTransform location = new RigidBodyTransform();
       location.appendTranslation(getWorldCoordinate(row, column));
@@ -206,7 +237,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
       combinedTerrainObject.addTerrainObject(setUpFlatGrid(row, column));
 
-      AppearanceDefinition curbAppearance = YoAppearance.DarkSlateGrey();
+      AppearanceDefinition curbAppearance = new YoAppearanceTexture("Textures/cinderBlockRotated.png");
       AppearanceDefinition edgeAppearance = YoAppearance.DarkGrey();
 
       RigidBodyTransform location = new RigidBodyTransform();
@@ -242,28 +273,35 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("InclinedSurface");
 
-      AppearanceDefinition curbAppearance = YoAppearance.LightSlateGrey();
-      AppearanceDefinition wallAppearance = YoAppearance.BurlyWood();
+      AppearanceDefinition inclinedSurfaceAppearance = YoAppearance.Grey();
+      AppearanceDefinition wallAppearance = new YoAppearanceTexture("Textures/cinderBlock2.jpeg");
+
       YoAppearance.makeTransparent(wallAppearance, 0.7f);
 
+      int rampLengthDimension = (endColumn - startColumn + 1);
+      int rampWidthDimension = (endRow - startRow + 1);
       double wallThickness = 0.05;
-      double wallHeight = 1.0;
-
-      double rampWidth = (endRow - startRow + 1) * gridLength - wallThickness;
-      double rampLength = (endColumn - startColumn + 1) * gridWidth;
+      double wallHeight = gridWidth;
+      double rampWidth = rampWidthDimension * gridLength - wallThickness;
+      double rampLength = rampLengthDimension * gridWidth;
 
       double centerX = (getWorldCoordinate(startRow, startColumn).getX() + getWorldCoordinate(endRow, endColumn).getX()) / 2 + wallThickness / 2;
       double centerY = (getWorldCoordinate(startRow, startColumn).getY() + getWorldCoordinate(endRow, endColumn).getY()) / 2;
-      RotatableRampTerrainObject inclinedSurface = new RotatableRampTerrainObject(centerX, centerY, rampLength, rampWidth, flatGridHeight, -90, curbAppearance);
+      RotatableRampTerrainObject inclinedSurface = new RotatableRampTerrainObject(centerX, centerY, rampLength, rampWidth, flatGridHeight, -90,
+                                                                                  inclinedSurfaceAppearance);
 
-      // TODO : place grass and stones on this surface.
       combinedTerrainObject.addTerrainObject(inclinedSurface);
 
-      RigidBodyTransform wallLocation = new RigidBodyTransform();
-      wallLocation.appendTranslation(centerX, centerY, 0.0);
-      wallLocation.appendTranslation(-wallThickness / 2 - rampWidth / 2, 0.0, wallHeight / 2);
+      for (int i = 0; i < rampLengthDimension; i++)
+      {
+         RigidBodyTransform wallLocation = new RigidBodyTransform();
+         wallLocation.appendTranslation(centerX, centerY, 0.0);
+         wallLocation.appendTranslation(-wallThickness / 2 - rampWidth / 2, 0.0, wallHeight / 2);
+         wallLocation.appendTranslation(0.0, rampLength / 2, 0.0);
+         wallLocation.appendTranslation(0.0, -wallHeight * (i + 0.5), 0.0);
 
-      combinedTerrainObject.addTerrainObject(new RotatableBoxTerrainObject(wallLocation, wallThickness, rampLength, wallHeight, wallAppearance));
+         combinedTerrainObject.addTerrainObject(new RotatableBoxTerrainObject(wallLocation, wallThickness, wallHeight, wallHeight, wallAppearance));
+      }
 
       return combinedTerrainObject;
    }
@@ -292,9 +330,6 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
       return combinedTerrainObject;
    }
-
-   private static final int POINTS_PER_POTHOLE = 8;
-   private static final double allowablePenetrationThickness = 0.07;
 
    private CombinedTerrainObject3D setUpPotholeGrid(int row, int column, Point2DReadOnly location, double centerToPoints, double depthToCentroid)
    {
@@ -341,8 +376,8 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("PotholeGrid");
 
-      AppearanceDefinition potholeAppearance = YoAppearance.DarkGrey();
-      AppearanceDefinition flatAppearance = YoAppearance.Grey();
+      AppearanceDefinition potholeAppearance = YoAppearance.Grey();
+      AppearanceDefinition flatAppearance = new YoAppearanceTexture("Textures/asphalt.png");
 
       for (int i = 0; i < numberOfPotholes; i++)
       {
@@ -359,11 +394,11 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
          for (int j = 0; j < potholePlanarRegions.size(); j++)
          {
-            if(j==0)
+            if (j == 0)
             {
                PlanarRegionTerrainObject potholeTerrainObject = new PlanarRegionTerrainObject(potholePlanarRegions.get(j), allowablePenetrationThickness,
                                                                                               flatAppearance);
-               combinedTerrainObject.addTerrainObject(potholeTerrainObject);   
+               combinedTerrainObject.addTerrainObject(potholeTerrainObject);
             }
             else
             {
@@ -376,7 +411,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          ConvexPolygon2D flatRegionPolygon = new ConvexPolygon2D();
          flatRegionPolygon.addVertex(intervalX / 2, gridWidth / 2 - location.getY());
          flatRegionPolygon.addVertex(intervalX / 2, -gridWidth / 2 - location.getY());
-         flatRegionPolygon.addVertex(-intervalX / 2,  -gridWidth / 2 - location.getY());
+         flatRegionPolygon.addVertex(-intervalX / 2, -gridWidth / 2 - location.getY());
          flatRegionPolygon.addVertex(-intervalX / 2, gridWidth / 2 - location.getY());
          flatRegionPolygon.update();
          List<PlanarRegion> flatPlanarRegions = potholePlanarRegionProvider.getAdjustedFlatPlanarRegions(flatRegionPolygon);
@@ -426,7 +461,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
 
    private class PotholePlanarRegionProvider
    {
-      private final static double defaultRatio = 0.5;
+      private final static double defaultRatio = 0.7;
       private final Point3D centroidLocation;
       private final double depthToCentroid;
       private final double ratioToInnerPolygon;
@@ -505,7 +540,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                   break;
                }
             }
-            PrintTools.info("clockwisePolygon "+clockwisePolygon);
+            PrintTools.info("clockwisePolygon " + clockwisePolygon);
 
             ConvexPolygon2D counterClockwisePolygon = new ConvexPolygon2D();
             counterClockwisePolygon.addVertex(intersectionPoints.get(1));
@@ -524,7 +559,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                   break;
                }
             }
-            PrintTools.info("counterClockwiseIndex "+counterClockwiseIndex);
+            PrintTools.info("counterClockwiseIndex " + counterClockwiseIndex);
 
             List<Point2DReadOnly> pointsExceptPotholeEdge = new ArrayList<Point2DReadOnly>();
             for (int j = 0; j < numberOfVertices; j++)
@@ -540,7 +575,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
                if (clockwisePolygon.isPointInside(pointsExceptPotholeEdge.get(j), 0.01))
                {
                   polygonIsOutside = false;
-                  PrintTools.info("hello "+j);
+                  PrintTools.info("hello " + j);
                }
             }
             if (polygonIsOutside)
