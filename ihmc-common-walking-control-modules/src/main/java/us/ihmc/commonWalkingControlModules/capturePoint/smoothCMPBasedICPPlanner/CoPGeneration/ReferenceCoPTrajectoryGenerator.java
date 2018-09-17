@@ -42,6 +42,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -92,15 +93,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private CoPPointName[] swingCoPPointList;
    private final YoDouble additionalTimeForFinalTransfer;
 
-   // State variables 
+   // State variables
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
    private final SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>();
 
    // Planner parameters
    private final YoInteger numberOfPointsPerFoot;
-   private final YoInteger numberOfUpcomingFootsteps;
    private final YoInteger numberFootstepsToConsider;
+   private final IntegerProvider numberOfUpcomingFootsteps;
 
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
@@ -109,6 +110,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<YoDouble> swingDurationShiftFractions;
    private final List<YoDouble> transferSplitFractions;
    private final List<UseSplitFractionFor> useTransferSplitFractionFor;
+   private final List<FootstepData> upcomingFootstepsData;
 
    private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
 
@@ -146,30 +148,23 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePoint2D tempFramePoint2d = new FramePoint2D();
    private final FramePoint3D tempPointForCoPCalculation = new FramePoint3D();
 
-   // Planner level overrides (the planner knows better!)
-   private static final int maxNumberOfFootstepsToConsider = 4;
-
-   // Input data
-   private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<FootstepData>(maxNumberOfFootstepsToConsider,
-                                                                                                               FootstepData.class);
-
-   // Visualization 
+   // Visualization
    private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
    /**
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to
     * pass planning parameters
-    * 
+    *
     * @param namePrefix
     */
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations,
                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          YoVariableRegistry parentRegistry)
+                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
-           touchdownDurations, swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, parentRegistry);
+           touchdownDurations, swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, numberOfUpcomingFootsteps, upcomingFootstepsData, parentRegistry);
 
    }
 
@@ -177,7 +172,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations,
                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          boolean debug, YoVariableRegistry parentRegistry)
+                                          boolean debug, IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData, YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
@@ -193,7 +188,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       exitCoPForwardSafetyMarginOnToes = new YoDouble(fullPrefix + "ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
       percentageChickenSupport = new YoDouble(fullPrefix + "PercentageChickenSupport", registry);
-      numberOfUpcomingFootsteps = new YoInteger(fullPrefix + "NumberOfUpcomingFootsteps", registry);
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
@@ -202,6 +196,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
       this.useTransferSplitFractionFor = new ArrayList<>(transferSplitFractions.size());
+      this.numberOfUpcomingFootsteps = numberOfUpcomingFootsteps;
+      this.upcomingFootstepsData = upcomingFootstepsData;
       for (int i = 0; i < transferSplitFractions.size(); i++)
          useTransferSplitFractionFor.add(UseSplitFractionFor.TIME);
 
@@ -448,8 +444,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public void clear()
    {
-      upcomingFootstepsData.clear();
-      numberOfUpcomingFootsteps.set(0);
       desiredCoPPosition.setToNaN();
       desiredCoPVelocity.setToNaN();
       desiredCoPAcceleration.setToNaN();
@@ -472,7 +466,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public int getNumberOfFootstepsRegistered()
    {
-      return numberOfUpcomingFootsteps.getIntegerValue();
+      return numberOfUpcomingFootsteps.getValue();
    }
 
    public Footstep getFootstep(int footstepIndex)
@@ -542,7 +536,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
       lastTransferToSide = transferToSide;
       // Put first CoP as per chicken support computations in case starting from rest
-      if (atAStop && numberOfUpcomingFootsteps.getIntegerValue() == 0)
+      if (atAStop && numberOfUpcomingFootsteps.getValue() == 0)
       {
          isDoneWalking.set(true);
 
@@ -594,7 +588,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          // compute all the upcoming footsteps
          computeCoPPointsForUpcomingFootsteps(copLocationIndex, footstepIndex);
       }
-      else if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
+      else if (numberOfUpcomingFootsteps.getValue() == 0)
       {
          // Put first CoP at the exitCoP of the swing foot if not starting from rest
          clearHeldPosition();
@@ -648,7 +642,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
       FootstepData upcomingFootstepData = upcomingFootstepsData.get(footstepIndex);
 
-      if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
+      if (numberOfUpcomingFootsteps.getValue() == 0)
       {
          isDoneWalking.set(true);
          return;
@@ -830,7 +824,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void computeCoPPointsForUpcomingFootsteps(int copLocationIndex, int footstepIndex)
    {
-      int numberOfUpcomingFootsteps = Math.min(numberFootstepsToConsider.getIntegerValue(), this.numberOfUpcomingFootsteps.getIntegerValue());
+      int numberOfUpcomingFootsteps = Math.min(numberFootstepsToConsider.getIntegerValue(), this.numberOfUpcomingFootsteps.getValue());
       FootstepData upcomingFootstepData = upcomingFootstepsData.get(footstepIndex);
       for (int i = 0; i < numberOfUpcomingFootsteps; i++)
       {
@@ -1332,21 +1326,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          framePolygonToPack.addVertices(defaultFootPolygons.get(robotSide));
       }
       framePolygonToPack.update();
-   }
-
-   @Override
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
-   {
-      if (footstep != null && timing != null)
-      {
-         if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
-         {
-            upcomingFootstepsData.add().set(footstep, timing);
-            numberOfUpcomingFootsteps.increment();
-         }
-         else
-            PrintTools.warn(this, "Received bad footstep: " + footstep);
-      }
    }
 
    @Override

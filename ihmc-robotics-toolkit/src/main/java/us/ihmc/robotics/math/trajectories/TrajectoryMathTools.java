@@ -681,7 +681,7 @@ public class TrajectoryMathTools
          currentTime = Math.min(segmentTraj1.getFinalTime(), segmentTraj2.getFinalTime());
          if (currentTime < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
             i++;
-         else if (currentTime < traj1.getSegment(j).getFinalTime() - TIME_EPSILON)
+         else if (currentTime < traj1.getSegment(i).getFinalTime() - TIME_EPSILON)
             j++;
          else
          {
