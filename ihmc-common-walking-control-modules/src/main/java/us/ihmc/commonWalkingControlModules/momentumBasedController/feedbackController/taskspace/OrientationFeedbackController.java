@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -9,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -27,9 +30,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -112,9 +112,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
                                         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
-      if (optimizationSettings != null)
-         computeIntegralTerm = optimizationSettings.computeIntegralTermInFeedbackControllers();
+      FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
+      if (settings != null)
+         computeIntegralTerm = settings.enableIntegralTerm();
       else
          computeIntegralTerm = true;
 
