@@ -19,14 +19,6 @@ public abstract class AvatarTestYoVariables
    private final YoDouble midFeetZUpZ;
    private final YoDouble desiredCOMHeight;
 
-   private final YoDouble angularMomentumX;
-   private final YoDouble angularMomentumY;
-   private final YoDouble angularMomentumZ;
-
-   private final YoDouble icpPlannerDesiredCentroidalAngularMomentumX;
-   private final YoDouble icpPlannerDesiredCentroidalAngularMomentumY;
-   private final YoDouble icpPlannerDesiredCentroidalAngularMomentumZ;
-
    private final SideDependentList<YoFramePoint3D> solePositions = new SideDependentList<>();
 
    public AvatarTestYoVariables(SimulationConstructionSet scs)
@@ -54,14 +46,6 @@ public abstract class AvatarTestYoVariables
                                                          (YoDouble) scs.getVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
       solePositions.set(RobotSide.RIGHT, new YoFramePoint3D((YoDouble) scs.getVariable("rightSoleX"), (YoDouble) scs.getVariable("rightSoleY"),
                                                          (YoDouble) scs.getVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
-
-      angularMomentumX = (YoDouble) scs.getVariable("AngularMomentumX");
-      angularMomentumY = (YoDouble) scs.getVariable("AngularMomentumY");
-      angularMomentumZ = (YoDouble) scs.getVariable("AngularMomentumZ");
-
-      icpPlannerDesiredCentroidalAngularMomentumX = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumX");
-      icpPlannerDesiredCentroidalAngularMomentumY = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumY");
-      icpPlannerDesiredCentroidalAngularMomentumZ = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumZ");
    }
 
    public YoDouble getYoTime()
@@ -102,35 +86,5 @@ public abstract class AvatarTestYoVariables
    public YoFramePoint3D getSolePosition(RobotSide robotSide)
    {
       return solePositions.get(robotSide);
-   }
-
-   public YoDouble getAngularMomentumX()
-   {
-      return angularMomentumX;
-   }
-
-   public YoDouble getAngularMomentumY()
-   {
-      return angularMomentumY;
-   }
-
-   public YoDouble getAngularMomentumZ()
-   {
-      return angularMomentumZ;
-   }
-
-   public YoDouble getIcpPlannerDesiredCentroidalAngularMomentumX()
-   {
-      return icpPlannerDesiredCentroidalAngularMomentumX;
-   }
-
-   public YoDouble getIcpPlannerDesiredCentroidalAngularMomentumY()
-   {
-      return icpPlannerDesiredCentroidalAngularMomentumY;
-   }
-
-   public YoDouble getIcpPlannerDesiredCentroidalAngularMomentumZ()
-   {
-      return icpPlannerDesiredCentroidalAngularMomentumZ;
    }
 }

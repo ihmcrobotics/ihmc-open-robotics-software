@@ -403,7 +403,7 @@ public class SmoothCMPBasedICPPlannerTest
          }
       };
       this.planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
-                                                  null, null, registry, graphicsListRegistry, gravity);
+                                                  registry, graphicsListRegistry, gravity);
       this.planner.initializeParameters(plannerParameters);
       this.planner.setFinalTransferDuration(defaultFinalTransferTime);
       this.planner.setOmega0(omega);
