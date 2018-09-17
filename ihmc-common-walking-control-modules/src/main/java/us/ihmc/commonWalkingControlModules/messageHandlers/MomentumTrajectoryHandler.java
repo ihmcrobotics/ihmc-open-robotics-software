@@ -42,7 +42,7 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
 
          if (!Double.isFinite(time) || position.containsNaN() || velocity.containsNaN())
          {
-            PrintTools.info("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
+            PrintTools.warn("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
             trajectoryToPack.clear();
             return;
          }
