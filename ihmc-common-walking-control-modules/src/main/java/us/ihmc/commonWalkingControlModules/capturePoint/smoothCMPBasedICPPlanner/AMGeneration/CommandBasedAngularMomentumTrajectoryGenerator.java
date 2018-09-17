@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -164,7 +165,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
          double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, entryCoPName);
          momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime, currentTime + swingPhaseDuration, waypointsPerWalkingPhase, waypoints);
-         setSubTrajectory(swingPhaseDuration, swingTrajectories.get(0), startingTrajectoryType);
+         setSubTrajectoryFromWaypoints(swingPhaseDuration, swingTrajectories.get(0), startingTrajectoryType);
          accumulatedTime += swingPhaseDuration;
 
          // the first transfer copLocation is at index 2 at the start of swing. otherwise it's at index 0
@@ -178,12 +179,12 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
          double transferPhaseDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, entryCoPName);
          momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + transferPhaseDuration, waypointsPerWalkingPhase, waypoints);
-         setSubTrajectory(transferPhaseDuration, transferTrajectories.get(stepIndex), WalkingTrajectoryType.TRANSFER);
+         setSubTrajectoryFromWaypoints(transferPhaseDuration, transferTrajectories.get(stepIndex), WalkingTrajectoryType.TRANSFER);
          accumulatedTime += transferPhaseDuration;
 
          double swingPhaseDuration = getPhaseDuration(WalkingTrajectoryType.SWING, pointsInFoot, entryCoPName);
          momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + swingPhaseDuration, waypointsPerWalkingPhase, waypoints);
-         setSubTrajectory(swingPhaseDuration, swingTrajectories.get(stepIndex), WalkingTrajectoryType.TRANSFER);
+         setSubTrajectoryFromWaypoints(swingPhaseDuration, swingTrajectories.get(stepIndex), WalkingTrajectoryType.TRANSFER);
          accumulatedTime += swingPhaseDuration;
       }
 
@@ -191,7 +192,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       CoPPointsInFoot pointsInFoot = copLocations.get(stepIndex + 1);
       double finalTransferDuration = getPhaseDuration(WalkingTrajectoryType.TRANSFER, pointsInFoot, entryCoPName);
       momentumTrajectoryHandler.getAngularMomentumTrajectory(currentTime + accumulatedTime, currentTime + accumulatedTime + finalTransferDuration, waypointsPerWalkingPhase, waypoints);
-      setSubTrajectory(finalTransferDuration, transferTrajectories.get(numberOfSteps), WalkingTrajectoryType.TRANSFER);
+      setSubTrajectoryFromWaypoints(finalTransferDuration, transferTrajectories.get(numberOfSteps), WalkingTrajectoryType.TRANSFER);
    }
 
    private boolean isInPhase(WalkingTrajectoryType phase)
@@ -238,7 +239,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       return phaseTime;
    }
 
-   private void setSubTrajectory(double subTrajectoryDuration, AngularMomentumTrajectory subTrajectory, WalkingTrajectoryType walkingTrajectoryType)
+   private void setSubTrajectoryFromWaypoints(double subTrajectoryDuration, AngularMomentumTrajectory subTrajectory, WalkingTrajectoryType walkingTrajectoryType)
    {
       subTrajectory.reset();
 
@@ -267,6 +268,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       if (!successfulTrajectory)
       {
+         PrintTools.warn("Something in the waypoint trajectory was invalid. Ignoring for the phase " + walkingTrajectoryType + ".");
          subTrajectory.reset();
          subTrajectory.add().setConstant(0.0, subTrajectoryDuration, zeroPoint);
       }
