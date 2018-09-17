@@ -81,13 +81,4 @@ public class BiasState extends State
       CommonOps.scale(variance.getValue() * sqrtHz, matrixToPack);
    }
 
-   public void reset()
-   {
-      for (int i = 0; i < size; i++)
-      {
-         bias.set(i, 0.0);
-         yoState.get(i).set(0.0);
-      }
-   }
-
 }

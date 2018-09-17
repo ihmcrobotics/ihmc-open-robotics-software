@@ -31,7 +31,7 @@ public class StateEstimator
       state.addState(sensor.getSensorState());
 
       filterMatrixOps.setIdentity(Pposterior, state.getSize());
-      CommonOps.scale(1.0, Pposterior);
+      CommonOps.scale(1.0E-05, Pposterior);
 
       predictionTimer = new ExecutionTimer(getClass().getSimpleName() + "Prediction", registry);
       correctionTimer = new ExecutionTimer(getClass().getSimpleName() + "Correction", registry);
@@ -94,11 +94,5 @@ public class StateEstimator
    public void getCovariance(DenseMatrix64F covarianceToPack)
    {
       covarianceToPack.set(Pposterior);
-   }
-
-   public void resetCovariance(double variance)
-   {
-      filterMatrixOps.setIdentity(Pposterior, state.getSize());
-      CommonOps.scale(variance, Pposterior);
    }
 }

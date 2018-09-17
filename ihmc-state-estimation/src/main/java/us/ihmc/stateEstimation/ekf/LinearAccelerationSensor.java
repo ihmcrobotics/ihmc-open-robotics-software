@@ -273,12 +273,4 @@ public class LinearAccelerationSensor extends Sensor
       CommonOps.mult(Lqdx, A, LqdxA);
       CommonOps.subtract(AqdxL, LqdxA, matrixToPack);
    }
-
-   public void reset()
-   {
-      if (biasState != null)
-      {
-         biasState.reset();
-      }
-   }
 }
